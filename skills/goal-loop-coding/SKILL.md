@@ -1,6 +1,6 @@
 ---
 name: goal-loop-coding
-description: Use for coding tasks that require implementation, debugging, refactoring, testing, behavior changes, complex fixes, or iterative validation. Use when Codex should define success first, work through evidence-driven loops, and review direction before declaring completion.
+description: Use for coding tasks that require implementation, debugging, refactoring, testing, behavior changes, complex fixes, requirements clarification, or iterative validation. Use when Codex should define success first, work through evidence-driven loops, and review direction before declaring completion.
 ---
 
 # Goal Loop Coding
@@ -44,7 +44,7 @@ Completion always triggers Review. Do not emit the final answer until a `complet
 Goal defines the source of truth:
 
 - What does success mean?
-- What constraints and non-goals apply?
+- What constraints, non-goals, and decision boundaries apply?
 - What evidence would prove completion?
 
 Loop creates evidence-driven progress:
@@ -64,6 +64,7 @@ Review challenges the direction:
 Use one loop mode at a time:
 
 - `discovery`
+- `interview`
 - `debug`
 - `tdd`
 - `implementation`
@@ -94,6 +95,16 @@ Do not declare completion from intent, partial progress, or plausible code. Comp
 - the last relevant loop is closed with evidence
 - a `completion` review outcome is `finish`
 - remaining risks are identified
+
+## Spec And Plan Artifacts
+
+Do not create spec or plan files by default.
+
+Create a spec from `references/spec-template.md` when requirements were clarified through interview, scope is multi-stage, or handoff/review is expected.
+
+Create a plan from `references/plan-template.md` when execution spans multiple modules, agents, risky migrations, or architecture decisions.
+
+For small tasks, keep Goal, Loop, and Review in the conversation and final output only.
 
 ## Final Output
 

@@ -69,7 +69,19 @@ End every review with exactly one outcome:
 - `adjust_goal`: evidence requires goal refinement
 - `restart_loop`: current loop path is invalid or exhausted
 - `simplify`: current solution is over-engineered
+- `redefine_goal`: intent no longer matches the user's real need
 - `finish`: acceptance is directly proven
+
+## Mode Focus
+
+Use these focused checks when a mode is selected:
+
+- `goal`: Is intent still valid? Are success criteria, constraints, and assumptions still accurate?
+- `loop`: Are loops being closed with objective evidence and justified decisions?
+- `code`: Does the implementation satisfy the current goal, follow local patterns, and cover the changed behavior with tests or runtime checks?
+- `architecture`: Does the design respect module boundaries and avoid unnecessary dependencies or coupling?
+- `scope`: Are we building anything outside the goal or beyond the stated success criteria?
+- `completion`: Have constraints and non-goals been honored, and are unresolved risks explicitly reported?
 
 ## Completion Review
 
