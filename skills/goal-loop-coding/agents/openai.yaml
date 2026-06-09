@@ -1,0 +1,4 @@
+interface:
+  display_name: "Goal Loop Coding"
+  short_description: "Goal-first evidence loops for coding"
+  default_prompt: "Use $goal-loop-coding to handle this coding task with a goal-first evidence loop."

@@ -1,0 +1,84 @@
+# Review Stage
+
+## Purpose
+
+Challenge whether the current direction still serves the goal.
+
+Review answers:
+
+- Are we solving the right problem?
+- Is the evidence strong enough?
+- Has scope drifted?
+- Is the solution simpler than the problem requires?
+- Is completion actually proven?
+
+## Run Review When
+
+Run Review when:
+
+- loop evidence contradicts assumptions
+- scope expands
+- implementation becomes complex
+- success appears complete
+- direction feels uncertain
+- repeated loops stop producing new evidence
+
+## Review Model
+
+Every review must produce:
+
+```yaml
+review:
+  mode:
+  target:
+  observations:
+  challenges:
+  findings:
+  recommendations:
+  outcome:
+  goal_update:
+```
+
+## Modes
+
+Use one mode per review:
+
+- `goal`: validate intent, success criteria, constraints, and non-goals
+- `loop`: validate hypothesis quality, evidence quality, and loop decisions
+- `code`: inspect correctness, maintainability, tests, and regressions
+- `architecture`: inspect boundaries, coupling, scalability, and fit to goal
+- `scope`: detect scope creep, hidden requirements, and accidental complexity
+- `completion`: prove or reject that acceptance is satisfied
+
+## Challenge Questions
+
+Ask the relevant questions before deciding:
+
+- What assumption could be false?
+- What evidence is missing or too indirect?
+- What alternative explanation fits the evidence?
+- What simpler solution satisfies the same goal?
+- What risk remains untested?
+- What requirement has not been matched to proof?
+
+## Outcomes
+
+End every review with exactly one outcome:
+
+- `continue`: current direction remains valid
+- `adjust_goal`: evidence requires goal refinement
+- `restart_loop`: current loop path is invalid or exhausted
+- `simplify`: current solution is over-engineered
+- `finish`: acceptance is directly proven
+
+## Completion Review
+
+Before `finish`, verify:
+
+- every success criterion has authoritative evidence
+- every acceptance item is satisfied
+- tests or runtime checks cover the changed behavior
+- known risks are resolved or explicitly reported
+- final output can cite goal status, loop evidence, review outcome, and remaining risks
+
+If any item lacks direct evidence, do not finish. Choose `continue`, `adjust_goal`, `restart_loop`, or `simplify`.
