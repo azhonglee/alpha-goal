@@ -100,9 +100,11 @@ Do not declare completion from intent, partial progress, or plausible code. Comp
 
 Do not create spec or plan files by default.
 
-Create a spec from `references/spec-template.md` when requirements were clarified through interview, scope is multi-stage, or handoff/review is expected.
+Create a spec from `references/spec-template.md` when requirements were clarified through interview, scope is multi-stage, or external handoff or durable stakeholder review is expected. The mandatory completion review does not by itself require a spec file.
 
-Create a plan from `references/plan-template.md` when execution spans multiple modules, agents, risky migrations, or architecture decisions.
+Create a plan from `references/plan-template.md` when execution spans multiple modules, agents, risky migrations, architecture decisions, or crosses repository, linked worktree, or submodule boundaries.
+
+If file modification is disallowed, draft any needed spec or plan in the conversation only and state that no artifact file was written.
 
 For small tasks, keep Goal, Loop, and Review in the conversation and final output only.
 

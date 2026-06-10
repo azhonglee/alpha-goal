@@ -32,7 +32,7 @@ loop:
 
 Use one mode per loop:
 
-- `discovery`: inspect the repository, applicable `AGENTS.md` files, dirty worktree state, current behavior, logs, or requirements
+- `discovery`: inspect the repository, worktree/subrepo boundaries, applicable `AGENTS.md` files, dirty worktree state, current behavior, logs, or requirements
 - `interview`: run a Socratic one-question-at-a-time clarification loop to resolve Goal ambiguity
 - `debug`: reproduce, isolate, and explain a failure
 - `tdd`: write or adjust a failing test before implementation
@@ -96,7 +96,28 @@ If no decision fits, gather stronger evidence before closing the loop.
 - For behavior changes, prefer tests or executable validation around the changed behavior.
 - Update the goal when loop evidence changes assumptions, risks, constraints, success criteria, or acceptance.
 
-Iterate the loop until you 100% confident in these artifacts.
+Iterate until completion review can cite direct evidence for the relevant success criteria and acceptance items.
+
+## Worktree And Subrepo Boundaries
+
+Before modifying files, identify:
+
+- repository root
+- current branch
+- whether the current directory is a linked worktree
+- dirty worktree state
+- owning git root for every touched path, compared with the primary repository root
+- nested git repositories or submodules under touched paths
+- applicable `AGENTS.md` files for every touched path
+- for each affected nested repo or submodule: root, branch or detached HEAD, dirty state, and applicable `AGENTS.md` files
+
+Rules:
+
+- Do not assume parent repository rules apply inside a nested repository.
+- Do not modify files across repository or worktree boundaries unless the user explicitly requested or confirmed that cross-boundary change after the boundaries were identified.
+- Treat submodules, nested `.git` directories, and vendored checkouts as separate ownership boundaries.
+- If a required change crosses into a subrepo, run a separate Goal/Loop check for that boundary.
+- Mention cross-boundary edits in the final output.
 
 ## Loop Quality Checklist
 

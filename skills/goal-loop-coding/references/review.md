@@ -43,7 +43,7 @@ review:
 
 Use one mode per review:
 
-- `goal`: validate intent, success criteria, constraints, and non-goals
+- `goal`: validate intent, success criteria, constraints, non-goals, and decision boundaries
 - `loop`: validate hypothesis quality, evidence quality, and loop decisions
 - `code`: inspect correctness, maintainability, tests, and regressions
 - `architecture`: inspect boundaries, coupling, scalability, and fit to goal
@@ -76,7 +76,7 @@ End every review with exactly one outcome:
 
 Use these focused checks when a mode is selected:
 
-- `goal`: Is intent still valid? Are success criteria, constraints, and assumptions still accurate?
+- `goal`: Is intent still valid? Are success criteria, constraints, non-goals, decision boundaries, and assumptions still accurate?
 - `loop`: Are loops being closed with objective evidence and justified decisions?
 - `code`: Does the implementation satisfy the current goal, follow local patterns, and cover the changed behavior with tests or runtime checks?
 - `architecture`: Does the design respect module boundaries and avoid unnecessary dependencies or coupling?

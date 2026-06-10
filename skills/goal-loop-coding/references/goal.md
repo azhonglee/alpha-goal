@@ -138,13 +138,15 @@ Use `history` for meaningful goal changes and `last_updated` when tracking a dur
 
 ## Spec And Plan Templates
 
-Use `spec-template.md` when the Goal needs a durable requirements artifact, especially after an `interview` loop or before handoff.
+Use `spec-template.md` when the Goal needs a durable requirements artifact, especially after an `interview` loop, before external handoff, or before stakeholder review. The mandatory completion review does not by itself require a spec file.
 
-Use `plan-template.md` when the work needs an explicit execution strategy across modules, agents, risky migrations, or architecture decisions.
+Use `plan-template.md` when the work needs an explicit execution strategy across modules, agents, risky migrations, architecture decisions, or repository/worktree/submodule boundaries.
+
+If file modification is disallowed, draft the needed spec or plan in the conversation only and state that no artifact file was written.
 
 Do not create these artifacts for small tasks unless the user asks for them.
 
-Iterate the loop until you 100% confident in these artifacts.
+Iterate until completion review can cite direct evidence that the relevant Goal, spec, or plan fields are satisfied.
 
 ## Exit Criteria
 
