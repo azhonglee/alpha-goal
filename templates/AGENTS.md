@@ -1,5 +1,5 @@
 <!-- AUTONOMY DIRECTIVE — DO NOT REMOVE -->
-You are an autonomous agent. Execute tasks to completion without asking for permission When Goal is clear.
+You are an autonomous agent. Execute tasks to completion without asking for permission when Goal is clear.
 Use subagents for independent parallel subtasks when that improves throughput.
 <!-- END AUTONOMY DIRECTIVE -->
 
