@@ -23,12 +23,20 @@ goal:
   decision_boundaries:
   assumptions:
   risks:
+  risk_tier:
   acceptance:
   evidence_plan:
+  claim_boundary:
   status:
   history:
   last_updated:
 ```
+
+`evidence_plan` describes the evidence needed to prove acceptance. It is not an execution plan.
+
+`risk_tier` is the initial evidence-strength classification: `low`, `medium`, or `high`. Loop evidence may update it.
+
+`claim_boundary` states the exact behavior, files, artifact, or diagnostic outcome that completion evidence must prove.
 
 ## Rules
 
@@ -37,6 +45,7 @@ goal:
 - Include non-goals to prevent scope drift.
 - Define decision boundaries: what Codex may decide independently and what needs user confirmation.
 - Treat unknowns as assumptions or risks, not facts.
+- Separate brownfield facts from inference when existing code, docs, logs, or behavior shape the Goal.
 - When intent, success criteria, constraints, non-goals, decision boundaries, or acceptance are unclear, ask targeted user questions before implementation.
 - Define acceptance before editing code.
 - Select the first loop target before leaving Goal.
@@ -57,6 +66,11 @@ success_criteria:
 acceptance:
   - relevant automated tests pass
   - latency evidence is captured from a representative run
+risk_tier: medium
+evidence_plan:
+  - compare repeated request latency before and after the change
+  - run compatibility tests for existing API responses
+claim_boundary: repeated request latency and backward-compatible API responses
 ```
 
 ## Status Values
@@ -95,6 +109,7 @@ Before implementation loops begin, verify:
 - non-goals prevent scope creep
 - decision boundaries are explicit
 - acceptance criteria are defined
+- risk tier and claim boundary are explicit enough for the first loop
 - another engineer can understand the goal without implementation details
 
 ## Socratic Interview Gate
@@ -136,17 +151,24 @@ goal_update:
 
 Use `history` for meaningful goal changes and `last_updated` when tracking a durable goal artifact.
 
-## Spec And Plan Templates
+## Spec Artifact
 
 Use `spec-template.md` when the Goal needs a durable requirements artifact, especially after an `interview` loop, before external handoff, or before stakeholder review. The mandatory completion review does not by itself require a spec file.
 
-Use `plan-template.md` when the work needs an explicit execution strategy across modules, agents, risky migrations, architecture decisions, or repository/worktree/submodule boundaries.
+Spec status is meaningful:
 
-If file modification is disallowed, draft the needed spec or plan in the conversation only and state that no artifact file was written.
+- `draft`: working requirements; do not treat as approved execution basis
+- `reviewed`: checked for clarity, evidence, and omissions; still not automatically approved
+- `approved`: accepted by the user or clear enough within explicit decision boundaries to execute
+- `superseded`: historical only; do not use for new work unless revived with evidence
 
-Do not create these artifacts for small tasks unless the user asks for them.
+If file modification is disallowed, draft the needed spec in the conversation only and state that no artifact file was written.
 
-Iterate until completion review can cite direct evidence that the relevant Goal, spec, or plan fields are satisfied.
+Do not create a spec artifact for small tasks unless the user asks for it.
+
+Plan artifacts belong to Loop. Goal may identify that execution is likely to need a durable route, but Loop creates, updates, or supersedes the plan from evidence.
+
+Iterate until completion review can cite direct evidence that the relevant Goal or spec fields are satisfied.
 
 ## Exit Criteria
 
