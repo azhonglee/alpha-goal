@@ -17,8 +17,9 @@ Use subagents for independent parallel subtasks when that improves throughput.
 
 ## Isolation Principles
 
-- 使用 worktree 隔离不同批的目标和任务改动；如果在聚合仓库中，使用子仓库的 worktree。
-- 永远不要在主分支上直接修改代码；始终在 worktree 中进行修改。
+- Use worktrees to isolate changes per goal/task batch; in monorepos, use subrepo worktrees.
+- Never edit directly on main/master; always work in a worktree.
+- Delete the worktree after PR/MR merge or local merge into main/master; do not proactively merge into main/master locally.
 
 ## Interaction Agreement
 
