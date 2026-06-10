@@ -91,6 +91,7 @@ Use these focused checks when a mode is selected:
 - `architecture`: Does the design respect module boundaries and avoid unnecessary dependencies or coupling?
 - `scope`: Are we building anything outside the goal or beyond the stated success criteria?
 - `completion`: Have constraints and non-goals been honored, and are unresolved risks explicitly reported?
+- `loophole`: Are there any hidden risks or assumptions that need to be addressed?
 
 ## Evidence Freshness
 
