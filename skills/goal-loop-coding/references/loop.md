@@ -47,7 +47,7 @@ Use one mode per loop:
 
 Respect explicit user constraints. If the user asks for read-only analysis or says not to modify files, treat `tdd`, `implementation`, `refactor`, and `hardening` loops as dry-run analysis only.
 
-Read-only loops may produce `advisory_audit` or `exploration_only` evidence. These outputs can inform Goal, Plan, or Review, but they are non-gate evidence and cannot by themselves prove implementation readiness or completion.
+Read-only loops may produce `advisory_audit` or `exploration_only` evidence. These outputs can complete a bounded read-only explanation, extraction, summary, critique, risk scan, or advisory audit when the evidence matches that audit boundary. They can also inform Goal, Plan, or Review, but they are non-gate evidence and cannot by themselves prove implementation readiness, repair completion, or behavior-change completion.
 
 For `interview` loops:
 

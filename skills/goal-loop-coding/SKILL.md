@@ -25,9 +25,9 @@ Goal Update after loop or review evidence
 Next Loop or Final Output
 ```
 
-Always start with Goal. Read `references/goal.md` before selecting a loop or editing.
+Always start with Goal. Read `references/goal.md` the first time Goal is entered in the current turn. Re-read it only when stage rules are uncertain, context was compacted, or evidence changes the Goal boundary before selecting a loop or editing.
 
-Then run one or more Loops. Read `references/loop.md` before selecting the first loop and before executing each loop.
+Then run one or more Loops. Read `references/loop.md` before selecting the first loop in the current turn. Re-read it before a later loop only when stage rules are uncertain, context was compacted, the loop mode changes into an unfamiliar path, or new evidence changes the execution boundary.
 
 Run Review with `references/review.md` when:
 
@@ -37,11 +37,11 @@ Run Review with `references/review.md` when:
 - success appears complete
 - direction feels uncertain
 
-Completion always triggers Review. Do not emit the final answer until a `completion` review has verified the acceptance evidence.
+Completion always triggers Review. Read `references/review.md` the first time Review is entered in the current turn, and re-read it when review rules are uncertain, context was compacted, or evidence changes the reviewed boundary. Do not emit the final answer until a `completion` review has verified the acceptance evidence.
 
 Use risk-adaptive ceremony: keep low-risk work conversational when direct evidence is enough; use durable artifacts, stronger checks, and explicit review gates when risk, ambiguity, or ownership breadth increases.
 
-Stay read-only for bounded explanation, extraction, summary, critique, risk scan, or advisory audit requests that do not require choosing behavior, mutating files, authoring durable artifacts, or claiming completion. Treat that output as non-gate evidence and exit the read-only path when the user asks to implement, persist a spec or plan, repair a defect, or verify readiness.
+Stay read-only for bounded explanation, extraction, summary, critique, risk scan, or advisory audit requests that do not require choosing behavior, mutating files, authoring durable artifacts, or claiming implementation readiness. A read-only advisory task may be completed from source, artifact, or command evidence within its stated audit boundary. Treat that output as non-gate evidence for any later implementation, readiness, or repair claim, and exit the read-only path when the user asks to implement, persist a spec or plan, repair a defect, or verify readiness.
 
 ## Stage Responsibilities
 
@@ -125,10 +125,12 @@ For small tasks, keep Goal, Loop, and Review in the conversation and final outpu
 
 ## Final Output
 
-Always include:
+For medium-risk, high-risk, or multi-step work, include:
 
 - Goal status
 - Loop evidence
 - Review outcome
 - Claim boundary and fresh verification evidence when claiming completion
 - Remaining risks
+
+For low-risk conversational work, compress the final output to the smallest useful form while still stating the evidence used, the claim boundary, and any meaningful remaining risk.
