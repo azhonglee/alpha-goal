@@ -51,7 +51,7 @@ scripts/install.sh
 脚本会执行三类操作：
 
 - 将 `skills/*` 下的技能目录软链接到 `${CODEX_HOME:-$HOME/.codex}/skills`。
-- 确保 `${CODEX_HOME:-$HOME/.codex}/AGENTS.md` 包含 `templates/AGENTS.md` 的内容。
+- 将 `templates/AGENTS.md` 同步到 `${CODEX_HOME:-$HOME/.codex}/AGENTS.md` 的受管理模板块；如果目标文件没有模板标记，则只追加模板内容，保留既有手写内容。
 - 检查 `${CODEX_HOME:-$HOME/.codex}/config.toml` 是否包含 `templates/config.toml` 里的配置，并只补齐缺失项，不覆盖已有值。
 
 如果目标位置已经存在指向其他目录的软链接，可以使用：
@@ -113,6 +113,8 @@ Goal、Loop、Review 是 `goal-loop` 内部的三个阶段，由 `skills/goal-lo
 ```bash
 scripts/install.sh
 ```
+
+如果 `templates/AGENTS.md` 发生变化，重新安装会更新 `${CODEX_HOME:-$HOME/.codex}/AGENTS.md` 中带 `generate-with-template:agents-md` 标记的受管理模板块，并保留模板块之外的用户内容。
 
 新增技能时，按以下结构放置：
 

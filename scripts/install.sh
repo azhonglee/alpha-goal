@@ -6,10 +6,9 @@ usage() {
 Usage: scripts/install.sh [--force]
 
 Install this repository's skills by symlinking each skills/*/SKILL.md directory
-into ${CODEX_HOME:-$HOME/.codex}/skills, ensure
-${CODEX_HOME:-$HOME/.codex}/AGENTS.md contains templates/AGENTS.md, and fill
-missing ${CODEX_HOME:-$HOME/.codex}/config.toml settings from
-templates/config.toml.
+into ${CODEX_HOME:-$HOME/.codex}/skills, sync the managed
+templates/AGENTS.md block into ${CODEX_HOME:-$HOME/.codex}/AGENTS.md, and fill
+missing ${CODEX_HOME:-$HOME/.codex}/config.toml settings from templates/config.toml.
 
 Options:
   --force   Replace existing symlinks that point elsewhere. Real files or
@@ -46,6 +45,7 @@ codex_home="${CODEX_HOME:-$HOME/.codex}"
 agents_target="$codex_home/AGENTS.md"
 config_target="$codex_home/config.toml"
 target_root="$codex_home/skills"
+agents_template_marker="<!-- generate-with-template:agents-md -->"
 
 inject_agents_template() {
   local template_content
@@ -57,12 +57,97 @@ inject_agents_template() {
     exit 1
   fi
 
+  if [[ "$template_content" != *"$agents_template_marker"* ]]; then
+    echo "AGENTS template is missing required marker: $agents_template_marker" >&2
+    exit 1
+  fi
+
   if [[ -f "$agents_target" ]]; then
     local existing_content
     existing_content="$(<"$agents_target")"
 
-    if [[ "$existing_content" == *"$template_content"* ]]; then
-      echo "AGENTS.md already contains template content: $agents_target"
+    if [[ "$existing_content" == *"$agents_template_marker"* ]]; then
+      if ! command -v python3 >/dev/null 2>&1; then
+        echo "python3 is required to update managed AGENTS template content in $agents_target" >&2
+        exit 1
+      fi
+
+      python3 - "$agents_template" "$agents_target" "$agents_template_marker" <<'PY'
+import sys
+from pathlib import Path
+
+
+template_path = Path(sys.argv[1])
+target_path = Path(sys.argv[2])
+marker = sys.argv[3]
+
+template = template_path.read_text()
+target = target_path.read_text()
+template_lines = template.splitlines()
+
+if marker not in template_lines:
+    print(f"AGENTS template is missing required marker: {marker}", file=sys.stderr)
+    raise SystemExit(1)
+
+if not template_lines:
+    print(f"AGENTS template is empty: {template_path}", file=sys.stderr)
+    raise SystemExit(1)
+
+block_start = template_lines[0]
+target_lines = target.splitlines(keepends=True)
+
+
+def logical_line(line):
+    return line.rstrip("\r\n")
+
+
+blocks = []
+marker_lines = sum(1 for line in target_lines if logical_line(line) == marker)
+index = 0
+
+while index < len(target_lines):
+    if logical_line(target_lines[index]) != block_start:
+        index += 1
+        continue
+
+    end = index
+    while end < len(target_lines):
+        if logical_line(target_lines[end]) == marker:
+            blocks.append((index, end + 1))
+            index = end + 1
+            break
+        end += 1
+    else:
+        index += 1
+
+if not blocks or marker_lines != len(blocks):
+    print(
+        f"Refusing to update {target_path}: found AGENTS template marker but could not identify a managed block",
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
+
+pieces = []
+cursor = 0
+inserted = False
+
+for start, end in blocks:
+    pieces.extend(target_lines[cursor:start])
+    if not inserted:
+        pieces.append(template if template.endswith("\n") else template + "\n")
+        inserted = True
+    cursor = end
+
+pieces.extend(target_lines[cursor:])
+updated = "".join(pieces)
+
+if updated == target:
+    print(f"AGENTS.md already has current managed template content: {target_path}")
+    raise SystemExit(0)
+
+target_path.write_text(updated)
+print(f"Updated managed AGENTS template content in {target_path}")
+PY
       return
     fi
 
