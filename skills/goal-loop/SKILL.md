@@ -129,11 +129,14 @@ For small tasks, keep Goal, Loop, and Review in the conversation and final outpu
 
 ## Artifact Location
 
-Use these default artifact paths relative to the owning repository root when a durable artifact is needed. If the owning repository has an existing convention for spec or plan location, prefer that convention.:
+Use `.goal-loop/` as the repository-local runtime artifact root unless a more specific path is defined below. Make sure `.goal-loop/` is ignored in `.gitignore` to prevent accidental commits.
+Use these default artifact paths relative to the owning repository root when a durable artifact is needed. If the owning repository has an existing convention for spec or plan location, prefer that convention:
 
 - spec: `docs/design/YYYYMMDD-<slug>-spec.md`
 - plan: `docs/plans/YYYYMMDD-<slug>-plan.md`
-- review receipt: `.goal-loop/reviews/YYYYMMDD-<slug>-review.md` → add `.goal-loop/` to `.gitignore`.
+- review receipt: `.goal-loop/reviews/YYYYMMDD-<slug>-review.md`
+- command/output evidence: `.goal-loop/evidence/YYYYMMDD-<slug>/`
+- scratch artifacts: `.goal-loop/tmp/YYYYMMDD-<slug>/`
 
 `<slug>` is a kebab-case string that describes the goal boundary, not the implementation means. Do not create empty directories before persisting the artifact.
 
