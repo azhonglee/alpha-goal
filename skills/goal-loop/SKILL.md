@@ -129,15 +129,13 @@ For small tasks, keep Goal, Loop, and Review in the conversation and final outpu
 
 ## Artifact Location
 
-当需要持久化产物且允许修改文件时，把产物写到所属仓库根目录下：
+Use these default artifact paths relative to the owning repository root when a durable artifact is needed. If the owning repository has an existing convention for spec or plan location, prefer that convention.:
 
-- spec: `docs/design/YYYYMMDD-HHMM-<slug>-spec.md`
-- plan: `docs/plans/YYYYMMDD-HHMM-<slug>-plan.md`
-- review receipt: `.goal-loop/reviews/YYYYMMDD-HHMM-<slug>-review.md` → add `.goal-loop/` to `.gitignore`.
+- spec: `docs/design/YYYYMMDD-<slug>-spec.md`
+- plan: `docs/plans/YYYYMMDD-<slug>-plan.md`
+- review receipt: `.goal-loop/reviews/YYYYMMDD-<slug>-review.md` → add `.goal-loop/` to `.gitignore`.
 
-使用实际拥有被改文件的仓库根目录。遇到嵌套仓库、linked worktree 或 submodule 时，把产物放在该 owning root 内，不要放到父仓库。若用户指定位置，或仓库已有明确的产物目录约定，优先使用该位置，并在产物元数据或最终输出中记录路径。
-
-`<slug>` 使用小写 kebab-case，描述目标边界，而不是实现手段。不要在确实需要持久化产物之前创建空目录。
+`<slug>` is a kebab-case string that describes the goal boundary, not the implementation means. Do not create empty directories before persisting the artifact.
 
 ## Final Output
 
