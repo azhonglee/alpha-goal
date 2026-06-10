@@ -123,6 +123,19 @@ If file modification is disallowed, draft any needed spec or plan in the convers
 
 For small tasks, keep Goal, Loop, and Review in the conversation and final output only.
 
+## Artifact Location
+
+当需要持久化产物且允许修改文件时，把产物写到所属仓库根目录下：
+
+- spec: `.codex/goal-loop/specs/YYYYMMDD-HHMM-<slug>-spec.md`
+- plan: `.codex/goal-loop/plans/YYYYMMDD-HHMM-<slug>-plan.md`
+- review receipt: `.codex/goal-loop/reviews/YYYYMMDD-HHMM-<slug>-review.md`
+- 已 superseded 的产物：移动或复制到 `.codex/goal-loop/archive/`，并标记 `Status: superseded`
+
+使用实际拥有被改文件的仓库根目录。遇到嵌套仓库、linked worktree 或 submodule 时，把产物放在该 owning root 内，不要放到父仓库。若用户指定位置，或仓库已有明确的产物目录约定，优先使用该位置，并在产物元数据或最终输出中记录路径。
+
+`<slug>` 使用小写 kebab-case，描述目标边界，而不是实现手段。不要在确实需要持久化产物之前创建空目录。
+
 ## Final Output
 
 For medium-risk, high-risk, or multi-step work, include:
