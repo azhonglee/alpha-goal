@@ -28,7 +28,8 @@
 │           ├── spec-template.md
 │           └── plan-template.md
 └── templates/
-    └── AGENTS.md               # 推荐写入 CODEX_HOME 的代理行为模板
+    ├── AGENTS.md               # 推荐写入 CODEX_HOME 的代理行为模板
+    └── config.toml             # 推荐补齐到 CODEX_HOME/config.toml 的配置模板
 ```
 
 ## 安装
@@ -39,10 +40,11 @@
 scripts/install.sh
 ```
 
-脚本会执行两类操作：
+脚本会执行三类操作：
 
 - 将 `skills/*` 下的技能目录软链接到 `${CODEX_HOME:-$HOME/.codex}/skills`。
 - 确保 `${CODEX_HOME:-$HOME/.codex}/AGENTS.md` 包含 `templates/AGENTS.md` 的内容。
+- 检查 `${CODEX_HOME:-$HOME/.codex}/config.toml` 是否包含 `templates/config.toml` 里的配置，并只补齐缺失项，不覆盖已有值。
 
 如果目标位置已经存在指向其他目录的软链接，可以使用：
 
@@ -110,4 +112,15 @@ skills/<skill-name>/SKILL.md
 
 ```bash
 scripts/install.sh --help
+```
+
+检查配置模板是否可解析：
+
+```bash
+python3 - <<'PY'
+import tomllib
+from pathlib import Path
+
+tomllib.loads(Path("templates/config.toml").read_text())
+PY
 ```
