@@ -18,7 +18,7 @@ Use subagents for independent parallel subtasks when that improves throughput.
 
 ## Isolation Principles
 
-- Use worktrees to isolate changes per goal/task batch; in monorepos, use subrepo worktrees.
+- Use worktrees to isolate changes per goal/task batch in codebases; in monorepos, use subrepo worktrees.
 - Never edit directly on main/master; always work in a worktree.
 - Delete the worktree after PR/MR merge or local merge into main/master; do not proactively merge into main/master locally.
 
