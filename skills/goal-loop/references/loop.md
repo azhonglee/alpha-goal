@@ -32,6 +32,8 @@ loop:
   goal_update:
 ```
 
+`learning` is loop-local unless the Learn Capture Gate promotes it to a learn artifact. Do not treat loop-local learning as reusable project guidance without scoped evidence.
+
 ## Modes
 
 Use one mode per loop:
@@ -129,6 +131,22 @@ If no decision fits, gather stronger evidence before closing the loop.
 - Update the goal when loop evidence changes assumptions, risks, constraints, success criteria, or acceptance.
 
 Iterate until completion review can cite direct evidence for the relevant success criteria and acceptance items.
+
+## Learn Capture Gate
+
+After a loop produces reusable learning, decide whether it should become a learn artifact.
+
+Create a learn artifact from `learn-template.md` only when:
+
+- the learning is evidence-backed
+- the scope is reusable beyond the current task
+- misuse risk can be bounded by `Applies When` and `Does Not Apply When`
+- invalidation triggers are explicit
+- the artifact will help future tasks avoid repeated diagnosis, failed approaches, or undocumented project conventions
+
+Do not create a learn artifact for ordinary loop notes, one-off fixes, unverified impressions, generic best practices, or current-task plans.
+
+A learn artifact is advisory evidence only. It may shape assumptions, risks, plans, and review questions. It never replaces fresh gate evidence for the current task, diff, artifact, or claim boundary.
 
 ## Debug Receipt
 

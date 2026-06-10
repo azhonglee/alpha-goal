@@ -45,7 +45,7 @@ Completion always triggers Review. Read `references/review.md` the first time Re
 
 Use risk-adaptive ceremony: keep low-risk work conversational when direct evidence is enough; use durable artifacts, stronger checks, and explicit review gates when risk, ambiguity, or ownership breadth increases.
 
-Stay read-only for bounded explanation, extraction, summary, critique, risk scan, or advisory audit requests that do not require choosing behavior, mutating files, authoring durable artifacts, or claiming implementation readiness. A read-only advisory task may be completed from source, artifact, or command evidence within its stated audit boundary. Treat that output as non-gate evidence for any later implementation, readiness, or repair claim, and exit the read-only path when the user asks to implement, persist a spec or plan, repair a defect, or verify readiness.
+Stay read-only for bounded explanation, extraction, summary, critique, risk scan, or advisory audit requests that do not require choosing behavior, mutating files, authoring durable artifacts, or claiming implementation readiness. A read-only advisory task may be completed from source, artifact, or command evidence within its stated audit boundary. Treat that output as non-gate evidence for any later implementation, readiness, or repair claim, and exit the read-only path when the user asks to implement, persist a spec, plan, or learn artifact, repair a defect, or verify readiness.
 
 ## Stage Responsibilities
 
@@ -108,13 +108,17 @@ Do not declare completion from intent, partial progress, or plausible code. Comp
 
 ## Artifact Rules
 
-Do not create spec or plan files by default.
+Do not create spec, plan, or learn files by default.
 
 Create a spec from `references/spec-template.md` when the Goal needs a durable requirements artifact: requirements were clarified through interview, scope is multi-stage, or external handoff or durable stakeholder review is expected. The mandatory completion review does not by itself require a spec file.
 
 Create a plan from `references/plan-template.md` during Loop when execution evidence shows the work needs a durable route across multiple loops, modules, agents, risky migrations, architecture decisions, or repository, linked worktree, or submodule boundaries.
 
 A plan is a Loop-owned execution artifact. It forecasts upcoming loops, evidence gates, and review gates. It may be updated or superseded when loop evidence changes the route. It is not part of the Goal definition and must not redefine intent, success criteria, non-goals, or decision boundaries.
+
+Create a learn artifact from `references/learn-template.md` only when loop or review evidence produces reusable project knowledge: repeated failure patterns, validated project conventions, architecture decisions, durable anti-patterns, or future task guidance.
+
+A learn artifact is advisory, scoped, evidence-backed, and supersedable. It may shape assumptions, risks, plans, and review questions. It must not redefine Goal intent, success criteria, acceptance, or current verification requirements, and it never proves current-task completion without fresh evidence.
 
 Artifact status matters:
 
@@ -123,9 +127,11 @@ Artifact status matters:
 - `approved`: accepted by the user or clear enough within decision boundaries to execute
 - `superseded`: preserved for history; do not execute without a current replacement
 
-If file modification is disallowed, draft any needed spec or plan in the conversation only and state that no artifact file was written.
+For learn artifacts, use the status semantics in `references/learn-template.md`.
 
-For small tasks, keep Goal, Loop, and Review in the conversation and final output only.
+If file modification is disallowed, draft any needed spec, plan, or learn artifact in the conversation only and state that no artifact file was written.
+
+For small tasks, keep Goal, Loop, Review, and loop-local learning in the conversation and final output only.
 
 ## Artifact Location
 
@@ -133,6 +139,7 @@ Use these default artifact paths relative to the owning repository root when a d
 
 - spec: `docs/design/YYYYMMDD-<slug>-spec.md`
 - plan: `docs/plans/YYYYMMDD-<slug>-plan.md`
+- learn: `docs/learn/YYYYMMDD-<slug>-learn.md`
 - review receipt: `.goal-loop/reviews/YYYYMMDD-<slug>-review.md` → add `.goal-loop/` to `.gitignore`.
 
 `<slug>` is a kebab-case string that describes the goal boundary, not the implementation means. Do not create empty directories before persisting the artifact.

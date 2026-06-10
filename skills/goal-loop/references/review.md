@@ -24,6 +24,7 @@ Run Review when:
 - repeated loops stop producing new evidence
 - plan, spec, or review evidence is stale, mismatched, blocked, or contradicted
 - review feedback arrives and must be evaluated before acting
+- loop or review evidence appears reusable beyond the current task and may need a learn artifact
 
 ## Review Model
 
@@ -68,6 +69,7 @@ Ask the relevant questions before deciding:
 - What risk remains untested?
 - What requirement has not been matched to proof?
 - Has any material change invalidated earlier evidence?
+- Is any reusable learning evidence-backed enough to capture, or too narrow to persist?
 
 ## Outcomes
 
@@ -92,6 +94,18 @@ Use these focused checks when a mode is selected:
 - `scope`: Are we building anything outside the goal or beyond the stated success criteria?
 - `completion`: Have constraints and non-goals been honored, and are unresolved risks explicitly reported?
 - `loophole`: Are there any hidden risks or assumptions that need to be addressed?
+
+## Learn Review
+
+When reviewing reusable learning, verify:
+
+- the learning is grounded in loop or review evidence, not preference
+- the artifact scope is narrower than the whole project unless evidence supports project-wide reuse
+- `Applies When`, `Does Not Apply When`, and invalidation triggers are explicit
+- the artifact records evidence basis and source loops or reviews
+- the artifact cannot be mistaken for current-task completion evidence
+
+Choose not to persist the learning when it is ordinary task context, a one-off fix, an unverified impression, or a generic practice already covered by existing project guidance.
 
 ## Evidence Freshness
 

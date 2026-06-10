@@ -33,6 +33,7 @@
 │           ├── goal.md         # Goal 阶段规则
 │           ├── loop.md         # Loop 阶段规则
 │           ├── review.md       # Review 阶段规则
+│           ├── learn-template.md
 │           ├── spec-template.md
 │           └── plan-template.md
 └── templates/
@@ -90,11 +91,14 @@ Goal、Loop、Review 是 `goal-loop` 内部的三个阶段，由 `skills/goal-lo
 
 ## Persistent Outputs
 
-默认情况下，小任务只在对话中维护 Goal、Loop 和 Review 信息，不创建额外文件。只有在任务需要可复用的需求、计划或评审记录时，才按模板生成持久化产物：
+默认情况下，小任务只在对话中维护 Goal、Loop、Review 和 loop-local learning 信息，不创建额外文件。只有在任务需要可复用的需求、计划、项目知识或评审记录时，才按模板生成持久化产物：
 
 - 需求规格：`docs/design/YYYYMMDD-<slug>-spec.md`
 - 执行计划：`docs/plans/YYYYMMDD-<slug>-plan.md`
+- 可复用知识：`docs/learn/YYYYMMDD-<slug>-learn.md`
 - 评审记录：`.goal-loop/reviews/YYYYMMDD-<slug>-review.md`
+
+Learn Artifact 只用于沉淀有证据支撑、可跨任务复用的项目知识，例如重复失败模式、已验证的项目惯例、架构决策或长期反模式。它是 advisory evidence，不能替代当前任务的 fresh verification，也不能重定义 Goal、验收标准或 claim boundary。
 
 对应模板位于 `skills/goal-loop/references/`。
 
