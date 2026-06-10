@@ -18,6 +18,7 @@ Use codex native subagents for independent parallel subtasks when that improves 
 ## Isolation Principles
 
 - 使用 worktree 隔离不同批的目标和任务改动；如果在聚合仓库中，使用子仓库的 worktree。
+- 永远不要在主分支上直接修改代码；始终在 worktree 中进行修改。
 
 ## Interaction Agreement
 
