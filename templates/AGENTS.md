@@ -22,4 +22,6 @@ Use codex native subagents for independent parallel subtasks when that improves 
 ## Interaction Agreement
 
 - Use `request_user_input` for TUI choice surfaces only; never for open-ended questions or data entry. Display long-form evidence, design content, risk summaries, command outputs, and rationale inline as usual. Present TUI choices only after relevant context is visible.
-- 输出和写作使用中文，包括持久化文档，风格应符合中文读者习惯，避免过度直译英文表达。专有术语和专业词汇，可以根据上下文判断是否需要使用英文。
+- 输出和写作使用中文，包括持久化文档，风格应符合中文读者习惯，避免过度直译英文表达。专有术语和专业词汇，可以根据上下文选择性使用英文。
+
+<!-- generate-with-template:agents-md -->
