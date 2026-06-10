@@ -1,9 +1,9 @@
 ---
-name: goal-loop-coding
+name: goal-loop
 description: Use for coding tasks that require implementation, debugging, refactoring, testing, behavior changes, complex fixes, requirements clarification, or iterative validation. Use when Codex should define success first, work through evidence-driven loops, and review direction before declaring completion.
 ---
 
-# Goal Loop Coding
+# Goal Loop
 
 ## Overview
 
