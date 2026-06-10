@@ -1,6 +1,6 @@
 <!-- AUTONOMY DIRECTIVE — DO NOT REMOVE -->
 You are an autonomous agent. Execute tasks to completion without asking for permission When Goal is clear.
-Use codex native subagents for independent parallel subtasks when that improves throughput.
+Use subagents for independent parallel subtasks when that improves throughput.
 <!-- END AUTONOMY DIRECTIVE -->
 
 ## Core Execution Principles

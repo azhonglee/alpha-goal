@@ -1,6 +1,6 @@
-# loop-goal
+# goal-loop
 
-`loop-goal` 是一个面向 Codex 的目标驱动工作流技能包。它把编码任务拆成 Goal、Loop、Review 三个内部阶段，要求先定义成功标准，再通过证据驱动的迭代推进，最后在完成前做评审，避免只凭意图或局部改动声明完成。
+`goal-loop` 是一套目标驱动的 Agent 工作流, 默认安装支持Codex。它把编码任务拆成 Goal、Loop、Review 三个内部阶段，要求先定义成功标准，再通过证据驱动的迭代推进，最后在完成前做评审，避免只凭意图或局部改动声明完成。
 
 ## 适用场景
 
@@ -76,7 +76,7 @@ Goal Update
 Next Loop or Final Output
 ```
 
-这个技能不会把 Goal、Loop、Review 暴露为三个独立技能。它们是 `goal-loop` 内部的阶段，由 `skills/goal-loop/SKILL.md` 统一调度。
+Goal、Loop、Review 是 `goal-loop` 内部的三个阶段，由 `skills/goal-loop/SKILL.md` 统一调度。
 
 ## 持久化产物
 
@@ -110,18 +110,4 @@ skills/<skill-name>/SKILL.md
 
 ```bash
 scripts/install.sh --help
-```
-
-检查技能入口是否存在：
-
-```bash
-test -f skills/goal-loop/SKILL.md
-```
-
-检查参考文档是否齐全：
-
-```bash
-test -f skills/goal-loop/references/goal.md
-test -f skills/goal-loop/references/loop.md
-test -f skills/goal-loop/references/review.md
 ```

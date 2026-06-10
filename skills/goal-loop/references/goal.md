@@ -114,7 +114,7 @@ Before implementation loops begin, verify:
 
 ## Socratic Interview Gate
 
-Use an `interview` loop when the request is broad, ambiguous, or missing acceptance criteria. The interview is part of Goal discovery, not a separate skill.
+Use an `socratic interview` loop when the request is broad, ambiguous, or missing acceptance criteria. The interview is part of Goal discovery, not a separate skill.
 
 Rules:
 
