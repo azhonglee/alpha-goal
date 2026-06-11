@@ -1,0 +1,4 @@
+interface:
+  display_name: "Goal Frame"
+  short_description: "Goal contracts before coding"
+  default_prompt: "Use $goal-frame to turn this request into a compact Goal Contract before coding."

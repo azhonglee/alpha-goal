@@ -2,11 +2,12 @@
 
 ## Project Structure & Module Organization
 
-本仓库维护 `goal-loop` Codex 技能。核心入口是 `skills/goal-loop/SKILL.md`；阶段规则、模板和执行约束位于 `skills/goal-loop/references/`，Agent 配置在 `skills/goal-loop/agents/openai.yaml`。安装与本地同步逻辑集中在 `scripts/install.sh`。`templates/AGENTS.md` 和 `templates/config.toml` 是写入 `${CODEX_HOME:-$HOME/.codex}` 的用户配置模板。`README.md` 应与这些路径和命令保持一致。
+本仓库维护一组 Goal Loop Codex 技能。`skills/goal-loop/SKILL.md` 是路由器；`skills/goal-frame/` 负责 Goal Contract；`skills/goal-iterate/` 负责有边界的一轮变更；`skills/goal-verify/` 负责 Verification Verdict。各技能的 `references/` 和 `scripts/` 存放阶段专属规则、模板和机械检查。安装与本地同步逻辑集中在 `scripts/install.sh`。`templates/AGENTS.md` 和 `templates/config.toml` 是写入 `${CODEX_HOME:-$HOME/.codex}` 的用户配置模板。`README.md` 应与这些路径和命令保持一致。
 
 ## Build, Test, and Development Commands
 
 - `bash -n scripts/install.sh`：对安装脚本做 Bash 语法检查。
+- `bash -n skills/goal-iterate/scripts/mutation-preflight.sh skills/goal-verify/scripts/evidence-summary.sh`：对技能脚本做 Bash 语法检查。
 - `python3 -c 'import pathlib,tomllib; tomllib.loads(pathlib.Path("templates/config.toml").read_text())'`：验证 TOML 模板可解析。
 
 ## Coding Style & Naming Conventions
@@ -17,7 +18,7 @@ Shell 脚本使用 Bash，保持 `set -euo pipefail`，函数名采用 `snake_ca
 
 ## Testing Guidelines
 
-当前没有独立测试框架。修改脚本时至少运行 `bash -n scripts/install.sh` 和相关 `scripts/install.sh` 命令。修改模板时验证目标格式：TOML 用 `tomllib`，Markdown 需人工检查标题层级、路径和安装说明是否仍准确。涉及安装行为时，优先使用临时 `CODEX_HOME` 进行验证，避免污染真实配置。
+当前没有独立测试框架。修改脚本时至少运行 `bash -n scripts/install.sh`、相关技能脚本的 `bash -n` 和相关 `scripts/install.sh` 命令。修改模板时验证目标格式：TOML 用 `tomllib`，Markdown 需人工检查标题层级、路径和安装说明是否仍准确。涉及安装行为时，优先使用临时 `CODEX_HOME` 进行验证，避免污染真实配置。
 
 ## Commit & Pull Request Guidelines
 

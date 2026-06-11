@@ -1,0 +1,4 @@
+interface:
+  display_name: "Goal Iterate"
+  short_description: "Bounded evidence-producing changes"
+  default_prompt: "Use $goal-iterate to perform one bounded implementation iteration under an existing Goal Contract."

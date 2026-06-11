@@ -1,0 +1,4 @@
+interface:
+  display_name: "Goal Verify"
+  short_description: "Verification verdicts before final claims"
+  default_prompt: "Use $goal-verify to decide whether evidence supports the requested completion claim."
