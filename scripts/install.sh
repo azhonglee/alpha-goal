@@ -214,6 +214,30 @@ remove_legacy_support_link() {
   fi
 }
 
+preflight_install_targets() {
+  for skill_file in "${skill_files[@]}"; do
+    local skill_dir
+    skill_dir="$(cd "$(dirname "$skill_file")" && pwd -P)"
+    local skill_name
+    skill_name="$(basename "$skill_dir")"
+    local target="$target_root/$skill_name"
+
+    if [[ -L "$target" ]]; then
+      local current_target
+      current_target="$(resolve_link_target "$target")"
+      if [[ "$current_target" == "$skill_dir" || "$force" == true ]]; then
+        continue
+      fi
+      echo "Refusing to replace existing symlink: $target -> $(readlink "$target")" >&2
+      echo "Re-run with --force to replace symlinks." >&2
+      exit 1
+    elif [[ -e "$target" ]]; then
+      echo "Refusing to replace existing non-symlink path: $target" >&2
+      exit 1
+    fi
+  done
+}
+
 validate_installed_links() {
   local failed=false
 
@@ -614,6 +638,8 @@ if [[ "$sync_user_templates" == true ]]; then
   fi
 fi
 
+run_skillset_validation
+
 required_skills=(goal-loop goal-frame goal-iterate goal-review goal-verify)
 skill_files=()
 for skill_name in "${required_skills[@]}"; do
@@ -634,6 +660,7 @@ if [[ "${#discovered_skill_files[@]}" -ne "${#required_skills[@]}" ]]; then
 fi
 
 mkdir -p "$codex_home" "$target_root"
+preflight_install_targets
 
 if [[ "$sync_user_templates" == true ]]; then
   inject_agents_template
@@ -655,6 +682,5 @@ for support_name in adapters tools templates scripts; do
 done
 
 validate_installed_links
-run_skillset_validation
 
 print_summary

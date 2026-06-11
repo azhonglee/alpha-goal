@@ -35,7 +35,7 @@ scripts/install.sh
 - 只有显式传入 `--sync-user-templates` 时，才会把 `templates/AGENTS.md` 合并到 Codex home 的 `AGENTS.md`，并把 `templates/config.toml` 中缺失的设置补齐到 Codex home 的 `config.toml`；模板不设置 sandbox 权限或抑制不稳定特性警告，安全边界仍由用户现有配置决定。
 - 清理旧版本可能留在 `skills/` 下、且指向本仓库的旧支持目录软链接。
 - 校验目标 `skills/` 中的 skill 软链接是否指向当前源码目录。
-- 安装后运行源码中的 `tools/validate_skillset.py` 校验技能包布局。
+- 安装后运行源码中的 `tools/validate_skillset.py` 校验技能包布局。`validate_skillset.py` 只验证布局、元数据、引用可发现性和少量一致性规则；不能证明实际路由、误触发、reference 加载策略或验证边界正确。
 
 如果要安装到其他位置，使用 `--codex-home` 或显式设置 `CODEX_HOME`：
 
@@ -142,7 +142,7 @@ $goal-verify 检查当前 diff 和测试证据，判断能否最终交付。
 - command/output evidence：`.goal-loop/evidence/YYYYMMDD-<slug>/`
 - scratch artifacts：`.goal-loop/tmp/YYYYMMDD-<slug>/`
 
-写入运行时证据和临时文件前，必须先把 `.goal-loop/` 加入 `.gitignore`，避免把 scratch 内容提交进仓库。
+写入运行时证据和临时文件前，必须先确认 `.goal-loop/` 已被 gitignored。如果未被忽略，不要静默修改 `.gitignore`；改用已批准的路径，或在 Goal Contract 中记录用户明确同意的持久化路径。
 
 ## 阶段输出
 

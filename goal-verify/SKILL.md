@@ -15,12 +15,12 @@ Use this skill when:
 
 - implementation appears complete;
 - there is a diff, patch, commit, MR/PR, test result, or runtime observation to assess;
-- the user asks whether work is done, correct, safe, or has loopholes;
+- the user asks whether changed work under an active or recoverable Goal Contract is done, correct, safe, or free of loopholes;
 - final output that includes or implies implementation completion, delivery readiness, merge readiness, correctness/safety of completed work, MR/PR creation, or another completion claim is being prepared;
 - `goal-iterate` returned `ITERATION_READY_FOR_VERIFY`.
 - `goal-review` returned `READY_FOR_VERIFY`.
 
-Do not use this skill for standalone read-only code review, safety review, loophole scan, findings, comparison, or advisory audit when there is no active Goal Contract and no implementation completion, readiness, merge/ship, or correctness claim.
+Do not use this skill for standalone read-only code review, safety review, loophole scan, findings, comparison, or advisory audit when there is no active Goal Contract and no implementation completion, readiness, merge/ship, or correctness claim. For standalone safety or loophole scans without completion/readiness intent, use ordinary read-only review, or route through FRAME only if target/rule/evidence-boundary discovery is needed.
 
 ## Required inputs
 
@@ -48,7 +48,7 @@ Minimal evidence bundle for a positive readiness verdict:
 - Debug Receipt for bug-fix claims;
 - current Review Record when review was triggered.
 
-If a required Review Record is missing, do not produce a positive completion verdict. Return `BLOCKED` with `Required next step: goal-review`, or let the router run `goal-review` first.
+If a required Review Record is missing, do not produce a positive completion verdict. Route to `goal-review` first. If VERIFY was explicitly invoked and cannot route, return `BLOCKED` with `Required next step: goal-review`.
 
 Optional context:
 

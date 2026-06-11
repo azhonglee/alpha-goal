@@ -237,6 +237,10 @@ def check_docs(root: Path) -> bool:
                 ok = fail(f"{doc.name}: missing --sync-user-templates opt-in documentation")
             if "validate_skillset.py" not in text:
                 ok = fail(f"{doc.name}: missing validate_skillset.py smoke test")
+            if "不能证明实际路由" not in text:
+                ok = fail(f"{doc.name}: missing validator evidence-boundary warning")
+            if doc.name == "INSTALL.md" and "$goal-loop" not in text:
+                ok = fail("INSTALL.md: missing $goal-loop routing smoke prompt")
             if doc.name == "README.md" and ".goal-loop/" not in text:
                 ok = fail("README.md: missing .goal-loop/ artifact guidance")
         if doc.name == "MANIFEST.md":
@@ -272,6 +276,8 @@ def check_consistency(root: Path) -> bool:
             ok = fail("goal-loop/SKILL.md: missing domain skill coexistence guidance")
         if "ordinary standalone review" not in text:
             ok = fail("goal-loop/SKILL.md: missing read-only trigger exclusion")
+        if "findings, evidence, recommendations, and residual uncertainty" not in text:
+            ok = fail("goal-loop/SKILL.md: missing read-only audit completion guidance")
 
     if install_script.exists():
         text = install_script.read_text(encoding="utf-8")
@@ -279,6 +285,16 @@ def check_consistency(root: Path) -> bool:
             ok = fail("scripts/install.sh: missing explicit user-template opt-in flag")
         if "sync_user_templates" not in text:
             ok = fail("scripts/install.sh: user template sync must be gated by a variable")
+        if "preflight_install_targets" not in text:
+            ok = fail("scripts/install.sh: missing install target preflight before user-template sync")
+        preflight_pos = text.find("\npreflight_install_targets\n\nif [[ \"$sync_user_templates\" == true ]]")
+        template_sync_pos = text.find("\n  inject_agents_template\n")
+        if preflight_pos == -1 or template_sync_pos == -1 or preflight_pos > template_sync_pos:
+            ok = fail("scripts/install.sh: install target preflight must run before user-template sync")
+        validation_pos = text.find("\nrun_skillset_validation\n\nrequired_skills=")
+        template_sync_pos = text.find("\n  inject_agents_template\n")
+        if validation_pos == -1 or template_sync_pos == -1 or validation_pos > template_sync_pos:
+            ok = fail("scripts/install.sh: skillset validation must run before user-template sync")
 
     return ok
 
