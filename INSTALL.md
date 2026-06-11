@@ -24,7 +24,7 @@ CODEX_HOME=/path/to/codex-home scripts/install.sh
 - 只有显式传入 `--sync-user-templates` 时，才更新 Codex home 的 `AGENTS.md` 中带 `generate-with-template:agents-md` 标记的受管理模板块，并只补齐 `config.toml` 中缺失的模板设置；模板不设置 `sandbox_mode`，也不抑制不稳定特性警告。
 - 清理旧版本可能留在 `skills/` 下、且指向本仓库的旧支持目录软链接。
 - 校验目标 `skills/` 中的 skill 软链接指向源码目录，且旧支持目录没有作为本仓库 skill 安装。
-- 安装后运行源码中的 `tools/validate_skillset.py` 校验技能包。
+- 安装后运行源码中的 `tools/validate_skillset.py` 校验技能包。该校验只覆盖布局、元数据、引用可发现性和少量一致性规则；不能证明实际路由、误触发、reference 加载策略或验证边界正确。
 
 如果目标位置已有其他软链接，可以使用：
 
@@ -64,6 +64,36 @@ rm -rf "$tmp_codex_home"
 ```
 
 ## Smoke test prompts
+
+```text
+$goal-loop 对本仓库 skill 和 references 做只读一致性审计，不要改文件。
+```
+
+Expected behavior:
+
+- It should use FRAME/discovery only for routing and target/evidence boundaries.
+- It should read the requested SKILL.md/reference files as the audit target.
+- It should return findings, evidence, recommendations, and residual uncertainty, not only a Goal Contract.
+- It should not run ITERATE or VERIFY because no mutation or completion claim is requested.
+
+```text
+$goal-loop 比较当前分支和某个已有 MR 的方案差异，只读。
+```
+
+Expected behavior:
+
+- It should ask for the MR/branch identifier when the comparison object is missing.
+- With a concrete object, it should frame a `COMPARISON_ONLY` read-only comparison.
+- It should not mutate files.
+
+```text
+请普通 review 这段 diff，不要求判断是否 done/ready，也不需要查仓库规则。
+```
+
+Expected behavior:
+
+- It should not force Goal Loop for ordinary standalone review.
+- It should use normal read-only review style unless target/rule/evidence-boundary discovery is needed.
 
 ```text
 $goal-frame 这是一个多仓 workspace，帮我先 frame “补充产物上传 TOS 日志”，不要改文件。

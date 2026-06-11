@@ -58,10 +58,10 @@ Examples are illustrative only; do not copy their repo names, paths, or facts as
 
 Do not create a spec by default. Small, local, low-risk work only needs a Goal Contract.
 
-Create or update a spec from `references/spec-template.md` when any condition holds:
+Create or update a spec from `references/spec-template.md` when any condition holds. Ordinary use of Goal Loop stages or an isolated worktree does not by itself require a spec:
 
 - requirements were clarified across turns and may be lost in chat;
-- scope crosses stages, modules, repos, worktrees, or ownership boundaries;
+- requirements span multiple independent implementation phases, modules, repos, ownership boundaries, or handoff contexts;
 - handoff, stakeholder review, PR/MR discussion, or later resumption is expected;
 - acceptance, non-goals, constraints, or decision boundaries are too detailed for the Goal Contract;
 - risk tier is high, or medium with real scope-drift risk;
@@ -150,7 +150,7 @@ Return `READY_FOR_ITERATION` only when:
 
 Return `ASK_USER` when a clarification is necessary before safe progress.
 
-Return `READ_ONLY` when the task is purely explanatory/audit and does not need mutation.
+Return `READ_ONLY` when the task is purely explanatory/audit and does not need mutation. If the user asked for audit findings, include findings, evidence, recommendations, and residual uncertainty after the Goal Contract boundary is clear.
 
 Return `COMPARISON_ONLY` when the right next step is comparing existing work rather than implementation.
 

@@ -6,7 +6,7 @@ description: Route non-trivial coding and evidence-bound engineering tasks throu
 ## Read-only routing
 
 - Bypass Goal Loop for trivial explanation, summarization, or ordinary standalone review with a clear target and no mutation path, active goal, or completion claim.
-- Run FRAME only and exit `READ_ONLY` for non-trivial read-only audits that need target, local-rule, existing-work, or evidence-boundary discovery but no mutation or completion claim.
+- Run FRAME only and exit `READ_ONLY` for non-trivial read-only audits that need target, local-rule, existing-work, or evidence-boundary discovery but no mutation or completion claim. When the user requested findings, do not stop at the Goal Contract; after discovery, perform the bounded read-only audit and return findings, evidence, recommendations, and residual uncertainty.
 - Run FRAME only and exit `COMPARISON_ONLY` for read-only comparison of existing work when target or evidence-boundary discovery is needed and no mutation is requested.
 - Use REVIEW or VERIFY only for read-only checks inside an active Goal Contract, review feedback path, or implementation completion/readiness claim.
 
@@ -25,6 +25,9 @@ FRAME -> ITERATE -> REVIEW -> VERIFY -> FINAL
 ```
 
 ## Stage loading
+
+When the user explicitly asks to audit, compare, or validate this skill package, SKILL.md files, references, docs, installer, or validator behavior, treat those files as the target evidence bundle. Read all directly relevant `SKILL.md` files and the referenced files requested by the user, even if a stage would normally load references lazily.
+
 
 `goal-loop` is the only skill that should trigger implicitly for implementation work. Stage skills should run only when explicitly named by the user or selected by this router. This is a multi-skill package; install all stage skills together. Before executing a stage, read that stage's sibling `SKILL.md` directly:
 
