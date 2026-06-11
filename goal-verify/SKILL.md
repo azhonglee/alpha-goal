@@ -36,7 +36,17 @@ Hard requirements for completion claims:
 - commands/tests already run, or an explicit reason they cannot run;
 - Review Record when review was triggered by feedback, complexity, scope expansion, architecture/ownership risk, evidence uncertainty, or explicit completion-readiness review.
 
-If the Goal Contract is missing or target boundary is unclear, return `REFRAME` rather than guessing.
+If the Goal Contract is missing or target boundary is unclear, return `REFRAME` rather than guessing. For bare readiness claims, first try to recover or identify the local Goal Contract, target boundary, diff/MR, and evidence bundle from current context; if they are not available or discoverable, `REFRAME` with the exact missing inputs.
+
+Minimal evidence bundle for a positive readiness verdict:
+
+- Goal Contract or equivalent target/acceptance/claim boundary;
+- current diff, commit, or MR/PR scope;
+- fresh repo state after the last material change;
+- exact test/check commands and outcomes, or documented blockers;
+- acceptance-to-evidence mapping;
+- Debug Receipt for bug-fix claims;
+- current Review Record when review was triggered.
 
 If a required Review Record is missing, do not produce a positive completion verdict. Return `BLOCKED` with `Required next step: goal-review`, or let the router run `goal-review` first.
 
@@ -66,7 +76,11 @@ Check:
 - final claim does not exceed evidence.
 
 You may use `scripts/evidence-summary.sh` for read-only diff/status evidence.
-Use `references/verification-verdict-schema.md` for field definitions, `references/completion-review-rubric.md` when checking readiness to merge or ship, and `references/claim-boundary-check.md` when user wording is broader than local evidence.
+Use references only when their detail is needed:
+
+- `references/verification-verdict-schema.md` for field definitions when the output contract is unclear.
+- `references/completion-review-rubric.md` for every readiness-to-merge, readiness-to-ship, or final-delivery check.
+- `references/claim-boundary-check.md` when user wording is broader than local evidence or when considering `NARROW_CLAIM_AND_FINAL`.
 
 ## Evidence matrix
 

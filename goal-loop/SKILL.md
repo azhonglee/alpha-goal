@@ -138,11 +138,13 @@ Use `goal-verify` when any of these is true:
 
 - implementation appears complete;
 - there is a diff, patch, commit, MR/PR, local evidence to assess, delivery, or completion readiness for changed work;
-- the user asks whether it is done, ready to merge, ready to ship, or whether a final claim is supported;
+- the user asks whether it is done, ready to merge, ready to ship, or whether a final claim is supported, and a Goal Contract or target boundary is available or discoverable;
 - final output that includes or implies implementation completion, delivery readiness, merge readiness, correctness/safety of completed work, MR/PR creation, or another completion claim is being prepared;
 - previous iteration returned `ITERATION_READY_FOR_VERIFY`;
 - review returned `READY_FOR_VERIFY`;
 - active spec/plan artifacts, if any, must be checked against final evidence.
+
+If the user asks for readiness but no Goal Contract, target boundary, diff/MR, or evidence bundle is available or discoverable, route to FRAME/recovery first. If VERIFY is already entered, return `REFRAME`; do not guess from user-reported tests.
 
 `goal-verify` exits with one of:
 
