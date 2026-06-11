@@ -11,6 +11,9 @@ Goal Contract:
   2. Non-retryable errors must still fail.
 - Non-goals: No transport retry policy redesign.
 - Constraints: Need know whether user expects reducer-only or full stream lifecycle behavior.
+- Decision boundaries: User must choose reducer-only versus full stream lifecycle before mutation.
+- Assumptions and risks: UI reducer and stream mapper may both affect the final user-visible state.
+- Risk tier: medium.
 - Claim boundary: Not closed.
 - Evidence plan: Reducer tests plus higher-boundary stream event test if product-level claim is intended.
 - Existing work: No obvious local duplicate found in read-only search.
@@ -30,6 +33,9 @@ Goal Contract:
   3. Recommend merge/follow-up/abandon path.
 - Non-goals: Do not modify code or create a new MR.
 - Constraints: Use MR metadata and local diff only; cite uncertainty if MR content is inaccessible.
+- Decision boundaries: Codex may recommend a path, but user chooses whether to implement follow-up work.
+- Assumptions and risks: MR content may be incomplete if remote access fails.
+- Risk tier: low.
 - Claim boundary: Comparison only.
 - Evidence plan: MR file list, commit diff, changed behavior map.
 - Existing work: MR 503 is primary object.

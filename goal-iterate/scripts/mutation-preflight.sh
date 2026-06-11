@@ -57,7 +57,7 @@ section "local rule files"
 if [ -n "$root" ] && [ -d "$root" ]; then
   find "$root" \
     -path '*/.git' -prune -o \
-    \( -name AGENTS.md -o -name CLAUDE.md -o -name code_review.md \) \
+    \( -name AGENTS.override.md -o -name AGENTS.md -o -name CLAUDE.md -o -name code_review.md \) \
     -print 2>/dev/null | sort || true
 else
   echo "<unknown root>"

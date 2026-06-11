@@ -9,6 +9,9 @@ Goal Contract:
 - Acceptance:
 - Non-goals:
 - Constraints:
+- Decision boundaries:
+- Assumptions and risks:
+- Risk tier:
 - Claim boundary:
 - Evidence plan:
 - Existing work:
@@ -37,6 +40,22 @@ What should not be changed, migrated, refactored, optimized, or claimed.
 ### Constraints
 
 Project rules, worktree requirements, compatibility requirements, time/environment limits, ownership boundaries, and user constraints.
+
+### Decision boundaries
+
+What Codex may decide independently and what needs user confirmation before mutation or final claims.
+
+### Assumptions and risks
+
+Separate observed facts from assumptions. Record meaningful risks such as missing environment, unverified integration behavior, destructive operations, ownership uncertainty, or broad blast radius.
+
+### Risk tier
+
+Use one of:
+
+- `low`: bounded docs, prompt, local wording, or mechanical edits with no behavior or contract impact.
+- `medium`: bounded behavior, integration, CLI, UI, or maintainability change without high-risk triggers.
+- `high`: security, destructive/remote state, production/compliance/PII, public API, persisted schema, billing, permissions, tenant isolation, or irreversible behavior.
 
 ### Claim boundary
 
@@ -76,6 +95,9 @@ Goal Contract:
   3. Existing behavior and upload result semantics are unchanged.
 - Non-goals: No retry behavior change; no credential/config changes; no broad refactor.
 - Constraints: Must use isolated worktree; must follow selected repo `AGENTS.md`; must check existing MR with similar title before implementation.
+- Decision boundaries: Codex may choose exact log wording inside existing style; user confirmation needed for retry or credential behavior changes.
+- Assumptions and risks: Assumes test environment can run targeted Go tests; production observability is not available locally.
+- Risk tier: medium.
 - Claim boundary: Implementation-level logging behavior in selected repo, not production observability confirmation.
 - Evidence plan: unit tests where practical, targeted go test, diff review, existing MR scan.
 - Existing work: Search required before mutation because feature wording looks like an MR-sized task.

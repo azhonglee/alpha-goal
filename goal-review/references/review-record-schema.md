@@ -1,0 +1,59 @@
+# Review Record Schema
+
+The Review Record challenges a goal-loop workflow without making a final completion claim.
+
+```text
+Review Record:
+- Mode:
+- Target:
+- Evidence basis:
+- Findings:
+- Feedback classification:
+- Scope/architecture notes:
+- Risk tier:
+- Required evidence:
+- Review verdict:
+- Next:
+```
+
+## Field definitions
+
+### Mode
+
+One of `goal`, `loop`, `code`, `architecture`, `scope`, `feedback`, or `completion`.
+
+### Target
+
+The Goal Contract, Iteration Record, diff, feedback item, architecture choice, or completion claim being reviewed.
+
+### Evidence basis
+
+Fresh source findings, commands, diffs, tests, logs, screenshots, or explicit blocker evidence used for the review.
+
+### Findings
+
+Findings should lead with correctness, regression, missing evidence, scope, or safety concerns. Prefer concrete file/line references when reviewing code.
+
+### Feedback classification
+
+Use `accepted`, `rejected`, `needs_clarification`, `blocked`, or `none`.
+
+### Scope/architecture notes
+
+Record ownership boundaries, repo/worktree/submodule crossings, broad refactors, or unnecessary coupling.
+
+### Risk tier
+
+Use `low`, `medium`, or `high` based on blast radius and evidence needs.
+
+### Required evidence
+
+Checks or artifacts needed before `goal-verify` can support a final claim.
+
+### Review verdict
+
+One of `CONTINUE`, `NEXT_ITERATION`, `REFRAME`, `SIMPLIFY`, `BLOCKED`, or `READY_FOR_VERIFY`.
+
+### Next
+
+The next stage and why.

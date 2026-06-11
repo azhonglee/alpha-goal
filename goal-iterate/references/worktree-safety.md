@@ -19,11 +19,14 @@ Prefer:
 git worktree list
 git status --short
 mkdir -p .worktrees
+git check-ignore .worktrees/<task-name> || { touch .gitignore && grep -qxF '.worktrees/' .gitignore || printf '.worktrees/\n' >> .gitignore; }
 git worktree add .worktrees/<task-name> -b <branch-name> <base-branch>
 cd .worktrees/<task-name>
 ```
 
 Only after entering the isolated worktree should mutation begin.
+
+If project rules require a different ignored worktree root, use that root instead. If `.gitignore` has unrelated user changes or cannot be safely edited, ask before changing it and record the blocker.
 
 ## Unsafe pattern
 

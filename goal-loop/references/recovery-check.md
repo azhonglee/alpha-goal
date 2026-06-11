@@ -14,6 +14,7 @@ Recovery:
 - active worktree:
 - last known Goal Contract:
 - last known Iteration Record:
+- last known Review Record:
 - last known Verification Verdict:
 - suspected incomplete actions:
 - safest next state:
@@ -25,5 +26,6 @@ Recovery:
 - Do not continue mutation until the dirty state is understood.
 - Do not assume a previous edit was intentional unless it maps to the Goal Contract.
 - If changed files belong to a different repo/path than the Goal Contract, return to `goal-frame`.
+- If review feedback, scope expansion, complexity, or uncertainty exists without a Review Record, enter `goal-review`.
 - If the implementation appears complete but no evidence matrix exists, enter `goal-verify`.
 - If the workspace contains unrelated user changes, preserve them and mention the boundary.

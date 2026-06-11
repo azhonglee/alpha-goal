@@ -34,6 +34,9 @@ Check:
 - acceptance criteria;
 - non-goals;
 - constraints;
+- decision boundaries;
+- assumptions and risks;
+- risk tier;
 - evidence plan;
 - claim boundary.
 
@@ -98,6 +101,9 @@ Goal Contract:
 - Acceptance:
 - Non-goals:
 - Constraints:
+- Decision boundaries:
+- Assumptions and risks:
+- Risk tier:
 - Claim boundary:
 - Evidence plan:
 - Existing work:
@@ -120,7 +126,8 @@ Return `READY_FOR_ITERATION` only when:
 - target boundary is closed;
 - acceptance is testable or otherwise verifiable;
 - claim boundary is explicit;
-- constraints and non-goals are recorded;
+- constraints, non-goals, and decision boundaries are recorded;
+- assumptions, risks, and risk tier are recorded;
 - existing work has been checked when triggered;
 - no required user decision is missing.
 

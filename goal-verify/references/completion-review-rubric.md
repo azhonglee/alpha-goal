@@ -11,6 +11,9 @@ A task can pass to final only when:
 - tested boundary matches the final claim;
 - changed files match the Goal Contract target and non-goals;
 - expected checks were run or a clear blocker is documented;
+- review feedback was classified when present;
+- Review Record exists when complexity, scope, architecture, or uncertainty triggered review;
+- risk-tier evidence requirements are met or explicitly blocked;
 - unresolved gaps are disclosed;
 - final claim is no broader than evidence.
 
@@ -26,6 +29,7 @@ Return `NEXT_ITERATION`, `REFRAME`, or `NARROW_CLAIM_AND_FINAL` when:
 - a failed check is dismissed without diagnosis;
 - no fresh check was run after the last edit;
 - review depends on stale or pre-existing evidence.
+- no Review Record exists after review feedback, scope expansion, complexity, or uncertainty.
 
 ## Final answer shape
 
@@ -37,6 +41,7 @@ Evidence:
 - Acceptance 1 -> ...
 - Acceptance 2 -> ...
 Checks run: ...
+Review/risk evidence: ...
 Remaining gaps / not covered: ...
 ```
 

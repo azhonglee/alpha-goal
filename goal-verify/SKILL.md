@@ -25,6 +25,7 @@ Prefer to have:
 
 - Goal Contract;
 - Iteration Record or current diff/evidence;
+- Review Record when review was triggered by feedback, complexity, scope expansion, uncertainty, or completion readiness;
 - fresh repo state;
 - applicable project rules;
 - commands/tests already run, or an explicit reason they cannot run.
@@ -36,10 +37,12 @@ If the Goal Contract is missing or target boundary is unclear, return `REFRAME` 
 Check:
 
 - every acceptance item has fresh, relevant evidence;
+- risk-tier evidence requirements are met or explicitly blocked;
 - evidence is at the right boundary for the user's wording;
 - changed files match intended target and non-goals;
 - tests/checks are appropriate for the touched code;
 - failure output is understood, not hand-waved;
+- review feedback has been classified and accepted items were verified;
 - no obvious regression, loophole, race, persistence, stream lifecycle, or UI dispatch gap exists;
 - final claim does not exceed evidence.
 
@@ -107,6 +110,7 @@ Verification Verdict:
 - Verdict:
 - Acceptance evidence matrix:
 - Claim boundary:
+- Risk/evidence review:
 - Fresh checks run:
 - Diff/scope review:
 - Unresolved gaps:

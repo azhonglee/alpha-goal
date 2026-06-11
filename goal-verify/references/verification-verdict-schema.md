@@ -7,6 +7,7 @@ Verification Verdict:
 - Verdict:
 - Acceptance evidence matrix:
 - Claim boundary:
+- Risk/evidence review:
 - Fresh checks run:
 - Diff/scope review:
 - Unresolved gaps:
@@ -39,6 +40,10 @@ Evidence may be a test, build, typecheck, lint, runtime probe, diff review, MR c
 ### Claim boundary
 
 Compare user wording, implemented boundary, tested boundary, highest practical boundary, gap, and final claim allowed.
+
+### Risk/evidence review
+
+Record the risk tier, expected evidence floor, whether a Review Record was required, and whether the evidence was collected after the last material change.
 
 ### Fresh checks run
 
