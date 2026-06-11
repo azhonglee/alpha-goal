@@ -16,6 +16,7 @@ Goal Contract:
 - Risk tier: medium.
 - Claim boundary: Not closed.
 - Evidence plan: Reducer tests plus higher-boundary stream event test if product-level claim is intended.
+- Artifacts: spec: none; plan need: not yet.
 - Existing work: No obvious local duplicate found in read-only search.
 - Frame verdict: ASK_USER
 - Next: Ask whether to cover full app-server -> UI event path or only reducer behavior.
@@ -38,7 +39,8 @@ Goal Contract:
 - Risk tier: low.
 - Claim boundary: Comparison only.
 - Evidence plan: MR file list, commit diff, changed behavior map.
+- Artifacts: spec: none; plan need: not yet.
 - Existing work: MR 503 is primary object.
 - Frame verdict: COMPARISON_ONLY
-- Next: Perform read-only comparison, then goal-verify if making a recommendation.
+- Next: Perform read-only comparison; verify only if making a completion or readiness claim.
 ```

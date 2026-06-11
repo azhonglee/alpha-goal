@@ -17,7 +17,8 @@ Use this skill when:
 - scope expands or implementation becomes complex;
 - review feedback arrives and must be classified before action;
 - direction feels uncertain;
-- success appears complete but no current review exists;
+- an explicit completion-readiness review is requested or required by the router;
+- `goal-iterate` returned `ITERATION_READY_FOR_REVIEW`;
 - `goal-verify` returned `NEXT_ITERATION`, `REFRAME`, or an evidence gap that needs diagnosis.
 - an active spec or plan may be stale, over-broad, superseded, or inconsistent with current evidence.
 
@@ -74,6 +75,7 @@ Review Record:
 - Mode:
 - Target:
 - Evidence basis:
+- Freshness boundary:
 - Findings:
 - Feedback classification:
 - Artifact review:

@@ -32,7 +32,7 @@ Hard requirements for completion claims:
 - fresh repo state from after the last material change;
 - applicable project rules, or an explicit reason they cannot be read;
 - commands/tests already run, or an explicit reason they cannot run;
-- Review Record when review was triggered by feedback, complexity, scope expansion, uncertainty, or completion readiness.
+- Review Record when review was triggered by feedback, complexity, scope expansion, architecture/ownership risk, evidence uncertainty, or explicit completion-readiness review.
 
 If the Goal Contract is missing or target boundary is unclear, return `REFRAME` rather than guessing.
 
@@ -50,7 +50,8 @@ Check:
 - every active spec success criterion that is inside the claim boundary is covered or explicitly excluded;
 - any active plan verification route and evidence gate is satisfied, superseded with reason, or explicitly blocked;
 - loop mode, hypothesis, evidence type, learning, and decision are consistent with the final claim;
-- bug-fix claims have `ROOT_CAUSE_CONFIRMED` or fresh final evidence that proves the fix boundary;
+- any required Review Record covers the latest material change boundary;
+- bug-fix claims have `ROOT_CAUSE_CONFIRMED`, and fresh final evidence proves the fix boundary;
 - `NOT_REPRODUCED` or `BLOCKED` Debug Receipts are not treated as repair completion;
 - risk-tier evidence requirements are met or explicitly blocked;
 - evidence is at the right boundary for the user's wording;

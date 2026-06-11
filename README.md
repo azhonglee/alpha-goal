@@ -34,6 +34,7 @@ scripts/install.sh
 - 将 `templates/AGENTS.md` 合并到 `${CODEX_HOME:-<repo>/codex}/AGENTS.md` 的受管理模板块。
 - 将 `templates/config.toml` 中缺失的设置补齐到 `${CODEX_HOME:-<repo>/codex}/config.toml`，不覆盖已有值。
 - 清理旧版本可能留在 `skills/` 下、且指向本仓库的旧支持目录软链接。
+- 校验目标 `skills/` 中的 skill 软链接指向源码目录，且旧支持目录没有作为本仓库 skill 安装。
 - 安装后运行源码中的 `tools/validate_skillset.py` 校验技能包。
 
 如果要安装到真实 Codex home，显式指定：
@@ -163,6 +164,7 @@ Review Record:
 - Mode:
 - Target:
 - Evidence basis:
+- Freshness boundary:
 - Findings:
 - Feedback classification:
 - Artifact review:
@@ -202,6 +204,7 @@ If the skills feel too verbose, reduce output detail inside each stage, but keep
 - `Iteration Record.Loop mode`
 - `Iteration Record.Debug receipt`
 - `Iteration Record.Mutation preflight`
+- `Review Record.Freshness boundary`
 - `Review Record.Review verdict`
 - `Verification Verdict.Acceptance evidence matrix`
 - `Verification Verdict.Verdict`

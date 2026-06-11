@@ -93,6 +93,53 @@ remove_legacy_support_link() {
   fi
 }
 
+validate_installed_links() {
+  local failed=false
+
+  for skill_file in "${skill_files[@]}"; do
+    local skill_dir
+    skill_dir="$(cd "$(dirname "$skill_file")" && pwd -P)"
+    local skill_name
+    skill_name="$(basename "$skill_dir")"
+    local target="$target_root/$skill_name"
+
+    if [[ ! -L "$target" ]]; then
+      echo "Installed skill is not a symlink: $target" >&2
+      failed=true
+      continue
+    fi
+
+    local current_target
+    current_target="$(readlink "$target")"
+    if [[ "$current_target" != "$skill_dir" ]]; then
+      echo "Installed skill points elsewhere: $target -> $current_target" >&2
+      failed=true
+      continue
+    fi
+
+    if [[ ! -f "$target/SKILL.md" ]]; then
+      echo "Installed skill is missing SKILL.md through symlink: $target" >&2
+      failed=true
+    fi
+  done
+
+  for support_name in adapters tools templates scripts; do
+    local target="$target_root/$support_name"
+    local legacy_source="$repo_root/$support_name"
+
+    if [[ -L "$target" && "$(readlink "$target")" == "$legacy_source" ]]; then
+      echo "Support directory should not be installed as a skill: $target" >&2
+      failed=true
+    fi
+  done
+
+  if [[ "$failed" == true ]]; then
+    exit 1
+  fi
+
+  echo "Validated installed skill links in $target_root"
+}
+
 inject_agents_template() {
   local template_content
   template_content="$(<"$agents_template")"
@@ -403,6 +450,7 @@ for support_name in adapters tools templates scripts; do
   remove_legacy_support_link "$support_name"
 done
 
+validate_installed_links
 python3 "$repo_root/tools/validate_skillset.py" "$repo_root"
 
 echo "Installed $installed skill(s) into $target_root"

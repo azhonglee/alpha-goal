@@ -30,6 +30,7 @@ Recovery:
 - If a spec or plan exists, read its current version and status before relying on remembered context.
 - Do not continue from a `superseded` artifact; return to `goal-frame` for spec issues or `goal-iterate`/`goal-review` for plan issues.
 - If changed files belong to a different repo/path than the Goal Contract, return to `goal-frame`.
-- If review feedback, scope expansion, complexity, or uncertainty exists without a Review Record, enter `goal-review`.
+- If a Review Record exists but changed files, evidence, or artifact revisions moved past its Freshness boundary, treat it as stale.
+- If review feedback, scope expansion, complexity, architecture/ownership risk, or uncertainty exists without a current Review Record, enter `goal-review`.
 - If the implementation appears complete but no evidence matrix exists, enter `goal-verify`.
 - If the workspace contains unrelated user changes, preserve them and mention the boundary.
