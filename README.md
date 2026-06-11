@@ -20,19 +20,33 @@ It also includes optional read-only helper scripts and a ByteDance Codebase adap
 
 ## Install
 
-For Codex CLI / IDE usage, copy the skill directories into either:
+For Codex CLI / IDE usage, install from this checkout into either:
 
 ```bash
 # User-level skills
-mkdir -p "$HOME/.agents/skills"
-unzip codex-goal-loop-skills.zip -d "$HOME/.agents/skills"
+install_root="$HOME/.agents/skills"
+mkdir -p "$install_root"
+rsync -a --delete goal-loop/ "$install_root/goal-loop/"
+rsync -a --delete goal-frame/ "$install_root/goal-frame/"
+rsync -a --delete goal-iterate/ "$install_root/goal-iterate/"
+rsync -a --delete goal-verify/ "$install_root/goal-verify/"
+rsync -a --delete adapters/ "$install_root/adapters/"
+rsync -a --delete tools/ "$install_root/tools/"
+python3 "$install_root/tools/validate_skillset.py" "$install_root"
 
 # Or repo-level skills
-mkdir -p .agents/skills
-unzip codex-goal-loop-skills.zip -d .agents/skills
+install_root=".agents/skills"
+mkdir -p "$install_root"
+rsync -a --delete goal-loop/ "$install_root/goal-loop/"
+rsync -a --delete goal-frame/ "$install_root/goal-frame/"
+rsync -a --delete goal-iterate/ "$install_root/goal-iterate/"
+rsync -a --delete goal-verify/ "$install_root/goal-verify/"
+rsync -a --delete adapters/ "$install_root/adapters/"
+rsync -a --delete tools/ "$install_root/tools/"
+python3 "$install_root/tools/validate_skillset.py" "$install_root"
 ```
 
-The zip root contains the skill directories directly:
+The checkout root contains the skill directories directly:
 
 ```text
 goal-loop/
@@ -43,7 +57,7 @@ adapters/
 tools/
 ```
 
-Only directories containing `SKILL.md` are skills. `adapters/` and `tools/` are supporting material.
+Only directories containing `SKILL.md` are skills. `adapters/` and `tools/` are supporting material, but keep them next to the skills so relative references and validation commands continue to work.
 
 ## Recommended invocation
 

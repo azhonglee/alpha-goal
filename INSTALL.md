@@ -3,17 +3,29 @@
 ## Install user-level
 
 ```bash
-mkdir -p "$HOME/.agents/skills"
-unzip codex-goal-loop-skills.zip -d "$HOME/.agents/skills"
-python "$HOME/.agents/skills/tools/validate_skillset.py" "$HOME/.agents/skills"
+install_root="$HOME/.agents/skills"
+mkdir -p "$install_root"
+rsync -a --delete goal-loop/ "$install_root/goal-loop/"
+rsync -a --delete goal-frame/ "$install_root/goal-frame/"
+rsync -a --delete goal-iterate/ "$install_root/goal-iterate/"
+rsync -a --delete goal-verify/ "$install_root/goal-verify/"
+rsync -a --delete adapters/ "$install_root/adapters/"
+rsync -a --delete tools/ "$install_root/tools/"
+python3 "$install_root/tools/validate_skillset.py" "$install_root"
 ```
 
 ## Install repo-level
 
 ```bash
-mkdir -p .agents/skills
-unzip codex-goal-loop-skills.zip -d .agents/skills
-python .agents/skills/tools/validate_skillset.py .agents/skills
+install_root=".agents/skills"
+mkdir -p "$install_root"
+rsync -a --delete goal-loop/ "$install_root/goal-loop/"
+rsync -a --delete goal-frame/ "$install_root/goal-frame/"
+rsync -a --delete goal-iterate/ "$install_root/goal-iterate/"
+rsync -a --delete goal-verify/ "$install_root/goal-verify/"
+rsync -a --delete adapters/ "$install_root/adapters/"
+rsync -a --delete tools/ "$install_root/tools/"
+python3 "$install_root/tools/validate_skillset.py" "$install_root"
 ```
 
 ## Smoke test prompts
