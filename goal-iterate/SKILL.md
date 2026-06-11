@@ -1,6 +1,6 @@
 ---
 name: goal-iterate
-description: Perform one bounded implementation iteration under an existing Goal Contract, and create or update a durable plan artifact only when risk or complexity requires it. Use after goal-frame is READY_FOR_ITERATION. Enforces mutation preflight, isolated edit path, minimal patching, evidence-producing changes, and plan escalation.
+description: Perform one bounded implementation iteration under an existing Goal Contract, using loop modes, evidence records, debug receipts, mutation preflight, isolated edit paths, minimal patching, and plan escalation when risk or complexity requires it. Use after goal-frame is READY_FOR_ITERATION.
 ---
 
 # Goal Iterate
@@ -49,7 +49,7 @@ Mutation Preflight:
 
 You may use `scripts/mutation-preflight.sh` to collect read-only git state.
 
-Use `references/worktree-safety.md` when creating or validating an isolated edit path, especially if the current checkout may be the primary branch. Use `references/iteration-record-schema.md` for field definitions when the output contract is unclear. Use `references/plan-template.md` only when a durable route is needed.
+Use `references/worktree-safety.md` when creating or validating an isolated edit path, especially if the current checkout may be the primary branch. Use `references/iteration-record-schema.md` for field definitions when the output contract is unclear. Use `references/loop-modes.md` when selecting a loop mode, debugging, TDD, spike, refactor, or hardening path. Use `references/plan-template.md` only when a durable route is needed.
 
 ## Forbidden by default
 
@@ -71,6 +71,29 @@ Before mutating, classify risk from the Goal Contract:
 - `high`: security, destructive/remote state, production/compliance/PII, public API, persisted schema, billing, permissions, tenant isolation, or irreversible behavior; require broad verification and rollback/blocker evidence.
 
 Evidence must be fresh and collected after the last material change.
+
+## Loop mode
+
+Choose one loop mode before acting:
+
+- `discovery`
+- `interview`
+- `debug`
+- `tdd`
+- `implementation`
+- `refactor`
+- `spike`
+- `hardening`
+
+Record hypothesis, evidence type, learning, and decision for every iteration. Use `references/loop-modes.md` for mode-specific evidence rules.
+
+For `debug`, do not patch from a guessed cause. Close the diagnostic path with a Debug Receipt status before any fix claim:
+
+- `ROOT_CAUSE_CONFIRMED`
+- `NOT_REPRODUCED`
+- `BLOCKED`
+
+Only `ROOT_CAUSE_CONFIRMED` authorizes a fix iteration. `NOT_REPRODUCED` and `BLOCKED` may support only a bounded diagnostic or no-fix claim.
 
 ## Plan escalation
 
@@ -185,11 +208,17 @@ Produce exactly one Iteration Record:
 Iteration Record:
 - Contract version:
 - Active artifacts:
+- Loop mode:
+- Hypothesis:
+- Evidence type:
+- Debug receipt:
 - Iteration goal:
 - Mutation preflight:
 - Action:
 - Changed files:
 - Local evidence:
+- Learning:
+- Decision:
 - Acceptance delta:
 - Risks introduced:
 - Review needed:

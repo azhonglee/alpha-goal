@@ -6,7 +6,7 @@
 |---|---|
 | `goal-loop/` | Router and global invariants. |
 | `goal-frame/` | Goal Contract, clarification, target boundary, existing work scan, and spec escalation. |
-| `goal-iterate/` | One bounded implementation iteration with mutation preflight and plan escalation. |
+| `goal-iterate/` | One bounded implementation iteration with loop mode evidence, debug receipts, mutation preflight, and plan escalation. |
 | `goal-review/` | Review Record for direction, feedback, scope, artifact freshness, architecture, and completion readiness. |
 | `goal-verify/` | Verification Verdict, artifact alignment, and completion routing. |
 
