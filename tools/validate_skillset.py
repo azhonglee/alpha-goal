@@ -28,6 +28,7 @@ MIN_SHORT_DESCRIPTION_LEN = 25
 MAX_SHORT_DESCRIPTION_LEN = 64
 FORBIDDEN_CONFIG_KEYS = {"sandbox_mode", "suppress_unstable_features_warning"}
 WORKTREE_CANONICAL = ".worktrees/codex/<task-slug>"
+REQUIRED_OPENAI_INTERFACE_KEYS = {"display_name", "short_description", "default_prompt"}
 
 
 def parse_front_matter(text: str) -> dict[str, str]:
@@ -51,6 +52,92 @@ def parse_front_matter(text: str) -> dict[str, str]:
 def fail(message: str) -> bool:
     print(f"FAIL {message}")
     return False
+
+
+def parse_openai_yaml_metadata(text: str) -> dict[str, dict[str, str]]:
+    """Parse the constrained agents/openai.yaml shape without external dependencies."""
+    data: dict[str, dict[str, str]] = {"interface": {}, "policy": {}}
+    section: str | None = None
+    seen_paths: set[tuple[str, str]] = set()
+
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        section_match = re.match(r"^([A-Za-z0-9_-]+):\s*$", line)
+        if section_match:
+            section = section_match.group(1)
+            if section not in data:
+                raise ValueError(f"line {lineno}: unsupported top-level section {section!r}")
+            continue
+
+        item_match = re.match(r"^\s{2}([A-Za-z0-9_-]+):\s*(.+?)\s*$", line)
+        if not item_match or section is None:
+            raise ValueError(f"line {lineno}: unsupported YAML shape")
+
+        key, raw_value = item_match.groups()
+        path = (section, key)
+        if path in seen_paths:
+            raise ValueError(f"line {lineno}: duplicate key {section}.{key}")
+        seen_paths.add(path)
+        data[section][key] = raw_value.strip().strip('"').strip("'")
+
+    return data
+
+
+def check_openai_yaml(skill: str, openai_yaml: Path) -> bool:
+    ok = True
+    metadata = openai_yaml.read_text(encoding="utf-8")
+    try:
+        data = parse_openai_yaml_metadata(metadata)
+    except ValueError as exc:
+        return fail(f"{skill}: invalid agents/openai.yaml: {exc}")
+
+    interface = data["interface"]
+    policy = data["policy"]
+    missing_interface = REQUIRED_OPENAI_INTERFACE_KEYS - set(interface)
+    if missing_interface:
+        ok = fail(f"{skill}: missing interface field(s): {sorted(missing_interface)}")
+    for key in REQUIRED_OPENAI_INTERFACE_KEYS & set(interface):
+        if not interface[key]:
+            ok = fail(f"{skill}: interface.{key} must not be empty")
+
+    short = interface.get("short_description", "")
+    if short and not (MIN_SHORT_DESCRIPTION_LEN <= len(short) <= MAX_SHORT_DESCRIPTION_LEN):
+        ok = fail(
+            f"{skill}: short_description length {len(short)} outside "
+            f"{MIN_SHORT_DESCRIPTION_LEN}-{MAX_SHORT_DESCRIPTION_LEN}: {short!r}"
+        )
+
+    default_prompt = interface.get("default_prompt", "")
+    if default_prompt and f"${skill}" not in default_prompt:
+        ok = fail(f"{skill}: default_prompt should mention ${skill}")
+
+    policy_keys = set(policy)
+    if policy_keys != {"allow_implicit_invocation"}:
+        ok = fail(f"{skill}: policy must contain only allow_implicit_invocation, got {sorted(policy_keys)}")
+    implicit_value = policy.get("allow_implicit_invocation")
+    if implicit_value not in {"true", "false"}:
+        ok = fail(f"{skill}: allow_implicit_invocation must be true or false, got {implicit_value!r}")
+    elif implicit_value != IMPLICIT_POLICY[skill]:
+        ok = fail(
+            f"{skill}: allow_implicit_invocation is {implicit_value!r}, "
+            f"expected {IMPLICIT_POLICY[skill]!r}"
+        )
+
+    return ok
+
+
+def check_goal_loop_description(description: str) -> bool:
+    ok = True
+    lower = description.lower()
+    for phrase in ["non-trivial read-only", "target", "evidence-boundary"]:
+        if phrase not in lower:
+            ok = fail(f"goal-loop: description missing read-only discovery trigger phrase {phrase!r}")
+    if "advisory audit" in lower and "when no" not in lower and "unless" not in lower:
+        ok = fail("goal-loop: description appears to exclude advisory audit unconditionally")
+    return ok
 
 
 def check_skill_references(skill: str, skill_dir: Path, skill_text: str) -> bool:
@@ -182,7 +269,7 @@ def check_consistency(root: Path) -> bool:
         text = goal_loop.read_text(encoding="utf-8")
         if "Domain skill coexistence" not in text:
             ok = fail("goal-loop/SKILL.md: missing domain skill coexistence guidance")
-        if "ordinary read-only" not in text:
+        if "ordinary standalone review" not in text:
             ok = fail("goal-loop/SKILL.md: missing read-only trigger exclusion")
 
     if install_script.exists():
@@ -242,27 +329,10 @@ def main() -> int:
             print(f"FAIL {skill}: missing {openai_yaml}")
             ok = False
             continue
-        metadata = openai_yaml.read_text(encoding="utf-8")
-        short_match = re.search(r'^\s*short_description:\s*["\'](.+)["\']\s*$', metadata, re.MULTILINE)
-        if not short_match:
-            print(f"FAIL {skill}: missing interface.short_description")
-            ok = False
-        else:
-            short = short_match.group(1)
-            if not (MIN_SHORT_DESCRIPTION_LEN <= len(short) <= MAX_SHORT_DESCRIPTION_LEN):
-                print(
-                    f"FAIL {skill}: short_description length {len(short)} outside "
-                    f"{MIN_SHORT_DESCRIPTION_LEN}-{MAX_SHORT_DESCRIPTION_LEN}: {short!r}"
-                )
-                ok = False
+        ok = check_openai_yaml(skill, openai_yaml) and ok
 
-        expected_policy = f"allow_implicit_invocation: {IMPLICIT_POLICY[skill]}"
-        if expected_policy not in metadata:
-            print(f"FAIL {skill}: missing expected policy {expected_policy!r}")
-            ok = False
-        if f"${skill}" not in metadata:
-            print(f"FAIL {skill}: default_prompt should mention ${skill}")
-            ok = False
+        if skill == "goal-loop" and description:
+            ok = check_goal_loop_description(description) and ok
 
         ok = check_skill_references(skill, skill_dir, skill_text) and ok
 
