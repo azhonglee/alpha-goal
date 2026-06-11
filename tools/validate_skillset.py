@@ -75,7 +75,7 @@ def check_skill_references(skill: str, skill_dir: Path, skill_text: str) -> bool
 
 def check_supporting_paths(root: Path) -> bool:
     ok = True
-    for path in [root / "adapters", root / "tools", root / "templates"]:
+    for path in [root / "adapters", root / "tools", root / "templates", root / "scripts"]:
         if not path.exists():
             ok = fail(f"missing supporting path {path}")
 
@@ -100,6 +100,14 @@ def check_supporting_paths(root: Path) -> bool:
         except tomllib.TOMLDecodeError as exc:
             ok = fail(f"invalid TOML in {config_template}: {exc}")
 
+    install_script = root / "scripts" / "install.sh"
+    if not install_script.exists():
+        ok = fail(f"missing install script {install_script}")
+    else:
+        result = subprocess.run(["bash", "-n", str(install_script)], check=False, capture_output=True, text=True)
+        if result.returncode != 0:
+            ok = fail(f"bash -n failed for {install_script}: {result.stderr.strip()}")
+
     return ok
 
 
@@ -115,12 +123,10 @@ def check_docs(root: Path) -> bool:
             continue
         text = doc.read_text(encoding="utf-8")
         if doc.name in {"README.md", "INSTALL.md"}:
-            for skill in REQUIRED_SKILLS:
-                expected = f"rsync -a --delete {skill}/"
-                if expected not in text:
-                    ok = fail(f"{doc.name}: missing install copy command for {skill}")
-            if "rsync -a --delete templates/" not in text:
-                ok = fail(f"{doc.name}: missing install copy command for templates")
+            if "scripts/install.sh" not in text:
+                ok = fail(f"{doc.name}: missing scripts/install.sh install command")
+            if "codex/skills" not in text:
+                ok = fail(f"{doc.name}: missing default codex/skills install target")
             if "validate_skillset.py" not in text:
                 ok = fail(f"{doc.name}: missing validate_skillset.py smoke test")
         if doc.name == "MANIFEST.md":
@@ -129,6 +135,8 @@ def check_docs(root: Path) -> bool:
                     ok = fail(f"MANIFEST.md: missing skill entry for {skill}")
             if "`templates/`" not in text:
                 ok = fail("MANIFEST.md: missing templates entry")
+            if "`scripts/`" not in text:
+                ok = fail("MANIFEST.md: missing scripts entry")
     return ok
 
 

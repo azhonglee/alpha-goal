@@ -22,34 +22,30 @@ The package contains five skills:
 
 ## Install
 
-For Codex CLI / IDE usage, install from this checkout into either:
+默认安装到仓库根目录下的 `codex/`，并把技能目录软链接到 `codex/skills/`：
 
 ```bash
-# User-level skills
-install_root="$HOME/.agents/skills"
-mkdir -p "$install_root"
-rsync -a --delete goal-loop/ "$install_root/goal-loop/"
-rsync -a --delete goal-frame/ "$install_root/goal-frame/"
-rsync -a --delete goal-iterate/ "$install_root/goal-iterate/"
-rsync -a --delete goal-review/ "$install_root/goal-review/"
-rsync -a --delete goal-verify/ "$install_root/goal-verify/"
-rsync -a --delete adapters/ "$install_root/adapters/"
-rsync -a --delete tools/ "$install_root/tools/"
-rsync -a --delete templates/ "$install_root/templates/"
-python3 "$install_root/tools/validate_skillset.py" "$install_root"
+scripts/install.sh
+```
 
-# Or repo-level skills
-install_root=".agents/skills"
-mkdir -p "$install_root"
-rsync -a --delete goal-loop/ "$install_root/goal-loop/"
-rsync -a --delete goal-frame/ "$install_root/goal-frame/"
-rsync -a --delete goal-iterate/ "$install_root/goal-iterate/"
-rsync -a --delete goal-review/ "$install_root/goal-review/"
-rsync -a --delete goal-verify/ "$install_root/goal-verify/"
-rsync -a --delete adapters/ "$install_root/adapters/"
-rsync -a --delete tools/ "$install_root/tools/"
-rsync -a --delete templates/ "$install_root/templates/"
-python3 "$install_root/tools/validate_skillset.py" "$install_root"
+脚本会：
+
+- 将顶层 `*/SKILL.md` 技能目录软链接到 `${CODEX_HOME:-<repo>/codex}/skills/`。
+- 将 `adapters/`、`tools/`、`templates/`、`scripts/` 作为支持目录软链接到同一个 `skills/` 目录，保证相对引用可用。
+- 将 `templates/AGENTS.md` 合并到 `${CODEX_HOME:-<repo>/codex}/AGENTS.md` 的受管理模板块。
+- 将 `templates/config.toml` 中缺失的设置补齐到 `${CODEX_HOME:-<repo>/codex}/config.toml`，不覆盖已有值。
+- 安装后运行 `tools/validate_skillset.py` 校验安装结果。
+
+如果要安装到真实 Codex home，显式指定：
+
+```bash
+CODEX_HOME="$HOME/.codex" scripts/install.sh
+```
+
+如果目标位置已有指向其他目录的软链接，使用 `--force` 替换软链接；脚本不会删除真实文件或真实目录：
+
+```bash
+scripts/install.sh --force
 ```
 
 The checkout root contains the skill directories directly:
@@ -63,13 +59,15 @@ goal-verify/
 adapters/
 tools/
 templates/
+scripts/
+codex/        # local install output, ignored by git
 ```
 
-只有包含 `SKILL.md` 的目录才是技能。`adapters/`、`tools/` 和 `templates/` 都是支持材料，应与技能目录保持同级，确保相对引用和校验命令可用。
+只有包含 `SKILL.md` 的目录才是技能。`adapters/`、`tools/`、`templates/` 和 `scripts/` 都是支持材料，应与技能目录保持同级，确保相对引用、安装脚本和校验命令可用。
 
 ## 可选用户配置模板
 
-`templates/AGENTS.md` 和 `templates/config.toml` 来自原 `main` 分支的安装模型。上面的 `rsync` 命令不会自动应用它们，因为这些文件会影响全局 Codex 行为和本地自主执行设置。只有在确认这些默认值适合用户环境后，才将它们审阅并合并到 `${CODEX_HOME:-$HOME/.codex}`。
+`templates/AGENTS.md` 和 `templates/config.toml` 来自原 `main` 分支的安装模型。默认安装只会写入仓库根目录下的 `codex/`。如果显式设置 `CODEX_HOME="$HOME/.codex"`，脚本会合并这些模板到真实 Codex home；执行前应确认这些默认值适合用户环境。
 
 ## Recommended invocation
 

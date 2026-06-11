@@ -1,45 +1,45 @@
 # Installation and Smoke Test
 
-## Install user-level
+## 默认安装
 
 ```bash
-install_root="$HOME/.agents/skills"
-mkdir -p "$install_root"
-rsync -a --delete goal-loop/ "$install_root/goal-loop/"
-rsync -a --delete goal-frame/ "$install_root/goal-frame/"
-rsync -a --delete goal-iterate/ "$install_root/goal-iterate/"
-rsync -a --delete goal-review/ "$install_root/goal-review/"
-rsync -a --delete goal-verify/ "$install_root/goal-verify/"
-rsync -a --delete adapters/ "$install_root/adapters/"
-rsync -a --delete tools/ "$install_root/tools/"
-rsync -a --delete templates/ "$install_root/templates/"
-python3 "$install_root/tools/validate_skillset.py" "$install_root"
+scripts/install.sh
 ```
 
-## Install repo-level
+默认 `CODEX_HOME` 是仓库根目录下的 `codex/`，技能会软链接到 `codex/skills/`。
+
+## 安装到真实 Codex home
 
 ```bash
-install_root=".agents/skills"
-mkdir -p "$install_root"
-rsync -a --delete goal-loop/ "$install_root/goal-loop/"
-rsync -a --delete goal-frame/ "$install_root/goal-frame/"
-rsync -a --delete goal-iterate/ "$install_root/goal-iterate/"
-rsync -a --delete goal-review/ "$install_root/goal-review/"
-rsync -a --delete goal-verify/ "$install_root/goal-verify/"
-rsync -a --delete adapters/ "$install_root/adapters/"
-rsync -a --delete tools/ "$install_root/tools/"
-rsync -a --delete templates/ "$install_root/templates/"
-python3 "$install_root/tools/validate_skillset.py" "$install_root"
+CODEX_HOME="$HOME/.codex" scripts/install.sh
 ```
 
-## 可选用户配置模板
+## 安装行为
+
+脚本会：
+
+- 软链接顶层技能目录到 `${CODEX_HOME:-<repo>/codex}/skills/`。
+- 软链接 `adapters/`、`tools/`、`templates/`、`scripts/` 到同一个 `skills/` 目录。
+- 更新 `${CODEX_HOME:-<repo>/codex}/AGENTS.md` 中带 `generate-with-template:agents-md` 标记的受管理模板块；如果没有目标文件则创建。
+- 只补齐 `${CODEX_HOME:-<repo>/codex}/config.toml` 中缺失的模板设置，不覆盖已有值。
+- 安装后运行 `tools/validate_skillset.py` 校验结果。
+
+如果目标位置已有其他软链接，可以使用：
+
+```bash
+scripts/install.sh --force
+```
+
+`--force` 只替换软链接，不删除真实文件或真实目录。
+
+## 用户配置模板
 
 安装后的 `templates/` 目录包含：
 
 - `AGENTS.md`：推荐的自主 Agent 行为和隔离工作流约束。
 - `config.toml`：启用 multi-agent 等本地特性的可选 Codex 配置。
 
-不要直接覆盖已有的 `${CODEX_HOME:-$HOME/.codex}/AGENTS.md` 或 `config.toml`。先审阅模板，只合并适合用户环境的设置。
+默认安装只写入仓库根目录下的 `codex/`。只有显式设置 `CODEX_HOME="$HOME/.codex"` 时，脚本才会更新真实 Codex home。
 
 ## Smoke test prompts
 
