@@ -2,13 +2,14 @@
 
 ## Project Structure & Module Organization
 
-本仓库维护 `goal-loop` Codex 技能包。核心入口是 `goal-loop/SKILL.md`；阶段技能位于 `goal-frame/`、`goal-iterate/`、`goal-review/`、`goal-verify/`。各阶段的详细规则放在本阶段 `references/` 下，脚本放在本阶段 `scripts/` 下。`adapters/` 是可选环境参考，`tools/validate_skillset.py` 用于本地布局校验。`README.md`、`INSTALL.md`、`MANIFEST.md` 应与这些路径和命令保持一致。
+本仓库维护 `goal-loop` Codex 技能包。核心入口是 `goal-loop/SKILL.md`；阶段技能位于 `goal-frame/`、`goal-iterate/`、`goal-review/`、`goal-verify/`。各阶段的详细规则放在本阶段 `references/` 下，脚本放在本阶段 `scripts/` 下。`adapters/` 是可选环境参考，`templates/` 是可选用户配置模板，`tools/validate_skillset.py` 用于本地布局校验。`README.md`、`INSTALL.md`、`MANIFEST.md` 应与这些路径和命令保持一致。
 
 ## Build, Test, and Development Commands
 
 - `python3 tools/validate_skillset.py .`：验证必需技能目录和 front matter。
 - `bash -n goal-iterate/scripts/mutation-preflight.sh`：检查迭代阶段脚本语法。
 - `bash -n goal-verify/scripts/evidence-summary.sh`：检查验证阶段脚本语法。
+- `python3 -c 'import pathlib,tomllib; tomllib.loads(pathlib.Path("templates/config.toml").read_text())'`：验证配置模板可解析。
 - 使用临时目录执行 README/INSTALL 中的 `rsync` 安装步骤，并运行临时目录内的 `tools/validate_skillset.py`，验证安装说明可执行。
 
 ## Coding Style & Naming Conventions
@@ -17,7 +18,7 @@
 
 ## Testing Guidelines
 
-当前没有独立测试框架。修改技能布局、front matter、安装文档或阶段输出契约后，至少运行 `python3 tools/validate_skillset.py .`。修改 shell 脚本时运行对应 `bash -n`。修改安装说明时必须用临时安装目录验证说明中的命令，不要污染真实用户配置。
+当前没有独立测试框架。修改技能布局、front matter、安装文档、模板或阶段输出契约后，至少运行 `python3 tools/validate_skillset.py .`。修改 shell 脚本时运行对应 `bash -n`。修改 `templates/config.toml` 时验证 TOML 可解析。修改安装说明时必须用临时安装目录验证说明中的命令，不要污染真实用户配置。
 
 ## Commit & Pull Request Guidelines
 

@@ -12,6 +12,7 @@ rsync -a --delete goal-review/ "$install_root/goal-review/"
 rsync -a --delete goal-verify/ "$install_root/goal-verify/"
 rsync -a --delete adapters/ "$install_root/adapters/"
 rsync -a --delete tools/ "$install_root/tools/"
+rsync -a --delete templates/ "$install_root/templates/"
 python3 "$install_root/tools/validate_skillset.py" "$install_root"
 ```
 
@@ -27,8 +28,18 @@ rsync -a --delete goal-review/ "$install_root/goal-review/"
 rsync -a --delete goal-verify/ "$install_root/goal-verify/"
 rsync -a --delete adapters/ "$install_root/adapters/"
 rsync -a --delete tools/ "$install_root/tools/"
+rsync -a --delete templates/ "$install_root/templates/"
 python3 "$install_root/tools/validate_skillset.py" "$install_root"
 ```
+
+## 可选用户配置模板
+
+安装后的 `templates/` 目录包含：
+
+- `AGENTS.md`：推荐的自主 Agent 行为和隔离工作流约束。
+- `config.toml`：启用 multi-agent 等本地特性的可选 Codex 配置。
+
+不要直接覆盖已有的 `${CODEX_HOME:-$HOME/.codex}/AGENTS.md` 或 `config.toml`。先审阅模板，只合并适合用户环境的设置。
 
 ## Smoke test prompts
 

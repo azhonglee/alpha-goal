@@ -13,6 +13,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+import tomllib
 
 REQUIRED_SKILLS = ["goal-loop", "goal-frame", "goal-iterate", "goal-review", "goal-verify"]
 IMPLICIT_POLICY = {
@@ -74,13 +75,30 @@ def check_skill_references(skill: str, skill_dir: Path, skill_text: str) -> bool
 
 def check_supporting_paths(root: Path) -> bool:
     ok = True
-    for path in [root / "adapters", root / "tools"]:
+    for path in [root / "adapters", root / "tools", root / "templates"]:
         if not path.exists():
             ok = fail(f"missing supporting path {path}")
 
     adapter = root / "adapters" / "bytedance-codebase.md"
     if not adapter.exists():
         ok = fail(f"missing adapter reference {adapter}")
+
+    agents_template = root / "templates" / "AGENTS.md"
+    if not agents_template.exists():
+        ok = fail(f"missing AGENTS template {agents_template}")
+    else:
+        template_text = agents_template.read_text(encoding="utf-8")
+        if "<!-- generate-with-template:agents-md -->" not in template_text:
+            ok = fail(f"AGENTS template missing managed marker: {agents_template}")
+
+    config_template = root / "templates" / "config.toml"
+    if not config_template.exists():
+        ok = fail(f"missing config template {config_template}")
+    else:
+        try:
+            tomllib.loads(config_template.read_text(encoding="utf-8"))
+        except tomllib.TOMLDecodeError as exc:
+            ok = fail(f"invalid TOML in {config_template}: {exc}")
 
     return ok
 
@@ -101,12 +119,16 @@ def check_docs(root: Path) -> bool:
                 expected = f"rsync -a --delete {skill}/"
                 if expected not in text:
                     ok = fail(f"{doc.name}: missing install copy command for {skill}")
+            if "rsync -a --delete templates/" not in text:
+                ok = fail(f"{doc.name}: missing install copy command for templates")
             if "validate_skillset.py" not in text:
                 ok = fail(f"{doc.name}: missing validate_skillset.py smoke test")
         if doc.name == "MANIFEST.md":
             for skill in REQUIRED_SKILLS:
                 if f"`{skill}/`" not in text:
                     ok = fail(f"MANIFEST.md: missing skill entry for {skill}")
+            if "`templates/`" not in text:
+                ok = fail("MANIFEST.md: missing templates entry")
     return ok
 
 
