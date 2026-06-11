@@ -31,10 +31,10 @@ scripts/install.sh
 脚本会：
 
 - 将顶层 `*/SKILL.md` 技能目录软链接到 `${CODEX_HOME:-<repo>/codex}/skills/`。
-- 将 `adapters/`、`tools/`、`templates/`、`scripts/` 作为支持目录软链接到同一个 `skills/` 目录，保证相对引用可用。
 - 将 `templates/AGENTS.md` 合并到 `${CODEX_HOME:-<repo>/codex}/AGENTS.md` 的受管理模板块。
 - 将 `templates/config.toml` 中缺失的设置补齐到 `${CODEX_HOME:-<repo>/codex}/config.toml`，不覆盖已有值。
-- 安装后运行 `tools/validate_skillset.py` 校验安装结果。
+- 清理旧版本可能留在 `skills/` 下、且指向本仓库的 `adapters/`、`tools/`、`templates/`、`scripts/` 支持目录软链接。
+- 安装后运行源码中的 `tools/validate_skillset.py` 校验技能包。
 
 如果要安装到真实 Codex home，显式指定：
 

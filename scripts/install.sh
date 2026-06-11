@@ -6,8 +6,7 @@ usage() {
 Usage: scripts/install.sh [--force]
 
 Install this repository's top-level skills by symlinking them into
-${CODEX_HOME:-<repo>/codex}/skills. Supporting directories are symlinked next
-to the skills so sibling references keep working.
+${CODEX_HOME:-<repo>/codex}/skills.
 
 The script also syncs templates/AGENTS.md into ${CODEX_HOME}/AGENTS.md and
 fills missing ${CODEX_HOME}/config.toml settings from templates/config.toml.
@@ -75,6 +74,23 @@ link_path() {
 
   ln -s "$source" "$target"
   echo "Installed: $label -> $source"
+}
+
+remove_legacy_support_link() {
+  local support_name="$1"
+  local support_dir="$repo_root/$support_name"
+  local target="$target_root/$support_name"
+
+  if [[ ! -L "$target" || ! -d "$support_dir" ]]; then
+    return
+  fi
+
+  local current_target
+  current_target="$(readlink "$target")"
+  if [[ "$current_target" == "$support_dir" ]]; then
+    rm "$target"
+    echo "Removed legacy support link: $target"
+  fi
 }
 
 inject_agents_template() {
@@ -384,13 +400,10 @@ for skill_file in "${skill_files[@]}"; do
 done
 
 for support_name in adapters tools templates scripts; do
-  support_dir="$repo_root/$support_name"
-  if [[ -d "$support_dir" ]]; then
-    link_path "$(cd "$support_dir" && pwd -P)" "$target_root/$support_name" "$support_name"
-  fi
+  remove_legacy_support_link "$support_name"
 done
 
-python3 "$target_root/tools/validate_skillset.py" "$target_root"
+python3 "$repo_root/tools/validate_skillset.py" "$repo_root"
 
 echo "Installed $installed skill(s) into $target_root"
 echo "Codex home: $codex_home"

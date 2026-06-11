@@ -19,10 +19,10 @@ CODEX_HOME="$HOME/.codex" scripts/install.sh
 脚本会：
 
 - 软链接顶层技能目录到 `${CODEX_HOME:-<repo>/codex}/skills/`。
-- 软链接 `adapters/`、`tools/`、`templates/`、`scripts/` 到同一个 `skills/` 目录。
 - 更新 `${CODEX_HOME:-<repo>/codex}/AGENTS.md` 中带 `generate-with-template:agents-md` 标记的受管理模板块；如果没有目标文件则创建。
 - 只补齐 `${CODEX_HOME:-<repo>/codex}/config.toml` 中缺失的模板设置，不覆盖已有值。
-- 安装后运行 `tools/validate_skillset.py` 校验结果。
+- 清理旧版本可能留在 `skills/` 下、且指向本仓库的 `adapters/`、`tools/`、`templates/`、`scripts/` 支持目录软链接。
+- 安装后运行源码中的 `tools/validate_skillset.py` 校验技能包。
 
 如果目标位置已有其他软链接，可以使用：
 
@@ -34,7 +34,7 @@ scripts/install.sh --force
 
 ## 用户配置模板
 
-安装后的 `templates/` 目录包含：
+源码中的 `templates/` 目录包含：
 
 - `AGENTS.md`：推荐的自主 Agent 行为和隔离工作流约束。
 - `config.toml`：启用 multi-agent 等本地特性的可选 Codex 配置。
