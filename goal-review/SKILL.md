@@ -52,7 +52,7 @@ Good delegation targets:
 
 Keep each delegated review focused and read-only. Give the subagent only the scope and artifacts needed for its check, and ask for concrete findings with evidence, file/line references when applicable, open questions, and residual risk.
 
-The main agent remains responsible for the Review Record. Treat subagent findings as review input, not final truth: inspect the underlying artifacts, resolve conflicts between reviewers, reject unsupported claims, and make the final `Review verdict` yourself. For low-risk or narrow changes, skip subagents unless the user or repository instructions require them.
+You remain responsible for the Review Record. Treat subagent findings as review input, not final truth: inspect the underlying artifacts, resolve conflicts between reviewers, reject unsupported claims, and make the final `Review verdict` yourself. For low-risk or narrow changes, skip subagents unless the user or repository instructions require them.
 
 ## Challenge checks
 

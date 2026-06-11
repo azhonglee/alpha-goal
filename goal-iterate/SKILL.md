@@ -105,8 +105,8 @@ Do not create a plan by default. Use one only when the next step is no longer sa
 Create or update a plan from `references/plan-template.md` when loop evidence shows any condition holds:
 
 - work crosses loops, modules, repos, worktrees, submodules, or ownership surfaces;
-- execution needs dependent slices and later agents must resume without chat history;
-- multiple agents or parallel workstreams need coordination;
+- execution needs dependent slices and later work must resume without chat history;
+- multiple workstreams need coordination;
 - migration, architecture, rollback, compatibility, or evidence sequencing decisions must persist;
 - earlier loop evidence invalidated the route and the new route must be traceable;
 - the user asks for a plan, execution artifact, handoff route, or status artifact.
@@ -137,7 +137,7 @@ Before each iteration, read the active plan if it exists. After each material it
 
 ## Delegation boundary
 
-Use another agent only for bounded, self-contained work.
+Use subagents only for bounded, self-contained work.
 
 - Provide task id, exact scope, working directory, ownership surface, current Goal/spec/plan evidence, constraints, expected evidence, and return contract.
 - Parallelize only when ownership is independent and shared files or generated outputs are not contested.

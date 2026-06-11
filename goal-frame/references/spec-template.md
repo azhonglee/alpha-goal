@@ -54,11 +54,11 @@ What evidence proves each success criterion?
 
 ## Decision Boundaries
 
-Codex may decide:
+You may decide:
 
 -
 
-Codex must ask before:
+You must ask before:
 
 -
 
