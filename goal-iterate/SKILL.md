@@ -19,6 +19,8 @@ Required before mutation:
 - Applicable local rules have been read.
 - Mutation preflight is recorded.
 - Isolated edit path is known.
+- Risk tier and evidence floor are known.
+- Repo, worktree, submodule, and ownership boundaries are understood.
 
 If any requirement is missing, do not mutate.
 
@@ -34,6 +36,10 @@ Mutation Preflight:
 - worktree list:
 - primary checkout:
 - isolated edit path:
+- applicable rule files:
+- nested repos/submodules:
+- risk tier:
+- evidence floor:
 - mutation allowed:
 ```
 
@@ -50,6 +56,29 @@ Do not do these unless the user explicitly asks and the risk is documented:
 - include unrelated cleanup/refactors not tied to acceptance;
 - claim final completion from inside iteration.
 
+## Risk-tiered evidence
+
+Before mutating, classify risk from the Goal Contract:
+
+- `low`: no behavior or public contract impact; focused self-check and artifact evidence may be enough.
+- `medium`: bounded behavior, integration, CLI, UI, or maintainability change; run focused tests/checks and review changed behavior.
+- `high`: security, destructive/remote state, production/compliance/PII, public API, persisted schema, billing, permissions, tenant isolation, or irreversible behavior; require broad verification and rollback/blocker evidence.
+
+Evidence must be fresh and collected after the last material change.
+
+## Ownership boundaries
+
+Before editing, identify:
+
+- repository root and current branch;
+- whether the current directory is a linked worktree;
+- dirty state and unrelated user changes;
+- owning git root for each touched path;
+- nested `.git` directories or submodules under touched paths;
+- applicable `AGENTS.md`, `AGENTS.override.md`, `CLAUDE.md`, or `code_review.md` files.
+
+Do not modify across repository, worktree, or submodule boundaries unless the Goal Contract explicitly includes that boundary.
+
 ## Iteration rules
 
 - Make the smallest coherent change that advances one or more acceptance items.
@@ -59,6 +88,8 @@ Do not do these unless the user explicitly asks and the risk is documented:
 - If discovery reveals existing work that changes task identity, stop and return `REFRAME_NEEDED`.
 - If project rules require a specific worktree, branch, or test flow, follow them.
 - If a check fails, diagnose whether it is caused by the iteration, environment, or unrelated baseline.
+- Do not patch from a plausible but unconfirmed root cause when debugging; first record reproducible evidence or a diagnostic blocker.
+- If three attempts on the same failure thread do not produce new evidence, route to `goal-review`.
 
 ## No evidence, no progress
 
@@ -72,6 +103,13 @@ Examples of fresh evidence:
 - diff review against acceptance;
 - runtime/manual probe output;
 - documented blocker with attempted command and failure reason.
+
+Unacceptable evidence:
+
+- intuition or preference;
+- stale checks from before the last material change;
+- code changes without validation;
+- review approval without fresh verification.
 
 ## Stop conditions
 
@@ -89,6 +127,13 @@ Stop and return `BLOCKED` when:
 - tests cannot run and no substitute evidence is available;
 - local state is too dirty to safely isolate changes.
 
+Route to `goal-review` when:
+
+- review feedback needs classification;
+- implementation becomes complex;
+- scope expands;
+- architecture or ownership decisions become material.
+
 ## Output
 
 Produce exactly one Iteration Record:
@@ -103,6 +148,7 @@ Iteration Record:
 - Local evidence:
 - Acceptance delta:
 - Risks introduced:
+- Review needed:
 - Iterate verdict:
 - Next:
 ```

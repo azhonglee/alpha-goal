@@ -2,7 +2,8 @@
 """Validate a local Codex goal-loop skillset layout.
 
 This is intentionally lightweight: it checks that each skill directory has a
-SKILL.md file with YAML front matter containing name and description.
+SKILL.md file with YAML front matter containing name and description, plus
+the expected agents/openai.yaml invocation policy.
 It does not validate Codex runtime behavior.
 """
 
@@ -12,7 +13,14 @@ import re
 import sys
 from pathlib import Path
 
-REQUIRED_SKILLS = ["goal-loop", "goal-frame", "goal-iterate", "goal-verify"]
+REQUIRED_SKILLS = ["goal-loop", "goal-frame", "goal-iterate", "goal-review", "goal-verify"]
+IMPLICIT_POLICY = {
+    "goal-loop": "true",
+    "goal-frame": "false",
+    "goal-iterate": "false",
+    "goal-review": "false",
+    "goal-verify": "false",
+}
 
 
 def parse_front_matter(text: str) -> dict[str, str]:
@@ -62,6 +70,20 @@ def main() -> int:
             ok = False
         else:
             print(f"PASS {skill}: {description[:90]}")
+
+        openai_yaml = skill_dir / "agents" / "openai.yaml"
+        if not openai_yaml.exists():
+            print(f"FAIL {skill}: missing {openai_yaml}")
+            ok = False
+            continue
+        metadata = openai_yaml.read_text(encoding="utf-8")
+        expected_policy = f"allow_implicit_invocation: {IMPLICIT_POLICY[skill]}"
+        if expected_policy not in metadata:
+            print(f"FAIL {skill}: missing expected policy {expected_policy!r}")
+            ok = False
+        if f"${skill}" not in metadata:
+            print(f"FAIL {skill}: default_prompt should mention ${skill}")
+            ok = False
 
     return 0 if ok else 1
 

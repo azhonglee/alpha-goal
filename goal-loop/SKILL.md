@@ -1,7 +1,11 @@
 ---
 name: goal-loop
-description: Route non-trivial coding tasks through goal-frame, goal-iterate, and goal-verify. Use for multi-step coding tasks, ambiguous requirements, repository mutation, review, verification, recovery, or completion claims; not for trivial read-only answers.
+description: Route non-trivial coding tasks through goal-frame, goal-iterate, goal-review, and goal-verify. Use for multi-step coding tasks, ambiguous requirements, repository mutation, review feedback inside an active goal, verification, recovery, or completion claims; not for trivial read-only answers.
 ---
+
+## Read-only bypass
+
+Do not use Goal Loop for ordinary read-only explanation, code review, diff review, comparison, summarization, or advisory audit when no mutation or completion claim is requested.
 
 # Goal Loop Router
 
@@ -10,18 +14,31 @@ Goal Loop is a staged execution protocol, not a long-form ritual.
 Use the smallest stage that can safely advance the task.
 
 ```text
-FRAME -> ITERATE -> VERIFY -> FINAL
+FRAME -> ITERATE -> REVIEW -> VERIFY -> FINAL
+                  -> VERIFY
                   -> ITERATE
                   -> FRAME
                   -> BLOCKED
 ```
+
+## Stage loading
+
+`goal-loop` is the only skill that should trigger implicitly for implementation work. Before executing a stage, read that stage's sibling `SKILL.md` directly:
+
+- FRAME: `../goal-frame/SKILL.md`
+- ITERATE: `../goal-iterate/SKILL.md`
+- REVIEW: `../goal-review/SKILL.md`
+- VERIFY: `../goal-verify/SKILL.md`
+
+If a referenced stage file is unavailable, stay within this router, use the compact output contracts in `README.md`, and report the missing file as a blocker before mutating.
 
 ## Global invariants
 
 - No Goal Contract, no mutation.
 - No target boundary, no mutation.
 - No isolated edit path, no mutation.
-- No evidence, no Verification Verdict.
+- No evidence, no Review Record or Verification Verdict.
+- No Review Record when review feedback, complexity, scope expansion, or uncertainty changes direction.
 - No Verification Verdict, no final completion claim.
 - No final claim may exceed the verified claim boundary.
 
@@ -63,15 +80,35 @@ Use `goal-iterate` when all are true:
 - `BLOCKED`
 - `REFRAME_NEEDED`
 
+### Enter REVIEW when direction or diff needs challenge
+
+Use `goal-review` when any of these is true:
+
+- loop evidence contradicts assumptions;
+- scope expands or implementation becomes complex;
+- review feedback arrives and must be evaluated before action;
+- an architecture, scope, code, loop, or goal check is needed before continuing;
+- implementation appears complete but review evidence is not yet current.
+
+`goal-review` exits with one of:
+
+- `CONTINUE`
+- `NEXT_ITERATION`
+- `REFRAME`
+- `SIMPLIFY`
+- `BLOCKED`
+- `READY_FOR_VERIFY`
+
 ### Enter VERIFY before any completion claim
 
 Use `goal-verify` when any of these is true:
 
 - implementation appears complete;
-- there is a diff, patch, commit, MR/PR, or local evidence to assess;
-- the user asks whether it is done, correct, safe, or has loopholes;
+- there is a diff, patch, commit, MR/PR, local evidence to assess, delivery, final output, or completion readiness;
+- the user asks whether it is done, ready to merge, ready to ship, or whether a final claim is supported;
 - final output, MR/PR creation, or completion claim is being prepared;
 - previous iteration returned `ITERATION_READY_FOR_VERIFY`.
+- review returned `READY_FOR_VERIFY`.
 
 `goal-verify` exits with one of:
 

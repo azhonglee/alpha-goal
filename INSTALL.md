@@ -8,6 +8,7 @@ mkdir -p "$install_root"
 rsync -a --delete goal-loop/ "$install_root/goal-loop/"
 rsync -a --delete goal-frame/ "$install_root/goal-frame/"
 rsync -a --delete goal-iterate/ "$install_root/goal-iterate/"
+rsync -a --delete goal-review/ "$install_root/goal-review/"
 rsync -a --delete goal-verify/ "$install_root/goal-verify/"
 rsync -a --delete adapters/ "$install_root/adapters/"
 rsync -a --delete tools/ "$install_root/tools/"
@@ -22,6 +23,7 @@ mkdir -p "$install_root"
 rsync -a --delete goal-loop/ "$install_root/goal-loop/"
 rsync -a --delete goal-frame/ "$install_root/goal-frame/"
 rsync -a --delete goal-iterate/ "$install_root/goal-iterate/"
+rsync -a --delete goal-review/ "$install_root/goal-review/"
 rsync -a --delete goal-verify/ "$install_root/goal-verify/"
 rsync -a --delete adapters/ "$install_root/adapters/"
 rsync -a --delete tools/ "$install_root/tools/"
@@ -49,6 +51,16 @@ Expected behavior:
 - It should run or manually record mutation preflight.
 - It should refuse mutation if target is not closed or edit path is unsafe.
 - It should produce an Iteration Record, not a final claim.
+
+```text
+$goal-review 检查当前实现方向、反馈和证据缺口。
+```
+
+Expected behavior:
+
+- It should not mutate files.
+- It should produce a Review Record.
+- It should route to iteration, verification, reframe, or blocked.
 
 ```text
 $goal-verify 检查当前 diff、测试和声明边界，判断是否可以最终交付。

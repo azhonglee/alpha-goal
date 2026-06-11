@@ -12,6 +12,7 @@ Iteration Record:
 - Local evidence:
 - Acceptance delta:
 - Risks introduced:
+- Review needed:
 - Iterate verdict:
 - Next:
 ```
@@ -49,6 +50,10 @@ Which acceptance items moved from uncovered to covered, partially covered, or st
 ### Risks introduced
 
 New risk from the patch: behavior changes, compatibility issues, test gaps, concurrency concerns, migration risk, observability gaps.
+
+### Review needed
+
+State `yes` when complexity, scope expansion, feedback, architecture, ownership, or evidence uncertainty should route to `goal-review` before verification. Otherwise state `no` with a short reason.
 
 ### Iterate verdict
 

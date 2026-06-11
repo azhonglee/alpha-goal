@@ -3,17 +3,19 @@
 A small Codex skill collection that turns goal-loop into a staged execution protocol:
 
 ```text
-FRAME -> ITERATE -> VERIFY -> FINAL
+FRAME -> ITERATE -> REVIEW -> VERIFY -> FINAL
+                  -> VERIFY
                   -> ITERATE
                   -> FRAME
                   -> BLOCKED
 ```
 
-The package contains four skills:
+The package contains five skills:
 
 - `goal-loop`: router and global invariants.
 - `goal-frame`: Goal Contract, clarification, target/scope boundary, existing work scan.
 - `goal-iterate`: one bounded implementation iteration with mutation preflight.
+- `goal-review`: direction, feedback, scope, architecture, and completion-readiness review.
 - `goal-verify`: Verification Verdict, acceptance-to-evidence mapping, claim boundary check.
 
 It also includes optional read-only helper scripts and a ByteDance Codebase adapter reference.
@@ -29,6 +31,7 @@ mkdir -p "$install_root"
 rsync -a --delete goal-loop/ "$install_root/goal-loop/"
 rsync -a --delete goal-frame/ "$install_root/goal-frame/"
 rsync -a --delete goal-iterate/ "$install_root/goal-iterate/"
+rsync -a --delete goal-review/ "$install_root/goal-review/"
 rsync -a --delete goal-verify/ "$install_root/goal-verify/"
 rsync -a --delete adapters/ "$install_root/adapters/"
 rsync -a --delete tools/ "$install_root/tools/"
@@ -40,6 +43,7 @@ mkdir -p "$install_root"
 rsync -a --delete goal-loop/ "$install_root/goal-loop/"
 rsync -a --delete goal-frame/ "$install_root/goal-frame/"
 rsync -a --delete goal-iterate/ "$install_root/goal-iterate/"
+rsync -a --delete goal-review/ "$install_root/goal-review/"
 rsync -a --delete goal-verify/ "$install_root/goal-verify/"
 rsync -a --delete adapters/ "$install_root/adapters/"
 rsync -a --delete tools/ "$install_root/tools/"
@@ -52,6 +56,7 @@ The checkout root contains the skill directories directly:
 goal-loop/
 goal-frame/
 goal-iterate/
+goal-review/
 goal-verify/
 adapters/
 tools/
@@ -72,6 +77,7 @@ More specific:
 ```text
 $goal-frame 先帮我把这个需求 frame 清楚，不要改文件。
 $goal-iterate 根据上面的 Goal Contract 做一轮最小实现。
+$goal-review 检查当前实现方向、反馈和证据缺口。
 $goal-verify 检查当前 diff 和测试证据，判断能否最终交付。
 ```
 
@@ -98,6 +104,9 @@ Goal Contract:
 - Acceptance:
 - Non-goals:
 - Constraints:
+- Decision boundaries:
+- Assumptions and risks:
+- Risk tier:
 - Claim boundary:
 - Evidence plan:
 - Existing work:
@@ -119,7 +128,26 @@ Iteration Record:
 - Local evidence:
 - Acceptance delta:
 - Risks introduced:
+- Review needed:
 - Iterate verdict:
+- Next:
+```
+
+### Review Record
+
+Produced by `goal-review`.
+
+```text
+Review Record:
+- Mode:
+- Target:
+- Evidence basis:
+- Findings:
+- Feedback classification:
+- Scope/architecture notes:
+- Risk tier:
+- Required evidence:
+- Review verdict:
 - Next:
 ```
 
@@ -132,6 +160,7 @@ Verification Verdict:
 - Verdict:
 - Acceptance evidence matrix:
 - Claim boundary:
+- Risk/evidence review:
 - Fresh checks run:
 - Diff/scope review:
 - Unresolved gaps:
@@ -146,6 +175,7 @@ If the skills feel too verbose, reduce output detail inside each stage, but keep
 - `Goal Contract.Acceptance`
 - `Goal Contract.Claim boundary`
 - `Iteration Record.Mutation preflight`
+- `Review Record.Review verdict`
 - `Verification Verdict.Acceptance evidence matrix`
 - `Verification Verdict.Verdict`
 
