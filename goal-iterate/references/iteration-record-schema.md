@@ -5,6 +5,7 @@ The Iteration Record captures one bounded implementation loop. It is not a final
 ```text
 Iteration Record:
 - Contract version:
+- Active artifacts:
 - Iteration goal:
 - Mutation preflight:
 - Action:
@@ -22,6 +23,10 @@ Iteration Record:
 ### Contract version
 
 A short reference to the Goal Contract used for this iteration. If no explicit version exists, use a timestamp or concise summary.
+
+### Active artifacts
+
+Spec and plan artifacts read or updated in this iteration. Use `none` when no durable artifact is active. Include path, status, and whether the iteration read, updated, created, or superseded the artifact.
 
 ### Iteration goal
 

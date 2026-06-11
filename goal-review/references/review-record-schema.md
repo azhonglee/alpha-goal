@@ -9,6 +9,7 @@ Review Record:
 - Evidence basis:
 - Findings:
 - Feedback classification:
+- Artifact review:
 - Scope/architecture notes:
 - Risk tier:
 - Required evidence:
@@ -37,6 +38,10 @@ Findings should lead with correctness, regression, missing evidence, scope, or s
 ### Feedback classification
 
 Use `accepted`, `rejected`, `needs_clarification`, `blocked`, or `none`.
+
+### Artifact review
+
+State whether any active spec or plan was reviewed. Check freshness, status, alignment with Goal Contract, scope creep, and whether the plan remains incremental. Use `none` when no durable artifact exists.
 
 ### Scope/architecture notes
 

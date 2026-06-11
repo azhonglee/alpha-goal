@@ -13,6 +13,8 @@ Recovery:
 - untracked files:
 - active worktree:
 - last known Goal Contract:
+- last known spec artifact:
+- last known plan artifact:
 - last known Iteration Record:
 - last known Review Record:
 - last known Verification Verdict:
@@ -25,6 +27,8 @@ Recovery:
 
 - Do not continue mutation until the dirty state is understood.
 - Do not assume a previous edit was intentional unless it maps to the Goal Contract.
+- If a spec or plan exists, read its current version and status before relying on remembered context.
+- Do not continue from a `superseded` artifact; return to `goal-frame` for spec issues or `goal-iterate`/`goal-review` for plan issues.
 - If changed files belong to a different repo/path than the Goal Contract, return to `goal-frame`.
 - If review feedback, scope expansion, complexity, or uncertainty exists without a Review Record, enter `goal-review`.
 - If the implementation appears complete but no evidence matrix exists, enter `goal-verify`.

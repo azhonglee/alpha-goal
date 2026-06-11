@@ -19,6 +19,7 @@ Use this skill when:
 - direction feels uncertain;
 - success appears complete but no current review exists;
 - `goal-verify` returned `NEXT_ITERATION`, `REFRAME`, or an evidence gap that needs diagnosis.
+- an active spec or plan may be stale, over-broad, superseded, or inconsistent with current evidence.
 
 For ordinary standalone code review with no active Goal Contract or completion claim, do not force Goal Loop. Use the normal review style requested by the user.
 
@@ -47,6 +48,9 @@ Ask:
 - What simpler solution satisfies the same acceptance?
 - Has scope crossed repo, worktree, submodule, or ownership boundaries?
 - Has feedback been classified instead of blindly applied?
+- If an active spec exists, do Goal Contract, diff, evidence, and non-goals still align with it?
+- If an active plan exists, is it current, incrementally updated, and still the smallest credible route?
+- Is any stage relying on a `draft` or `superseded` artifact as if it were approved/current?
 
 ## Feedback handling
 
@@ -70,6 +74,7 @@ Review Record:
 - Evidence basis:
 - Findings:
 - Feedback classification:
+- Artifact review:
 - Scope/architecture notes:
 - Risk tier:
 - Required evidence:

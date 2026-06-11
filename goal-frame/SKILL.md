@@ -1,13 +1,15 @@
 ---
 name: goal-frame
-description: Build a compact Goal Contract before coding. Use for ambiguous requirements, unclear target repo/path, multi-repo workspaces, existing MR/PR/branch discovery, acceptance criteria, claim boundary, and clarification. Must not mutate files.
+description: Build a compact Goal Contract before coding, and create or update a durable spec artifact only when risk or complexity requires it. Use for ambiguous requirements, unclear target repo/path, multi-repo workspaces, existing MR/PR/branch discovery, acceptance criteria, claim boundary, clarification, and spec escalation.
 ---
 
 # Goal Frame
 
 Your job is to turn the user's request into a compact Goal Contract.
 
-Do not edit files, create branches, create worktrees, generate artifacts, commit, push, or open an MR/PR.
+Do not edit implementation files, create branches, create worktrees, commit, push, or open an MR/PR.
+
+只有在下方 spec escalation 规则要求，且本任务允许写入 artifact 时，才创建或更新持久化 spec 文件。否则只在对话里保留 spec 草稿。
 
 ## Entry
 
@@ -39,8 +41,47 @@ Check:
 - risk tier;
 - evidence plan;
 - claim boundary.
+- 是否需要持久化 spec artifact。
 
-Use `references/goal-contract-schema.md` for field definitions and `references/frame-examples.md` for compact examples. Examples are illustrative only; do not copy their repo names, paths, or facts as evidence for the current task.
+Use `references/goal-contract-schema.md` for field definitions and `references/frame-examples.md` for compact examples. 仅当需要持久化 spec artifact 时使用 `references/spec-template.md`。Examples are illustrative only; do not copy their repo names, paths, or facts as evidence for the current task.
+
+## Spec escalation
+
+默认不要创建 spec。小型、本地、低风险任务只需要 Goal Contract。
+
+当至少满足一个条件时，使用 `references/spec-template.md` 创建或更新 spec：
+
+- 需求经过多轮澄清，继续只放在对话里容易丢失；
+- 范围跨多个阶段、模块、仓库、worktree 或 ownership boundary；
+- 预期需要外部交接、stakeholder review、PR/MR 讨论或后续恢复；
+- acceptance、non-goals、constraints 或 decision boundaries 很细，只放 Goal Contract 会丢信息；
+- risk tier 为 high，或 medium 且存在明显 scope drift 风险；
+- 用户明确要求 spec、design artifact、持久化需求或交接文档。
+
+优先使用仓库已有 spec/design 路径约定。没有约定时默认使用：
+
+```text
+docs/design/YYYYMMDD-<slug>-spec.md
+```
+
+`<slug>` 描述目标边界，不描述具体实现方法。
+
+写入 spec 文件前，必须已经确认目标 repo/path 和适用规则；否则只在对话里起草。
+
+当 spec 存在时：
+
+- 生成或修订 Goal Contract 前先读取当前 spec；
+- Goal Contract 保持紧凑，并在 `Artifacts` 里记录 spec 路径和状态；
+- 后续阶段依赖变更后的需求前，先更新 spec；
+- 过期 spec 标记为 `superseded`，不要删除或改写历史；
+- 决策和变更历史只追加；只更新当前摘要、状态、open questions 和 acceptance state。
+
+Spec status values:
+
+- `draft`: 工作态需求；需要用户批准时不能视为已批准。
+- `reviewed`: 已检查清晰度和证据，但不自动等同批准。
+- `approved`: 用户已接受，或在记录的 decision boundaries 内足够明确，可以执行。
+- `superseded`: 仅保留历史；不得继续作为当前执行依据。
 
 ## Clarification policy
 
@@ -116,6 +157,7 @@ Goal Contract:
 - Risk tier:
 - Claim boundary:
 - Evidence plan:
+- Artifacts:
 - Existing work:
 - Frame verdict:
 - Next:
@@ -139,6 +181,7 @@ Return `READY_FOR_ITERATION` only when:
 - constraints, non-goals, and decision boundaries are recorded;
 - assumptions, risks, and risk tier are recorded;
 - existing work has been checked when triggered;
+- durable spec need is recorded, and any referenced spec has current path/status;
 - no required user decision is missing.
 
 Return `ASK_USER` when a clarification is necessary before safe progress.

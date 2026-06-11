@@ -41,6 +41,22 @@ If a referenced stage file is unavailable, stay within this router, use the comp
 - No continuing past review feedback, complexity, scope expansion, uncertainty, or completion-readiness review triggers without a current Review Record.
 - No Verification Verdict, no final completion claim.
 - No final claim may exceed the verified claim boundary.
+- 默认不创建 spec 或 plan；只有风险、复杂度、交接或用户请求需要持久化 artifact 时才创建。
+- 依赖 spec 或 plan 前，必须读取当前版本和状态。
+- 不得基于 `superseded` artifact 执行；需要用户批准时，不得把 `draft` artifact 当作已批准。
+- plan 不得重写 Goal Contract 或 active spec 中的 intent、success criteria、non-goals、constraints 或 decision boundaries。
+
+## Artifact locations
+
+优先使用目标仓库已有约定。没有约定时，使用以下默认路径：
+
+- spec: `docs/design/YYYYMMDD-<slug>-spec.md`
+- plan: `docs/plans/YYYYMMDD-<slug>-plan.md`
+- review receipt: `.goal-loop/reviews/YYYYMMDD-<slug>-review.md`
+- command/output evidence: `.goal-loop/evidence/YYYYMMDD-<slug>/`
+- scratch artifacts: `.goal-loop/tmp/YYYYMMDD-<slug>/`
+
+`<slug>` 描述 goal boundary。不要为了空目录提前创建 artifact 路径。写入 `.goal-loop/` 前，确认它被 `.gitignore` 忽略；如果没有忽略，必须把这个风险纳入 Goal Contract 或 Iteration Record，而不是静默污染提交。
 
 ## Routing
 
@@ -55,6 +71,7 @@ Use `goal-frame` when any of these is true:
 - the task may duplicate an existing MR/PR/branch/issue/design doc;
 - mutation may be needed;
 - previous verification returned `REFRAME`.
+- durable requirements may be needed before safe iteration.
 
 `goal-frame` exits with one of:
 
@@ -73,6 +90,7 @@ Use `goal-iterate` when all are true:
 - target repo/path is closed;
 - mutation is required;
 - the isolated edit path is known or can be safely created after preflight.
+- any active spec has been read, and any active plan is current or intentionally absent.
 
 `goal-iterate` exits with one of:
 
@@ -89,6 +107,7 @@ Use `goal-review` when any of these is true:
 - review feedback arrives and must be evaluated before action;
 - an architecture, scope, code, loop, or goal check is needed before continuing;
 - implementation appears complete but review evidence is not yet current.
+- an active spec or plan may be stale, over-broad, superseded, or inconsistent with current evidence.
 
 If both REVIEW and VERIFY conditions match, run REVIEW first unless a current Review Record already returns `READY_FOR_VERIFY`.
 
@@ -111,6 +130,7 @@ Use `goal-verify` when any of these is true:
 - final output, MR/PR creation, or completion claim is being prepared;
 - previous iteration returned `ITERATION_READY_FOR_VERIFY`.
 - review returned `READY_FOR_VERIFY`.
+- active spec/plan artifacts, if any, must be checked against final evidence.
 
 `goal-verify` exits with one of:
 
@@ -128,6 +148,7 @@ Before continuing after interruption, resumed context, dirty workspace, or parti
 - current branch;
 - status / changed files;
 - previous intended goal if known;
+- active spec/plan artifacts if known;
 - safest next state: `FRAME`, `ITERATE`, `VERIFY`, or `BLOCKED`.
 
 Use `references/recovery-check.md` when the resumed state is not obvious.
@@ -150,6 +171,8 @@ Do not emit route records for trivial read-only questions.
 ## Final output rule
 
 Any final completion claim must be based on the latest Verification Verdict.
+
+If a spec or plan was used, final output must mention the artifact boundary and whether final evidence covered it, superseded it, or left gaps.
 
 No Verification Verdict is required for non-completion exits from FRAME such as `ASK_USER`, `READ_ONLY`, `COMPARISON_ONLY`, or `BLOCKED`. In those cases, final output may report the route, blocker, comparison boundary, or read-only finding without claiming implementation completion.
 
