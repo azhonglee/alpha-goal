@@ -19,8 +19,8 @@ Use subagents for independent parallel subtasks when that improves throughput.
 ## Isolation Principles
 
 - Ensure `.worktrees/` is ignored before placing repository-local worktrees there.
-- Use repository-local worktrees to isolate changes per goal/task batch. Create them under `<repo>/.worktrees/codex/<task-slug>/` unless the repository already defines a stricter convention or the path is not technically usable.
-- In monorepos, create the worktree under the owning subrepo's `.worktrees/codex/<task-slug>/`.
+- Use repository-local worktrees to isolate changes per goal/task batch. Create them under `<repo>/.worktrees/agents/<task-slug>/` unless the repository already defines a stricter convention or the path is not technically usable.
+- In monorepos, create the worktree under the owning subrepo's `.worktrees/agents/<task-slug>/`.
 - Never edit/delete directly on main/master; always work in a worktree.
 - Delete the worktree after PR/MR merge or local merge into main/master; do not proactively merge into main/master locally.
 
