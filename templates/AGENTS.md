@@ -27,6 +27,6 @@ Use subagents for independent parallel subtasks when that improves throughput.
 ## Interaction Agreement
 
 - Use `request_user_input` for structured TUI choices, and only after presenting the necessary context. Do not use it for open-ended questions or data entry. Put evidence, designs, risks, command output, and rationale in regular assistant messages.
-- 输出和写作使用中文，包括持久化文档，风格应符合中文读者习惯，避免过度直译英文表达。专有术语和专业词汇，可以根据上下文选择性使用英文。
+- 输出和写作使用中文，包括持久化文档，确保阅读友好，风格一致，逻辑清晰，避免直译英文表达。专有术语和专业词汇，可以根据上下文选择性使用英文。
 
 <!-- generate-with-template:agents-md -->
