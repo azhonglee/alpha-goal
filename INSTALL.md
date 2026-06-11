@@ -6,21 +6,22 @@
 scripts/install.sh
 ```
 
-默认 `CODEX_HOME` 是仓库根目录下的 `codex/`，技能会软链接到 `codex/skills/`。
+默认 Codex home 是 `$HOME/.codex`，技能会软链接到 `$HOME/.codex/skills/`。
 
-## 安装到真实 Codex home
+## 安装到指定 Codex home
 
 ```bash
-CODEX_HOME="$HOME/.codex" scripts/install.sh
+scripts/install.sh --codex-home /path/to/codex-home
+CODEX_HOME=/path/to/codex-home scripts/install.sh
 ```
 
 ## 安装行为
 
 脚本会：
 
-- 软链接顶层技能目录到 `${CODEX_HOME:-<repo>/codex}/skills/`。
-- 更新 `${CODEX_HOME:-<repo>/codex}/AGENTS.md` 中带 `generate-with-template:agents-md` 标记的受管理模板块；如果没有目标文件则创建。
-- 只补齐 `${CODEX_HOME:-<repo>/codex}/config.toml` 中缺失的模板设置，不覆盖已有值。
+- 软链接顶层技能目录到 `${CODEX_HOME:-$HOME/.codex}/skills/`。
+- 更新 Codex home 的 `AGENTS.md` 中带 `generate-with-template:agents-md` 标记的受管理模板块；如果没有目标文件则创建。
+- 只补齐 Codex home 的 `config.toml` 中缺失的模板设置，不覆盖已有值。
 - 清理旧版本可能留在 `skills/` 下、且指向本仓库的旧支持目录软链接。
 - 校验目标 `skills/` 中的 skill 软链接指向源码目录，且旧支持目录没有作为本仓库 skill 安装。
 - 安装后运行源码中的 `tools/validate_skillset.py` 校验技能包。
@@ -40,7 +41,14 @@ scripts/install.sh --force
 - `AGENTS.md`：推荐的自主 Agent 行为和隔离工作流约束。
 - `config.toml`：启用 multi-agent 等本地特性的可选 Codex 配置。
 
-默认安装只写入仓库根目录下的 `codex/`。只有显式设置 `CODEX_HOME="$HOME/.codex"` 时，脚本才会更新真实 Codex home。
+默认安装会更新真实 Codex home。做 smoke test 或文档验证时，应使用临时 `CODEX_HOME`：
+
+```bash
+tmp_codex_home="$(mktemp -d)"
+CODEX_HOME="$tmp_codex_home" scripts/install.sh
+python3 tools/validate_skillset.py .
+rm -rf "$tmp_codex_home"
+```
 
 ## Smoke test prompts
 
