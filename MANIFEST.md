@@ -14,7 +14,6 @@
 
 | Directory | Purpose |
 |---|---|
-| `adapters/` | Optional environment-specific references. |
 | `tools/` | Local validation helper. |
 | `templates/` | 可选的用户级 Codex 配置模板。 |
 | `scripts/` | 安装脚本。 |

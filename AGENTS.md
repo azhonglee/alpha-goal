@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-本仓库维护 `goal-loop` Codex 技能包。核心入口是 `goal-loop/SKILL.md`；阶段技能位于 `goal-frame/`、`goal-iterate/`、`goal-review/`、`goal-verify/`。各阶段的详细规则放在本阶段 `references/` 下，脚本放在本阶段 `scripts/` 下。`adapters/` 是可选环境参考，`templates/` 是可选用户配置模板，`scripts/install.sh` 负责软链接安装，`tools/validate_skillset.py` 用于本地布局校验。`README.md`、`INSTALL.md`、`MANIFEST.md` 应与这些路径和命令保持一致。
+本仓库维护 `goal-loop` Codex 技能包。核心入口是 `goal-loop/SKILL.md`；阶段技能位于 `goal-frame/`、`goal-iterate/`、`goal-review/`、`goal-verify/`。各阶段的详细规则放在本阶段 `references/` 下，脚本放在本阶段 `scripts/` 下。`templates/` 是可选用户配置模板，`scripts/install.sh` 负责软链接安装，`tools/validate_skillset.py` 用于本地布局校验。`README.md`、`INSTALL.md`、`MANIFEST.md` 应与这些路径和命令保持一致。
 
 ## Build, Test, and Development Commands
 

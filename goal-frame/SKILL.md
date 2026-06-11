@@ -100,8 +100,6 @@ Record whether the task is:
 - `comparison-only`
 - `unknown`
 
-Use `../adapters/bytedance-codebase.md` when working in ByteDance Codebase-like repos.
-
 ## Goal Contract
 
 Produce this exact compact contract:
