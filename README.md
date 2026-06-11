@@ -56,13 +56,8 @@ goal-frame/
 goal-iterate/
 goal-review/
 goal-verify/
-tools/
 templates/
-scripts/
-codex/        # local install output, ignored by git
 ```
-
-只有包含 `SKILL.md` 的目录才是技能。`tools/`、`templates/` 和 `scripts/` 都是支持材料，应与技能目录保持同级，确保安装脚本和校验命令可用。
 
 ## 可选用户配置模板
 
