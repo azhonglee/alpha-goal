@@ -1,6 +1,8 @@
 # Loop Modes
 
-Use one mode per iteration. The mode sets the evidence shape; it is not a new stage.
+Use one dominant mode per iteration. The mode sets the evidence shape; it is not a new stage.
+
+For bug fixes, prefer a `debug` iteration until `ROOT_CAUSE_CONFIRMED`. If the confirmed fix is small and happens in the same bounded pass, the Iteration Record may keep `Loop mode: debug` and include the minimal patch after the Debug Receipt. Split into a separate `implementation` iteration when the fix surface is broad, the root cause is uncertain, or review/evidence risk becomes material.
 
 ## Modes
 
