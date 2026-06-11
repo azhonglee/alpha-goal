@@ -39,6 +39,18 @@ Good:
 I found candidate implementations in `repo-a` and `repo-b`. `repo-a` owns artifact upload and has TOS code under `internal/app`; `repo-b` only has a low-level TOS driver. Should I implement in `repo-a`, or compare both before changing code?
 ```
 
+## Interview ownership
+
+Interview-style clarification belongs to `goal-frame`.
+
+Rules:
+
+- ask exactly one question per round;
+- target the weakest Goal Contract field first;
+- stop asking when remaining ambiguity can be recorded as a bounded assumption or risk;
+- return `ASK_USER` when the missing answer blocks safe progress;
+- return `READY_FOR_ITERATION` only after the contract is closed.
+
 ## Default when blocked
 
 If the user is unavailable and mutation would be unsafe, stop with `Frame verdict: ASK_USER` or `BLOCKED`.

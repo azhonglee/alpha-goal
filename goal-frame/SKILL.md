@@ -141,6 +141,22 @@ Record whether the task is:
 - `comparison-only`
 - `unknown`
 
+## Interview clarification
+
+Interview belongs to `goal-frame`, not `goal-iterate`.
+
+Use an interview only when a missing Goal Contract field affects implementation, safety, or claim boundary. Ask one high-leverage question at a time. Target the weakest field first:
+
+1. intent
+2. target
+3. acceptance
+4. non-goals
+5. constraints
+6. decision boundaries
+7. claim boundary
+
+After the answer, update the Goal Contract. If the answer changes target, acceptance, constraints, non-goals, or claim boundary after iteration started, return through the router before any more mutation.
+
 ## Goal Contract
 
 Produce this exact compact contract:

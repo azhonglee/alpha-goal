@@ -36,7 +36,7 @@ Spec and plan artifacts read or updated in this iteration. Use `none` when no du
 
 ### Loop mode
 
-One of `discovery`, `interview`, `debug`, `tdd`, `implementation`, `refactor`, `spike`, or `hardening`. See `references/loop-modes.md`.
+One of `discovery`, `debug`, `tdd`, `implementation`, `refactor`, `spike`, or `hardening`. See `references/loop-modes.md`.
 
 ### Hypothesis
 
