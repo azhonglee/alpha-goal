@@ -13,10 +13,10 @@ FRAME -> ITERATE -> REVIEW -> VERIFY -> FINAL
 The package contains five skills:
 
 - `goal-loop`: router and global invariants.
-- `goal-frame`: Goal Contract, clarification, target/scope boundary, existing work scan.
-- `goal-iterate`: one bounded implementation iteration with mutation preflight.
-- `goal-review`: direction, feedback, scope, architecture, and completion-readiness review.
-- `goal-verify`: Verification Verdict, acceptance-to-evidence mapping, claim boundary check.
+- `goal-frame`: Goal Contract, clarification, target/scope boundary, existing work scan, and spec escalation when needed.
+- `goal-iterate`: one bounded implementation iteration with mutation preflight, plus plan escalation when needed.
+- `goal-review`: direction, feedback, scope, architecture, artifact freshness, and completion-readiness review.
+- `goal-verify`: Verification Verdict, acceptance-to-evidence mapping, artifact alignment, claim boundary check.
 
 它还包含可选的只读辅助脚本和用户配置模板。
 
@@ -87,8 +87,22 @@ Only `goal-loop` is intended to trigger implicitly. Stage skills set `allow_impl
 - The router is thin; stages do the work.
 - Each stage has one auditable output.
 - References are optional and loaded only when needed.
+- Spec and plan are risk/complexity escalation artifacts, not default ceremony.
+- Spec records durable requirements; plan records current execution route plus append-only route history.
 - Scripts are read-only helpers; they do not replace judgment.
 - Project-specific commands and conventions belong in `AGENTS.md`, not in these cross-repo skills.
+
+## Artifact defaults
+
+优先使用目标仓库已有约定。没有约定时，使用：
+
+- spec: `docs/design/YYYYMMDD-<slug>-spec.md`
+- plan: `docs/plans/YYYYMMDD-<slug>-plan.md`
+- review receipt: `.goal-loop/reviews/YYYYMMDD-<slug>-review.md`
+- command/output evidence: `.goal-loop/evidence/YYYYMMDD-<slug>/`
+- scratch artifacts: `.goal-loop/tmp/YYYYMMDD-<slug>/`
+
+`.goal-loop/` 必须被 `.gitignore` 忽略后才能写入，避免把运行时证据和 scratch 文件提交进仓库。
 
 ## Stage outputs
 
@@ -108,6 +122,7 @@ Goal Contract:
 - Risk tier:
 - Claim boundary:
 - Evidence plan:
+- Artifacts:
 - Existing work:
 - Frame verdict:
 - Next:
@@ -120,6 +135,7 @@ Produced by `goal-iterate`.
 ```text
 Iteration Record:
 - Contract version:
+- Active artifacts:
 - Iteration goal:
 - Mutation preflight:
 - Action:
@@ -143,6 +159,7 @@ Review Record:
 - Evidence basis:
 - Findings:
 - Feedback classification:
+- Artifact review:
 - Scope/architecture notes:
 - Risk tier:
 - Required evidence:
@@ -158,6 +175,7 @@ Produced by `goal-verify`.
 Verification Verdict:
 - Verdict:
 - Acceptance evidence matrix:
+- Artifact review:
 - Claim boundary:
 - Risk/evidence review:
 - Fresh checks run:
@@ -173,6 +191,8 @@ If the skills feel too verbose, reduce output detail inside each stage, but keep
 
 - `Goal Contract.Acceptance`
 - `Goal Contract.Claim boundary`
+- `Goal Contract.Artifacts`
+- `Iteration Record.Active artifacts`
 - `Iteration Record.Mutation preflight`
 - `Review Record.Review verdict`
 - `Verification Verdict.Acceptance evidence matrix`

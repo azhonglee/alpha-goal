@@ -6,6 +6,7 @@ The Verification Verdict is the only valid basis for a final completion claim.
 Verification Verdict:
 - Verdict:
 - Acceptance evidence matrix:
+- Artifact review:
 - Claim boundary:
 - Risk/evidence review:
 - Fresh checks run:
@@ -36,6 +37,10 @@ For every acceptance item from the Goal Contract, record:
 - status.
 
 Evidence may be a test, build, typecheck, lint, runtime probe, diff review, MR comparison, manual inspection, or documented blocker.
+
+### Artifact review
+
+Record whether any active spec or plan was read and whether final evidence covers it. If an artifact is stale, draft-only, superseded, or broader than the verified boundary, return `NEXT_ITERATION`, `REFRAME`, `BLOCKED`, or `NARROW_CLAIM_AND_FINAL` instead of overclaiming.
 
 ### Claim boundary
 

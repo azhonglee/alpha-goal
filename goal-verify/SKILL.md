@@ -25,6 +25,8 @@ Use this skill when:
 Hard requirements for completion claims:
 
 - Goal Contract with target, acceptance, risk tier, and claim boundary;
+- current spec if the Goal Contract references a durable spec;
+- current plan if the Iteration Record or Review Record references a durable plan;
 - Iteration Record or current diff/evidence;
 - fresh repo state from after the last material change;
 - applicable project rules, or an explicit reason they cannot be read;
@@ -44,6 +46,8 @@ Optional context:
 Check:
 
 - every acceptance item has fresh, relevant evidence;
+- every active spec success criterion that is inside the claim boundary is covered or explicitly excluded;
+- any active plan verification route and evidence gate is satisfied, superseded with reason, or explicitly blocked;
 - risk-tier evidence requirements are met or explicitly blocked;
 - evidence is at the right boundary for the user's wording;
 - changed files match intended target and non-goals;
@@ -58,7 +62,7 @@ Use `references/verification-verdict-schema.md` for field definitions, `referenc
 
 ## Evidence matrix
 
-Map acceptance to evidence explicitly:
+Map acceptance to evidence explicitly. If a current spec exists, use it to expand or clarify acceptance without letting it override the Goal Contract's decision boundaries:
 
 ```text
 Acceptance evidence matrix:
@@ -115,6 +119,7 @@ Produce exactly one Verification Verdict:
 Verification Verdict:
 - Verdict:
 - Acceptance evidence matrix:
+- Artifact review:
 - Claim boundary:
 - Risk/evidence review:
 - Fresh checks run:

@@ -14,6 +14,7 @@ Goal Contract:
 - Risk tier:
 - Claim boundary:
 - Evidence plan:
+- Artifacts:
 - Existing work:
 - Frame verdict:
 - Next:
@@ -71,6 +72,22 @@ The maximum final claim that evidence must support. Examples:
 
 What evidence should prove acceptance. Include tests, builds, static checks, manual probes, diff review, MR comparison, or explicit reason a check cannot run.
 
+### Artifacts
+
+Durable artifacts that later stages must read before relying on them.
+
+Use `spec: none` for small tasks. When a spec exists, record path and status, for example:
+
+```text
+spec: `docs/design/20260611-install-flow-spec.md` (approved)
+```
+
+If a durable plan is already clearly needed, record the reason without creating it in frame:
+
+```text
+plan need: likely, because work crosses two repos and needs staged verification
+```
+
 ### Existing work
 
 Whether existing MR/PR/branch/issue/design work exists and how it relates to the task.
@@ -100,6 +117,7 @@ Goal Contract:
 - Risk tier: medium.
 - Claim boundary: Implementation-level logging behavior in selected repo, not production observability confirmation.
 - Evidence plan: unit tests where practical, targeted go test, diff review, existing MR scan.
+- Artifacts: spec: none; plan need: not yet.
 - Existing work: Search required before mutation because feature wording looks like an MR-sized task.
 - Frame verdict: READY_FOR_ITERATION
 - Next: Run goal-iterate in isolated edit path.
