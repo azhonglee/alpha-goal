@@ -32,7 +32,7 @@ The Goal Contract, Iteration Record, diff, feedback item, architecture choice, o
 
 Fresh source findings, commands, diffs, tests, logs, screenshots, loop mode evidence, Debug Receipt, or explicit blocker evidence used for the review.
 
-If subagents were used, include their review notes or identifiers and the underlying artifacts the main agent personally checked. A subagent report without artifact evidence is a lead, not evidence by itself.
+If subagents were used, include their review notes or identifiers and the underlying artifacts you personally checked. A subagent report without artifact evidence is a lead, not evidence by itself.
 
 ### Freshness boundary
 
@@ -42,7 +42,7 @@ The contract version, iteration record, changed-file set, diff or commit state, 
 
 Findings should lead with correctness, regression, missing evidence, scope, or safety concerns. Prefer concrete file/line references when reviewing code.
 
-When findings come from subagents, state whether the main agent confirmed, rejected, or could not verify them. Resolve conflicting subagent findings before choosing a `Review verdict`.
+When findings come from subagents, state whether you confirmed, rejected, or could not verify them. Resolve conflicting subagent findings before choosing a `Review verdict`.
 
 ### Feedback classification
 
