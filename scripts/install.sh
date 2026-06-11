@@ -5,10 +5,11 @@ usage() {
   cat <<'EOF'
 Usage: scripts/install.sh [--force]
 
-Install this repository's skills by symlinking each skills/*/SKILL.md directory
-into ${CODEX_HOME:-$HOME/.codex}/skills, sync the managed
-templates/AGENTS.md block into ${CODEX_HOME:-$HOME/.codex}/AGENTS.md, and fill
-missing ${CODEX_HOME:-$HOME/.codex}/config.toml settings from templates/config.toml.
+Install this repository's top-level skills by symlinking them into
+${CODEX_HOME:-<repo>/codex}/skills.
+
+The script also syncs templates/AGENTS.md into ${CODEX_HOME}/AGENTS.md and
+fills missing ${CODEX_HOME}/config.toml settings from templates/config.toml.
 
 Options:
   --force   Replace existing symlinks that point elsewhere. Real files or
@@ -38,18 +39,109 @@ done
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd "$script_dir/.." && pwd -P)"
-source_root="$repo_root/skills"
+codex_home="${CODEX_HOME:-$repo_root/codex}"
+target_root="$codex_home/skills"
 agents_template="$repo_root/templates/AGENTS.md"
 config_template="$repo_root/templates/config.toml"
-codex_home="${CODEX_HOME:-$HOME/.codex}"
 agents_target="$codex_home/AGENTS.md"
 config_target="$codex_home/config.toml"
-target_root="$codex_home/skills"
 agents_template_marker="<!-- generate-with-template:agents-md -->"
+
+link_path() {
+  local source="$1"
+  local target="$2"
+  local label="$3"
+
+  if [[ -L "$target" ]]; then
+    local current_target
+    current_target="$(readlink "$target")"
+    if [[ "$current_target" == "$source" ]]; then
+      echo "Already installed: $label -> $source"
+      return
+    fi
+
+    if [[ "$force" == true ]]; then
+      rm "$target"
+    else
+      echo "Refusing to replace existing symlink: $target -> $current_target" >&2
+      echo "Re-run with --force to replace symlinks." >&2
+      exit 1
+    fi
+  elif [[ -e "$target" ]]; then
+    echo "Refusing to replace existing non-symlink path: $target" >&2
+    exit 1
+  fi
+
+  ln -s "$source" "$target"
+  echo "Installed: $label -> $source"
+}
+
+remove_legacy_support_link() {
+  local support_name="$1"
+  local legacy_source="$repo_root/$support_name"
+  local target="$target_root/$support_name"
+
+  if [[ ! -L "$target" ]]; then
+    return
+  fi
+
+  local current_target
+  current_target="$(readlink "$target")"
+  if [[ "$current_target" == "$legacy_source" ]]; then
+    rm "$target"
+    echo "Removed legacy support link: $target"
+  fi
+}
+
+validate_installed_links() {
+  local failed=false
+
+  for skill_file in "${skill_files[@]}"; do
+    local skill_dir
+    skill_dir="$(cd "$(dirname "$skill_file")" && pwd -P)"
+    local skill_name
+    skill_name="$(basename "$skill_dir")"
+    local target="$target_root/$skill_name"
+
+    if [[ ! -L "$target" ]]; then
+      echo "Installed skill is not a symlink: $target" >&2
+      failed=true
+      continue
+    fi
+
+    local current_target
+    current_target="$(readlink "$target")"
+    if [[ "$current_target" != "$skill_dir" ]]; then
+      echo "Installed skill points elsewhere: $target -> $current_target" >&2
+      failed=true
+      continue
+    fi
+
+    if [[ ! -f "$target/SKILL.md" ]]; then
+      echo "Installed skill is missing SKILL.md through symlink: $target" >&2
+      failed=true
+    fi
+  done
+
+  for support_name in adapters tools templates scripts; do
+    local target="$target_root/$support_name"
+    local legacy_source="$repo_root/$support_name"
+
+    if [[ -L "$target" && "$(readlink "$target")" == "$legacy_source" ]]; then
+      echo "Support directory should not be installed as a skill: $target" >&2
+      failed=true
+    fi
+  done
+
+  if [[ "$failed" == true ]]; then
+    exit 1
+  fi
+
+  echo "Validated installed skill links in $target_root"
+}
 
 inject_agents_template() {
   local template_content
-
   template_content="$(<"$agents_template")"
 
   if [[ -e "$agents_target" && ! -f "$agents_target" ]]; then
@@ -62,20 +154,29 @@ inject_agents_template() {
     exit 1
   fi
 
-  if [[ -f "$agents_target" ]]; then
-    local existing_content
-    existing_content="$(<"$agents_target")"
+  if [[ ! -f "$agents_target" ]]; then
+    cp "$agents_template" "$agents_target"
+    echo "Created AGENTS.md from template: $agents_target"
+    return
+  fi
 
-    if [[ "$existing_content" == *"$agents_template_marker"* ]]; then
-      if ! command -v python3 >/dev/null 2>&1; then
-        echo "python3 is required to update managed AGENTS template content in $agents_target" >&2
-        exit 1
+  local existing_content
+  existing_content="$(<"$agents_target")"
+
+  if [[ "$existing_content" != *"$agents_template_marker"* ]]; then
+    {
+      if [[ -s "$agents_target" ]]; then
+        printf '\n\n'
       fi
+      cat "$agents_template"
+    } >>"$agents_target"
+    echo "Injected AGENTS template into $agents_target"
+    return
+  fi
 
-      python3 - "$agents_template" "$agents_target" "$agents_template_marker" <<'PY'
+  python3 - "$agents_template" "$agents_target" "$agents_template_marker" <<'PY'
 import sys
 from pathlib import Path
-
 
 template_path = Path(sys.argv[1])
 target_path = Path(sys.argv[2])
@@ -85,34 +186,28 @@ template = template_path.read_text()
 target = target_path.read_text()
 template_lines = template.splitlines()
 
-if marker not in template_lines:
-    print(f"AGENTS template is missing required marker: {marker}", file=sys.stderr)
-    raise SystemExit(1)
-
-if not template_lines:
-    print(f"AGENTS template is empty: {template_path}", file=sys.stderr)
+if not template_lines or marker not in template_lines:
+    print(f"Invalid AGENTS template: {template_path}", file=sys.stderr)
     raise SystemExit(1)
 
 block_start = template_lines[0]
 target_lines = target.splitlines(keepends=True)
 
 
-def logical_line(line):
+def logical(line: str) -> str:
     return line.rstrip("\r\n")
 
 
 blocks = []
-marker_lines = sum(1 for line in target_lines if logical_line(line) == marker)
 index = 0
-
 while index < len(target_lines):
-    if logical_line(target_lines[index]) != block_start:
+    if logical(target_lines[index]) != block_start:
         index += 1
         continue
 
     end = index
     while end < len(target_lines):
-        if logical_line(target_lines[end]) == marker:
+        if logical(target_lines[end]) == marker:
             blocks.append((index, end + 1))
             index = end + 1
             break
@@ -120,9 +215,9 @@ while index < len(target_lines):
     else:
         index += 1
 
-if not blocks or marker_lines != len(blocks):
+if not blocks:
     print(
-        f"Refusing to update {target_path}: found AGENTS template marker but could not identify a managed block",
+        f"Refusing to update {target_path}: marker exists but managed block was not found",
         file=sys.stderr,
     )
     raise SystemExit(1)
@@ -130,40 +225,21 @@ if not blocks or marker_lines != len(blocks):
 pieces = []
 cursor = 0
 inserted = False
-
 for start, end in blocks:
     pieces.extend(target_lines[cursor:start])
     if not inserted:
         pieces.append(template if template.endswith("\n") else template + "\n")
         inserted = True
     cursor = end
-
 pieces.extend(target_lines[cursor:])
-updated = "".join(pieces)
 
+updated = "".join(pieces)
 if updated == target:
     print(f"AGENTS.md already has current managed template content: {target_path}")
-    raise SystemExit(0)
-
-target_path.write_text(updated)
-print(f"Updated managed AGENTS template content in {target_path}")
+else:
+    target_path.write_text(updated)
+    print(f"Updated managed AGENTS template content in {target_path}")
 PY
-      return
-    fi
-
-    {
-      if [[ -s "$agents_target" ]]; then
-        printf '\n\n'
-      fi
-      cat "$agents_template"
-    } >>"$agents_target"
-
-    echo "Injected AGENTS template into $agents_target"
-    return
-  fi
-
-  cp "$agents_template" "$agents_target"
-  echo "Created AGENTS.md from template: $agents_target"
 }
 
 sync_config_template() {
@@ -178,19 +254,12 @@ sync_config_template() {
     return
   fi
 
-  if ! command -v python3 >/dev/null 2>&1; then
-    echo "python3 is required to merge config template settings into $config_target" >&2
-    exit 1
-  fi
-
   python3 - "$config_template" "$config_target" <<'PY'
 from __future__ import annotations
 
 import json
 import re
 import sys
-from collections import OrderedDict
-from datetime import date, datetime, time
 from pathlib import Path
 
 try:
@@ -199,9 +268,7 @@ except ModuleNotFoundError:
     print("python3 with tomllib support is required to merge config.toml", file=sys.stderr)
     raise SystemExit(1)
 
-
-HEADER_RE = re.compile(r"^\s*\[([^\[\]]+)\]\s*(?:#.*)?$")
-BARE_KEY_RE = re.compile(r"^[A-Za-z0-9_-]+$")
+HEADER_RE = re.compile(r"^\s*\[([A-Za-z0-9_.-]+)\]\s*(?:#.*)?$")
 
 
 def load_toml(path: Path) -> dict:
@@ -247,16 +314,6 @@ def parent_conflict(data: dict, path: tuple[str, ...]) -> tuple[str, ...] | None
     return None
 
 
-def toml_key(key: str) -> str:
-    if BARE_KEY_RE.match(key):
-        return key
-    return json.dumps(key)
-
-
-def toml_table(path: tuple[str, ...]) -> str:
-    return ".".join(toml_key(part) for part in path)
-
-
 def toml_value(value) -> str:
     if isinstance(value, bool):
         return "true" if value else "false"
@@ -268,82 +325,24 @@ def toml_value(value) -> str:
         return repr(value)
     if isinstance(value, list):
         return "[" + ", ".join(toml_value(item) for item in value) + "]"
-    if isinstance(value, dict):
-        items = ", ".join(f"{toml_key(key)} = {toml_value(child)}" for key, child in value.items())
-        return "{ " + items + " }"
-    if isinstance(value, (datetime, date, time)):
-        return value.isoformat()
     print(f"Unsupported TOML value type in template: {type(value).__name__}", file=sys.stderr)
     raise SystemExit(1)
 
 
-def parse_key_part(part: str) -> str:
-    part = part.strip()
-    if part.startswith(("\"", "'")):
-        try:
-            return tomllib.loads("key = " + part)["key"]
-        except tomllib.TOMLDecodeError:
-            pass
-    return part
-
-
-def split_table_name(raw: str) -> tuple[str, ...]:
-    parts = []
-    current = []
-    quote = None
-    escaped = False
-
-    for char in raw.strip():
-        if quote:
-            current.append(char)
-            if quote == '"' and escaped:
-                escaped = False
-            elif quote == '"' and char == "\\":
-                escaped = True
-            elif char == quote:
-                quote = None
-            continue
-
-        if char in ("\"", "'"):
-            quote = char
-            current.append(char)
-        elif char == ".":
-            parts.append(parse_key_part("".join(current)))
-            current = []
-        else:
-            current.append(char)
-
-    parts.append(parse_key_part("".join(current)))
-    return tuple(parts)
-
-
-def collect_table_blocks(lines: list[str]) -> tuple[dict[tuple[str, ...], tuple[int, int]], int]:
+def collect_tables(lines: list[str]) -> tuple[dict[tuple[str, ...], tuple[int, int]], int]:
     headers = []
     for index, line in enumerate(lines):
-        if line.lstrip().startswith("[["):
-            continue
         match = HEADER_RE.match(line)
         if match:
-            headers.append((index, split_table_name(match.group(1))))
+            headers.append((index, tuple(match.group(1).split("."))))
 
     blocks = {}
     for offset, (index, path) in enumerate(headers):
         end = headers[offset + 1][0] if offset + 1 < len(headers) else len(lines)
-        blocks.setdefault(path, (index, end))
+        blocks[path] = (index, end)
 
     first_table = headers[0][0] if headers else len(lines)
     return blocks, first_table
-
-
-def key_lines(items: list[tuple[str, object]]) -> list[str]:
-    return [f"{toml_key(key)} = {toml_value(value)}\n" for key, value in items]
-
-
-def insertion_before_trailing_blank(lines: list[str], start: int, end: int) -> int:
-    index = end
-    while index > start and lines[index - 1].strip() == "":
-        index -= 1
-    return index
 
 
 template_path = Path(sys.argv[1])
@@ -357,10 +356,8 @@ for path, value in flatten(template_data):
         continue
     conflict = parent_conflict(target_data, path)
     if conflict:
-        dotted = ".".join(conflict)
-        missing_path = ".".join(path)
         print(
-            f"Cannot add {missing_path}: {target_path} already defines non-table value at {dotted}",
+            f"Cannot add {'.'.join(path)}: non-table value exists at {'.'.join(conflict)}",
             file=sys.stderr,
         )
         raise SystemExit(1)
@@ -370,7 +367,7 @@ if not missing:
     print(f"config.toml already contains template settings: {target_path}")
     raise SystemExit(0)
 
-groups = OrderedDict()
+groups: dict[tuple[str, ...], list[tuple[str, object]]] = {}
 for path, value in missing:
     groups.setdefault(path[:-1], []).append((path[-1], value))
 
@@ -380,36 +377,30 @@ for index, line in enumerate(lines):
     if line and not line.endswith("\n"):
         lines[index] = line + "\n"
 
-blocks, first_table = collect_table_blocks(lines)
+blocks, first_table = collect_tables(lines)
 insertions = []
 appends = []
 
 for parent, items in groups.items():
-    additions = key_lines(items)
+    additions = [f"{key} = {toml_value(value)}\n" for key, value in items]
     if not parent:
-        insert_at = insertion_before_trailing_blank(lines, 0, first_table)
-        if insert_at < len(lines):
+        if first_table < len(lines):
             additions.append("\n")
-        insertions.append((insert_at, additions))
+        insertions.append((first_table, additions))
     elif parent in blocks:
-        start, end = blocks[parent]
-        insert_at = insertion_before_trailing_blank(lines, start + 1, end)
-        if insert_at < len(lines) and lines[insert_at].strip() != "":
-            additions.append("\n")
-        insertions.append((insert_at, additions))
+        _start, end = blocks[parent]
+        insertions.append((end, additions))
     else:
-        appends.append((parent, items))
+        appends.append((parent, additions))
 
-for insert_at, additions in sorted(insertions, key=lambda item: item[0], reverse=True):
-    lines[insert_at:insert_at] = additions
+for index, additions in sorted(insertions, key=lambda item: item[0], reverse=True):
+    lines[index:index] = additions
 
-for parent, items in appends:
-    if lines and lines[-1].strip() != "":
+for parent, additions in appends:
+    if lines and lines[-1].strip():
         lines.append("\n")
-    if lines and (len(lines) < 2 or lines[-2].strip() != ""):
-        lines.append("\n")
-    lines.append(f"[{toml_table(parent)}]\n")
-    lines.extend(key_lines(items))
+    lines.append(f"[{'.'.join(parent)}]\n")
+    lines.extend(additions)
 
 new_text = "".join(lines)
 try:
@@ -423,11 +414,6 @@ print(f"Added {len(missing)} config setting(s) into {target_path}")
 PY
 }
 
-if [[ ! -d "$source_root" ]]; then
-  echo "No skills directory found at $source_root" >&2
-  exit 1
-fi
-
 if [[ ! -f "$agents_template" ]]; then
   echo "No AGENTS template found at $agents_template" >&2
   exit 1
@@ -439,11 +425,11 @@ if [[ ! -f "$config_template" ]]; then
 fi
 
 shopt -s nullglob
-skill_files=("$source_root"/*/SKILL.md)
+skill_files=("$repo_root"/*/SKILL.md)
 shopt -u nullglob
 
 if [[ "${#skill_files[@]}" -eq 0 ]]; then
-  echo "No skills found under $source_root" >&2
+  echo "No top-level skills found under $repo_root" >&2
   exit 1
 fi
 
@@ -453,35 +439,19 @@ inject_agents_template
 sync_config_template
 
 installed=0
-
 for skill_file in "${skill_files[@]}"; do
   skill_dir="$(cd "$(dirname "$skill_file")" && pwd -P)"
   skill_name="$(basename "$skill_dir")"
-  target="$target_root/$skill_name"
-
-  if [[ -L "$target" ]]; then
-    current_target="$(readlink "$target")"
-    if [[ "$current_target" == "$skill_dir" ]]; then
-      echo "Already installed: $skill_name -> $skill_dir"
-      installed=$((installed + 1))
-      continue
-    fi
-
-    if [[ "$force" == true ]]; then
-      rm "$target"
-    else
-      echo "Refusing to replace existing symlink: $target -> $current_target" >&2
-      echo "Re-run with --force to replace symlinks." >&2
-      exit 1
-    fi
-  elif [[ -e "$target" ]]; then
-    echo "Refusing to replace existing non-symlink path: $target" >&2
-    exit 1
-  fi
-
-  ln -s "$skill_dir" "$target"
-  echo "Installed: $skill_name -> $skill_dir"
+  link_path "$skill_dir" "$target_root/$skill_name" "$skill_name"
   installed=$((installed + 1))
 done
 
+for support_name in adapters tools templates scripts; do
+  remove_legacy_support_link "$support_name"
+done
+
+validate_installed_links
+python3 "$repo_root/tools/validate_skillset.py" "$repo_root"
+
 echo "Installed $installed skill(s) into $target_root"
+echo "Codex home: $codex_home"
