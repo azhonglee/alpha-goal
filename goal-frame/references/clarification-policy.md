@@ -43,8 +43,8 @@ I found candidate implementations in `repo-a` and `repo-b`. `repo-a` owns artifa
 
 Rules:
 
-- ask exactly one question per round;
-- inspect available repo evidence before asking about brownfield facts;
+- ask exactly one high-leverage question per round;
+- inspect available repo evidence before asking about brownfield facts; ask evidence-backed confirmation questions, not discoverable facts;
 - ask about intent, outcome, scope, non-goals, and decision boundaries before implementation details;
 - target the weakest Goal Contract field first;
 - pressure-test the answer before moving on: example, hidden assumption, boundary/tradeoff, or symptom-to-outcome reframe;
@@ -52,6 +52,8 @@ Rules:
 - stop asking when remaining ambiguity can be recorded as a bounded assumption or risk;
 - return `ASK_USER` when the missing answer blocks safe progress;
 - return `READY_FOR_ITERATION` only after the contract is closed.
+
+After the user answers, update the Goal Contract. If the answer changes target, acceptance, constraints, non-goals, or claim boundary after iteration started, return through the router before any more mutation.
 
 ## Default when blocked
 

@@ -44,7 +44,15 @@ Check:
 - claim boundary;
 - durable spec need.
 
-Use `references/goal-contract-schema.md` when field definitions are unclear, the contract is high-risk, or the output boundary needs precision. Use `references/frame-examples.md` only when routing or output shape is uncertain. Use `references/spec-template.md` only when a durable spec is needed. Examples are illustrative only; do not copy their repo names, paths, or facts as evidence for the current task.
+Use references only when their detail is needed:
+
+- `references/goal-contract-schema.md` when field definitions are unclear, the contract is high-risk, or the output boundary needs precision.
+- `references/target-discovery.md` when target ownership is ambiguous, multiple repos/paths may qualify, or existing work could change the task identity.
+- `references/clarification-policy.md` when deciding whether to ask, assume, run a Socratic interview, or return `ASK_USER`.
+- `references/frame-examples.md` only when routing or output shape is uncertain.
+- `references/spec-template.md` only when a durable spec is needed.
+
+Examples are illustrative only; do not copy their repo names, paths, or facts as evidence for the current task.
 
 ## Spec escalation
 
@@ -84,85 +92,15 @@ Spec status values:
 - `approved`: accepted by the user or clear enough within recorded decision boundaries; record approval basis.
 - `superseded`: history only; do not execute against it.
 
-## Clarification policy
+## Discovery details
 
-Ask the user only when the answer changes the implementation or safety boundary.
+Keep FRAME lightweight. Load detail only for the condition that needs it:
 
-Ask when:
+- Clarification and Socratic interview rules: `references/clarification-policy.md`. Ask only when the answer changes implementation or safety; otherwise record a bounded assumption.
+- Multi-repo target selection and existing-work scan: `references/target-discovery.md`. Do not mutate until target selection and duplicate/follow-up risk are closed.
+- Spec escalation: use the rules above, then load `references/spec-template.md` only when a durable requirements artifact is actually needed.
 
-- target repo/path is ambiguous and a wrong choice could mutate the wrong place;
-- different interpretations imply different code changes;
-- existing work may turn the task into follow-up, duplicate, or comparison-only work;
-- a destructive or irreversible operation might be needed;
-- user request conflicts with project rules;
-- credentials, environment, or permissions are required.
-
-Otherwise, record a bounded assumption and continue read-only discovery.
-
-Use `references/clarification-policy.md` for edge cases.
-
-## Multi-repo Target Gate
-
-If cwd is a workspace, aggregator, monorepo, or contains multiple candidate repos:
-
-- do not mutate anything;
-- list the candidate repos or paths found by lightweight read-only checks;
-- inspect candidate repos only as needed;
-- record positive evidence for the selected repo;
-- record exclusion or deferral reasons for non-selected repos;
-- record applicable local rules for the selected repo.
-
-Target selection is closed only when the selected repo/path has stronger evidence than alternatives.
-
-If the current repo only has examples, docs, tests, or template mentions of the requested feature and no real implementation surface, target selection is not closed. Return `ASK_USER` with the missing repo/path or ask whether to produce a read-only search plan.
-
-For cross-repo, worktree, submodule, or ownership-boundary implementation, record the explicit user request, confirmation, or decision boundary that authorizes that boundary. Otherwise return `ASK_USER`.
-
-Minimum read-only checks:
-
-- identify the git root and current directory role;
-- look one level down for candidate `.git` directories, worktrees, or package roots;
-- search task keywords in candidate names, local branches, recent commits, and docs when cheap;
-- read only the local rule files needed to decide target ownership.
-
-If the user describes a multi-repo workspace but cwd is not enough to find candidates, return `ASK_USER` with the missing workspace or repo path. Return `BLOCKED` only when the needed data, permission, or tooling is unavailable after the target source is known.
-
-## Existing Work Scan
-
-Always do the cheapest local scan needed to avoid duplicate or wrong-target work. Escalate to broader branch, MR/PR, issue, or collaboration-tool scans only when:
-
-- user mentions MR/PR/issue/branch;
-- the request sounds like follow-up, duplicate, comparison, or alternative implementation;
-- target ownership is ambiguous;
-- local keywords, branches, commits, or docs suggest overlapping work;
-- final output may create MR/PR and duplicate risk is material.
-
-Record whether the task is:
-
-- `new work`
-- `follow-up`
-- `duplicate`
-- `alternative implementation`
-- `comparison-only`
-- `unknown`
-
-## Socratic interview
-
-Use a Socratic interview when the request is broad, ambiguous, or missing acceptance, non-goals, decision boundaries, or claim boundary.
-
-Rules:
-
-- ask exactly one high-leverage question per round;
-- inspect available code, docs, diffs, or logs first for brownfield facts; ask evidence-backed confirmation questions, not discoverable facts;
-- ask about intent, desired outcome, scope, non-goals, and decision boundaries before implementation details;
-- target the weakest field first: intent, outcome, scope, acceptance, non-goals, constraints, decision boundaries, brownfield context, claim boundary;
-- after each answer, pressure-test the strongest claim with the first useful move: ask for an example/counterexample/evidence signal, probe the hidden assumption, force a boundary/tradeoff, or reframe symptoms toward root cause or desired end state;
-- track each field as `clear`, `partial`, or `missing` while deciding whether to ask, assume, or block;
-- stop asking when remaining `partial` fields can be recorded as bounded assumptions or risks.
-
-Return `ASK_USER` when a missing or `partial` field blocks safe progress. Return `READY_FOR_ITERATION` only when execution-critical fields are clear or safely bounded.
-
-After the answer, update the Goal Contract. If the answer changes target, acceptance, constraints, non-goals, or claim boundary after iteration started, return through the router before any more mutation.
+Return `ASK_USER` when missing information blocks safe progress; return `READY_FOR_ITERATION` only when execution-critical fields are clear or safely bounded.
 
 ## Goal Contract
 
