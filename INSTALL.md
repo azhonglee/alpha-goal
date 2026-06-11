@@ -20,8 +20,8 @@ CODEX_HOME=/path/to/codex-home scripts/install.sh
 脚本会：
 
 - 软链接顶层技能目录到 `${CODEX_HOME:-$HOME/.codex}/skills/`。
-- 更新 Codex home 的 `AGENTS.md` 中带 `generate-with-template:agents-md` 标记的受管理模板块；如果没有目标文件则创建。
-- 只补齐 Codex home 的 `config.toml` 中缺失的模板设置，不覆盖已有值。
+- 默认不修改 Codex home 的 `AGENTS.md` 或 `config.toml`。
+- 只有显式传入 `--sync-user-templates` 时，才更新 Codex home 的 `AGENTS.md` 中带 `generate-with-template:agents-md` 标记的受管理模板块，并只补齐 `config.toml` 中缺失的模板设置；模板不设置 `sandbox_mode`，也不抑制不稳定特性警告。
 - 清理旧版本可能留在 `skills/` 下、且指向本仓库的旧支持目录软链接。
 - 校验目标 `skills/` 中的 skill 软链接指向源码目录，且旧支持目录没有作为本仓库 skill 安装。
 - 安装后运行源码中的 `tools/validate_skillset.py` 校验技能包。
@@ -34,6 +34,12 @@ scripts/install.sh --force
 
 `--force` 只替换软链接，不删除真实文件或真实目录。
 
+如需同步用户级模板，显式 opt in：
+
+```bash
+scripts/install.sh --sync-user-templates
+```
+
 默认输出只保留安装摘要。排查安装过程时使用：
 
 ```bash
@@ -45,13 +51,14 @@ scripts/install.sh --verbose
 源码中的 `templates/` 目录包含：
 
 - `AGENTS.md`：推荐的自主 Agent 行为和隔离工作流约束。
-- `config.toml`：启用 multi-agent 等本地特性的可选 Codex 配置。
+- `config.toml`：启用 multi-agent 等本地特性的可选 Codex 配置，不改变 sandbox 权限，也不抑制不稳定特性警告。
 
-默认安装会更新真实 Codex home。做 smoke test 或文档验证时，应使用临时 `CODEX_HOME`：
+默认安装只写入 skill symlink；`--sync-user-templates` 才会更新真实 Codex home 的用户级模板。做 smoke test 或文档验证时，应使用临时 `CODEX_HOME`：
 
 ```bash
 tmp_codex_home="$(mktemp -d)"
 CODEX_HOME="$tmp_codex_home" scripts/install.sh
+CODEX_HOME="$tmp_codex_home" scripts/install.sh --sync-user-templates
 python3 tools/validate_skillset.py .
 rm -rf "$tmp_codex_home"
 ```

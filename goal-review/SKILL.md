@@ -1,6 +1,6 @@
 ---
 name: goal-review
-description: Challenge an active Goal Contract, iteration, diff, architecture, scope, or review feedback before verification. Use explicitly or from goal-loop when direction, complexity, review feedback, or completion readiness needs review; not for ordinary standalone code review outside a goal-loop workflow.
+description: Stage skill for the goal-loop package. Challenge an active Goal Contract, iteration, diff, architecture, scope, or review feedback before verification. Use only when explicitly named by the user or selected by goal-loop; not for ordinary standalone code review outside a goal-loop workflow.
 ---
 
 # Goal Review
@@ -111,4 +111,4 @@ Allowed `Review verdict` values:
 - `BLOCKED`: missing decision, data, environment, or permissions prevent safe progress.
 - `READY_FOR_VERIFY`: review found no blocker and completion evidence can be checked by `goal-verify`.
 
-Route `READY_FOR_VERIFY` to `goal-verify`. Route `NEXT_ITERATION` or `SIMPLIFY` to `goal-iterate`. Route `REFRAME` to `goal-frame`.
+Route `READY_FOR_VERIFY` to `goal-verify`. Route `NEXT_ITERATION` or `SIMPLIFY` to `goal-iterate`. Route `REFRAME` to `goal-frame`. For `CONTINUE`, state the prior route in `Next`; use it only to continue an in-progress stage, never to authorize final output or completion-readiness.

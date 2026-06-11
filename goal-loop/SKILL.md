@@ -1,11 +1,14 @@
 ---
 name: goal-loop
-description: Route non-trivial coding tasks through goal-frame, goal-iterate, goal-review, and goal-verify. Use for multi-step coding tasks, ambiguous requirements, repository mutation, review feedback inside an active goal, verification, recovery, or completion claims; not for trivial read-only answers.
+description: Route non-trivial coding tasks through goal-frame, goal-iterate, goal-review, and goal-verify. Use for multi-step coding tasks that may require mutation, staged implementation, recovery, review feedback inside an active goal, verification of changed work, or completion claims. Do not use for ordinary read-only explanation, standalone code review, diff review, comparison, summarization, or advisory audit unless a goal-loop mutation path or completion claim is in scope.
 ---
 
-## Read-only bypass
+## Read-only routing
 
-Do not use Goal Loop for ordinary read-only explanation, code review, diff review, comparison, summarization, or advisory audit when no mutation or completion claim is requested.
+- Bypass Goal Loop for trivial read-only explanation, standalone code review, diff review, comparison, summarization, or advisory audit when no mutation, target discovery, active goal, or completion claim is involved.
+- Run FRAME only and exit `READ_ONLY` for non-trivial read-only audits that need target, rule, or evidence-boundary discovery but no mutation or completion claim.
+- Run FRAME only and exit `COMPARISON_ONLY` for read-only comparison of existing work.
+- Use REVIEW or VERIFY only for read-only checks inside an active Goal Contract, review feedback path, or implementation completion/readiness claim.
 
 # Goal Loop Router
 
@@ -23,7 +26,7 @@ FRAME -> ITERATE -> REVIEW -> VERIFY -> FINAL
 
 ## Stage loading
 
-`goal-loop` is the only skill that should trigger implicitly for implementation work. This is a multi-skill package; install all stage skills together. Before executing a stage, read that stage's sibling `SKILL.md` directly:
+`goal-loop` is the only skill that should trigger implicitly for implementation work. Stage skills should run only when explicitly named by the user or selected by this router. This is a multi-skill package; install all stage skills together. Before executing a stage, read that stage's sibling `SKILL.md` directly:
 
 - FRAME: `../goal-frame/SKILL.md`
 - ITERATE: `../goal-iterate/SKILL.md`
@@ -32,11 +35,15 @@ FRAME -> ITERATE -> REVIEW -> VERIFY -> FINAL
 
 If a referenced stage file is unavailable, report the missing stage file as a blocker before mutating. Do not infer missing stage rules from memory.
 
+## Domain skill coexistence
+
+When another explicitly named or repository-required skill applies, use Goal Loop for routing, isolation, mutation safety, evidence, and final completion claims. Use the domain skill for task-specific design, editing, and validation constraints. Load the domain skill during FRAME when it affects acceptance, constraints, non-goals, or evidence plan; apply its editing rules during ITERATE within the closed target boundary; treat its validation or forward-testing requirements as REVIEW/VERIFY evidence.
+
 ## Global invariants
 
 - No Goal Contract, no implementation mutation.
 - No target boundary, no implementation mutation.
-- No isolated edit path, no implementation mutation.
+- No isolated edit path or approved first-step isolation setup, no implementation mutation.
 - No unsupported review or verification conclusion without evidence.
 - No continuing past review feedback, complexity, scope expansion, architecture/ownership risk, or evidence uncertainty without a current Review Record.
 - No Verification Verdict, no final completion claim.
@@ -58,7 +65,7 @@ Prefer existing repo conventions. If none exist, use:
 - command/output evidence: `.goal-loop/evidence/YYYYMMDD-<slug>/`
 - scratch artifacts: `.goal-loop/tmp/YYYYMMDD-<slug>/`
 
-`<slug>` names the goal boundary. Do not create empty artifact directories. Before writing `.goal-loop/`, confirm it is gitignored; otherwise record the risk in the Goal Contract or Iteration Record.
+`<slug>` names the goal boundary. Do not create empty artifact directories. Before writing `.goal-loop/`, confirm it is gitignored; otherwise do not write there unless the user explicitly approves a committed durable artifact path and the Goal Contract records that decision.
 
 ## Routing
 
@@ -91,7 +98,7 @@ Use `goal-iterate` when all are true:
 - `Frame verdict` is `READY_FOR_ITERATION`;
 - target repo/path is closed;
 - mutation is required;
-- the isolated edit path is known or can be safely created after preflight;
+- the isolated edit path is known or can be safely created as the first ITERATE setup action after preflight;
 - any active spec has been read, and any active plan is current or intentionally absent.
 
 `goal-iterate` exits with one of:
@@ -123,14 +130,16 @@ If both REVIEW and VERIFY conditions match, run REVIEW first unless a current Re
 - `BLOCKED`
 - `READY_FOR_VERIFY`
 
+`CONTINUE` means the reviewed current stage may proceed only within its prior route. It must name the next stage in `Next`; use `NEXT_ITERATION` for more implementation/evidence and `READY_FOR_VERIFY` for completion-readiness. `CONTINUE` never authorizes final output.
+
 ### Enter VERIFY before any completion claim
 
 Use `goal-verify` when any of these is true:
 
 - implementation appears complete;
-- there is a diff, patch, commit, MR/PR, local evidence to assess, delivery, final output, or completion readiness;
+- there is a diff, patch, commit, MR/PR, local evidence to assess, delivery, or completion readiness for changed work;
 - the user asks whether it is done, ready to merge, ready to ship, or whether a final claim is supported;
-- final output, MR/PR creation, or completion claim is being prepared;
+- final output that includes or implies implementation completion, delivery readiness, merge readiness, correctness/safety of completed work, MR/PR creation, or another completion claim is being prepared;
 - previous iteration returned `ITERATION_READY_FOR_VERIFY`;
 - review returned `READY_FOR_VERIFY`;
 - active spec/plan artifacts, if any, must be checked against final evidence.

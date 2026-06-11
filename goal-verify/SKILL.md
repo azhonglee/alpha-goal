@@ -1,6 +1,6 @@
 ---
 name: goal-verify
-description: Produce a Verification Verdict before final output. Use after implementation, before MR/PR/final claims, when asked if work is done/correct/safe, or when checking loopholes. Maps acceptance to evidence and routes to final, next iteration, reframe, or blocked.
+description: Stage skill for the goal-loop package. Produce a Verification Verdict for an active Goal Contract before implementation completion, MR/PR, merge-readiness, correctness/safety, or final delivery claims. Use only when explicitly named by the user or selected by goal-loop; not for standalone read-only code review or advisory audits without a completion claim.
 ---
 
 # Goal Verify
@@ -16,9 +16,11 @@ Use this skill when:
 - implementation appears complete;
 - there is a diff, patch, commit, MR/PR, test result, or runtime observation to assess;
 - the user asks whether work is done, correct, safe, or has loopholes;
-- final output, MR/PR creation, or completion claim is being prepared;
+- final output that includes or implies implementation completion, delivery readiness, merge readiness, correctness/safety of completed work, MR/PR creation, or another completion claim is being prepared;
 - `goal-iterate` returned `ITERATION_READY_FOR_VERIFY`.
 - `goal-review` returned `READY_FOR_VERIFY`.
+
+Do not use this skill for standalone read-only code review, safety review, loophole scan, findings, comparison, or advisory audit when there is no active Goal Contract and no implementation completion, readiness, merge/ship, or correctness claim.
 
 ## Required inputs
 

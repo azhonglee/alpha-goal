@@ -1,6 +1,6 @@
 ---
 name: goal-frame
-description: Build a compact Goal Contract before coding, and create or update a durable spec artifact only when risk or complexity requires it. Use for ambiguous requirements, unclear target repo/path, multi-repo workspaces, existing MR/PR/branch discovery, acceptance criteria, claim boundary, clarification, and spec escalation.
+description: Stage skill for the goal-loop package. Build a compact Goal Contract before coding, and create or update a durable spec artifact only when risk or complexity requires it. Use only when explicitly named by the user or selected by goal-loop for ambiguous requirements, unclear target repo/path, multi-repo workspaces, existing MR/PR/branch discovery, acceptance criteria, claim boundary, clarification, and spec escalation.
 ---
 
 # Goal Frame
@@ -44,7 +44,7 @@ Check:
 - claim boundary;
 - durable spec need.
 
-Use `references/goal-contract-schema.md` for field definitions and `references/frame-examples.md` for compact examples. Use `references/spec-template.md` only when a durable spec is needed. Examples are illustrative only; do not copy their repo names, paths, or facts as evidence for the current task.
+Use `references/goal-contract-schema.md` when field definitions are unclear, the contract is high-risk, or the output boundary needs precision. Use `references/frame-examples.md` only when routing or output shape is uncertain. Use `references/spec-template.md` only when a durable spec is needed. Examples are illustrative only; do not copy their repo names, paths, or facts as evidence for the current task.
 
 ## Spec escalation
 
