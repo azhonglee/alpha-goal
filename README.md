@@ -22,7 +22,7 @@ The package contains five skills:
 
 ## Install
 
-默认安装到仓库根目录下的 `codex/`，并把技能目录软链接到 `codex/skills/`：
+默认安装到真实 Codex home，并把技能目录软链接到 `$HOME/.codex/skills/`：
 
 ```bash
 scripts/install.sh
@@ -30,17 +30,18 @@ scripts/install.sh
 
 脚本会：
 
-- 将顶层 `*/SKILL.md` 技能目录软链接到 `${CODEX_HOME:-<repo>/codex}/skills/`。
-- 将 `templates/AGENTS.md` 合并到 `${CODEX_HOME:-<repo>/codex}/AGENTS.md` 的受管理模板块。
-- 将 `templates/config.toml` 中缺失的设置补齐到 `${CODEX_HOME:-<repo>/codex}/config.toml`，不覆盖已有值。
+- 将顶层 `*/SKILL.md` 技能目录软链接到 `${CODEX_HOME:-$HOME/.codex}/skills/`。
+- 将 `templates/AGENTS.md` 合并到 Codex home 的 `AGENTS.md` 受管理模板块。
+- 将 `templates/config.toml` 中缺失的设置补齐到 Codex home 的 `config.toml`，不覆盖已有值。
 - 清理旧版本可能留在 `skills/` 下、且指向本仓库的旧支持目录软链接。
 - 校验目标 `skills/` 中的 skill 软链接指向源码目录，且旧支持目录没有作为本仓库 skill 安装。
 - 安装后运行源码中的 `tools/validate_skillset.py` 校验技能包。
 
-如果要安装到真实 Codex home，显式指定：
+如果要安装到其他位置，使用 `--codex-home` 或显式设置 `CODEX_HOME`：
 
 ```bash
-CODEX_HOME="$HOME/.codex" scripts/install.sh
+scripts/install.sh --codex-home /path/to/codex-home
+CODEX_HOME=/path/to/codex-home scripts/install.sh
 ```
 
 如果目标位置已有指向其他目录的软链接，使用 `--force` 替换软链接；脚本不会删除真实文件或真实目录：
@@ -62,7 +63,7 @@ templates/
 
 ## 可选用户配置模板
 
-`templates/AGENTS.md` 和 `templates/config.toml` 来自原 `main` 分支的安装模型。默认安装只会写入仓库根目录下的 `codex/`。如果显式设置 `CODEX_HOME="$HOME/.codex"`，脚本会合并这些模板到真实 Codex home；执行前应确认这些默认值适合用户环境。
+`templates/AGENTS.md` 和 `templates/config.toml` 来自原 `main` 分支的安装模型。默认安装会合并这些模板到真实 Codex home；执行前应确认这些默认值适合用户环境。做本地验证时，使用临时 `CODEX_HOME`，避免污染真实配置。
 
 ## Recommended invocation
 
