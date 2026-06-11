@@ -21,7 +21,7 @@ CODEX_HOME="$HOME/.codex" scripts/install.sh
 - 软链接顶层技能目录到 `${CODEX_HOME:-<repo>/codex}/skills/`。
 - 更新 `${CODEX_HOME:-<repo>/codex}/AGENTS.md` 中带 `generate-with-template:agents-md` 标记的受管理模板块；如果没有目标文件则创建。
 - 只补齐 `${CODEX_HOME:-<repo>/codex}/config.toml` 中缺失的模板设置，不覆盖已有值。
-- 清理旧版本可能留在 `skills/` 下、且指向本仓库的 `adapters/`、`tools/`、`templates/`、`scripts/` 支持目录软链接。
+- 清理旧版本可能留在 `skills/` 下、且指向本仓库的旧支持目录软链接。
 - 安装后运行源码中的 `tools/validate_skillset.py` 校验技能包。
 
 如果目标位置已有其他软链接，可以使用：

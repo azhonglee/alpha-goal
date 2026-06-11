@@ -18,7 +18,7 @@ The package contains five skills:
 - `goal-review`: direction, feedback, scope, architecture, and completion-readiness review.
 - `goal-verify`: Verification Verdict, acceptance-to-evidence mapping, claim boundary check.
 
-它还包含可选的只读辅助脚本、ByteDance Codebase 适配参考，以及用户配置模板。
+它还包含可选的只读辅助脚本和用户配置模板。
 
 ## Install
 
@@ -33,7 +33,7 @@ scripts/install.sh
 - 将顶层 `*/SKILL.md` 技能目录软链接到 `${CODEX_HOME:-<repo>/codex}/skills/`。
 - 将 `templates/AGENTS.md` 合并到 `${CODEX_HOME:-<repo>/codex}/AGENTS.md` 的受管理模板块。
 - 将 `templates/config.toml` 中缺失的设置补齐到 `${CODEX_HOME:-<repo>/codex}/config.toml`，不覆盖已有值。
-- 清理旧版本可能留在 `skills/` 下、且指向本仓库的 `adapters/`、`tools/`、`templates/`、`scripts/` 支持目录软链接。
+- 清理旧版本可能留在 `skills/` 下、且指向本仓库的旧支持目录软链接。
 - 安装后运行源码中的 `tools/validate_skillset.py` 校验技能包。
 
 如果要安装到真实 Codex home，显式指定：
@@ -56,14 +56,13 @@ goal-frame/
 goal-iterate/
 goal-review/
 goal-verify/
-adapters/
 tools/
 templates/
 scripts/
 codex/        # local install output, ignored by git
 ```
 
-只有包含 `SKILL.md` 的目录才是技能。`adapters/`、`tools/`、`templates/` 和 `scripts/` 都是支持材料，应与技能目录保持同级，确保相对引用、安装脚本和校验命令可用。
+只有包含 `SKILL.md` 的目录才是技能。`tools/`、`templates/` 和 `scripts/` 都是支持材料，应与技能目录保持同级，确保安装脚本和校验命令可用。
 
 ## 可选用户配置模板
 

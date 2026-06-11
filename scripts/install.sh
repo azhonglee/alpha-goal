@@ -78,16 +78,16 @@ link_path() {
 
 remove_legacy_support_link() {
   local support_name="$1"
-  local support_dir="$repo_root/$support_name"
+  local legacy_source="$repo_root/$support_name"
   local target="$target_root/$support_name"
 
-  if [[ ! -L "$target" || ! -d "$support_dir" ]]; then
+  if [[ ! -L "$target" ]]; then
     return
   fi
 
   local current_target
   current_target="$(readlink "$target")"
-  if [[ "$current_target" == "$support_dir" ]]; then
+  if [[ "$current_target" == "$legacy_source" ]]; then
     rm "$target"
     echo "Removed legacy support link: $target"
   fi

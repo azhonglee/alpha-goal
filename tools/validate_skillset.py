@@ -75,13 +75,9 @@ def check_skill_references(skill: str, skill_dir: Path, skill_text: str) -> bool
 
 def check_supporting_paths(root: Path) -> bool:
     ok = True
-    for path in [root / "adapters", root / "tools", root / "templates", root / "scripts"]:
+    for path in [root / "tools", root / "templates", root / "scripts"]:
         if not path.exists():
             ok = fail(f"missing supporting path {path}")
-
-    adapter = root / "adapters" / "bytedance-codebase.md"
-    if not adapter.exists():
-        ok = fail(f"missing adapter reference {adapter}")
 
     agents_template = root / "templates" / "AGENTS.md"
     if not agents_template.exists():
