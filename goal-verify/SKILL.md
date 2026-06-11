@@ -28,6 +28,7 @@ Hard requirements for completion claims:
 - current spec if the Goal Contract references a durable spec;
 - current plan if the Iteration Record or Review Record references a durable plan;
 - Iteration Record or current diff/evidence;
+- Debug Receipt when the work used `debug` mode or claims to fix a bug;
 - fresh repo state from after the last material change;
 - applicable project rules, or an explicit reason they cannot be read;
 - commands/tests already run, or an explicit reason they cannot run;
@@ -48,6 +49,9 @@ Check:
 - every acceptance item has fresh, relevant evidence;
 - every active spec success criterion that is inside the claim boundary is covered or explicitly excluded;
 - any active plan verification route and evidence gate is satisfied, superseded with reason, or explicitly blocked;
+- loop mode, hypothesis, evidence type, learning, and decision are consistent with the final claim;
+- bug-fix claims have `ROOT_CAUSE_CONFIRMED` or fresh final evidence that proves the fix boundary;
+- `NOT_REPRODUCED` or `BLOCKED` Debug Receipts are not treated as repair completion;
 - risk-tier evidence requirements are met or explicitly blocked;
 - evidence is at the right boundary for the user's wording;
 - changed files match intended target and non-goals;

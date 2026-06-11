@@ -6,11 +6,17 @@ The Iteration Record captures one bounded implementation loop. It is not a final
 Iteration Record:
 - Contract version:
 - Active artifacts:
+- Loop mode:
+- Hypothesis:
+- Evidence type:
+- Debug receipt:
 - Iteration goal:
 - Mutation preflight:
 - Action:
 - Changed files:
 - Local evidence:
+- Learning:
+- Decision:
 - Acceptance delta:
 - Risks introduced:
 - Review needed:
@@ -27,6 +33,22 @@ A short reference to the Goal Contract used for this iteration. If no explicit v
 ### Active artifacts
 
 Spec and plan artifacts read or updated in this iteration. Use `none` when no durable artifact is active. Include path, status, and whether the iteration read, updated, created, or superseded the artifact.
+
+### Loop mode
+
+One of `discovery`, `interview`, `debug`, `tdd`, `implementation`, `refactor`, `spike`, or `hardening`. See `references/loop-modes.md`.
+
+### Hypothesis
+
+The specific claim being tested by this iteration.
+
+### Evidence type
+
+One of `gate_evidence`, `advisory_audit`, `exploration_only`, `delta_review`, or `evidence_audit`.
+
+### Debug receipt
+
+Use `none` unless `Loop mode` is `debug`. For debug, include status `ROOT_CAUSE_CONFIRMED`, `NOT_REPRODUCED`, or `BLOCKED` with symptom, reproduction, probe, evidence, root cause when known, and decision.
 
 ### Iteration goal
 
@@ -47,6 +69,14 @@ List only files intentionally touched by this iteration.
 ### Local evidence
 
 Commands run, tests added, probes performed, diff checks, or blocker evidence.
+
+### Learning
+
+What the evidence proved or disproved about the hypothesis.
+
+### Decision
+
+Exactly one of `continue`, `pivot`, `expand`, `harden`, or `finish`.
 
 ### Acceptance delta
 

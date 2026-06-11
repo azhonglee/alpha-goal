@@ -14,7 +14,7 @@ The package contains five skills:
 
 - `goal-loop`: router and global invariants.
 - `goal-frame`: Goal Contract, clarification, target/scope boundary, existing work scan, and spec escalation when needed.
-- `goal-iterate`: one bounded implementation iteration with mutation preflight, plus plan escalation when needed.
+- `goal-iterate`: one bounded implementation iteration with mutation preflight, loop mode evidence, debug receipts, plus plan escalation when needed.
 - `goal-review`: direction, feedback, scope, architecture, artifact freshness, and completion-readiness review.
 - `goal-verify`: Verification Verdict, acceptance-to-evidence mapping, artifact alignment, claim boundary check.
 
@@ -136,11 +136,17 @@ Produced by `goal-iterate`.
 Iteration Record:
 - Contract version:
 - Active artifacts:
+- Loop mode:
+- Hypothesis:
+- Evidence type:
+- Debug receipt:
 - Iteration goal:
 - Mutation preflight:
 - Action:
 - Changed files:
 - Local evidence:
+- Learning:
+- Decision:
 - Acceptance delta:
 - Risks introduced:
 - Review needed:
@@ -193,6 +199,8 @@ If the skills feel too verbose, reduce output detail inside each stage, but keep
 - `Goal Contract.Claim boundary`
 - `Goal Contract.Artifacts`
 - `Iteration Record.Active artifacts`
+- `Iteration Record.Loop mode`
+- `Iteration Record.Debug receipt`
 - `Iteration Record.Mutation preflight`
 - `Review Record.Review verdict`
 - `Verification Verdict.Acceptance evidence matrix`

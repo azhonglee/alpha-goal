@@ -45,6 +45,7 @@ If a referenced stage file is unavailable, stay within this router, use the comp
 - Read the current version and status before relying on any spec or plan.
 - Do not execute from a `superseded` artifact. Do not treat `draft` as approved when approval is required.
 - A plan must not redefine Goal Contract or active spec intent, success criteria, non-goals, constraints, or decision boundaries.
+- A bug-fix claim needs debug evidence. `NOT_REPRODUCED` and `BLOCKED` support diagnostic claims only, not repair completion.
 
 ## Artifact locations
 

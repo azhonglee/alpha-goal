@@ -1,7 +1,7 @@
 interface:
   display_name: "Goal Iterate"
-  short_description: "Run one bounded iteration"
-  default_prompt: "Use $goal-iterate to perform one bounded implementation iteration under the current Goal Contract."
+  short_description: "Run one evidence loop"
+  default_prompt: "Use $goal-iterate to perform one bounded evidence-producing iteration under the current Goal Contract."
 
 policy:
   allow_implicit_invocation: false

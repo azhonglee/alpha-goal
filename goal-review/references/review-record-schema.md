@@ -29,7 +29,7 @@ The Goal Contract, Iteration Record, diff, feedback item, architecture choice, o
 
 ### Evidence basis
 
-Fresh source findings, commands, diffs, tests, logs, screenshots, or explicit blocker evidence used for the review.
+Fresh source findings, commands, diffs, tests, logs, screenshots, loop mode evidence, Debug Receipt, or explicit blocker evidence used for the review.
 
 ### Findings
 
@@ -53,7 +53,7 @@ Use `low`, `medium`, or `high` based on blast radius and evidence needs.
 
 ### Required evidence
 
-Checks or artifacts needed before `goal-verify` can support a final claim.
+Checks, artifacts, loop evidence, or Debug Receipt updates needed before `goal-verify` can support a final claim.
 
 ### Review verdict
 

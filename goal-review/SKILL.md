@@ -51,6 +51,8 @@ Ask:
 - If an active spec exists, do Goal Contract, diff, evidence, and non-goals still align with it?
 - If an active plan exists, is it current, incrementally updated, and still the smallest credible route?
 - Is any stage relying on a `draft` or `superseded` artifact as if it were approved/current?
+- Does the Iteration Record choose the right loop mode and provide hypothesis, evidence type, learning, and decision?
+- For debug work, does the Debug Receipt prove `ROOT_CAUSE_CONFIRMED` before any fix, or correctly limit `NOT_REPRODUCED`/`BLOCKED` to diagnostic claims?
 
 ## Feedback handling
 
