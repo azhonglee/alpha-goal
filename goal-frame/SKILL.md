@@ -143,9 +143,7 @@ Record whether the task is:
 
 ## Interview clarification
 
-Interview belongs to `goal-frame`, not `goal-iterate`.
-
-Use an interview only when a missing Goal Contract field affects implementation, safety, or claim boundary. Ask one high-leverage question at a time. Target the weakest field first:
+Use interview clarification when a missing Goal Contract field affects implementation, safety, or claim boundary. Ask one high-leverage question at a time. Target the weakest field first:
 
 1. intent
 2. target

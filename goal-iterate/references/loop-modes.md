@@ -12,8 +12,6 @@ Use one mode per iteration. The mode sets the evidence shape; it is not a new st
 - `spike`: test feasibility with bounded or throwaway work; do not claim completion from spike evidence alone.
 - `hardening`: add edge cases, coverage, compatibility checks, docs, or cleanup after core behavior works.
 
-Do not use `goal-iterate` for interview. If an iteration needs clarification, return `REFRAME_NEEDED` and let `goal-frame` update the Goal Contract.
-
 ## Evidence Types
 
 - `gate_evidence`: can satisfy a Goal, plan, review, or completion gate.
