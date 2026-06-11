@@ -40,6 +40,8 @@ Check:
 - evidence plan;
 - claim boundary.
 
+Use `references/goal-contract-schema.md` for field definitions and `references/frame-examples.md` for compact examples. Examples are illustrative only; do not copy their repo names, paths, or facts as evidence for the current task.
+
 ## Clarification policy
 
 Ask the user only when the answer changes the implementation or safety boundary.
@@ -62,12 +64,22 @@ Use `references/clarification-policy.md` for edge cases.
 If cwd is a workspace, aggregator, monorepo, or contains multiple candidate repos:
 
 - do not mutate anything;
+- list the candidate repos or paths found by lightweight read-only checks;
 - inspect candidate repos only as needed;
 - record positive evidence for the selected repo;
 - record exclusion or deferral reasons for non-selected repos;
 - record applicable local rules for the selected repo.
 
 Target selection is closed only when the selected repo/path has stronger evidence than alternatives.
+
+Minimum read-only checks:
+
+- identify the git root and current directory role;
+- look one level down for candidate `.git` directories, worktrees, or package roots;
+- search task keywords in candidate names, local branches, recent commits, and docs when cheap;
+- read only the local rule files needed to decide target ownership.
+
+If the user describes a multi-repo workspace but cwd is not enough to find candidates, return `ASK_USER` with the missing workspace or repo path. Return `BLOCKED` only when the needed data, permission, or tooling is unavailable after the target source is known.
 
 ## Existing Work Scan
 

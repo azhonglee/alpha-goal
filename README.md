@@ -81,7 +81,7 @@ $goal-review 检查当前实现方向、反馈和证据缺口。
 $goal-verify 检查当前 diff 和测试证据，判断能否最终交付。
 ```
 
-Implicit triggering is supported by the skill descriptions, but explicit invocation is better while tuning.
+Only `goal-loop` is intended to trigger implicitly. Stage skills set `allow_implicit_invocation: false`; invoke them explicitly for focused testing or let the router load them.
 
 ## Design principles
 

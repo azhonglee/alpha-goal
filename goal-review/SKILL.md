@@ -22,6 +22,8 @@ Use this skill when:
 
 For ordinary standalone code review with no active Goal Contract or completion claim, do not force Goal Loop. Use the normal review style requested by the user.
 
+Use `references/review-record-schema.md` for field definitions when the output contract is unclear.
+
 ## Review modes
 
 Choose exactly one mode:

@@ -45,6 +45,8 @@ Mutation Preflight:
 
 You may use `scripts/mutation-preflight.sh` to collect read-only git state.
 
+Use `references/worktree-safety.md` when creating or validating an isolated edit path, especially if the current checkout may be the primary branch. Use `references/iteration-record-schema.md` for field definitions when the output contract is unclear.
+
 ## Forbidden by default
 
 Do not do these unless the user explicitly asks and the risk is documented:
