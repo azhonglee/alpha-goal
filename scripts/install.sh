@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: scripts/install.sh [--codex-home PATH] [--force]
+Usage: scripts/install.sh [--codex-home PATH] [--force] [--verbose]
 
 Install this repository's top-level skills by symlinking them into
 ${CODEX_HOME:-$HOME/.codex}/skills.
@@ -16,6 +16,7 @@ Options:
             Install into PATH instead of ${CODEX_HOME:-$HOME/.codex}.
   --force   Replace existing symlinks that point elsewhere. Real files or
             directories are never removed.
+  --verbose Print detailed install and validation output.
 EOF
 }
 
@@ -25,6 +26,7 @@ die() {
 }
 
 force=false
+verbose=false
 codex_home_arg=""
 
 while [[ $# -gt 0 ]]; do
@@ -48,6 +50,10 @@ while [[ $# -gt 0 ]]; do
       force=true
       shift
       ;;
+    --verbose)
+      verbose=true
+      shift
+      ;;
     -h|--help)
       usage
       exit 0
@@ -59,6 +65,12 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+log() {
+  if [[ "$verbose" == true ]]; then
+    echo "$*"
+  fi
+}
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd "$script_dir/.." && pwd -P)"
@@ -116,6 +128,12 @@ config_template="$repo_root/templates/config.toml"
 agents_target="$codex_home/AGENTS.md"
 config_target="$codex_home/config.toml"
 agents_template_marker="<!-- generate-with-template:agents-md -->"
+linked_count=0
+replaced_count=0
+already_count=0
+legacy_removed_count=0
+agents_action="current"
+config_action="current"
 
 resolve_link_target() {
   local link_path="$1"
@@ -133,6 +151,7 @@ link_path() {
   local source="$1"
   local target="$2"
   local label="$3"
+  local replaced=false
 
   if [[ -L "$target" ]]; then
     local raw_current_target
@@ -140,12 +159,14 @@ link_path() {
     raw_current_target="$(readlink "$target")"
     current_target="$(resolve_link_target "$target")"
     if [[ "$current_target" == "$source" ]]; then
-      echo "Already installed: $label -> $source"
+      already_count=$((already_count + 1))
+      log "Already installed: $label -> $source"
       return
     fi
 
     if [[ "$force" == true ]]; then
       rm "$target"
+      replaced=true
     else
       echo "Refusing to replace existing symlink: $target -> $raw_current_target" >&2
       echo "Re-run with --force to replace symlinks." >&2
@@ -157,7 +178,13 @@ link_path() {
   fi
 
   ln -s "$source" "$target"
-  echo "Installed: $label -> $source"
+  if [[ "$replaced" == true ]]; then
+    replaced_count=$((replaced_count + 1))
+    log "Replaced: $label -> $source"
+  else
+    linked_count=$((linked_count + 1))
+    log "Installed: $label -> $source"
+  fi
 }
 
 remove_legacy_support_link() {
@@ -173,7 +200,8 @@ remove_legacy_support_link() {
   current_target="$(resolve_link_target "$target")"
   if [[ "$current_target" == "$legacy_source" ]]; then
     rm "$target"
-    echo "Removed legacy support link: $target"
+    legacy_removed_count=$((legacy_removed_count + 1))
+    log "Removed legacy support link: $target"
   fi
 }
 
@@ -221,7 +249,7 @@ validate_installed_links() {
     exit 1
   fi
 
-  echo "Validated installed skill links in $target_root"
+  log "Validated installed skill links in $target_root"
 }
 
 inject_agents_template() {
@@ -240,7 +268,8 @@ inject_agents_template() {
 
   if [[ ! -f "$agents_target" ]]; then
     cp "$agents_template" "$agents_target"
-    echo "Created AGENTS.md from template: $agents_target"
+    agents_action="created"
+    log "Created AGENTS.md from template: $agents_target"
     return
   fi
 
@@ -254,11 +283,13 @@ inject_agents_template() {
       fi
       cat "$agents_template"
     } >>"$agents_target"
-    echo "Injected AGENTS template into $agents_target"
+    agents_action="updated"
+    log "Injected AGENTS template into $agents_target"
     return
   fi
 
-  python3 - "$agents_template" "$agents_target" "$agents_template_marker" <<'PY'
+  local result
+  result="$(python3 - "$agents_template" "$agents_target" "$agents_template_marker" <<'PY'
 import sys
 from pathlib import Path
 
@@ -319,11 +350,26 @@ pieces.extend(target_lines[cursor:])
 
 updated = "".join(pieces)
 if updated == target:
-    print(f"AGENTS.md already has current managed template content: {target_path}")
+    print("current")
 else:
     target_path.write_text(updated)
-    print(f"Updated managed AGENTS template content in {target_path}")
+    print("updated")
 PY
+)"
+
+  case "$result" in
+    current)
+      agents_action="current"
+      log "AGENTS.md already has current managed template content: $agents_target"
+      ;;
+    updated)
+      agents_action="updated"
+      log "Updated managed AGENTS template content in $agents_target"
+      ;;
+    *)
+      die "Unexpected AGENTS template merge result: $result"
+      ;;
+  esac
 }
 
 sync_config_template() {
@@ -334,11 +380,13 @@ sync_config_template() {
 
   if [[ ! -f "$config_target" ]]; then
     cp "$config_template" "$config_target"
-    echo "Created config.toml from template: $config_target"
+    config_action="created"
+    log "Created config.toml from template: $config_target"
     return
   fi
 
-  python3 - "$config_template" "$config_target" <<'PY'
+  local result
+  result="$(python3 - "$config_template" "$config_target" <<'PY'
 from __future__ import annotations
 
 import json
@@ -448,7 +496,7 @@ for path, value in flatten(template_data):
     missing.append((path, value))
 
 if not missing:
-    print(f"config.toml already contains template settings: {target_path}")
+    print("current")
     raise SystemExit(0)
 
 groups: dict[tuple[str, ...], list[tuple[str, object]]] = {}
@@ -494,8 +542,46 @@ except tomllib.TOMLDecodeError as exc:
     raise SystemExit(1)
 
 target_path.write_text(new_text)
-print(f"Added {len(missing)} config setting(s) into {target_path}")
+print(f"updated:{len(missing)}")
 PY
+)"
+
+  case "$result" in
+    current)
+      config_action="current"
+      log "config.toml already contains template settings: $config_target"
+      ;;
+    updated:*)
+      config_action="updated"
+      log "Added ${result#updated:} config setting(s) into $config_target"
+      ;;
+    *)
+      die "Unexpected config template merge result: $result"
+      ;;
+  esac
+}
+
+run_skillset_validation() {
+  if [[ "$verbose" == true ]]; then
+    python3 "$repo_root/tools/validate_skillset.py" "$repo_root"
+    return
+  fi
+
+  local output
+  if ! output="$(python3 "$repo_root/tools/validate_skillset.py" "$repo_root" 2>&1)"; then
+    echo "$output" >&2
+    exit 1
+  fi
+}
+
+print_summary() {
+  local status="ready"
+  if [[ "$linked_count" -gt 0 || "$replaced_count" -gt 0 || "$legacy_removed_count" -gt 0 || "$agents_action" != "current" || "$config_action" != "current" ]]; then
+    status="installed"
+  fi
+
+  echo "Goal Loop skills $status: $installed -> $target_root"
+  echo "Codex home: $codex_home"
 }
 
 if [[ ! -f "$agents_template" ]]; then
@@ -535,7 +621,6 @@ for support_name in adapters tools templates scripts; do
 done
 
 validate_installed_links
-python3 "$repo_root/tools/validate_skillset.py" "$repo_root"
+run_skillset_validation
 
-echo "Installed $installed skill(s) into $target_root"
-echo "Codex home: $codex_home"
+print_summary
