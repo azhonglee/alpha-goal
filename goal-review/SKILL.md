@@ -38,6 +38,22 @@ Choose exactly one mode:
 - `feedback`: classify incoming reviewer/user feedback before action.
 - `completion`: challenge readiness before `goal-verify`.
 
+## Subagent delegation
+
+Do not outsource the review wholesale. Use subagents as independent reviewers when review work is high-risk, spans multiple concerns, or can be usefully checked in parallel.
+
+Good delegation targets:
+
+- code correctness, regressions, and missing tests;
+- evidence quality and acceptance-to-evidence alignment;
+- architecture, ownership boundaries, and scope creep;
+- feedback classification and unresolved decisions;
+- documentation or artifact freshness.
+
+Keep each delegated review focused and read-only. Give the subagent only the scope and artifacts needed for its check, and ask for concrete findings with evidence, file/line references when applicable, open questions, and residual risk.
+
+The main agent remains responsible for the Review Record. Treat subagent findings as review input, not final truth: inspect the underlying artifacts, resolve conflicts between reviewers, reject unsupported claims, and make the final `Review verdict` yourself. For low-risk or narrow changes, skip subagents unless the user or repository instructions require them.
+
 ## Challenge checks
 
 Ask:
