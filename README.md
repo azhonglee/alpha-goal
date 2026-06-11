@@ -1,6 +1,6 @@
-# Codex Goal Loop Skills
+# Codex Goal Loop 技能集
 
-A small Codex skill collection that turns goal-loop into a staged execution protocol:
+本仓库提供一组 Codex skill，帮助 Codex 把复杂任务拆成清晰、可追踪的阶段流程：
 
 ```text
 FRAME -> ITERATE -> REVIEW -> VERIFY -> FINAL
@@ -10,46 +10,49 @@ FRAME -> ITERATE -> REVIEW -> VERIFY -> FINAL
                   -> BLOCKED
 ```
 
-The package contains five skills:
+技能集包含 5 个顶层 skill：
 
-- `goal-loop`: router and global invariants.
-- `goal-frame`: Goal Contract, clarification, target/scope boundary, existing work scan, and spec escalation when needed.
-- `goal-iterate`: one bounded implementation iteration with mutation preflight, loop mode evidence, debug receipts, plus plan escalation when needed.
-- `goal-review`: direction, feedback, scope, architecture, artifact freshness, and completion-readiness review.
-- `goal-verify`: Verification Verdict, acceptance-to-evidence mapping, artifact alignment, claim boundary check.
+- `goal-loop`：统一入口，负责选择合适阶段，并维护阶段之间的通用约束。
+- `goal-frame`：先把目标说清楚，产出 Goal Contract，明确范围、验收标准、约束、风险和证据计划。
+- `goal-iterate`：在已有 Goal Contract 下完成一轮有限实现，记录 mutation preflight、loop mode 证据、debug receipt 和必要计划。
+- `goal-review`：检查实现方向、反馈处理、范围、架构、相关产物状态，以及是否具备收尾条件。
+- `goal-verify`：产出 Verification Verdict，核对验收项、证据、产物一致性和最终可声明的范围。
 
-它还包含可选的只读辅助脚本和用户配置模板。
+仓库还附带一些可选的只读辅助脚本，以及用户级 Codex 配置模板。
 
-## Install
+## 安装
 
-默认安装到仓库根目录下的 `codex/`，并把技能目录软链接到 `codex/skills/`：
+默认安装到真实 Codex home，并把这些 skill 软链接到 `$HOME/.codex/skills/`：
 
 ```bash
 scripts/install.sh
 ```
 
-脚本会：
+脚本会执行以下操作：
 
-- 将顶层 `*/SKILL.md` 技能目录软链接到 `${CODEX_HOME:-<repo>/codex}/skills/`。
-- 将 `templates/AGENTS.md` 合并到 `${CODEX_HOME:-<repo>/codex}/AGENTS.md` 的受管理模板块。
-- 将 `templates/config.toml` 中缺失的设置补齐到 `${CODEX_HOME:-<repo>/codex}/config.toml`，不覆盖已有值。
+- 将顶层 `*/SKILL.md` 所在目录软链接到 `${CODEX_HOME:-$HOME/.codex}/skills/`。
+- 将 `templates/AGENTS.md` 合并到 Codex home 的 `AGENTS.md` 受管理模板块。
+- 将 `templates/config.toml` 中缺失的设置补齐到 Codex home 的 `config.toml`，不会覆盖已有值。
 - 清理旧版本可能留在 `skills/` 下、且指向本仓库的旧支持目录软链接。
-- 校验目标 `skills/` 中的 skill 软链接指向源码目录，且旧支持目录没有作为本仓库 skill 安装。
-- 安装后运行源码中的 `tools/validate_skillset.py` 校验技能包。
+- 校验目标 `skills/` 中的 skill 软链接是否指向当前源码目录。
+- 安装后运行源码中的 `tools/validate_skillset.py` 校验技能包布局。
 
-如果要安装到真实 Codex home，显式指定：
+如果要安装到其他位置，使用 `--codex-home` 或显式设置 `CODEX_HOME`：
 
 ```bash
-CODEX_HOME="$HOME/.codex" scripts/install.sh
+scripts/install.sh --codex-home /path/to/codex-home
+CODEX_HOME=/path/to/codex-home scripts/install.sh
 ```
 
-如果目标位置已有指向其他目录的软链接，使用 `--force` 替换软链接；脚本不会删除真实文件或真实目录：
+如果目标位置已经有同名软链接，并且指向其他目录，可以使用 `--force` 替换。脚本不会删除真实文件或真实目录：
 
 ```bash
 scripts/install.sh --force
 ```
 
-The checkout root contains the skill directories directly:
+## 仓库结构
+
+仓库根目录直接放置各个 skill：
 
 ```text
 goal-loop/
@@ -60,19 +63,36 @@ goal-verify/
 templates/
 ```
 
-## 可选用户配置模板
+其中：
 
-`templates/AGENTS.md` 和 `templates/config.toml` 来自原 `main` 分支的安装模型。默认安装只会写入仓库根目录下的 `codex/`。如果显式设置 `CODEX_HOME="$HOME/.codex"`，脚本会合并这些模板到真实 Codex home；执行前应确认这些默认值适合用户环境。
+- `goal-loop/` 是统一入口。
+- `goal-frame/`、`goal-iterate/`、`goal-review/`、`goal-verify/` 分别对应四个阶段。
+- `templates/` 保存可选的用户配置模板。
+- `scripts/` 保存安装脚本。
+- `tools/` 保存本地校验脚本。
 
-## Recommended invocation
+## 用户配置模板
 
-Explicit:
+`templates/AGENTS.md` 和 `templates/config.toml` 继承自原 `main` 分支的安装模型。默认安装会把这些模板合并到真实 Codex home；执行前应确认这些默认值适合当前用户环境。
+
+做本地验证时，建议使用临时 `CODEX_HOME`，避免污染真实配置：
+
+```bash
+tmp_codex_home="$(mktemp -d)"
+CODEX_HOME="$tmp_codex_home" scripts/install.sh
+python3 tools/validate_skillset.py .
+rm -rf "$tmp_codex_home"
+```
+
+## 推荐调用方式
+
+直接走总入口：
 
 ```text
 $goal-loop 帮我实现这个需求：...
 ```
 
-More specific:
+也可以显式调用某个阶段：
 
 ```text
 $goal-frame 先帮我把这个需求 frame 清楚，不要改文件。
@@ -81,35 +101,35 @@ $goal-review 检查当前实现方向、反馈和证据缺口。
 $goal-verify 检查当前 diff 和测试证据，判断能否最终交付。
 ```
 
-Only `goal-loop` is intended to trigger implicitly. Stage skills set `allow_implicit_invocation: false`; invoke them explicitly for focused testing or let the router load them.
+只有 `goal-loop` 适合隐式触发。其他阶段 skill 的 `allow_implicit_invocation` 都是 `false`，更适合显式测试，或由路由入口按需加载。
 
-## Design principles
+## 设计原则
 
-- The router is thin; stages do the work.
-- Each stage has one auditable output.
-- References are optional and loaded only when needed.
-- Spec and plan are risk/complexity escalation artifacts, not default ceremony.
-- Spec records durable requirements; plan records current execution route plus append-only route history.
-- Scripts are read-only helpers; they do not replace judgment.
-- Project-specific commands and conventions belong in `AGENTS.md`, not in these cross-repo skills.
+- 路由入口只负责分派，具体工作交给阶段 skill。
+- 每个阶段只产出一份便于追踪的记录。
+- 详细规则放在 `references/`，只在需要时加载。
+- Spec 和 plan 只在风险或复杂度升高时使用，不作为默认流程负担。
+- Spec 记录稳定需求，plan 记录当前执行路线和路线调整历史。
+- 脚本只作为只读辅助工具，不替代工程判断。
+- 项目特有命令和约定应放在目标仓库的 `AGENTS.md`，不要塞进这些跨仓库 skill。
 
-## Artifact defaults
+## 默认产物路径
 
-优先使用目标仓库已有约定。没有约定时，使用：
+优先沿用目标仓库已有约定。没有约定时，可以使用以下默认路径：
 
-- spec: `docs/design/YYYYMMDD-<slug>-spec.md`
-- plan: `docs/plans/YYYYMMDD-<slug>-plan.md`
-- review receipt: `.goal-loop/reviews/YYYYMMDD-<slug>-review.md`
-- command/output evidence: `.goal-loop/evidence/YYYYMMDD-<slug>/`
-- scratch artifacts: `.goal-loop/tmp/YYYYMMDD-<slug>/`
+- spec：`docs/design/YYYYMMDD-<slug>-spec.md`
+- plan：`docs/plans/YYYYMMDD-<slug>-plan.md`
+- review receipt：`.goal-loop/reviews/YYYYMMDD-<slug>-review.md`
+- command/output evidence：`.goal-loop/evidence/YYYYMMDD-<slug>/`
+- scratch artifacts：`.goal-loop/tmp/YYYYMMDD-<slug>/`
 
-`.goal-loop/` 必须被 `.gitignore` 忽略后才能写入，避免把运行时证据和 scratch 文件提交进仓库。
+写入运行时证据和临时文件前，必须先把 `.goal-loop/` 加入 `.gitignore`，避免把 scratch 内容提交进仓库。
 
-## Stage outputs
+## 阶段输出
 
 ### Goal Contract
 
-Produced by `goal-frame`.
+由 `goal-frame` 产出，用来固定目标、范围和验收边界。
 
 ```text
 Goal Contract:
@@ -131,7 +151,7 @@ Goal Contract:
 
 ### Iteration Record
 
-Produced by `goal-iterate`.
+由 `goal-iterate` 产出，用来记录一轮有限实现的目标、动作、证据和下一步判断。
 
 ```text
 Iteration Record:
@@ -157,7 +177,7 @@ Iteration Record:
 
 ### Review Record
 
-Produced by `goal-review`.
+由 `goal-review` 产出，用来检查方向是否正确、反馈是否处理、范围和架构是否合理，以及是否还缺关键证据。
 
 ```text
 Review Record:
@@ -177,7 +197,7 @@ Review Record:
 
 ### Verification Verdict
 
-Produced by `goal-verify`.
+由 `goal-verify` 产出，用来判断当前证据是否足以支持最终交付声明。
 
 ```text
 Verification Verdict:
@@ -193,9 +213,9 @@ Verification Verdict:
 - Final claim allowed:
 ```
 
-## Safe tuning knobs
+## 调优建议
 
-If the skills feel too verbose, reduce output detail inside each stage, but keep these fields:
+如果阶段输出显得太长，可以减少解释文字，但应保留这些关键字段：
 
 - `Goal Contract.Acceptance`
 - `Goal Contract.Claim boundary`
@@ -209,4 +229,4 @@ If the skills feel too verbose, reduce output detail inside each stage, but keep
 - `Verification Verdict.Acceptance evidence matrix`
 - `Verification Verdict.Verdict`
 
-If the skills miss important repo-specific behavior, add that behavior to the repo's `AGENTS.md` or a dedicated adapter reference rather than bloating the core skills.
+如果这些 skill 漏掉了某个仓库的关键约定，应优先把约定写进目标仓库的 `AGENTS.md`，或新增专门的 adapter reference，而不是让核心 skill 变得过于复杂。

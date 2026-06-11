@@ -3,24 +3,47 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: scripts/install.sh [--force]
+Usage: scripts/install.sh [--codex-home PATH] [--force]
 
 Install this repository's top-level skills by symlinking them into
-${CODEX_HOME:-<repo>/codex}/skills.
+${CODEX_HOME:-$HOME/.codex}/skills.
 
-The script also syncs templates/AGENTS.md into ${CODEX_HOME}/AGENTS.md and
-fills missing ${CODEX_HOME}/config.toml settings from templates/config.toml.
+The script also syncs templates/AGENTS.md into the Codex home AGENTS.md and
+fills missing config.toml settings from templates/config.toml.
 
 Options:
+  --codex-home PATH
+            Install into PATH instead of ${CODEX_HOME:-$HOME/.codex}.
   --force   Replace existing symlinks that point elsewhere. Real files or
             directories are never removed.
 EOF
 }
 
+die() {
+  echo "$*" >&2
+  exit 1
+}
+
 force=false
+codex_home_arg=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --codex-home)
+      shift
+      if [[ $# -eq 0 ]]; then
+        die "Missing value for --codex-home"
+      fi
+      codex_home_arg="$1"
+      shift
+      ;;
+    --codex-home=*)
+      codex_home_arg="${1#*=}"
+      if [[ -z "$codex_home_arg" ]]; then
+        die "Missing value for --codex-home"
+      fi
+      shift
+      ;;
     --force)
       force=true
       shift
@@ -39,7 +62,54 @@ done
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd "$script_dir/.." && pwd -P)"
-codex_home="${CODEX_HOME:-$repo_root/codex}"
+
+normalize_path() {
+  python3 - "$1" <<'PY'
+import sys
+from pathlib import Path
+
+raw_path = sys.argv[1]
+if not raw_path:
+    print("empty path is not valid", file=sys.stderr)
+    raise SystemExit(1)
+
+print(Path(raw_path).expanduser().resolve(strict=False))
+PY
+}
+
+absolute_path() {
+  python3 - "$1" <<'PY'
+import os
+import sys
+
+raw_path = sys.argv[1]
+if not raw_path:
+    print("empty path is not valid", file=sys.stderr)
+    raise SystemExit(1)
+
+print(os.path.abspath(os.path.expanduser(raw_path)))
+PY
+}
+
+default_codex_home() {
+  if [[ -n "$codex_home_arg" ]]; then
+    printf '%s\n' "$codex_home_arg"
+    return
+  fi
+
+  if [[ -n "${CODEX_HOME:-}" ]]; then
+    printf '%s\n' "$CODEX_HOME"
+    return
+  fi
+
+  if [[ -z "${HOME:-}" ]]; then
+    die "CODEX_HOME is not set and HOME is unavailable; pass --codex-home PATH"
+  fi
+
+  printf '%s\n' "$HOME/.codex"
+}
+
+codex_home="$(absolute_path "$(default_codex_home)")"
 target_root="$codex_home/skills"
 agents_template="$repo_root/templates/AGENTS.md"
 config_template="$repo_root/templates/config.toml"
@@ -47,14 +117,28 @@ agents_target="$codex_home/AGENTS.md"
 config_target="$codex_home/config.toml"
 agents_template_marker="<!-- generate-with-template:agents-md -->"
 
+resolve_link_target() {
+  local link_path="$1"
+  local raw_target
+  raw_target="$(readlink "$link_path")"
+
+  if [[ "$raw_target" == /* ]]; then
+    normalize_path "$raw_target"
+  else
+    normalize_path "$(dirname "$link_path")/$raw_target"
+  fi
+}
+
 link_path() {
   local source="$1"
   local target="$2"
   local label="$3"
 
   if [[ -L "$target" ]]; then
+    local raw_current_target
     local current_target
-    current_target="$(readlink "$target")"
+    raw_current_target="$(readlink "$target")"
+    current_target="$(resolve_link_target "$target")"
     if [[ "$current_target" == "$source" ]]; then
       echo "Already installed: $label -> $source"
       return
@@ -63,7 +147,7 @@ link_path() {
     if [[ "$force" == true ]]; then
       rm "$target"
     else
-      echo "Refusing to replace existing symlink: $target -> $current_target" >&2
+      echo "Refusing to replace existing symlink: $target -> $raw_current_target" >&2
       echo "Re-run with --force to replace symlinks." >&2
       exit 1
     fi
@@ -86,7 +170,7 @@ remove_legacy_support_link() {
   fi
 
   local current_target
-  current_target="$(readlink "$target")"
+  current_target="$(resolve_link_target "$target")"
   if [[ "$current_target" == "$legacy_source" ]]; then
     rm "$target"
     echo "Removed legacy support link: $target"
@@ -110,7 +194,7 @@ validate_installed_links() {
     fi
 
     local current_target
-    current_target="$(readlink "$target")"
+    current_target="$(resolve_link_target "$target")"
     if [[ "$current_target" != "$skill_dir" ]]; then
       echo "Installed skill points elsewhere: $target -> $current_target" >&2
       failed=true
@@ -127,7 +211,7 @@ validate_installed_links() {
     local target="$target_root/$support_name"
     local legacy_source="$repo_root/$support_name"
 
-    if [[ -L "$target" && "$(readlink "$target")" == "$legacy_source" ]]; then
+    if [[ -L "$target" && "$(resolve_link_target "$target")" == "$legacy_source" ]]; then
       echo "Support directory should not be installed as a skill: $target" >&2
       failed=true
     fi
