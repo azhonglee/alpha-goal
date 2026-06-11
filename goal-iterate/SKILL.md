@@ -21,8 +21,8 @@ Required before mutation:
 - Isolated edit path is known.
 - Risk tier and evidence floor are known.
 - Repo, worktree, submodule, and ownership boundaries are understood.
-- 已读取 Goal Contract 引用的 active spec。
-- 已读取当前工作引用的 active plan。
+- Any active spec referenced by the Goal Contract has been read.
+- Any active plan referenced by current work has been read.
 
 If any requirement is missing, do not mutate.
 
@@ -49,7 +49,7 @@ Mutation Preflight:
 
 You may use `scripts/mutation-preflight.sh` to collect read-only git state.
 
-Use `references/worktree-safety.md` when creating or validating an isolated edit path, especially if the current checkout may be the primary branch. Use `references/iteration-record-schema.md` for field definitions when the output contract is unclear. 仅当需要持久化执行路线时使用 `references/plan-template.md`。
+Use `references/worktree-safety.md` when creating or validating an isolated edit path, especially if the current checkout may be the primary branch. Use `references/iteration-record-schema.md` for field definitions when the output contract is unclear. Use `references/plan-template.md` only when a durable route is needed.
 
 ## Forbidden by default
 
@@ -74,40 +74,40 @@ Evidence must be fresh and collected after the last material change.
 
 ## Plan escalation
 
-默认不要创建 plan。只有当单靠对话中的下一步已经不可靠时，才需要 plan。
+Do not create a plan by default. Use one only when the next step is no longer safe to hold in chat.
 
-当 loop evidence 表明至少满足一个条件时，使用 `references/plan-template.md` 创建或更新 plan：
+Create or update a plan from `references/plan-template.md` when loop evidence shows any condition holds:
 
-- 工作跨多个 loop、模块、仓库、worktree、submodule 或 ownership surface；
-- 执行需要多个依赖 slice，且后续 agent 必须在没有聊天历史的情况下理解当前状态；
-- 多个 agent 或并行 workstream 需要协调；
-- 迁移、架构、回滚、兼容性或 evidence sequencing 决策有风险，需要保留；
-- 之前的 loop evidence 推翻了路线，新路线需要可追溯；
-- 用户明确要求 plan、执行 artifact、交接路线或状态 artifact。
+- work crosses loops, modules, repos, worktrees, submodules, or ownership surfaces;
+- execution needs dependent slices and later agents must resume without chat history;
+- multiple agents or parallel workstreams need coordination;
+- migration, architecture, rollback, compatibility, or evidence sequencing decisions must persist;
+- earlier loop evidence invalidated the route and the new route must be traceable;
+- the user asks for a plan, execution artifact, handoff route, or status artifact.
 
-优先使用仓库已有 plan 路径约定。没有约定时默认使用：
+Prefer existing repo plan conventions. If none exist, use:
 
 ```text
 docs/plans/YYYYMMDD-<slug>-plan.md
 ```
 
-`<slug>` 描述目标边界，不描述具体实现方法。
+`<slug>` names the goal boundary, not the implementation method.
 
 A plan is Loop-owned:
 
-- 它预测 upcoming loops、evidence gates、review gates 和当前执行状态；
-- 它不得重写 Goal Contract 或 active spec 中的 intent、success criteria、non-goals、constraints 或 decision boundaries；
-- 当 evidence 改变执行路线时，它可以被更新；
-- 当整体路线不再有效时，应标记为 `superseded`，不要静默改写。
+- forecast upcoming loops, evidence gates, review gates, and current state;
+- never redefine Goal Contract or active spec intent, success criteria, non-goals, constraints, or decision boundaries;
+- update when evidence changes the route;
+- mark as `superseded`, not silently rewritten, when the route is no longer valid.
 
-将 plan 维护为“当前视图 + 追加式历史”：
+Maintain the plan as current view plus append-only history:
 
-- 更新 `Current Strategy`、`Execution Slices` 和当前状态，让下一轮 loop 能直接接上；
-- 将 decisions、evidence、blockers 和 route changes 追加到 `Change Log`；
-- 过期 slice 标记为 `superseded` 并写明原因，不要删除；
-- 如果 plan 状态是 `draft`，只把它当作工作路线，不要描述成 reviewed 或 approved。
+- update `Current Strategy`, `Execution Slices`, and current status for the next loop;
+- append decisions, evidence, blockers, and route changes to `Change Log`;
+- mark obsolete slices `superseded` with reason; do not delete them;
+- treat `draft` as working route only, not reviewed or approved.
 
-每次 iteration 前，如果 active plan 存在，必须读取它。每次 material iteration 后，先更新 plan 的状态、slice state、evidence link 或 change log，再让后续阶段依赖它。如果不允许写 artifact，在 Iteration Record 里记录 plan，并说明没有写文件。
+Before each iteration, read the active plan if it exists. After each material iteration, update plan status, slice state, evidence link, or change log before later stages rely on it. If artifact writes are not allowed, record the plan in the Iteration Record and state no file was written.
 
 ## Ownership boundaries
 

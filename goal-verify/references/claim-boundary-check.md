@@ -30,7 +30,7 @@ Use the highest practical boundary for the claim. If not practical, narrow the f
 User wording:
 
 ```text
-请求重试不算失败状态
+Retryable request errors do not mark the user-visible run as failed
 ```
 
 Reducer test evidence supports:
@@ -55,7 +55,7 @@ Verdict should be:
 User wording:
 
 ```text
-补充产物上传 TOS 时日志
+Add logs for artifact upload to TOS
 ```
 
 Local unit tests and diff review support:

@@ -21,7 +21,7 @@ A task can pass to final only when:
 
 Return `NEXT_ITERATION`, `REFRAME`, or `NARROW_CLAIM_AND_FINAL` when:
 
-- final answer says “done” but evidence only lists generic test commands;
+- final answer says "done" but evidence only lists generic test commands;
 - acceptance items are not individually mapped to evidence;
 - user wording is product-level but tests are only helper-level;
 - changed files include a different repo/module than framed target;

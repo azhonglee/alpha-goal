@@ -1,8 +1,8 @@
 # Spec Template
 
-仅在 `goal-frame` 判断需要持久化需求 artifact 时使用。小任务继续只用 Goal Contract。
+Use only when `goal-frame` decides a durable requirements artifact is needed. Small tasks still use only the Goal Contract.
 
-Spec 负责回答“做什么、为什么做、边界是什么、怎么算完成”。它不负责拆执行步骤，也不替代后续的 plan、Iteration Record、Review Record 或 Verification Verdict。
+A spec states what to do, why, boundaries, and completion criteria. It does not split execution steps or replace plan, Iteration Record, Review Record, or Verification Verdict.
 
 ## Metadata
 
@@ -16,20 +16,20 @@ Spec 负责回答“做什么、为什么做、边界是什么、怎么算完成
 - Supersedes:
 - Last updated:
 
-Status 语义：
+Status:
 
-- `draft`: 需求还在形成中；需要用户批准时不能作为已批准执行依据。
-- `reviewed`: 已检查清晰度和证据，但不等于用户批准。
-- `approved`: 用户已接受，或在记录的 decision boundaries 内足够明确，可以执行。
-- `superseded`: 仅保留历史；不得继续作为当前执行依据。
+- `draft`: requirements are still forming; not approved when approval is required.
+- `reviewed`: checked for clarity and evidence; not automatically approved.
+- `approved`: user accepted, or clear enough within recorded decision boundaries.
+- `superseded`: history only; do not execute against it.
 
 ## Intent
 
-为什么要做这个目标？
+Why does this goal matter?
 
 ## Desired Outcome
 
-完成后应出现什么用户可见或系统可见结果？
+What user-visible or system-visible outcome should exist?
 
 ## Scope
 
@@ -47,17 +47,17 @@ Out of scope:
 
 ## Acceptance Evidence
 
-每条 success criterion 需要什么证据证明？
+What evidence proves each success criterion?
 
 -
 
 ## Decision Boundaries
 
-Codex 可以自行决定：
+Codex may decide:
 
 -
 
-Codex 必须先询问用户：
+Codex must ask before:
 
 -
 
@@ -79,7 +79,7 @@ Codex 必须先询问用户：
 
 ## Brownfield Evidence
 
-仅当现有代码、文档、测试、运行结果影响了需求判断时填写。
+Use only when existing code, docs, tests, or runtime behavior shaped the requirements.
 
 - Source:
   - Finding:
@@ -87,7 +87,7 @@ Codex 必须先询问用户：
 
 ## Change Log
 
-追加记录已经影响执行的需求变化、澄清、边界调整或审批信息。不要删除旧记录；过期内容用 `superseded` 标记。
+Append requirement changes, clarifications, boundary changes, or approval updates that affected execution. Do not delete old records; mark stale content `superseded`.
 
 - Version:
   - Changed:
