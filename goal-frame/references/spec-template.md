@@ -54,11 +54,11 @@ What evidence proves each success criterion?
 
 ## Decision Boundaries
 
-The agent may decide:
+You may decide:
 
 -
 
-The agent must ask before:
+You must ask before:
 
 -
 

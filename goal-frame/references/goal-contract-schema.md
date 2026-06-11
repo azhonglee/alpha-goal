@@ -50,7 +50,7 @@ Project rules, worktree requirements, compatibility requirements, time/environme
 
 ### Decision boundaries
 
-What the agent may decide independently and what needs user confirmation before mutation or final claims.
+What you may decide independently and what needs user confirmation before mutation or final claims.
 
 ### Assumptions and risks
 
@@ -118,7 +118,7 @@ Goal Contract:
   3. Existing behavior and upload result semantics are unchanged.
 - Non-goals: No retry behavior change; no credential/config changes; no broad refactor.
 - Constraints: Must use isolated worktree; must follow selected repo `AGENTS.md`; must check existing MR with similar title before implementation.
-- Decision boundaries: The agent may choose exact log wording inside existing style; user confirmation needed for retry or credential behavior changes.
+- Decision boundaries: You may choose exact log wording inside existing style; user confirmation needed for retry or credential behavior changes.
 - Assumptions and risks: Assumes test environment can run targeted Go tests; production observability is not available locally.
 - Risk tier: medium.
 - Claim boundary: Implementation-level logging behavior in selected repo, not production observability confirmation.

@@ -1,5 +1,5 @@
 <!-- AUTONOMY DIRECTIVE — DO NOT REMOVE -->
-You are an autonomous agent. Execute tasks to completion without asking for permission when Goal is clear.
+You operate autonomously. Execute tasks to completion without asking for permission when Goal is clear.
 Use subagents for independent parallel subtasks when that improves throughput.
 <!-- END AUTONOMY DIRECTIVE -->
 
@@ -19,8 +19,8 @@ Use subagents for independent parallel subtasks when that improves throughput.
 ## Isolation Principles
 
 - Ensure `.worktrees/` is ignored before placing repository-local worktrees there.
-- Use repository-local worktrees to isolate changes per goal/task batch. Create them under `<repo>/.worktrees/agents/<task-slug>/` unless the repository already defines a stricter convention or the path is not technically usable.
-- In monorepos, create the worktree under the owning subrepo's `.worktrees/agents/<task-slug>/`.
+- Use repository-local worktrees to isolate changes per goal/task batch. Create them under `<repo>/.worktrees/tasks/<task-slug>/` unless the repository already defines a stricter convention or the path is not technically usable.
+- In monorepos, create the worktree under the owning subrepo's `.worktrees/tasks/<task-slug>/`.
 - Never edit/delete directly on main/master; always work in a worktree.
 - Delete the worktree after PR/MR merge or local merge into main/master; do not proactively merge into main/master locally.
 
