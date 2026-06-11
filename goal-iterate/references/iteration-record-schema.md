@@ -56,7 +56,7 @@ The smallest acceptance-relevant change attempted in this loop.
 
 ### Mutation preflight
 
-Summarize repo root, branch, status, worktrees, isolated edit path, and whether mutation is allowed.
+Summarize repo root, branch, status, worktrees, isolated edit path, baseline health, and whether mutation is allowed. If a relevant baseline check failed or could not run, record the command and scope decision.
 
 ### Action
 

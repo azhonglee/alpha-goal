@@ -57,6 +57,7 @@ Check:
 - evidence is at the right boundary for the user's wording;
 - changed files match intended target and non-goals;
 - tests/checks are appropriate for the touched code;
+- verification runs against the target final state and does not depend on paths or artifacts that will be removed, self-matching greps, pre-change layout checks, or mock-only checks that miss the claim;
 - failure output is understood, not hand-waved;
 - review feedback has been classified and accepted items were verified;
 - no obvious regression, loophole, race, persistence, stream lifecycle, or UI dispatch gap exists;
