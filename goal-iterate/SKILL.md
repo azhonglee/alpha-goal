@@ -44,10 +44,11 @@ Mutation Preflight:
 - active plan:
 - risk tier:
 - evidence floor:
+- baseline health:
 - mutation allowed:
 ```
 
-You may use `scripts/mutation-preflight.sh` to collect read-only git state.
+You may use `scripts/mutation-preflight.sh` to collect read-only git state. Add the smallest relevant baseline health check when it is cheap and available, such as an existing focused test, build, typecheck, lint, or documented reason no baseline can run. If baseline health fails, record the failing command and decide whether it is in scope before treating later failures as regressions.
 
 Use `references/worktree-safety.md` when creating or validating an isolated edit path, especially if the current checkout may be the primary branch. Use `references/iteration-record-schema.md` for field definitions when the output contract is unclear. Use `references/loop-modes.md` when selecting a loop mode, debugging, TDD, spike, refactor, or hardening path. Use `references/plan-template.md` only when a durable route is needed.
 
@@ -59,6 +60,7 @@ Do not do these unless the user explicitly asks and the risk is documented:
 - run `git checkout -b` or `git switch -c` inside the primary `main`/`master` checkout;
 - create a branch or worktree before target selection is closed;
 - mutate a candidate repo that was not selected in the Goal Contract;
+- mutate across repository, worktree, submodule, or ownership boundaries without explicit user request, confirmation, or recorded decision boundary;
 - include unrelated cleanup/refactors not tied to acceptance;
 - claim final completion from inside iteration.
 
@@ -131,6 +133,16 @@ Maintain the plan as current view plus append-only history:
 
 Before each iteration, read the active plan if it exists. After each material iteration, update plan status, slice state, evidence link, or change log before later stages rely on it. If artifact writes are not allowed, record the plan in the Iteration Record and state no file was written.
 
+## Delegation boundary
+
+Use another agent only for bounded, self-contained work.
+
+- Provide task id, exact scope, working directory, ownership surface, current Goal/spec/plan evidence, constraints, expected evidence, and return contract.
+- Parallelize only when ownership is independent and shared files or generated outputs are not contested.
+- Require a receipt: `DONE`, `DONE_WITH_CONCERNS`, `NEEDS_CONTEXT`, or `BLOCKED`.
+- Inspect delegated files, ownership, evidence, and concerns before accepting the result.
+- Delegated output never bypasses Goal Contract, Iteration Record, Review Record, Verification Verdict, risk-tier evidence, or fresh final checks.
+
 ## Ownership boundaries
 
 Before editing, identify:
@@ -142,7 +154,7 @@ Before editing, identify:
 - nested `.git` directories or submodules under touched paths;
 - applicable `AGENTS.md`, `AGENTS.override.md`, `CLAUDE.md`, or `code_review.md` files.
 
-Do not modify across repository, worktree, or submodule boundaries unless the Goal Contract explicitly includes that boundary.
+Do not modify across repository, worktree, submodule, or ownership boundaries unless the Goal Contract explicitly includes that boundary and the user request, confirmation, or recorded decision boundary authorizes it.
 
 ## Iteration rules
 

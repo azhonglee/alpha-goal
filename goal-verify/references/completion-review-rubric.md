@@ -9,6 +9,7 @@ A task can pass to final only when:
 - all acceptance items are covered or explicitly out of scope;
 - evidence is fresh and relevant;
 - tested boundary matches the final claim;
+- verification can run in the target final state;
 - changed files match the Goal Contract target and non-goals;
 - expected checks were run or a clear blocker is documented;
 - review feedback was classified when present;
@@ -25,6 +26,7 @@ Return `NEXT_ITERATION`, `REFRAME`, or `NARROW_CLAIM_AND_FINAL` when:
 - acceptance items are not individually mapped to evidence;
 - user wording is product-level but tests are only helper-level;
 - changed files include a different repo/module than framed target;
+- evidence depends on deleted paths, self-matching greps, pre-change layout checks, or mock-only checks that miss the claim;
 - existing MR/PR discovered late changes task identity;
 - a failed check is dismissed without diagnosis;
 - no fresh check was run after the last edit;

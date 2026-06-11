@@ -33,6 +33,7 @@ Check:
 - applicable local rules such as `AGENTS.md` or `CLAUDE.md`;
 - candidate repos when cwd is a workspace or aggregator;
 - existing work when likely;
+- desired outcome and scope boundary;
 - acceptance criteria;
 - non-goals;
 - constraints;
@@ -113,6 +114,10 @@ If cwd is a workspace, aggregator, monorepo, or contains multiple candidate repo
 
 Target selection is closed only when the selected repo/path has stronger evidence than alternatives.
 
+If the current repo only has examples, docs, tests, or template mentions of the requested feature and no real implementation surface, target selection is not closed. Return `ASK_USER` with the missing repo/path or ask whether to produce a read-only search plan.
+
+For cross-repo, worktree, submodule, or ownership-boundary implementation, record the explicit user request, confirmation, or decision boundary that authorizes that boundary. Otherwise return `ASK_USER`.
+
 Minimum read-only checks:
 
 - identify the git root and current directory role;
@@ -124,13 +129,13 @@ If the user describes a multi-repo workspace but cwd is not enough to find candi
 
 ## Existing Work Scan
 
-Required when:
+Always do the cheapest local scan needed to avoid duplicate or wrong-target work. Escalate to broader branch, MR/PR, issue, or collaboration-tool scans only when:
 
 - user mentions MR/PR/issue/branch;
-- the task sounds like follow-up, bugfix, add, repair, implement, or compare;
-- internal collaboration tooling is available;
-- final output may create MR/PR;
-- feature keywords appear in local branches, commits, docs, or open work.
+- the request sounds like follow-up, duplicate, comparison, or alternative implementation;
+- target ownership is ambiguous;
+- local keywords, branches, commits, or docs suggest overlapping work;
+- final output may create MR/PR and duplicate risk is material.
 
 Record whether the task is:
 
@@ -141,17 +146,21 @@ Record whether the task is:
 - `comparison-only`
 - `unknown`
 
-## Interview clarification
+## Socratic interview
 
-Use interview clarification when a missing Goal Contract field affects implementation, safety, or claim boundary. Ask one high-leverage question at a time. Target the weakest field first:
+Use a Socratic interview when the request is broad, ambiguous, or missing acceptance, non-goals, decision boundaries, or claim boundary.
 
-1. intent
-2. target
-3. acceptance
-4. non-goals
-5. constraints
-6. decision boundaries
-7. claim boundary
+Rules:
+
+- ask exactly one high-leverage question per round;
+- inspect available code, docs, diffs, or logs first for brownfield facts; ask evidence-backed confirmation questions, not discoverable facts;
+- ask about intent, desired outcome, scope, non-goals, and decision boundaries before implementation details;
+- target the weakest field first: intent, outcome, scope, acceptance, non-goals, constraints, decision boundaries, brownfield context, claim boundary;
+- after each answer, pressure-test the strongest claim with the first useful move: ask for an example/counterexample/evidence signal, probe the hidden assumption, force a boundary/tradeoff, or reframe symptoms toward root cause or desired end state;
+- track each field as `clear`, `partial`, or `missing` while deciding whether to ask, assume, or block;
+- stop asking when remaining `partial` fields can be recorded as bounded assumptions or risks.
+
+Return `ASK_USER` when a missing or `partial` field blocks safe progress. Return `READY_FOR_ITERATION` only when execution-critical fields are clear or safely bounded.
 
 After the answer, update the Goal Contract. If the answer changes target, acceptance, constraints, non-goals, or claim boundary after iteration started, return through the router before any more mutation.
 
@@ -177,6 +186,8 @@ Goal Contract:
 - Next:
 ```
 
+For `ASK_USER`, still produce the Goal Contract with `Frame verdict: ASK_USER` unless the request is outside Goal Loop and only needs a trivial read-only answer.
+
 Allowed `Frame verdict` values:
 
 - `READY_FOR_ITERATION`
@@ -194,6 +205,7 @@ Return `READY_FOR_ITERATION` only when:
 - claim boundary is explicit;
 - constraints, non-goals, and decision boundaries are recorded;
 - assumptions, risks, and risk tier are recorded;
+- any `partial` interview fields are recorded as bounded assumptions or risks;
 - existing work has been checked when triggered;
 - durable spec need is recorded, and any referenced spec has current path/status;
 - no required user decision is missing.

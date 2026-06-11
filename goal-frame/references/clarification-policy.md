@@ -39,12 +39,16 @@ Good:
 I found candidate implementations in `repo-a` and `repo-b`. `repo-a` owns artifact upload and has TOS code under `internal/app`; `repo-b` only has a low-level TOS driver. Should I implement in `repo-a`, or compare both before changing code?
 ```
 
-## Interview clarification
+## Socratic interview
 
 Rules:
 
 - ask exactly one question per round;
+- inspect available repo evidence before asking about brownfield facts;
+- ask about intent, outcome, scope, non-goals, and decision boundaries before implementation details;
 - target the weakest Goal Contract field first;
+- pressure-test the answer before moving on: example, hidden assumption, boundary/tradeoff, or symptom-to-outcome reframe;
+- track critical fields as `clear`, `partial`, or `missing`;
 - stop asking when remaining ambiguity can be recorded as a bounded assumption or risk;
 - return `ASK_USER` when the missing answer blocks safe progress;
 - return `READY_FOR_ITERATION` only after the contract is closed.
