@@ -151,7 +151,7 @@ Do not modify across repository, worktree, or submodule boundaries unless the Go
 - Preserve unrelated user changes.
 - Keep implementation within the claim boundary.
 - If discovery reveals existing work that changes task identity, stop and return `REFRAME_NEEDED`.
-- If clarification is needed, stop and return `REFRAME_NEEDED`; interview belongs to `goal-frame`.
+- If clarification is needed, stop and return `REFRAME_NEEDED` before further mutation.
 - If project rules require a specific worktree, branch, or test flow, follow them.
 - If a check fails, diagnose whether it is caused by the iteration, environment, or unrelated baseline.
 - Do not patch from a plausible but unconfirmed root cause when debugging; first record reproducible evidence or a diagnostic blocker.

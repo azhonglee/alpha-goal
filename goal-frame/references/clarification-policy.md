@@ -39,9 +39,7 @@ Good:
 I found candidate implementations in `repo-a` and `repo-b`. `repo-a` owns artifact upload and has TOS code under `internal/app`; `repo-b` only has a low-level TOS driver. Should I implement in `repo-a`, or compare both before changing code?
 ```
 
-## Interview ownership
-
-Interview-style clarification belongs to `goal-frame`.
+## Interview clarification
 
 Rules:
 
