@@ -108,7 +108,7 @@ Only `ROOT_CAUSE_CONFIRMED` authorizes a fix iteration. `NOT_REPRODUCED` and `BL
 
 Do not load or write extra process artifacts by default. Use the smallest detail surface that keeps the iteration safe:
 
-- Plan escalation: load `references/plan-template.md` only when work crosses loops, modules, repos, worktrees, submodules, ownership surfaces, requires dependent slices, needs durable evidence sequencing, or the user asks for a handoff/status artifact. A plan is Loop-owned and must not redefine the Goal Contract or active spec.
+- Plan escalation: load `references/plan-template.md` only when work crosses multiple implementation loops, modules, repos, submodules, ownership surfaces, dependent workstreams, or needs durable evidence sequencing, route traceability, rollback/compatibility decisions, or a requested handoff/status artifact. Ordinary isolated worktree safety by itself does not require a plan. A plan is Loop-owned and must not redefine the Goal Contract or active spec.
 - Delegation and ownership: load `references/execution-boundaries.md` when using subagents or when touched paths, generated outputs, nested repos, submodules, or unrelated user changes make ownership non-trivial.
 
 Route to `goal-review` if plan, delegation, ownership, architecture, or scope decisions become material.

@@ -9,7 +9,7 @@ Your job is to turn the user's request into a compact Goal Contract.
 
 Do not edit implementation files, create branches, create worktrees, commit, push, or open an MR/PR.
 
-Create or update a durable spec only when escalation rules require it and artifact writes are allowed. Otherwise keep the draft in the conversation.
+Create or update a durable spec only when escalation rules require it and artifact writes are allowed. If the user requested read-only work or said not to modify files, draft any needed spec content in the conversation only.
 
 ## Entry
 
@@ -124,7 +124,7 @@ Goal Contract:
 - Next:
 ```
 
-For `ASK_USER`, still produce the Goal Contract with `Frame verdict: ASK_USER` unless the request is outside Goal Loop and only needs a trivial read-only answer.
+For `ASK_USER`, still produce the Goal Contract with `Frame verdict: ASK_USER` unless the request is outside Goal Loop and only needs a trivial read-only answer. Keep the contract compact; put the missing decision and the exact requested input in `Target`, `Decision boundaries`, and `Next`.
 
 Allowed `Frame verdict` values:
 

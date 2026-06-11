@@ -10,9 +10,9 @@ A plan is Loop-owned: forecast upcoming loops, evidence gates, review gates, and
 
 Create or update a plan when loop evidence shows any condition holds:
 
-- work crosses loops, modules, repos, worktrees, submodules, or ownership surfaces;
+- work crosses multiple implementation loops, modules, repos, submodules, or ownership surfaces;
 - execution needs dependent slices and later work must resume without chat history;
-- multiple workstreams need coordination;
+- multiple workstreams or contested ownership surfaces need coordination;
 - migration, architecture, rollback, compatibility, or evidence sequencing decisions must persist;
 - earlier loop evidence invalidated the route and the new route must be traceable;
 - the user asks for a plan, execution artifact, handoff route, or status artifact.

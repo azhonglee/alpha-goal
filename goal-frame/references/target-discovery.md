@@ -23,6 +23,7 @@ Minimum read-only checks:
 
 - identify the git root and current directory role;
 - look one level down for candidate `.git` directories, worktrees, or package roots;
+- bound broad workspace scans: prefer depth 1 first, skip ignored/cache/vendor/build directories, and expand only when cheap evidence cannot close target selection;
 - search task keywords in candidate names, local branches, recent commits, and docs when cheap;
 - read only the local rule files needed to decide target ownership.
 
@@ -46,3 +47,7 @@ Record whether the task is:
 - `alternative implementation`
 - `comparison-only`
 - `unknown`
+
+## Comparison target missing
+
+When the user asks for a read-only comparison against an existing MR/PR/branch but does not identify the comparison object, return `ASK_USER` before `COMPARISON_ONLY`. Record the comparison intent, current object if known, missing MR/PR/branch identifier, claim boundary, and exact input needed. Do not infer a remote object from vague wording.
