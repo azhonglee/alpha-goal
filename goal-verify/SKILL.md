@@ -18,19 +18,26 @@ Use this skill when:
 - the user asks whether work is done, correct, safe, or has loopholes;
 - final output, MR/PR creation, or completion claim is being prepared;
 - `goal-iterate` returned `ITERATION_READY_FOR_VERIFY`.
+- `goal-review` returned `READY_FOR_VERIFY`.
 
 ## Required inputs
 
-Prefer to have:
+Hard requirements for completion claims:
 
-- Goal Contract;
+- Goal Contract with target, acceptance, risk tier, and claim boundary;
 - Iteration Record or current diff/evidence;
-- Review Record when review was triggered by feedback, complexity, scope expansion, uncertainty, or completion readiness;
-- fresh repo state;
-- applicable project rules;
-- commands/tests already run, or an explicit reason they cannot run.
+- fresh repo state from after the last material change;
+- applicable project rules, or an explicit reason they cannot be read;
+- commands/tests already run, or an explicit reason they cannot run;
+- Review Record when review was triggered by feedback, complexity, scope expansion, uncertainty, or completion readiness.
 
 If the Goal Contract is missing or target boundary is unclear, return `REFRAME` rather than guessing.
+
+If a required Review Record is missing, do not produce a positive completion verdict. Return `BLOCKED` with `Required next step: goal-review`, or let the router run `goal-review` first.
+
+Optional context:
+
+- older logs, previous failed attempts, reviewer comments already classified elsewhere, and user-facing release notes.
 
 ## Verification checks
 
@@ -47,6 +54,7 @@ Check:
 - final claim does not exceed evidence.
 
 You may use `scripts/evidence-summary.sh` for read-only diff/status evidence.
+Use `references/verification-verdict-schema.md` for field definitions, `references/completion-review-rubric.md` when checking readiness to merge or ship, and `references/claim-boundary-check.md` when user wording is broader than local evidence.
 
 ## Evidence matrix
 
@@ -88,8 +96,6 @@ Choose either:
 
 - `NEXT_ITERATION` to add higher-boundary evidence; or
 - `NARROW_CLAIM_AND_FINAL` to explicitly narrow the final claim.
-
-Use `references/claim-boundary-check.md` for examples.
 
 ## Verdicts
 

@@ -37,8 +37,8 @@ If a referenced stage file is unavailable, stay within this router, use the comp
 - No Goal Contract, no mutation.
 - No target boundary, no mutation.
 - No isolated edit path, no mutation.
-- No evidence, no Review Record or Verification Verdict.
-- No Review Record when review feedback, complexity, scope expansion, or uncertainty changes direction.
+- No unsupported review or verification conclusion without evidence.
+- No continuing past review feedback, complexity, scope expansion, uncertainty, or completion-readiness review triggers without a current Review Record.
 - No Verification Verdict, no final completion claim.
 - No final claim may exceed the verified claim boundary.
 
@@ -89,6 +89,8 @@ Use `goal-review` when any of these is true:
 - review feedback arrives and must be evaluated before action;
 - an architecture, scope, code, loop, or goal check is needed before continuing;
 - implementation appears complete but review evidence is not yet current.
+
+If both REVIEW and VERIFY conditions match, run REVIEW first unless a current Review Record already returns `READY_FOR_VERIFY`.
 
 `goal-review` exits with one of:
 
@@ -147,7 +149,9 @@ Do not emit route records for trivial read-only questions.
 
 ## Final output rule
 
-The final answer must be based on the latest Verification Verdict.
+Any final completion claim must be based on the latest Verification Verdict.
+
+No Verification Verdict is required for non-completion exits from FRAME such as `ASK_USER`, `READ_ONLY`, `COMPARISON_ONLY`, or `BLOCKED`. In those cases, final output may report the route, blocker, comparison boundary, or read-only finding without claiming implementation completion.
 
 If the verdict is:
 
