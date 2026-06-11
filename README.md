@@ -1,144 +1,212 @@
-# goal-loop
+# Codex Goal Loop Skills
 
-`goal-loop` 是一套目标驱动的 Agent 工作流, 默认安装支持Codex。它把编码任务拆成 Goal、Loop、Review 三个内部阶段，要求先定义成功标准，再通过证据驱动的迭代推进，最后在完成前做评审，避免只凭意图或局部改动声明完成。
-
-不是单纯的抛弃了SDD，而是将其作为目标定义的一种方式，帮助开发者更清晰地定义任务目标，避免只凭意图或局部改动声明完成。其中，也吸取了其他项目的优秀经验，比如Oh-My-Codex。
-
-## Key Features
-
-- 目标驱动：先定义成功标准，再通过证据驱动的迭代推进，最后在完成前做评审。
-- 证据驱动：每个阶段都依赖于证据，确保任务按计划进行。
-- 自主执行：Agent 可以自主执行任务，无需人工干预。
-
-## Application Scenarios
-
-当任务涉及实现、调试、重构、测试、行为变更、复杂修复、需求澄清或迭代验证时，`goal-loop` 技能会提供一套统一工作流：
-
-1. Goal：明确目标、成功标准、约束、非目标、决策边界和验收证据。
-2. Loop：用最小有效行动产出证据，并根据证据决定继续、转向、扩展、加固或进入完成评审。
-3. Review：挑战当前方向、证据强度、范围漂移和完成声明，确认是否真的满足验收条件。
-
-## Repository Structure
+A small Codex skill collection that turns goal-loop into a staged execution protocol:
 
 ```text
-.
-├── scripts/
-│   └── install.sh              # 安装脚本，将 skills 软链接到 Codex 技能目录
-├── skills/
-│   └── goal-loop/
-│       ├── SKILL.md            # 技能入口和总流程
-│       ├── agents/
-│       │   └── openai.yaml     # Agent 配置
-│       └── references/
-│           ├── goal.md         # Goal 阶段规则
-│           ├── loop.md         # Loop 阶段规则
-│           ├── review.md       # Review 阶段规则
-│           ├── spec-template.md
-│           └── plan-template.md
-└── templates/
-    ├── AGENTS.md               # 推荐写入 CODEX_HOME 的 Agent 行为模板
-    └── config.toml             # 推荐补齐到 CODEX_HOME/config.toml 的配置模板
+FRAME -> ITERATE -> REVIEW -> VERIFY -> FINAL
+                  -> VERIFY
+                  -> ITERATE
+                  -> FRAME
+                  -> BLOCKED
 ```
 
-## How to Install it in Codex
+The package contains five skills:
 
-在仓库根目录执行：
+- `goal-loop`: router and global invariants.
+- `goal-frame`: Goal Contract, clarification, target/scope boundary, existing work scan, and spec escalation when needed.
+- `goal-iterate`: one bounded implementation iteration with mutation preflight, loop mode evidence, debug receipts, plus plan escalation when needed.
+- `goal-review`: direction, feedback, scope, architecture, artifact freshness, and completion-readiness review.
+- `goal-verify`: Verification Verdict, acceptance-to-evidence mapping, artifact alignment, claim boundary check.
+
+它还包含可选的只读辅助脚本和用户配置模板。
+
+## Install
+
+默认安装到仓库根目录下的 `codex/`，并把技能目录软链接到 `codex/skills/`：
 
 ```bash
 scripts/install.sh
 ```
 
-脚本会执行三类操作：
+脚本会：
 
-- 将 `skills/*` 下的技能目录软链接到 `${CODEX_HOME:-$HOME/.codex}/skills`。
-- 将 `templates/AGENTS.md` 同步到 `${CODEX_HOME:-$HOME/.codex}/AGENTS.md` 的受管理模板块；如果目标文件没有模板标记，则只追加模板内容，保留既有手写内容。
-- 检查 `${CODEX_HOME:-$HOME/.codex}/config.toml` 是否包含 `templates/config.toml` 里的配置，并只补齐缺失项，不覆盖已有值。
+- 将顶层 `*/SKILL.md` 技能目录软链接到 `${CODEX_HOME:-<repo>/codex}/skills/`。
+- 将 `templates/AGENTS.md` 合并到 `${CODEX_HOME:-<repo>/codex}/AGENTS.md` 的受管理模板块。
+- 将 `templates/config.toml` 中缺失的设置补齐到 `${CODEX_HOME:-<repo>/codex}/config.toml`，不覆盖已有值。
+- 清理旧版本可能留在 `skills/` 下、且指向本仓库的旧支持目录软链接。
+- 校验目标 `skills/` 中的 skill 软链接指向源码目录，且旧支持目录没有作为本仓库 skill 安装。
+- 安装后运行源码中的 `tools/validate_skillset.py` 校验技能包。
 
-如果目标位置已经存在指向其他目录的软链接，可以使用：
+如果要安装到真实 Codex home，显式指定：
+
+```bash
+CODEX_HOME="$HOME/.codex" scripts/install.sh
+```
+
+如果目标位置已有指向其他目录的软链接，使用 `--force` 替换软链接；脚本不会删除真实文件或真实目录：
 
 ```bash
 scripts/install.sh --force
 ```
 
-`--force` 只会替换已有软链接，不会删除或覆盖真实文件、真实目录。
-
-如需安装到自定义 Codex 主目录：
-
-```bash
-CODEX_HOME=/path/to/codex-home scripts/install.sh
-```
-
-## How to Use
-
-安装后，Codex 会在适用任务中加载 `goal-loop`。典型执行顺序如下：
+The checkout root contains the skill directories directly:
 
 ```text
-Request
-  ↓
-Goal
-  ↓
-Loop
-  ↓
-Review
-  ↓
-Goal Update
-  ↓
-Next Loop or Final Output
+goal-loop/
+goal-frame/
+goal-iterate/
+goal-review/
+goal-verify/
+templates/
 ```
 
-Goal、Loop、Review 是 `goal-loop` 内部的三个阶段，由 `skills/goal-loop/SKILL.md` 统一调度。
+## 可选用户配置模板
 
-## Persistent Outputs
+`templates/AGENTS.md` 和 `templates/config.toml` 来自原 `main` 分支的安装模型。默认安装只会写入仓库根目录下的 `codex/`。如果显式设置 `CODEX_HOME="$HOME/.codex"`，脚本会合并这些模板到真实 Codex home；执行前应确认这些默认值适合用户环境。
 
-默认情况下，小任务只在对话中维护 Goal、Loop 和 Review 信息，不创建额外文件。只有在任务需要可复用的需求、计划或评审记录时，才按模板生成持久化产物：
+## Recommended invocation
 
-- 需求规格：`docs/design/YYYYMMDD-<slug>-spec.md`
-- 执行计划：`docs/plans/YYYYMMDD-<slug>-plan.md`
-- 评审记录：`.goal-loop/reviews/YYYYMMDD-<slug>-review.md`
-
-对应模板位于 `skills/goal-loop/references/`。
-
-## Driving Codex Autonomous
-
-除了在skill中定义了工作流的规则，还在配置文件中配置了权限最大化，确保Codex执行时无需人工干预。
-
-1. 在AGENTS.md中配置了Agent的行为，引导Codex按照目标驱动的工作流执行。
-2. 在cofig.toml文件中配置了权限最大化，确保Codex有执行权限。
-3. 在config.toml文件中调用subagent配置，确保能主动spawn_subagent。
-
-## Development and Updates
-
-修改技能内容后，通常重新执行安装脚本即可让本地 Codex 使用最新软链接内容：
-
-```bash
-scripts/install.sh
-```
-
-如果 `templates/AGENTS.md` 发生变化，重新安装会更新 `${CODEX_HOME:-$HOME/.codex}/AGENTS.md` 中带 `generate-with-template:agents-md` 标记的受管理模板块，并保留模板块之外的用户内容。
-
-新增技能时，按以下结构放置：
+Explicit:
 
 ```text
-skills/<skill-name>/SKILL.md
+$goal-loop 帮我实现这个需求：...
 ```
 
-安装脚本会自动发现 `skills/*/SKILL.md`。
+More specific:
 
-## Verification
-
-检查安装脚本帮助信息：
-
-```bash
-scripts/install.sh --help
+```text
+$goal-frame 先帮我把这个需求 frame 清楚，不要改文件。
+$goal-iterate 根据上面的 Goal Contract 做一轮最小实现。
+$goal-review 检查当前实现方向、反馈和证据缺口。
+$goal-verify 检查当前 diff 和测试证据，判断能否最终交付。
 ```
 
-检查配置模板是否可解析：
+Only `goal-loop` is intended to trigger implicitly. Stage skills set `allow_implicit_invocation: false`; invoke them explicitly for focused testing or let the router load them.
 
-```bash
-python3 - <<'PY'
-import tomllib
-from pathlib import Path
+## Design principles
 
-tomllib.loads(Path("templates/config.toml").read_text())
-PY
+- The router is thin; stages do the work.
+- Each stage has one auditable output.
+- References are optional and loaded only when needed.
+- Spec and plan are risk/complexity escalation artifacts, not default ceremony.
+- Spec records durable requirements; plan records current execution route plus append-only route history.
+- Scripts are read-only helpers; they do not replace judgment.
+- Project-specific commands and conventions belong in `AGENTS.md`, not in these cross-repo skills.
+
+## Artifact defaults
+
+优先使用目标仓库已有约定。没有约定时，使用：
+
+- spec: `docs/design/YYYYMMDD-<slug>-spec.md`
+- plan: `docs/plans/YYYYMMDD-<slug>-plan.md`
+- review receipt: `.goal-loop/reviews/YYYYMMDD-<slug>-review.md`
+- command/output evidence: `.goal-loop/evidence/YYYYMMDD-<slug>/`
+- scratch artifacts: `.goal-loop/tmp/YYYYMMDD-<slug>/`
+
+`.goal-loop/` 必须被 `.gitignore` 忽略后才能写入，避免把运行时证据和 scratch 文件提交进仓库。
+
+## Stage outputs
+
+### Goal Contract
+
+Produced by `goal-frame`.
+
+```text
+Goal Contract:
+- Intent:
+- Target:
+- Acceptance:
+- Non-goals:
+- Constraints:
+- Decision boundaries:
+- Assumptions and risks:
+- Risk tier:
+- Claim boundary:
+- Evidence plan:
+- Artifacts:
+- Existing work:
+- Frame verdict:
+- Next:
 ```
+
+### Iteration Record
+
+Produced by `goal-iterate`.
+
+```text
+Iteration Record:
+- Contract version:
+- Active artifacts:
+- Loop mode:
+- Hypothesis:
+- Evidence type:
+- Debug receipt:
+- Iteration goal:
+- Mutation preflight:
+- Action:
+- Changed files:
+- Local evidence:
+- Learning:
+- Decision:
+- Acceptance delta:
+- Risks introduced:
+- Review needed:
+- Iterate verdict:
+- Next:
+```
+
+### Review Record
+
+Produced by `goal-review`.
+
+```text
+Review Record:
+- Mode:
+- Target:
+- Evidence basis:
+- Freshness boundary:
+- Findings:
+- Feedback classification:
+- Artifact review:
+- Scope/architecture notes:
+- Risk tier:
+- Required evidence:
+- Review verdict:
+- Next:
+```
+
+### Verification Verdict
+
+Produced by `goal-verify`.
+
+```text
+Verification Verdict:
+- Verdict:
+- Acceptance evidence matrix:
+- Artifact review:
+- Claim boundary:
+- Risk/evidence review:
+- Fresh checks run:
+- Diff/scope review:
+- Unresolved gaps:
+- Required next step:
+- Final claim allowed:
+```
+
+## Safe tuning knobs
+
+If the skills feel too verbose, reduce output detail inside each stage, but keep these fields:
+
+- `Goal Contract.Acceptance`
+- `Goal Contract.Claim boundary`
+- `Goal Contract.Artifacts`
+- `Iteration Record.Active artifacts`
+- `Iteration Record.Loop mode`
+- `Iteration Record.Debug receipt`
+- `Iteration Record.Mutation preflight`
+- `Review Record.Freshness boundary`
+- `Review Record.Review verdict`
+- `Verification Verdict.Acceptance evidence matrix`
+- `Verification Verdict.Verdict`
+
+If the skills miss important repo-specific behavior, add that behavior to the repo's `AGENTS.md` or a dedicated adapter reference rather than bloating the core skills.

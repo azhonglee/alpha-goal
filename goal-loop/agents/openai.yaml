@@ -1,0 +1,7 @@
+interface:
+  display_name: "Goal Loop"
+  short_description: "Route goal-driven coding work"
+  default_prompt: "Use $goal-loop to frame, iterate, review, and verify this coding task."
+
+policy:
+  allow_implicit_invocation: true

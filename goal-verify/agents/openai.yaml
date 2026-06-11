@@ -1,0 +1,7 @@
+interface:
+  display_name: "Goal Verify"
+  short_description: "Verify completion evidence"
+  default_prompt: "Use $goal-verify to map acceptance to evidence and decide whether a final claim is supported."
+
+policy:
+  allow_implicit_invocation: false
