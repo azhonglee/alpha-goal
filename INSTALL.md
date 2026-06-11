@@ -34,6 +34,12 @@ scripts/install.sh --force
 
 `--force` 只替换软链接，不删除真实文件或真实目录。
 
+默认输出只保留安装摘要。排查安装过程时使用：
+
+```bash
+scripts/install.sh --verbose
+```
+
 ## 用户配置模板
 
 源码中的 `templates/` 目录包含：
