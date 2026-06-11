@@ -3,19 +3,23 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: scripts/install.sh [--codex-home PATH] [--force] [--verbose]
+Usage: scripts/install.sh [--codex-home PATH] [--force] [--sync-user-templates] [--verbose]
 
 Install this repository's top-level skills by symlinking them into
 ${CODEX_HOME:-$HOME/.codex}/skills.
 
-The script also syncs templates/AGENTS.md into the Codex home AGENTS.md and
-fills missing config.toml settings from templates/config.toml.
+By default, this script does not modify user-level AGENTS.md or config.toml.
+Use --sync-user-templates to merge templates/AGENTS.md and fill missing
+config.toml settings from templates/config.toml.
 
 Options:
   --codex-home PATH
             Install into PATH instead of ${CODEX_HOME:-$HOME/.codex}.
   --force   Replace existing symlinks that point elsewhere. Real files or
             directories are never removed.
+  --sync-user-templates
+            Opt in to updating Codex home AGENTS.md and config.toml from
+            templates/. This may affect future Codex sessions.
   --verbose Print detailed install and validation output.
 EOF
 }
@@ -27,6 +31,7 @@ die() {
 
 force=false
 verbose=false
+sync_user_templates=false
 codex_home_arg=""
 
 while [[ $# -gt 0 ]]; do
@@ -48,6 +53,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --force)
       force=true
+      shift
+      ;;
+    --sync-user-templates)
+      sync_user_templates=true
       shift
       ;;
     --verbose)
@@ -132,8 +141,8 @@ linked_count=0
 replaced_count=0
 already_count=0
 legacy_removed_count=0
-agents_action="current"
-config_action="current"
+agents_action="skipped"
+config_action="skipped"
 
 resolve_link_target() {
   local link_path="$1"
@@ -576,37 +585,61 @@ run_skillset_validation() {
 
 print_summary() {
   local status="ready"
-  if [[ "$linked_count" -gt 0 || "$replaced_count" -gt 0 || "$legacy_removed_count" -gt 0 || "$agents_action" != "current" || "$config_action" != "current" ]]; then
+  if [[ "$linked_count" -gt 0 || "$replaced_count" -gt 0 || "$legacy_removed_count" -gt 0 ]]; then
+    status="installed"
+  fi
+  if [[ "$sync_user_templates" == true && ( "$agents_action" != "current" || "$config_action" != "current" ) ]]; then
     status="installed"
   fi
 
   echo "Goal Loop skills $status: $installed -> $target_root"
   echo "Codex home: $codex_home"
+  if [[ "$sync_user_templates" == true ]]; then
+    echo "User templates: AGENTS.md $agents_action, config.toml $config_action"
+  else
+    echo "User templates: skipped (pass --sync-user-templates to opt in)"
+  fi
 }
 
-if [[ ! -f "$agents_template" ]]; then
-  echo "No AGENTS template found at $agents_template" >&2
-  exit 1
+if [[ "$sync_user_templates" == true ]]; then
+  if [[ ! -f "$agents_template" ]]; then
+    echo "No AGENTS template found at $agents_template" >&2
+    exit 1
+  fi
+
+  if [[ ! -f "$config_template" ]]; then
+    echo "No config template found at $config_template" >&2
+    exit 1
+  fi
 fi
 
-if [[ ! -f "$config_template" ]]; then
-  echo "No config template found at $config_template" >&2
-  exit 1
-fi
+required_skills=(goal-loop goal-frame goal-iterate goal-review goal-verify)
+skill_files=()
+for skill_name in "${required_skills[@]}"; do
+  skill_file="$repo_root/$skill_name/SKILL.md"
+  if [[ ! -f "$skill_file" ]]; then
+    echo "Missing required skill: $skill_file" >&2
+    exit 1
+  fi
+  skill_files+=("$skill_file")
+done
 
 shopt -s nullglob
-skill_files=("$repo_root"/*/SKILL.md)
+discovered_skill_files=("$repo_root"/*/SKILL.md)
 shopt -u nullglob
-
-if [[ "${#skill_files[@]}" -eq 0 ]]; then
-  echo "No top-level skills found under $repo_root" >&2
+if [[ "${#discovered_skill_files[@]}" -ne "${#required_skills[@]}" ]]; then
+  echo "Unexpected top-level skill set under $repo_root; run tools/validate_skillset.py for details." >&2
   exit 1
 fi
 
 mkdir -p "$codex_home" "$target_root"
 
-inject_agents_template
-sync_config_template
+if [[ "$sync_user_templates" == true ]]; then
+  inject_agents_template
+  sync_config_template
+else
+  log "Skipped user template sync; pass --sync-user-templates to opt in"
+fi
 
 installed=0
 for skill_file in "${skill_files[@]}"; do

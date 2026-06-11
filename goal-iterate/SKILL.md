@@ -1,6 +1,6 @@
 ---
 name: goal-iterate
-description: Perform one bounded implementation iteration under an existing Goal Contract, using loop modes, evidence records, debug receipts, mutation preflight, isolated edit paths, minimal patching, and plan escalation when risk or complexity requires it. Use after goal-frame is READY_FOR_ITERATION.
+description: Stage skill for the goal-loop package. Perform one bounded implementation iteration under an existing Goal Contract, using loop modes, evidence records, debug receipts, mutation preflight, isolated edit paths, minimal patching, and plan escalation when risk or complexity requires it. Use only when explicitly named by the user or selected by goal-loop after goal-frame is READY_FOR_ITERATION.
 ---
 
 # Goal Iterate
@@ -18,7 +18,7 @@ Required before mutation:
 - Target repo/path is closed.
 - Applicable local rules have been read.
 - Mutation preflight is recorded.
-- Isolated edit path is known.
+- Isolated edit path is known, or can be created as the first setup action after preflight.
 - Risk tier and evidence floor are known.
 - Repo, worktree, submodule, and ownership boundaries are understood.
 - Any active spec referenced by the Goal Contract has been read.
@@ -37,7 +37,7 @@ Mutation Preflight:
 - status:
 - worktree list:
 - primary checkout:
-- isolated edit path:
+- isolated edit path or setup target:
 - applicable rule files:
 - nested repos/submodules:
 - active spec:
@@ -49,6 +49,8 @@ Mutation Preflight:
 ```
 
 You may use `scripts/mutation-preflight.sh` to collect read-only git state. Add the smallest relevant baseline health check when it is cheap and available, such as an existing focused test, build, typecheck, lint, or documented reason no baseline can run. If baseline health fails, record the failing command and decide whether it is in scope before treating later failures as regressions.
+
+If the task starts from a primary checkout and no isolated edit path exists yet, ITERATE may create the isolated worktree as its first setup mutation after preflight only when the Goal Contract target is closed, project rules allow the chosen worktree root, `.worktrees/` or the chosen root is ignored or explicitly approved, and no implementation file is edited before entering the isolated worktree. Record the setup command and then rerun or update preflight from inside the isolated edit path before implementation mutation.
 
 Use `references/worktree-safety.md` when creating or validating an isolated edit path, especially if the current checkout may be the primary branch. Use `references/iteration-record-schema.md` for field definitions when the output contract is unclear. Use `references/loop-modes.md` when selecting a loop mode, debugging, TDD, spike, refactor, or hardening path. Use `references/plan-template.md` only when a durable route is needed.
 
