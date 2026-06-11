@@ -34,7 +34,7 @@ Goal Contract:
   3. Recommend merge/follow-up/abandon path.
 - Non-goals: Do not modify code or create a new MR.
 - Constraints: Use MR metadata and local diff only; cite uncertainty if MR content is inaccessible.
-- Decision boundaries: Codex may recommend a path, but user chooses whether to implement follow-up work.
+- Decision boundaries: The agent may recommend a path, but user chooses whether to implement follow-up work.
 - Assumptions and risks: MR content may be incomplete if remote access fails.
 - Risk tier: low.
 - Claim boundary: Comparison only.
