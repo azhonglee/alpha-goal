@@ -26,6 +26,7 @@ IMPLICIT_POLICY = {
 ALLOWED_FRONT_MATTER_KEYS = {"name", "description"}
 MIN_SHORT_DESCRIPTION_LEN = 25
 MAX_SHORT_DESCRIPTION_LEN = 64
+MAX_SKILL_MD_LINES = 240
 FORBIDDEN_CONFIG_KEYS = {"sandbox_mode", "suppress_unstable_features_warning"}
 WORKTREE_CANONICAL = ".worktrees/codex/<task-slug>"
 REQUIRED_OPENAI_INTERFACE_KEYS = {"display_name", "short_description", "default_prompt"}
@@ -298,6 +299,10 @@ def main() -> int:
             ok = False
             continue
         skill_text = skill_md.read_text(encoding="utf-8")
+        skill_lines = len(skill_text.splitlines())
+        if skill_lines > MAX_SKILL_MD_LINES:
+            print(f"FAIL {skill}: SKILL.md has {skill_lines} lines; keep core workflow under {MAX_SKILL_MD_LINES} lines and move details to references")
+            ok = False
         try:
             data = parse_front_matter(skill_text)
         except Exception as exc:  # noqa: BLE001
