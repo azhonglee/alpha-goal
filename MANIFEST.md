@@ -17,11 +17,13 @@
 | `adapters/` | Optional environment-specific references. |
 | `tools/` | Local validation helper. |
 | `templates/` | 可选的用户级 Codex 配置模板。 |
+| `scripts/` | 安装脚本。 |
 
 ## Scripts
 
 | Path | Mutates state? | Purpose |
 |---|---:|---|
+| `scripts/install.sh` | Yes | Symlinks skills and support directories into `${CODEX_HOME:-<repo>/codex}/skills`, then merges optional user config templates. |
 | `goal-iterate/scripts/mutation-preflight.sh` | No | Prints git root, branch, status, worktrees, local rule files. |
 | `goal-verify/scripts/evidence-summary.sh` | No | Prints changed files, diff stat, diff check status, recent commits. |
 | `tools/validate_skillset.py` | No | Checks skill front matter, invocation metadata, bundled references/scripts, install docs, and templates. |
