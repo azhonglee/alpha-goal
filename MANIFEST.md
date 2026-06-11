@@ -22,7 +22,7 @@
 
 | Path | Mutates state? | Purpose |
 |---|---:|---|
-| `scripts/install.sh` | Yes | Merges optional user config templates, symlinks top-level skills into `${CODEX_HOME:-<repo>/codex}/skills`, cleans legacy support links, and validates target symlinks. |
+| `scripts/install.sh` | Yes | Merges optional user config templates, symlinks top-level skills into `${CODEX_HOME:-$HOME/.codex}/skills`, cleans legacy support links, and validates target symlinks. |
 | `goal-iterate/scripts/mutation-preflight.sh` | No | Prints git root, branch, status, worktrees, local rule files. |
 | `goal-verify/scripts/evidence-summary.sh` | No | Prints changed files, diff stat, diff check status, recent commits. |
 | `tools/validate_skillset.py` | No | Checks skill front matter, invocation metadata, bundled references/scripts, install docs, and templates. |

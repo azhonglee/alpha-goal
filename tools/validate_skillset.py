@@ -121,8 +121,10 @@ def check_docs(root: Path) -> bool:
         if doc.name in {"README.md", "INSTALL.md"}:
             if "scripts/install.sh" not in text:
                 ok = fail(f"{doc.name}: missing scripts/install.sh install command")
-            if "codex/skills" not in text:
-                ok = fail(f"{doc.name}: missing default codex/skills install target")
+            if "$HOME/.codex/skills" not in text and "${CODEX_HOME:-$HOME/.codex}/skills" not in text:
+                ok = fail(f"{doc.name}: missing default $HOME/.codex/skills install target")
+            if "--codex-home" not in text:
+                ok = fail(f"{doc.name}: missing --codex-home override documentation")
             if "validate_skillset.py" not in text:
                 ok = fail(f"{doc.name}: missing validate_skillset.py smoke test")
         if doc.name == "MANIFEST.md":
