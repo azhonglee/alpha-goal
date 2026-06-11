@@ -594,6 +594,7 @@ print_summary() {
 
   echo "Goal Loop skills $status: $installed -> $target_root"
   echo "Codex home: $codex_home"
+  echo "Validation: passed (tools/validate_skillset.py)"
   if [[ "$sync_user_templates" == true ]]; then
     echo "User templates: AGENTS.md $agents_action, config.toml $config_action"
   else

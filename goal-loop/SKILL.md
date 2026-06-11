@@ -1,13 +1,13 @@
 ---
 name: goal-loop
-description: Route non-trivial coding tasks through goal-frame, goal-iterate, goal-review, and goal-verify. Use for multi-step coding tasks that may require mutation, staged implementation, recovery, review feedback inside an active goal, verification of changed work, or completion claims. Do not use for ordinary read-only explanation, standalone code review, diff review, comparison, summarization, or advisory audit unless a goal-loop mutation path or completion claim is in scope.
+description: Route non-trivial coding and evidence-bound engineering tasks through goal-frame, goal-iterate, goal-review, and goal-verify. Use for multi-step coding tasks that may require mutation, staged implementation, recovery, review feedback inside an active goal, verification of changed work, completion claims, or non-trivial read-only audits/comparisons that require target, local-rule, existing-work, or evidence-boundary discovery. Do not use for trivial read-only explanation, ordinary standalone code review, simple diff review, summarization, or advisory answers when no target/rule/evidence discovery, active goal, mutation path, or completion claim is in scope.
 ---
 
 ## Read-only routing
 
-- Bypass Goal Loop for trivial read-only explanation, standalone code review, diff review, comparison, summarization, or advisory audit when no mutation, target discovery, active goal, or completion claim is involved.
-- Run FRAME only and exit `READ_ONLY` for non-trivial read-only audits that need target, rule, or evidence-boundary discovery but no mutation or completion claim.
-- Run FRAME only and exit `COMPARISON_ONLY` for read-only comparison of existing work.
+- Bypass Goal Loop for trivial explanation, summarization, or ordinary standalone review with a clear target and no mutation path, active goal, or completion claim.
+- Run FRAME only and exit `READ_ONLY` for non-trivial read-only audits that need target, local-rule, existing-work, or evidence-boundary discovery but no mutation or completion claim.
+- Run FRAME only and exit `COMPARISON_ONLY` for read-only comparison of existing work when target or evidence-boundary discovery is needed and no mutation is requested.
 - Use REVIEW or VERIFY only for read-only checks inside an active Goal Contract, review feedback path, or implementation completion/readiness claim.
 
 # Goal Loop Router
