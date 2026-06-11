@@ -13,6 +13,7 @@ A spec states what to do, why, boundaries, and completion criteria. It does not 
 - Goal Contract:
 - Risk tier: low | medium | high
 - Claim boundary:
+- Approval basis:
 - Supersedes:
 - Last updated:
 
@@ -20,7 +21,7 @@ Status:
 
 - `draft`: requirements are still forming; not approved when approval is required.
 - `reviewed`: checked for clarity and evidence; not automatically approved.
-- `approved`: user accepted, or clear enough within recorded decision boundaries.
+- `approved`: user accepted, or clear enough within recorded decision boundaries; record approval basis.
 - `superseded`: history only; do not execute against it.
 
 ## Intent

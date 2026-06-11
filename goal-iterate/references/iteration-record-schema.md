@@ -92,7 +92,7 @@ State `yes` when complexity, scope expansion, feedback, architecture, ownership,
 
 ### Iterate verdict
 
-One of: `ITERATION_READY_FOR_VERIFY`, `BLOCKED`, `REFRAME_NEEDED`.
+One of: `ITERATION_READY_FOR_VERIFY`, `ITERATION_READY_FOR_REVIEW`, `BLOCKED`, `REFRAME_NEEDED`.
 
 ### Next
 

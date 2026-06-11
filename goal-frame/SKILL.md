@@ -40,7 +40,7 @@ Check:
 - assumptions and risks;
 - risk tier;
 - evidence plan;
-- claim boundary.
+- claim boundary;
 - durable spec need.
 
 Use `references/goal-contract-schema.md` for field definitions and `references/frame-examples.md` for compact examples. Use `references/spec-template.md` only when a durable spec is needed. Examples are illustrative only; do not copy their repo names, paths, or facts as evidence for the current task.
@@ -80,7 +80,7 @@ Spec status values:
 
 - `draft`: working requirements; not approved when approval is required.
 - `reviewed`: checked for clarity and evidence; not automatically approved.
-- `approved`: accepted by the user or clear enough within recorded decision boundaries.
+- `approved`: accepted by the user or clear enough within recorded decision boundaries; record approval basis.
 - `superseded`: history only; do not execute against it.
 
 ## Clarification policy

@@ -2,6 +2,12 @@
 
 The Goal Contract is intentionally compact. It should be short enough to write before everyday coding tasks, but complete enough to prevent unsafe mutation and overclaiming.
 
+## Contents
+
+- Contract block
+- Field definitions
+- Example: multi-repo implementation
+
 ```text
 Goal Contract:
 - Intent:

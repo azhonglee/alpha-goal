@@ -200,6 +200,8 @@ Route to `goal-review` when:
 - scope expands;
 - architecture or ownership decisions become material.
 
+When routing to review, set `Iterate verdict` to `ITERATION_READY_FOR_REVIEW`.
+
 ## Output
 
 Produce exactly one Iteration Record:
@@ -229,6 +231,7 @@ Iteration Record:
 Allowed `Iterate verdict` values:
 
 - `ITERATION_READY_FOR_VERIFY`
+- `ITERATION_READY_FOR_REVIEW`
 - `BLOCKED`
 - `REFRAME_NEEDED`
 

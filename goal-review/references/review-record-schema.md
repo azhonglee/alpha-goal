@@ -7,6 +7,7 @@ Review Record:
 - Mode:
 - Target:
 - Evidence basis:
+- Freshness boundary:
 - Findings:
 - Feedback classification:
 - Artifact review:
@@ -30,6 +31,10 @@ The Goal Contract, Iteration Record, diff, feedback item, architecture choice, o
 ### Evidence basis
 
 Fresh source findings, commands, diffs, tests, logs, screenshots, loop mode evidence, Debug Receipt, or explicit blocker evidence used for the review.
+
+### Freshness boundary
+
+The contract version, iteration record, changed-file set, diff or commit state, or artifact revision this review covers. A material change outside this boundary makes the review stale.
 
 ### Findings
 

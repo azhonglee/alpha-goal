@@ -12,6 +12,7 @@ A plan states how to proceed now, the next step, evidence, and risks. It must no
 - Related spec:
 - Owner:
 - Risk tier: low | medium | high
+- Approval basis:
 - Supersedes:
 - Last updated:
 
@@ -19,7 +20,7 @@ Status:
 
 - `draft`: route is still forming; use only as a working draft.
 - `reviewed`: readiness or direction was checked; not automatically approved.
-- `approved`: user accepted, or clear enough within recorded decision boundaries.
+- `approved`: user accepted, or clear enough within recorded decision boundaries; record approval basis.
 - `superseded`: history only; do not execute against it.
 
 ## Current Strategy

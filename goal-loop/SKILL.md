@@ -23,25 +23,26 @@ FRAME -> ITERATE -> REVIEW -> VERIFY -> FINAL
 
 ## Stage loading
 
-`goal-loop` is the only skill that should trigger implicitly for implementation work. Before executing a stage, read that stage's sibling `SKILL.md` directly:
+`goal-loop` is the only skill that should trigger implicitly for implementation work. This is a multi-skill package; install all stage skills together. Before executing a stage, read that stage's sibling `SKILL.md` directly:
 
 - FRAME: `../goal-frame/SKILL.md`
 - ITERATE: `../goal-iterate/SKILL.md`
 - REVIEW: `../goal-review/SKILL.md`
 - VERIFY: `../goal-verify/SKILL.md`
 
-If a referenced stage file is unavailable, stay within this router, use the compact output contracts in `README.md`, and report the missing file as a blocker before mutating.
+If a referenced stage file is unavailable, report the missing stage file as a blocker before mutating. Do not infer missing stage rules from memory.
 
 ## Global invariants
 
-- No Goal Contract, no mutation.
-- No target boundary, no mutation.
-- No isolated edit path, no mutation.
+- No Goal Contract, no implementation mutation.
+- No target boundary, no implementation mutation.
+- No isolated edit path, no implementation mutation.
 - No unsupported review or verification conclusion without evidence.
-- No continuing past review feedback, complexity, scope expansion, uncertainty, or completion-readiness review triggers without a current Review Record.
+- No continuing past review feedback, complexity, scope expansion, architecture/ownership risk, or evidence uncertainty without a current Review Record.
 - No Verification Verdict, no final completion claim.
 - No final claim may exceed the verified claim boundary.
 - Do not create spec or plan by default; escalate only for risk, complexity, handoff, or user request.
+- Durable artifact writes are allowed only by their owning stage rules; they do not authorize implementation mutation.
 - Read the current version and status before relying on any spec or plan.
 - Do not execute from a `superseded` artifact. Do not treat `draft` as approved when approval is required.
 - A plan must not redefine Goal Contract or active spec intent, success criteria, non-goals, constraints, or decision boundaries.
@@ -71,7 +72,7 @@ Use `goal-frame` when any of these is true:
 - the workspace may contain multiple repos or submodules;
 - the task may duplicate an existing MR/PR/branch/issue/design doc;
 - mutation may be needed;
-- previous verification returned `REFRAME`.
+- previous verification returned `REFRAME`;
 - durable requirements may be needed before safe iteration.
 
 `goal-frame` exits with one of:
@@ -90,12 +91,13 @@ Use `goal-iterate` when all are true:
 - `Frame verdict` is `READY_FOR_ITERATION`;
 - target repo/path is closed;
 - mutation is required;
-- the isolated edit path is known or can be safely created after preflight.
+- the isolated edit path is known or can be safely created after preflight;
 - any active spec has been read, and any active plan is current or intentionally absent.
 
 `goal-iterate` exits with one of:
 
 - `ITERATION_READY_FOR_VERIFY`
+- `ITERATION_READY_FOR_REVIEW`
 - `BLOCKED`
 - `REFRAME_NEEDED`
 
@@ -107,7 +109,7 @@ Use `goal-review` when any of these is true:
 - scope expands or implementation becomes complex;
 - review feedback arrives and must be evaluated before action;
 - an architecture, scope, code, loop, or goal check is needed before continuing;
-- implementation appears complete but review evidence is not yet current.
+- previous iteration returned `ITERATION_READY_FOR_REVIEW`;
 - an active spec or plan may be stale, over-broad, superseded, or inconsistent with current evidence.
 
 If both REVIEW and VERIFY conditions match, run REVIEW first unless a current Review Record already returns `READY_FOR_VERIFY`.
@@ -129,8 +131,8 @@ Use `goal-verify` when any of these is true:
 - there is a diff, patch, commit, MR/PR, local evidence to assess, delivery, final output, or completion readiness;
 - the user asks whether it is done, ready to merge, ready to ship, or whether a final claim is supported;
 - final output, MR/PR creation, or completion claim is being prepared;
-- previous iteration returned `ITERATION_READY_FOR_VERIFY`.
-- review returned `READY_FOR_VERIFY`.
+- previous iteration returned `ITERATION_READY_FOR_VERIFY`;
+- review returned `READY_FOR_VERIFY`;
 - active spec/plan artifacts, if any, must be checked against final evidence.
 
 `goal-verify` exits with one of:
@@ -150,7 +152,7 @@ Before continuing after interruption, resumed context, dirty workspace, or parti
 - status / changed files;
 - previous intended goal if known;
 - active spec/plan artifacts if known;
-- safest next state: `FRAME`, `ITERATE`, `VERIFY`, or `BLOCKED`.
+- safest next state: `FRAME`, `ITERATE`, `REVIEW`, `VERIFY`, or `BLOCKED`.
 
 Use `references/recovery-check.md` when the resumed state is not obvious.
 
