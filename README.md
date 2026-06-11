@@ -50,6 +50,12 @@ CODEX_HOME=/path/to/codex-home scripts/install.sh
 scripts/install.sh --force
 ```
 
+默认输出只保留安装摘要。如果需要查看每个软链接、模板合并和校验过程，追加 `--verbose`：
+
+```bash
+scripts/install.sh --verbose
+```
+
 ## 仓库结构
 
 仓库根目录直接放置各个 skill：
