@@ -18,7 +18,7 @@ The package contains five skills:
 - `goal-review`: direction, feedback, scope, architecture, and completion-readiness review.
 - `goal-verify`: Verification Verdict, acceptance-to-evidence mapping, claim boundary check.
 
-It also includes optional read-only helper scripts and a ByteDance Codebase adapter reference.
+它还包含可选的只读辅助脚本、ByteDance Codebase 适配参考，以及用户配置模板。
 
 ## Install
 
@@ -35,6 +35,7 @@ rsync -a --delete goal-review/ "$install_root/goal-review/"
 rsync -a --delete goal-verify/ "$install_root/goal-verify/"
 rsync -a --delete adapters/ "$install_root/adapters/"
 rsync -a --delete tools/ "$install_root/tools/"
+rsync -a --delete templates/ "$install_root/templates/"
 python3 "$install_root/tools/validate_skillset.py" "$install_root"
 
 # Or repo-level skills
@@ -47,6 +48,7 @@ rsync -a --delete goal-review/ "$install_root/goal-review/"
 rsync -a --delete goal-verify/ "$install_root/goal-verify/"
 rsync -a --delete adapters/ "$install_root/adapters/"
 rsync -a --delete tools/ "$install_root/tools/"
+rsync -a --delete templates/ "$install_root/templates/"
 python3 "$install_root/tools/validate_skillset.py" "$install_root"
 ```
 
@@ -60,9 +62,14 @@ goal-review/
 goal-verify/
 adapters/
 tools/
+templates/
 ```
 
-Only directories containing `SKILL.md` are skills. `adapters/` and `tools/` are supporting material, but keep them next to the skills so relative references and validation commands continue to work.
+只有包含 `SKILL.md` 的目录才是技能。`adapters/`、`tools/` 和 `templates/` 都是支持材料，应与技能目录保持同级，确保相对引用和校验命令可用。
+
+## 可选用户配置模板
+
+`templates/AGENTS.md` 和 `templates/config.toml` 来自原 `main` 分支的安装模型。上面的 `rsync` 命令不会自动应用它们，因为这些文件会影响全局 Codex 行为和本地自主执行设置。只有在确认这些默认值适合用户环境后，才将它们审阅并合并到 `${CODEX_HOME:-$HOME/.codex}`。
 
 ## Recommended invocation
 
