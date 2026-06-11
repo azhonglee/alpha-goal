@@ -41,14 +41,14 @@ If a referenced stage file is unavailable, stay within this router, use the comp
 - No continuing past review feedback, complexity, scope expansion, uncertainty, or completion-readiness review triggers without a current Review Record.
 - No Verification Verdict, no final completion claim.
 - No final claim may exceed the verified claim boundary.
-- 默认不创建 spec 或 plan；只有风险、复杂度、交接或用户请求需要持久化 artifact 时才创建。
-- 依赖 spec 或 plan 前，必须读取当前版本和状态。
-- 不得基于 `superseded` artifact 执行；需要用户批准时，不得把 `draft` artifact 当作已批准。
-- plan 不得重写 Goal Contract 或 active spec 中的 intent、success criteria、non-goals、constraints 或 decision boundaries。
+- Do not create spec or plan by default; escalate only for risk, complexity, handoff, or user request.
+- Read the current version and status before relying on any spec or plan.
+- Do not execute from a `superseded` artifact. Do not treat `draft` as approved when approval is required.
+- A plan must not redefine Goal Contract or active spec intent, success criteria, non-goals, constraints, or decision boundaries.
 
 ## Artifact locations
 
-优先使用目标仓库已有约定。没有约定时，使用以下默认路径：
+Prefer existing repo conventions. If none exist, use:
 
 - spec: `docs/design/YYYYMMDD-<slug>-spec.md`
 - plan: `docs/plans/YYYYMMDD-<slug>-plan.md`
@@ -56,7 +56,7 @@ If a referenced stage file is unavailable, stay within this router, use the comp
 - command/output evidence: `.goal-loop/evidence/YYYYMMDD-<slug>/`
 - scratch artifacts: `.goal-loop/tmp/YYYYMMDD-<slug>/`
 
-`<slug>` 描述 goal boundary。不要为了空目录提前创建 artifact 路径。写入 `.goal-loop/` 前，确认它被 `.gitignore` 忽略；如果没有忽略，必须把这个风险纳入 Goal Contract 或 Iteration Record，而不是静默污染提交。
+`<slug>` names the goal boundary. Do not create empty artifact directories. Before writing `.goal-loop/`, confirm it is gitignored; otherwise record the risk in the Goal Contract or Iteration Record.
 
 ## Routing
 
