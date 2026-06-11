@@ -1,0 +1,70 @@
+#!/usr/bin/env python3
+"""Validate a local Codex goal-loop skillset layout.
+
+This is intentionally lightweight: it checks that each skill directory has a
+SKILL.md file with YAML front matter containing name and description.
+It does not validate Codex runtime behavior.
+"""
+
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+REQUIRED_SKILLS = ["goal-loop", "goal-frame", "goal-iterate", "goal-verify"]
+
+
+def parse_front_matter(text: str) -> dict[str, str]:
+    if not text.startswith("---\n"):
+        raise ValueError("missing opening YAML front matter delimiter")
+    end = text.find("\n---", 4)
+    if end == -1:
+        raise ValueError("missing closing YAML front matter delimiter")
+    raw = text[4:end].strip().splitlines()
+    data: dict[str, str] = {}
+    for line in raw:
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        match = re.match(r"^([A-Za-z0-9_-]+):\s*(.*)$", line)
+        if not match:
+            raise ValueError(f"unsupported front matter line: {line!r}")
+        data[match.group(1)] = match.group(2).strip().strip('"').strip("'")
+    return data
+
+
+def main() -> int:
+    root = Path(sys.argv[1]) if len(sys.argv) > 1 else Path.cwd()
+    ok = True
+
+    print(f"Validating skillset root: {root}")
+
+    for skill in REQUIRED_SKILLS:
+        skill_dir = root / skill
+        skill_md = skill_dir / "SKILL.md"
+        if not skill_md.exists():
+            print(f"FAIL {skill}: missing {skill_md}")
+            ok = False
+            continue
+        try:
+            data = parse_front_matter(skill_md.read_text(encoding="utf-8"))
+        except Exception as exc:  # noqa: BLE001
+            print(f"FAIL {skill}: {exc}")
+            ok = False
+            continue
+        name = data.get("name")
+        description = data.get("description")
+        if name != skill:
+            print(f"FAIL {skill}: front matter name is {name!r}")
+            ok = False
+        elif not description:
+            print(f"FAIL {skill}: missing description")
+            ok = False
+        else:
+            print(f"PASS {skill}: {description[:90]}")
+
+    return 0 if ok else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
