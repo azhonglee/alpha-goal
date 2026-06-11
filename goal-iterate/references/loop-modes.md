@@ -5,13 +5,14 @@ Use one mode per iteration. The mode sets the evidence shape; it is not a new st
 ## Modes
 
 - `discovery`: inspect repo, rules, current behavior, logs, ownership, or existing work.
-- `interview`: clarify one missing Goal field, then return to `goal-frame` when the contract changes.
 - `debug`: reproduce, isolate, and explain a failure before fixing.
 - `tdd`: create or adjust a failing test before implementation, or state why a substitute contract check is needed.
 - `implementation`: make the smallest acceptance-relevant change.
 - `refactor`: simplify structure while preserving behavior with evidence.
 - `spike`: test feasibility with bounded or throwaway work; do not claim completion from spike evidence alone.
 - `hardening`: add edge cases, coverage, compatibility checks, docs, or cleanup after core behavior works.
+
+Do not use `goal-iterate` for interview. If an iteration needs clarification, return `REFRAME_NEEDED` and let `goal-frame` update the Goal Contract.
 
 ## Evidence Types
 
