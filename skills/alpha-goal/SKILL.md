@@ -41,7 +41,7 @@ Artifact safety gate:
 
 Minimum context can be compact: task statement, desired outcome, probable intent, known evidence, constraints, unknowns, decision-boundary gaps, and likely touchpoints. Store it at `.alpha-goal/context/YYYYMMDD-<slug>.md` only when the gate passes.
 
-Announce route, depth profile, ambiguity, artifact status, and the next question or read-only action.
+Announce only the state that helps the user decide or follow the route. For simple `EXPLORE`, a lightweight route note is enough; report depth, ambiguity, or artifact status only when they materially affect clarification, persistence, or handoff.
 
 ### 2. Route
 

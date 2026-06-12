@@ -19,7 +19,9 @@ All must be true before editing implementation files:
 - `.worktrees/`, `.alpha-goal/`, or alternative process-artifact paths are gitignored or explicitly approved;
 - strongest material risk, loop mode, evidence floor, and mutation preflight are recorded.
 
-If these semantics are missing, ambiguous, or contradicted, do not mutate. Return to `alpha-goal`. Do not reject valid context merely because it uses different headings.
+Before mutation, cite the contract source you actually read: file path, chat excerpt, or explicit equivalent context. If it is not locally available or included in the prompt, do not infer it from phrases like "existing Goal Contract".
+
+If these semantics are missing, ambiguous, unavailable, or contradicted, do not mutate. Return to `alpha-goal`. Do not reject valid context merely because it uses different headings.
 
 Load bundled resources only when needed:
 
@@ -54,7 +56,8 @@ If persistent goal tooling is already active, align the slice with that objectiv
 ### 2. Execute
 
 - Run or manually record mutation preflight before edits.
-- Make one coherent change, probe, test, audit, or evidence-collection step.
+- For a mutation slice, make one coherent change and collect the evidence needed for that change.
+- For a read-only/probe slice, do not mutate; produce evidence, diagnosis, or route decisions only.
 - Stay inside the approved target, scope, non-goals, and claim boundary.
 - Preserve unrelated user changes; never stash, revert, move, or overwrite them without approval.
 - For debug work, gather falsifiable evidence before patching.

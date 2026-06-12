@@ -56,6 +56,7 @@ Confirm:
 - approved context and durable specs/plans are current or explicitly superseded;
 - Iteration Record goal type, dynamic plan, execution, feedback, and learning match the final diff and claim;
 - changed files match target and non-goals;
+- an empty diff supports deliverability only when the approved context expects no file changes and the evidence bundle covers that no-change claim; otherwise return `BLOCKED`, `REFRAME`, or `NEXT_ITERATION`, not `PASS_TO_FINAL`;
 - mutation evidence comes from an isolated edit path, not a primary `main`/`master` checkout;
 - `.worktrees/` or `.alpha-goal/` paths, if used, are gitignored or approved;
 - fresh checks ran after the last material change, or missing checks have a stated blocker/substitute evidence;
