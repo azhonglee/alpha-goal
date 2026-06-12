@@ -23,7 +23,7 @@ Do not use it for ordinary standalone review, security scan, loophole scan, or a
 
 A positive verdict needs at least:
 
-- user-reviewed Goal Contract with Desired Outcome, In-Scope, Out-of-Scope / Non-goals, Decision Boundaries, Constraints, Testable acceptance criteria, and a derivable claim boundary;
+- reviewed Goal Contract, interview summary, chat-only contract, or equivalent approved context with semantic evidence for desired outcome, included scope, excluded scope/non-goals, decision boundaries, constraints, acceptance/evidence expectations, and claim boundary;
 - current durable spec/plan if the contract or Iteration Record references it;
 - Iteration Record or equivalent diff/evidence bundle;
 - Debug Receipt when loop mode is `debug` or the claim mentions a bug/root cause fix;
@@ -33,7 +33,7 @@ A positive verdict needs at least:
 - exact test/check/probe commands and outcomes, or an explicit blocker;
 - feedback-phase record for user/reviewer/test feedback.
 
-If Goal Contract, target/scope boundary, Testable acceptance criteria, claim boundary, or evidence bundle is missing, return `REFRAME`; do not guess.
+If approved context, target/scope boundary, acceptance semantics, claim boundary, or evidence bundle is missing, return `REFRAME`; do not guess. Do not fail solely because headings or formatting differ.
 
 Use `scripts/evidence-summary.sh` for read-only diff/status evidence.
 
@@ -52,7 +52,7 @@ VERIFY does two things:
 
 Check:
 
-- each Testable acceptance criterion has fresh, relevant, final-state evidence;
+- each acceptance expectation has fresh, relevant, final-state evidence;
 - contract and durable-spec success criteria are covered inside the claim boundary or explicitly excluded;
 - active plan evidence gates are satisfied, superseded, or blocked;
 - Iteration Record goal type, dynamic plan, execution, feedback, and learning match the final claim;

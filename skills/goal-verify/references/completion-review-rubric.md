@@ -6,7 +6,7 @@
 
 返回 `PASS_TO_FINAL` 前确认：
 
-- Goal Contract current，含 Testable acceptance criteria，且 claim boundary 可从 Desired Outcome、In-Scope、Out-of-Scope / Non-goals 和 Decision Boundaries 推导；
+- Goal Contract 或等价 approved context current，且可语义推导 acceptance、included/excluded scope、decision boundaries 和 claim boundary；不要依赖固定字段名；
 - changed files 匹配 target 和 non-goals；
 - Iteration Record 的 dynamic plan、execution、feedback 与当前 diff 一致；
 - 最后一处 material change 之后有 fresh checks；

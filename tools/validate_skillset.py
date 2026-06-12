@@ -297,10 +297,8 @@ def check_consistency(root: Path) -> bool:
         for phrase in [
             "Artifact safety gate",
             "request_user_input` only for 2-3 structured",
-            "Goal Contract should include",
-            "Out-of-Scope / Non-goals",
-            "Decision Boundaries",
-            "Testable acceptance criteria",
+            "not mandatory headings",
+            "equivalent wording",
             "Enter `goal-iterate` only when the Goal Contract passes the user's review",
             "</Process>",
             ".alpha-goal/",
@@ -308,6 +306,15 @@ def check_consistency(root: Path) -> bool:
         ]:
             if phrase not in text:
                 ok = fail(f"skills/alpha-goal/SKILL.md: missing alpha-goal guidance {phrase!r}")
+        lower_text = text.lower()
+        semantic_groups = {
+            "non-goal semantics": ["non-goals", "out-of-scope", "excluded scope"],
+            "decision-boundary semantics": ["decision boundaries", "what you may decide", "user-owned decisions"],
+            "acceptance semantics": ["acceptance criteria", "success criteria", "acceptance/evidence"],
+        }
+        for label, options in semantic_groups.items():
+            if not any(option in lower_text for option in options):
+                ok = fail(f"skills/alpha-goal/SKILL.md: missing {label}")
 
     if loop_modes.exists():
         text = loop_modes.read_text(encoding="utf-8")

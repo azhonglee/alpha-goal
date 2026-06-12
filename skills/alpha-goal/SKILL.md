@@ -197,22 +197,22 @@ If artifact safety is satisfied, write:
 
 If artifact safety is not satisfied, output both in chat.
 
-Goal Contract should include:
-- Metadata (profile, rounds, final ambiguity, threshold, context type)
-- Context snapshot reference/path
-- Clarity breakdown table
-- Intent (why the user wants this)
-- Desired Outcome
-- In-Scope
-- Out-of-Scope / Non-goals
-- Decision Boundaries (what you may decide without confirmation)
-- Constraints
-- Testable acceptance criteria
-- Assumptions exposed + resolutions
-- Pressure-pass findings (which answer was revisited, and what changed)
-- Brownfield evidence vs inference notes for any repository-grounded confirmation questions
-- Technical context findings
-- Full or condensed transcript
+Goal Contract should cover the semantic content below. These are not mandatory headings; use any concise structure and equivalent wording when clearer:
+- profile, rounds, final ambiguity, threshold, and context type;
+- context reference or artifact path;
+- clarity breakdown;
+- intent, meaning why the user wants this;
+- desired outcome;
+- included scope;
+- excluded scope / non-goals;
+- decision boundaries, meaning what you may decide without confirmation;
+- constraints;
+- acceptance/evidence expectations;
+- assumptions exposed and resolved;
+- pressure-pass findings, including which answer was revisited and what changed;
+- brownfield evidence vs inference notes for repository-grounded confirmations;
+- technical context findings;
+- full or condensed transcript.
 
 ## Phase 5. Verify
 
