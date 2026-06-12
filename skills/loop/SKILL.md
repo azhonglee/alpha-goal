@@ -44,8 +44,8 @@ Load bundled resources only when needed:
 <Process>
 
 Iteration can be executed in two modes:
-1. `Native`: default mode. If you can use `goals` / equivalent, use this mode.
-2. `Custom`: fallback mode like this:
+1. `Native`: use only when an active native goal already exists, or the user explicitly asks to create one.
+2. `Custom`: default mode for ordinary loop execution:
 
 ```text
 Generate Goal Objective -> Dynamic planning -> Execution -> Feedback -> Next iteration
@@ -54,12 +54,12 @@ Generate Goal Objective -> Dynamic planning -> Execution -> Feedback -> Next ite
 ```
 ## Native mode
 
-1. Call `create_goal` with an objective that restates the Goal Contract.
-2. Set `token_budget` only if the user explicitly provides one.
-3. Execute the workflow to completion.
-4. Validate the final state before claiming success.
-5. Call `update_goal` with `complete` only when the objective is actually achieved.
-6. Do not create a goal for ordinary task requests that do not explicitly ask for one.
+1. Reuse the active native goal when present.
+2. Call `create_goal` only when the user explicitly asks to create a goal; restate the Goal Contract as the objective.
+3. Set `token_budget` only if the user explicitly provides one.
+4. Execute the workflow to completion.
+5. Validate the final state before claiming success.
+6. Call `update_goal` with `complete` only when the objective is actually achieved.
 
 If native mode is not available, use custom mode.
 
