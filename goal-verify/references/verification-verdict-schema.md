@@ -48,7 +48,7 @@ Compare user wording, implemented boundary, tested boundary, highest practical b
 
 ### Risk/evidence review
 
-Record the risk tier, expected evidence floor, loop mode fit, Debug Receipt status when relevant, whether a Review Record was required and current for its freshness boundary, and whether the evidence was collected after the last material change.
+Record the risk tier, expected evidence floor, loop mode fit, Debug Receipt status when relevant, whether a Review Record was required and current for its freshness boundary, whether applicable project rules were read or explicitly not independently verified, and whether the evidence was collected after the last material change.
 
 ### Fresh checks run
 

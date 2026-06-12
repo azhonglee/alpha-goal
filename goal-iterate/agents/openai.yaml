@@ -1,6 +1,6 @@
 interface:
   display_name: "Goal Iterate"
-  short_description: "Run one evidence loop"
+  short_description: "Run one bounded evidence loop"
   default_prompt: "Use $goal-iterate to perform one bounded evidence-producing iteration under the current Goal Contract."
 
 policy:

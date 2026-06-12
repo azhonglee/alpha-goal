@@ -4,6 +4,21 @@ Use only when `goal-iterate` decides a durable route is needed. A plan is not a 
 
 A plan states how to proceed now, the next step, evidence, and risks. It must not rewrite Goal Contract or active spec goals, success criteria, non-goals, or decision boundaries.
 
+Prefer existing repo plan conventions. If none exist, use `docs/plans/YYYYMMDD-<slug>-plan.md`; `<slug>` names the goal boundary, not the implementation method.
+
+A plan is Loop-owned: forecast upcoming loops, evidence gates, review gates, and current state; update when evidence changes the route; mark invalid routes as `superseded` instead of silently rewriting them. Before each iteration, read any active plan. After each material iteration, update plan status, slice state, evidence link, or change log before later stages rely on it.
+
+Create or update a plan when loop evidence shows any condition holds:
+
+- work crosses multiple implementation loops, modules, repos, submodules, or ownership surfaces;
+- execution needs dependent slices and later work must resume without chat history;
+- multiple workstreams or contested ownership surfaces need coordination;
+- migration, architecture, rollback, compatibility, or evidence sequencing decisions must persist;
+- earlier loop evidence invalidated the route and the new route must be traceable;
+- the user asks for a plan, execution artifact, handoff route, or status artifact.
+
+If artifact writes are not allowed, record the plan in the Iteration Record and state that no file was written.
+
 ## Metadata
 
 - Title:

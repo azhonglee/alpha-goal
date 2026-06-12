@@ -31,11 +31,11 @@ scripts/install.sh
 脚本会执行以下操作：
 
 - 将顶层 `*/SKILL.md` 所在目录软链接到 `${CODEX_HOME:-$HOME/.codex}/skills/`。
-- 将 `templates/AGENTS.md` 合并到 Codex home 的 `AGENTS.md` 受管理模板块。
-- 将 `templates/config.toml` 中缺失的设置补齐到 Codex home 的 `config.toml`，不会覆盖已有值。
+- 默认不修改 Codex home 的 `AGENTS.md` 或 `config.toml`，只安装 skill 软链接。
+- 只有显式传入 `--sync-user-templates` 时，才会把 `templates/AGENTS.md` 合并到 Codex home 的 `AGENTS.md`，并把 `templates/config.toml` 中缺失的设置补齐到 Codex home 的 `config.toml`；模板不设置 sandbox 权限或抑制不稳定特性警告，安全边界仍由用户现有配置决定。
 - 清理旧版本可能留在 `skills/` 下、且指向本仓库的旧支持目录软链接。
 - 校验目标 `skills/` 中的 skill 软链接是否指向当前源码目录。
-- 安装后运行源码中的 `tools/validate_skillset.py` 校验技能包布局。
+- 安装后运行源码中的 `tools/validate_skillset.py` 校验技能包布局。`validate_skillset.py` 只验证布局、元数据、引用可发现性和少量一致性规则；不能证明实际路由、误触发、reference 加载策略或验证边界正确。
 
 如果要安装到其他位置，使用 `--codex-home` 或显式设置 `CODEX_HOME`：
 
@@ -48,6 +48,12 @@ CODEX_HOME=/path/to/codex-home scripts/install.sh
 
 ```bash
 scripts/install.sh --force
+```
+
+如果确实希望同步用户级模板，显式追加 `--sync-user-templates`。这会修改 Codex home 的 `AGENTS.md` / `config.toml`，影响之后的 Codex 会话：
+
+```bash
+scripts/install.sh --sync-user-templates
 ```
 
 默认输出只保留安装摘要。如果需要查看每个软链接、模板合并和校验过程，追加 `--verbose`：
@@ -79,13 +85,14 @@ templates/
 
 ## 用户配置模板
 
-`templates/AGENTS.md` 和 `templates/config.toml` 继承自原 `main` 分支的安装模型。默认安装会把这些模板合并到真实 Codex home；执行前应确认这些默认值适合当前用户环境。
+`templates/AGENTS.md` 和 `templates/config.toml` 继承自原 `main` 分支的安装模型，但现在只在 `--sync-user-templates` 下应用。执行前应确认这些默认值适合当前用户环境。`templates/config.toml` 只补齐协作/多 agent 相关开关，不设置 `sandbox_mode`，也不抑制不稳定特性警告。
 
 做本地验证时，建议使用临时 `CODEX_HOME`，避免污染真实配置：
 
 ```bash
 tmp_codex_home="$(mktemp -d)"
 CODEX_HOME="$tmp_codex_home" scripts/install.sh
+CODEX_HOME="$tmp_codex_home" scripts/install.sh --sync-user-templates
 python3 tools/validate_skillset.py .
 rm -rf "$tmp_codex_home"
 ```
@@ -96,6 +103,12 @@ rm -rf "$tmp_codex_home"
 
 ```text
 $goal-loop 帮我实现这个需求：...
+```
+
+需要非平凡只读审查时，也可以走总入口先确认目标、规则和证据边界：
+
+```text
+$goal-loop 对这个仓库做只读审查，先确认目标和证据边界，不要改文件。
 ```
 
 也可以显式调用某个阶段：
@@ -116,7 +129,7 @@ $goal-verify 检查当前 diff 和测试证据，判断能否最终交付。
 - 详细规则放在 `references/`，只在需要时加载。
 - Spec 和 plan 只在风险或复杂度升高时使用，不作为默认流程负担。
 - Spec 记录稳定需求，plan 记录当前执行路线和路线调整历史。
-- 脚本只作为只读辅助工具，不替代工程判断。
+- 阶段内辅助脚本只作为只读证据收集工具，不替代工程判断；安装脚本是显式安装入口，可能修改 Codex home。
 - 项目特有命令和约定应放在目标仓库的 `AGENTS.md`，不要塞进这些跨仓库 skill。
 
 ## 默认产物路径
@@ -129,7 +142,7 @@ $goal-verify 检查当前 diff 和测试证据，判断能否最终交付。
 - command/output evidence：`.goal-loop/evidence/YYYYMMDD-<slug>/`
 - scratch artifacts：`.goal-loop/tmp/YYYYMMDD-<slug>/`
 
-写入运行时证据和临时文件前，必须先把 `.goal-loop/` 加入 `.gitignore`，避免把 scratch 内容提交进仓库。
+写入运行时证据和临时文件前，必须先确认 `.goal-loop/` 已被 gitignored。如果未被忽略，不要静默修改 `.gitignore`；改用已批准的路径，或在 Goal Contract 中记录用户明确同意的持久化路径。
 
 ## 阶段输出
 

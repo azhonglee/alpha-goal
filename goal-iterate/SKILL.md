@@ -1,6 +1,6 @@
 ---
 name: goal-iterate
-description: Perform one bounded implementation iteration under an existing Goal Contract, using loop modes, evidence records, debug receipts, mutation preflight, isolated edit paths, minimal patching, and plan escalation when risk or complexity requires it. Use after goal-frame is READY_FOR_ITERATION.
+description: Stage skill for the goal-loop package. Perform one bounded implementation iteration under an existing Goal Contract, using loop modes, evidence records, debug receipts, mutation preflight, isolated edit paths, minimal patching, and plan escalation when risk or complexity requires it. Use only when explicitly named by the user or selected by goal-loop after goal-frame is READY_FOR_ITERATION.
 ---
 
 # Goal Iterate
@@ -18,7 +18,7 @@ Required before mutation:
 - Target repo/path is closed.
 - Applicable local rules have been read.
 - Mutation preflight is recorded.
-- Isolated edit path is known.
+- Isolated edit path is known, or can be created as the first setup action after preflight.
 - Risk tier and evidence floor are known.
 - Repo, worktree, submodule, and ownership boundaries are understood.
 - Any active spec referenced by the Goal Contract has been read.
@@ -37,7 +37,7 @@ Mutation Preflight:
 - status:
 - worktree list:
 - primary checkout:
-- isolated edit path:
+- isolated edit path or setup target:
 - applicable rule files:
 - nested repos/submodules:
 - active spec:
@@ -50,7 +50,15 @@ Mutation Preflight:
 
 You may use `scripts/mutation-preflight.sh` to collect read-only git state. Add the smallest relevant baseline health check when it is cheap and available, such as an existing focused test, build, typecheck, lint, or documented reason no baseline can run. If baseline health fails, record the failing command and decide whether it is in scope before treating later failures as regressions.
 
-Use `references/worktree-safety.md` when creating or validating an isolated edit path, especially if the current checkout may be the primary branch. Use `references/iteration-record-schema.md` for field definitions when the output contract is unclear. Use `references/loop-modes.md` when selecting a loop mode, debugging, TDD, spike, refactor, or hardening path. Use `references/plan-template.md` only when a durable route is needed.
+If the task starts from a primary checkout and no isolated edit path exists yet, ITERATE may create the isolated worktree as its first setup mutation after preflight only when the Goal Contract target is closed, project rules allow the chosen worktree root, `.worktrees/` or the chosen root is ignored or explicitly approved, and no implementation file is edited before entering the isolated worktree. Record the setup command and then rerun or update preflight from inside the isolated edit path before implementation mutation.
+
+Use references only when their detail is needed:
+
+- `references/worktree-safety.md` when creating or validating an isolated edit path, especially if the current checkout may be the primary branch.
+- `references/execution-boundaries.md` when delegation, ownership, submodules, nested repos, generated outputs, or unrelated user changes matter.
+- `references/loop-modes.md` when selecting a loop mode, debugging, TDD, spike, refactor, or hardening path.
+- `references/plan-template.md` only when a durable route is needed.
+- `references/iteration-record-schema.md` for field definitions when the output contract is unclear.
 
 ## Forbidden by default
 
@@ -96,65 +104,14 @@ For `debug`, do not patch from a guessed cause. Close the diagnostic path with a
 
 Only `ROOT_CAUSE_CONFIRMED` authorizes a fix iteration. `NOT_REPRODUCED` and `BLOCKED` may support only a bounded diagnostic or no-fix claim.
 
-## Plan escalation
+## Conditional detail gates
 
-Do not create a plan by default. Use one only when the next step is no longer safe to hold in chat.
+Do not load or write extra process artifacts by default. Use the smallest detail surface that keeps the iteration safe:
 
-Create or update a plan from `references/plan-template.md` when loop evidence shows any condition holds:
+- Plan escalation: load `references/plan-template.md` only when work crosses multiple implementation loops, modules, repos, submodules, ownership surfaces, dependent workstreams, or needs durable evidence sequencing, route traceability, rollback/compatibility decisions, or a requested handoff/status artifact. Ordinary isolated worktree safety by itself does not require a plan. A plan is Loop-owned and must not redefine the Goal Contract or active spec.
+- Delegation and ownership: load `references/execution-boundaries.md` when using subagents or when touched paths, generated outputs, nested repos, submodules, or unrelated user changes make ownership non-trivial.
 
-- work crosses loops, modules, repos, worktrees, submodules, or ownership surfaces;
-- execution needs dependent slices and later work must resume without chat history;
-- multiple workstreams need coordination;
-- migration, architecture, rollback, compatibility, or evidence sequencing decisions must persist;
-- earlier loop evidence invalidated the route and the new route must be traceable;
-- the user asks for a plan, execution artifact, handoff route, or status artifact.
-
-Prefer existing repo plan conventions. If none exist, use:
-
-```text
-docs/plans/YYYYMMDD-<slug>-plan.md
-```
-
-`<slug>` names the goal boundary, not the implementation method.
-
-A plan is Loop-owned:
-
-- forecast upcoming loops, evidence gates, review gates, and current state;
-- never redefine Goal Contract or active spec intent, success criteria, non-goals, constraints, or decision boundaries;
-- update when evidence changes the route;
-- mark as `superseded`, not silently rewritten, when the route is no longer valid.
-
-Maintain the plan as current view plus append-only history:
-
-- update `Current Strategy`, `Execution Slices`, and current status for the next loop;
-- append decisions, evidence, blockers, and route changes to `Change Log`;
-- mark obsolete slices `superseded` with reason; do not delete them;
-- treat `draft` as working route only, not reviewed or approved.
-
-Before each iteration, read the active plan if it exists. After each material iteration, update plan status, slice state, evidence link, or change log before later stages rely on it. If artifact writes are not allowed, record the plan in the Iteration Record and state no file was written.
-
-## Delegation boundary
-
-Use subagents only for bounded, self-contained work.
-
-- Provide task id, exact scope, working directory, ownership surface, current Goal/spec/plan evidence, constraints, expected evidence, and return contract.
-- Parallelize only when ownership is independent and shared files or generated outputs are not contested.
-- Require a receipt: `DONE`, `DONE_WITH_CONCERNS`, `NEEDS_CONTEXT`, or `BLOCKED`.
-- Inspect delegated files, ownership, evidence, and concerns before accepting the result.
-- Delegated output never bypasses Goal Contract, Iteration Record, Review Record, Verification Verdict, risk-tier evidence, or fresh final checks.
-
-## Ownership boundaries
-
-Before editing, identify:
-
-- repository root and current branch;
-- whether the current directory is a linked worktree;
-- dirty state and unrelated user changes;
-- owning git root for each touched path;
-- nested `.git` directories or submodules under touched paths;
-- applicable `AGENTS.md`, `AGENTS.override.md`, `CLAUDE.md`, or `code_review.md` files.
-
-Do not modify across repository, worktree, submodule, or ownership boundaries unless the Goal Contract explicitly includes that boundary and the user request, confirmation, or recorded decision boundary authorizes it.
+Route to `goal-review` if plan, delegation, ownership, architecture, or scope decisions become material.
 
 ## Iteration rules
 

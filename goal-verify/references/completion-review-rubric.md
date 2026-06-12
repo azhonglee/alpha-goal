@@ -11,6 +11,7 @@ A task can pass to final only when:
 - tested boundary matches the final claim;
 - verification can run in the target final state;
 - changed files match the Goal Contract target and non-goals;
+- applicable project rules were read, or the verdict explicitly narrows itself to a user-provided evidence bundle and records that project-rule compliance was not independently verified;
 - expected checks were run or a clear blocker is documented;
 - review feedback was classified when present;
 - Review Record exists and covers the latest material change when feedback, complexity, scope, architecture, ownership, or uncertainty triggered review;
