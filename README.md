@@ -125,7 +125,8 @@ $goal-verify 检查当前 diff 和测试证据，判断能否最终交付。
 - 路由入口只负责分派，具体工作交给阶段 skill。
 - 每个阶段只产出一份便于追踪的记录。
 - 详细规则放在 `references/`，只在需要时加载。
-- 诊断任务先区分用户可见容器、子模块、数据实体、API/RPC 和日志证据，不把业务域里的 artifact/product item 混同为 Goal Loop 的 `Artifacts` 字段。
+- 诊断任务先对齐用户可见对象、子模块、数据实体、接口/RPC 和日志证据，避免把聚合页面或空间误当成单一业务实体。
+- Goal Loop 的 `Artifacts` 只表示流程产物；业务域里的对象、条目或产物应记录在 Target、Acceptance、Non-goals 或 Evidence plan 中。
 - Debug receipt 要与风险匹配：复杂 RCA 需要竞争假设、entity/interface/log 对齐和根因声明验证；低风险单函数/单分支 bug 可用 focused failing test、直接代码分歧和修复后测试形成紧凑证据。
 - Spec 和 plan 只在风险或复杂度升高时使用，不作为默认流程负担。
 - Spec 记录稳定需求，plan 记录当前执行路线和路线调整历史。
