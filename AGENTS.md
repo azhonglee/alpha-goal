@@ -17,6 +17,12 @@
 
 创建或修改技能时，参考 OpenAI Codex 的 Create a Skill 指南，并优先使用 `skill-creator`。技能目录使用短横线命名，必须包含 `SKILL.md`。`SKILL.md` 保持短小，把详细规则放进同级 `references/`；脚本放进同级 `scripts/`。Markdown 文档保持简洁、可执行，路径和命令使用反引号。Shell 脚本使用 Bash，保持 `set -euo pipefail`，函数名采用 `snake_case`。
 
+设计skill时，需要考虑以下几点：
+
+- 确保合理、正确且优雅
+- 避免形式主义，保持简洁可靠
+- 抽象出通用的决策规则，避免case-by-case处理
+
 ## Testing Guidelines
 
 当前没有独立测试框架。修改技能布局、front matter、安装文档、模板或阶段输出契约后，至少运行 `python3 tools/validate_skillset.py .`。修改 shell 脚本时运行对应 `bash -n`。修改 `templates/config.toml` 时验证 TOML 可解析。修改安装说明时必须用临时 `CODEX_HOME` 验证 `scripts/install.sh`，不要污染真实用户配置。
