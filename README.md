@@ -15,7 +15,7 @@ INTENT -> ALPHA-GOAL(discovery + interview + contract) -> ITERATE(dynamic plan -
 
 ## 安装
 
-默认安装到真实 Codex home，并把 `skills/` 下的 skill 软链接到 `$HOME/.codex/skills/`：
+默认安装到真实 Codex home，并在 `$HOME/.codex/skills/` 下创建一个 `alpha-goal` 软链接，指向本仓库的 `skills/`：
 
 ```bash
 scripts/install.sh
@@ -23,10 +23,10 @@ scripts/install.sh
 
 脚本会执行以下操作：
 
-- 将 `skills/*/SKILL.md` 所在技能目录软链接到 `${CODEX_HOME:-$HOME/.codex}/skills/`。
+- 创建 `${CODEX_HOME:-$HOME/.codex}/skills/alpha-goal` 软链接，目标是本仓库的 `skills/` 目录。
 - 默认把 `templates/AGENTS.md` 合并到 Codex home 的 `AGENTS.md`，并把 `templates/config.toml` 中缺失的设置补齐到 Codex home 的 `config.toml`；模板只补齐 multi-agent、child AGENTS 和结构化 `request_user_input` 相关开关，不设置 sandbox 权限、休眠行为或不稳定特性警告抑制项。
-- 自动替换指向本仓库旧顶层布局的同名 skill 软链接，并清理旧版本可能留在目标 `skills/` 下、且指向本仓库的 obsolete `goal-frame`、`goal-loop` 或支持目录旧软链接。
-- 校验目标 `skills/` 中的 skill 软链接是否指向当前源码目录。
+- 自动替换指向本仓库旧顶层布局或旧 `skills/alpha-goal` 目录的 `alpha-goal` 软链接，并清理旧版本可能留在目标 `skills/` 下、且指向本仓库的 `loop`、`verify`、obsolete `goal-frame`、`goal-loop` 或支持目录旧软链接。
+- 校验目标 `skills/alpha-goal` 软链接是否指向当前仓库的 `skills/` 目录，并能通过该链接访问所有必需 skill。
 - 安装前运行源码中的 `tools/validate_skillset.py` 校验技能包布局。`validate_skillset.py` 只验证布局、元数据、引用可发现性和少量一致性规则；不能证明实际路由、误触发、reference 加载策略或验证边界正确。
 
 安装到其他位置：

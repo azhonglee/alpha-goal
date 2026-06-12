@@ -1,4 +1,5 @@
 .worktrees/
+.alpha-goal/
 .goal-loop/
 codex/
 __pycache__/

@@ -341,6 +341,10 @@ def check_consistency(root: Path) -> bool:
             ok = fail("scripts/install.sh: user template sync must be gated by a variable")
         if "sync_user_templates=true" not in text:
             ok = fail("scripts/install.sh: user template sync should be enabled by default")
+        if 'install_source="$source_skill_root"' not in text:
+            ok = fail("scripts/install.sh: alpha-goal symlink should target repository skills/")
+        if 'link_path "$install_source" "$target_root/$install_link_name" "$install_link_name"' not in text:
+            ok = fail("scripts/install.sh: must install a single alpha-goal skillset symlink")
         if "preflight_install_targets" not in text:
             ok = fail("scripts/install.sh: missing install target preflight before user-template sync")
         preflight_pos = text.find("\npreflight_install_targets\n\nif [[ \"$sync_user_templates\" == true ]]")
