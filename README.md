@@ -31,8 +31,7 @@ scripts/install.sh
 脚本会执行以下操作：
 
 - 将顶层 `*/SKILL.md` 所在目录软链接到 `${CODEX_HOME:-$HOME/.codex}/skills/`。
-- 默认不修改 Codex home 的 `AGENTS.md` 或 `config.toml`，只安装 skill 软链接。
-- 只有显式传入 `--sync-user-templates` 时，才会把 `templates/AGENTS.md` 合并到 Codex home 的 `AGENTS.md`，并把 `templates/config.toml` 中缺失的设置补齐到 Codex home 的 `config.toml`；模板不设置 sandbox 权限或抑制不稳定特性警告，安全边界仍由用户现有配置决定。
+- 默认把 `templates/AGENTS.md` 合并到 Codex home 的 `AGENTS.md`，并把 `templates/config.toml` 中缺失的设置补齐到 Codex home 的 `config.toml`；模板不设置 sandbox 权限或抑制不稳定特性警告，安全边界仍由用户现有配置决定。
 - 清理旧版本可能留在 `skills/` 下、且指向本仓库的旧支持目录软链接。
 - 校验目标 `skills/` 中的 skill 软链接是否指向当前源码目录。
 - 安装后运行源码中的 `tools/validate_skillset.py` 校验技能包布局。`validate_skillset.py` 只验证布局、元数据、引用可发现性和少量一致性规则；不能证明实际路由、误触发、reference 加载策略或验证边界正确。
@@ -50,10 +49,10 @@ CODEX_HOME=/path/to/codex-home scripts/install.sh
 scripts/install.sh --force
 ```
 
-如果确实希望同步用户级模板，显式追加 `--sync-user-templates`。这会修改 Codex home 的 `AGENTS.md` / `config.toml`，影响之后的 Codex 会话：
+如果需要只安装 skill symlink、不更新用户级模板，显式追加 `--no-sync-user-templates`：
 
 ```bash
-scripts/install.sh --sync-user-templates
+scripts/install.sh --no-sync-user-templates
 ```
 
 默认输出只保留安装摘要。如果需要查看每个软链接、模板合并和校验过程，追加 `--verbose`：
@@ -85,14 +84,13 @@ templates/
 
 ## 用户配置模板
 
-`templates/AGENTS.md` 和 `templates/config.toml` 继承自原 `main` 分支的安装模型，但现在只在 `--sync-user-templates` 下应用。执行前应确认这些默认值适合当前用户环境。`templates/config.toml` 只补齐协作/多 agent 相关开关，不设置 `sandbox_mode`，也不抑制不稳定特性警告。
+`templates/AGENTS.md` 和 `templates/config.toml` 默认同步到 Codex home。执行前应确认这些默认值适合当前用户环境。`templates/AGENTS.md` 只承载推荐的自主 Agent、HITL 和交互约束，隔离工作流由 Goal Loop skills 承载。`templates/config.toml` 只补齐协作/多 agent 相关开关，不设置 `sandbox_mode`，也不抑制不稳定特性警告。
 
 做本地验证时，建议使用临时 `CODEX_HOME`，避免污染真实配置：
 
 ```bash
 tmp_codex_home="$(mktemp -d)"
 CODEX_HOME="$tmp_codex_home" scripts/install.sh
-CODEX_HOME="$tmp_codex_home" scripts/install.sh --sync-user-templates
 python3 tools/validate_skillset.py .
 rm -rf "$tmp_codex_home"
 ```
