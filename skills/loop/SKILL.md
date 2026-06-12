@@ -32,6 +32,14 @@ Before mutation, all of these must be true:
 If required semantics are missing, ambiguous, or contradicted, do not mutate. Return `alpha-goal`. Do not block merely because the approved context uses different headings or structure.
 </EntryRequirements>
 
+Load bundled resources only when needed:
+
+- `references/worktree-safety.md`: create or verify isolated edit paths.
+- `references/execution-boundaries.md`: delegated work, ownership, submodules, generated output, or user-owned changes.
+- `references/loop-modes.md`: choose mode and evidence shape.
+- `references/plan-template.md`: durable dynamic plan.
+- `references/iteration-record-schema.md`: Iteration Record fields.
+- `scripts/mutation-preflight.sh`: read-only git and path preflight.
 
 <Process>
 
@@ -72,7 +80,7 @@ Create or update a durable plan only for multiple independent loops, modules, re
 - Preserve unrelated user changes.
 - Stop with `alpha-goal` if target/entity/API/log evidence contradicts the contract.
 - For debug work, collect falsifiable evidence before patching.
-- If the same failure thread repeats three times without new evidence, enter feedback judgment and consider explicit `goal-review`.
+- If the same failure thread repeats three times without new evidence, enter feedback judgment and consider independent review.
 
 Forbidden unless the user explicitly requests it and risk is recorded:
 
@@ -111,8 +119,8 @@ Enter the next iteration if not blocked.
 
 ### Phase 6: Verify
 
-Enter `goal-verify` with your claim until you are 100% confident the goal is met.
+Enter `verify` with your claim until you are 100% confident the goal is met.
 
 </Process>
 
-Do not make final completion claims in an Iteration Record. Completion judgment belongs to `goal-verify`. `BLOCKED` routes back to `alpha-goal`.
+Do not make final completion claims in an Iteration Record. Completion judgment belongs to `verify`. `BLOCKED` routes back to `alpha-goal`.

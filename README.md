@@ -10,9 +10,8 @@ INTENT -> ALPHA-GOAL(discovery + interview + contract) -> ITERATE(dynamic plan -
 核心思路：
 
 - `alpha-goal`：执行 Discovery + Socratic interview，产出 Goal Contract，并决定下一入口。
-- `goal-iterate`：按 Goal type 执行三段循环：dynamic planning、execution、feedback。
-- `goal-verify`：验收 acceptance，判断证据是否支持最终 claim。
-- `goal-review`：可选辅助审查；仅在用户点名、仓库规则要求或反馈风险需要独立挑战时使用，不是默认主流程。
+- `loop`：按 Goal type 执行三段循环：dynamic planning、execution、feedback。
+- `verify`：验收 acceptance，判断证据是否支持最终 claim。
 
 ## 安装
 
@@ -60,9 +59,8 @@ scripts/install.sh --verbose
 ```text
 skills/
   alpha-goal/
-  goal-iterate/
-  goal-review/
-  goal-verify/
+  loop/
+  verify/
 templates/
 scripts/
 tools/
@@ -101,9 +99,8 @@ $alpha-goal 对这个仓库做只读一致性审计，不要改文件。
 
 ```text
 $alpha-goal 先把这个需求 frame 清楚，不要改文件。
-$goal-iterate 根据上面的 Goal Contract 做一轮最小变更。
-$goal-verify 检查当前 diff、测试和声明边界，判断是否可以最终交付。
-$goal-review 独立挑战当前反馈、scope 或 readiness 风险。
+$loop 根据上面的 Goal Contract 做一轮最小变更。
+$verify 检查当前 diff、测试和声明边界，判断是否可以最终交付。
 ```
 
 只有 `alpha-goal` 适合隐式触发。下游阶段技能的 `allow_implicit_invocation` 都是 `false`。
@@ -114,7 +111,7 @@ $goal-review 独立挑战当前反馈、scope 或 readiness 风险。
 - Goal Contract 必须记录 intent、scope、non-goals、decision boundaries、constraints、acceptance 和 evidence。
 - 写入 `.alpha-goal/` 或 `docs/design/` 前必须确认路径已 gitignored 或用户明确批准；否则在对话中输出 chat-only contract。
 - ITERATE 固定为 dynamic planning、execution、feedback 三段；Goal type 决定本轮证据形状。
-- 普通反馈在 ITERATE feedback phase 处理；`goal-review` 只做可选独立挑战。
+- 普通反馈在 loop feedback phase 处理。
 - VERIFY 只做验收和判断；任何最终完成声明必须基于 Verification Verdict。
 - Alpha Goal 的 process artifacts 只表示流程产物；业务域对象应记录在 Goal Contract 的 Scope、Acceptance、Evidence 中。
 - Debug/root-cause 声明必须有能验证根因的证据，不能只靠 plausible patch。
@@ -140,9 +137,8 @@ $goal-review 独立挑战当前反馈、scope 或 readiness 风险。
 阶段输出契约的权威来源在各阶段 `SKILL.md` 和同级 `references/`：
 
 - `alpha-goal`：Goal Contract，覆盖 intent、outcome、scope、non-goals、decision boundary、constraints、acceptance/evidence 等语义；不要求固定字段名。
-- `goal-iterate`：Iteration Record，包含 Dynamic plan、Execution、Feedback、Local evidence、Acceptance delta 和下一步判断。
-- `goal-verify`：Verification Verdict，包含 Acceptance evidence matrix、Contract review、Claim boundary、Judgment 和 Final claim allowed。
-- `goal-review`：Review Record，仅用于显式辅助审查。
+- `loop`：Iteration Record，包含 Dynamic plan、Execution、Feedback、Local evidence、Acceptance delta 和下一步判断。
+- `verify`：Verification Verdict，包含 Acceptance evidence matrix、Contract review、Claim boundary、Judgment 和 Final claim allowed。
 
 ## 调优建议
 

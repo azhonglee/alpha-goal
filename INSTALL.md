@@ -127,7 +127,7 @@ Expected behavior:
 - It should record candidate repos and existing work if likely.
 
 ```text
-$goal-iterate 根据上面的 Goal Contract 做一轮最小变更。
+$loop 根据上面的 Goal Contract 做一轮最小变更。
 ```
 
 Expected behavior:
@@ -137,7 +137,7 @@ Expected behavior:
 - It should produce an Iteration Record with Dynamic plan, Execution, and Feedback.
 
 ```text
-$goal-verify 检查当前 diff、测试和声明边界，判断是否可以最终交付。
+$verify 检查当前 diff、测试和声明边界，判断是否可以最终交付。
 ```
 
 Expected behavior:
@@ -146,13 +146,3 @@ Expected behavior:
 - It should review contract acceptance and claim boundary.
 - It should produce a Verification Verdict with Judgment.
 - It should route to final, next iteration, reframe, or blocked.
-
-```text
-$goal-review 检查当前反馈是否需要改方向。
-```
-
-Expected behavior:
-
-- It should run only because explicitly named.
-- It should not mutate files.
-- It should produce a Review Record as auxiliary input, not a final completion verdict.

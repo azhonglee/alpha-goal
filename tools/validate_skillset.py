@@ -15,13 +15,12 @@ import sys
 from pathlib import Path
 import tomllib
 
-REQUIRED_SKILLS = ["alpha-goal", "goal-iterate", "goal-review", "goal-verify"]
+REQUIRED_SKILLS = ["alpha-goal", "loop", "verify"]
 SKILLS_DIR = "skills"
 IMPLICIT_POLICY = {
     "alpha-goal": "true",
-    "goal-iterate": "false",
-    "goal-review": "false",
-    "goal-verify": "false",
+    "loop": "false",
+    "verify": "false",
 }
 ALLOWED_FRONT_MATTER_KEYS = {"name", "description"}
 MIN_SHORT_DESCRIPTION_LEN = 25
@@ -282,10 +281,10 @@ def check_docs(root: Path) -> bool:
 def check_consistency(root: Path) -> bool:
     ok = True
     source = skill_root(root)
-    worktree_safety = source / "goal-iterate" / "references" / "worktree-safety.md"
+    worktree_safety = source / "loop" / "references" / "worktree-safety.md"
     alpha_goal = source / "alpha-goal" / "SKILL.md"
-    loop_modes = source / "goal-iterate" / "references" / "loop-modes.md"
-    goal_verify = source / "goal-verify" / "SKILL.md"
+    loop_modes = source / "loop" / "references" / "loop-modes.md"
+    verify = source / "verify" / "SKILL.md"
     install_script = root / "scripts" / "install.sh"
 
     for path in [worktree_safety]:
@@ -299,7 +298,7 @@ def check_consistency(root: Path) -> bool:
             "request_user_input` only for 2-3 structured",
             "not mandatory headings",
             "equivalent wording",
-            "Enter `goal-iterate` only when the Goal Contract passes the user's review",
+            "Enter `loop`",
             "</Process>",
             ".alpha-goal/",
             "docs/design/YYYYMMDD-<slug>.md",
@@ -319,19 +318,19 @@ def check_consistency(root: Path) -> bool:
     if loop_modes.exists():
         text = loop_modes.read_text(encoding="utf-8")
         if "one-paragraph receipt is enough" not in text:
-            ok = fail("skills/goal-iterate/references/loop-modes.md: missing compact low-risk Debug Receipt guidance")
+            ok = fail("skills/loop/references/loop-modes.md: missing compact low-risk Debug Receipt guidance")
         if "return `REFRAME_NEEDED` instead of forcing the evidence into the old target" not in text:
-            ok = fail("skills/goal-iterate/references/loop-modes.md: missing wrong-target debug reframe guidance")
+            ok = fail("skills/loop/references/loop-modes.md: missing wrong-target debug reframe guidance")
 
-    if goal_verify.exists():
-        text = goal_verify.read_text(encoding="utf-8")
+    if verify.exists():
+        text = verify.read_text(encoding="utf-8")
         if "low-risk local bug fixes without a formal RCA claim" not in text:
-            ok = fail("skills/goal-verify/SKILL.md: missing low-risk local bug verification boundary")
+            ok = fail("skills/verify/SKILL.md: missing low-risk local bug verification boundary")
 
     if worktree_safety.exists():
         text = worktree_safety.read_text(encoding="utf-8")
         if ".alpha-goal/" not in text:
-            ok = fail("skills/goal-iterate/references/worktree-safety.md: missing .alpha-goal/ ignore guidance")
+            ok = fail("skills/loop/references/worktree-safety.md: missing .alpha-goal/ ignore guidance")
 
     if install_script.exists():
         text = install_script.read_text(encoding="utf-8")

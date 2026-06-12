@@ -1,6 +1,6 @@
 # Plan Template
 
-仅当 `goal-iterate` 判断需要 durable dynamic plan 时使用。Plan 是当前执行视图和增量历史，不是 approval gate 或 waterfall。
+仅当 `loop` 判断需要 durable dynamic plan 时使用。Plan 是当前执行视图和增量历史，不是 approval gate 或 waterfall。
 
 Plan 不得重写 Goal Contract 的 intent、desired outcome、success criteria、non-goals、constraints、decision boundaries，或任何 active durable spec。
 
