@@ -199,13 +199,13 @@ If artifact safety is not satisfied, output both in chat.
 
 Goal Contract should include:
 - Metadata (profile, rounds, final ambiguity, threshold, context type)
-- Context snapshot reference/path (for ralplan/team reuse)
+- Context snapshot reference/path
 - Clarity breakdown table
 - Intent (why the user wants this)
 - Desired Outcome
 - In-Scope
 - Out-of-Scope / Non-goals
-- Decision Boundaries (what OMX may decide without confirmation)
+- Decision Boundaries (what you may decide without confirmation)
 - Constraints
 - Testable acceptance criteria
 - Assumptions exposed + resolutions
