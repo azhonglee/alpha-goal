@@ -1,6 +1,6 @@
 ---
 name: goal-verify
-description: Produce a Verification Verdict before final output. Use after implementation, before MR/PR/final claims, when asked if work is done/correct/safe, or when checking loopholes. Maps acceptance to evidence and routes to final, next iteration, reframe, or blocked.
+description: Stage skill for the goal-loop package. Produce a Verification Verdict for an active Goal Contract before implementation completion, MR/PR, merge-readiness, correctness/safety, or final delivery claims. Use only when explicitly named by the user or selected by goal-loop; not for standalone read-only code review or advisory audits without a completion claim.
 ---
 
 # Goal Verify
@@ -15,10 +15,12 @@ Use this skill when:
 
 - implementation appears complete;
 - there is a diff, patch, commit, MR/PR, test result, or runtime observation to assess;
-- the user asks whether work is done, correct, safe, or has loopholes;
-- final output, MR/PR creation, or completion claim is being prepared;
+- the user asks whether changed work under an active or recoverable Goal Contract is done, correct, safe, or free of loopholes;
+- final output that includes or implies implementation completion, delivery readiness, merge readiness, correctness/safety of completed work, MR/PR creation, or another completion claim is being prepared;
 - `goal-iterate` returned `ITERATION_READY_FOR_VERIFY`.
 - `goal-review` returned `READY_FOR_VERIFY`.
+
+Do not use this skill for standalone read-only code review, safety review, loophole scan, findings, comparison, or advisory audit when there is no active Goal Contract and no implementation completion, readiness, merge/ship, or correctness claim. For standalone safety or loophole scans without completion/readiness intent, use ordinary read-only review, or route through FRAME only if target/rule/evidence-boundary discovery is needed.
 
 ## Required inputs
 
@@ -34,9 +36,19 @@ Hard requirements for completion claims:
 - commands/tests already run, or an explicit reason they cannot run;
 - Review Record when review was triggered by feedback, complexity, scope expansion, architecture/ownership risk, evidence uncertainty, or explicit completion-readiness review.
 
-If the Goal Contract is missing or target boundary is unclear, return `REFRAME` rather than guessing.
+If the Goal Contract is missing or target boundary is unclear, return `REFRAME` rather than guessing. For bare readiness claims, first try to recover or identify the local Goal Contract, target boundary, diff/MR, and evidence bundle from current context; if they are not available or discoverable, `REFRAME` with the exact missing inputs.
 
-If a required Review Record is missing, do not produce a positive completion verdict. Return `BLOCKED` with `Required next step: goal-review`, or let the router run `goal-review` first.
+Minimal evidence bundle for a positive readiness verdict:
+
+- Goal Contract or equivalent target/acceptance/claim boundary;
+- current diff, commit, or MR/PR scope;
+- fresh repo state after the last material change;
+- exact test/check commands and outcomes, or documented blockers;
+- acceptance-to-evidence mapping;
+- Debug Receipt for bug-fix claims;
+- current Review Record when review was triggered.
+
+If a required Review Record is missing, do not produce a positive completion verdict. Route to `goal-review` first. If VERIFY was explicitly invoked and cannot route, return `BLOCKED` with `Required next step: goal-review`.
 
 Optional context:
 
@@ -64,7 +76,11 @@ Check:
 - final claim does not exceed evidence.
 
 You may use `scripts/evidence-summary.sh` for read-only diff/status evidence.
-Use `references/verification-verdict-schema.md` for field definitions, `references/completion-review-rubric.md` when checking readiness to merge or ship, and `references/claim-boundary-check.md` when user wording is broader than local evidence.
+Use references only when their detail is needed:
+
+- `references/verification-verdict-schema.md` for field definitions when the output contract is unclear.
+- `references/completion-review-rubric.md` for every readiness-to-merge, readiness-to-ship, or final-delivery check.
+- `references/claim-boundary-check.md` when user wording is broader than local evidence or when considering `NARROW_CLAIM_AND_FINAL`.
 
 ## Evidence matrix
 

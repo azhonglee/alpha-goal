@@ -23,6 +23,11 @@ From narrow to broad:
 
 Use the highest practical boundary for the claim. If not practical, narrow the final claim.
 
+Choose the verdict from delivery intent:
+
+- Use `NEXT_ITERATION` when the user needs the original broad claim, asks for readiness without accepting a narrower boundary, or higher-boundary evidence is required before merge/ship.
+- Use `NARROW_CLAIM_AND_FINAL` when the local goal is satisfied, the remaining gap is only a broader unverified boundary, and the final response can explicitly narrow the claim without misleading the user.
+
 ## Examples
 
 ### Reducer-only evidence
