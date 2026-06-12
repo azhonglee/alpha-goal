@@ -139,7 +139,7 @@ $goal-review 独立挑战当前反馈、scope 或 readiness 风险。
 
 阶段输出契约的权威来源在各阶段 `SKILL.md` 和同级 `references/`：
 
-- `alpha-goal`：Goal Contract，包含 Intent、Desired Outcome、In-Scope、Out-of-Scope / Non-goals、Decision Boundaries、Constraints、Testable acceptance criteria、artifact status 和下一步判断。
+- `alpha-goal`：Goal Contract，覆盖 intent、outcome、scope、non-goals、decision boundary、constraints、acceptance/evidence 等语义；不要求固定字段名。
 - `goal-iterate`：Iteration Record，包含 Dynamic plan、Execution、Feedback、Local evidence、Acceptance delta 和下一步判断。
 - `goal-verify`：Verification Verdict，包含 Acceptance evidence matrix、Contract review、Claim boundary、Judgment 和 Final claim allowed。
 - `goal-review`：Review Record，仅用于显式辅助审查。
@@ -148,10 +148,9 @@ $goal-review 独立挑战当前反馈、scope 或 readiness 风险。
 
 如果输出太长，可以减少解释文字，但保留关键字段：
 
-- `Goal Contract.Desired Outcome`
-- `Goal Contract.In-Scope`
-- `Goal Contract.Testable acceptance criteria`
-- `Goal Contract.Decision Boundaries`
+- Goal Contract 的 outcome / scope 语义
+- Goal Contract 的 non-goals / decision-boundary 语义
+- Goal Contract 的 acceptance / evidence 语义
 - `Iteration Record.Dynamic plan`
 - `Iteration Record.Execution`
 - `Iteration Record.Feedback`

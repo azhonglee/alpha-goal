@@ -17,9 +17,9 @@ Each iteration has three phases:
 
 Before mutation, all of these must be true:
 
-- Goal Contract exists and has passed the user's review or explicit user-approved handoff from `alpha-goal`;
-- Goal type has been selected from the reviewed contract: `EXPLORE`, `DESIGN`, `IMPLEMENT`, `DEBUG`, `VERIFY`, or `RECOVER`;
-- Desired Outcome, In-Scope, Out-of-Scope / Non-goals, Decision Boundaries, Constraints, and Testable acceptance criteria are clear;
+- a reviewed Goal Contract, interview summary, chat-only contract, or equivalent approved context exists; exact headings are not required;
+- Goal type can be selected from semantic evidence in the approved context: `EXPLORE`, `DESIGN`, `IMPLEMENT`, `DEBUG`, `VERIFY`, or `RECOVER`;
+- enough semantic content exists to identify desired outcome, included scope, excluded scope/non-goals, decision boundaries, constraints, and acceptance/evidence expectations;
 - target/scope boundary and claim boundary are clear enough to decide changed files and final claim wording;
 - applicable local rules have been read;
 - mutation preflight is recorded;
@@ -29,7 +29,7 @@ Before mutation, all of these must be true:
 - `.worktrees/`, `.alpha-goal/`, or alternative paths are gitignored or explicitly approved;
 - active durable spec/plan, if any, has been read.
 
-If any item is missing, do not mutate.
+If required semantics are missing, ambiguous, or contradicted, do not mutate. Return `REFRAME_NEEDED`. Do not block merely because the approved context uses different headings or structure.
 
 ## Mutation Preflight Gate
 

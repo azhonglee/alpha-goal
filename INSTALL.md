@@ -123,7 +123,7 @@ Expected behavior:
 
 - It should avoid mutation.
 - It should run discovery before asking.
-- It should produce a Goal Contract with Desired Outcome, In-Scope, Non-goals, Decision Boundaries, and Testable acceptance criteria.
+- It should produce a Goal Contract covering outcome, scope, non-goals, decision-boundary, and acceptance/evidence semantics; exact field names are not required.
 - It should record candidate repos and existing work if likely.
 
 ```text
