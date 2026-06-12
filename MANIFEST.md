@@ -5,10 +5,10 @@
 | Directory | Purpose |
 |---|---|
 | `goal-loop/` | Router and global invariants. |
-| `goal-frame/` | Goal Contract, clarification, target boundary, existing work scan, and spec escalation. |
-| `goal-iterate/` | One bounded implementation iteration with loop mode evidence, debug receipts, mutation preflight, and plan escalation. |
-| `goal-review/` | Review Record for direction, feedback, scope, artifact freshness, architecture, and completion readiness. |
-| `goal-verify/` | Verification Verdict, artifact alignment, and completion routing. |
+| `goal-frame/` | Goal Contract, clarification, target/domain boundary, existing work scan, and spec escalation. |
+| `goal-iterate/` | One bounded implementation iteration with loop mode evidence, risk-matched debug receipts, mutation preflight, and plan escalation. |
+| `goal-review/` | Review Record for direction, feedback, scope, entity/evidence alignment, artifact freshness, architecture, and completion readiness. |
+| `goal-verify/` | Verification Verdict, artifact alignment, root-cause/claim-boundary checks, and completion routing. |
 
 ## Supporting directories
 

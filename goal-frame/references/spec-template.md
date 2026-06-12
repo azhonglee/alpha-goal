@@ -74,6 +74,25 @@ You must ask before:
 - Risk:
   - Mitigation:
 
+
+## Debug / Root-Cause Frame
+
+Use only for bug, incident, or root-cause goals where durable diagnostic context is needed.
+
+- Symptom:
+- Expected vs actual:
+- Problem-space decomposition:
+  - Entities:
+  - Interfaces:
+  - State/lifecycle:
+  - Logs/observability:
+- Competing hypotheses:
+  - Hypothesis:
+    - Supports:
+    - Contradicts:
+    - Next probe:
+- Root-cause claim to validate:
+
 ## Open Questions
 
 -

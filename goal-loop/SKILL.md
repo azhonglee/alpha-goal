@@ -53,10 +53,11 @@ When another explicitly named or repository-required skill applies, use Goal Loo
 - No final claim may exceed the verified claim boundary.
 - Do not create spec or plan by default; escalate only for risk, complexity, handoff, or user request.
 - Durable artifact writes are allowed only by their owning stage rules; they do not authorize implementation mutation.
+- In Goal Loop, `Artifacts` means loop-owned process artifacts such as specs, plans, reviews, evidence, or scratch files; do not use it to enumerate product-domain objects.
 - Read the current version and status before relying on any spec or plan.
 - Do not execute from a `superseded` artifact. Do not treat `draft` as approved when approval is required.
 - A plan must not redefine Goal Contract or active spec intent, success criteria, non-goals, constraints, or decision boundaries.
-- A bug-fix claim needs debug evidence. `NOT_REPRODUCED` and `BLOCKED` support diagnostic claims only, not repair completion.
+- A bug-fix or root-cause claim needs debug evidence that validates the root-cause statement, not just a plausible patch location. `NOT_REPRODUCED` and `BLOCKED` support diagnostic claims only, not repair completion.
 - Repository mutations must use an isolated edit path. Prefer a repository-local worktree under the owning repo or subrepo at `.worktrees/codex/<task-slug>/` unless project rules are stricter or the path is not technically usable.
 - Before using `.worktrees/` or `.goal-loop/`, confirm the path is gitignored or record explicit approval for the alternative. Never edit or delete directly in a primary `main`/`master` checkout.
 - Isolated worktrees are cleanup candidates only after PR/MR merge or local merge. Do not proactively merge an isolated task branch into `main`/`master`.
@@ -81,6 +82,7 @@ Use `goal-frame` when any of these is true:
 
 - the task is new or non-trivial;
 - the user request is ambiguous;
+- the target term may be a user-facing container, page, space, or umbrella concept that must be decomposed before selecting a submodule/entity/API;
 - the target repo, package, service, or path is unclear;
 - the workspace may contain multiple repos or submodules;
 - the task may duplicate an existing MR/PR/branch/issue/design doc;
@@ -119,6 +121,7 @@ Use `goal-iterate` when all are true:
 Use `goal-review` when any of these is true:
 
 - loop evidence contradicts assumptions;
+- logs, API/RPC names, payload fields, or user corrections point to a different entity or submodule than the current Goal Contract;
 - scope expands or implementation becomes complex;
 - review feedback arrives and must be evaluated before action;
 - an architecture, scope, code, loop, or goal check is needed before continuing;

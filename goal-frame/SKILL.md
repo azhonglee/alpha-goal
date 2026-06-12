@@ -30,6 +30,7 @@ Check:
 
 - user intent;
 - target repo/path/service/module;
+- problem-space decomposition when a user-facing page, space, container, or umbrella term may contain multiple submodules, data entities, or source APIs;
 - applicable local rules such as `AGENTS.md` or `CLAUDE.md`;
 - candidate repos when cwd is a workspace or aggregator;
 - existing work when likely;
@@ -45,10 +46,12 @@ Check:
 - claim boundary;
 - durable spec need.
 
+For bug, debug, or root-cause tasks, keep the frame compact. Record symptom, expected-vs-actual behavior, reproduction boundary or blocker, problem-space decomposition, initial competing hypotheses or why only one is credible, and evidence that will distinguish hypotheses before proving a patch. For low-risk single-function failures with focused failing-test and direct branch evidence, one concise sentence across the existing fields is enough.
+
 Use references only when their detail is needed:
 
 - `references/goal-contract-schema.md` when field definitions are unclear, the contract is high-risk, or the output boundary needs precision.
-- `references/target-discovery.md` when target ownership is ambiguous, multiple repos/paths may qualify, or existing work could change the task identity.
+- `references/target-discovery.md` when target ownership is ambiguous, multiple repos/paths may qualify, existing work could change the task identity, or a user-facing container/umbrella term must be separated from submodules, data entities, and source APIs.
 - `references/clarification-policy.md` when deciding whether to ask, assume, run a Socratic interview, or return `ASK_USER`.
 - `references/frame-examples.md` only when routing or output shape is uncertain.
 - `references/spec-template.md` only when a durable spec is needed.
@@ -145,6 +148,7 @@ Return `READY_FOR_ITERATION` only when:
 - constraints, non-goals, and decision boundaries are recorded;
 - assumptions, risks, and risk tier are recorded;
 - any `partial` interview fields are recorded as bounded assumptions or risks;
+- aggregate/container terms have been decomposed or explicitly recorded as unresolved assumptions when they can change the implementation or diagnosis path;
 - existing work has been checked when triggered;
 - durable spec need is recorded, and any referenced spec has current path/status;
 - no required user decision is missing.
