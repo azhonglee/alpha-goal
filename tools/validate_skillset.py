@@ -292,8 +292,8 @@ def check_consistency(root: Path) -> bool:
         text = target_discovery.read_text(encoding="utf-8")
         if "Domain boundary gate" not in text:
             ok = fail("goal-frame/references/target-discovery.md: missing domain boundary gate")
-        if "artifact vs trigger vs task" not in text:
-            ok = fail("goal-frame/references/target-discovery.md: missing artifact/trigger/task disambiguation example")
+        if "related but not equivalent" not in text or "UI labels" not in text:
+            ok = fail("goal-frame/references/target-discovery.md: missing general domain-term disambiguation guidance")
 
     if loop_modes.exists():
         text = loop_modes.read_text(encoding="utf-8")

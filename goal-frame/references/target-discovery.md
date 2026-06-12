@@ -32,13 +32,13 @@ If the user describes a multi-repo workspace but cwd is not enough to find candi
 
 ## Domain boundary gate
 
-Use this gate when the user names a page, product area, workspace, canvas, "space", or other umbrella term that may contain multiple lists, panels, automations, artifacts, or configuration surfaces.
+Use this gate when the user names a page, product area, workspace, canvas, space, dashboard, or other umbrella term that may contain multiple lists, panels, automations, status views, records, or configuration surfaces.
 
 Before selecting the implementation or diagnostic target:
 
 - separate the user-facing container from the specific submodule under discussion;
 - map the submodule to its data entity, API/RPC, logs, and code symbols when evidence is available;
-- record terms that are related but not equivalent, such as artifact vs trigger vs task;
+- record terms that are related but not equivalent across UI labels, domain objects, persisted records, jobs, events, or operations;
 - prefer the narrowest evidence-backed submodule over the broad container;
 - return `ASK_USER` only when the submodule choice changes scope and cannot be discovered safely.
 

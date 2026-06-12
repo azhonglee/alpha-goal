@@ -95,18 +95,18 @@ Expected behavior:
 
 
 ```text
-$goal-loop 产物空间里自动化任务列表为空；ArtifactList 正常，但日志显示 ListTriggers 返回空。只读判断下一步定位方向，不要改文件。
+$goal-loop 某个工作区页面里列表 A 正常，但列表 B 为空；日志显示 B 的接口返回空。只读判断下一步定位方向，不要改文件。
 ```
 
 Expected behavior:
 
-- It should frame the user-facing space as a container, not as the Goal Loop `Artifacts` field.
-- It should distinguish artifact/content data from automation trigger/task data.
-- It should treat `ListTriggers` as the primary diagnostic boundary unless evidence links the task list to `ArtifactList`.
+- It should frame the user-facing page/workspace as a container, not as one data model or the Goal Loop `Artifacts` field.
+- It should distinguish the affected submodule, data entity, source interface, and log evidence from neighboring healthy modules.
+- It should treat the interface/log evidence for the affected module as the primary diagnostic boundary unless evidence links it to another module.
 - It should return a read-only diagnosis and next evidence plan, not mutate files.
 
 ```text
-$goal-loop 修复一个低风险纯函数 bug：parseFlag('off') 返回 true，已有 focused failing test 指向单个分支错误。
+$goal-loop 修复一个低风险纯函数 bug：某个输入返回值错误，已有 focused failing test 指向单个分支错误。
 ```
 
 Expected behavior:
