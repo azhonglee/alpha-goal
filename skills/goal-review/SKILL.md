@@ -1,6 +1,6 @@
 ---
 name: goal-review
-description: Optional auxiliary skill for the goal-loop package. 独立挑战 active Goal Contract、dynamic plan、iteration feedback、diff、architecture、scope 或 reviewer feedback。Use only when explicitly named by the user, required by repository rules, or selected by goal-loop/goal-iterate because feedback risk needs an independent review; not for ordinary standalone code review outside a goal-loop workflow.
+description: Optionally challenge an active Goal Contract, dynamic plan, iteration feedback, diff, architecture, scope, or readiness risk. Use only when explicitly named, required by repo rules, or selected because feedback risk needs independent review; not for ordinary standalone code review outside a goal-loop workflow.
 ---
 
 # Goal Review

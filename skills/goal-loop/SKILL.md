@@ -1,6 +1,6 @@
 ---
 name: goal-loop
-description: 统一路由 non-trivial read-only、coding、debug、review-feedback、verification 等 evidence-bound engineering tasks。Use when task needs target/evidence-boundary discovery, mutation, active goal continuation, feedback handling, verification, completion claims, or recovery. Do not use for trivial read-only explanation, ordinary standalone review, simple diff review, summarization, or advisory answers when no target/rule/evidence discovery, active goal, mutation path, or completion claim is in scope.
+description: Route non-trivial read-only, coding, debugging, feedback, recovery, and verification work by intent. Use when target/evidence-boundary discovery, mutation, active-goal continuation, feedback handling, completion claims, or recovery is in scope. Do not use for trivial explanations, summaries, ordinary standalone reviews, simple diff reviews, or advisory answers without discovery, mutation, active goal, or completion claim.
 ---
 
 # Goal Loop Router

@@ -31,6 +31,7 @@ MAX_SKILL_MD_LINES = 240
 FORBIDDEN_CONFIG_KEYS = {"sandbox_mode", "suppress_unstable_features_warning"}
 WORKTREE_CANONICAL = ".worktrees/codex/<task-slug>"
 REQUIRED_OPENAI_INTERFACE_KEYS = {"display_name", "short_description", "default_prompt"}
+CJK_RE = re.compile(r"[\u3400-\u9fff]")
 
 
 def parse_front_matter(text: str) -> dict[str, str]:
@@ -54,6 +55,10 @@ def parse_front_matter(text: str) -> dict[str, str]:
 def fail(message: str) -> bool:
     print(f"FAIL {message}")
     return False
+
+
+def contains_cjk(text: str) -> bool:
+    return bool(CJK_RE.search(text))
 
 
 def parse_openai_yaml_metadata(text: str) -> dict[str, dict[str, str]]:
@@ -104,6 +109,8 @@ def check_openai_yaml(skill: str, openai_yaml: Path) -> bool:
     for key in REQUIRED_OPENAI_INTERFACE_KEYS & set(interface):
         if not interface[key]:
             ok = fail(f"{skill}: interface.{key} must not be empty")
+        elif contains_cjk(interface[key]):
+            ok = fail(f"{skill}: interface.{key} should use concise English: {interface[key]!r}")
 
     short = interface.get("short_description", "")
     if short and not (MIN_SHORT_DESCRIPTION_LEN <= len(short) <= MAX_SHORT_DESCRIPTION_LEN):
@@ -405,6 +412,9 @@ def main() -> int:
             ok = False
         elif not description:
             print(f"FAIL {skill}: missing description")
+            ok = False
+        elif contains_cjk(description):
+            print(f"FAIL {skill}: front matter description should use concise English")
             ok = False
         else:
             print(f"PASS {skill}: {description[:90]}")

@@ -1,6 +1,6 @@
 ---
 name: goal-verify
-description: Stage skill for the goal-loop package. 对 active Goal Contract 做验收和判断，产出 Verification Verdict，决定证据是否支持 completion、readiness、correctness/safety、MR/PR-ready 或 narrowed claim。Use only when explicitly named by the user or selected by goal-loop; not for standalone read-only code review or advisory audits without a completion claim.
+description: Judge whether fresh evidence satisfies an active Goal Contract and supports completion, readiness, correctness/safety, MR/PR-ready, or narrowed claims. Use only when explicitly named or selected by goal-loop; not for standalone read-only code review or advisory audits without a completion claim.
 ---
 
 # Goal Verify

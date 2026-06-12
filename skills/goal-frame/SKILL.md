@@ -1,6 +1,6 @@
 ---
 name: goal-frame
-description: Stage skill for the goal-loop package. 用 Discovery 和 Socratic interview 澄清目标，产出包含 inline Spec 的 Goal Contract，并只在风险、复杂度、handoff 或用户要求时创建 durable spec artifact。Use only when explicitly named by the user or selected by goal-loop for ambiguous requirements, unclear target repo/path, multi-repo workspaces, existing work discovery, acceptance criteria, claim boundary, clarification, and spec escalation.
+description: Frame a goal with discovery and Socratic clarification, then produce a Goal Contract with an inline Spec. Use when explicitly named or selected by goal-loop for ambiguous requirements, unclear target repo/path, multi-repo workspaces, existing-work discovery, acceptance criteria, claim boundaries, and spec escalation.
 ---
 
 # Goal Frame
