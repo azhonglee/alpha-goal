@@ -16,6 +16,7 @@ from pathlib import Path
 import tomllib
 
 REQUIRED_SKILLS = ["goal-loop", "goal-frame", "goal-iterate", "goal-review", "goal-verify"]
+SKILLS_DIR = "skills"
 IMPLICIT_POLICY = {
     "goal-loop": "true",
     "goal-frame": "false",
@@ -174,12 +175,19 @@ def check_skill_references(skill: str, skill_dir: Path, skill_text: str) -> bool
     return ok
 
 
-def check_top_level_skills(root: Path) -> bool:
+def skill_root(root: Path) -> Path:
+    return root / SKILLS_DIR
+
+
+def check_skill_layout(root: Path) -> bool:
     ok = True
-    discovered = sorted(path.parent.name for path in root.glob("*/SKILL.md"))
+    source = skill_root(root)
+    if not source.exists():
+        return fail(f"missing skill source directory {source}")
+    discovered = sorted(path.parent.name for path in source.glob("*/SKILL.md"))
     expected = sorted(REQUIRED_SKILLS)
     if discovered != expected:
-        ok = fail(f"top-level skills mismatch: discovered={discovered}, expected={expected}")
+        ok = fail(f"skills/ layout mismatch: discovered={discovered}, expected={expected}")
     return ok
 
 
@@ -251,8 +259,8 @@ def check_docs(root: Path) -> bool:
                 ok = fail("README.md: missing .goal-loop/ artifact guidance")
         if doc.name == "MANIFEST.md":
             for skill in REQUIRED_SKILLS:
-                if f"`{skill}/`" not in text:
-                    ok = fail(f"MANIFEST.md: missing skill entry for {skill}")
+                if f"`skills/{skill}/`" not in text:
+                    ok = fail(f"MANIFEST.md: missing skill entry for skills/{skill}")
             if "`templates/`" not in text:
                 ok = fail("MANIFEST.md: missing templates entry")
             if "`scripts/`" not in text:
@@ -262,12 +270,13 @@ def check_docs(root: Path) -> bool:
 
 def check_consistency(root: Path) -> bool:
     ok = True
-    worktree_safety = root / "goal-iterate" / "references" / "worktree-safety.md"
-    goal_loop = root / "goal-loop" / "SKILL.md"
-    goal_frame = root / "goal-frame" / "SKILL.md"
-    target_discovery = root / "goal-frame" / "references" / "target-discovery.md"
-    loop_modes = root / "goal-iterate" / "references" / "loop-modes.md"
-    goal_verify = root / "goal-verify" / "SKILL.md"
+    source = skill_root(root)
+    worktree_safety = source / "goal-iterate" / "references" / "worktree-safety.md"
+    goal_loop = source / "goal-loop" / "SKILL.md"
+    goal_frame = source / "goal-frame" / "SKILL.md"
+    target_discovery = source / "goal-frame" / "references" / "target-discovery.md"
+    loop_modes = source / "goal-iterate" / "references" / "loop-modes.md"
+    goal_verify = source / "goal-verify" / "SKILL.md"
     install_script = root / "scripts" / "install.sh"
 
     for path in [worktree_safety, goal_loop]:
@@ -277,46 +286,46 @@ def check_consistency(root: Path) -> bool:
     if goal_loop.exists():
         text = goal_loop.read_text(encoding="utf-8")
         if "Domain skill coexistence" not in text:
-            ok = fail("goal-loop/SKILL.md: missing domain skill coexistence guidance")
+            ok = fail("skills/goal-loop/SKILL.md: missing domain skill coexistence guidance")
         if "ordinary standalone review" not in text:
-            ok = fail("goal-loop/SKILL.md: missing read-only trigger exclusion")
+            ok = fail("skills/goal-loop/SKILL.md: missing read-only trigger exclusion")
         if "findings, evidence, recommendations, and residual uncertainty" not in text:
-            ok = fail("goal-loop/SKILL.md: missing read-only audit completion guidance")
+            ok = fail("skills/goal-loop/SKILL.md: missing read-only audit completion guidance")
         if "`Artifacts` means loop-owned process artifacts" not in text:
-            ok = fail("goal-loop/SKILL.md: missing process-vs-domain artifact disambiguation")
+            ok = fail("skills/goal-loop/SKILL.md: missing process-vs-domain artifact disambiguation")
         if "root-cause claim needs debug evidence" not in text:
-            ok = fail("goal-loop/SKILL.md: missing root-cause debug evidence invariant")
+            ok = fail("skills/goal-loop/SKILL.md: missing root-cause debug evidence invariant")
         if ".goal-loop/" not in text:
-            ok = fail("goal-loop/SKILL.md: missing .goal-loop/ ignore guidance")
+            ok = fail("skills/goal-loop/SKILL.md: missing .goal-loop/ ignore guidance")
 
     if goal_frame.exists():
         text = goal_frame.read_text(encoding="utf-8")
         if "low-risk single-function failures" not in text:
-            ok = fail("goal-frame/SKILL.md: missing compact low-risk debug framing guidance")
+            ok = fail("skills/goal-frame/SKILL.md: missing compact low-risk debug framing guidance")
 
     if target_discovery.exists():
         text = target_discovery.read_text(encoding="utf-8")
         if "Domain boundary gate" not in text:
-            ok = fail("goal-frame/references/target-discovery.md: missing domain boundary gate")
+            ok = fail("skills/goal-frame/references/target-discovery.md: missing domain boundary gate")
         if "related but not equivalent" not in text or "UI labels" not in text:
-            ok = fail("goal-frame/references/target-discovery.md: missing general domain-term disambiguation guidance")
+            ok = fail("skills/goal-frame/references/target-discovery.md: missing general domain-term disambiguation guidance")
 
     if loop_modes.exists():
         text = loop_modes.read_text(encoding="utf-8")
         if "one-paragraph receipt is enough" not in text:
-            ok = fail("goal-iterate/references/loop-modes.md: missing compact low-risk Debug Receipt guidance")
+            ok = fail("skills/goal-iterate/references/loop-modes.md: missing compact low-risk Debug Receipt guidance")
         if "return `REFRAME_NEEDED` instead of forcing the evidence into the old target" not in text:
-            ok = fail("goal-iterate/references/loop-modes.md: missing wrong-target debug reframe guidance")
+            ok = fail("skills/goal-iterate/references/loop-modes.md: missing wrong-target debug reframe guidance")
 
     if goal_verify.exists():
         text = goal_verify.read_text(encoding="utf-8")
         if "low-risk local bug fixes without a formal RCA claim" not in text:
-            ok = fail("goal-verify/SKILL.md: missing low-risk local bug verification boundary")
+            ok = fail("skills/goal-verify/SKILL.md: missing low-risk local bug verification boundary")
 
     if worktree_safety.exists():
         text = worktree_safety.read_text(encoding="utf-8")
         if ".goal-loop/" not in text:
-            ok = fail("goal-iterate/references/worktree-safety.md: missing .goal-loop/ ignore guidance")
+            ok = fail("skills/goal-iterate/references/worktree-safety.md: missing .goal-loop/ ignore guidance")
 
     if install_script.exists():
         text = install_script.read_text(encoding="utf-8")
@@ -345,11 +354,11 @@ def main() -> int:
     ok = True
 
     print(f"Validating skillset root: {root}")
-    ok = check_top_level_skills(root) and ok
+    ok = check_skill_layout(root) and ok
     ok = check_supporting_paths(root) and ok
 
     for skill in REQUIRED_SKILLS:
-        skill_dir = root / skill
+        skill_dir = skill_root(root) / skill
         skill_md = skill_dir / "SKILL.md"
         if not skill_md.exists():
             print(f"FAIL {skill}: missing {skill_md}")

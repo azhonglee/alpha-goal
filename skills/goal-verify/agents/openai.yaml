@@ -1,0 +1,7 @@
+interface:
+  display_name: "Goal Verify"
+  short_description: "Judge acceptance evidence"
+  default_prompt: "Use $goal-verify to map acceptance to fresh evidence and judge the final claim boundary."
+
+policy:
+  allow_implicit_invocation: false
