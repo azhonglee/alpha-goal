@@ -14,7 +14,7 @@ A task can pass to final only when:
 - applicable project rules were read, or the verdict explicitly narrows itself to a user-provided evidence bundle and records that project-rule compliance was not independently verified;
 - expected checks were run or a clear blocker is documented;
 - review feedback was classified when present;
-- Review Record exists and covers the latest material change when feedback, complexity, scope, architecture, ownership, or uncertainty triggered review;
+- Review Record exists and covers the latest material change when feedback, complexity, scope, architecture, ownership, or material route/claim-boundary uncertainty triggered review;
 - risk-tier evidence requirements are met or explicitly blocked;
 - unresolved gaps are disclosed;
 - final claim is no broader than evidence.
@@ -32,7 +32,7 @@ Return `NEXT_ITERATION`, `REFRAME`, or `NARROW_CLAIM_AND_FINAL` when:
 - a failed check is dismissed without diagnosis;
 - no fresh check was run after the last edit;
 - review depends on stale or pre-existing evidence;
-- no current Review Record exists after review feedback, scope expansion, complexity, ownership, or uncertainty;
+- no current Review Record exists after review feedback, scope expansion, complexity, ownership, or material route/claim-boundary uncertainty;
 - a non-trivial bug-fix claim says `ROOT_CAUSE_CONFIRMED` but only shows a plausible code location, not first-divergence evidence;
 - no competing hypothesis was considered or bounded for a non-trivial failure;
 - logs or traces point to a different entity/interface than the patched path;

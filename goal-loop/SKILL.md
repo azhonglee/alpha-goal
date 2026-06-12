@@ -48,7 +48,7 @@ When another explicitly named or repository-required skill applies, use Goal Loo
 - No target boundary, no implementation mutation.
 - No isolated edit path or approved first-step isolation setup, no implementation mutation.
 - No unsupported review or verification conclusion without evidence.
-- No continuing past review feedback, complexity, scope expansion, architecture/ownership risk, or evidence uncertainty without a current Review Record.
+- No continuing past review feedback, material complexity or scope expansion, architecture/ownership risk, or unresolved evidence conflict that changes the route or claim boundary without a current Review Record. Routine missing evidence may be handled by the current stage by running the check or narrowing the claim.
 - No Verification Verdict, no final completion claim.
 - No final claim may exceed the verified claim boundary.
 - Do not create spec or plan by default; escalate only for risk, complexity, handoff, or user request.
@@ -124,7 +124,7 @@ Use `goal-review` when any of these is true:
 - logs, API/RPC names, payload fields, or user corrections point to a different entity or submodule than the current Goal Contract;
 - scope expands or implementation becomes complex;
 - review feedback arrives and must be evaluated before action;
-- an architecture, scope, code, loop, or goal check is needed before continuing;
+- an architecture, scope, loop, goal, or completion-readiness check is needed because current evidence leaves a material route or claim-boundary decision unresolved;
 - previous iteration returned `ITERATION_READY_FOR_REVIEW`;
 - an active spec or plan may be stale, over-broad, superseded, or inconsistent with current evidence.
 

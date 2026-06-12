@@ -63,4 +63,4 @@ Status rules:
 - `NOT_REPRODUCED`: reproduction was attempted but not observed; do not claim fixed.
 - `BLOCKED`: missing logs, commands, files, environment, or scope prevents diagnosis.
 
-Only `ROOT_CAUSE_CONFIRMED` authorizes a fix iteration. `NOT_REPRODUCED` may support a bounded diagnostic/no-fix claim only with scope, no-fix rationale, risk, and needed fresh evidence.
+Only `ROOT_CAUSE_CONFIRMED` authorizes a fix action, either as the minimal patch in the same bounded debug iteration or as a separate implementation iteration when the fix surface is broader. `NOT_REPRODUCED` may support a bounded diagnostic/no-fix claim only with scope, no-fix rationale, risk, and needed fresh evidence.

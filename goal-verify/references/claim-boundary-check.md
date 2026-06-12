@@ -8,18 +8,19 @@ The claim boundary check prevents local evidence from being used to support prod
 Does the evidence prove the user's wording at the boundary the user likely cares about?
 ```
 
-## Boundary ladder
+## Boundary model
 
-From narrow to broad:
+Start from the artifact directly changed or inspected, then climb only as far as fresh evidence actually reaches:
 
-1. helper function;
-2. reducer / mapper / handler;
-3. service method;
-4. API endpoint;
-5. event stream / persistence / queue lifecycle;
-6. UI dispatch / user-visible state;
-7. end-to-end product behavior;
-8. production observability.
+1. local unit or document section;
+2. component, command, handler, rule, or generated artifact;
+3. public interface, package contract, API, CLI, installer, or workflow boundary;
+4. integration path across components, persistence, queues, external tools, or configuration;
+5. user-visible, operator-visible, or downstream-consumer behavior;
+6. end-to-end system behavior in the target environment;
+7. production or real-world operational evidence.
+
+For web/service tasks, one concrete instantiation is helper function -> reducer/mapper/handler -> service method -> API endpoint -> event stream/persistence/queue lifecycle -> UI dispatch/user-visible state -> end-to-end product behavior -> production observability. Treat this as an example, not a required taxonomy.
 
 For diagnostic claims, use a parallel ladder: symptom observed, reproduction attempted, call chain mapped, first divergence point identified, narrowed component named, material alternatives excluded, fix surface identified, fix verified. Do not use a narrower rung to claim a broader one.
 

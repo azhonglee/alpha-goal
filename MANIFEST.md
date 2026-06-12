@@ -15,7 +15,7 @@
 | Directory | Purpose |
 |---|---|
 | `tools/` | Local validation helper. |
-| `templates/` | 默认同步的用户级 Codex 配置模板；不包含 sandbox 权限扩大项或不稳定特性警告抑制项。 |
+| `templates/` | 默认同步的用户级 Codex 配置模板；不包含 sandbox 权限、休眠行为或不稳定特性警告抑制项。 |
 | `scripts/` | 安装脚本。 |
 
 ## Scripts
