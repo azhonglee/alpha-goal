@@ -16,7 +16,9 @@ Use this skill when:
 - loop evidence contradicts assumptions;
 - scope expands or implementation becomes complex;
 - review feedback arrives and must be classified before action;
+- user feedback corrects the current framing, classification, target, or root-cause interpretation;
 - direction feels uncertain;
+- debug evidence has multiple plausible root causes, weak reproduction, missing observability alignment, or a broad fix surface;
 - an explicit completion-readiness review is requested or required by the router;
 - `goal-iterate` returned `ITERATION_READY_FOR_REVIEW`;
 - `goal-verify` returned `NEXT_ITERATION`, `REFRAME`, or an evidence gap that needs diagnosis.
@@ -61,6 +63,7 @@ Ask:
 - What assumption could be false?
 - What evidence is missing or too indirect?
 - Does evidence match the current Goal Contract, diff, risk tier, and claim boundary?
+- Do user-facing terms, UI modules, data entities, API/RPC names, logs, and code symbols refer to the same object; if not, should the workflow `REFRAME`?
 - Has any material change invalidated earlier evidence?
 - What simpler solution satisfies the same acceptance?
 - Has scope crossed repo, worktree, submodule, or ownership boundaries?
@@ -69,7 +72,7 @@ Ask:
 - If an active plan exists, is it current, incrementally updated, and still the smallest credible route?
 - Is any stage relying on a `draft` or `superseded` artifact as if it were approved/current?
 - Does the Iteration Record choose the right loop mode and provide hypothesis, evidence type, learning, and decision?
-- For debug work, does the Debug Receipt prove `ROOT_CAUSE_CONFIRMED` before any fix, or correctly limit `NOT_REPRODUCED`/`BLOCKED` to diagnostic claims?
+- For debug work, does the Debug Receipt prove `ROOT_CAUSE_CONFIRMED` with problem-space decomposition, entity/API/log alignment, excluded material alternatives, symptom explanation, and the smallest credible fix surface; or correctly limit `NOT_REPRODUCED`/`BLOCKED` to diagnostic claims?
 
 ## Feedback handling
 
@@ -80,7 +83,7 @@ When feedback exists, classify each item:
 - `needs_clarification`: cannot be implemented safely without a specific decision.
 - `blocked`: cannot proceed because data, credentials, permissions, or environment are missing.
 
-Only accepted feedback may route to `goal-iterate`.
+If feedback says the prior framing or root-cause interpretation is wrong, first decide whether it is an entity/target mismatch. Route accepted target corrections to `REFRAME`, not directly to implementation. Only accepted feedback that preserves the Goal Contract may route to `goal-iterate`.
 
 ## Output
 

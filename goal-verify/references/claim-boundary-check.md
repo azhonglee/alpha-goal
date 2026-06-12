@@ -21,6 +21,8 @@ From narrow to broad:
 7. end-to-end product behavior;
 8. production observability.
 
+For diagnostic claims, use a parallel ladder: symptom observed, reproduction attempted, call chain mapped, first divergence point identified, narrowed component named, material alternatives excluded, fix surface identified, fix verified. Do not use a narrower rung to claim a broader one.
+
 Use the highest practical boundary for the claim. If not practical, narrow the final claim.
 
 Choose the verdict from delivery intent:
@@ -76,3 +78,26 @@ production logs are visible in the operational logging platform
 ```
 
 Narrow final claim unless runtime/observability evidence exists.
+
+
+### Root-cause claim boundary
+
+User wording:
+
+```text
+Find and fix why jobs complete twice.
+```
+
+Local evidence supports:
+
+```text
+Duplicate completion is caused by retry replay across queue handler X because event idempotency key Y is not checked; this was reproduced by test Z and confirmed by logs A/B.
+```
+
+It does not automatically support:
+
+```text
+All duplicate job completion causes are fixed in production.
+```
+
+Narrow the final claim unless end-to-end or production observability evidence exists.
