@@ -1,6 +1,6 @@
 # Spec Template
 
-仅当 `goal-frame` 判定需要 durable requirements artifact 时使用。小任务把 compact spec 写进 Goal Contract 的 `Spec` 字段即可。
+仅当 `goal-loop` frame phase 判定需要 durable requirements artifact 时使用。小任务把 compact spec 写进 Goal Contract 的 `Spec` 字段即可。
 
 Spec 说明 what/why/boundaries/success criteria，不拆执行步骤，也不替代 dynamic plan、Iteration Record 或 Verification Verdict。
 
@@ -11,7 +11,7 @@ Spec 说明 what/why/boundaries/success criteria，不拆执行步骤，也不�
 - Owner:
 - Source request:
 - Related Goal Contract:
-- Loop type:
+- Goal type:
 - Risk tier: low | medium | high
 - Claim boundary:
 - Approval basis:

@@ -18,7 +18,7 @@ Recovery:
 - last known Iteration Record:
 - last known Review Record:
 - last known Verification Verdict:
-- inferred loop type:
+- inferred goal type:
 - suspected incomplete actions:
 - safest next state:
 - next action:
@@ -29,8 +29,8 @@ Recovery:
 - Do not continue mutation until the dirty state is understood.
 - Do not assume a previous edit was intentional unless it maps to the Goal Contract.
 - If a spec or plan exists, read its current version and status before relying on remembered context.
-- Do not continue from a `superseded` artifact; return to `goal-frame` for spec issues or `goal-iterate` for plan issues.
-- If changed files belong to a different repo/path than the Goal Contract, return to `goal-frame`.
+- Do not continue from a `superseded` artifact; return to `goal-loop` frame phase for spec issues or `goal-iterate` for plan issues.
+- If changed files belong to a different repo/path than the Goal Contract, return to `goal-loop` frame phase.
 - If a Review Record exists but changed files, evidence, or artifact revisions moved past its Freshness boundary, treat it as stale review input, not a completion verdict.
 - If review feedback, scope expansion, complexity, architecture/ownership risk, or uncertainty exists, first decide whether `goal-iterate` feedback can handle it; enter `goal-review` only for explicit or material independent challenge.
 - If the implementation appears complete but no evidence matrix exists, enter `goal-verify`.

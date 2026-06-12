@@ -15,11 +15,10 @@ import sys
 from pathlib import Path
 import tomllib
 
-REQUIRED_SKILLS = ["goal-loop", "goal-frame", "goal-iterate", "goal-review", "goal-verify"]
+REQUIRED_SKILLS = ["goal-loop", "goal-iterate", "goal-review", "goal-verify"]
 SKILLS_DIR = "skills"
 IMPLICIT_POLICY = {
     "goal-loop": "true",
-    "goal-frame": "false",
     "goal-iterate": "false",
     "goal-review": "false",
     "goal-verify": "false",
@@ -287,8 +286,7 @@ def check_consistency(root: Path) -> bool:
     source = skill_root(root)
     worktree_safety = source / "goal-iterate" / "references" / "worktree-safety.md"
     goal_loop = source / "goal-loop" / "SKILL.md"
-    goal_frame = source / "goal-frame" / "SKILL.md"
-    target_discovery = source / "goal-frame" / "references" / "target-discovery.md"
+    target_discovery = source / "goal-loop" / "references" / "target-discovery.md"
     loop_modes = source / "goal-iterate" / "references" / "loop-modes.md"
     goal_verify = source / "goal-verify" / "SKILL.md"
     install_script = root / "scripts" / "install.sh"
@@ -311,32 +309,29 @@ def check_consistency(root: Path) -> bool:
             ok = fail("skills/goal-loop/SKILL.md: missing root-cause debug evidence invariant")
         if ".goal-loop/" not in text:
             ok = fail("skills/goal-loop/SKILL.md: missing .goal-loop/ ignore guidance")
-
-    if goal_frame.exists():
-        text = goal_frame.read_text(encoding="utf-8")
         if "low-risk single-function failures" not in text:
-            ok = fail("skills/goal-frame/SKILL.md: missing compact low-risk debug framing guidance")
-        if "Do not invent composite loop types" not in text or "Do not encode stage state into loop type" not in text:
-            ok = fail("skills/goal-frame/SKILL.md: missing atomic loop type guidance")
+            ok = fail("skills/goal-loop/SKILL.md: missing compact low-risk debug framing guidance")
+        if "Do not invent composite goal types" not in text or "not the current stage" not in text:
+            ok = fail("skills/goal-loop/SKILL.md: missing atomic goal type guidance")
         contract_start = text.find("Goal Contract:\n")
         contract_end = text.find("```", contract_start + 1) if contract_start != -1 else -1
         contract_block = text[contract_start:contract_end] if contract_start != -1 and contract_end != -1 else ""
         for duplicated_field in ["- Acceptance:", "- Non-goals:", "- Constraints:", "- Decision boundaries:", "- Claim boundary:", "- Evidence plan:"]:
             if duplicated_field in contract_block:
                 ok = fail(
-                    "skills/goal-frame/SKILL.md: Goal Contract should keep requirements inside Spec, "
+                    "skills/goal-loop/SKILL.md: Goal Contract should keep requirements inside Spec, "
                     f"not top-level {duplicated_field}"
                 )
         for required_spec_field in ["- Outcome:", "- Scope:", "- Acceptance:", "- Constraints:", "- Claim boundary:", "- Evidence:"]:
             if required_spec_field not in text:
-                ok = fail(f"skills/goal-frame/SKILL.md: missing compact Spec field {required_spec_field}")
+                ok = fail(f"skills/goal-loop/SKILL.md: missing compact Spec field {required_spec_field}")
 
     if target_discovery.exists():
         text = target_discovery.read_text(encoding="utf-8")
         if "Domain boundary gate" not in text:
-            ok = fail("skills/goal-frame/references/target-discovery.md: missing domain boundary gate")
+            ok = fail("skills/goal-loop/references/target-discovery.md: missing domain boundary gate")
         if "related but not equivalent" not in text or "UI labels" not in text:
-            ok = fail("skills/goal-frame/references/target-discovery.md: missing general domain-term disambiguation guidance")
+            ok = fail("skills/goal-loop/references/target-discovery.md: missing general domain-term disambiguation guidance")
 
     if loop_modes.exists():
         text = loop_modes.read_text(encoding="utf-8")

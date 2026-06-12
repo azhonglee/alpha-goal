@@ -5,7 +5,7 @@ Iteration Record 记录一轮 bounded loop。它不是最终验收，也不重�
 ```text
 Iteration Record:
 - Contract version:
-- Loop type:
+- Goal type:
 - Active artifacts:
 - Dynamic plan:
 - Loop mode:
@@ -32,9 +32,9 @@ Iteration Record:
 
 本轮使用的 Goal Contract 引用。无显式版本时，用时间或简短摘要。
 
-### Loop type
+### Goal type
 
-继承 Goal Contract：`NEW_GOAL`、`DEBUG_GOAL`、`CONTINUE_GOAL`、`READ_ONLY_DISCOVERY`、`VERIFY_CLAIM`、`RECOVERY`。
+继承 Goal Contract：`EXPLORE`、`DESIGN`、`IMPLEMENT`、`DEBUG`、`VERIFY`、`RECOVER`。`CLARIFY` 不能进入 iterate。
 
 ### Active artifacts
 

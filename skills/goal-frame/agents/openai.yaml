@@ -1,7 +1,0 @@
-interface:
-  display_name: "Goal Frame"
-  short_description: "Discover and contract goals"
-  default_prompt: "Use $goal-frame to run discovery, ask one Socratic clarification if needed, and produce a Goal Contract with Spec."
-
-policy:
-  allow_implicit_invocation: false

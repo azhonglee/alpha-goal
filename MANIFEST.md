@@ -4,9 +4,8 @@
 
 | Directory | Purpose |
 |---|---|
-| `skills/goal-loop/` | 轻量意图识别、loop type 分类、入口路由和全局不变量。 |
-| `skills/goal-frame/` | Discovery + Socratic interview，产出包含 Spec 的 Goal Contract。 |
-| `skills/goal-iterate/` | 按 loop type 执行 dynamic planning、execution、feedback 三段循环。 |
+| `skills/goal-loop/` | Goal type 分类、Discovery + Socratic interview、Goal Contract、入口路由和全局不变量。 |
+| `skills/goal-iterate/` | 按 Goal type 执行 dynamic planning、execution、feedback 三段循环。 |
 | `skills/goal-verify/` | 验收 acceptance、检查证据边界并给出 Verification Verdict/Judgment。 |
 | `skills/goal-review/` | 可选辅助审查；显式挑战反馈、scope、架构或 readiness 风险。 |
 
@@ -29,12 +28,12 @@
 
 ## Invocation policy
 
-`skills/goal-loop/agents/openai.yaml` allows implicit invocation. Stage skills set `policy.allow_implicit_invocation: false` so they can be invoked explicitly or selected by the router without competing with the router during ordinary task matching.
+`skills/goal-loop/agents/openai.yaml` allows implicit invocation. Downstream stage skills set `policy.allow_implicit_invocation: false` so they can be invoked explicitly or selected by `goal-loop` without competing during ordinary task matching.
 
 默认主路径是：
 
 ```text
-INTENT -> FRAME -> ITERATE(dynamic plan -> execution -> feedback) -> VERIFY -> FINAL
+INTENT -> GOAL-LOOP(triage + frame + contract) -> ITERATE(dynamic plan -> execution -> feedback) -> VERIFY -> FINAL
 ```
 
 `goal-review` 保留为显式辅助审查，不是默认主路径。

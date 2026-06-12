@@ -1,17 +1,16 @@
 # Codex Goal Loop 技能集
 
-本仓库提供一组 Goal Loop skills，帮助 Codex 把非平凡工程任务按“意图识别、目标澄清、迭代执行、验收判断”推进。
+本仓库提供一组 Goal Loop skills，帮助 Codex 把非平凡工程任务按“目标分类、frame 澄清、迭代执行、验收判断”推进。
 
 ```text
-INTENT -> FRAME -> ITERATE(dynamic plan -> execution -> feedback) -> VERIFY -> FINAL
-                    ^--------------------------------------------|
+INTENT -> GOAL-LOOP(triage + frame + contract) -> ITERATE(dynamic plan -> execution -> feedback) -> VERIFY -> FINAL
+                                                    ^--------------------------------------------|
 ```
 
 核心思路：
 
-- `goal-loop`：轻量意图识别，确定 loop type 和入口。
-- `goal-frame`：Discovery + Socratic interview，澄清 goal，产出包含 `Spec` 的 Goal Contract。
-- `goal-iterate`：按 loop type 执行三段循环：dynamic planning、execution、feedback。
+- `goal-loop`：识别 Goal type，执行 Discovery + Socratic interview，产出包含 `Spec` 的 Goal Contract，并决定下一入口。
+- `goal-iterate`：按 Goal type 执行三段循环：dynamic planning、execution、feedback。
 - `goal-verify`：验收 acceptance，判断证据是否支持最终 claim。
 - `goal-review`：可选辅助审查；仅在用户点名、仓库规则要求或反馈风险需要独立挑战时使用，不是默认主流程。
 
@@ -27,7 +26,7 @@ scripts/install.sh
 
 - 将 `skills/*/SKILL.md` 所在技能目录软链接到 `${CODEX_HOME:-$HOME/.codex}/skills/`。
 - 默认把 `templates/AGENTS.md` 合并到 Codex home 的 `AGENTS.md`，并把 `templates/config.toml` 中缺失的设置补齐到 Codex home 的 `config.toml`；模板只补齐 multi-agent、child AGENTS 和结构化 `request_user_input` 相关开关，不设置 sandbox 权限、休眠行为或不稳定特性警告抑制项。
-- 自动替换指向本仓库旧顶层布局的同名 skill 软链接，并清理旧版本可能留在目标 `skills/` 下、且指向本仓库支持目录的旧软链接。
+- 自动替换指向本仓库旧顶层布局的同名 skill 软链接，并清理旧版本可能留在目标 `skills/` 下、且指向本仓库的 obsolete `goal-frame` 或支持目录旧软链接。
 - 校验目标 `skills/` 中的 skill 软链接是否指向当前源码目录。
 - 安装前运行源码中的 `tools/validate_skillset.py` 校验技能包布局。`validate_skillset.py` 只验证布局、元数据、引用可发现性和少量一致性规则；不能证明实际路由、误触发、reference 加载策略或验证边界正确。
 
@@ -61,7 +60,6 @@ scripts/install.sh --verbose
 ```text
 skills/
   goal-loop/
-  goal-frame/
   goal-iterate/
   goal-review/
   goal-verify/
@@ -102,20 +100,21 @@ $goal-loop 对这个仓库做只读一致性审计，不要改文件。
 显式调用阶段：
 
 ```text
-$goal-frame 先把这个需求 frame 清楚，不要改文件。
+$goal-loop 先把这个需求 frame 清楚，不要改文件。
 $goal-iterate 根据上面的 Goal Contract 做一轮最小变更。
 $goal-verify 检查当前 diff、测试和声明边界，判断是否可以最终交付。
 $goal-review 独立挑战当前反馈、scope 或 readiness 风险。
 ```
 
-只有 `goal-loop` 适合隐式触发。阶段技能的 `allow_implicit_invocation` 都是 `false`。
+只有 `goal-loop` 适合隐式触发。下游阶段技能的 `allow_implicit_invocation` 都是 `false`。
 
 ## 设计原则
 
-- Router 只做意图识别和入口选择，不承载阶段细节。
+- `goal-loop` 承担 triage、frame、Goal Contract 和路由；不做实现 mutation，不做最终完成声明。
+- Goal type 使用 `EXPLORE`、`DESIGN`、`IMPLEMENT`、`DEBUG`、`VERIFY`、`RECOVER`、`CLARIFY`；`CLARIFY` 只能作为临时 frame 状态，不能进入执行。
 - FRAME 先 Discovery，再按需 Socratic interview；Goal Contract 必须包含 `Spec` 字段。
 - Spec 默认内联且紧凑；只有风险、复杂度、handoff、恢复或用户要求时才写 durable spec。
-- ITERATE 固定为 dynamic planning、execution、feedback 三段；loop type 决定本轮证据形状。
+- ITERATE 固定为 dynamic planning、execution、feedback 三段；Goal type 决定本轮证据形状。
 - 普通反馈在 ITERATE feedback phase 处理；`goal-review` 只做可选独立挑战。
 - VERIFY 只做验收和判断；任何最终完成声明必须基于 Verification Verdict。
 - Goal Loop 的 `Artifacts` 只表示流程产物；业务域对象应记录在 Target 或 `Spec` 的 Scope、Acceptance、Evidence 中。
@@ -139,7 +138,7 @@ $goal-review 独立挑战当前反馈、scope 或 readiness 风险。
 
 阶段输出契约的权威来源在各阶段 `SKILL.md` 和同级 `references/`：
 
-- `goal-frame`：Goal Contract，包含 Intent、Loop type、Target、Discovery、Socratic state、Spec、Risk tier、Risks、Artifacts、Existing work 和下一步判断。
+- `goal-loop`：Goal Contract，包含 Intent、Goal type、Target、Discovery、Socratic state、Spec、Risk tier、Risks、Artifacts、Existing work 和下一步判断。
 - `goal-iterate`：Iteration Record，包含 Dynamic plan、Execution、Feedback、Local evidence、Acceptance delta 和下一步判断。
 - `goal-verify`：Verification Verdict，包含 Acceptance evidence matrix、Spec review、Claim boundary、Judgment 和 Final claim allowed。
 - `goal-review`：Review Record，仅用于显式辅助审查。

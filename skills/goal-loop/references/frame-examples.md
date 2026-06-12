@@ -7,7 +7,7 @@
 ```text
 Goal Contract:
 - Intent: 修复 retryable request error 的可见状态。
-- Loop type: DEBUG_GOAL.
+- Goal type: DEBUG.
 - Target: ambiguous; UI reducer 和 stream event mapper 都影响状态。
 - Discovery: reducer 有状态分支，stream mapper 有错误事件转换；缺少产品边界选择。
 - Socratic state: missing; reducer-only 与 full lifecycle 会改变验收。
@@ -31,7 +31,7 @@ Goal Contract:
 ```text
 Goal Contract:
 - Intent: 比较本地实现和 MR 503。
-- Loop type: READ_ONLY_DISCOVERY.
+- Goal type: EXPLORE.
 - Target: existing MR and current branch diff, read-only.
 - Discovery: 当前对象是比较，不是实现。
 - Socratic state: clear.
@@ -55,7 +55,7 @@ Goal Contract:
 ```text
 Goal Contract:
 - Intent: 为产物上传到 TOS 增加可诊断日志；本轮只 frame，不改文件。
-- Loop type: NEW_GOAL.
+- Goal type: IMPLEMENT.
 - Target: 未闭合；当前仓若只有文档示例命中，不能当作业务实现面。
 - Discovery: 当前证据不足以选择目标 repo/path。
 - Socratic state: missing; 阻塞点是目标业务 repo/path。

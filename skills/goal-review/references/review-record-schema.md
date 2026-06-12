@@ -66,4 +66,4 @@ active spec/plan 是否 current、draft、approved、superseded、over-broad 或
 
 ### Next
 
-`goal-iterate`、`goal-frame`、`goal-verify` 或 blocker。
+`goal-iterate`、`goal-loop` frame phase、`goal-verify` 或 blocker。

@@ -1,6 +1,6 @@
 # Clarification Policy
 
-FRAME 的澄清目标是关闭执行风险，而不是把所有需求都变成访谈。
+`goal-loop` frame phase 的澄清目标是关闭执行风险，而不是把所有需求都变成访谈。
 
 ## Must ask
 
@@ -41,7 +41,7 @@ FRAME 的澄清目标是关闭执行风险，而不是把所有需求都变成�
 我找到两个候选位置：`repo-a` 有上传编排和 TOS 日志上下文，`repo-b` 只有底层 TOS driver。这个需求是要改编排日志，还是先比较两个位置的职责边界？
 ```
 
-用户回答后更新 Goal Contract。若答案改变 target、acceptance、constraints、non-goals 或 claim boundary，后续必须重新走 router，不要继续旧 iteration。
+用户回答后更新 Goal Contract。若答案改变 target、acceptance、constraints、non-goals 或 claim boundary，后续必须重新走 `goal-loop` frame phase，不要继续旧 iteration。
 
 ## Default when blocked
 
