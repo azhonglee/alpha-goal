@@ -3,23 +3,24 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: scripts/install.sh [--codex-home PATH] [--force] [--sync-user-templates] [--verbose]
+Usage: scripts/install.sh [--codex-home PATH] [--force] [--no-sync-user-templates] [--verbose]
 
 Install this repository's top-level skills by symlinking them into
 ${CODEX_HOME:-$HOME/.codex}/skills.
 
-By default, this script does not modify user-level AGENTS.md or config.toml.
-Use --sync-user-templates to merge templates/AGENTS.md and fill missing
-config.toml settings from templates/config.toml.
+By default, this script merges templates/AGENTS.md into user-level AGENTS.md
+and fills missing config.toml settings from templates/config.toml.
+Use --no-sync-user-templates to skip user-level template updates.
 
 Options:
   --codex-home PATH
             Install into PATH instead of ${CODEX_HOME:-$HOME/.codex}.
   --force   Replace existing symlinks that point elsewhere. Real files or
             directories are never removed.
+  --no-sync-user-templates
+            Skip updating Codex home AGENTS.md and config.toml from templates/.
   --sync-user-templates
-            Opt in to updating Codex home AGENTS.md and config.toml from
-            templates/. This may affect future Codex sessions.
+            Compatibility no-op; user templates are synced by default.
   --verbose Print detailed install and validation output.
 EOF
 }
@@ -31,7 +32,7 @@ die() {
 
 force=false
 verbose=false
-sync_user_templates=false
+sync_user_templates=true
 codex_home_arg=""
 
 while [[ $# -gt 0 ]]; do
@@ -57,6 +58,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --sync-user-templates)
       sync_user_templates=true
+      shift
+      ;;
+    --no-sync-user-templates)
+      sync_user_templates=false
       shift
       ;;
     --verbose)
@@ -622,7 +627,7 @@ print_summary() {
   if [[ "$sync_user_templates" == true ]]; then
     echo "User templates: AGENTS.md $agents_action, config.toml $config_action"
   else
-    echo "User templates: skipped (pass --sync-user-templates to opt in)"
+    echo "User templates: skipped (--no-sync-user-templates)"
   fi
 }
 
@@ -666,7 +671,7 @@ if [[ "$sync_user_templates" == true ]]; then
   inject_agents_template
   sync_config_template
 else
-  log "Skipped user template sync; pass --sync-user-templates to opt in"
+  log "Skipped user template sync due to --no-sync-user-templates"
 fi
 
 installed=0
