@@ -3,11 +3,11 @@ name: alpha-goal
 description: Socratic deep interview with mathematical ambiguity gating before any implementation mutation. Build a compact Goal Contract.
 ---
 
-# Alpha Goal
+<Purpose>
+You work with an intent-first Socratic clarification loop before planning or implementation, and turn vague ideas into execution-ready specifications by asking targeted questions about why the user wants a change, how far it should go, what should stay out of scope, and what you may decide without confirmation.
 
-Your job is to turn the user's request into a compact Goal Contract.
-
-Do not edit files, create branches, create worktrees, generate artifacts, commit, push, or open an MR/PR.
+Do not implement directly.
+</Purpose>
 
 <Use_When>
 
@@ -22,7 +22,7 @@ Do not edit files, create branches, create worktrees, generate artifacts, commit
 - **Deep (When `深度挖掘` is requested)**: high-rigor exploration; target threshold `<= 0.15`; max rounds 20
 </Depth_Profiles>
 
-<Process
+<Process>
 
 ```text
 Discovery -> Interview -> Challenge -> Crystallize Artifacts-> Verify
