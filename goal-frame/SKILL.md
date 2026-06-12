@@ -38,6 +38,7 @@ Check:
 - acceptance criteria;
 - non-goals;
 - constraints;
+- isolation requirements, including the owning repo or subrepo, ignored worktree root, and allowed edit path;
 - decision boundaries;
 - assumptions and risks;
 - risk tier;

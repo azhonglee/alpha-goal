@@ -68,6 +68,7 @@ Check:
 - risk-tier evidence requirements are met or explicitly blocked;
 - evidence is at the right boundary for the user's wording, including diagnosis-only claims such as root cause narrowed to a component but not yet fixed internally;
 - changed files match intended target and non-goals;
+- repository mutation evidence came from the isolated edit path, not a primary `main`/`master` checkout, and any `.worktrees/` or `.goal-loop/` paths used for the claim were gitignored or explicitly approved;
 - tests/checks are appropriate for the touched code and, for bug fixes, exercise the confirmed failure path rather than only a neighboring helper or mocked path;
 - verification runs against the target final state and does not depend on paths or artifacts that will be removed, self-matching greps, pre-change layout checks, or mock-only checks that miss the claim;
 - failure output is understood, not hand-waved;
