@@ -1,0 +1,7 @@
+interface:
+  display_name: "Alpha Goal"
+  short_description: "Clarify goal contracts before iteration"
+  default_prompt: "Use $alpha-goal to clarify ambiguous engineering goals and produce a Goal Contract before iteration."
+
+policy:
+  allow_implicit_invocation: true

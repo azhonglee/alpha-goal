@@ -5,7 +5,7 @@ usage() {
   cat <<'EOF'
 Usage: scripts/install.sh [--codex-home PATH] [--force] [--no-sync-user-templates] [--verbose]
 
-Install this repository's top-level skills by symlinking them into
+Install this repository's skills/ directories by symlinking them into
 ${CODEX_HOME:-$HOME/.codex}/skills.
 
 By default, this script merges templates/AGENTS.md into user-level AGENTS.md
@@ -88,6 +88,7 @@ log() {
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd "$script_dir/.." && pwd -P)"
+source_skill_root="$repo_root/skills"
 
 normalize_path() {
   python3 - "$1" <<'PY'
@@ -178,7 +179,11 @@ link_path() {
       return
     fi
 
-    if [[ "$force" == true ]]; then
+    local legacy_skill_source="$repo_root/$label"
+    if [[ "$current_target" == "$legacy_skill_source" && "$source" == "$source_skill_root/$label" ]]; then
+      rm "$target"
+      replaced=true
+    elif [[ "$force" == true ]]; then
       rm "$target"
       replaced=true
     else
@@ -219,6 +224,23 @@ remove_legacy_support_link() {
   fi
 }
 
+remove_obsolete_skill_link() {
+  local skill_name="$1"
+  local target="$target_root/$skill_name"
+
+  if [[ ! -L "$target" ]]; then
+    return
+  fi
+
+  local current_target
+  current_target="$(resolve_link_target "$target")"
+  if [[ "$current_target" == "$source_skill_root/$skill_name" || "$current_target" == "$repo_root/$skill_name" ]]; then
+    rm "$target"
+    legacy_removed_count=$((legacy_removed_count + 1))
+    log "Removed obsolete skill link: $target"
+  fi
+}
+
 preflight_install_targets() {
   for skill_file in "${skill_files[@]}"; do
     local skill_dir
@@ -230,7 +252,8 @@ preflight_install_targets() {
     if [[ -L "$target" ]]; then
       local current_target
       current_target="$(resolve_link_target "$target")"
-      if [[ "$current_target" == "$skill_dir" || "$force" == true ]]; then
+      local legacy_skill_source="$repo_root/$skill_name"
+      if [[ "$current_target" == "$skill_dir" || "$current_target" == "$legacy_skill_source" || "$force" == true ]]; then
         continue
       fi
       echo "Refusing to replace existing symlink: $target -> $(readlink "$target")" >&2
@@ -621,7 +644,7 @@ print_summary() {
     status="installed"
   fi
 
-  echo "Goal Loop skills $status: $installed -> $target_root"
+  echo "Alpha Goal skills $status: $installed -> $target_root"
   echo "Codex home: $codex_home"
   echo "Validation: passed (tools/validate_skillset.py)"
   if [[ "$sync_user_templates" == true ]]; then
@@ -645,10 +668,10 @@ fi
 
 run_skillset_validation
 
-required_skills=(goal-loop goal-frame goal-iterate goal-review goal-verify)
+required_skills=(alpha-goal loop verify)
 skill_files=()
 for skill_name in "${required_skills[@]}"; do
-  skill_file="$repo_root/$skill_name/SKILL.md"
+  skill_file="$source_skill_root/$skill_name/SKILL.md"
   if [[ ! -f "$skill_file" ]]; then
     echo "Missing required skill: $skill_file" >&2
     exit 1
@@ -657,10 +680,10 @@ for skill_name in "${required_skills[@]}"; do
 done
 
 shopt -s nullglob
-discovered_skill_files=("$repo_root"/*/SKILL.md)
+discovered_skill_files=("$source_skill_root"/*/SKILL.md)
 shopt -u nullglob
 if [[ "${#discovered_skill_files[@]}" -ne "${#required_skills[@]}" ]]; then
-  echo "Unexpected top-level skill set under $repo_root; run tools/validate_skillset.py for details." >&2
+  echo "Unexpected skill set under $source_skill_root; run tools/validate_skillset.py for details." >&2
   exit 1
 fi
 
@@ -684,6 +707,10 @@ done
 
 for support_name in adapters tools templates scripts; do
   remove_legacy_support_link "$support_name"
+done
+
+for obsolete_skill in goal-frame goal-loop goal-iterate goal-review goal-verify; do
+  remove_obsolete_skill_link "$obsolete_skill"
 done
 
 validate_installed_links

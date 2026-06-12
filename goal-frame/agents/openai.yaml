@@ -1,7 +1,0 @@
-interface:
-  display_name: "Goal Frame"
-  short_description: "Create a compact Goal Contract"
-  default_prompt: "Use $goal-frame to clarify the target, acceptance, constraints, and claim boundary before coding."
-
-policy:
-  allow_implicit_invocation: false
