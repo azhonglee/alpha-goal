@@ -1,109 +1,56 @@
 # Iteration Record Schema
 
-Iteration Record 记录一轮 bounded loop。它不是最终验收，也不重写 Goal Contract。
+Use this reference only when a loop result needs a durable or handoff-ready record. Keep the record proportional: a field belongs only when it changes judgment, handoff, recovery, or accountability.
+
+## Compact record
 
 ```text
 Iteration Record:
-- Contract version:
-- Goal type:
-- Active artifacts:
-- Dynamic plan:
-- Loop mode:
-- Hypothesis:
-- Evidence type:
-- Mutation preflight:
-- Execution:
-- Debug receipt:
-- Feedback:
-- Changed files:
-- Local evidence:
-- Learning:
+- Boundary:
+- Action:
+- Evidence:
 - Decision:
-- Acceptance delta:
-- Risks introduced:
-- Review needed:
-- Iterate verdict:
 - Next:
 ```
 
-## Field definitions
+### Boundary
 
-### Contract version
+Approved Goal Contract or equivalent context used, including target/scope/non-goals/claim boundary relevant to this slice.
 
-本轮使用的 Goal Contract 引用。无显式版本时，用时间或简短摘要。
+### Action
 
-### Goal type
+What was changed, explored, tested, delegated, or blocked in this iteration. Avoid long narrative.
 
-从 reviewed Goal Contract、interview summary、chat-only contract 或等价 approved context 的语义中选择：`EXPLORE`、`DESIGN`、`IMPLEMENT`、`DEBUG`、`VERIFY`、`RECOVER`。`CLARIFY` 不能进入 iterate。不要依赖固定字段名。
+### Evidence
 
-### Active artifacts
-
-本轮读取或更新的 durable spec/plan/review/evidence。无 durable artifact 时写 `none`。包含 path、status、read/updated/created/superseded。
-
-### Dynamic plan
-
-本轮最小切片、证据门槛、允许触碰的边界、成功/失败/反馈路由。若使用 durable plan，写路径和本轮更新。
-
-### Loop mode
-
-`discovery`、`debug`、`tdd`、`implementation`、`refactor`、`spike`、`hardening`。见 `references/loop-modes.md`。
-
-### Hypothesis
-
-本轮要验证的具体假设。debug mode 下包含 competing hypotheses 或说明为何替代项不可信。
-
-### Evidence type
-
-`gate_evidence`、`advisory_audit`、`exploration_only`、`delta_review`、`evidence_audit`。
-
-### Mutation preflight
-
-概述 repo root、branch、status、worktrees、isolated edit path、baseline health、mutation allowed。相关 baseline 失败或无法运行时，记录命令和 scope decision。
-
-### Execution
-
-本轮实际动作：代码改动、只读探查、probe、测试、补证据或 blocker。避免长叙事。
-
-### Debug receipt
-
-非 debug 写 `none`。debug 写 `ROOT_CAUSE_CONFIRMED`、`NOT_REPRODUCED` 或 `BLOCKED`，并包含 symptom、reproduction/blocker、problem-space decomposition、hypotheses、probes、evidence、entity/interface/log alignment、root-cause statement、validation、fix surface、decision。
-
-### Feedback
-
-解释测试/用户/reviewer/运行结果如何改变路线：继续、pivot、expand、harden、finish、reframe 或 blocked。
-
-### Changed files
-
-只列本轮故意触碰的文件。
-
-### Local evidence
-
-命令、测试、probe、diff check 或 blocker evidence。
-
-### Learning
-
-证据证明或推翻了什么。
+Fresh checks, probes, diff review, command output, or blocker evidence. State whether evidence is gate evidence, advisory, or exploration-only when that matters.
 
 ### Decision
 
-`continue`、`pivot`、`expand`、`harden`、`finish`。
-
-### Acceptance delta
-
-哪些 acceptance expectations 从 uncovered 变成 covered/partially covered，哪些仍 uncovered。
-
-### Risks introduced
-
-补丁引入的新风险：行为、兼容、测试缺口、并发、迁移、观测性。
-
-### Review needed
-
-普通反馈写 `no` 并说明已在 feedback phase 处理。复杂架构、scope、ownership、争议反馈或 claim-boundary 风险写 `yes`，并在 Feedback/Risks 里记录需要的独立审查；不要输出不存在的 review route。
-
-### Iterate verdict
-
-`ITERATION_READY_FOR_VERIFY`、`ITERATION_CONTINUES`、`BLOCKED`、`RETURN_TO_ALPHA_GOAL`。
+One of: `continue`, `harden`, `verify`, `reframe`, or `blocked`.
 
 ### Next
 
-下一入口：通常是下一轮 `loop`、`verify`、`alpha-goal` 或具体 blocker。
+Smallest next action or handoff target: another `loop`, `verify`, `alpha-goal`, final blocker, or explicit no-op for read-only work.
+
+## Conditional fields
+
+Add only the fields that affect this iteration:
+
+- `Dynamic plan`: multi-slice, multi-repo/module, contested ownership, recovery, rollback, compatibility, or handoff sequencing.
+- `Preflight`: mutation path, dirty-state, worktree, submodule, local-rule, or user-change evidence when editing is involved.
+- `Changed files`: intentional touched paths when there is a diff.
+- `Acceptance delta`: acceptance items newly covered, partially covered, or still uncovered.
+- `Feedback handling`: user, reviewer, test, runtime, or advisory feedback that changed the route.
+- `Risk/ownership`: cross-boundary, generated-output, migration, compatibility, concurrency, data, security, or observability risk.
+- `Debug Receipt`: required for bug/root-cause claims. See `references/loop-modes.md`.
+- `Delegation receipt`: required when subagents own an independent surface.
+
+## Verdict vocabulary
+
+Use route-oriented labels rather than final-completion claims:
+
+- `ITERATION_CONTINUES`: another loop slice is needed.
+- `ITERATION_READY_FOR_VERIFY`: acceptance appears covered; final judgment belongs to `verify`.
+- `RETURN_TO_ALPHA_GOAL`: target, scope, acceptance, non-goals, decision boundary, or claim boundary needs reframing.
+- `BLOCKED`: the smallest missing input, permission, tool, data, environment, or safe-state condition is named.

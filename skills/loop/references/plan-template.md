@@ -30,7 +30,7 @@ docs/plans/YYYYMMDD-<slug>-plan.md
 - Related Goal Contract:
 - Related spec:
 - Owner:
-- Risk tier: low | medium | high
+- Strongest material risk:
 - Approval basis:
 - Supersedes:
 - Last updated:
@@ -67,7 +67,7 @@ Status: `pending`, `in_progress`, `done`, `blocked`, `superseded`。
 
 ## Risks And Watchpoints
 
-- Risk:
+- Strongest material risk:
   - Mitigation:
   - Evidence needed:
 

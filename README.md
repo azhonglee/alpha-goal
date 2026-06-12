@@ -108,13 +108,13 @@ $verify 检查当前 diff、测试和声明边界，判断是否可以最终交�
 ## 设计原则
 
 - `alpha-goal` 承担 Discovery、Socratic interview、ambiguity scoring、Goal Contract 和路由；不做实现 mutation，不做最终完成声明。
-- Goal Contract 必须记录 intent、scope、non-goals、decision boundaries、constraints、acceptance 和 evidence。
-- 写入 `.alpha-goal/` 或 `docs/design/` 前必须确认路径已 gitignored 或用户明确批准；否则在对话中输出 chat-only contract。
-- ITERATE 固定为 dynamic planning、execution、feedback 三段；Goal type 决定本轮证据形状。
-- 普通反馈在 loop feedback phase 处理。
-- VERIFY 只做验收和判断；任何最终完成声明必须基于 Verification Verdict。
+- Goal Contract 覆盖 intent、scope、non-goals、decision boundaries、constraints、acceptance 和 evidence；小任务可保持紧凑。
+- 写入 `.alpha-goal/` 或 `docs/design/` 前确认路径已 gitignored 或用户明确批准；否则在对话中输出 chat-only contract。
+- ITERATE 以 dynamic planning、execution、feedback 为核心；本轮主导不确定性决定证据形状。
+- 普通反馈在 loop feedback phase 处理；改变目标、范围、验收或声明边界的反馈回到 `alpha-goal`。
+- VERIFY 只做验收和判断；最终完成声明基于 Verification Verdict。
 - Alpha Goal 的 process artifacts 只表示流程产物；业务域对象应记录在 Goal Contract 的 Scope、Acceptance、Evidence 中。
-- Debug/root-cause 声明必须有能验证根因的证据，不能只靠 plausible patch。
+- Debug/root-cause 声明需要能验证根因的证据，不能只靠 plausible patch。
 - 阶段内辅助脚本只作为只读证据收集工具，不替代工程判断。
 - 项目特有命令和约定应放在目标仓库的 `AGENTS.md`，不要塞进这些跨仓库 skill。
 
@@ -130,7 +130,7 @@ $verify 检查当前 diff、测试和声明边界，判断是否可以最终交�
 - command/output evidence：`.alpha-goal/evidence/YYYYMMDD-<slug>/`
 - scratch artifacts：`.alpha-goal/tmp/YYYYMMDD-<slug>/`
 
-写入 `.alpha-goal/` 前必须确认它已被 gitignored。若未忽略，不要静默修改 `.gitignore`；改用已批准路径，或在 Goal Contract 中记录用户明确同意的持久化路径。
+写入 `.alpha-goal/` 前确认它已被 gitignored。若未忽略，不要静默修改 `.gitignore`；改用已批准路径，或在 Goal Contract 中记录用户明确同意的持久化路径。
 
 ## 阶段输出
 
@@ -142,7 +142,7 @@ $verify 检查当前 diff、测试和声明边界，判断是否可以最终交�
 
 ## 调优建议
 
-如果输出太长，可以减少解释文字，但保留关键字段：
+如果输出太长，可以减少解释文字，但保留会改变判断或交接的关键语义：
 
 - Goal Contract 的 outcome / scope 语义
 - Goal Contract 的 non-goals / decision-boundary 语义

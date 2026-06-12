@@ -1,51 +1,45 @@
 # Completion Review Rubric
 
-用于 readiness-to-merge、readiness-to-ship 或 final-delivery 判断。这里的 review 是 verify 内部的验收检查，不等同于独立 review 阶段。
+Use this reference for readiness-to-merge, readiness-to-ship, final-delivery, or other formal completion judgments. This review is internal to `verify`; it is not an advisory code review.
 
 ## Positive verdict floor
 
-返回 `PASS_TO_FINAL` 前确认：
+Return `PASS_TO_FINAL` only when:
 
-- Goal Contract 或等价 approved context current，且可语义推导 acceptance、included/excluded scope、decision boundaries 和 claim boundary；不要依赖固定字段名；
-- changed files 匹配 target 和 non-goals；
-- Iteration Record 的 dynamic plan、execution、feedback 与当前 diff 一致；
-- 最后一处 material change 之后有 fresh checks；
-- feedback 已处理或明确 out of scope；
-- risk tier 的证据门槛满足；
-- bug/root-cause claim 有有效 Debug Receipt；
-- final claim 不超过 tested boundary。
+- approved context is current and semantically covers acceptance, included/excluded scope, decision boundaries, and claim boundary;
+- changed files and artifacts match target and non-goals;
+- implementation/evidence history is consistent with the current diff;
+- fresh checks ran after the last material change, or substitute evidence is explicitly sufficient for the narrowed claim;
+- feedback is handled, out of scope, or routed elsewhere;
+- the strongest material risk has matching evidence;
+- bug/root-cause claims have valid root-cause evidence;
+- final claim does not exceed tested or observed boundary.
+
+## Evidence floor by risk
+
+Choose evidence by the strongest material risk, not by a ceremonial tier label:
+
+- localized/read-only/low blast radius: diff review plus focused check or direct evidence may be enough;
+- behavior, API, data, or user-visible change: relevant automated test, runtime probe, integration evidence, or explicit substitute is needed;
+- migration, security, compliance, production, tenant, or irreversible claim: final-state, environment-specific, or independently reviewable evidence is needed;
+- missing environment/tool/data: narrow the claim, return `NEXT_ITERATION`, or return `BLOCKED`.
 
 ## Return NEXT_ITERATION
 
-以下情况回 `loop`：
-
-- acceptance 部分覆盖；
-- 需要补测试、probe、diff cleanup、edge case 或 feedback action；
-- 实现方向正确但证据不到 final state；
-- narrowed claim 不符合用户实际需要。
+Use when acceptance is partially covered, checks/probes/cleanup/edge cases/feedback action remain, implementation direction is valid but evidence is not final-state, or a narrowed claim would not satisfy the user.
 
 ## Return REFRAME
 
-以下情况回 `alpha-goal`：
-
-- target/scope、acceptance、non-goals 或 claim boundary 错误/不完整；
-- existing work 关系改变任务身份；
-- feedback 表明当前 contract 不是用户真实目标；
-- evidence 指向不同 entity、API/RPC、submodule 或 repo。
+Use when target/scope, acceptance, non-goals, existing-work relationship, user intent, or claim boundary is wrong or incomplete; or when evidence points to a different entity, API/RPC, submodule, repo, or user-owned decision.
 
 ## Return BLOCKED
 
-以下情况 block：
-
-- 缺 credential、permission、service、data、tooling 或环境；
-- 必须由用户决定风险接受或 scope；
-- 测试无法运行且没有 substitute evidence；
-- 工作区状态无法安全判断。
+Use when credential, permission, service, data, tooling, environment, or required user risk/scope decision is missing and no meaningful loop progress can be made.
 
 ## Narrowed claim
 
-当本地目标已满足但用户措辞更宽，返回 `NARROW_CLAIM_AND_FINAL`，并写明：
+When the local target is satisfied but user wording is broader, return `NARROW_CLAIM_AND_FINAL` and state:
 
-- 已验证的最宽边界；
-- 未验证的更高边界；
-- 用户最终可收到的窄声明。
+- widest verified boundary;
+- higher boundary not verified;
+- final wording the user may receive.
