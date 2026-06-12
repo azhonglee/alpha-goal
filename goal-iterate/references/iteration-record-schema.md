@@ -48,7 +48,7 @@ One of `gate_evidence`, `advisory_audit`, `exploration_only`, `delta_review`, or
 
 ### Debug receipt
 
-Use `none` unless `Loop mode` is `debug`. For debug, include status `ROOT_CAUSE_CONFIRMED`, `NOT_REPRODUCED`, or `BLOCKED` with symptom, reproduction or blocker, problem-space decomposition, competing hypotheses or reason omitted, probes, evidence, entity/interface/log alignment when available, root-cause statement, validation, fix surface, and decision. For low-risk pure-function or single-branch failures with focused test evidence, compress these into a concise paragraph and mark irrelevant entity/log fields as not applicable.
+Use `none` unless `Loop mode` is `debug`. For debug, include status `ROOT_CAUSE_CONFIRMED`, `NOT_REPRODUCED`, or `BLOCKED` with symptom, reproduction or blocker, problem-space decomposition, competing hypotheses or reason omitted, probes, evidence, entity/interface/log alignment when available, root-cause statement, validation, fix surface, and decision. For low-risk pure-function or single-branch failures with focused test evidence, compress these into a concise paragraph and mark irrelevant entity/log fields `not applicable`.
 
 ### Iteration goal
 

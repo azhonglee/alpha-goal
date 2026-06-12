@@ -45,7 +45,7 @@ Check:
 - claim boundary;
 - durable spec need.
 
-For bug, debug, or root-cause tasks, keep the frame compact but record symptom/expected-vs-actual behavior, reproduction boundary or blocker, problem-space decomposition, initial competing hypotheses or why only one is credible, and evidence that will distinguish hypotheses before proving a patch. For low-risk single-function failures with a focused failing test and direct branch evidence, this may be one concise sentence across the existing fields.
+For bug, debug, or root-cause tasks, keep the frame compact. Record symptom, expected-vs-actual behavior, reproduction boundary or blocker, problem-space decomposition, initial competing hypotheses or why only one is credible, and evidence that will distinguish hypotheses before proving a patch. For low-risk single-function failures with focused failing-test and direct branch evidence, one concise sentence across the existing fields is enough.
 
 Use references only when their detail is needed:
 

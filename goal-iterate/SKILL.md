@@ -96,7 +96,13 @@ Choose one loop mode before acting:
 
 Record hypothesis, evidence type, learning, and decision for every iteration. Use `references/loop-modes.md` for mode-specific evidence rules.
 
-For `debug`, do not patch from a guessed cause. Before `ROOT_CAUSE_CONFIRMED`, include problem-space decomposition, competing hypotheses or an evidence-based reason none are credible, entity/interface/log alignment when available, and root-cause validation. For low-risk pure-function or single-branch failures with a focused failing test and direct code divergence, the Debug Receipt may be compact and mark entity/log alignment as not applicable. When symptoms, logs, API/RPC names, payload fields, or user corrections point to different entities than the current target, keep competing hypotheses until a discriminator excludes them or route to `REFRAME_NEEDED`. Close the diagnostic path with a Debug Receipt status before any fix claim:
+For `debug`, do not patch from a guessed cause. Before `ROOT_CAUSE_CONFIRMED`:
+
+- include problem-space decomposition, competing hypotheses or an evidence-based reason none are credible, entity/interface/log alignment when available, and root-cause validation;
+- use a compact Debug Receipt for low-risk pure-function or single-branch failures with focused failing-test and direct code-divergence evidence; mark entity/log alignment as not applicable;
+- when symptoms, logs, API/RPC names, payload fields, or user corrections point to different entities than the current target, keep competing hypotheses until a discriminator excludes them or route to `REFRAME_NEEDED`.
+
+Close the diagnostic path with a Debug Receipt status before any fix claim:
 
 - `ROOT_CAUSE_CONFIRMED`
 - `NOT_REPRODUCED`
