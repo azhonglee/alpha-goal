@@ -46,7 +46,7 @@ Core policy:
 - Complete at least one pressure pass that revisits an earlier answer.
 - Ask only for user-owned decisions; do not ask the user for discoverable facts.
 - Use plain assistant messages for open-ended Socratic questions.
-- Prefer using `request_user_input` for questions.
+- Use `request_user_input` only for 2-3 structured choices, after evidence and tradeoffs are clear.
 - Re-score ambiguity after each answer and show progress.
 - Do not hand off while ambiguity remains above threshold unless the user explicitly accepts the risk.
 - Do not hand off while `Non-goals` or `Decision Boundaries` remain unresolved.
@@ -68,7 +68,7 @@ Derive a short task slug. `<slug>` names the goal boundary. Do not create empty 
 
 Artifact safety gate:
 
-- Before writing `.alpha-goal/`, confirm the path is gitignored or make it if not.
+- Before writing `.alpha-goal/`, confirm the path is gitignored. Do not silently edit ignore rules.
 - If artifact writing is not safe or not allowed, keep the Context, transcript summary, and Goal Contract in chat only.
 - Record artifact status as `none`, `chat-only`, `created`, `updated`, or `blocked`.
 
@@ -129,7 +129,7 @@ Detailed dimensions:
 
 ### 2b. Ask the question
 
-Use structured user-input tooling available in the runtime (`request_user_input` / equivalent) and present:
+Use structured user-input tooling (`request_user_input` / equivalent) only for 2-3 explicit choices. For open-ended Socratic questions, present:
 
 ```text
 Round {n} | Target: {weakest_dimension} | Ambiguity: {score}%
