@@ -5,7 +5,7 @@ description: Clarify ambiguous engineering goals with Socratic interview, ambigu
 
 <Purpose>
 
-Turn vague requests into execution-ready Goal Contracts before planning or implementation.
+Turn vague requests into execution-ready Goal Contracts before implementation.
 
 Do not edit implementation files, create branches or worktrees, commit, push, open PRs/MRs, or claim implementation completion. Process artifacts may be written only after the artifact safety gate below.
 
@@ -68,7 +68,7 @@ Derive a short task slug. `<slug>` names the goal boundary. Do not create empty 
 
 Artifact safety gate:
 
-- Before writing `.alpha-goal/` or `docs/design/`, confirm the path is gitignored or the user explicitly approved a durable artifact path.
+- Before writing `.alpha-goal/`, confirm the path is gitignored or make it if not.
 - If artifact writing is not safe or not allowed, keep the Context, transcript summary, and Goal Contract in chat only.
 - Record artifact status as `none`, `chat-only`, `created`, `updated`, or `blocked`.
 
@@ -198,21 +198,21 @@ If artifact safety is satisfied, write:
 If artifact safety is not satisfied, output both in chat.
 
 Goal Contract should cover the semantic content below. These are not mandatory headings; use any concise structure and equivalent wording when clearer:
-- profile, rounds, final ambiguity, threshold, and context type;
-- context reference or artifact path;
-- clarity breakdown;
-- intent, meaning why the user wants this;
-- desired outcome;
-- included scope;
-- excluded scope / non-goals;
-- decision boundaries, meaning what you may decide without confirmation;
-- constraints;
-- acceptance/evidence expectations;
-- assumptions exposed and resolved;
-- pressure-pass findings, including which answer was revisited and what changed;
-- brownfield evidence vs inference notes for repository-grounded confirmations;
-- technical context findings;
-- full or condensed transcript.
+- Metadata (profile, rounds, final ambiguity, threshold, context type)
+- Context snapshot reference/path
+- Clarity breakdown table
+- Intent (why the user wants this)
+- Desired Outcome
+- In-Scope
+- Out-of-Scope / Non-goals
+- Decision Boundaries (what you may decide without confirmation)
+- Constraints
+- Testable acceptance criteria
+- Assumptions exposed + resolutions
+- Pressure-pass findings (which answer was revisited, and what changed)
+- Brownfield evidence vs inference notes for any repository-grounded confirmation questions
+- Technical context findings
+- Full or condensed transcript
 
 ## Phase 5. Verify
 
@@ -222,7 +222,9 @@ For high-risk or broad contracts, use independent review before handoff when ava
 
 Ask the user to confirm only user-owned decisions. If the user rejects or changes requirements, return to the Interview phase with the feedback.
 
-Enter `goal-iterate` only when the Goal Contract passes the user's review.
+After passing the user's review:
+1. Commit the Goal Contract to the repository.
+2. Enter `goal-iterate` to start iteration.
 
 </Process>
 

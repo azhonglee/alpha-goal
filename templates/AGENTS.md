@@ -29,9 +29,17 @@ Before asking, decide whether the missing input is material, discoverable, risky
 - Ask one high-leverage question per round, backed by evidence already checked.
 - Do not ask the user to substitute for missing evidence; gather evidence, narrow the claim, or report the gap.
 
+## Isolation Principles
+
+- Ensure `.worktrees/` is ignored before placing repository-local worktrees there, and keep `.goal-loop/` ignored for runtime evidence, reviews, and scratch artifacts.
+- Use repository-local worktrees to isolate changes per goal/task batch. Create them under `<repo>/.worktrees/codex/<task-slug>/` unless the repository already defines a stricter convention or the path is not technically usable.
+- In monorepos, create the worktree under the owning subrepo's `.worktrees/codex/<task-slug>/`.
+- Never edit/delete directly on main/master; always work in a worktree.
+- Delete the worktree after PR/MR merge or local merge into main/master; do not proactively merge into main/master locally.
+
 ## Interaction Agreement
 
-- Use `request_user_input` for structured TUI choices, and only after presenting the necessary context. Do not use it for open-ended questions or data entry. Put evidence, designs, risks, command output, and rationale in regular assistant messages.
+- Use `request_user_input` default, and only after presenting the necessary context. Do not use it for just-open-ended questions or data entry. Put evidence, designs, risks, command output, and rationale in regular assistant messages.
 - 输出和写作默认使用中文，包括持久化文档，确保阅读友好，风格一致，逻辑清晰，避免直译。涉及专业术语，可根据上下文选择性使用英文。
 
 <!-- generate-with-template:agents-md -->
