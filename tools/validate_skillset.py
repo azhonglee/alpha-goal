@@ -295,7 +295,6 @@ def check_consistency(root: Path) -> bool:
         text = alpha_goal.read_text(encoding="utf-8")
         for phrase in [
             "Artifact safety gate",
-            "request_user_input` only for 2-3 structured",
             "not mandatory headings",
             "equivalent wording",
             "Enter `loop`",
@@ -310,6 +309,8 @@ def check_consistency(root: Path) -> bool:
             "non-goal semantics": ["non-goals", "out-of-scope", "excluded scope"],
             "decision-boundary semantics": ["decision boundaries", "what you may decide", "user-owned decisions"],
             "acceptance semantics": ["acceptance criteria", "success criteria", "acceptance/evidence"],
+            "user-input tooling semantics": ["request_user_input", "structured user-input tooling"],
+            "open-ended question semantics": ["plain assistant messages", "open-ended socratic questions"],
         }
         for label, options in semantic_groups.items():
             if not any(option in lower_text for option in options):
