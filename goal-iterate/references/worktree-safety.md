@@ -32,7 +32,7 @@ cd .worktrees/codex/<task-slug>
 
 Only after entering the isolated worktree should mutation begin.
 
-If `.worktrees/` is not ignored, do not silently edit `.gitignore` from the preflight snippet. Prefer an already ignored worktree root, an external worktree path outside the primary checkout, or an explicit setup change that is part of the Goal Contract. If `.gitignore` must be changed, make that change deliberately, validate it with `git check-ignore`, and include it in the Iteration Record.
+If `.worktrees/` is not ignored, do not silently edit `.gitignore` from the preflight snippet, and do not edit `.gitignore` in the primary checkout. Prefer an already ignored worktree root or an external worktree path outside the primary checkout. If the repository needs a `.gitignore` setup change, make that change from an isolated branch/worktree, validate it with `git check-ignore`, and include it in the Iteration Record.
 
 If project rules require a different ignored worktree root, use that root instead. If `.gitignore` has unrelated user changes or cannot be safely edited, ask before changing it and record the blocker.
 

@@ -34,7 +34,7 @@ Hard requirements for completion claims:
 - fresh repo state from after the last material change;
 - applicable project rules, or an explicit reason they cannot be read;
 - commands/tests already run, or an explicit reason they cannot run;
-- Review Record when review was triggered by feedback, complexity, scope expansion, architecture/ownership risk, evidence uncertainty, or explicit completion-readiness review.
+- Review Record when review was triggered by feedback, complexity, scope expansion, architecture/ownership risk, material route or claim-boundary uncertainty, or explicit completion-readiness review.
 
 If the Goal Contract is missing or target boundary is unclear, return `REFRAME` rather than guessing. For bare readiness claims, first try to recover or identify the local Goal Contract, target boundary, diff/MR, and evidence bundle from current context; if they are not available or discoverable, `REFRAME` with the exact missing inputs.
 

@@ -20,7 +20,7 @@ CODEX_HOME=/path/to/codex-home scripts/install.sh
 脚本会：
 
 - 软链接顶层技能目录到 `${CODEX_HOME:-$HOME/.codex}/skills/`。
-- 默认更新 Codex home 的 `AGENTS.md` 中带 `generate-with-template:agents-md` 标记的受管理模板块，并只补齐 `config.toml` 中缺失的模板设置；模板不设置 `sandbox_mode`，也不抑制不稳定特性警告。
+- 默认更新 Codex home 的 `AGENTS.md` 中带 `generate-with-template:agents-md` 标记的受管理模板块，并只补齐 `config.toml` 中缺失的模板设置；模板只补齐 multi-agent、child AGENTS 和结构化 `request_user_input` 相关开关，不设置 `sandbox_mode`、休眠行为或不稳定特性警告抑制项。
 - 清理旧版本可能留在 `skills/` 下、且指向本仓库的旧支持目录软链接。
 - 校验目标 `skills/` 中的 skill 软链接指向源码目录，且旧支持目录没有作为本仓库 skill 安装。
 - 安装后运行源码中的 `tools/validate_skillset.py` 校验技能包。该校验只覆盖布局、元数据、引用可发现性和少量一致性规则；不能证明实际路由、误触发、reference 加载策略或验证边界正确。
@@ -50,7 +50,7 @@ scripts/install.sh --verbose
 源码中的 `templates/` 目录包含：
 
 - `AGENTS.md`：推荐的自主 Agent 行为、HITL 和交互约束；隔离工作流由 Goal Loop skills 承载。
-- `config.toml`：启用 multi-agent 等本地特性的可选 Codex 配置，不改变 sandbox 权限，也不抑制不稳定特性警告。启用 multi-agent 后，复杂任务可能启动多个子 agent；模板默认最多 6 个线程、深度 1，可能增加本地资源和模型用量。
+- `config.toml`：启用 multi-agent、child AGENTS 和结构化 `request_user_input` 的可选 Codex 配置，不改变 sandbox 权限、休眠行为，也不抑制不稳定特性警告。启用 multi-agent 后，复杂任务可能启动多个子 agent；模板默认最多 6 个线程、深度 1，可能增加本地资源和模型用量。
 
 默认安装会同步用户级模板。做 smoke test 或文档验证时，应使用临时 `CODEX_HOME`：
 
