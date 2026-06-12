@@ -48,9 +48,20 @@ Policy:
 
 ## Phase 1. Discovery
 
-1. Parse `{{ARGUMENTS}}` and derive a short task slug. `<slug>` names the goal boundary. Do not create empty artifact directories.
+1. Attempt to understand the user's intent and context.
 
-2. Record the Context in the `.alpha-goal/context/YYYYMMDD-<slug>.md` file and reference it in mode state.
+Collect all evidence needed to decide whether the task is feasible to execute:
+
+- user intent;
+- target repo/path/service/module;
+- candidate repos when cwd is a workspace or aggregator;
+- existing work when likely;
+- assumptions and risks;
+- constraints and decision boundaries;
+
+2. Parse `{{ARGUMENTS}}` and derive a short task slug. `<slug>` names the goal boundary. Do not create empty artifact directories.
+
+3. Preflight the Context in the `.alpha-goal/context/YYYYMMDD-<slug>.md` file and reference it in mode state.
 
 A minimum Context includes:
 
@@ -63,17 +74,6 @@ A minimum Context includes:
   - Unknowns/open questions
   - Decision-boundary unknowns
   - Likely codebase touchpoints
-
-3. Attempt to understand the user's intent and context.
-
-Collect all evidence needed to decide whether the task is feasible to execute:
-
-- user intent;
-- target repo/path/service/module;
-- candidate repos when cwd is a workspace or aggregator;
-- existing work when likely;
-- assumptions and risks;
-- constraints and decision boundaries;
 
 4. Announce kickoff, threshold, and current ambiguity.
 
@@ -164,7 +164,7 @@ When threshold is met (or user exits with warning / hard cap):
    - `.alpha-goal/interviews/YYYYMMDD-{slug}.md`  
      (kept for ralph PRD compatibility)
 2. Write execution-ready goal Contract to:
-   - `docs/specs/YYYYMMDD-{slug}.md`
+   - `docs/design/YYYYMMDD-{slug}.md`
 
 Goal Contract should include:
 - Metadata (profile, rounds, final ambiguity, threshold, context type)
@@ -206,8 +206,7 @@ Enter `goal-iterate` only when the Goal Contract passes Verification.
 - [ ] At least one persistent follow-up / pressure pass deepened a prior answer
 - [ ] Challenge modes triggered at thresholds (when applicable)
 - [ ] Transcript written to `.alpha-goal/interviews/YYYYMMDD-<slug>.md`
-- [ ] Spec written to `docs/design/YYYYMMDD-<slug>-spec.md`
+- [ ] Goal Contract written to `docs/design/YYYYMMDD-<slug>.md`
 - [ ] Brownfield questions use evidence-backed confirmation when applicable
-- [ ] Handoff options provided (`$ralplan`, `$autopilot`, `$ralph`, `$team`)
 - [ ] No direct implementation performed in this mode
 </Final_Checklist>
