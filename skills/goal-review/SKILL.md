@@ -5,28 +5,28 @@ description: Optionally challenge an active Goal Contract, dynamic plan, iterati
 
 # Goal Review
 
-`goal-review` 不是默认主阶段。普通执行反馈由 `goal-iterate` 的 feedback phase 处理；只有需要独立挑战时才使用本技能。
+`goal-review` is not a default main stage. Normal execution feedback belongs in the `goal-iterate` feedback phase. Use this skill only when an independent challenge is needed.
 
-不要 mutation。不要批准完成。完成判断交给 `goal-verify`。
+Do not mutate. Do not approve completion. Completion judgment belongs to `goal-verify`.
 
 ## Entry
 
-使用本技能，当：
+Use this skill when:
 
-- 用户显式点名 `$goal-review`；
-- 仓库规则要求 review record；
-- `goal-iterate` feedback phase 判断有架构、scope、ownership、复杂度或 claim-boundary 风险；
-- reviewer/user feedback 需要在 action 前分类；
-- active spec/plan 可能 stale、over-broad、superseded 或与证据不一致；
-- completion readiness 需要独立挑战，但最终 verdict 仍要由 `goal-verify` 给出。
+- the user explicitly names `$goal-review`;
+- repo rules require a review record;
+- `goal-iterate` feedback detects architecture, scope, ownership, complexity, or claim-boundary risk;
+- reviewer/user feedback must be classified before action;
+- the active spec/plan may be stale, too broad, superseded, or inconsistent with evidence;
+- readiness for completion needs independent challenge, while final verdict still belongs to `goal-verify`.
 
-普通 standalone code review 且没有 Goal Contract 或 completion claim 时，不强制 Goal Loop，按用户要求做普通 review。
+For ordinary standalone code review with no Goal Contract or completion claim, do a normal review without forcing Goal Loop.
 
-字段不清时读取 `references/review-record-schema.md`。
+Read `references/review-record-schema.md` if fields are unclear.
 
 ## Review modes
 
-选择一个 mode：
+Choose one mode:
 
 - `goal`
 - `loop`
@@ -38,32 +38,32 @@ description: Optionally challenge an active Goal Contract, dynamic plan, iterati
 
 ## Checks
 
-优先挑战：
+Challenge first:
 
-- 哪个假设可能是错的；
-- evidence 是否新鲜、直接、覆盖 claim boundary；
-- user-facing term、UI module、data entity、API/RPC、log、code symbol 是否指向同一对象；
-- dynamic plan 是否仍是最小可信路线；
-- feedback 是否被分类，而非盲目实现；
-- scope 是否越过 repo、worktree、submodule 或 ownership boundary；
-- spec/plan 是否 current，且没有把 `draft` 或 `superseded` 当成 approved/current；
-- debug receipt 是否在对应风险边界证明 `ROOT_CAUSE_CONFIRMED`；
-- 更简单方案是否满足 acceptance。
+- which assumption may be wrong;
+- whether evidence is fresh, direct, and within the claim boundary;
+- whether user-facing term, UI module, data entity, API/RPC, log, and code symbol name the same object;
+- whether the dynamic plan is still the smallest credible route;
+- whether feedback is classified instead of blindly implemented;
+- whether scope crosses repo, worktree, submodule, or ownership boundaries;
+- whether spec/plan is current, and not treating `draft` or `superseded` as approved/current;
+- whether debug receipt proves `ROOT_CAUSE_CONFIRMED` for the relevant risk;
+- whether a simpler path satisfies acceptance.
 
 ## Feedback classification
 
-逐项分类：
+Classify each item:
 
-- `accepted`：技术上正确且在 goal scope 内。
-- `rejected`：错误、不安全或越界；说明原因。
-- `needs_clarification`：缺用户决策，不能安全实现。
-- `blocked`：缺数据、凭证、权限或环境。
+- `accepted`: technically correct and inside goal scope.
+- `rejected`: wrong, unsafe, or out of scope; explain why.
+- `needs_clarification`: needs a user decision before safe action.
+- `blocked`: missing data, credentials, permission, or environment.
 
-若反馈改变 target、acceptance、constraints、non-goals 或 claim boundary，返回 `REFRAME`，不要直接 implementation。
+If feedback changes target, acceptance, constraints, non-goals, or claim boundary, return `REFRAME`; do not implement directly.
 
 ## Output
 
-产出一个 Review Record：
+Produce a Review Record:
 
 ```text
 Review Record:
@@ -90,4 +90,4 @@ Allowed `Review verdict` values:
 - `BLOCKED`
 - `READY_FOR_VERIFY`
 
-`READY_FOR_VERIFY` 只表示可交给 `goal-verify` 判断，不等于完成。
+`READY_FOR_VERIFY` only means the work may go to `goal-verify`; it is not a completion verdict.

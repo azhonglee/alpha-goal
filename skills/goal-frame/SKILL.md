@@ -5,96 +5,90 @@ description: Frame a goal with discovery and Socratic clarification, then produc
 
 # Goal Frame
 
-你的职责是把请求澄清成可执行、可验收、可声明边界清楚的 Goal Contract。不要编辑实现文件，不要创建分支、worktree、commit、push 或 MR/PR。
+Turn the request into an executable, verifiable Goal Contract. Do not edit implementation files, create branches/worktrees, commit, push, or open PRs/MRs.
 
-FRAME 由两步组成：
+FRAME has two steps:
 
-1. `Discovery`：用只读证据确认目标、上下文、约束和已有工作。
-2. `Socratic interview`：只在关键决策无法安全推断时提出一个高杠杆问题。
+1. `Discovery`: read-only evidence gathering for target, context, constraints, and existing work.
+2. `Socratic interview`: ask one high-leverage question only when a material decision cannot be safely inferred.
 
-产物是 Goal Contract；它必须包含 `Spec` 字段，并把验收、范围、约束、声明边界和证据计划收进 Spec，而不是在顶层重复铺开。小任务使用内联 compact spec；只有升级条件成立且 artifact 写入被允许时，才创建或更新 durable spec 文件。
+The output is a Goal Contract. It must contain `Spec`, and the Spec carries acceptance, scope, constraints, claim boundary, and evidence. Small tasks use an inline compact spec. Create or update a durable spec only when escalation criteria are met and artifact writing is allowed.
 
 ## Entry
 
-使用本技能，当：
+Use this skill when:
 
-- task 是新需求、非平凡需求或可能 mutation；
-- target repo/path/service/module 不清楚；
-- workspace 有多个候选 repo、submodule 或 package；
-- 用户术语可能是页面、空间、工作区、容器或 umbrella concept；
-- 请求可能与已有 MR/PR/branch/issue/design doc 重叠；
-- acceptance、non-goals、constraints、claim boundary 不清楚；
-- verification 返回 `REFRAME`。
+- the task is new, non-trivial, or may require mutation;
+- target repo/path/service/module is unclear;
+- the workspace has multiple candidate repos, submodules, or packages;
+- the user's term may name a page, space, workspace, container, or umbrella concept;
+- existing MR/PR/branch/issue/design work may overlap;
+- acceptance, non-goals, constraints, or claim boundary are unclear;
+- verification returns `REFRAME`.
 
-`Loop type` 必须取 `goal-loop` 定义的一个原子值。不要把阶段状态写进 loop type：只读 frame 一个未来实现目标时，仍使用 `NEW_GOAL`；只读 frame 一个 bug 修复目标时，仍使用 `DEBUG_GOAL`；只有用户最终要求本身是只读审计、诊断、比较或方向判断时，才使用 `READ_ONLY_DISCOVERY`。
+`Loop type` must be one atomic value from `goal-loop`. Do not invent composite loop types. Do not encode stage state into loop type. A read-only frame for future implementation is still `NEW_GOAL`; a read-only frame for a bug fix is still `DEBUG_GOAL`; use `READ_ONLY_DISCOVERY` only when the user's final goal is audit, diagnosis, comparison, or directional judgment.
 
 ## Discovery
 
-只收集能决定“是否安全执行”的信息：
+Gather only evidence needed to decide whether execution is safe:
 
-- user intent 和期望 outcome；
-- target repo/path/service/module，以及候选项排除理由；
-- 容器型目标的子模块、数据实体、source API/RPC、日志和代码符号；
-- 本地规则，如 `AGENTS.md`、`CLAUDE.md`、`code_review.md`；
-- 现有分支、MR/PR、issue、design doc 或本地改动是否改变任务身份；
-- scope、non-goals、constraints、decision boundaries；
-- isolation requirement：owning repo/subrepo、ignored worktree root、allowed edit path；
-- risk tier、evidence plan、claim boundary；
-- spec need：inline compact spec 还是 durable spec。
+- user intent and expected outcome;
+- target repo/path/service/module, plus rejected candidates and why;
+- container submodules, data entities, source APIs/RPCs, logs, and code symbols;
+- local rules such as `AGENTS.md`, `CLAUDE.md`, or `code_review.md`;
+- existing branches, MR/PRs, issues, design docs, or local changes that alter task identity;
+- scope, non-goals, constraints, and decision boundaries;
+- isolation requirement: owning repo/subrepo, ignored worktree root, allowed edit path;
+- risk tier, evidence plan, and claim boundary;
+- spec need: inline compact spec or durable spec.
 
-bug/debug/root-cause 任务保持紧凑：记录 symptom、expected vs actual、reproduction boundary 或 blocker、problem-space decomposition、初始 competing hypotheses，以及区分假设所需证据。low-risk single-function failures 有 focused failing test 和直接分支证据时，可用一句话覆盖这些字段。
+For bug/debug/root-cause work, stay compact. Record symptom, expected vs actual behavior, reproduction boundary or blocker, problem-space decomposition, initial competing hypotheses, and evidence needed to distinguish them. For low-risk single-function failures with a focused failing test and direct branch evidence, one sentence may cover these fields.
 
-按需加载引用：
+Load references only as needed:
 
-- `references/target-discovery.md`：target、multi-repo、existing work 或容器/实体边界不清。
-- `references/clarification-policy.md`：判断是否询问、假设、Socratic interview 或 `ASK_USER`。
-- `references/goal-contract-schema.md`：字段定义、风险较高或输出边界需精确。
-- `references/spec-template.md`：需要 durable spec 文件。
-- `references/frame-examples.md`：路由或输出形状不确定。
+- `references/target-discovery.md`: unclear target, multi-repo, existing-work, container, or entity boundary.
+- `references/clarification-policy.md`: whether to ask, assume, run Socratic interview, or return `ASK_USER`.
+- `references/goal-contract-schema.md`: precise field semantics or higher-risk output boundaries.
+- `references/spec-template.md`: durable spec creation.
+- `references/frame-examples.md`: uncertain routing or output shape.
 
-示例只说明形状，不得复制其中事实。
+Examples show shape only; do not copy their facts.
 
 ## Socratic interview
 
-先读可发现证据，再问用户。每轮最多一个问题。
+Read discoverable evidence before asking. Ask at most one question per round.
 
-优先问会改变以下内容的决策：
+Ask only when the answer changes target, ownership, acceptance, non-goals, constraints, destructive/remote/production/credential risk, product-level claim boundary, mutually exclusive implementation direction, or a conflict with repo rules.
 
-- target 或 ownership；
-- acceptance、non-goals、constraints；
-- destructive/remote/production/credential 风险接受；
-- product-level claim boundary；
-- 两个互斥实现方向或验收标准；
-- 用户意图与仓库规则冲突。
-
-能安全推断时不问，记录 bounded assumption 和风险。缺失输入会改变 mutation safety、scope、acceptance 或 final claim 时，返回 `ASK_USER`。
+If a safe inference exists, proceed and record the bounded assumption. If the missing decision affects mutation safety, scope, acceptance, or final claim, return `ASK_USER`.
 
 ## Spec policy
 
-`Spec` 是 Goal Contract 的需求载体：
+`Spec` is the requirement carrier inside the Goal Contract.
 
-- 小任务：写 3-8 行 inline compact spec，覆盖 outcome、scope/non-goals、acceptance、constraints/decision boundary、claim boundary、evidence。
-- 复杂任务：`Spec` 字段引用 durable spec path/status，并给出同样维度的摘要。
+For small tasks, write a 3-8 line inline compact spec covering outcome, scope/non-goals, acceptance, constraints/decision boundary, claim boundary, and evidence.
 
-只有以下情况才创建或更新 durable spec：
+For complex tasks, the `Spec` field references a durable spec path/status and includes a compact summary with the same dimensions.
 
-- 澄清跨多轮，聊天中容易丢失需求；
-- 跨多个独立阶段、模块、repo、ownership boundary 或 handoff；
-- acceptance、non-goals、constraints 或 decision boundaries 过长；
-- risk tier 是 high，或 medium 且 scope drift 风险真实存在；
-- 用户要求 spec、design artifact、durable requirements 或 handoff document。
+Create or update a durable spec only when:
 
-默认路径：
+- clarification spans multiple rounds and requirements may be lost in chat;
+- work crosses independent phases, modules, repos, ownership boundaries, or handoff;
+- acceptance, non-goals, constraints, or decision boundaries are long;
+- risk tier is high, or medium with real scope-drift risk;
+- the user asks for a spec, design artifact, durable requirements, or handoff document.
+
+Default path:
 
 ```text
 docs/design/YYYYMMDD-<slug>-spec.md
 ```
 
-写 spec 文件前必须闭合 target repo/path 和 applicable rules；只读任务或禁止写文件时，在对话中草拟 spec，不写文件。
+Before writing a spec file, close target repo/path and applicable rules. For read-only work or no-write instructions, draft the spec in chat only.
 
 ## Goal Contract
 
-输出一个紧凑契约：
+Output a compact contract:
 
 ```text
 Goal Contract:
@@ -112,7 +106,7 @@ Goal Contract:
 - Next:
 ```
 
-`Spec` 写稳定需求。需要分行时使用：
+When `Spec` needs multiple lines, use:
 
 ```text
 Spec:
@@ -124,7 +118,7 @@ Spec:
 - Evidence:
 ```
 
-`Scope` 同时写 in-scope 和 out-of-scope。`Constraints` 包含 decision boundaries。`Artifacts` 只写 loop/process artifacts，例如 durable spec、plan、review、evidence、scratch。不要把业务对象、UI 区块、数据库记录或产品产物放进 `Artifacts`。
+`Scope` includes both in-scope and out-of-scope. `Constraints` includes decision boundaries. `Artifacts` only names loop/process artifacts such as durable specs, plans, reviews, evidence, or scratch files. Do not list product objects, UI sections, database records, or business outputs under `Artifacts`.
 
 Allowed `Frame verdict` values:
 
@@ -136,22 +130,12 @@ Allowed `Frame verdict` values:
 
 ## Exit
 
-返回 `READY_FOR_ITERATION` 仅当：
+Return `READY_FOR_ITERATION` only when target boundary is closed, `Spec.Acceptance` is verifiable, `Spec.Claim boundary` is explicit, `Spec.Scope`, `Spec.Constraints`, and `Spec.Evidence` are recorded, risk and assumptions are recorded, Spec content or durable spec path/status/summary is present, container terms are decomposed or risk is explicit, existing-work scan was run when triggered, and no user decision blocks mutation safety.
 
-- target boundary 已闭合；
-- `Spec.Acceptance` 可验证；
-- `Spec.Claim boundary` 明确；
-- `Spec.Scope`、`Spec.Constraints`、`Spec.Evidence` 已记录；
-- risk tier、assumptions、risks 已记录；
-- `Spec` 已包含内联内容，或 durable spec path/status/current summary 已记录；
-- 容器/umbrella 术语已拆分，或风险被明示；
-- 触发 existing-work scan 时已检查；
-- 没有阻塞 mutation safety 的用户决策缺失。
+Return `READ_ONLY` for audit-style findings. After the Goal Contract, give findings, evidence, recommendations, and residual uncertainty.
 
-返回 `READ_ONLY` 时，如用户要求审计发现，Goal Contract 后继续给 findings、evidence、recommendations 和 residual uncertainty。
+Return `COMPARISON_ONLY` when only existing work should be compared.
 
-返回 `COMPARISON_ONLY` 时，只比较既有工作，不进入实现。
+Return `ASK_USER` with the Goal Contract and one precise question in `Next`.
 
-返回 `ASK_USER` 时仍输出 Goal Contract，并在 `Next` 写明一个精确问题。
-
-返回 `BLOCKED` 时写清缺失数据、权限、环境或工具。
+Return `BLOCKED` with the missing data, permission, environment, or tool.
