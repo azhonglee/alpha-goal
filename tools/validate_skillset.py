@@ -233,8 +233,8 @@ def check_docs(root: Path) -> bool:
                 ok = fail(f"{doc.name}: missing default $HOME/.codex/skills install target")
             if "--codex-home" not in text:
                 ok = fail(f"{doc.name}: missing --codex-home override documentation")
-            if "--sync-user-templates" not in text:
-                ok = fail(f"{doc.name}: missing --sync-user-templates opt-in documentation")
+            if "--no-sync-user-templates" not in text:
+                ok = fail(f"{doc.name}: missing --no-sync-user-templates opt-out documentation")
             if "validate_skillset.py" not in text:
                 ok = fail(f"{doc.name}: missing validate_skillset.py smoke test")
             if "不能证明实际路由" not in text:
@@ -282,10 +282,12 @@ def check_consistency(root: Path) -> bool:
 
     if install_script.exists():
         text = install_script.read_text(encoding="utf-8")
-        if "--sync-user-templates" not in text:
-            ok = fail("scripts/install.sh: missing explicit user-template opt-in flag")
+        if "--no-sync-user-templates" not in text:
+            ok = fail("scripts/install.sh: missing explicit user-template opt-out flag")
         if "sync_user_templates" not in text:
             ok = fail("scripts/install.sh: user template sync must be gated by a variable")
+        if "sync_user_templates=true" not in text:
+            ok = fail("scripts/install.sh: user template sync should be enabled by default")
         if "preflight_install_targets" not in text:
             ok = fail("scripts/install.sh: missing install target preflight before user-template sync")
         preflight_pos = text.find("\npreflight_install_targets\n\nif [[ \"$sync_user_templates\" == true ]]")

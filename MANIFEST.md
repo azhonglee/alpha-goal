@@ -15,14 +15,14 @@
 | Directory | Purpose |
 |---|---|
 | `tools/` | Local validation helper. |
-| `templates/` | 可选的用户级 Codex 配置模板；仅在 `--sync-user-templates` 下应用，不包含 sandbox 权限扩大项或不稳定特性警告抑制项。 |
+| `templates/` | 默认同步的用户级 Codex 配置模板；不包含 sandbox 权限扩大项或不稳定特性警告抑制项。 |
 | `scripts/` | 安装脚本。 |
 
 ## Scripts
 
 | Path | Mutates state? | Purpose |
 |---|---:|---|
-| `scripts/install.sh` | Yes | Symlinks required top-level skills into `${CODEX_HOME:-$HOME/.codex}/skills`, optionally merges user config templates with `--sync-user-templates`, cleans legacy support links, and validates target symlinks. |
+| `scripts/install.sh` | Yes | Symlinks required top-level skills into `${CODEX_HOME:-$HOME/.codex}/skills`, merges user config templates by default unless `--no-sync-user-templates` is passed, cleans legacy support links, and validates target symlinks. |
 | `goal-iterate/scripts/mutation-preflight.sh` | No | Prints git root, branch, status, worktrees, local rule files. |
 | `goal-verify/scripts/evidence-summary.sh` | No | Prints changed files, diff stat, diff check status, recent commits. |
 | `tools/validate_skillset.py` | No | Checks skill front matter, invocation metadata, bundled references/scripts, install docs, templates, top-level skill set, and selected consistency rules. |
