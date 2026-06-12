@@ -108,24 +108,34 @@ Target the lowest-scoring dimension, but respect stage priority:
 - Stage 2, feasibility: Constraints, Success Criteria.
 - Stage 3, brownfield grounding: Context Clarity.
 
-Follow-up pressure ladder:
+Follow-up pressure ladder for each answer:
 
 1. Ask for a concrete example, counterexample, or evidence signal behind the latest claim.
 2. Probe the hidden assumption, dependency, or belief that makes the claim true.
 3. Force a boundary or tradeoff: what should be excluded, deferred, or rejected?
 4. If the answer still describes symptoms, reframe toward essence or root cause.
 
+Prefer staying on the same thread for multiple rounds when it has the highest leverage. Breadth without pressure is not progress.
+
+Detailed dimensions:
+- Intent Clarity — why the user wants this
+- Outcome Clarity — what end state they want
+- Scope Clarity — how far the change should go
+- Constraint Clarity — technical or business limits that must hold
+- Success Criteria Clarity — how completion will be judged
+- Context Clarity — existing codebase understanding (brownfield only)
+
+`Non-goals` and `Decision Boundaries` are mandatory readiness gates. Ask about them early and keep revisiting them until they are explicit.
+
 ### 2b. Ask the question
 
-Use this shape:
+Use structured user-input tooling available in the runtime (`request_user_input` / equivalent) and present:
 
 ```text
 Round {n} | Target: {weakest_dimension} | Ambiguity: {score}%
 
 {one question}
 ```
-
-For a structured choice, include consequences for each option. For open-ended clarification, ask in normal chat and wait.
 
 ### 2c. Score ambiguity
 
@@ -147,9 +157,9 @@ Readiness gates:
 
 - `Non-goals` must be explicit.
 - `Decision Boundaries` must be explicit.
-- At least one earlier answer has been revisited with evidence, assumption, or tradeoff pressure.
+- A pressure pass must be complete: at least one earlier answer has been revisited with an evidence, assumption, or tradeoff follow-up.
 
-If any readiness gate is unresolved, continue interviewing even when weighted ambiguity is below threshold.
+If any readiness gate is unresolved, or the pressure pass is incomplete, continue interviewing even when weighted ambiguity is below threshold.
 
 ### 2d. Report progress
 
@@ -157,7 +167,7 @@ Show the weighted breakdown table, readiness-gate status, artifact status, and n
 
 ### 2e. Track state
 
-Track rounds in chat. If artifact safety is satisfied, append round summaries to the active `.alpha-goal/context/` artifact. Do not call unavailable state tools.
+Track rounds append round summaries to the active `.alpha-goal/interviews/` artifact.
 
 ### 2f. Round controls
 
@@ -174,7 +184,7 @@ Use each applicable mode at most once:
 - `simplifier`: probe minimal viable scope.
 - `ontologist`: reframe symptoms into essence or root cause.
 
-Track used modes in chat or the approved context artifact.
+Track used modes in the approved interview summary artifact.
 
 ## Phase 4. Crystallize
 
@@ -187,30 +197,22 @@ If artifact safety is satisfied, write:
 
 If artifact safety is not satisfied, output both in chat.
 
-Goal Contract must include:
-
-```text
-Goal Contract:
-- Intent:
-- Goal type: EXPLORE | DESIGN | IMPLEMENT | DEBUG | VERIFY | RECOVER
-- Target:
-- Discovery:
-- Socratic state:
-- Spec:
-  - Outcome:
-  - Scope:
-  - Acceptance:
-  - Constraints:
-  - Claim boundary:
-  - Evidence:
-- Non-goals:
-- Decision Boundaries:
-- Assumptions and risks:
-- Pressure-pass findings:
-- Artifact status:
-- Alpha verdict: CONTRACT_READY | USER_DECISION_NEEDED | BLOCKED | REVISE
-- Next:
-```
+Goal Contract should include:
+- Metadata (profile, rounds, final ambiguity, threshold, context type)
+- Context snapshot reference/path (for ralplan/team reuse)
+- Clarity breakdown table
+- Intent (why the user wants this)
+- Desired Outcome
+- In-Scope
+- Out-of-Scope / Non-goals
+- Decision Boundaries (what OMX may decide without confirmation)
+- Constraints
+- Testable acceptance criteria
+- Assumptions exposed + resolutions
+- Pressure-pass findings (which answer was revisited, and what changed)
+- Brownfield evidence vs inference notes for any repository-grounded confirmation questions
+- Technical context findings
+- Full or condensed transcript
 
 ## Phase 5. Verify
 
@@ -220,14 +222,7 @@ For high-risk or broad contracts, use independent review before handoff when ava
 
 Ask the user to confirm only user-owned decisions. If the user rejects or changes requirements, return to the Interview phase with the feedback.
 
-Alpha verdict values:
-
-- `CONTRACT_READY`: handoff is safe inside the recorded boundary.
-- `USER_DECISION_NEEDED`: one user-owned decision blocks readiness.
-- `BLOCKED`: missing data, permission, environment, or tool blocks readiness.
-- `REVISE`: user feedback changed the contract.
-
-Enter `goal-iterate` only when the Goal Contract is `CONTRACT_READY`.
+Enter `goal-iterate` only when the Goal Contract passes the user's review.
 
 </Process>
 
