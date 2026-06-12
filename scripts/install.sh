@@ -5,8 +5,8 @@ usage() {
   cat <<'EOF'
 Usage: scripts/install.sh [--codex-home PATH] [--force] [--no-sync-user-templates] [--verbose]
 
-Install this repository's skills/ directories by symlinking them into
-${CODEX_HOME:-$HOME/.codex}/skills.
+Install this repository's skills/ tree by creating a single alpha-goal
+symlink under ${CODEX_HOME:-$HOME/.codex}/skills.
 
 By default, this script merges templates/AGENTS.md into user-level AGENTS.md
 and fills missing config.toml settings from templates/config.toml.
@@ -89,6 +89,8 @@ log() {
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd "$script_dir/.." && pwd -P)"
 source_skill_root="$repo_root/skills"
+install_link_name="alpha-goal"
+install_source="$source_skill_root"
 
 normalize_path() {
   python3 - "$1" <<'PY'
@@ -179,8 +181,9 @@ link_path() {
       return
     fi
 
-    local legacy_skill_source="$repo_root/$label"
-    if [[ "$current_target" == "$legacy_skill_source" && "$source" == "$source_skill_root/$label" ]]; then
+    local legacy_top_level_source="$repo_root/$label"
+    local legacy_skill_dir_source="$source_skill_root/$label"
+    if [[ "$current_target" == "$legacy_top_level_source" || "$current_target" == "$legacy_skill_dir_source" ]]; then
       rm "$target"
       replaced=true
     elif [[ "$force" == true ]]; then
@@ -242,56 +245,62 @@ remove_obsolete_skill_link() {
 }
 
 preflight_install_targets() {
-  for skill_file in "${skill_files[@]}"; do
-    local skill_dir
-    skill_dir="$(cd "$(dirname "$skill_file")" && pwd -P)"
-    local skill_name
-    skill_name="$(basename "$skill_dir")"
-    local target="$target_root/$skill_name"
+  local target="$target_root/$install_link_name"
 
-    if [[ -L "$target" ]]; then
-      local current_target
-      current_target="$(resolve_link_target "$target")"
-      local legacy_skill_source="$repo_root/$skill_name"
-      if [[ "$current_target" == "$skill_dir" || "$current_target" == "$legacy_skill_source" || "$force" == true ]]; then
-        continue
-      fi
-      echo "Refusing to replace existing symlink: $target -> $(readlink "$target")" >&2
-      echo "Re-run with --force to replace symlinks." >&2
-      exit 1
-    elif [[ -e "$target" ]]; then
-      echo "Refusing to replace existing non-symlink path: $target" >&2
-      exit 1
+  if [[ -L "$target" ]]; then
+    local current_target
+    current_target="$(resolve_link_target "$target")"
+    local legacy_top_level_source="$repo_root/$install_link_name"
+    local legacy_skill_dir_source="$source_skill_root/$install_link_name"
+    if [[ "$current_target" == "$install_source" || "$current_target" == "$legacy_top_level_source" || "$current_target" == "$legacy_skill_dir_source" || "$force" == true ]]; then
+      return
     fi
-  done
+    echo "Refusing to replace existing symlink: $target -> $(readlink "$target")" >&2
+    echo "Re-run with --force to replace symlinks." >&2
+    exit 1
+  elif [[ -e "$target" ]]; then
+    echo "Refusing to replace existing non-symlink path: $target" >&2
+    exit 1
+  fi
 }
 
 validate_installed_links() {
   local failed=false
+  local target="$target_root/$install_link_name"
+
+  if [[ ! -L "$target" ]]; then
+    echo "Installed skillset is not a symlink: $target" >&2
+    failed=true
+  else
+    local current_target
+    current_target="$(resolve_link_target "$target")"
+    if [[ "$current_target" != "$install_source" ]]; then
+      echo "Installed skillset points elsewhere: $target -> $current_target" >&2
+      failed=true
+    fi
+  fi
 
   for skill_file in "${skill_files[@]}"; do
     local skill_dir
     skill_dir="$(cd "$(dirname "$skill_file")" && pwd -P)"
     local skill_name
     skill_name="$(basename "$skill_dir")"
-    local target="$target_root/$skill_name"
 
-    if [[ ! -L "$target" ]]; then
-      echo "Installed skill is not a symlink: $target" >&2
+    if [[ ! -f "$target/$skill_name/SKILL.md" ]]; then
+      echo "Installed skillset is missing $skill_name/SKILL.md through symlink: $target" >&2
       failed=true
       continue
     fi
 
-    local current_target
-    current_target="$(resolve_link_target "$target")"
-    if [[ "$current_target" != "$skill_dir" ]]; then
-      echo "Installed skill points elsewhere: $target -> $current_target" >&2
-      failed=true
+    local direct_target="$target_root/$skill_name"
+    if [[ "$skill_name" == "$install_link_name" || ! -L "$direct_target" ]]; then
       continue
     fi
 
-    if [[ ! -f "$target/SKILL.md" ]]; then
-      echo "Installed skill is missing SKILL.md through symlink: $target" >&2
+    local direct_current_target
+    direct_current_target="$(resolve_link_target "$direct_target")"
+    if [[ "$direct_current_target" == "$skill_dir" || "$direct_current_target" == "$repo_root/$skill_name" ]]; then
+      echo "Required skill should be installed through $install_link_name, not as a direct same-repo link: $direct_target" >&2
       failed=true
     fi
   done
@@ -310,7 +319,7 @@ validate_installed_links() {
     exit 1
   fi
 
-  log "Validated installed skill links in $target_root"
+  log "Validated installed skillset link in $target_root"
 }
 
 inject_agents_template() {
@@ -644,7 +653,7 @@ print_summary() {
     status="installed"
   fi
 
-  echo "Alpha Goal skills $status: $installed -> $target_root"
+  echo "Alpha Goal skillset $status: $installed -> $target_root"
   echo "Codex home: $codex_home"
   echo "Validation: passed (tools/validate_skillset.py)"
   if [[ "$sync_user_templates" == true ]]; then
@@ -698,15 +707,15 @@ else
 fi
 
 installed=0
-for skill_file in "${skill_files[@]}"; do
-  skill_dir="$(cd "$(dirname "$skill_file")" && pwd -P)"
-  skill_name="$(basename "$skill_dir")"
-  link_path "$skill_dir" "$target_root/$skill_name" "$skill_name"
-  installed=$((installed + 1))
-done
+link_path "$install_source" "$target_root/$install_link_name" "$install_link_name"
+installed=1
 
 for support_name in adapters tools templates scripts; do
   remove_legacy_support_link "$support_name"
+done
+
+for skill_name in loop verify; do
+  remove_obsolete_skill_link "$skill_name"
 done
 
 for obsolete_skill in goal-frame goal-loop goal-iterate goal-review goal-verify; do

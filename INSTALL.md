@@ -6,7 +6,7 @@
 scripts/install.sh
 ```
 
-默认 Codex home 是 `$HOME/.codex`，技能会从仓库 `skills/` 软链接到 `$HOME/.codex/skills/`。
+默认 Codex home 是 `$HOME/.codex`，脚本会创建 `$HOME/.codex/skills/alpha-goal` 软链接，目标是本仓库的 `skills/`。
 
 ## 安装到指定 Codex home
 
@@ -19,10 +19,10 @@ CODEX_HOME=/path/to/codex-home scripts/install.sh
 
 脚本会：
 
-- 软链接 `skills/*/SKILL.md` 所在技能目录到 `${CODEX_HOME:-$HOME/.codex}/skills/`。
+- 创建 `${CODEX_HOME:-$HOME/.codex}/skills/alpha-goal` 软链接，目标是本仓库的 `skills/` 目录。
 - 默认更新 Codex home 的 `AGENTS.md` 中带 `generate-with-template:agents-md` 标记的受管理模板块，并只补齐 `config.toml` 中缺失的模板设置；模板只补齐 multi-agent、child AGENTS 和结构化 `request_user_input` 相关开关，不设置 `sandbox_mode`、休眠行为或不稳定特性警告抑制项。
-- 自动替换指向本仓库旧顶层布局的同名 skill 软链接，并清理旧版本可能留在目标 `skills/` 下、且指向本仓库的 obsolete `goal-frame`、`goal-loop` 或支持目录旧软链接。
-- 校验目标 `skills/` 中的 skill 软链接指向源码目录，且旧支持目录没有作为本仓库 skill 安装。
+- 自动替换指向本仓库旧顶层布局或旧 `skills/alpha-goal` 目录的 `alpha-goal` 软链接，并清理旧版本可能留在目标 `skills/` 下、且指向本仓库的 `loop`、`verify`、obsolete `goal-frame`、`goal-loop` 或支持目录旧软链接。
+- 校验目标 `skills/alpha-goal` 软链接指向源码 `skills/` 目录，所有必需 skill 都能通过该链接访问，且旧支持目录没有作为本仓库 skill 安装。
 - 安装前运行源码中的 `tools/validate_skillset.py` 校验技能包。该校验只覆盖布局、元数据、引用可发现性和少量一致性规则；不能证明实际路由、误触发、reference 加载策略或验证边界正确。
 
 如果目标位置已有其他软链接：

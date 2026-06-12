@@ -20,7 +20,7 @@
 
 | Path | Mutates state? | Purpose |
 |---|---:|---|
-| `scripts/install.sh` | Yes | Symlinks required skills from `skills/` into `${CODEX_HOME:-$HOME/.codex}/skills`, replaces same-repo legacy skill links, merges user config templates by default unless `--no-sync-user-templates` is passed, cleans legacy support links, and validates target symlinks. |
+| `scripts/install.sh` | Yes | Creates one `${CODEX_HOME:-$HOME/.codex}/skills/alpha-goal` symlink to the repository `skills/` tree, replaces same-repo legacy skill links, merges user config templates by default unless `--no-sync-user-templates` is passed, cleans legacy support links, and validates the target symlink. |
 | `skills/loop/scripts/mutation-preflight.sh` | No | Prints git root, branch, status, worktrees, local rule files, ignored worktree/evidence paths, and submodules. |
 | `skills/verify/scripts/evidence-summary.sh` | No | Prints changed files, diff stat, diff check status, and recent commits. |
 | `tools/validate_skillset.py` | No | Checks skill front matter, invocation metadata, bundled references/scripts, install docs, templates, `skills/` layout, and selected consistency rules. |
