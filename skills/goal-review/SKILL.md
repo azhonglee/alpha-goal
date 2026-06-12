@@ -1,6 +1,6 @@
 ---
 name: goal-review
-description: Optionally challenge an active Goal Contract, dynamic plan, iteration feedback, diff, architecture, scope, or readiness risk. Use only when explicitly named, required by repo rules, or selected because feedback risk needs independent review; not for ordinary standalone code review outside a goal-loop workflow.
+description: Optionally challenge an active Goal Contract, dynamic plan, iteration feedback, diff, architecture, scope, or readiness risk. Use only when explicitly named, required by repo rules, or selected because feedback risk needs independent review; not for ordinary standalone code review outside an alpha-goal workflow.
 ---
 
 # Goal Review
@@ -20,7 +20,7 @@ Use this skill when:
 - the active spec/plan may be stale, too broad, superseded, or inconsistent with evidence;
 - readiness for completion needs independent challenge, while final verdict still belongs to `goal-verify`.
 
-For ordinary standalone code review with no Goal Contract or completion claim, do a normal review without forcing Goal Loop.
+For ordinary standalone code review with no Goal Contract or completion claim, do a normal review without forcing Alpha Goal.
 
 Read `references/review-record-schema.md` if fields are unclear.
 

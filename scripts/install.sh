@@ -644,7 +644,7 @@ print_summary() {
     status="installed"
   fi
 
-  echo "Goal Loop skills $status: $installed -> $target_root"
+  echo "Alpha Goal skills $status: $installed -> $target_root"
   echo "Codex home: $codex_home"
   echo "Validation: passed (tools/validate_skillset.py)"
   if [[ "$sync_user_templates" == true ]]; then
@@ -668,7 +668,7 @@ fi
 
 run_skillset_validation
 
-required_skills=(goal-loop goal-iterate goal-review goal-verify)
+required_skills=(alpha-goal goal-iterate goal-review goal-verify)
 skill_files=()
 for skill_name in "${required_skills[@]}"; do
   skill_file="$source_skill_root/$skill_name/SKILL.md"
@@ -709,7 +709,7 @@ for support_name in adapters tools templates scripts; do
   remove_legacy_support_link "$support_name"
 done
 
-for obsolete_skill in goal-frame; do
+for obsolete_skill in goal-frame goal-loop; do
   remove_obsolete_skill_link "$obsolete_skill"
 done
 

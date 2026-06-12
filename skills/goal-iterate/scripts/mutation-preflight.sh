@@ -78,7 +78,7 @@ section "ignore checks"
 if [ -n "$root" ] && [ -d "$root" ]; then
   (
     cd "$root"
-    for path in .worktrees/codex/preflight-check .goal-loop/preflight-check; do
+    for path in .worktrees/codex/preflight-check .alpha-goal/preflight-check; do
       if git check-ignore -q "$path"; then
         echo "$path: ignored"
       else

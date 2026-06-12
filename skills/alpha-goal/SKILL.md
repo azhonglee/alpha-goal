@@ -1,212 +1,234 @@
 ---
 name: alpha-goal
-description: Socratic deep interview with mathematical ambiguity gating before any implementation mutation. Build a compact Goal Contract.
+description: Clarify ambiguous engineering goals with Socratic interview, ambiguity scoring, pressure tests, and a compact Goal Contract before implementation mutation. Use for broad requests, missing acceptance criteria, target/scope uncertainty, decision-boundary discovery, or handoff to goal-iterate.
 ---
 
 <Purpose>
-You work with an intent-first Socratic clarification loop before planning or implementation, and turn vague ideas into execution-ready specifications by asking targeted questions about why the user wants a change, how far it should go, what should stay out of scope, and what you may decide without confirmation.
 
-Do not implement directly.
+Turn vague requests into execution-ready Goal Contracts before planning or implementation.
+
+Do not edit implementation files, create branches or worktrees, commit, push, open PRs/MRs, or claim implementation completion. Process artifacts may be written only after the artifact safety gate below.
+
 </Purpose>
 
 <Use_When>
 
-- The request is broad, ambiguous, or missing concrete acceptance criteria
-- The user wants to avoid misaligned implementation from underspecified requirements
-- You need a requirements artifact before handing off to `goal-iterate`
+- The request is broad, ambiguous, or missing concrete acceptance criteria.
+- The user wants to avoid misaligned implementation from underspecified requirements.
+- Target, scope, non-goals, constraints, or decision boundaries are unclear.
+- A requirements artifact is needed before handing off to `goal-iterate`.
+
 </Use_When>
 
 <Depth_Profiles>
-- **Quick (When `快速完成` is requested)**: fast pre-PRD pass; target threshold `<= 0.30`; max rounds 5
-- **Standard (default)**: full requirement interview; target threshold `<= 0.20`; max rounds 12
-- **Deep (When `深度挖掘` is requested)**: high-rigor exploration; target threshold `<= 0.15`; max rounds 20
+
+- `quick`: fast pre-PRD pass; target ambiguity `<= 0.30`; max rounds 5.
+- `standard`: default full requirement interview; target ambiguity `<= 0.20`; max rounds 12.
+- `deep`: high-rigor exploration; target ambiguity `<= 0.15`; max rounds 20.
+
 </Depth_Profiles>
 
 <Process>
 
 ```text
-Discovery -> Interview -> Challenge -> Crystallize Artifacts-> Verify
+Discovery -> Interview -> Challenge -> Crystallize -> Verify -> Handoff
 ```
 
-Policy:
+Core policy:
 
-- Gather codebase facts via `explore` before asking user about internals
-- Always Discovery before the first interview question
-- Ask ONE question per round (never batch)
-- Ask about intent and boundaries before implementation detail
-- Target the weakest clarity dimension each round after applying the stage-priority rules below
-- Treat every answer as a claim to pressure-test before moving on: the next question should usually demand evidence or examples, expose a hidden assumption, force a tradeoff or boundary, or reframe root cause vs symptom
-- Do not rotate to a new clarity dimension just for coverage when the current answer is still vague; stay on the same thread until one layer deeper, one assumption clearer, or one boundary tighter
-- Before crystallizing, complete at least one explicit pressure pass that revisits an earlier answer with a deeper, assumption-focused, or tradeoff-focused follow-up
-- Reduce user effort: ask only the highest-leverage unresolved question, and never ask the user for codebase facts that can be discovered directly
-- For brownfield work, prefer evidence-backed confirmation questions such as "I found X in Y. Should this change follow that pattern?"
-- Prefer use `request_user_input`.
-- Re-score ambiguity after each answer and show progress transparently
-- Do not hand off to execution while ambiguity remains above threshold unless user explicitly opts to proceed with warning
-- Do not crystallize or hand off while `Non-goals` or `Decision Boundaries` remain unresolved, even if the weighted ambiguity threshold is met
-- Treat early exit as a safety valve, not the default success path
+- Gather codebase facts before asking the user about discoverable internals.
+- Always run Discovery before the first interview question.
+- Ask one question per round. Do not batch unrelated questions.
+- Ask about intent and boundaries before implementation detail.
+- Target the weakest clarity dimension after applying stage-priority rules.
+- Treat every answer as a claim to pressure-test.
+- Stay on the same thread while the current answer is still vague.
+- Complete at least one pressure pass that revisits an earlier answer.
+- Ask only for user-owned decisions; do not ask the user for discoverable facts.
+- Use plain assistant messages for open-ended Socratic questions.
+- Use `request_user_input` only for 2-3 structured, mutually exclusive choices.
+- Re-score ambiguity after each answer and show progress.
+- Do not hand off while ambiguity remains above threshold unless the user explicitly accepts the risk.
+- Do not hand off while `Non-goals` or `Decision Boundaries` remain unresolved.
 
 ## Phase 1. Discovery
 
-1. Attempt to understand the user's intent and context.
-
-Collect all evidence needed to decide whether the task is feasible to execute:
+Collect evidence needed to decide whether execution is safe:
 
 - user intent;
+- desired outcome;
 - target repo/path/service/module;
 - candidate repos when cwd is a workspace or aggregator;
 - existing work when likely;
 - assumptions and risks;
 - constraints and decision boundaries;
+- likely codebase touchpoints.
 
-2. Parse `{{ARGUMENTS}}` and derive a short task slug. `<slug>` names the goal boundary. Do not create empty artifact directories.
+Derive a short task slug. `<slug>` names the goal boundary. Do not create empty artifact directories.
 
-3. Preflight the Context in the `.alpha-goal/context/YYYYMMDD-<slug>.md` file and reference it in mode state.
+Artifact safety gate:
 
-A minimum Context includes:
+- Before writing `.alpha-goal/` or `docs/design/`, confirm the path is gitignored or the user explicitly approved a durable artifact path.
+- If artifact writing is not safe or not allowed, keep the Context, transcript summary, and Goal Contract in chat only.
+- Record artifact status as `none`, `chat-only`, `created`, `updated`, or `blocked`.
 
-  - Task statement
-  - Desired outcome
-  - Stated solution (what the user asked for)
-  - Probable intent hypothesis (why they likely want it)
-  - Known facts/evidence
-  - Constraints
-  - Unknowns/open questions
-  - Decision-boundary unknowns
-  - Likely codebase touchpoints
+Minimum Context:
 
-4. Announce kickoff, threshold, and current ambiguity.
+- Task statement
+- Desired outcome
+- Stated solution
+- Probable intent hypothesis
+- Known facts/evidence
+- Constraints
+- Unknowns/open questions
+- Decision-boundary unknowns
+- Likely codebase touchpoints
+
+If artifact safety is satisfied, store Context at `.alpha-goal/context/YYYYMMDD-<slug>.md`; otherwise keep it in chat.
+
+Announce kickoff, depth profile, threshold, artifact status, and current ambiguity.
 
 ## Phase 2. Socratic Interview Loop
 
-Repeat until ambiguity `<= threshold`, the pressure pass is complete, the readiness gates are explicit, the user exits with warning, or max rounds are reached.
+Repeat until ambiguity `<= threshold`, pressure pass is complete, readiness gates are explicit, user exits with warning, or max rounds are reached.
 
 ### 2a. Generate next question
+
 Use:
-- Original idea
-- Prior Q&A rounds
-- Current dimension scores
-- Brownfield context (if any)
-- Activated challenge mode injection (Phase 3)
+
+- original idea;
+- prior Q&A rounds;
+- current dimension scores;
+- brownfield context, if any;
+- active challenge mode.
 
 Target the lowest-scoring dimension, but respect stage priority:
-- **Stage 1 — Intent-first:** Intent, Outcome, Scope, Non-goals, Decision Boundaries
-- **Stage 2 — Feasibility:** Constraints, Success Criteria
-- **Stage 3 — Brownfield grounding:** Context Clarity (brownfield only)
 
-Follow-up pressure ladder after each answer:
-1. Ask for a concrete example, counterexample, or evidence signal behind the latest claim
-2. Probe the hidden assumption, dependency, or belief that makes the claim true
-3. Force a boundary or tradeoff: what would you explicitly not do, defer, or reject?
-4. If the answer still describes symptoms, reframe toward essence / root cause before moving on
+- Stage 1, intent first: Intent, Outcome, Scope, Non-goals, Decision Boundaries.
+- Stage 2, feasibility: Constraints, Success Criteria.
+- Stage 3, brownfield grounding: Context Clarity.
 
-Prefer staying on the same thread for multiple rounds when it has the highest leverage. Breadth without pressure is not progress.
+Follow-up pressure ladder:
 
-Detailed dimensions:
-- Intent Clarity — why the user wants this
-- Outcome Clarity — what end state they want
-- Scope Clarity — how far the change should go
-- Constraint Clarity — technical or business limits that must hold
-- Success Criteria Clarity — how completion will be judged
-- Context Clarity — existing codebase understanding (brownfield only)
-
-`Non-goals` and `Decision Boundaries` are mandatory readiness gates. Ask about them early and keep revisiting them until they are explicit.
+1. Ask for a concrete example, counterexample, or evidence signal behind the latest claim.
+2. Probe the hidden assumption, dependency, or belief that makes the claim true.
+3. Force a boundary or tradeoff: what should be excluded, deferred, or rejected?
+4. If the answer still describes symptoms, reframe toward essence or root cause.
 
 ### 2b. Ask the question
-Use structured user-input tooling available in the runtime (`request_user_input` / equivalent) and present:
 
-```
+Use this shape:
+
+```text
 Round {n} | Target: {weakest_dimension} | Ambiguity: {score}%
 
-{question}
+{one question}
 ```
 
+For a structured choice, include consequences for each option. For open-ended clarification, ask in normal chat and wait.
+
 ### 2c. Score ambiguity
-Score each weighted dimension in `[0.0, 1.0]` with justification + gap.
 
-Greenfield: `ambiguity = 1 - (intent × 0.30 + outcome × 0.25 + scope × 0.20 + constraints × 0.15 + success × 0.10)`
+Score each weighted dimension in `[0.0, 1.0]` with justification and gap.
 
-Brownfield: `ambiguity = 1 - (intent × 0.25 + outcome × 0.20 + scope × 0.20 + constraints × 0.15 + success × 0.10 + context × 0.10)`
+Greenfield:
 
-Readiness gate:
-- `Non-goals` must be explicit
-- `Decision Boundaries` must be explicit
-- A pressure pass must be complete: at least one earlier answer has been revisited with an evidence, assumption, or tradeoff follow-up
-- If either gate is unresolved, or the pressure pass is incomplete, continue interviewing even when weighted ambiguity is below threshold
+```text
+ambiguity = 1 - (intent * 0.30 + outcome * 0.25 + scope * 0.20 + constraints * 0.15 + success * 0.10)
+```
+
+Brownfield:
+
+```text
+ambiguity = 1 - (intent * 0.25 + outcome * 0.20 + scope * 0.20 + constraints * 0.15 + success * 0.10 + context * 0.10)
+```
+
+Readiness gates:
+
+- `Non-goals` must be explicit.
+- `Decision Boundaries` must be explicit.
+- At least one earlier answer has been revisited with evidence, assumption, or tradeoff pressure.
+
+If any readiness gate is unresolved, continue interviewing even when weighted ambiguity is below threshold.
 
 ### 2d. Report progress
-Show weighted breakdown table, readiness-gate status (`Non-goals`, `Decision Boundaries`), and the next focus dimension.
 
-### 2e. Persist state
-Append round result and updated scores via `state_write`.
+Show the weighted breakdown table, readiness-gate status, artifact status, and next focus dimension.
+
+### 2e. Track state
+
+Track rounds in chat. If artifact safety is satisfied, append round summaries to the active `.alpha-goal/context/` artifact. Do not call unavailable state tools.
 
 ### 2f. Round controls
-- Do not offer early exit before the first explicit assumption probe and one persistent follow-up have happened
-- Round 4+: allow explicit early exit with risk warning
-- Soft warning at profile midpoint (e.g., round 3/6/10 depending on profile)
-- Hard cap at profile `max_rounds`
 
-## Phase 3: Challenge Modes (assumption stress tests)
+- Do not offer early exit before the first assumption probe and one persistent follow-up.
+- Round 4+: allow explicit early exit with risk warning.
+- Warn at the profile midpoint.
+- Stop at the profile max rounds.
 
-Use each mode once when applicable. These are normal escalation tools, not rare rescue moves:
+## Phase 3. Challenge Modes
 
-- **Contrarian** (round 2+ or immediately when an answer rests on an untested assumption): challenge core assumptions
-- **Simplifier** (round 4+ or when scope expands faster than outcome clarity): probe minimal viable scope
-- **Ontologist** (round 5+ and ambiguity > 0.25, or when the user keeps describing symptoms): ask for essence-level reframing
+Use each applicable mode at most once:
 
-Track used modes in state to prevent repetition.
+- `contrarian`: challenge core assumptions.
+- `simplifier`: probe minimal viable scope.
+- `ontologist`: reframe symptoms into essence or root cause.
 
-## Phase 4: Crystallize Artifacts
+Track used modes in chat or the approved context artifact.
 
-When threshold is met (or user exits with warning / hard cap):
+## Phase 4. Crystallize
 
-1. Write interview transcript summary to:
-   - `.alpha-goal/interviews/YYYYMMDD-{slug}.md`  
-     (kept for ralph PRD compatibility)
-2. Write execution-ready goal Contract to:
-   - `docs/design/YYYYMMDD-{slug}.md`
+When threshold is met, user exits with warning, or hard cap is reached, produce a Goal Contract.
 
-Goal Contract should include:
-- Metadata (profile, rounds, final ambiguity, threshold, context type)
-- Clarity breakdown table
-- Intent (why the user wants this)
-- In-Scope
-- Out-of-Scope / Non-goals
-- Decision Boundaries (what you may decide without confirmation)
-- Desired Outcome
-- Constraints
-- Testable acceptance criteria
-- Assumptions exposed + resolutions
-- Pressure-pass findings (which answer was revisited, and what changed)
-- Brownfield evidence vs inference notes for any repository-grounded confirmation questions
-- Technical context findings
-- Full or condensed transcript
+If artifact safety is satisfied, write:
 
-## Phase 5: Verification
-1. Self-review the goal Contract Artifacts for accuracy and completeness. If any findings are found, correct them.
-2. Dispatch subagents review the goal Contract Artifacts for risk. If any findings are found and you accept the risk, correct them.
-3. Confirm the goal Contract Artifacts with the user using the runtime (`request_user_input` / equivalent). 
-   - If the user confirms, set the Verification Verdict to `COMPLETED`.
-   - If the user rejects, set the Verification Verdict to `REJECTED`.
-   - If the user requests to modify the goal Contract Artifacts, go back to Interview phase with user feedback.
+- transcript summary: `.alpha-goal/interviews/YYYYMMDD-<slug>.md`
+- Goal Contract: `docs/design/YYYYMMDD-<slug>.md`
 
-## Phase 6: Final output rule
+If artifact safety is not satisfied, output both in chat.
 
-Any completion claim must rest on the latest Verification Verdict.
+Goal Contract must include:
 
-Enter `goal-iterate` only when the Goal Contract passes Verification.
-<Process>
+```text
+Goal Contract:
+- Intent:
+- Goal type: EXPLORE | DESIGN | IMPLEMENT | DEBUG | VERIFY | RECOVER
+- Target:
+- Discovery:
+- Socratic state:
+- Spec:
+  - Outcome:
+  - Scope:
+  - Acceptance:
+  - Constraints:
+  - Claim boundary:
+  - Evidence:
+- Non-goals:
+- Decision Boundaries:
+- Assumptions and risks:
+- Pressure-pass findings:
+- Artifact status:
+- Alpha verdict: CONTRACT_READY | USER_DECISION_NEEDED | BLOCKED | REVISE
+- Next:
+```
 
-<Final_Checklist>
-- [ ] Preflight context snapshot exists under `.alpha-goal/context/YYYYMMDD-<slug>.md`
-- [ ] Ambiguity score shown each round
-- [ ] Intent-first stage priority used before implementation detail
-- [ ] Weakest-dimension targeting used within the active stage
-- [ ] At least one explicit assumption probe happened before crystallization
-- [ ] At least one persistent follow-up / pressure pass deepened a prior answer
-- [ ] Challenge modes triggered at thresholds (when applicable)
-- [ ] Transcript written to `.alpha-goal/interviews/YYYYMMDD-<slug>.md`
-- [ ] Goal Contract written to `docs/design/YYYYMMDD-<slug>.md`
-- [ ] Brownfield questions use evidence-backed confirmation when applicable
-- [ ] No direct implementation performed in this mode
-</Final_Checklist>
+## Phase 5. Verify
+
+Self-review the Goal Contract for accuracy and completeness. Correct accepted findings.
+
+For high-risk or broad contracts, use independent review before handoff when available. Do not leak intended answers; pass the artifact and a neutral review request.
+
+Ask the user to confirm only user-owned decisions. If the user rejects or changes requirements, return to the Interview phase with the feedback.
+
+Alpha verdict values:
+
+- `CONTRACT_READY`: handoff is safe inside the recorded boundary.
+- `USER_DECISION_NEEDED`: one user-owned decision blocks readiness.
+- `BLOCKED`: missing data, permission, environment, or tool blocks readiness.
+- `REVISE`: user feedback changed the contract.
+
+Enter `goal-iterate` only when the Goal Contract is `CONTRACT_READY`.
+
+</Process>
+
+Final checklist: artifact safety recorded; context captured; ambiguity shown each round; readiness gates closed or blocker recorded; pressure pass complete; transcript and Goal Contract written or included in chat; no direct implementation performed.

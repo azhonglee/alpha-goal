@@ -19,7 +19,7 @@ Start with a read-only preflight in the current checkout:
 git worktree list
 git status --short
 git check-ignore -q .worktrees/codex/<task-slug> || printf 'BLOCKED: .worktrees/ is not ignored here\n'
-git check-ignore -q .goal-loop/preflight-check || printf 'BLOCKED: .goal-loop/ is not ignored here\n'
+git check-ignore -q .alpha-goal/preflight-check || printf 'BLOCKED: .alpha-goal/ is not ignored here\n'
 ```
 
 If `.worktrees/` is already ignored, it is safe to create the isolated worktree. In monorepos, run this from the owning subrepo unless project rules define a stricter owner or path:

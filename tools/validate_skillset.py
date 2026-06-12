@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate a local Codex goal-loop skillset layout.
+"""Validate a local Codex alpha-goal skillset layout.
 
 This intentionally stays lightweight and dependency-free. It checks skill
 metadata, invocation policy, discoverability of bundled references/scripts,
@@ -15,10 +15,10 @@ import sys
 from pathlib import Path
 import tomllib
 
-REQUIRED_SKILLS = ["goal-loop", "goal-iterate", "goal-review", "goal-verify"]
+REQUIRED_SKILLS = ["alpha-goal", "goal-iterate", "goal-review", "goal-verify"]
 SKILLS_DIR = "skills"
 IMPLICIT_POLICY = {
-    "goal-loop": "true",
+    "alpha-goal": "true",
     "goal-iterate": "false",
     "goal-review": "false",
     "goal-verify": "false",
@@ -144,14 +144,12 @@ def check_openai_yaml(skill: str, openai_yaml: Path) -> bool:
     return ok
 
 
-def check_goal_loop_description(description: str) -> bool:
+def check_alpha_goal_description(description: str) -> bool:
     ok = True
     lower = description.lower()
-    for phrase in ["non-trivial read-only", "target", "evidence-boundary"]:
+    for phrase in ["socratic", "goal contract", "implementation mutation"]:
         if phrase not in lower:
-            ok = fail(f"goal-loop: description missing read-only discovery trigger phrase {phrase!r}")
-    if "advisory audit" in lower and "when no" not in lower and "unless" not in lower:
-        ok = fail("goal-loop: description appears to exclude advisory audit unconditionally")
+            ok = fail(f"alpha-goal: description missing trigger phrase {phrase!r}")
     return ok
 
 
@@ -268,8 +266,8 @@ def check_docs(root: Path) -> bool:
                 ok = fail(f"{doc.name}: missing validate_skillset.py smoke test")
             if not ("不能证明" in text and "路由" in text and "验证边界" in text):
                 ok = fail(f"{doc.name}: missing validator evidence-boundary warning")
-            if doc.name == "README.md" and ".goal-loop/" not in text:
-                ok = fail("README.md: missing .goal-loop/ artifact guidance")
+            if doc.name == "README.md" and ".alpha-goal/" not in text:
+                ok = fail("README.md: missing .alpha-goal/ artifact guidance")
         if doc.name == "MANIFEST.md":
             for skill in REQUIRED_SKILLS:
                 if f"`skills/{skill}/`" not in text:
@@ -285,53 +283,30 @@ def check_consistency(root: Path) -> bool:
     ok = True
     source = skill_root(root)
     worktree_safety = source / "goal-iterate" / "references" / "worktree-safety.md"
-    goal_loop = source / "goal-loop" / "SKILL.md"
-    target_discovery = source / "goal-loop" / "references" / "target-discovery.md"
+    alpha_goal = source / "alpha-goal" / "SKILL.md"
     loop_modes = source / "goal-iterate" / "references" / "loop-modes.md"
     goal_verify = source / "goal-verify" / "SKILL.md"
     install_script = root / "scripts" / "install.sh"
 
-    for path in [worktree_safety, goal_loop]:
+    for path in [worktree_safety]:
         if path.exists() and WORKTREE_CANONICAL not in path.read_text(encoding="utf-8"):
             ok = fail(f"{path}: missing canonical worktree path {WORKTREE_CANONICAL}")
 
-    if goal_loop.exists():
-        text = goal_loop.read_text(encoding="utf-8")
-        if "Domain skill coexistence" not in text:
-            ok = fail("skills/goal-loop/SKILL.md: missing domain skill coexistence guidance")
-        if "ordinary standalone review" not in text:
-            ok = fail("skills/goal-loop/SKILL.md: missing read-only trigger exclusion")
-        if "findings, evidence, recommendations, and residual uncertainty" not in text:
-            ok = fail("skills/goal-loop/SKILL.md: missing read-only audit completion guidance")
-        if "`Artifacts` means loop-owned process artifacts" not in text:
-            ok = fail("skills/goal-loop/SKILL.md: missing process-vs-domain artifact disambiguation")
-        if "root-cause claim needs debug evidence" not in text:
-            ok = fail("skills/goal-loop/SKILL.md: missing root-cause debug evidence invariant")
-        if ".goal-loop/" not in text:
-            ok = fail("skills/goal-loop/SKILL.md: missing .goal-loop/ ignore guidance")
-        if "low-risk single-function failures" not in text:
-            ok = fail("skills/goal-loop/SKILL.md: missing compact low-risk debug framing guidance")
-        if "Do not invent composite goal types" not in text or "not the current stage" not in text:
-            ok = fail("skills/goal-loop/SKILL.md: missing atomic goal type guidance")
-        contract_start = text.find("Goal Contract:\n")
-        contract_end = text.find("```", contract_start + 1) if contract_start != -1 else -1
-        contract_block = text[contract_start:contract_end] if contract_start != -1 and contract_end != -1 else ""
-        for duplicated_field in ["- Acceptance:", "- Non-goals:", "- Constraints:", "- Decision boundaries:", "- Claim boundary:", "- Evidence plan:"]:
-            if duplicated_field in contract_block:
-                ok = fail(
-                    "skills/goal-loop/SKILL.md: Goal Contract should keep requirements inside Spec, "
-                    f"not top-level {duplicated_field}"
-                )
-        for required_spec_field in ["- Outcome:", "- Scope:", "- Acceptance:", "- Constraints:", "- Claim boundary:", "- Evidence:"]:
-            if required_spec_field not in text:
-                ok = fail(f"skills/goal-loop/SKILL.md: missing compact Spec field {required_spec_field}")
-
-    if target_discovery.exists():
-        text = target_discovery.read_text(encoding="utf-8")
-        if "Domain boundary gate" not in text:
-            ok = fail("skills/goal-loop/references/target-discovery.md: missing domain boundary gate")
-        if "related but not equivalent" not in text or "UI labels" not in text:
-            ok = fail("skills/goal-loop/references/target-discovery.md: missing general domain-term disambiguation guidance")
+    if alpha_goal.exists():
+        text = alpha_goal.read_text(encoding="utf-8")
+        for phrase in [
+            "Artifact safety gate",
+            "request_user_input` only for 2-3 structured",
+            "Do not call unavailable state tools",
+            "Goal Contract must include",
+            "Non-goals",
+            "Decision Boundaries",
+            "</Process>",
+            ".alpha-goal/",
+            "docs/design/YYYYMMDD-<slug>.md",
+        ]:
+            if phrase not in text:
+                ok = fail(f"skills/alpha-goal/SKILL.md: missing alpha-goal guidance {phrase!r}")
 
     if loop_modes.exists():
         text = loop_modes.read_text(encoding="utf-8")
@@ -347,8 +322,8 @@ def check_consistency(root: Path) -> bool:
 
     if worktree_safety.exists():
         text = worktree_safety.read_text(encoding="utf-8")
-        if ".goal-loop/" not in text:
-            ok = fail("skills/goal-iterate/references/worktree-safety.md: missing .goal-loop/ ignore guidance")
+        if ".alpha-goal/" not in text:
+            ok = fail("skills/goal-iterate/references/worktree-safety.md: missing .alpha-goal/ ignore guidance")
 
     if install_script.exists():
         text = install_script.read_text(encoding="utf-8")
@@ -432,8 +407,8 @@ def main() -> int:
             continue
         ok = check_openai_yaml(skill, openai_yaml) and ok
 
-        if skill == "goal-loop" and description:
-            ok = check_goal_loop_description(description) and ok
+        if skill == "alpha-goal" and description:
+            ok = check_alpha_goal_description(description) and ok
 
         ok = check_skill_references(skill, skill_dir, skill_text) and ok
 
