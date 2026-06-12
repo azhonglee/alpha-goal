@@ -40,7 +40,7 @@ The contract version, iteration record, changed-file set, diff or commit state, 
 
 ### Findings
 
-Findings should lead with correctness, regression, missing evidence, scope, or safety concerns. Prefer concrete file/line references when reviewing code.
+Findings should lead with correctness, regression, missing evidence, scope, entity alignment, or safety concerns. Prefer concrete file/line references when reviewing code. For diagnostic work, state whether problem-space decomposition is sufficient, competing hypotheses were addressed, user-facing terms/modules/data entities/APIs/RPCs/logs/code symbols align, and the root-cause statement is validated or overclaimed; if they do not align, prefer `REFRAME` over continuing under the wrong target.
 
 When findings come from subagents, state whether you confirmed, rejected, or could not verify them. Resolve conflicting subagent findings before choosing a `Review verdict`.
 
@@ -54,7 +54,7 @@ State whether any active spec or plan was reviewed. Check freshness, status, ali
 
 ### Scope/architecture notes
 
-Record ownership boundaries, repo/worktree/submodule crossings, broad refactors, or unnecessary coupling.
+Record ownership boundaries, repo/worktree/submodule crossings, broad refactors, unnecessary coupling, or accidental widening from a narrow submodule/entity to a broader container.
 
 ### Risk tier
 
@@ -62,7 +62,7 @@ Use `low`, `medium`, or `high` based on blast radius and evidence needs.
 
 ### Required evidence
 
-Checks, artifacts, loop evidence, or Debug Receipt updates needed before `goal-verify` can support a final claim.
+Checks, artifacts, loop evidence, or Debug Receipt updates needed before `goal-verify` can support a final claim. For unresolved root-cause analysis, name the smallest missing probe, log, trace, test, or code inspection needed to distinguish remaining hypotheses.
 
 ### Review verdict
 

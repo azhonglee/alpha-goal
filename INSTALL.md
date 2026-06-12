@@ -93,6 +93,29 @@ Expected behavior:
 - It should not force Goal Loop for ordinary standalone review.
 - It should use normal read-only review style unless target/rule/evidence-boundary discovery is needed.
 
+
+```text
+$goal-loop 某个工作区页面里列表 A 正常，但列表 B 为空；日志显示 B 的接口返回空。只读判断下一步定位方向，不要改文件。
+```
+
+Expected behavior:
+
+- It should frame the user-facing page/workspace as a container, not as one data model or the Goal Loop `Artifacts` field.
+- It should distinguish the affected submodule, data entity, source interface, and log evidence from neighboring healthy modules.
+- It should treat the interface/log evidence for the affected module as the primary diagnostic boundary unless evidence links it to another module.
+- It should return a read-only diagnosis and next evidence plan, not mutate files.
+
+```text
+$goal-loop 修复一个低风险纯函数 bug：某个输入返回值错误，已有 focused failing test 指向单个分支错误。
+```
+
+Expected behavior:
+
+- It should still require debug evidence before a bug-fix claim.
+- It may use a compact Debug Receipt because the boundary is a low-risk single-function failure.
+- It should verify the focused failure path after the patch and narrow the final claim to the tested local boundary.
+- It should not require incident-style RCA, durable spec, plan, or review unless new evidence expands the risk.
+
 ```text
 $goal-frame 这是一个多仓 workspace，帮我先 frame “补充产物上传 TOS 日志”，不要改文件。
 ```

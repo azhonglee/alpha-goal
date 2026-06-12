@@ -258,6 +258,10 @@ def check_consistency(root: Path) -> bool:
     ok = True
     worktree_safety = root / "goal-iterate" / "references" / "worktree-safety.md"
     goal_loop = root / "goal-loop" / "SKILL.md"
+    goal_frame = root / "goal-frame" / "SKILL.md"
+    target_discovery = root / "goal-frame" / "references" / "target-discovery.md"
+    loop_modes = root / "goal-iterate" / "references" / "loop-modes.md"
+    goal_verify = root / "goal-verify" / "SKILL.md"
     install_script = root / "scripts" / "install.sh"
 
     for path in [worktree_safety, goal_loop]:
@@ -272,8 +276,36 @@ def check_consistency(root: Path) -> bool:
             ok = fail("goal-loop/SKILL.md: missing read-only trigger exclusion")
         if "findings, evidence, recommendations, and residual uncertainty" not in text:
             ok = fail("goal-loop/SKILL.md: missing read-only audit completion guidance")
+        if "`Artifacts` means loop-owned process artifacts" not in text:
+            ok = fail("goal-loop/SKILL.md: missing process-vs-domain artifact disambiguation")
+        if "root-cause claim needs debug evidence" not in text:
+            ok = fail("goal-loop/SKILL.md: missing root-cause debug evidence invariant")
         if ".goal-loop/" not in text:
             ok = fail("goal-loop/SKILL.md: missing .goal-loop/ ignore guidance")
+
+    if goal_frame.exists():
+        text = goal_frame.read_text(encoding="utf-8")
+        if "low-risk single-function failures" not in text:
+            ok = fail("goal-frame/SKILL.md: missing compact low-risk debug framing guidance")
+
+    if target_discovery.exists():
+        text = target_discovery.read_text(encoding="utf-8")
+        if "Domain boundary gate" not in text:
+            ok = fail("goal-frame/references/target-discovery.md: missing domain boundary gate")
+        if "related but not equivalent" not in text or "UI labels" not in text:
+            ok = fail("goal-frame/references/target-discovery.md: missing general domain-term disambiguation guidance")
+
+    if loop_modes.exists():
+        text = loop_modes.read_text(encoding="utf-8")
+        if "one-paragraph receipt is enough" not in text:
+            ok = fail("goal-iterate/references/loop-modes.md: missing compact low-risk Debug Receipt guidance")
+        if "return `REFRAME_NEEDED` instead of forcing the evidence into the old target" not in text:
+            ok = fail("goal-iterate/references/loop-modes.md: missing wrong-target debug reframe guidance")
+
+    if goal_verify.exists():
+        text = goal_verify.read_text(encoding="utf-8")
+        if "low-risk local bug fixes without a formal RCA claim" not in text:
+            ok = fail("goal-verify/SKILL.md: missing low-risk local bug verification boundary")
 
     if worktree_safety.exists():
         text = worktree_safety.read_text(encoding="utf-8")

@@ -13,8 +13,8 @@ FRAME -> ITERATE -> REVIEW -> VERIFY -> FINAL
 技能集包含 5 个顶层 skill：
 
 - `goal-loop`：统一入口，负责选择合适阶段，并维护阶段之间的通用约束。
-- `goal-frame`：先把目标说清楚，产出 Goal Contract，明确范围、验收标准、约束、风险和证据计划。
-- `goal-iterate`：在已有 Goal Contract 下完成一轮有限实现，记录 mutation preflight、loop mode 证据、debug receipt 和必要计划。
+- `goal-frame`：先把目标说清楚，产出 Goal Contract，明确范围、验收标准、约束、风险和证据计划；遇到页面/空间/容器型目标时，先区分子模块、数据实体和源接口。
+- `goal-iterate`：在已有 Goal Contract 下完成一轮有限实现，记录 mutation preflight、loop mode 证据、debug receipt 和必要计划；debug 模式先确认根因边界再修复。
 - `goal-review`：检查实现方向、反馈处理、范围、架构、相关产物状态，以及是否具备收尾条件。
 - `goal-verify`：产出 Verification Verdict，核对验收项、证据、产物一致性和最终可声明的范围。
 
@@ -125,6 +125,9 @@ $goal-verify 检查当前 diff 和测试证据，判断能否最终交付。
 - 路由入口只负责分派，具体工作交给阶段 skill。
 - 每个阶段只产出一份便于追踪的记录。
 - 详细规则放在 `references/`，只在需要时加载。
+- 诊断任务先对齐用户可见对象、子模块、数据实体、接口/RPC 和日志证据，避免把聚合页面或空间误当成单一业务实体。
+- Goal Loop 的 `Artifacts` 只表示流程产物；业务域里的对象、条目或产物应记录在 Target、Acceptance、Non-goals 或 Evidence plan 中。
+- Debug receipt 要与风险匹配：复杂 RCA 需要竞争假设、entity/interface/log 对齐和根因声明验证；低风险单函数/单分支 bug 可用 focused failing test、直接代码分歧和修复后测试形成紧凑证据。
 - Spec 和 plan 只在风险或复杂度升高时使用，不作为默认流程负担。
 - Spec 记录稳定需求，plan 记录当前执行路线和路线调整历史。
 - 阶段内辅助脚本只作为只读证据收集工具，不替代工程判断；安装脚本是显式安装入口，可能修改 Codex home。
@@ -232,7 +235,7 @@ Verification Verdict:
 
 ## 调优建议
 
-如果阶段输出显得太长，可以减少解释文字，但应保留这些关键字段：
+如果阶段输出显得太长，可以减少解释文字，但应保留这些关键字段。低风险本地 bug 可以压缩 Debug receipt 内容，但不能省略失败路径、分歧点、修复面和修复后证据：
 
 - `Goal Contract.Acceptance`
 - `Goal Contract.Claim boundary`

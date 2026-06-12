@@ -98,7 +98,13 @@ Choose one loop mode before acting:
 
 Record hypothesis, evidence type, learning, and decision for every iteration. Use `references/loop-modes.md` for mode-specific evidence rules.
 
-For `debug`, do not patch from a guessed cause. Close the diagnostic path with a Debug Receipt status before any fix claim:
+For `debug`, do not patch from a guessed cause. Before `ROOT_CAUSE_CONFIRMED`:
+
+- include problem-space decomposition, competing hypotheses or an evidence-based reason none are credible, entity/interface/log alignment when available, and root-cause validation;
+- use a compact Debug Receipt for low-risk pure-function or single-branch failures with focused failing-test and direct code-divergence evidence; mark entity/log alignment as not applicable;
+- when symptoms, logs, API/RPC names, payload fields, or user corrections point to different entities than the current target, keep competing hypotheses until a discriminator excludes them or route to `REFRAME_NEEDED`.
+
+Close the diagnostic path with a Debug Receipt status before any fix claim:
 
 - `ROOT_CAUSE_CONFIRMED`
 - `NOT_REPRODUCED`
@@ -121,11 +127,11 @@ Route to `goal-review` if plan, delegation, ownership, architecture, or scope de
 - Prefer evidence-producing changes: tests, assertions, logging checks, static checks, or targeted probes.
 - Preserve unrelated user changes.
 - Keep implementation within the claim boundary.
-- If discovery reveals existing work that changes task identity, stop and return `REFRAME_NEEDED`.
+- If discovery reveals existing work, a different submodule, or an API/log entity that changes task identity, stop and return `REFRAME_NEEDED`.
 - If clarification is needed, stop and return `REFRAME_NEEDED` before further mutation.
 - If project rules require a specific worktree, branch, or test flow, follow them.
 - If a check fails, diagnose whether it is caused by the iteration, environment, or unrelated baseline.
-- Do not patch from a plausible but unconfirmed root cause when debugging; first record reproducible evidence or a diagnostic blocker.
+- Do not patch from a plausible but unconfirmed root cause when debugging; first record reproducible evidence, entity/API alignment, or a diagnostic blocker.
 - If three attempts on the same failure thread do not produce new evidence, route to `goal-review`.
 
 ## No evidence, no progress
@@ -169,7 +175,8 @@ Route to `goal-review` when:
 - review feedback needs classification;
 - implementation becomes complex;
 - scope expands;
-- architecture or ownership decisions become material.
+- architecture or ownership decisions become material;
+- debug evidence supports multiple plausible root causes, logs and code disagree, or the proposed fix surface is broader than the confirmed divergence.
 
 When routing to review, set `Iterate verdict` to `ITERATION_READY_FOR_REVIEW`.
 

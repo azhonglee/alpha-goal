@@ -34,11 +34,11 @@ What the user wants, restated as an implementation goal.
 
 ### Target
 
-Repo, package, service, module, path, or read-only object under consideration. In multi-repo work, include candidates checked and why the selected target wins.
+Repo, package, service, module, path, or read-only object under consideration. In multi-repo work, include candidates checked and why the selected target wins. For a user-facing page, space, or umbrella term, decompose it enough to avoid entity drift: container, submodule, data entity, source API/RPC, and terms that are not assumed equivalent.
 
 ### Acceptance
 
-Observable conditions that define completion. Prefer product-facing behavior over internal implementation details when the user phrase is product-facing.
+Observable conditions that define completion. Prefer product-facing behavior over internal implementation details when the user phrase is product-facing. For bug/debug work, distinguish diagnostic acceptance (reproduce or explain the symptom), root-cause acceptance (identify the first divergence and exclude material alternatives), and repair acceptance (final behavior no longer exhibits the symptom).
 
 ### Non-goals
 
@@ -54,7 +54,7 @@ What you may decide independently and what needs user confirmation before mutati
 
 ### Assumptions and risks
 
-Separate observed facts from assumptions. Record meaningful risks such as missing environment, unverified integration behavior, destructive operations, ownership uncertainty, or broad blast radius.
+Separate observed facts from assumptions. Record meaningful risks such as missing environment, unverified integration behavior, destructive operations, ownership uncertainty, broad blast radius, or unresolved terminology/entity ambiguity.
 
 ### Risk tier
 
@@ -76,11 +76,11 @@ The maximum final claim that evidence must support. Examples:
 
 ### Evidence plan
 
-What evidence should prove acceptance. Include tests, builds, static checks, manual probes, diff review, MR comparison, or explicit reason a check cannot run.
+What evidence should prove acceptance. Include tests, builds, static checks, manual probes, diff review, MR comparison, call-chain/log evidence for diagnostic work, or explicit reason a check cannot run.
 
 ### Artifacts
 
-Durable artifacts that later stages must read before relying on them.
+Durable loop/process artifacts that later stages must read before relying on them. Do not list domain objects, UI sections, database rows, product artifacts, or generated business items here; disambiguate those in `Target`, `Acceptance`, or `Non-goals`.
 
 Use `spec: none` for small tasks. When a spec exists, record path and status, for example:
 
