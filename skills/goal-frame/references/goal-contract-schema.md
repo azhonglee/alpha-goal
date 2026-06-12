@@ -26,7 +26,7 @@ Goal Contract:
 
 ### Loop type
 
-由 `goal-loop` 识别的一个原子类型：`NEW_GOAL`、`DEBUG_GOAL`、`CONTINUE_GOAL`、`READ_ONLY_DISCOVERY`、`VERIFY_CLAIM`、`RECOVERY`。若直接调用 `goal-frame`，根据用户最终目标补齐。不要写组合类型；“先 frame 不改文件”的实现请求仍是 `NEW_GOAL` 或 `DEBUG_GOAL`，不是 `READ_ONLY_DISCOVERY for future NEW_GOAL`。
+由 `goal-loop` 识别的一个原子类型：`NEW_GOAL`、`DEBUG_GOAL`、`CONTINUE_GOAL`、`READ_ONLY_DISCOVERY`、`VERIFY_CLAIM`、`RECOVERY`。若直接调用 `goal-frame`，根据用户最终目标补齐。不要写组合类型；“先 frame 不改文件”的实现请求仍是 `NEW_GOAL` 或 `DEBUG_GOAL`，不要把 read-only 当前阶段和 future implementation 目标拼成新标签。
 
 ### Target
 
