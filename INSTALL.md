@@ -95,6 +95,29 @@ Expected behavior:
 - It should not force Goal Loop for ordinary standalone review.
 - It should use normal read-only review style unless target/rule/evidence-boundary discovery is needed.
 
+
+```text
+$goal-loop 产物空间里自动化任务列表为空；ArtifactList 正常，但日志显示 ListTriggers 返回空。只读判断下一步定位方向，不要改文件。
+```
+
+Expected behavior:
+
+- It should frame the user-facing space as a container, not as the Goal Loop `Artifacts` field.
+- It should distinguish artifact/content data from automation trigger/task data.
+- It should treat `ListTriggers` as the primary diagnostic boundary unless evidence links the task list to `ArtifactList`.
+- It should return a read-only diagnosis and next evidence plan, not mutate files.
+
+```text
+$goal-loop 修复一个低风险纯函数 bug：parseFlag('off') 返回 true，已有 focused failing test 指向单个分支错误。
+```
+
+Expected behavior:
+
+- It should still require debug evidence before a bug-fix claim.
+- It may use a compact Debug Receipt because the boundary is a low-risk single-function failure.
+- It should verify the focused failure path after the patch and narrow the final claim to the tested local boundary.
+- It should not require incident-style RCA, durable spec, plan, or review unless new evidence expands the risk.
+
 ```text
 $goal-frame 这是一个多仓 workspace，帮我先 frame “补充产物上传 TOS 日志”，不要改文件。
 ```
