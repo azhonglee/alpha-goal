@@ -34,9 +34,11 @@ Close every iteration with exactly one decision:
 
 ## Debug Receipt
 
-Use this receipt only for `debug` mode. Keep it compact but falsifiable. For low-risk pure-function or single-branch failures with a focused failing test and direct code divergence, a one-paragraph receipt is enough if it names the symptom, failing path, branch divergence, fix surface, and post-fix evidence; mark entity/API/log alignment as not applicable. For entity or module ambiguity, keep competing hypotheses with evidence for, evidence against, discriminator, and status; do not collapse to one hypothesis until evidence explains why alternatives are weaker or out of scope.
+Use this receipt only for `debug` mode. Keep it compact but falsifiable.
 
-Use `ROOT_CAUSE_CONFIRMED` only when the receipt identifies the first divergence point, affected entity/state, relevant interface or log boundary when available, excluded material alternatives, and smallest credible fix surface. If logs or APIs point to a different submodule than the Goal Contract target, return `REFRAME_NEEDED` instead of forcing the evidence into the old target.
+- For low-risk pure-function or single-branch failures with focused failing-test and direct code-divergence evidence, a one-paragraph receipt is enough if it names symptom, failing path, branch divergence, fix surface, and post-fix evidence; mark entity/API/log alignment as not applicable.
+- For entity or module ambiguity, keep competing hypotheses with evidence for, evidence against, discriminator, and status; do not collapse to one hypothesis until evidence explains why alternatives are weaker or out of scope.
+- If logs or APIs point to a different submodule than the Goal Contract target, return `REFRAME_NEEDED` instead of forcing the evidence into the old target.
 
 
 ```text

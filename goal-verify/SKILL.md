@@ -63,7 +63,7 @@ Check:
 - any active plan verification route and evidence gate is satisfied, superseded with reason, or explicitly blocked;
 - loop mode, hypothesis, evidence type, learning, and decision are consistent with the final claim;
 - any required Review Record covers the latest material change boundary;
-- bug-fix and root-cause claims have `ROOT_CAUSE_CONFIRMED`; evidence validates the root-cause statement by explaining the symptom, identifying the first divergence, aligning affected entities/interfaces/logs when available, excluding or bounding competing hypotheses, and proving the claimed boundary. For low-risk local bug fixes without a formal RCA claim, focused failure-path evidence plus direct code divergence and post-fix tests may satisfy this check;
+- bug-fix and root-cause claims have `ROOT_CAUSE_CONFIRMED`; for non-trivial RCA, evidence validates the root-cause statement by explaining the symptom, identifying the first divergence, aligning affected entities/interfaces/logs when available, excluding or bounding competing hypotheses, and proving the claimed boundary. For low-risk local bug fixes without a formal RCA claim, focused failure-path evidence plus direct code divergence and post-fix tests may satisfy this check;
 - `NOT_REPRODUCED` or `BLOCKED` Debug Receipts are not treated as repair completion;
 - risk-tier evidence requirements are met or explicitly blocked;
 - evidence is at the right boundary for the user's wording, including diagnosis-only claims such as root cause narrowed to a component but not yet fixed internally;
