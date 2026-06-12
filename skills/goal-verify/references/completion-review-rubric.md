@@ -6,7 +6,7 @@
 
 返回 `PASS_TO_FINAL` 前确认：
 
-- Goal Contract current，含 `Spec.Acceptance` 和 `Spec.Claim boundary`；
+- Goal Contract current，含 Testable acceptance criteria，且 claim boundary 可从 Desired Outcome、In-Scope、Out-of-Scope / Non-goals 和 Decision Boundaries 推导；
 - changed files 匹配 target 和 non-goals；
 - Iteration Record 的 dynamic plan、execution、feedback 与当前 diff 一致；
 - 最后一处 material change 之后有 fresh checks；
@@ -28,7 +28,7 @@
 
 以下情况回 `alpha-goal`：
 
-- target、Spec、acceptance、non-goals 或 claim boundary 错误/不完整；
+- target/scope、acceptance、non-goals 或 claim boundary 错误/不完整；
 - existing work 关系改变任务身份；
 - feedback 表明当前 contract 不是用户真实目标；
 - evidence 指向不同 entity、API/RPC、submodule 或 repo。

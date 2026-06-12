@@ -34,7 +34,7 @@ Iteration Record:
 
 ### Goal type
 
-继承 Goal Contract：`EXPLORE`、`DESIGN`、`IMPLEMENT`、`DEBUG`、`VERIFY`、`RECOVER`。`CLARIFY` 不能进入 iterate。
+从 user-reviewed Goal Contract 的 intent、desired outcome、in-scope、acceptance 和 claim boundary 中选择：`EXPLORE`、`DESIGN`、`IMPLEMENT`、`DEBUG`、`VERIFY`、`RECOVER`。`CLARIFY` 不能进入 iterate。
 
 ### Active artifacts
 
@@ -90,7 +90,7 @@ Iteration Record:
 
 ### Acceptance delta
 
-哪些 acceptance 从 uncovered 变成 covered/partially covered，哪些仍 uncovered。
+哪些 Testable acceptance criteria 从 uncovered 变成 covered/partially covered，哪些仍 uncovered。
 
 ### Risks introduced
 

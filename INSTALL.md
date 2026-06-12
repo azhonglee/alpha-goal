@@ -123,7 +123,7 @@ Expected behavior:
 
 - It should avoid mutation.
 - It should run discovery before asking.
-- It should produce a Goal Contract with `Spec`.
+- It should produce a Goal Contract with Desired Outcome, In-Scope, Non-goals, Decision Boundaries, and Testable acceptance criteria.
 - It should record candidate repos and existing work if likely.
 
 ```text
@@ -143,7 +143,7 @@ $goal-verify 检查当前 diff、测试和声明边界，判断是否可以最�
 Expected behavior:
 
 - It should map acceptance items to fresh evidence.
-- It should review Spec and claim boundary.
+- It should review contract acceptance and claim boundary.
 - It should produce a Verification Verdict with Judgment.
 - It should route to final, next iteration, reframe, or blocked.
 

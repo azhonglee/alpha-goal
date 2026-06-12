@@ -1,11 +1,11 @@
 ---
 name: goal-iterate
-description: Run one bounded goal iteration under an existing Goal Contract: dynamic planning, execution, and feedback. Use when explicitly named or selected by alpha-goal after its contract verification returns CONTRACT_READY for implementation, debugging, hardening, evidence collection, or feedback handling.
+description: Run one bounded goal iteration under an existing user-reviewed Goal Contract: dynamic planning, execution, and feedback. Use when explicitly named or selected after alpha-goal produces a reviewed contract for implementation, debugging, hardening, evidence collection, or feedback handling.
 ---
 
 # Goal Iterate
 
-Advance one bounded iteration under an existing Goal Contract. Do not redefine the goal. If new evidence breaks the contract, target, spec, or claim boundary, stop and return `REFRAME_NEEDED`.
+Advance one bounded iteration under an existing Goal Contract. Do not redefine the goal. If new evidence breaks the contract, target/scope boundary, acceptance, or claim boundary, stop and return `REFRAME_NEEDED`.
 
 Each iteration has three phases:
 
@@ -17,12 +17,14 @@ Each iteration has three phases:
 
 Before mutation, all of these must be true:
 
-- Goal Contract exists with `Alpha verdict: CONTRACT_READY`;
-- `Goal type`, `Target`, `Spec.Acceptance`, and `Spec.Claim boundary` are clear;
+- Goal Contract exists and has passed the user's review or explicit user-approved handoff from `alpha-goal`;
+- Goal type has been selected from the reviewed contract: `EXPLORE`, `DESIGN`, `IMPLEMENT`, `DEBUG`, `VERIFY`, or `RECOVER`;
+- Desired Outcome, In-Scope, Out-of-Scope / Non-goals, Decision Boundaries, Constraints, and Testable acceptance criteria are clear;
+- target/scope boundary and claim boundary are clear enough to decide changed files and final claim wording;
 - applicable local rules have been read;
 - mutation preflight is recorded;
 - isolated edit path is known, or its creation is the first setup mutation;
-- risk tier and evidence floor are known;
+- risk tier and evidence floor are chosen during dynamic planning before mutation;
 - repo, worktree, submodule, and ownership boundaries are understood;
 - `.worktrees/`, `.alpha-goal/`, or alternative paths are gitignored or explicitly approved;
 - active durable spec/plan, if any, has been read.
