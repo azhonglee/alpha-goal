@@ -53,7 +53,7 @@ root-cause claim 要记录 symptom、first divergence point、narrowed component
 
 ## Risk/evidence review
 
-记录 risk tier、expected evidence floor、loop type/mode fit、Debug Receipt status、root-cause validation、feedback handling、project rules、final-state freshness。
+记录 risk tier、expected evidence floor、goal type/mode fit、Debug Receipt status、root-cause validation、feedback handling、project rules、final-state freshness。
 
 ## Fresh checks run
 
@@ -77,7 +77,7 @@ root-cause claim 要记录 symptom、first divergence point、narrowed component
 
 ## Required next step
 
-`final`、`goal-iterate`、`goal-frame`、`goal-review` 或具体 blocker。
+`final`、`goal-iterate`、`goal-loop` frame phase、`goal-review` 或具体 blocker。
 
 ## Final claim allowed
 

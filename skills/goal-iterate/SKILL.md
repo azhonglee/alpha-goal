@@ -1,6 +1,6 @@
 ---
 name: goal-iterate
-description: Run one bounded goal iteration under an existing Goal Contract: dynamic planning, execution, and feedback. Use when explicitly named or selected by goal-loop after goal-frame is READY_FOR_ITERATION for implementation, debugging, hardening, evidence collection, or feedback handling.
+description: Run one bounded goal iteration under an existing Goal Contract: dynamic planning, execution, and feedback. Use when explicitly named or selected by goal-loop after its frame phase returns READY_FOR_ITERATION for implementation, debugging, hardening, evidence collection, or feedback handling.
 ---
 
 # Goal Iterate
@@ -18,7 +18,7 @@ Each iteration has three phases:
 Before mutation, all of these must be true:
 
 - Goal Contract exists with `Frame verdict: READY_FOR_ITERATION`;
-- `Loop type`, `Target`, `Spec.Acceptance`, and `Spec.Claim boundary` are clear;
+- `Goal type`, `Target`, `Spec.Acceptance`, and `Spec.Claim boundary` are clear;
 - applicable local rules have been read;
 - mutation preflight is recorded;
 - isolated edit path is known, or its creation is the first setup mutation;
@@ -45,7 +45,7 @@ Mutation Preflight:
 - nested repos/submodules:
 - active spec:
 - active plan:
-- loop type:
+- goal type:
 - risk tier:
 - evidence floor:
 - baseline health:
@@ -64,13 +64,14 @@ Load references only as needed:
 - `references/plan-template.md`: durable dynamic plan.
 - `references/iteration-record-schema.md`: exact output fields.
 
-## Loop type to mode
+## Goal type to mode
 
-- `NEW_GOAL`: usually `implementation` or `tdd`; start with the smallest acceptance slice.
-- `DEBUG_GOAL`: start with `debug`; do not claim repair before `ROOT_CAUSE_CONFIRMED`.
-- `CONTINUE_GOAL`: use `implementation`, `hardening`, `refactor`, or `discovery` based on feedback.
-- `READ_ONLY_DISCOVERY`: use only `discovery` or `spike`; do not mutate; return bounded findings.
-- `VERIFY_CLAIM` evidence gaps: use `hardening` with evidence type `evidence_audit` or `gate_evidence`.
+- `EXPLORE`: use `discovery` or `spike`; do not mutate unless the contract explicitly requires a process artifact.
+- `DESIGN`: use `discovery`, `spike`, or `hardening` for evidence; use `implementation` only to write an approved design artifact.
+- `IMPLEMENT`: use `implementation`, `tdd`, `refactor`, or `hardening`; start with the smallest acceptance slice.
+- `DEBUG`: start with `debug`; do not claim repair before `ROOT_CAUSE_CONFIRMED`.
+- `VERIFY`: use `hardening` with evidence type `evidence_audit` or `gate_evidence` when verify returns evidence gaps.
+- `RECOVER`: choose the mode implied by recovered contract state.
 
 Allowed loop modes:
 
@@ -129,8 +130,8 @@ Feedback covers:
 Decisions:
 
 - `continue`: current route works; run another iteration.
-- `pivot`: evidence breaks the route; reframe or change the dynamic plan.
-- `expand`: goal remains valid but scope grew; usually frame or review.
+- `pivot`: evidence breaks the route; return `REFRAME_NEEDED` or change the dynamic plan.
+- `expand`: goal remains valid but scope grew; usually return `REFRAME_NEEDED` or review.
 - `harden`: core behavior is done but evidence or risk is insufficient.
 - `finish`: acceptance appears met; enter verify.
 
@@ -153,7 +154,7 @@ Produce an Iteration Record:
 ```text
 Iteration Record:
 - Contract version:
-- Loop type:
+- Goal type:
 - Active artifacts:
 - Dynamic plan:
 - Loop mode:
@@ -182,4 +183,4 @@ Allowed `Iterate verdict` values:
 - `BLOCKED`
 - `REFRAME_NEEDED`
 
-Do not make final completion claims in an Iteration Record. Completion judgment belongs to `goal-verify`.
+Do not make final completion claims in an Iteration Record. Completion judgment belongs to `goal-verify`. `REFRAME_NEEDED` routes back to `goal-loop` frame phase.

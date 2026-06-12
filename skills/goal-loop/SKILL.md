@@ -1,50 +1,122 @@
 ---
 name: goal-loop
-description: Route non-trivial read-only, coding, debugging, feedback, recovery, and verification work by intent. Use when target/evidence-boundary discovery, mutation, active-goal continuation, feedback handling, completion claims, or recovery is in scope. Do not use for trivial explanations, summaries, ordinary standalone reviews, simple diff reviews, or advisory answers without discovery, mutation, active goal, or completion claim.
+description: Frame and route non-trivial read-only, design, implementation, debugging, feedback, recovery, and verification work. Use when target/evidence-boundary discovery, Socratic clarification, Goal Contract creation, mutation routing, active-goal continuation, completion claims, or recovery is in scope. Do not use for trivial explanations, summaries, ordinary standalone reviews, simple diff reviews, or advisory answers without discovery, mutation, active goal, or completion claim.
 ---
 
-# Goal Loop Router
+# Goal Loop
 
-`goal-loop` only performs light intent routing. Stage skills do the real work.
+`goal-loop` owns triage, frame, Goal Contract creation, and routing. It must not mutate implementation files or make final completion claims.
 
 Default path:
 
 ```text
-INTENT -> FRAME -> ITERATE(dynamic plan -> execution -> feedback) -> VERIFY -> FINAL
-                    ^--------------------------------------------|
+INTENT -> GOAL-LOOP(triage + frame + contract) -> ITERATE(dynamic plan -> execution -> feedback) -> VERIFY -> FINAL
+                                                    ^--------------------------------------------|
 ```
 
 `goal-review` is optional. Load it only when the user names it, repo rules require it, or feedback carries architecture, scope, ownership, complexity, or claim-boundary risk. Ordinary feedback stays in the `goal-iterate` feedback phase.
 
-## Intent routing
+## Triage
 
-Choose one atomic loop type, then choose the entry stage. Loop type names the user's end goal, not the current read/write permission. Do not invent composite loop types.
+Choose one atomic Goal type. Goal type names the user's final outcome, not the current stage, permission level, or execution mode. Do not invent composite goal types.
 
-- `NEW_GOAL`: new work, unclear target, possible implementation, or acceptance/boundary framing. Entry: `goal-frame`.
-- `DEBUG_GOAL`: bug, failure, root cause, broken behavior, or abnormal signal. Entry: `goal-frame`; later use debug-oriented iteration.
-- `CONTINUE_GOAL`: an existing Goal Contract needs more implementation, evidence, failed-check handling, or user/reviewer feedback. Entry: `goal-iterate`; if the contract is missing, return to `goal-frame`.
-- `READ_ONLY_DISCOVERY`: the final user goal is audit, diagnosis, comparison, or directional judgment, and target/rule/existing-work/evidence-boundary discovery is needed. Entry: `goal-frame`; return findings, evidence, recommendations, and residual uncertainty inside the read-only boundary.
-- `VERIFY_CLAIM`: the user asks whether work is done, ready, correct, safe, or shippable, or the final answer would make a completion claim. Entry: `goal-verify`; if contract or evidence boundary is missing, return to `goal-frame`.
-- `RECOVERY`: interrupted context, dirty worktree, existing unfinished changes, or partial stage records. Run recovery, then route to `FRAME`, `ITERATE`, `VERIFY`, `REVIEW`, or `BLOCKED`.
+- `EXPLORE`: understand, audit, compare, map boundaries, diagnose direction, or produce findings without committing to implementation.
+- `DESIGN`: produce a design, spec, architecture choice, tradeoff analysis, or decision rationale.
+- `IMPLEMENT`: create, change, refactor, migrate, configure, document, or otherwise deliver a repository change.
+- `DEBUG`: reproduce, isolate, explain, or fix a failure, bug, incident, or root-cause claim.
+- `VERIFY`: judge whether work is done, ready, correct, safe, shippable, or claim-supported.
+- `RECOVER`: recover from interrupted context, dirty state, existing task branch, partial artifacts, or unfinished changes.
+- `CLARIFY`: temporary type when the final outcome cannot be classified safely.
+
+`CLARIFY` cannot enter execution. The frame phase must resolve it to `EXPLORE`, `DESIGN`, `IMPLEMENT`, `DEBUG`, `VERIFY`, or `RECOVER`, or return `ASK_USER`/`BLOCKED`.
 
 Bypass Goal Loop for trivial explanations, summaries, ordinary standalone review, simple diff review, or advisory answers with no discovery, mutation path, active goal, or completion claim.
 
-## Stage loading
+## Frame Phase
+
+Frame the goal before any implementation mutation. FRAME has two steps:
+
+1. `Discovery`: read-only evidence gathering for target, context, constraints, and existing work.
+2. `Socratic interview`: ask one high-leverage question only when a material decision cannot be safely inferred.
+
+Discovery gathers only evidence needed to decide whether execution is safe: user intent, target repo/path/service/module, candidate exclusions, container/submodule/entity/API/log boundaries, local rules, existing work, scope, non-goals, constraints, isolation requirements, risk tier, evidence plan, claim boundary, and spec need.
+
+For bug/debug/root-cause work, record symptom, expected vs actual behavior, reproduction boundary or blocker, problem-space decomposition, initial competing hypotheses, and evidence needed to distinguish them. For low-risk single-function failures with focused failing-test and direct branch evidence, one sentence may cover these fields.
+
+Ask at most one question per round. Ask only when the answer changes target, ownership, acceptance, non-goals, constraints, destructive/remote/production/credential risk, product-level claim boundary, mutually exclusive implementation direction, or a conflict with repo rules. If a safe inference exists, proceed and record the bounded assumption.
+
+Load references only as needed:
+
+- `references/target-discovery.md`: unclear target, multi-repo, existing-work, container, or entity boundary.
+- `references/clarification-policy.md`: whether to ask, assume, run Socratic interview, or return `ASK_USER`.
+- `references/goal-contract-schema.md`: precise field semantics or higher-risk output boundaries.
+- `references/spec-template.md`: durable spec creation.
+- `references/frame-examples.md`: uncertain routing or output shape.
+- `references/recovery-check.md`: interrupted state, dirty worktree, or partial artifacts.
+
+## Goal Contract
+
+Produce a compact contract:
+
+```text
+Goal Contract:
+- Intent:
+- Goal type:
+- Target:
+- Discovery:
+- Socratic state:
+- Spec:
+- Risk tier:
+- Risks and assumptions:
+- Artifacts:
+- Existing work:
+- Frame verdict:
+- Next:
+```
+
+`Spec` is the requirement carrier. For small tasks, write an inline compact spec:
+
+```text
+Spec:
+- Outcome:
+- Scope:
+- Acceptance:
+- Constraints:
+- Claim boundary:
+- Evidence:
+```
+
+`Scope` includes both in-scope and out-of-scope. `Constraints` includes decision boundaries. `Artifacts` only names loop/process artifacts such as durable specs, plans, reviews, evidence, or scratch files. Do not list product objects, UI sections, database records, or business outputs under `Artifacts`.
+
+Create or update a durable spec only for multi-round clarification, multiple independent phases/modules/repos/ownership boundaries, handoff, long acceptance/constraints, high risk, medium risk with real scope drift, or user request. Default path: `docs/design/YYYYMMDD-<slug>-spec.md`.
+
+Allowed `Frame verdict` values:
+
+- `READY_FOR_ITERATION`
+- `ASK_USER`
+- `READ_ONLY`
+- `DESIGN_ONLY`
+- `COMPARISON_ONLY`
+- `READY_FOR_VERIFY`
+- `BLOCKED`
+
+Return `READY_FOR_ITERATION` only when target boundary is closed, `Spec.Acceptance` is verifiable, `Spec.Claim boundary` is explicit, `Spec.Scope`, `Spec.Constraints`, and `Spec.Evidence` are recorded, risk and assumptions are recorded, Spec content or durable spec path/status/summary is present, container terms are decomposed or risk is explicit, existing-work scan was run when triggered, and no user decision blocks mutation safety.
+
+## Stage Loading
 
 If the user asks to audit, compare, or verify this skillset, SKILL files, references, docs, installer, or validator, treat those files as the target evidence bundle and read all directly relevant files.
 
-`goal-loop` is the only skill that should be implicitly invoked for implementation routing. Before entering a stage, read the sibling stage file:
+`goal-loop` is the only skill that should be implicitly invoked for goal workflows. Before entering a downstream stage, read the sibling stage file:
 
-- FRAME: `../goal-frame/SKILL.md`
 - ITERATE: `../goal-iterate/SKILL.md`
 - VERIFY: `../goal-verify/SKILL.md`
 - REVIEW: `../goal-review/SKILL.md`, only for explicit or risk-triggered review.
 
-If a stage file is missing, report a blocker instead of reconstructing rules from memory.
+If a downstream stage file is missing, report a blocker instead of reconstructing rules from memory.
 
 ## Domain skill coexistence
 
-When a named or repo-required domain skill also applies, use Goal Loop for routing, isolation, mutation safety, evidence, and final claims. Use the domain skill for task-specific design, editing, and validation rules. FRAME records how the domain skill changes acceptance, constraints, non-goals, and evidence. ITERATE applies it inside the closed target boundary. VERIFY treats its validation requirements as evidence requirements.
+When a named or repo-required domain skill also applies, use Goal Loop for triage, frame, routing, isolation, mutation safety, evidence, and final claims. Use the domain skill for task-specific design, editing, and validation rules. FRAME records how the domain skill changes acceptance, constraints, non-goals, and evidence. ITERATE applies it inside the closed target boundary. VERIFY treats its validation requirements as evidence requirements.
 
 ## Global invariants
 
@@ -73,15 +145,19 @@ Prefer repo conventions. If none exist, use:
 
 `<slug>` names the goal boundary. Do not create empty artifact directories.
 
-## Routing rules
+## Route After Frame
 
-Enter `goal-frame` when the request is a new goal, target or acceptance is unclear, mutation may be needed, or Discovery/Socratic interview is required. Also frame when the target may be a page, space, workspace, container, or umbrella concept; when multiple repos/submodules or existing MR/PR/branch/issue/design artifacts may overlap; when VERIFY returns `REFRAME`; or when recovery finds an unreliable contract, target, or evidence boundary.
+- `READ_ONLY`, `DESIGN_ONLY`, and `COMPARISON_ONLY`: answer within the framed boundary; include findings, evidence, recommendations, and residual uncertainty when applicable.
+- `READY_FOR_ITERATION`: enter `goal-iterate`.
+- `READY_FOR_VERIFY`: enter `goal-verify`.
+- `ASK_USER`: ask the single blocking question in `Next`.
+- `BLOCKED`: report the blocker and smallest missing input, permission, data, environment, or tool.
 
-Enter `goal-iterate` when a Goal Contract exists, `Frame verdict: READY_FOR_ITERATION`, target repo/path is closed, mutation or evidence work must continue, loop type is recorded, an isolated edit path can be established, and active specs/plans have been read or are explicitly unnecessary.
+Enter `goal-iterate` only when the Goal Contract exists, target repo/path is closed, mutation or evidence work must continue, Goal type is recorded, isolated edit path can be established, and active specs/plans have been read or are explicitly unnecessary.
 
 Enter `goal-verify` when implementation appears complete, the user asks for done/ready/ship/merge/correct/safe judgment, the final response would claim completion/readiness/correctness/safety, or `goal-iterate` returns `ITERATION_READY_FOR_VERIFY`.
 
-Enter `goal-review` when the user names `$goal-review`, repo rules require independent review, or feedback has architecture, scope, ownership, complexity, or claim-boundary risk.
+Enter `goal-review` only when the user names `$goal-review`, repo rules require independent review, or feedback has architecture, scope, ownership, complexity, or claim-boundary risk.
 
 ## Recovery routing
 
@@ -94,14 +170,15 @@ For interrupted work, inspect:
 
 If the state is unclear, read `references/recovery-check.md`.
 
-## Router output
+## Route output
 
 When routing is not obvious, output:
 
 ```text
 Route:
-- loop type:
-- entry:
+- goal type:
+- frame needed:
+- next entry:
 - reason:
 - blocking missing input:
 - next action:
@@ -113,4 +190,4 @@ Do not emit a route record for trivial read-only answers.
 
 Any completion claim must rest on the latest Verification Verdict.
 
-Non-completion exits do not need a Verification Verdict: `ASK_USER`, `READ_ONLY`, `COMPARISON_ONLY`, and `BLOCKED` may report only boundaries, findings, comparison results, or blockers. They must not claim implementation completion.
+Non-completion exits do not need a Verification Verdict: `ASK_USER`, `READ_ONLY`, `DESIGN_ONLY`, `COMPARISON_ONLY`, and `BLOCKED` may report only boundaries, findings, design decisions, comparison results, or blockers. They must not claim implementation completion.

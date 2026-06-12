@@ -224,6 +224,23 @@ remove_legacy_support_link() {
   fi
 }
 
+remove_obsolete_skill_link() {
+  local skill_name="$1"
+  local target="$target_root/$skill_name"
+
+  if [[ ! -L "$target" ]]; then
+    return
+  fi
+
+  local current_target
+  current_target="$(resolve_link_target "$target")"
+  if [[ "$current_target" == "$source_skill_root/$skill_name" || "$current_target" == "$repo_root/$skill_name" ]]; then
+    rm "$target"
+    legacy_removed_count=$((legacy_removed_count + 1))
+    log "Removed obsolete skill link: $target"
+  fi
+}
+
 preflight_install_targets() {
   for skill_file in "${skill_files[@]}"; do
     local skill_dir
@@ -651,7 +668,7 @@ fi
 
 run_skillset_validation
 
-required_skills=(goal-loop goal-frame goal-iterate goal-review goal-verify)
+required_skills=(goal-loop goal-iterate goal-review goal-verify)
 skill_files=()
 for skill_name in "${required_skills[@]}"; do
   skill_file="$source_skill_root/$skill_name/SKILL.md"
@@ -690,6 +707,10 @@ done
 
 for support_name in adapters tools templates scripts; do
   remove_legacy_support_link "$support_name"
+done
+
+for obsolete_skill in goal-frame; do
+  remove_obsolete_skill_link "$obsolete_skill"
 done
 
 validate_installed_links

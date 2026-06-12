@@ -40,7 +40,7 @@ Target selection 只有在选中目标比替代项证据更强时才算 closed�
 
 记录 related but not equivalent 的术语，例如 UI labels、domain objects、persisted records、jobs、events、operations。优先选择最窄的 evidence-backed submodule，而不是宽泛 container。
 
-若 logs、route names、RPC names 或 payload fields 指向不同 entity，target selection 不闭合。FRAME 产出新 Goal Contract；后续阶段应 `REFRAME_NEEDED`，不要把证据硬塞进旧 target。
+若 logs、route names、RPC names 或 payload fields 指向不同 entity，target selection 不闭合。`goal-loop` frame phase 产出新 Goal Contract；后续阶段应 `REFRAME_NEEDED`，不要把证据硬塞进旧 target。
 
 ## Existing work scan
 

@@ -5,7 +5,7 @@ Goal Contract 是执行边界，不是长设计文档。它必须包含足够的
 ```text
 Goal Contract:
 - Intent:
-- Loop type:
+- Goal type:
 - Target:
 - Discovery:
 - Socratic state:
@@ -24,9 +24,9 @@ Goal Contract:
 
 把用户请求重述为执行目标。
 
-### Loop type
+### Goal type
 
-由 `goal-loop` 识别的一个原子类型：`NEW_GOAL`、`DEBUG_GOAL`、`CONTINUE_GOAL`、`READ_ONLY_DISCOVERY`、`VERIFY_CLAIM`、`RECOVERY`。若直接调用 `goal-frame`，根据用户最终目标补齐。不要写组合类型；“先 frame 不改文件”的实现请求仍是 `NEW_GOAL` 或 `DEBUG_GOAL`，不要把 read-only 当前阶段和 future implementation 目标拼成新标签。
+由 `goal-loop` 识别的一个原子类型：`EXPLORE`、`DESIGN`、`IMPLEMENT`、`DEBUG`、`VERIFY`、`RECOVER`、`CLARIFY`。不要写组合类型；“先 frame 不改文件”的实现请求仍是 `IMPLEMENT` 或 `DEBUG`，不要把 read-only 当前阶段和 future implementation 目标拼成新标签。`CLARIFY` 只是临时分类，不能进入 iterate；frame phase 必须把它收敛到真实目标类型，或返回 `ASK_USER` / `BLOCKED`。
 
 ### Target
 
@@ -84,7 +84,7 @@ Goal Contract:
 ```text
 Goal Contract:
 - Intent: 为产物上传到 TOS 增加可诊断日志。
-- Loop type: NEW_GOAL.
+- Goal type: IMPLEMENT.
 - Target: `anyclaw_agent`; 候选 `anyclaw_agent_runtime` 仅有底层 TOS driver，非编排入口。
 - Discovery: 已读 repo rules；上传编排在 app service；未发现本地重复分支。
 - Socratic state: clear; 日志上下文可按现有风格自主决定。

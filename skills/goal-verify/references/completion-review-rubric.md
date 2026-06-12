@@ -26,7 +26,7 @@
 
 ## Return REFRAME
 
-以下情况回 `goal-frame`：
+以下情况回 `goal-loop` frame phase：
 
 - target、Spec、acceptance、non-goals 或 claim boundary 错误/不完整；
 - existing work 关系改变任务身份；

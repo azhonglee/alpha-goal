@@ -54,7 +54,7 @@ Check:
 - each `Spec.Acceptance` item has fresh, relevant, final-state evidence;
 - inline/durable Spec success criteria are covered inside the claim boundary or explicitly excluded;
 - active plan evidence gates are satisfied, superseded, or blocked;
-- Iteration Record loop type, dynamic plan, execution, feedback, and learning match the final claim;
+- Iteration Record goal type, dynamic plan, execution, feedback, and learning match the final claim;
 - bug/root-cause claims have `ROOT_CAUSE_CONFIRMED`; low-risk local bug fixes without a formal RCA claim may rely on focused failure-path evidence, direct code-branch evidence, and post-fix tests;
 - `NOT_REPRODUCED` or `BLOCKED` Debug Receipt is not treated as repair completion;
 - changed files match target and non-goals;
@@ -137,5 +137,5 @@ Verification Verdict:
 - `PASS_TO_FINAL`: final answer may claim completion inside the verified boundary.
 - `NARROW_CLAIM_AND_FINAL`: final answer must state the narrowed claim and remaining higher-boundary gap.
 - `NEXT_ITERATION`: return to `goal-iterate`; do not claim completion.
-- `REFRAME`: return to `goal-frame`; do not continue mutation.
+- `REFRAME`: return to `goal-loop` frame phase; do not continue mutation.
 - `BLOCKED`: report blocker and the smallest missing input or permission.
