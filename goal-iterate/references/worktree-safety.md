@@ -19,9 +19,10 @@ Start with a read-only preflight in the current checkout:
 git worktree list
 git status --short
 git check-ignore -q .worktrees/codex/<task-slug> || printf 'BLOCKED: .worktrees/ is not ignored here\n'
+git check-ignore -q .goal-loop/preflight-check || printf 'BLOCKED: .goal-loop/ is not ignored here\n'
 ```
 
-If `.worktrees/` is already ignored, it is safe to create the isolated worktree:
+If `.worktrees/` is already ignored, it is safe to create the isolated worktree. In monorepos, run this from the owning subrepo unless project rules define a stricter owner or path:
 
 ```bash
 mkdir -p .worktrees/codex
@@ -35,6 +36,10 @@ If `.worktrees/` is not ignored, do not silently edit `.gitignore` from the pref
 
 If project rules require a different ignored worktree root, use that root instead. If `.gitignore` has unrelated user changes or cannot be safely edited, ask before changing it and record the blocker.
 
+## Lifecycle
+
+Keep the isolated worktree until the PR/MR has merged or the task branch has been locally merged into the target branch. Delete the worktree only after that merge boundary is complete. Do not proactively merge the task branch into `main` or `master` locally.
+
 ## Unsafe pattern
 
 Avoid:
@@ -45,7 +50,7 @@ git checkout -b <branch-name>
 git switch -c <branch-name>
 ```
 
-inside the primary `main`/`master` checkout.
+inside the primary `main`/`master` checkout. Also avoid direct file edits or deletes in that checkout.
 
 ## Existing changes
 

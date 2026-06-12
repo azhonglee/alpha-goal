@@ -57,6 +57,9 @@ When another explicitly named or repository-required skill applies, use Goal Loo
 - Do not execute from a `superseded` artifact. Do not treat `draft` as approved when approval is required.
 - A plan must not redefine Goal Contract or active spec intent, success criteria, non-goals, constraints, or decision boundaries.
 - A bug-fix claim needs debug evidence. `NOT_REPRODUCED` and `BLOCKED` support diagnostic claims only, not repair completion.
+- Repository mutations must use an isolated edit path. Prefer a repository-local worktree under the owning repo or subrepo at `.worktrees/codex/<task-slug>/` unless project rules are stricter or the path is not technically usable.
+- Before using `.worktrees/` or `.goal-loop/`, confirm the path is gitignored or record explicit approval for the alternative. Never edit or delete directly in a primary `main`/`master` checkout.
+- Isolated worktrees are cleanup candidates only after PR/MR merge or local merge. Do not proactively merge an isolated task branch into `main`/`master`.
 
 ## Artifact locations
 

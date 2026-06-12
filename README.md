@@ -85,7 +85,7 @@ templates/
 
 ## 用户配置模板
 
-`templates/AGENTS.md` 和 `templates/config.toml` 继承自原 `main` 分支的安装模型，但现在只在 `--sync-user-templates` 下应用。执行前应确认这些默认值适合当前用户环境。`templates/config.toml` 只补齐协作/多 agent 相关开关，不设置 `sandbox_mode`，也不抑制不稳定特性警告。
+`templates/AGENTS.md` 和 `templates/config.toml` 继承自原 `main` 分支的安装模型，但现在只在 `--sync-user-templates` 下应用。执行前应确认这些默认值适合当前用户环境。`templates/AGENTS.md` 只承载推荐的自主 Agent、HITL 和交互约束，隔离工作流由 Goal Loop skills 承载。`templates/config.toml` 只补齐协作/多 agent 相关开关，不设置 `sandbox_mode`，也不抑制不稳定特性警告。
 
 做本地验证时，建议使用临时 `CODEX_HOME`，避免污染真实配置：
 

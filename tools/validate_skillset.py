@@ -257,18 +257,12 @@ def check_docs(root: Path) -> bool:
 def check_consistency(root: Path) -> bool:
     ok = True
     worktree_safety = root / "goal-iterate" / "references" / "worktree-safety.md"
-    agents_template = root / "templates" / "AGENTS.md"
     goal_loop = root / "goal-loop" / "SKILL.md"
     install_script = root / "scripts" / "install.sh"
 
-    for path in [worktree_safety, agents_template]:
+    for path in [worktree_safety, goal_loop]:
         if path.exists() and WORKTREE_CANONICAL not in path.read_text(encoding="utf-8"):
             ok = fail(f"{path}: missing canonical worktree path {WORKTREE_CANONICAL}")
-
-    if agents_template.exists():
-        text = agents_template.read_text(encoding="utf-8")
-        if ".goal-loop/" not in text:
-            ok = fail(f"{agents_template}: missing .goal-loop/ ignore guidance")
 
     if goal_loop.exists():
         text = goal_loop.read_text(encoding="utf-8")
@@ -278,6 +272,13 @@ def check_consistency(root: Path) -> bool:
             ok = fail("goal-loop/SKILL.md: missing read-only trigger exclusion")
         if "findings, evidence, recommendations, and residual uncertainty" not in text:
             ok = fail("goal-loop/SKILL.md: missing read-only audit completion guidance")
+        if ".goal-loop/" not in text:
+            ok = fail("goal-loop/SKILL.md: missing .goal-loop/ ignore guidance")
+
+    if worktree_safety.exists():
+        text = worktree_safety.read_text(encoding="utf-8")
+        if ".goal-loop/" not in text:
+            ok = fail("goal-iterate/references/worktree-safety.md: missing .goal-loop/ ignore guidance")
 
     if install_script.exists():
         text = install_script.read_text(encoding="utf-8")
