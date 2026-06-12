@@ -45,7 +45,7 @@ Minimal evidence bundle for a positive readiness verdict:
 - fresh repo state after the last material change;
 - exact test/check commands and outcomes, or documented blockers;
 - acceptance-to-evidence mapping;
-- Debug Receipt for bug-fix claims;
+- Debug Receipt for bug-fix or root-cause claims;
 - current Review Record when review was triggered.
 
 If a required Review Record is missing, do not produce a positive completion verdict. Route to `goal-review` first. If VERIFY was explicitly invoked and cannot route, return `BLOCKED` with `Required next step: goal-review`.
@@ -63,12 +63,12 @@ Check:
 - any active plan verification route and evidence gate is satisfied, superseded with reason, or explicitly blocked;
 - loop mode, hypothesis, evidence type, learning, and decision are consistent with the final claim;
 - any required Review Record covers the latest material change boundary;
-- bug-fix claims have `ROOT_CAUSE_CONFIRMED`, and fresh final evidence proves the fix boundary;
+- bug-fix and root-cause claims have `ROOT_CAUSE_CONFIRMED`; evidence validates the root-cause statement by explaining the symptom, identifying the first divergence, aligning affected entities/interfaces/logs when available, excluding or bounding competing hypotheses, and proving the claimed boundary;
 - `NOT_REPRODUCED` or `BLOCKED` Debug Receipts are not treated as repair completion;
 - risk-tier evidence requirements are met or explicitly blocked;
-- evidence is at the right boundary for the user's wording;
+- evidence is at the right boundary for the user's wording, including diagnosis-only claims such as root cause narrowed to a component but not yet fixed internally;
 - changed files match intended target and non-goals;
-- tests/checks are appropriate for the touched code;
+- tests/checks are appropriate for the touched code and, for bug fixes, exercise the confirmed failure path rather than only a neighboring helper or mocked path;
 - verification runs against the target final state and does not depend on paths or artifacts that will be removed, self-matching greps, pre-change layout checks, or mock-only checks that miss the claim;
 - failure output is understood, not hand-waved;
 - review feedback has been classified and accepted items were verified;
@@ -84,7 +84,7 @@ Use references only when their detail is needed:
 
 ## Evidence matrix
 
-Map acceptance to evidence explicitly. If a current spec exists, use it to expand or clarify acceptance without letting it override the Goal Contract's decision boundaries:
+Map acceptance to evidence explicitly. If the claim is diagnostic or root-cause oriented, include the symptom, observed chain, narrowed component, excluded alternatives, and remaining uncertainty inside the relevant evidence rows. If a current spec exists, use it to expand or clarify acceptance without letting it override the Goal Contract's decision boundaries:
 
 ```text
 Acceptance evidence matrix:
@@ -116,7 +116,7 @@ Claim boundary:
 - Final claim allowed:
 ```
 
-If the user phrase is product-level but evidence is only local helper/reducer-level, do not return `PASS_TO_FINAL`.
+If the user phrase is product-level but evidence is only local helper/reducer-level, or if the claim says `root cause` while evidence only shows correlation without call-chain closure and alternative exclusion, do not return `PASS_TO_FINAL`.
 
 Choose either:
 

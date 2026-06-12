@@ -40,7 +40,7 @@ One of `discovery`, `debug`, `tdd`, `implementation`, `refactor`, `spike`, or `h
 
 ### Hypothesis
 
-The specific claim being tested by this iteration.
+The specific claim being tested by this iteration. In `debug` mode, use a compact competing-hypothesis set when multiple modules/entities/source APIs could explain the symptom; include the next discriminator or why alternatives are excluded.
 
 ### Evidence type
 
@@ -48,7 +48,7 @@ One of `gate_evidence`, `advisory_audit`, `exploration_only`, `delta_review`, or
 
 ### Debug receipt
 
-Use `none` unless `Loop mode` is `debug`. For debug, include status `ROOT_CAUSE_CONFIRMED`, `NOT_REPRODUCED`, or `BLOCKED` with symptom, reproduction, probe, evidence, root cause when known, and decision.
+Use `none` unless `Loop mode` is `debug`. For debug, include status `ROOT_CAUSE_CONFIRMED`, `NOT_REPRODUCED`, or `BLOCKED` with symptom, reproduction or blocker, problem-space decomposition, competing hypotheses or reason omitted, probes, evidence, entity/interface/log alignment when available, root-cause statement, validation, fix surface, and decision.
 
 ### Iteration goal
 

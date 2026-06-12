@@ -7,7 +7,7 @@ For bug fixes, prefer a `debug` iteration until `ROOT_CAUSE_CONFIRMED`. If the c
 ## Modes
 
 - `discovery`: inspect repo, rules, current behavior, logs, ownership, or existing work.
-- `debug`: reproduce, isolate, and explain a failure before fixing.
+- `debug`: reproduce, isolate, and explain a failure before fixing; keep competing hypotheses when the symptom could belong to different submodules, entities, or source APIs.
 - `tdd`: create or adjust a failing test before implementation, or state why a substitute contract check is needed.
 - `implementation`: make the smallest acceptance-relevant change.
 - `refactor`: simplify structure while preserving behavior with evidence.
@@ -34,23 +34,30 @@ Close every iteration with exactly one decision:
 
 ## Debug Receipt
 
-Use this receipt only for `debug` mode:
+Use this receipt only for `debug` mode. Keep it compact but falsifiable. For entity or module ambiguity, keep competing hypotheses with evidence for, evidence against, discriminator, and status; do not collapse to one hypothesis until evidence explains why alternatives are weaker or out of scope.
+
+Use `ROOT_CAUSE_CONFIRMED` only when the receipt identifies the first divergence point, affected entity/state, relevant interface or log boundary when available, excluded material alternatives, and smallest credible fix surface. If logs or APIs point to a different submodule than the Goal Contract target, return `REFRAME_NEEDED` instead of forcing the evidence into the old target.
+
 
 ```text
 Debug Receipt:
 - Symptom:
 - Reproduction:
-- Hypothesis:
+- Problem-space decomposition:
+- Competing hypotheses:
 - Probe:
 - Evidence:
-- Root cause:
+- Entity/interface/log alignment:
+- Root cause statement:
+- Root cause validation:
+- Fix surface:
 - Status: ROOT_CAUSE_CONFIRMED | NOT_REPRODUCED | BLOCKED
 - Decision:
 ```
 
 Status rules:
 
-- `ROOT_CAUSE_CONFIRMED`: evidence identifies the first divergence point and smallest credible fix surface.
+- `ROOT_CAUSE_CONFIRMED`: evidence identifies the first divergence point, links it to the affected entity/state and interface boundary, explains relevant log/trace/runtime observations when available, excludes or bounds material alternative hypotheses, and supports the smallest credible fix surface.
 - `NOT_REPRODUCED`: reproduction was attempted but not observed; do not claim fixed.
 - `BLOCKED`: missing logs, commands, files, environment, or scope prevents diagnosis.
 

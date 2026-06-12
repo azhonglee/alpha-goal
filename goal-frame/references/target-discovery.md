@@ -29,6 +29,21 @@ Minimum read-only checks:
 
 If the user describes a multi-repo workspace but cwd is not enough to find candidates, return `ASK_USER` with the missing workspace or repo path. Return `BLOCKED` only when the needed data, permission, or tooling is unavailable after the target source is known.
 
+
+## Domain boundary gate
+
+Use this gate when the user names a page, product area, workspace, canvas, "space", or other umbrella term that may contain multiple lists, panels, automations, artifacts, or configuration surfaces.
+
+Before selecting the implementation or diagnostic target:
+
+- separate the user-facing container from the specific submodule under discussion;
+- map the submodule to its data entity, API/RPC, logs, and code symbols when evidence is available;
+- record terms that are related but not equivalent, such as artifact vs trigger vs task;
+- prefer the narrowest evidence-backed submodule over the broad container;
+- return `ASK_USER` only when the submodule choice changes scope and cannot be discovered safely.
+
+If evidence such as logs, route names, RPC names, or payload fields points to a different entity than the current target, target selection is not closed. In FRAME, produce a Goal Contract that names the narrower entity and records the earlier term as a container, not as the data model; in later stages, route back to FRAME instead of forcing evidence into the old target.
+
 ## Existing work scan
 
 Always do the cheapest local scan needed to avoid duplicate or wrong-target work. Escalate to broader branch, MR/PR, issue, or collaboration-tool scans only when:

@@ -32,7 +32,12 @@ Return `NEXT_ITERATION`, `REFRAME`, or `NARROW_CLAIM_AND_FINAL` when:
 - a failed check is dismissed without diagnosis;
 - no fresh check was run after the last edit;
 - review depends on stale or pre-existing evidence;
-- no current Review Record exists after review feedback, scope expansion, complexity, ownership, or uncertainty.
+- no current Review Record exists after review feedback, scope expansion, complexity, ownership, or uncertainty;
+- a bug-fix claim says `ROOT_CAUSE_CONFIRMED` but only shows a plausible code location, not first-divergence evidence;
+- no competing hypothesis was considered or bounded for a non-trivial failure;
+- logs or traces point to a different entity/interface than the patched path;
+- final tests prove the changed helper but not the confirmed failure path;
+- root-cause wording is broader than evidence, such as claiming a product lifecycle cause from one unit-level observation.
 
 ## Final answer shape
 
