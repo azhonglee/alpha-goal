@@ -1,6 +1,6 @@
 interface:
   display_name: "Goal Iterate"
-  short_description: "Plan execute feedback loop"
+  short_description: "Plan, execute, and learn safely"
   default_prompt: "Use $goal-iterate to run one dynamic planning, execution, and feedback loop under the current Goal Contract."
 
 policy:

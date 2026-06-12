@@ -1,6 +1,6 @@
 interface:
   display_name: "Goal Loop"
-  short_description: "Route goal loops by intent"
+  short_description: "Route goal work by intent"
   default_prompt: "Use $goal-loop to identify the loop type, choose frame/iterate/verify, and keep evidence-bound claims honest."
 
 policy:

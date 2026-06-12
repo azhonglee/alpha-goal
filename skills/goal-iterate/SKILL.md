@@ -1,6 +1,6 @@
 ---
 name: goal-iterate
-description: Stage skill for the goal-loop package. 在已有 Goal Contract 下执行一轮 bounded loop：dynamic planning、execution、feedback，并按 loop type 选择 debug、implementation、read-only discovery、hardening 或 feedback handling 的证据形状。Use only when explicitly named by the user or selected by goal-loop after goal-frame is READY_FOR_ITERATION.
+description: Run one bounded goal iteration under an existing Goal Contract: dynamic planning, execution, and feedback. Use when explicitly named or selected by goal-loop after goal-frame is READY_FOR_ITERATION for implementation, debugging, hardening, evidence collection, or feedback handling.
 ---
 
 # Goal Iterate
