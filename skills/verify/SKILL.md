@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Judge whether fresh evidence satisfies an active Goal Contract and supports completion, readiness, correctness/safety, MR/PR-ready, or narrowed claims. Use only when explicitly named or selected by alpha-goal or goal-iterate; not for standalone read-only code review or advisory audits without a completion claim.
+description: Judge whether fresh evidence satisfies an active Goal Contract and supports completion, readiness, correctness/safety, MR/PR-ready, or narrowed claims. Use only when explicitly named or selected by alpha-goal or loop; not for standalone read-only code review or advisory audits without a completion claim.
 ---
 
 <Purpose>
@@ -17,7 +17,7 @@ Use this skill when:
 - there is a diff, patch, commit, MR/PR, test result, runtime observation, or Iteration Record to judge;
 - the user asks whether work is done, ready, correct, safe, ready to merge, or ready to ship;
 - the final answer would claim completion, delivery, correctness, safety, MR/PR-readiness, or similar;
-- `goal-iterate` returns `ITERATION_READY_FOR_VERIFY`.
+- `loop` returns `ITERATION_READY_FOR_VERIFY`.
 
 Do not use it for ordinary standalone review, security scan, loophole scan, or advisory audit without an active/recoverable Goal Contract and a completion/readiness/correctness claim.
 
@@ -40,6 +40,7 @@ Load references only as needed:
 - `references/verification-verdict-schema.md`: exact field semantics.
 - `references/completion-review-rubric.md`: readiness-to-merge, readiness-to-ship, or final-delivery judgment.
 - `references/claim-boundary-check.md`: user wording is broader than evidence, or a narrowed claim may be needed.
+- `scripts/evidence-summary.sh`: read-only diff/status evidence.
 
 ## Acceptance and judgment
 
@@ -125,6 +126,6 @@ Produce a Verification Verdict:
 
 - `PASS_TO_FINAL`: final answer may claim completion inside the verified boundary.
 - `NARROW_CLAIM_AND_FINAL`: final answer must state the narrowed claim and remaining higher-boundary gap.
-- `NEXT_ITERATION`: return to `goal-iterate`; do not claim completion.
+- `NEXT_ITERATION`: return to `loop`; do not claim completion.
 - `REFRAME`: return to `alpha-goal`; do not continue mutation.
 - `BLOCKED`: report blocker and the smallest missing input or permission.

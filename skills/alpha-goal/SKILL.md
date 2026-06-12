@@ -1,6 +1,6 @@
 ---
 name: alpha-goal
-description: Clarify ambiguous engineering goals with Socratic interview, ambiguity scoring, pressure tests, and a compact Goal Contract before implementation mutation. Use for broad requests, missing acceptance criteria, target/scope uncertainty, decision-boundary discovery, or handoff to goal-iterate.
+description: Clarify ambiguous engineering goals with Socratic interview, ambiguity scoring, pressure tests, and a compact Goal Contract before implementation mutation. Use for broad requests, missing acceptance criteria, target/scope uncertainty, decision-boundary discovery, or handoff to loop.
 ---
 
 <Purpose>
@@ -16,7 +16,7 @@ Do not edit implementation files, create branches or worktrees, commit, push, op
 - The request is broad, ambiguous, or missing concrete acceptance criteria.
 - The user wants to avoid misaligned implementation from underspecified requirements.
 - Target, scope, non-goals, constraints, or decision boundaries are unclear.
-- A requirements artifact is needed before handing off to `goal-iterate`.
+- A requirements artifact is needed before handing off to `loop`.
 
 </Use_When>
 
@@ -224,7 +224,7 @@ Ask the user to confirm only user-owned decisions. If the user rejects or change
 
 After passing the user's review:
 1. Commit the Goal Contract to the repository.
-2. Enter `goal-iterate` to start iteration.
+2. Enter `loop` to start iteration.
 
 </Process>
 

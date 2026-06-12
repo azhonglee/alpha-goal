@@ -77,7 +77,7 @@ root-cause claim 要记录 symptom、first divergence point、narrowed component
 
 ## Required next step
 
-`final`、`goal-iterate`、`alpha-goal`、`goal-review` 或具体 blocker。
+`final`、`loop`、`alpha-goal` 或具体 blocker。
 
 ## Final claim allowed
 

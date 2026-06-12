@@ -98,7 +98,7 @@ Iteration Record:
 
 ### Review needed
 
-普通反馈写 `no` 并说明已在 feedback phase 处理。复杂架构、scope、ownership、争议反馈或 claim-boundary 风险写 `yes`，进入显式 `goal-review`。
+普通反馈写 `no` 并说明已在 feedback phase 处理。复杂架构、scope、ownership、争议反馈或 claim-boundary 风险写 `yes`，进入独立 review。
 
 ### Iterate verdict
 
@@ -106,4 +106,4 @@ Iteration Record:
 
 ### Next
 
-下一入口：通常是下一轮 `goal-iterate` 或 `goal-verify`；否则写 blocker/reframe/review。
+下一入口：通常是下一轮 `loop` 或 `verify`；否则写 blocker/reframe/review。

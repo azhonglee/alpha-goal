@@ -1,6 +1,6 @@
 # Completion Review Rubric
 
-用于 readiness-to-merge、readiness-to-ship 或 final-delivery 判断。这里的 review 是 verify 内部的验收检查，不等同于 `goal-review` 阶段。
+用于 readiness-to-merge、readiness-to-ship 或 final-delivery 判断。这里的 review 是 verify 内部的验收检查，不等同于独立 review 阶段。
 
 ## Positive verdict floor
 
@@ -17,7 +17,7 @@
 
 ## Return NEXT_ITERATION
 
-以下情况回 `goal-iterate`：
+以下情况回 `loop`：
 
 - acceptance 部分覆盖；
 - 需要补测试、probe、diff cleanup、edge case 或 feedback action；

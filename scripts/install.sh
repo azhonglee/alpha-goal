@@ -668,7 +668,7 @@ fi
 
 run_skillset_validation
 
-required_skills=(alpha-goal goal-iterate goal-review goal-verify)
+required_skills=(alpha-goal loop verify)
 skill_files=()
 for skill_name in "${required_skills[@]}"; do
   skill_file="$source_skill_root/$skill_name/SKILL.md"
@@ -709,7 +709,7 @@ for support_name in adapters tools templates scripts; do
   remove_legacy_support_link "$support_name"
 done
 
-for obsolete_skill in goal-frame goal-loop; do
+for obsolete_skill in goal-frame goal-loop goal-iterate goal-review goal-verify; do
   remove_obsolete_skill_link "$obsolete_skill"
 done
 
