@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate a local Codex goal-loop skillset layout.
+"""Validate a local Codex alpha-goal skillset layout.
 
 This intentionally stays lightweight and dependency-free. It checks skill
 metadata, invocation policy, discoverability of bundled references/scripts,
@@ -15,13 +15,12 @@ import sys
 from pathlib import Path
 import tomllib
 
-REQUIRED_SKILLS = ["goal-loop", "goal-frame", "goal-iterate", "goal-review", "goal-verify"]
+REQUIRED_SKILLS = ["alpha-goal", "loop", "verify"]
+SKILLS_DIR = "skills"
 IMPLICIT_POLICY = {
-    "goal-loop": "true",
-    "goal-frame": "false",
-    "goal-iterate": "false",
-    "goal-review": "false",
-    "goal-verify": "false",
+    "alpha-goal": "true",
+    "loop": "false",
+    "verify": "false",
 }
 ALLOWED_FRONT_MATTER_KEYS = {"name", "description"}
 MIN_SHORT_DESCRIPTION_LEN = 25
@@ -30,6 +29,7 @@ MAX_SKILL_MD_LINES = 240
 FORBIDDEN_CONFIG_KEYS = {"sandbox_mode", "suppress_unstable_features_warning"}
 WORKTREE_CANONICAL = ".worktrees/codex/<task-slug>"
 REQUIRED_OPENAI_INTERFACE_KEYS = {"display_name", "short_description", "default_prompt"}
+CJK_RE = re.compile(r"[\u3400-\u9fff]")
 
 
 def parse_front_matter(text: str) -> dict[str, str]:
@@ -50,9 +50,20 @@ def parse_front_matter(text: str) -> dict[str, str]:
     return data
 
 
+def skill_body(text: str) -> str:
+    end = text.find("\n---", 4)
+    if end == -1:
+        return ""
+    return text[end + 4 :]
+
+
 def fail(message: str) -> bool:
     print(f"FAIL {message}")
     return False
+
+
+def contains_cjk(text: str) -> bool:
+    return bool(CJK_RE.search(text))
 
 
 def parse_openai_yaml_metadata(text: str) -> dict[str, dict[str, str]]:
@@ -103,6 +114,8 @@ def check_openai_yaml(skill: str, openai_yaml: Path) -> bool:
     for key in REQUIRED_OPENAI_INTERFACE_KEYS & set(interface):
         if not interface[key]:
             ok = fail(f"{skill}: interface.{key} must not be empty")
+        elif contains_cjk(interface[key]):
+            ok = fail(f"{skill}: interface.{key} should use concise English: {interface[key]!r}")
 
     short = interface.get("short_description", "")
     if short and not (MIN_SHORT_DESCRIPTION_LEN <= len(short) <= MAX_SHORT_DESCRIPTION_LEN):
@@ -130,14 +143,12 @@ def check_openai_yaml(skill: str, openai_yaml: Path) -> bool:
     return ok
 
 
-def check_goal_loop_description(description: str) -> bool:
+def check_alpha_goal_description(description: str) -> bool:
     ok = True
     lower = description.lower()
-    for phrase in ["non-trivial read-only", "target", "evidence-boundary"]:
+    for phrase in ["socratic", "goal contract", "implementation mutation"]:
         if phrase not in lower:
-            ok = fail(f"goal-loop: description missing read-only discovery trigger phrase {phrase!r}")
-    if "advisory audit" in lower and "when no" not in lower and "unless" not in lower:
-        ok = fail("goal-loop: description appears to exclude advisory audit unconditionally")
+            ok = fail(f"alpha-goal: description missing trigger phrase {phrase!r}")
     return ok
 
 
@@ -174,12 +185,19 @@ def check_skill_references(skill: str, skill_dir: Path, skill_text: str) -> bool
     return ok
 
 
-def check_top_level_skills(root: Path) -> bool:
+def skill_root(root: Path) -> Path:
+    return root / SKILLS_DIR
+
+
+def check_skill_layout(root: Path) -> bool:
     ok = True
-    discovered = sorted(path.parent.name for path in root.glob("*/SKILL.md"))
+    source = skill_root(root)
+    if not source.exists():
+        return fail(f"missing skill source directory {source}")
+    discovered = sorted(path.parent.name for path in source.glob("*/SKILL.md"))
     expected = sorted(REQUIRED_SKILLS)
     if discovered != expected:
-        ok = fail(f"top-level skills mismatch: discovered={discovered}, expected={expected}")
+        ok = fail(f"skills/ layout mismatch: discovered={discovered}, expected={expected}")
     return ok
 
 
@@ -247,12 +265,12 @@ def check_docs(root: Path) -> bool:
                 ok = fail(f"{doc.name}: missing validate_skillset.py smoke test")
             if not ("不能证明" in text and "路由" in text and "验证边界" in text):
                 ok = fail(f"{doc.name}: missing validator evidence-boundary warning")
-            if doc.name == "README.md" and ".goal-loop/" not in text:
-                ok = fail("README.md: missing .goal-loop/ artifact guidance")
+            if doc.name == "README.md" and ".alpha-goal/" not in text:
+                ok = fail("README.md: missing .alpha-goal/ artifact guidance")
         if doc.name == "MANIFEST.md":
             for skill in REQUIRED_SKILLS:
-                if f"`{skill}/`" not in text:
-                    ok = fail(f"MANIFEST.md: missing skill entry for {skill}")
+                if f"`skills/{skill}/`" not in text:
+                    ok = fail(f"MANIFEST.md: missing skill entry for skills/{skill}")
             if "`templates/`" not in text:
                 ok = fail("MANIFEST.md: missing templates entry")
             if "`scripts/`" not in text:
@@ -262,61 +280,58 @@ def check_docs(root: Path) -> bool:
 
 def check_consistency(root: Path) -> bool:
     ok = True
-    worktree_safety = root / "goal-iterate" / "references" / "worktree-safety.md"
-    goal_loop = root / "goal-loop" / "SKILL.md"
-    goal_frame = root / "goal-frame" / "SKILL.md"
-    target_discovery = root / "goal-frame" / "references" / "target-discovery.md"
-    loop_modes = root / "goal-iterate" / "references" / "loop-modes.md"
-    goal_verify = root / "goal-verify" / "SKILL.md"
+    source = skill_root(root)
+    worktree_safety = source / "loop" / "references" / "worktree-safety.md"
+    alpha_goal = source / "alpha-goal" / "SKILL.md"
+    loop_modes = source / "loop" / "references" / "loop-modes.md"
+    verify = source / "verify" / "SKILL.md"
     install_script = root / "scripts" / "install.sh"
 
-    for path in [worktree_safety, goal_loop]:
+    for path in [worktree_safety]:
         if path.exists() and WORKTREE_CANONICAL not in path.read_text(encoding="utf-8"):
             ok = fail(f"{path}: missing canonical worktree path {WORKTREE_CANONICAL}")
 
-    if goal_loop.exists():
-        text = goal_loop.read_text(encoding="utf-8")
-        if "Domain skill coexistence" not in text:
-            ok = fail("goal-loop/SKILL.md: missing domain skill coexistence guidance")
-        if "ordinary standalone review" not in text:
-            ok = fail("goal-loop/SKILL.md: missing read-only trigger exclusion")
-        if "findings, evidence, recommendations, and residual uncertainty" not in text:
-            ok = fail("goal-loop/SKILL.md: missing read-only audit completion guidance")
-        if "`Artifacts` means loop-owned process artifacts" not in text:
-            ok = fail("goal-loop/SKILL.md: missing process-vs-domain artifact disambiguation")
-        if "root-cause claim needs debug evidence" not in text:
-            ok = fail("goal-loop/SKILL.md: missing root-cause debug evidence invariant")
-        if ".goal-loop/" not in text:
-            ok = fail("goal-loop/SKILL.md: missing .goal-loop/ ignore guidance")
-
-    if goal_frame.exists():
-        text = goal_frame.read_text(encoding="utf-8")
-        if "low-risk single-function failures" not in text:
-            ok = fail("goal-frame/SKILL.md: missing compact low-risk debug framing guidance")
-
-    if target_discovery.exists():
-        text = target_discovery.read_text(encoding="utf-8")
-        if "Domain boundary gate" not in text:
-            ok = fail("goal-frame/references/target-discovery.md: missing domain boundary gate")
-        if "related but not equivalent" not in text or "UI labels" not in text:
-            ok = fail("goal-frame/references/target-discovery.md: missing general domain-term disambiguation guidance")
+    if alpha_goal.exists():
+        text = alpha_goal.read_text(encoding="utf-8")
+        for phrase in [
+            "Artifact safety gate",
+            "not mandatory headings",
+            "equivalent wording",
+            "Enter `loop`",
+            "</Process>",
+            ".alpha-goal/",
+            "docs/design/YYYYMMDD-<slug>.md",
+        ]:
+            if phrase not in text:
+                ok = fail(f"skills/alpha-goal/SKILL.md: missing alpha-goal guidance {phrase!r}")
+        lower_text = text.lower()
+        semantic_groups = {
+            "non-goal semantics": ["non-goals", "out-of-scope", "excluded scope"],
+            "decision-boundary semantics": ["decision boundaries", "what you may decide", "user-owned decisions"],
+            "acceptance semantics": ["acceptance criteria", "success criteria", "acceptance/evidence"],
+            "user-input tooling semantics": ["request_user_input", "structured user-input tooling"],
+            "open-ended question semantics": ["plain assistant messages", "open-ended socratic questions"],
+        }
+        for label, options in semantic_groups.items():
+            if not any(option in lower_text for option in options):
+                ok = fail(f"skills/alpha-goal/SKILL.md: missing {label}")
 
     if loop_modes.exists():
         text = loop_modes.read_text(encoding="utf-8")
         if "one-paragraph receipt is enough" not in text:
-            ok = fail("goal-iterate/references/loop-modes.md: missing compact low-risk Debug Receipt guidance")
-        if "return `REFRAME_NEEDED` instead of forcing the evidence into the old target" not in text:
-            ok = fail("goal-iterate/references/loop-modes.md: missing wrong-target debug reframe guidance")
+            ok = fail("skills/loop/references/loop-modes.md: missing compact low-risk Debug Receipt guidance")
+        if "return to `alpha-goal` instead of forcing the evidence into the old target" not in text:
+            ok = fail("skills/loop/references/loop-modes.md: missing wrong-target debug reframe guidance")
 
-    if goal_verify.exists():
-        text = goal_verify.read_text(encoding="utf-8")
+    if verify.exists():
+        text = verify.read_text(encoding="utf-8")
         if "low-risk local bug fixes without a formal RCA claim" not in text:
-            ok = fail("goal-verify/SKILL.md: missing low-risk local bug verification boundary")
+            ok = fail("skills/verify/SKILL.md: missing low-risk local bug verification boundary")
 
     if worktree_safety.exists():
         text = worktree_safety.read_text(encoding="utf-8")
-        if ".goal-loop/" not in text:
-            ok = fail("goal-iterate/references/worktree-safety.md: missing .goal-loop/ ignore guidance")
+        if ".alpha-goal/" not in text:
+            ok = fail("skills/loop/references/worktree-safety.md: missing .alpha-goal/ ignore guidance")
 
     if install_script.exists():
         text = install_script.read_text(encoding="utf-8")
@@ -345,11 +360,11 @@ def main() -> int:
     ok = True
 
     print(f"Validating skillset root: {root}")
-    ok = check_top_level_skills(root) and ok
+    ok = check_skill_layout(root) and ok
     ok = check_supporting_paths(root) and ok
 
     for skill in REQUIRED_SKILLS:
-        skill_dir = root / skill
+        skill_dir = skill_root(root) / skill
         skill_md = skill_dir / "SKILL.md"
         if not skill_md.exists():
             print(f"FAIL {skill}: missing {skill_md}")
@@ -383,8 +398,15 @@ def main() -> int:
         elif not description:
             print(f"FAIL {skill}: missing description")
             ok = False
+        elif contains_cjk(description):
+            print(f"FAIL {skill}: front matter description should use concise English")
+            ok = False
         else:
             print(f"PASS {skill}: {description[:90]}")
+
+        if contains_cjk(skill_body(skill_text)):
+            print(f"FAIL {skill}: SKILL.md body should use concise English")
+            ok = False
 
         openai_yaml = skill_dir / "agents" / "openai.yaml"
         if not openai_yaml.exists():
@@ -393,8 +415,8 @@ def main() -> int:
             continue
         ok = check_openai_yaml(skill, openai_yaml) and ok
 
-        if skill == "goal-loop" and description:
-            ok = check_goal_loop_description(description) and ok
+        if skill == "alpha-goal" and description:
+            ok = check_alpha_goal_description(description) and ok
 
         ok = check_skill_references(skill, skill_dir, skill_text) and ok
 

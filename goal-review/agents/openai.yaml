@@ -1,7 +1,0 @@
-interface:
-  display_name: "Goal Review"
-  short_description: "Challenge goal-loop progress safely"
-  default_prompt: "Use $goal-review to review the current Goal Contract, iteration, diff, feedback, or completion readiness."
-
-policy:
-  allow_implicit_invocation: false

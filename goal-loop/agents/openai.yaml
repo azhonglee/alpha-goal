@@ -1,7 +1,0 @@
-interface:
-  display_name: "Goal Loop"
-  short_description: "Route coding and evidence work"
-  default_prompt: "Use $goal-loop to frame, route, iterate, review, or verify this coding or evidence-bound task."
-
-policy:
-  allow_implicit_invocation: true

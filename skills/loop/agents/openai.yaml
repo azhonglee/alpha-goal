@@ -1,0 +1,7 @@
+interface:
+  display_name: "Loop"
+  short_description: "Plan, execute, and learn safely"
+  default_prompt: "Use $loop to run one dynamic planning, execution, and feedback loop under the current Goal Contract."
+
+policy:
+  allow_implicit_invocation: false
