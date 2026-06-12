@@ -5,7 +5,7 @@ description:  Run one bounded goal iteration under an existing user-reviewed Goa
 
 <Purpose>
 
-Advance one bounded iteration under an existing Goal Contract. Do not redefine the goal. If new evidence breaks the contract, target/scope boundary, acceptance, or claim boundary, and stop.
+Advance one bounded iteration under an existing Goal Contract. Do not redefine the goal. If new evidence breaks the contract, target/scope boundary, acceptance, or claim boundary, stop and return to `alpha-goal`.
 
 Each iteration has three phases:
 
@@ -60,6 +60,8 @@ Generate Goal Objective -> Dynamic planning -> Execution -> Feedback -> Next ite
 4. Validate the final state before claiming success.
 5. Call `update_goal` with `complete` only when the objective is actually achieved.
 6. Do not create a goal for ordinary task requests that do not explicitly ask for one.
+
+If native mode is not available, use custom mode.
 
 ## Custom mode
 

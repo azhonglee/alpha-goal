@@ -46,7 +46,7 @@ Core policy:
 - Complete at least one pressure pass that revisits an earlier answer.
 - Ask only for user-owned decisions; do not ask the user for discoverable facts.
 - Use plain assistant messages for open-ended Socratic questions.
-- Use `request_user_input` only for 2-3 structured, mutually exclusive choices.
+- Prefer using `request_user_input` for questions.
 - Re-score ambiguity after each answer and show progress.
 - Do not hand off while ambiguity remains above threshold unless the user explicitly accepts the risk.
 - Do not hand off while `Non-goals` or `Decision Boundaries` remain unresolved.
