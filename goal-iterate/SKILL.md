@@ -110,13 +110,13 @@ Close the diagnostic path with a Debug Receipt status before any fix claim:
 - `NOT_REPRODUCED`
 - `BLOCKED`
 
-Only `ROOT_CAUSE_CONFIRMED` authorizes a fix iteration. `NOT_REPRODUCED` and `BLOCKED` may support only a bounded diagnostic or no-fix claim.
+Only `ROOT_CAUSE_CONFIRMED` authorizes a fix action, either as the minimal patch in the same bounded debug iteration or as a separate implementation iteration when the fix surface is broader. `NOT_REPRODUCED` and `BLOCKED` may support only a bounded diagnostic or no-fix claim.
 
 ## Conditional detail gates
 
 Do not load or write extra process artifacts by default. Use the smallest detail surface that keeps the iteration safe:
 
-- Plan escalation: load `references/plan-template.md` only when work crosses multiple implementation loops, modules, repos, submodules, ownership surfaces, dependent workstreams, or needs durable evidence sequencing, route traceability, rollback/compatibility decisions, or a requested handoff/status artifact. Ordinary isolated worktree safety by itself does not require a plan. A plan is Loop-owned and must not redefine the Goal Contract or active spec.
+- Plan escalation: load `references/plan-template.md` only when independent loops, modules, repos, submodules, ownership surfaces, or dependent workstreams require durable sequencing, coordination, later resumption, route traceability, rollback/compatibility decisions, or a requested handoff/status artifact. Ordinary isolated worktree safety or a bounded multi-file patch does not require a plan. A plan is Loop-owned and must not redefine the Goal Contract or active spec.
 - Delegation and ownership: load `references/execution-boundaries.md` when using subagents or when touched paths, generated outputs, nested repos, submodules, or unrelated user changes make ownership non-trivial.
 
 Route to `goal-review` if plan, delegation, ownership, architecture, or scope decisions become material.

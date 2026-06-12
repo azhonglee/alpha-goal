@@ -1,5 +1,4 @@
 [features]
-prevent_idle_sleep = true
 multi_agent = true
 default_mode_request_user_input = true
 child_agents_md = true

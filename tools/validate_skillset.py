@@ -165,6 +165,12 @@ def check_skill_references(skill: str, skill_dir: Path, skill_text: str) -> bool
                 result = subprocess.run(["bash", "-n", str(script)], check=False, capture_output=True, text=True)
                 if result.returncode != 0:
                     ok = fail(f"{skill}: bash -n failed for {script}: {result.stderr.strip()}")
+
+    mentioned_paths = sorted(set(re.findall(r"`((?:references|scripts)/[A-Za-z0-9_.\-/]+)`", skill_text)))
+    for rel in mentioned_paths:
+        target = skill_dir / rel
+        if not target.exists():
+            ok = fail(f"{skill}: SKILL.md mentions missing bundled path: {rel}")
     return ok
 
 
@@ -227,6 +233,8 @@ def check_docs(root: Path) -> bool:
             continue
         text = doc.read_text(encoding="utf-8")
         if doc.name in {"README.md", "INSTALL.md"}:
+            # Documentation coverage checks only. Runtime routing behavior needs
+            # forward tests; do not treat prompt examples as executable proof.
             if "scripts/install.sh" not in text:
                 ok = fail(f"{doc.name}: missing scripts/install.sh install command")
             if "$HOME/.codex/skills" not in text and "${CODEX_HOME:-$HOME/.codex}/skills" not in text:
@@ -237,10 +245,8 @@ def check_docs(root: Path) -> bool:
                 ok = fail(f"{doc.name}: missing --no-sync-user-templates opt-out documentation")
             if "validate_skillset.py" not in text:
                 ok = fail(f"{doc.name}: missing validate_skillset.py smoke test")
-            if "不能证明实际路由" not in text:
+            if not ("不能证明" in text and "路由" in text and "验证边界" in text):
                 ok = fail(f"{doc.name}: missing validator evidence-boundary warning")
-            if doc.name == "INSTALL.md" and "$goal-loop" not in text:
-                ok = fail("INSTALL.md: missing $goal-loop routing smoke prompt")
             if doc.name == "README.md" and ".goal-loop/" not in text:
                 ok = fail("README.md: missing .goal-loop/ artifact guidance")
         if doc.name == "MANIFEST.md":
