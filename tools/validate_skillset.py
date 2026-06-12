@@ -302,6 +302,20 @@ def check_consistency(root: Path) -> bool:
         text = goal_frame.read_text(encoding="utf-8")
         if "low-risk single-function failures" not in text:
             ok = fail("skills/goal-frame/SKILL.md: missing compact low-risk debug framing guidance")
+        if "不要发明组合值" not in text and "不要把阶段状态写进 loop type" not in text:
+            ok = fail("skills/goal-frame/SKILL.md: missing atomic loop type guidance")
+        contract_start = text.find("Goal Contract:\n")
+        contract_end = text.find("```", contract_start + 1) if contract_start != -1 else -1
+        contract_block = text[contract_start:contract_end] if contract_start != -1 and contract_end != -1 else ""
+        for duplicated_field in ["- Acceptance:", "- Non-goals:", "- Constraints:", "- Decision boundaries:", "- Claim boundary:", "- Evidence plan:"]:
+            if duplicated_field in contract_block:
+                ok = fail(
+                    "skills/goal-frame/SKILL.md: Goal Contract should keep requirements inside Spec, "
+                    f"not top-level {duplicated_field}"
+                )
+        for required_spec_field in ["- Outcome:", "- Scope:", "- Acceptance:", "- Constraints:", "- Claim boundary:", "- Evidence:"]:
+            if required_spec_field not in text:
+                ok = fail(f"skills/goal-frame/SKILL.md: missing compact Spec field {required_spec_field}")
 
     if target_discovery.exists():
         text = target_discovery.read_text(encoding="utf-8")

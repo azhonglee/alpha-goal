@@ -31,7 +31,7 @@ Verification Verdict:
 
 ## Acceptance evidence matrix
 
-对 Goal Contract 的每个 acceptance item 写：
+对 Goal Contract 的每个 `Spec.Acceptance` item 写：
 
 - evidence；
 - boundary；

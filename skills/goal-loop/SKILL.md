@@ -18,12 +18,12 @@ INTENT -> FRAME -> ITERATE(dynamic plan -> execution -> feedback) -> VERIFY -> F
 
 ## 意图识别
 
-先判断 loop type，再选择入口：
+先判断 loop type，再选择入口。Loop type 表示用户最终目标，不表示当前阶段是否允许写文件；不要发明组合值。用户要求“先 frame，不要改文件”的实现型需求仍是 `NEW_GOAL` 或 `DEBUG_GOAL`，只是当前入口停在 FRAME。
 
 - `NEW_GOAL`：新需求、目标不清、可能要改代码、需要澄清验收或边界。入口 `goal-frame`。
 - `DEBUG_GOAL`：bug、失败、根因、异常现象。入口 `goal-frame`；后续 `goal-iterate` 使用 debug-oriented loop。
 - `CONTINUE_GOAL`：已有 Goal Contract，需要继续实现、补证据、处理失败检查或用户反馈。入口 `goal-iterate`，缺 contract 时回 `goal-frame`。
-- `READ_ONLY_DISCOVERY`：非平凡只读审计、诊断、比较，需要 target、local-rule、existing-work 或 evidence-boundary discovery。入口 `goal-frame`，然后在只读边界内返回 findings, evidence, recommendations, and residual uncertainty。
+- `READ_ONLY_DISCOVERY`：最终目标就是只读审计、诊断、比较或方向判断，需要 target、local-rule、existing-work 或 evidence-boundary discovery。入口 `goal-frame`，然后在只读边界内返回 findings, evidence, recommendations, and residual uncertainty。
 - `VERIFY_CLAIM`：用户问是否完成、是否 ready、是否可交付，或最终回复将包含完成声明。入口 `goal-verify`；缺 Goal Contract/证据边界时回 `goal-frame`。
 - `RECOVERY`：上下文中断、脏工作区、已有未完成改动或阶段记录。先做 recovery check，再进入 `goal-frame`、`goal-iterate`、`goal-verify` 或 `BLOCKED`。
 

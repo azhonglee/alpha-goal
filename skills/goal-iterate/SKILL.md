@@ -18,7 +18,7 @@ description: Stage skill for the goal-loop package. 在已有 Goal Contract 下�
 mutation 前必须满足：
 
 - Goal Contract 存在，且 `Frame verdict: READY_FOR_ITERATION`；
-- `Loop type`、`Target`、`Spec`、`Acceptance`、`Claim boundary` 清楚；
+- `Loop type`、`Target`、`Spec.Acceptance`、`Spec.Claim boundary` 清楚；
 - applicable local rules 已读取；
 - mutation preflight 已记录；
 - isolated edit path 已知，或可作为第一步 setup mutation 创建；
@@ -70,7 +70,7 @@ Mutation Preflight:
 - `DEBUG_GOAL`：先用 `debug`，未 `ROOT_CAUSE_CONFIRMED` 不做修复声明。
 - `CONTINUE_GOAL`：根据反馈用 `implementation`、`hardening`、`refactor` 或 `discovery`。
 - `READ_ONLY_DISCOVERY`：只用 `discovery` 或 `spike`，不 mutation，产出 bounded findings。
-- `VERIFY_CLAIM` 返回补证据时：用 `hardening` 或 `evidence_audit` 型 loop 补最后缺口。
+- `VERIFY_CLAIM` 返回补证据时：用 `hardening`，并把 `Evidence type` 设为 `evidence_audit` 或 `gate_evidence`。
 
 允许的 loop mode：
 
