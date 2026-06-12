@@ -54,6 +54,13 @@ Generate Goal Objective -> Dynamic planning -> Execution -> Feedback -> Next ite
 ```
 ## Native mode
 
+1. Call `create_goal` with an objective that restates the Goal Contract.
+2. Set `token_budget` only if the user explicitly provides one.
+3. Execute the workflow to completion.
+4. Validate the final state before claiming success.
+5. Call `update_goal` with `complete` only when the objective is actually achieved.
+6. Do not create a goal for ordinary task requests that do not explicitly ask for one.
+
 ## Custom mode
 
 ### Phase 1: Generate Goal Objective
