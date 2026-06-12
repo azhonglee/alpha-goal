@@ -319,7 +319,7 @@ def check_consistency(root: Path) -> bool:
         text = loop_modes.read_text(encoding="utf-8")
         if "one-paragraph receipt is enough" not in text:
             ok = fail("skills/loop/references/loop-modes.md: missing compact low-risk Debug Receipt guidance")
-        if "return `REFRAME_NEEDED` instead of forcing the evidence into the old target" not in text:
+        if "return to `alpha-goal` instead of forcing the evidence into the old target" not in text:
             ok = fail("skills/loop/references/loop-modes.md: missing wrong-target debug reframe guidance")
 
     if verify.exists():

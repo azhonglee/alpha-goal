@@ -14,7 +14,7 @@
 
 ## Evidence types
 
-- `gate_evidence`：可满足 Goal、Spec、plan 或 completion gate。
+- `gate_evidence`：可满足 approved context、contract、plan 或 completion gate。
 - `advisory_audit`：有界 critique/risk scan，不作为 gate。
 - `exploration_only`：发现 map 或 source inventory，不作为 gate。
 - `delta_review`：原边界 gate evidence 仍新鲜时的窄 follow-up。
@@ -36,7 +36,7 @@ debug 先证明，再修复。Keep it compact but falsifiable.
 
 - For low-risk pure-function or single-branch failures with focused failing-test and direct code-divergence evidence, a one-paragraph receipt is enough if it names symptom, failing path, branch divergence, fix surface, and post-fix evidence; mark irrelevant entity/log fields `not applicable`.
 - 对 entity 或 module ambiguity，保留 competing hypotheses，直到证据解释为什么替代项更弱或 out of scope。
-- If logs or APIs point to a different submodule than the Goal Contract target, return `REFRAME_NEEDED` instead of forcing the evidence into the old target.
+- If logs or APIs point to a different submodule than the approved target, return to `alpha-goal` instead of forcing the evidence into the old target.
 
 ```text
 Debug Receipt:
