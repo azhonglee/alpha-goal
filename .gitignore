@@ -3,3 +3,4 @@
 .goal-loop/
 codex/
 __pycache__/
+.vscode/
