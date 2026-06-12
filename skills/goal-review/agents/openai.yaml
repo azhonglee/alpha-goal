@@ -1,0 +1,7 @@
+interface:
+  display_name: "Goal Review"
+  short_description: "Optional independent challenge"
+  default_prompt: "Use $goal-review to independently challenge goal-loop feedback, scope, architecture, diff, or readiness risk."
+
+policy:
+  allow_implicit_invocation: false
