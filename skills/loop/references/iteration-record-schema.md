@@ -98,12 +98,12 @@ Iteration Record:
 
 ### Review needed
 
-普通反馈写 `no` 并说明已在 feedback phase 处理。复杂架构、scope、ownership、争议反馈或 claim-boundary 风险写 `yes`，进入独立 review。
+普通反馈写 `no` 并说明已在 feedback phase 处理。复杂架构、scope、ownership、争议反馈或 claim-boundary 风险写 `yes`，并在 Feedback/Risks 里记录需要的独立审查；不要输出不存在的 review route。
 
 ### Iterate verdict
 
-`ITERATION_READY_FOR_VERIFY`、`ITERATION_CONTINUES`、`ITERATION_READY_FOR_REVIEW`、`BLOCKED`、`REFRAME_NEEDED`。
+`ITERATION_READY_FOR_VERIFY`、`ITERATION_CONTINUES`、`BLOCKED`、`RETURN_TO_ALPHA_GOAL`。
 
 ### Next
 
-下一入口：通常是下一轮 `loop` 或 `verify`；否则写 blocker/reframe/review。
+下一入口：通常是下一轮 `loop`、`verify`、`alpha-goal` 或具体 blocker。

@@ -6,7 +6,7 @@
 
 只把边界清楚、相互独立的工作交给 subagents。
 
-- 提供 task id、scope、working directory、ownership surface、Goal/spec/plan 证据、constraints、expected evidence、return contract。
+- 提供 task id、scope、working directory、ownership surface、approved context/contract/plan 证据、constraints、expected evidence、return contract。
 - 只有 ownership 独立且共享文件/生成物不冲突时并行。
 - 要求 receipt：`DONE`、`DONE_WITH_CONCERNS`、`NEEDS_CONTEXT`、`BLOCKED`。
 - 接受前检查 delegated files、ownership、evidence、concerns。
@@ -23,7 +23,7 @@
 - nested `.git` 或 submodules；
 - 适用 `AGENTS.md`、`AGENTS.override.md`、`CLAUDE.md`、`code_review.md`。
 
-Goal Contract 未明确包含并授权的 repo、worktree、submodule 或 ownership boundary，不得修改。
+Approved context 未明确包含并授权的 repo、worktree、submodule 或 ownership boundary，不得修改。
 
 ## User and unrelated changes
 
