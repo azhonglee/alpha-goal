@@ -23,16 +23,17 @@ Do not use it for ordinary standalone review, security scan, loophole scan, or a
 
 A positive verdict needs at least:
 
-- Goal Contract with target, `Spec.Acceptance`, `Spec.Claim boundary`, and risk tier;
+- user-reviewed Goal Contract with Desired Outcome, In-Scope, Out-of-Scope / Non-goals, Decision Boundaries, Constraints, Testable acceptance criteria, and a derivable claim boundary;
 - current durable spec/plan if the contract or Iteration Record references it;
 - Iteration Record or equivalent diff/evidence bundle;
 - Debug Receipt when loop mode is `debug` or the claim mentions a bug/root cause fix;
+- risk tier and evidence floor from the Iteration Record or dynamic plan;
 - fresh repo status for the final target state;
 - applicable project rules, or an explicit reason they cannot be read;
 - exact test/check/probe commands and outcomes, or an explicit blocker;
 - feedback-phase record for user/reviewer/test feedback.
 
-If Goal Contract, target boundary, `Spec.Acceptance`, or evidence bundle is missing, return `REFRAME`; do not guess.
+If Goal Contract, target/scope boundary, Testable acceptance criteria, claim boundary, or evidence bundle is missing, return `REFRAME`; do not guess.
 
 Use `scripts/evidence-summary.sh` for read-only diff/status evidence.
 
@@ -46,13 +47,13 @@ Load references only as needed:
 
 VERIFY does two things:
 
-1. `Acceptance`: map each Goal Contract and Spec acceptance item to fresh evidence.
+1. `Acceptance`: map each Goal Contract acceptance item to fresh evidence.
 2. `Judgment`: decide whether evidence supports the user's claim, or whether to narrow the claim, iterate, reframe, or block.
 
 Check:
 
-- each `Spec.Acceptance` item has fresh, relevant, final-state evidence;
-- inline/durable Spec success criteria are covered inside the claim boundary or explicitly excluded;
+- each Testable acceptance criterion has fresh, relevant, final-state evidence;
+- contract and durable-spec success criteria are covered inside the claim boundary or explicitly excluded;
 - active plan evidence gates are satisfied, superseded, or blocked;
 - Iteration Record goal type, dynamic plan, execution, feedback, and learning match the final claim;
 - bug/root-cause claims have `ROOT_CAUSE_CONFIRMED`; low-risk local bug fixes without a formal RCA claim may rely on focused failure-path evidence, direct code-branch evidence, and post-fix tests;
@@ -108,7 +109,7 @@ Return one verdict:
 - `PASS_TO_FINAL`: evidence covers acceptance and claim boundary.
 - `NARROW_CLAIM_AND_FINAL`: local target is satisfied, but final claim must be narrower than user wording.
 - `NEXT_ITERATION`: direction is valid, but implementation or evidence is still needed.
-- `REFRAME`: Goal Contract, target, `Spec.Acceptance`, `Spec.Claim boundary`, or existing-work relationship is wrong or incomplete.
+- `REFRAME`: Goal Contract, target/scope boundary, acceptance criteria, claim boundary, or existing-work relationship is wrong or incomplete.
 - `BLOCKED`: environment, data, permission, credential, or user decision is missing.
 
 ## Output
@@ -119,7 +120,7 @@ Produce a Verification Verdict:
 Verification Verdict:
 - Verdict:
 - Acceptance evidence matrix:
-- Spec review:
+- Contract review:
 - Artifact review:
 - Claim boundary:
 - Risk/evidence review:

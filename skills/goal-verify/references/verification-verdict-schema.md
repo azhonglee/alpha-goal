@@ -6,7 +6,7 @@ Verification Verdict 判断证据是否支持 final claim。它不继续实现�
 Verification Verdict:
 - Verdict:
 - Acceptance evidence matrix:
-- Spec review:
+- Contract review:
 - Artifact review:
 - Claim boundary:
 - Risk/evidence review:
@@ -31,7 +31,7 @@ Verification Verdict:
 
 ## Acceptance evidence matrix
 
-对 Goal Contract 的每个 `Spec.Acceptance` item 写：
+对 Goal Contract 的每个 Testable acceptance criterion 写：
 
 - evidence；
 - boundary；
@@ -39,9 +39,9 @@ Verification Verdict:
 
 root-cause claim 要记录 symptom、first divergence point、narrowed component、excluded material alternatives、remaining uncertainty。
 
-## Spec review
+## Contract review
 
-说明 inline/durable Spec 是否 current，success criteria 是否被验证。Spec 为 draft、superseded 或宽于当前证据时，不得过度声明。
+说明 Goal Contract 是否 current，success criteria 是否被验证。若 durable spec 存在且为 draft、superseded 或宽于当前证据，不得过度声明。
 
 ## Artifact review
 

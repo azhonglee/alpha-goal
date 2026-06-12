@@ -125,7 +125,7 @@ $goal-review 独立挑战当前反馈、scope 或 readiness 风险。
 
 优先沿用目标仓库已有约定。没有约定时：
 
-- spec：`docs/design/YYYYMMDD-<slug>-spec.md`
+- goal contract：`docs/design/YYYYMMDD-<slug>.md`
 - plan：`docs/plans/YYYYMMDD-<slug>-plan.md`
 - context snapshot：`.alpha-goal/context/YYYYMMDD-<slug>.md`
 - interview transcript：`.alpha-goal/interviews/YYYYMMDD-<slug>.md`
@@ -139,18 +139,19 @@ $goal-review 独立挑战当前反馈、scope 或 readiness 风险。
 
 阶段输出契约的权威来源在各阶段 `SKILL.md` 和同级 `references/`：
 
-- `alpha-goal`：Goal Contract，包含 Intent、Scope、Non-goals、Decision Boundaries、Constraints、Acceptance、Evidence、artifact status 和下一步判断。
+- `alpha-goal`：Goal Contract，包含 Intent、Desired Outcome、In-Scope、Out-of-Scope / Non-goals、Decision Boundaries、Constraints、Testable acceptance criteria、artifact status 和下一步判断。
 - `goal-iterate`：Iteration Record，包含 Dynamic plan、Execution、Feedback、Local evidence、Acceptance delta 和下一步判断。
-- `goal-verify`：Verification Verdict，包含 Acceptance evidence matrix、Spec review、Claim boundary、Judgment 和 Final claim allowed。
+- `goal-verify`：Verification Verdict，包含 Acceptance evidence matrix、Contract review、Claim boundary、Judgment 和 Final claim allowed。
 - `goal-review`：Review Record，仅用于显式辅助审查。
 
 ## 调优建议
 
 如果输出太长，可以减少解释文字，但保留关键字段：
 
-- `Goal Contract.Spec`
-- `Goal Contract.Spec.Acceptance`
-- `Goal Contract.Spec.Claim boundary`
+- `Goal Contract.Desired Outcome`
+- `Goal Contract.In-Scope`
+- `Goal Contract.Testable acceptance criteria`
+- `Goal Contract.Decision Boundaries`
 - `Iteration Record.Dynamic plan`
 - `Iteration Record.Execution`
 - `Iteration Record.Feedback`
