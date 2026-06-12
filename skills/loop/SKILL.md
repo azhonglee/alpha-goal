@@ -1,6 +1,6 @@
 ---
 name: loop
-description:  Run one bounded goal iteration under an existing user-reviewed Goal Contract: dynamic planning, execution, and feedback.
+description: Run one bounded goal iteration under an existing user-reviewed Goal Contract. Dynamic planning, execution, and feedback.
 ---
 
 <Purpose>
