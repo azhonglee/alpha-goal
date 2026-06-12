@@ -1,6 +1,6 @@
 ---
 name: goal-verify
-description: Judge whether fresh evidence satisfies an active Goal Contract and supports completion, readiness, correctness/safety, MR/PR-ready, or narrowed claims. Use only when explicitly named or selected by goal-loop; not for standalone read-only code review or advisory audits without a completion claim.
+description: Judge whether fresh evidence satisfies an active Goal Contract and supports completion, readiness, correctness/safety, MR/PR-ready, or narrowed claims. Use only when explicitly named or selected by alpha-goal or goal-iterate; not for standalone read-only code review or advisory audits without a completion claim.
 ---
 
 # Goal Verify
@@ -59,7 +59,7 @@ Check:
 - `NOT_REPRODUCED` or `BLOCKED` Debug Receipt is not treated as repair completion;
 - changed files match target and non-goals;
 - mutation evidence comes from an isolated edit path, not a primary `main`/`master` checkout;
-- `.worktrees/` or `.goal-loop/` paths, if used, are gitignored or approved;
+- `.worktrees/` or `.alpha-goal/` paths, if used, are gitignored or approved;
 - tests/checks cover the claimed boundary, not only nearby helpers, mock-only paths, or temporary paths that will be deleted;
 - failing output is understood;
 - user/reviewer/test feedback is handled;
@@ -137,5 +137,5 @@ Verification Verdict:
 - `PASS_TO_FINAL`: final answer may claim completion inside the verified boundary.
 - `NARROW_CLAIM_AND_FINAL`: final answer must state the narrowed claim and remaining higher-boundary gap.
 - `NEXT_ITERATION`: return to `goal-iterate`; do not claim completion.
-- `REFRAME`: return to `goal-loop` frame phase; do not continue mutation.
+- `REFRAME`: return to `alpha-goal`; do not continue mutation.
 - `BLOCKED`: report blocker and the smallest missing input or permission.

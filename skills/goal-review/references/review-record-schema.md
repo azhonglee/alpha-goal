@@ -1,6 +1,6 @@
 # Review Record Schema
 
-Review Record 是可选辅助审查产物，用来挑战 goal-loop workflow 中的方向、反馈、scope 或架构风险。它不做最终完成判断。
+Review Record 是可选辅助审查产物，用来挑战 alpha-goal workflow 中的方向、反馈、scope 或架构风险。它不做最终完成判断。
 
 ```text
 Review Record:
@@ -66,4 +66,4 @@ active spec/plan 是否 current、draft、approved、superseded、over-broad 或
 
 ### Next
 
-`goal-iterate`、`goal-loop` frame phase、`goal-verify` 或 blocker。
+`goal-iterate`、`alpha-goal`、`goal-verify` 或 blocker。

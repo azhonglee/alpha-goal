@@ -1,7 +1,7 @@
 interface:
   display_name: "Alpha Goal"
-  short_description: "Frame and route goal work"
-  default_prompt: "Use $alpha-goal to clarify the Goal Contract, and route iterate work."
+  short_description: "Clarify goal contracts before iteration"
+  default_prompt: "Use $alpha-goal to clarify ambiguous engineering goals and produce a Goal Contract before iteration."
 
 policy:
   allow_implicit_invocation: true

@@ -1,6 +1,6 @@
 ---
 name: goal-iterate
-description: Run one bounded goal iteration under an existing Goal Contract: dynamic planning, execution, and feedback. Use when explicitly named or selected by goal-loop after its frame phase returns READY_FOR_ITERATION for implementation, debugging, hardening, evidence collection, or feedback handling.
+description: Run one bounded goal iteration under an existing Goal Contract: dynamic planning, execution, and feedback. Use when explicitly named or selected by alpha-goal after its contract verification returns CONTRACT_READY for implementation, debugging, hardening, evidence collection, or feedback handling.
 ---
 
 # Goal Iterate
@@ -17,14 +17,14 @@ Each iteration has three phases:
 
 Before mutation, all of these must be true:
 
-- Goal Contract exists with `Frame verdict: READY_FOR_ITERATION`;
+- Goal Contract exists with `Alpha verdict: CONTRACT_READY`;
 - `Goal type`, `Target`, `Spec.Acceptance`, and `Spec.Claim boundary` are clear;
 - applicable local rules have been read;
 - mutation preflight is recorded;
 - isolated edit path is known, or its creation is the first setup mutation;
 - risk tier and evidence floor are known;
 - repo, worktree, submodule, and ownership boundaries are understood;
-- `.worktrees/`, `.goal-loop/`, or alternative paths are gitignored or explicitly approved;
+- `.worktrees/`, `.alpha-goal/`, or alternative paths are gitignored or explicitly approved;
 - active durable spec/plan, if any, has been read.
 
 If any item is missing, do not mutate.
@@ -183,4 +183,4 @@ Allowed `Iterate verdict` values:
 - `BLOCKED`
 - `REFRAME_NEEDED`
 
-Do not make final completion claims in an Iteration Record. Completion judgment belongs to `goal-verify`. `REFRAME_NEEDED` routes back to `goal-loop` frame phase.
+Do not make final completion claims in an Iteration Record. Completion judgment belongs to `goal-verify`. `REFRAME_NEEDED` routes back to `alpha-goal`.
