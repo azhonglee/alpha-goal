@@ -5,33 +5,33 @@ description: Run one bounded goal iteration under an existing Goal Contract: dyn
 
 # Goal Iterate
 
-你的职责是在现有 Goal Contract 下推进一轮有限循环。不要重定义 goal；如果 contract、target、spec 或 claim boundary 被新证据推翻，停止并返回 `REFRAME_NEEDED`。
+Advance one bounded iteration under an existing Goal Contract. Do not redefine the goal. If new evidence breaks the contract, target, spec, or claim boundary, stop and return `REFRAME_NEEDED`.
 
-每轮固定三段：
+Each iteration has three phases:
 
-1. `Dynamic planning`：选择本轮最小切片、证据门槛、隔离路径和 loop mode。
-2. `Execution`：按切片执行 mutation、只读探索、debug probe、测试或补证据。
-3. `Feedback`：解释结果，吸收用户/reviewer/测试反馈，决定继续、pivot、reframe 或 verify。
+1. `Dynamic planning`: choose the smallest slice, evidence floor, isolation path, and loop mode.
+2. `Execution`: run the slice through mutation, read-only exploration, debug probes, tests, or evidence collection.
+3. `Feedback`: interpret results, handle user/reviewer/test feedback, then continue, pivot, reframe, review, or verify.
 
 ## Entry requirements
 
-mutation 前必须满足：
+Before mutation, all of these must be true:
 
-- Goal Contract 存在，且 `Frame verdict: READY_FOR_ITERATION`；
-- `Loop type`、`Target`、`Spec.Acceptance`、`Spec.Claim boundary` 清楚；
-- applicable local rules 已读取；
-- mutation preflight 已记录；
-- isolated edit path 已知，或可作为第一步 setup mutation 创建；
-- risk tier 和 evidence floor 已知；
-- repo、worktree、submodule、ownership boundary 已理解；
-- `.worktrees/`、`.goal-loop/` 或替代路径已 gitignored 或显式批准；
-- active durable spec/plan 如存在已读取。
+- Goal Contract exists with `Frame verdict: READY_FOR_ITERATION`;
+- `Loop type`, `Target`, `Spec.Acceptance`, and `Spec.Claim boundary` are clear;
+- applicable local rules have been read;
+- mutation preflight is recorded;
+- isolated edit path is known, or its creation is the first setup mutation;
+- risk tier and evidence floor are known;
+- repo, worktree, submodule, and ownership boundaries are understood;
+- `.worktrees/`, `.goal-loop/`, or alternative paths are gitignored or explicitly approved;
+- active durable spec/plan, if any, has been read.
 
-缺任一项，不要 mutation。
+If any item is missing, do not mutate.
 
 ## Mutation Preflight Gate
 
-任何会改变文件、分支、worktree、commit、remote、dependency、generated artifact 或 runtime state 的命令前，记录：
+Before any command that changes files, branches, worktrees, commits, remotes, dependencies, generated artifacts, or runtime state, record:
 
 ```text
 Mutation Preflight:
@@ -52,27 +52,27 @@ Mutation Preflight:
 - mutation allowed:
 ```
 
-可用 `scripts/mutation-preflight.sh` 收集只读 git 状态；再补最小 baseline health check。若 baseline 失败，记录命令和 scope 判断，不要把后续失败自动归因于本轮。
+Use `scripts/mutation-preflight.sh` for read-only git state, then add the smallest useful baseline health check. If baseline is already failing, record the command and scope judgment; do not blame later failures on this iteration by default.
 
-若当前在 primary checkout 且没有 isolated edit path，ITERATE 只能在 contract target 闭合、规则允许、worktree root 已忽略或批准时，把创建 `.worktrees/codex/<task-slug>/` 作为第一步 setup mutation。进入隔离 worktree 后，再更新 preflight 才能改实现文件。
+If currently in a primary checkout with no isolated edit path, ITERATE may only create `.worktrees/codex/<task-slug>/` as the first setup mutation when the contract target is closed, rules allow it, and the worktree root is ignored or approved. After entering the isolated worktree, refresh preflight before implementation edits.
 
-按需加载引用：
+Load references only as needed:
 
-- `references/worktree-safety.md`：创建或验证隔离编辑路径。
-- `references/execution-boundaries.md`：subagents、ownership、submodule、generated output 或用户未提交改动相关。
-- `references/loop-modes.md`：按 loop type 选择 mode、debug/TDD/spike/hardening 证据。
-- `references/plan-template.md`：需要 durable dynamic plan。
-- `references/iteration-record-schema.md`：输出字段不清时。
+- `references/worktree-safety.md`: create or verify isolated edit paths.
+- `references/execution-boundaries.md`: subagents, ownership, submodules, generated output, or user-owned changes.
+- `references/loop-modes.md`: select mode and debug/TDD/spike/hardening evidence.
+- `references/plan-template.md`: durable dynamic plan.
+- `references/iteration-record-schema.md`: exact output fields.
 
 ## Loop type to mode
 
-- `NEW_GOAL`：通常用 `implementation` 或 `tdd`；先做最小 acceptance slice。
-- `DEBUG_GOAL`：先用 `debug`，未 `ROOT_CAUSE_CONFIRMED` 不做修复声明。
-- `CONTINUE_GOAL`：根据反馈用 `implementation`、`hardening`、`refactor` 或 `discovery`。
-- `READ_ONLY_DISCOVERY`：只用 `discovery` 或 `spike`，不 mutation，产出 bounded findings。
-- `VERIFY_CLAIM` 返回补证据时：用 `hardening`，并把 `Evidence type` 设为 `evidence_audit` 或 `gate_evidence`。
+- `NEW_GOAL`: usually `implementation` or `tdd`; start with the smallest acceptance slice.
+- `DEBUG_GOAL`: start with `debug`; do not claim repair before `ROOT_CAUSE_CONFIRMED`.
+- `CONTINUE_GOAL`: use `implementation`, `hardening`, `refactor`, or `discovery` based on feedback.
+- `READ_ONLY_DISCOVERY`: use only `discovery` or `spike`; do not mutate; return bounded findings.
+- `VERIFY_CLAIM` evidence gaps: use `hardening` with evidence type `evidence_audit` or `gate_evidence`.
 
-允许的 loop mode：
+Allowed loop modes:
 
 - `discovery`
 - `debug`
@@ -82,73 +82,73 @@ Mutation Preflight:
 - `spike`
 - `hardening`
 
-每轮都记录 hypothesis、evidence type、learning、decision。
+Every iteration records hypothesis, evidence type, learning, and decision.
 
 ## Dynamic planning
 
-动态规划不是 waterfall plan。它只回答本轮：
+Dynamic planning is not a waterfall plan. It answers only this iteration:
 
-- 最小可推进 acceptance 是什么；
-- 需要什么 fresh evidence；
-- 哪些文件/模块/ownership boundary 可碰；
-- 成功、失败、用户反馈分别如何路由；
-- 是否需要 durable plan。
+- smallest acceptance progress;
+- fresh evidence needed;
+- files, modules, and ownership boundaries allowed to change;
+- route for success, failure, and feedback;
+- whether a durable plan is needed.
 
-只有跨多个独立 loop、模块、repo、handoff、恢复、rollback/compatibility 决策或用户要求时，才读取 `references/plan-template.md` 并创建/更新 plan。普通小 patch 不需要 durable plan。
+Create or update a durable plan only for multiple independent loops, modules, repos, handoff, recovery, rollback/compatibility decisions, or user request. For that case, read `references/plan-template.md`. Small patches do not need durable plans.
 
 ## Execution
 
-- 做最小 coherent change；
-- 优先产生证据：测试、断言、lint/typecheck/build、runtime/manual probe、diff review；
-- 保持在 claim boundary 内；
-- 保留无关用户改动；
-- 发现 target/entity/API/log 与 contract 不符时停止并返回 `REFRAME_NEEDED`；
-- debug 不从猜测根因直接 patch；先收集可证伪证据；
-- 三次同一 failure thread 没有新证据时，进入 feedback 判断，必要时用显式 `goal-review`。
+- Make the smallest coherent change.
+- Prefer evidence: tests, assertions, lint/typecheck/build, runtime/manual probes, and diff review.
+- Stay inside the claim boundary.
+- Preserve unrelated user changes.
+- Stop with `REFRAME_NEEDED` if target/entity/API/log evidence contradicts the contract.
+- For debug work, collect falsifiable evidence before patching.
+- If the same failure thread repeats three times without new evidence, enter feedback judgment and consider explicit `goal-review`.
 
-禁用，除非用户明确要求且风险已记录：
+Forbidden unless the user explicitly requests it and risk is recorded:
 
-- 在 primary `main`/`master` checkout 编辑或删文件；
-- 在 primary `main`/`master` checkout 内 `git checkout -b` 或 `git switch -c`；
-- target 未闭合前创建 branch/worktree；
-- 修改未被 Goal Contract 选中的 candidate repo；
-- 未授权跨 repo/worktree/submodule/ownership boundary mutation；
-- unrelated cleanup/refactor；
-- 从 ITERATE 直接声明最终完成。
+- editing or deleting files in a primary `main`/`master` checkout;
+- creating a branch inside a primary `main`/`master` checkout;
+- creating branch/worktree before target closure;
+- mutating a candidate repo not selected by the Goal Contract;
+- crossing repo, worktree, submodule, or ownership boundary without authorization;
+- unrelated cleanup or refactor;
+- final completion claims from ITERATE.
 
 ## Feedback
 
-反馈阶段统一处理：
+Feedback covers:
 
-- test/build/lint/probe 输出；
-- reviewer/user feedback；
-- 新发现的 target、scope、entity、API/log 证据；
-- implementation risk、missing evidence、claim-boundary gap；
-- active spec/plan 是否过时。
+- test, build, lint, and probe output;
+- reviewer or user feedback;
+- new target, scope, entity, API, or log evidence;
+- implementation risk, missing evidence, and claim-boundary gaps;
+- whether active spec/plan is stale.
 
-反馈决策：
+Decisions:
 
-- `continue`：本路线有效，下一轮继续。
-- `pivot`：证据推翻路线，返回 `REFRAME_NEEDED` 或改 dynamic plan。
-- `expand`：goal 仍有效但 scope 扩大；通常需要 frame/review。
-- `harden`：核心行为完成但风险/证据不足。
-- `finish`：acceptance 看似满足，进入 verify。
+- `continue`: current route works; run another iteration.
+- `pivot`: evidence breaks the route; reframe or change the dynamic plan.
+- `expand`: goal remains valid but scope grew; usually frame or review.
+- `harden`: core behavior is done but evidence or risk is insufficient.
+- `finish`: acceptance appears met; enter verify.
 
-当反馈涉及复杂架构、scope、ownership、review 争议或 claim-boundary 风险，可加载 `goal-review` 做独立挑战；否则在 Iteration Record 内完成反馈处理。
+Load `goal-review` only for architecture, scope, ownership, review-dispute, or claim-boundary risk. Otherwise handle feedback inside the Iteration Record.
 
 ## Debug receipt
 
-`debug` mode 必须关闭诊断路径后才能修复声明：
+`debug` mode must close the diagnostic path before any repair claim:
 
 - `ROOT_CAUSE_CONFIRMED`
 - `NOT_REPRODUCED`
 - `BLOCKED`
 
-只有 `ROOT_CAUSE_CONFIRMED` 授权修复 action。低风险纯函数/单分支 bug 可用紧凑 receipt；非平凡 RCA 要包含 problem-space decomposition、competing hypotheses、entity/interface/log alignment、root-cause validation 和最小 fix surface。
+Only `ROOT_CAUSE_CONFIRMED` authorizes a fix action. Low-risk pure-function or single-branch bugs may use a compact receipt. Non-trivial RCA needs problem-space decomposition, competing hypotheses, entity/interface/log alignment, root-cause validation, and minimal fix surface.
 
 ## Output
 
-产出一个 Iteration Record：
+Produce an Iteration Record:
 
 ```text
 Iteration Record:
@@ -182,4 +182,4 @@ Allowed `Iterate verdict` values:
 - `BLOCKED`
 - `REFRAME_NEEDED`
 
-不要在 Iteration Record 中做 final completion claim；完成判断交给 `goal-verify`。
+Do not make final completion claims in an Iteration Record. Completion judgment belongs to `goal-verify`.

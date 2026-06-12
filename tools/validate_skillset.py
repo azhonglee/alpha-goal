@@ -52,6 +52,13 @@ def parse_front_matter(text: str) -> dict[str, str]:
     return data
 
 
+def skill_body(text: str) -> str:
+    end = text.find("\n---", 4)
+    if end == -1:
+        return ""
+    return text[end + 4 :]
+
+
 def fail(message: str) -> bool:
     print(f"FAIL {message}")
     return False
@@ -309,7 +316,7 @@ def check_consistency(root: Path) -> bool:
         text = goal_frame.read_text(encoding="utf-8")
         if "low-risk single-function failures" not in text:
             ok = fail("skills/goal-frame/SKILL.md: missing compact low-risk debug framing guidance")
-        if "不要发明组合值" not in text and "不要把阶段状态写进 loop type" not in text:
+        if "Do not invent composite loop types" not in text or "Do not encode stage state into loop type" not in text:
             ok = fail("skills/goal-frame/SKILL.md: missing atomic loop type guidance")
         contract_start = text.find("Goal Contract:\n")
         contract_end = text.find("```", contract_start + 1) if contract_start != -1 else -1
@@ -418,6 +425,10 @@ def main() -> int:
             ok = False
         else:
             print(f"PASS {skill}: {description[:90]}")
+
+        if contains_cjk(skill_body(skill_text)):
+            print(f"FAIL {skill}: SKILL.md body should use concise English")
+            ok = False
 
         openai_yaml = skill_dir / "agents" / "openai.yaml"
         if not openai_yaml.exists():
