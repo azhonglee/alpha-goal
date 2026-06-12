@@ -17,7 +17,7 @@ Use this skill when:
 - scope expands or implementation becomes complex;
 - review feedback arrives and must be classified before action;
 - user feedback corrects the current framing, classification, target, or root-cause interpretation;
-- direction feels uncertain;
+- current evidence leaves a material route, scope, target, or claim-boundary decision unresolved;
 - debug evidence has multiple plausible root causes, weak reproduction, missing observability alignment, or a broad fix surface;
 - an explicit completion-readiness review is requested or required by the router;
 - `goal-iterate` returned `ITERATION_READY_FOR_REVIEW`;

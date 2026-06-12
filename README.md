@@ -31,7 +31,7 @@ scripts/install.sh
 脚本会执行以下操作：
 
 - 将顶层 `*/SKILL.md` 所在目录软链接到 `${CODEX_HOME:-$HOME/.codex}/skills/`。
-- 默认把 `templates/AGENTS.md` 合并到 Codex home 的 `AGENTS.md`，并把 `templates/config.toml` 中缺失的设置补齐到 Codex home 的 `config.toml`；模板不设置 sandbox 权限或抑制不稳定特性警告，安全边界仍由用户现有配置决定。
+- 默认把 `templates/AGENTS.md` 合并到 Codex home 的 `AGENTS.md`，并把 `templates/config.toml` 中缺失的设置补齐到 Codex home 的 `config.toml`；模板只补齐 multi-agent、child AGENTS 和结构化 `request_user_input` 相关开关，不设置 sandbox 权限、休眠行为或不稳定特性警告抑制项，安全边界仍由用户现有配置决定。
 - 清理旧版本可能留在 `skills/` 下、且指向本仓库的旧支持目录软链接。
 - 校验目标 `skills/` 中的 skill 软链接是否指向当前源码目录。
 - 安装后运行源码中的 `tools/validate_skillset.py` 校验技能包布局。`validate_skillset.py` 只验证布局、元数据、引用可发现性和少量一致性规则；不能证明实际路由、误触发、reference 加载策略或验证边界正确。
@@ -84,7 +84,7 @@ templates/
 
 ## 用户配置模板
 
-`templates/AGENTS.md` 和 `templates/config.toml` 默认同步到 Codex home。执行前应确认这些默认值适合当前用户环境。`templates/AGENTS.md` 只承载推荐的自主 Agent、HITL 和交互约束，隔离工作流由 Goal Loop skills 承载。`templates/config.toml` 只补齐协作/多 agent 相关开关，不设置 `sandbox_mode`，也不抑制不稳定特性警告。
+`templates/AGENTS.md` 和 `templates/config.toml` 默认同步到 Codex home。执行前应确认这些默认值适合当前用户环境。`templates/AGENTS.md` 只承载推荐的自主 Agent、HITL 和交互约束，隔离工作流由 Goal Loop skills 承载。`templates/config.toml` 只补齐 multi-agent、child AGENTS 和结构化 `request_user_input` 相关开关，不设置 `sandbox_mode`、休眠行为或不稳定特性警告抑制项。
 
 做本地验证时，建议使用临时 `CODEX_HOME`，避免污染真实配置：
 
@@ -147,91 +147,12 @@ $goal-verify 检查当前 diff 和测试证据，判断能否最终交付。
 
 ## 阶段输出
 
-### Goal Contract
+阶段输出契约的权威来源在各阶段 `SKILL.md` 和同级 `references/` 中，README 只说明用途，避免字段清单漂移：
 
-由 `goal-frame` 产出，用来固定目标、范围和验收边界。
-
-```text
-Goal Contract:
-- Intent:
-- Target:
-- Acceptance:
-- Non-goals:
-- Constraints:
-- Decision boundaries:
-- Assumptions and risks:
-- Risk tier:
-- Claim boundary:
-- Evidence plan:
-- Artifacts:
-- Existing work:
-- Frame verdict:
-- Next:
-```
-
-### Iteration Record
-
-由 `goal-iterate` 产出，用来记录一轮有限实现的目标、动作、证据和下一步判断。
-
-```text
-Iteration Record:
-- Contract version:
-- Active artifacts:
-- Loop mode:
-- Hypothesis:
-- Evidence type:
-- Debug receipt:
-- Iteration goal:
-- Mutation preflight:
-- Action:
-- Changed files:
-- Local evidence:
-- Learning:
-- Decision:
-- Acceptance delta:
-- Risks introduced:
-- Review needed:
-- Iterate verdict:
-- Next:
-```
-
-### Review Record
-
-由 `goal-review` 产出，用来检查方向是否正确、反馈是否处理、范围和架构是否合理，以及是否还缺关键证据。
-
-```text
-Review Record:
-- Mode:
-- Target:
-- Evidence basis:
-- Freshness boundary:
-- Findings:
-- Feedback classification:
-- Artifact review:
-- Scope/architecture notes:
-- Risk tier:
-- Required evidence:
-- Review verdict:
-- Next:
-```
-
-### Verification Verdict
-
-由 `goal-verify` 产出，用来判断当前证据是否足以支持最终交付声明。
-
-```text
-Verification Verdict:
-- Verdict:
-- Acceptance evidence matrix:
-- Artifact review:
-- Claim boundary:
-- Risk/evidence review:
-- Fresh checks run:
-- Diff/scope review:
-- Unresolved gaps:
-- Required next step:
-- Final claim allowed:
-```
+- `goal-frame` 产出 Goal Contract，固定目标、范围、验收和声明边界。
+- `goal-iterate` 产出 Iteration Record，记录一轮有限实现的动作、证据和下一步判断。
+- `goal-review` 产出 Review Record，挑战方向、反馈、范围、架构、产物状态和证据缺口。
+- `goal-verify` 产出 Verification Verdict，判断当前证据是否足以支持最终交付声明。
 
 ## 调优建议
 

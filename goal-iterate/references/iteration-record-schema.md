@@ -88,7 +88,7 @@ New risk from the patch: behavior changes, compatibility issues, test gaps, conc
 
 ### Review needed
 
-State `yes` when complexity, scope expansion, feedback, architecture, ownership, or evidence uncertainty should route to `goal-review` before verification. Otherwise state `no` with a short reason.
+State `yes` when complexity, scope expansion, feedback, architecture, ownership, or material evidence uncertainty changes the route or claim boundary enough to require `goal-review` before verification. Otherwise state `no` with a short reason.
 
 ### Iterate verdict
 

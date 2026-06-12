@@ -65,7 +65,7 @@ Do not create a spec by default. Small, local, low-risk work only needs a Goal C
 Create or update a spec from `references/spec-template.md` when any condition holds. Ordinary use of Goal Loop stages or an isolated worktree does not by itself require a spec:
 
 - requirements were clarified across turns and may be lost in chat;
-- requirements span multiple independent implementation phases, modules, repos, ownership boundaries, or handoff contexts;
+- requirements span multiple independent implementation phases, modules, repos, ownership boundaries, or handoff contexts, and their acceptance or evidence would be easy to mix together in a compact Goal Contract;
 - handoff, stakeholder review, PR/MR discussion, or later resumption is expected;
 - acceptance, non-goals, constraints, or decision boundaries are too detailed for the Goal Contract;
 - risk tier is high, or medium with real scope-drift risk;
