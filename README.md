@@ -118,7 +118,7 @@ $goal-review 独立挑战当前反馈、scope 或 readiness 风险。
 - ITERATE 固定为 dynamic planning、execution、feedback 三段；loop type 决定本轮证据形状。
 - 普通反馈在 ITERATE feedback phase 处理；`goal-review` 只做可选独立挑战。
 - VERIFY 只做验收和判断；任何最终完成声明必须基于 Verification Verdict。
-- Goal Loop 的 `Artifacts` 只表示流程产物；业务域对象应记录在 Target、Acceptance、Non-goals 或 Evidence plan 中。
+- Goal Loop 的 `Artifacts` 只表示流程产物；业务域对象应记录在 Target 或 `Spec` 的 Scope、Acceptance、Evidence 中。
 - Debug/root-cause 声明必须有能验证根因的证据，不能只靠 plausible patch。
 - 阶段内辅助脚本只作为只读证据收集工具，不替代工程判断。
 - 项目特有命令和约定应放在目标仓库的 `AGENTS.md`，不要塞进这些跨仓库 skill。
@@ -139,7 +139,7 @@ $goal-review 独立挑战当前反馈、scope 或 readiness 风险。
 
 阶段输出契约的权威来源在各阶段 `SKILL.md` 和同级 `references/`：
 
-- `goal-frame`：Goal Contract，包含 Intent、Loop type、Target、Discovery、Socratic state、Spec、Acceptance、Claim boundary、Evidence plan 等。
+- `goal-frame`：Goal Contract，包含 Intent、Loop type、Target、Discovery、Socratic state、Spec、Risk tier、Risks、Artifacts、Existing work 和下一步判断。
 - `goal-iterate`：Iteration Record，包含 Dynamic plan、Execution、Feedback、Local evidence、Acceptance delta 和下一步判断。
 - `goal-verify`：Verification Verdict，包含 Acceptance evidence matrix、Spec review、Claim boundary、Judgment 和 Final claim allowed。
 - `goal-review`：Review Record，仅用于显式辅助审查。
@@ -149,8 +149,8 @@ $goal-review 独立挑战当前反馈、scope 或 readiness 风险。
 如果输出太长，可以减少解释文字，但保留关键字段：
 
 - `Goal Contract.Spec`
-- `Goal Contract.Acceptance`
-- `Goal Contract.Claim boundary`
+- `Goal Contract.Spec.Acceptance`
+- `Goal Contract.Spec.Claim boundary`
 - `Iteration Record.Dynamic plan`
 - `Iteration Record.Execution`
 - `Iteration Record.Feedback`

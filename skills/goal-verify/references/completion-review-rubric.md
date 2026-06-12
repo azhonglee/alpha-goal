@@ -6,7 +6,7 @@
 
 返回 `PASS_TO_FINAL` 前确认：
 
-- Goal Contract current，含 Spec、acceptance、claim boundary；
+- Goal Contract current，含 `Spec.Acceptance` 和 `Spec.Claim boundary`；
 - changed files 匹配 target 和 non-goals；
 - Iteration Record 的 dynamic plan、execution、feedback 与当前 diff 一致；
 - 最后一处 material change 之后有 fresh checks；

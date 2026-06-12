@@ -12,7 +12,7 @@ FRAME 由两步组成：
 1. `Discovery`：用只读证据确认目标、上下文、约束和已有工作。
 2. `Socratic interview`：只在关键决策无法安全推断时提出一个高杠杆问题。
 
-产物是 Goal Contract；它必须包含 `Spec` 字段。小任务使用内联 compact spec；只有升级条件成立且 artifact 写入被允许时，才创建或更新 durable spec 文件。
+产物是 Goal Contract；它必须包含 `Spec` 字段，并把验收、范围、约束、声明边界和证据计划收进 Spec，而不是在顶层重复铺开。小任务使用内联 compact spec；只有升级条件成立且 artifact 写入被允许时，才创建或更新 durable spec 文件。
 
 ## Entry
 
@@ -25,6 +25,8 @@ FRAME 由两步组成：
 - 请求可能与已有 MR/PR/branch/issue/design doc 重叠；
 - acceptance、non-goals、constraints、claim boundary 不清楚；
 - verification 返回 `REFRAME`。
+
+`Loop type` 必须取 `goal-loop` 定义的一个原子值。不要把阶段状态写进 loop type：只读 frame 一个未来实现目标时，仍使用 `NEW_GOAL`；只读 frame 一个 bug 修复目标时，仍使用 `DEBUG_GOAL`；只有用户最终要求本身是只读审计、诊断、比较或方向判断时，才使用 `READ_ONLY_DISCOVERY`。
 
 ## Discovery
 
@@ -69,10 +71,10 @@ bug/debug/root-cause 任务保持紧凑：记录 symptom、expected vs actual、
 
 ## Spec policy
 
-`Spec` 是 Goal Contract 的必填字段：
+`Spec` 是 Goal Contract 的需求载体：
 
-- 小任务：写 2-6 行 inline compact spec，覆盖 desired outcome、scope、success criteria、evidence。
-- 复杂任务：`Spec` 字段引用 durable spec path/status，并给出摘要。
+- 小任务：写 3-8 行 inline compact spec，覆盖 outcome、scope/non-goals、acceptance、constraints/decision boundary、claim boundary、evidence。
+- 复杂任务：`Spec` 字段引用 durable spec path/status，并给出同样维度的摘要。
 
 只有以下情况才创建或更新 durable spec：
 
@@ -102,21 +104,27 @@ Goal Contract:
 - Discovery:
 - Socratic state:
 - Spec:
-- Acceptance:
-- Non-goals:
-- Constraints:
-- Decision boundaries:
-- Assumptions and risks:
 - Risk tier:
-- Claim boundary:
-- Evidence plan:
+- Risks and assumptions:
 - Artifacts:
 - Existing work:
 - Frame verdict:
 - Next:
 ```
 
-`Spec` 写稳定需求；`Artifacts` 只写 loop/process artifacts，例如 durable spec、plan、review、evidence、scratch。不要把业务对象、UI 区块、数据库记录或产品产物放进 `Artifacts`。
+`Spec` 写稳定需求。需要分行时使用：
+
+```text
+Spec:
+- Outcome:
+- Scope:
+- Acceptance:
+- Constraints:
+- Claim boundary:
+- Evidence:
+```
+
+`Scope` 同时写 in-scope 和 out-of-scope。`Constraints` 包含 decision boundaries。`Artifacts` 只写 loop/process artifacts，例如 durable spec、plan、review、evidence、scratch。不要把业务对象、UI 区块、数据库记录或产品产物放进 `Artifacts`。
 
 Allowed `Frame verdict` values:
 
@@ -131,10 +139,10 @@ Allowed `Frame verdict` values:
 返回 `READY_FOR_ITERATION` 仅当：
 
 - target boundary 已闭合；
-- acceptance 可验证；
-- claim boundary 明确；
-- constraints、non-goals、decision boundaries 已记录；
-- risk tier、assumptions、evidence plan 已记录；
+- `Spec.Acceptance` 可验证；
+- `Spec.Claim boundary` 明确；
+- `Spec.Scope`、`Spec.Constraints`、`Spec.Evidence` 已记录；
+- risk tier、assumptions、risks 已记录；
 - `Spec` 已包含内联内容，或 durable spec path/status/current summary 已记录；
 - 容器/umbrella 术语已拆分，或风险被明示；
 - 触发 existing-work scan 时已检查；

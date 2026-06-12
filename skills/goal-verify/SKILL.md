@@ -23,7 +23,7 @@ description: Stage skill for the goal-loop package. 对 active Goal Contract 做
 
 正向 verdict 至少需要：
 
-- Goal Contract，含 target、Spec、Acceptance、Risk tier、Claim boundary；
+- Goal Contract，含 target、Spec.Acceptance、Spec.Claim boundary、Risk tier；
 - current durable spec/plan，如果 Goal Contract 或 Iteration Record 引用它；
 - Iteration Record 或等价的 diff/evidence bundle；
 - Debug Receipt，当 loop mode 是 `debug` 或声明修复 bug/root cause；
@@ -32,7 +32,7 @@ description: Stage skill for the goal-loop package. 对 active Goal Contract 做
 - exact test/check/probe commands and outcomes，或无法运行的明确 blocker；
 - feedback phase 对用户/reviewer/test 反馈的处理记录。
 
-缺 Goal Contract、target boundary、acceptance 或 evidence bundle 时，返回 `REFRAME`，不要猜。
+缺 Goal Contract、target boundary、`Spec.Acceptance` 或 evidence bundle 时，返回 `REFRAME`，不要猜。
 
 可使用 `scripts/evidence-summary.sh` 收集只读 diff/status 证据。
 
@@ -51,7 +51,7 @@ VERIFY 做两件事：
 
 检查：
 
-- 每个 acceptance item 是否有 fresh、relevant、final-state evidence；
+- 每个 `Spec.Acceptance` item 是否有 fresh、relevant、final-state evidence；
 - inline/durable Spec 的 success criteria 是否在 claim boundary 内被覆盖或明确排除；
 - active plan 的 evidence gate 是否满足、被 superseded，或被 blocker 阻断；
 - Iteration Record 的 loop type、dynamic plan、execution、feedback、learning 与最终声明一致；
@@ -108,7 +108,7 @@ Claim boundary:
 - `PASS_TO_FINAL`：证据覆盖 acceptance 和 claim boundary。
 - `NARROW_CLAIM_AND_FINAL`：本地目标满足，但 final claim 必须窄于用户宽泛措辞。
 - `NEXT_ITERATION`：方向正确，但还需要实现或证据。
-- `REFRAME`：Goal Contract、target、acceptance、Spec 或 existing-work 关系错误/不完整。
+- `REFRAME`：Goal Contract、target、Spec.Acceptance、Spec.Claim boundary 或 existing-work 关系错误/不完整。
 - `BLOCKED`：缺环境、数据、权限、凭证或用户决策。
 
 ## Output
