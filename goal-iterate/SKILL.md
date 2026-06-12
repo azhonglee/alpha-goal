@@ -21,6 +21,7 @@ Required before mutation:
 - Isolated edit path is known, or can be created as the first setup action after preflight.
 - Risk tier and evidence floor are known.
 - Repo, worktree, submodule, and ownership boundaries are understood.
+- `.worktrees/`, `.goal-loop/`, or any chosen alternatives are ignored or explicitly approved before use.
 - Any active spec referenced by the Goal Contract has been read.
 - Any active plan referenced by current work has been read.
 
@@ -50,7 +51,7 @@ Mutation Preflight:
 
 You may use `scripts/mutation-preflight.sh` to collect read-only git state. Add the smallest relevant baseline health check when it is cheap and available, such as an existing focused test, build, typecheck, lint, or documented reason no baseline can run. If baseline health fails, record the failing command and decide whether it is in scope before treating later failures as regressions.
 
-If the task starts from a primary checkout and no isolated edit path exists yet, ITERATE may create the isolated worktree as its first setup mutation after preflight only when the Goal Contract target is closed, project rules allow the chosen worktree root, `.worktrees/` or the chosen root is ignored or explicitly approved, and no implementation file is edited before entering the isolated worktree. Record the setup command and then rerun or update preflight from inside the isolated edit path before implementation mutation.
+If the task starts from a primary checkout and no isolated edit path exists yet, ITERATE may create the isolated worktree as its first setup mutation after preflight only when the Goal Contract target is closed, project rules allow the chosen worktree root, `.worktrees/` or the chosen root is ignored or explicitly approved, and no implementation file is edited before entering the isolated worktree. By default, create it under the selected repo's `.worktrees/codex/<task-slug>/`; in monorepos, use the owning subrepo's `.worktrees/codex/<task-slug>/`. Record the setup command and then rerun or update preflight from inside the isolated edit path before implementation mutation.
 
 Use references only when their detail is needed:
 
@@ -64,12 +65,13 @@ Use references only when their detail is needed:
 
 Do not do these unless the user explicitly asks and the risk is documented:
 
-- edit files in the primary `main`/`master` checkout;
+- edit or delete files in the primary `main`/`master` checkout;
 - run `git checkout -b` or `git switch -c` inside the primary `main`/`master` checkout;
 - create a branch or worktree before target selection is closed;
 - mutate a candidate repo that was not selected in the Goal Contract;
 - mutate across repository, worktree, submodule, or ownership boundaries without explicit user request, confirmation, or recorded decision boundary;
 - include unrelated cleanup/refactors not tied to acceptance;
+- merge an isolated task branch into `main`/`master`, or delete its worktree before PR/MR merge or local merge completes;
 - claim final completion from inside iteration.
 
 ## Risk-tiered evidence

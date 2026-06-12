@@ -50,7 +50,7 @@ scripts/install.sh --verbose
 
 源码中的 `templates/` 目录包含：
 
-- `AGENTS.md`：推荐的自主 Agent 行为和隔离工作流约束。
+- `AGENTS.md`：推荐的自主 Agent 行为、HITL 和交互约束；隔离工作流由 Goal Loop skills 承载。
 - `config.toml`：启用 multi-agent 等本地特性的可选 Codex 配置，不改变 sandbox 权限，也不抑制不稳定特性警告。启用 multi-agent 后，复杂任务可能启动多个子 agent；模板默认最多 6 个线程、深度 1，可能增加本地资源和模型用量。
 
 默认安装只写入 skill symlink；`--sync-user-templates` 才会更新真实 Codex home 的用户级模板。做 smoke test 或文档验证时，应使用临时 `CODEX_HOME`：

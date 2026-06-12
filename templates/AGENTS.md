@@ -16,13 +16,18 @@ Use subagents for independent parallel subtasks when that improves throughput.
 - Stay goal-oriented and prioritize building on existing persistent artifacts.
 - When goal is complete and has committed changes, push the task branch and create a PR/MR. Include verification evidence in the PR/MR description.
 
-## Isolation Principles
+## HITL Policy
 
-- Ensure `.worktrees/` is ignored before placing repository-local worktrees there, and keep `.goal-loop/` ignored for runtime evidence, reviews, and scratch artifacts.
-- Use repository-local worktrees to isolate changes per goal/task batch. Create them under `<repo>/.worktrees/codex/<task-slug>/` unless the repository already defines a stricter convention or the path is not technically usable.
-- In monorepos, create the worktree under the owning subrepo's `.worktrees/codex/<task-slug>/`.
-- Never edit/delete directly on main/master; always work in a worktree.
-- Delete the worktree after PR/MR merge or local merge into main/master; do not proactively merge into main/master locally.
+Use HITL for decisions, not for discoverable facts.
+
+Before asking, decide whether the missing input is material, discoverable, risky, and user-owned.
+
+- If it is safely discoverable, inspect local evidence first.
+- If it is under-specified but safe defaults exist, state the defaults and continue.
+- If it changes target, scope, acceptance, non-goals, side effects, risk acceptance, or final claim, ask before proceeding.
+- If it requires mutation, destructive action, external side effects, credentials, push, PR/MR, deployment, or real user config changes without prior authorization, ask before proceeding.
+- Ask one high-leverage question per round, backed by evidence already checked.
+- Do not ask the user to substitute for missing evidence; gather evidence, narrow the claim, or report the gap.
 
 ## Interaction Agreement
 
