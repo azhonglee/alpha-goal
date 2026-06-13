@@ -60,7 +60,7 @@ If persistent goal tooling is already active, align the slice with that objectiv
 - For a read-only/probe slice, do not mutate; produce evidence, diagnosis, or route decisions only.
 - Stay inside the approved target, scope, non-goals, and claim boundary.
 - Preserve unrelated user changes; never stash, revert, move, or overwrite them without approval.
-- For debug work, gather falsifiable evidence before patching.
+- For debug work, identify and record the root cause before patching; if root cause is not confirmed, do not fix—return a bounded diagnostic, gather more evidence, or block.
 - Use subagents only for independent ownership surfaces and inspect their files, evidence, and concerns before accepting results.
 - Stop and return to `alpha-goal` when evidence points to a different target/entity/API/repo or changes the user-owned decision boundary.
 

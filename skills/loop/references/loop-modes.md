@@ -36,7 +36,7 @@ Close each iteration with the route it justifies:
 
 ## Debug Receipt
 
-Debug first proves, then fixes. Keep the receipt compact but falsifiable.
+Debug must identify root cause before any fix. Keep the receipt compact but falsifiable.
 
 - For low-risk pure-function or single-branch failures with focused failing-test and direct code-divergence evidence, a one-paragraph receipt is enough if it names symptom, failing path, branch divergence, fix surface, and post-fix evidence; mark irrelevant entity/log fields `not applicable`.
 - For entity, module, API, or log ambiguity, preserve competing hypotheses until evidence explains why alternatives are weaker, out of scope, or blocked.
@@ -66,4 +66,4 @@ Status rules:
 - `NOT_REPRODUCED`: reproduction was attempted but not observed; do not claim fixed.
 - `BLOCKED`: missing logs, commands, files, environment, data, or scope prevents diagnosis.
 
-Only `ROOT_CAUSE_CONFIRMED` authorizes a root-cause repair claim. `NOT_REPRODUCED` can support only a bounded diagnostic or no-fix claim.
+Only `ROOT_CAUSE_CONFIRMED` authorizes a fix action or repair claim. `NOT_REPRODUCED` can support only a bounded diagnostic or no-fix claim.

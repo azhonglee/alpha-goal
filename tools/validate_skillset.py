@@ -327,8 +327,8 @@ def check_consistency(root: Path) -> bool:
 
     if verify.exists():
         text = verify.read_text(encoding="utf-8")
-        if "Low-risk local bug fixes without a formal RCA claim" not in text:
-            ok = fail("skills/verify/SKILL.md: missing low-risk local bug verification boundary")
+        if "Bug fixes and root-cause claims need `ROOT_CAUSE_CONFIRMED`" not in text:
+            ok = fail("skills/verify/SKILL.md: missing root-cause-first verification boundary")
         for phrase in ["proportional", "lower-boundary test cannot prove a higher-boundary", "strongest material risk"]:
             if phrase not in text:
                 ok = fail(f"skills/verify/SKILL.md: missing proportional verification guidance {phrase!r}")

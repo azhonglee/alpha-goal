@@ -63,7 +63,7 @@ Confirm:
 - failing output is understood and not hidden by broad claims;
 - user/reviewer/test feedback is handled or explicitly out of scope.
 
-Bug/root-cause claims need `ROOT_CAUSE_CONFIRMED`. Low-risk local bug fixes without a formal RCA claim may rely on focused failure-path evidence, direct code-branch evidence, and post-fix tests. `NOT_REPRODUCED` or `BLOCKED` does not support a repair-complete claim.
+Bug fixes and root-cause claims need `ROOT_CAUSE_CONFIRMED` before repair is accepted. Low-risk local bugs may use compact root-cause evidence, but still need a confirmed failing path, first divergence or branch error, fix surface, and post-fix test. `NOT_REPRODUCED` or `BLOCKED` does not support a repair-complete claim.
 
 ### 3. Check claim boundary
 

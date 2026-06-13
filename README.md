@@ -114,7 +114,7 @@ $verify 检查当前 diff、测试和声明边界，判断是否可以最终交�
 - 普通反馈在 loop feedback phase 处理；改变目标、范围、验收或声明边界的反馈回到 `alpha-goal`。
 - VERIFY 只做验收和判断；最终完成声明基于 Verification Verdict。
 - Alpha Goal 的 process artifacts 只表示流程产物；业务域对象应记录在 Goal Contract 的 Scope、Acceptance、Evidence 中。
-- Debug/root-cause 声明需要能验证根因的证据，不能只靠 plausible patch。
+- Debug 必须先确认根因再修复；不能只靠 plausible patch。
 - 阶段内辅助脚本只作为只读证据收集工具，不替代工程判断。
 - 项目特有命令和约定应放在目标仓库的 `AGENTS.md`，不要塞进这些跨仓库 skill。
 
