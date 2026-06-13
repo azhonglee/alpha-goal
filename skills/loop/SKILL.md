@@ -42,7 +42,7 @@ Plan this slice -> Execute -> Interpret feedback -> Record -> Route next
 
 Dynamic planning answers only the current iteration:
 
-- the smallest acceptance-relevant progress to make now;
+- the most useful coherent acceptance-relevant slice that can be completed and verified now;
 - fresh evidence needed after the slice;
 - files, modules, repos, generated outputs, and ownership surfaces allowed to change;
 - strongest material risk and evidence floor;
