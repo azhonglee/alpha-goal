@@ -27,11 +27,11 @@ Fresh checks, probes, diff review, command output, or blocker evidence. State wh
 
 ### Decision
 
-One of: `continue`, `harden`, `verify`, `reframe`, or `blocked`.
+Use one of the route labels from Verdict vocabulary. Compact notes may also include the short meaning: `continue`, `harden`, `verify`, `reframe`, or `blocked`.
 
 ### Next
 
-Smallest next action or handoff target. If leaving `loop`, the next skill is only `verify` or `alpha-goal`; otherwise continue with another slice in the current `loop`.
+Smallest next action or handoff target. The next action is only another bounded `loop` pass, a handoff to `verify`, a handoff to `alpha-goal`, or an iteration-level blocked stop state.
 
 ## Conditional fields
 
@@ -50,7 +50,8 @@ Add only the fields that affect this iteration:
 
 Use route-oriented labels rather than final-completion claims:
 
-- `ITERATION_CONTINUES`: another slice is needed in the current `loop`.
+- `ITERATION_CONTINUES`: goal remains valid and another bounded implementation slice should proceed or be recommended.
+- `ITERATION_HARDEN`: implementation direction is valid, but evidence, edge cases, compatibility, or cleanup are insufficient; run or recommend a hardening slice.
 - `ITERATION_READY_FOR_VERIFY`: acceptance appears covered; final judgment belongs to `verify`.
-- `RETURN_TO_ALPHA_GOAL`: target, scope, acceptance, non-goals, decision boundary, or claim boundary needs reframing.
-- `BLOCKED`: the smallest missing input, permission, tool, data, environment, or safe-state condition is named.
+- `RETURN_TO_ALPHA_GOAL`: target, scope, acceptance, non-goals, constraints, decision boundary, authorization, or claim boundary needs reframing.
+- `BLOCKED`: the smallest missing input, permission, tool, data, environment, or safe-state condition is named; this is an iteration-level blocker unless the active runtime policy says otherwise.
