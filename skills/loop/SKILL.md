@@ -96,7 +96,9 @@ Do not make final completion claims in an Iteration Record. Completion judgment 
 
 ### 5. Route next
 
-- `ITERATION_CONTINUES`: run another loop slice.
+The next skill after `loop` can only be `alpha-goal` or `verify`. Continuing implementation means another iteration within the current `loop`, not a handoff to a different skill.
+
+- `ITERATION_CONTINUES`: run another slice in the current `loop`.
 - `ITERATION_READY_FOR_VERIFY`: enter `verify` with the current claim and evidence.
-- `RETURN_TO_ALPHA_GOAL`: clarify or reframe before more mutation.
+- `RETURN_TO_ALPHA_GOAL`: enter `alpha-goal` to clarify or reframe before more mutation.
 - `BLOCKED`: report the blocker and smallest missing input, permission, tool, data, or environment.

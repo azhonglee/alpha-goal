@@ -31,7 +31,7 @@ One of: `continue`, `harden`, `verify`, `reframe`, or `blocked`.
 
 ### Next
 
-Smallest next action or handoff target: another `loop`, `verify`, `alpha-goal`, final blocker, or explicit no-op for read-only work.
+Smallest next action or handoff target. If leaving `loop`, the next skill is only `verify` or `alpha-goal`; otherwise continue with another slice in the current `loop`.
 
 ## Conditional fields
 
@@ -50,7 +50,7 @@ Add only the fields that affect this iteration:
 
 Use route-oriented labels rather than final-completion claims:
 
-- `ITERATION_CONTINUES`: another loop slice is needed.
+- `ITERATION_CONTINUES`: another slice is needed in the current `loop`.
 - `ITERATION_READY_FOR_VERIFY`: acceptance appears covered; final judgment belongs to `verify`.
 - `RETURN_TO_ALPHA_GOAL`: target, scope, acceptance, non-goals, decision boundary, or claim boundary needs reframing.
 - `BLOCKED`: the smallest missing input, permission, tool, data, environment, or safe-state condition is named.
