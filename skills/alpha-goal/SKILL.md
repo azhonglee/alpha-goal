@@ -36,7 +36,6 @@ Derive a short `<slug>` for the goal boundary. Do not create empty directories.
 Artifact safety gate:
 
 - Write `.alpha-goal/` artifacts only when that path is gitignored or explicitly approved; otherwise stay chat-only.
-- Write tracked artifacts only for requested or approved durable contracts.
 - Record artifact status as `none`, `chat-only`, `created`, `updated`, or `blocked`.
 
 Minimum context can be compact: task statement, desired outcome, probable intent, known evidence, constraints, unknowns, decision-boundary gaps, and likely touchpoints. Store it at `.alpha-goal/context/YYYYMMDD-<slug>.md` only when the gate passes.
