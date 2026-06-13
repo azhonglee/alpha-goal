@@ -31,6 +31,7 @@
 ## Commit & Pull Request Guidelines
 
 提交保持单一主题，使用简短祈使式信息。PR/MR 需说明变更范围、受影响路径、验证命令及结果；涉及安装行为时，说明对既有用户配置的影响。
+开发完成及时创建PR
 
 ## Agent-Specific Instructions
 
