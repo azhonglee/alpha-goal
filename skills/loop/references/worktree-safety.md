@@ -1,6 +1,18 @@
 # Worktree Safety
 
-Use this reference for repositories where primary branch pollution is a risk.
+Use this reference when mutation could pollute a primary checkout or cross an ownership boundary.
+
+## Isolation rule
+
+Isolation is valid when the edit path is:
+
+- not the primary checkout;
+- inside the approved repository or owner boundary;
+- ignored by the primary checkout or outside tracked paths;
+- recorded before mutation;
+- compatible with project rules and unrelated user changes.
+
+The default candidate path is `.worktrees/codex/<task-slug>/`, but project rules or an already approved external worktree path may override it.
 
 ## Primary checkout warning signs
 
@@ -11,18 +23,22 @@ Treat the current checkout as primary when:
 - project rules say not to edit the main checkout;
 - branch/worktree state is unknown.
 
-## Safe pattern
+## Read-only preflight
 
-Start with a read-only preflight in the current checkout:
+Start with facts, not mutation:
 
 ```bash
 git worktree list
 git status --short
-git check-ignore -q .worktrees/codex/<task-slug> || printf 'BLOCKED: .worktrees/ is not ignored here\n'
-git check-ignore -q .alpha-goal/preflight-check || printf 'BLOCKED: .alpha-goal/ is not ignored here\n'
+git check-ignore -q .worktrees/codex/<task-slug> || printf 'CHECK: default worktree path is not ignored here\n'
+git check-ignore -q .alpha-goal/preflight-check || printf 'CHECK: .alpha-goal/ is not ignored here\n'
 ```
 
-If `.worktrees/` is already ignored, it is safe to create the isolated worktree. In monorepos, run this from the owning subrepo unless project rules define a stricter owner or path:
+Those checks evaluate default candidates only. If the approved path differs, check that path instead.
+
+## Safe pattern
+
+If `.worktrees/` is ignored and matches the project rules, create a repository-local worktree from the owning repo or subrepo:
 
 ```bash
 mkdir -p .worktrees/codex
@@ -32,9 +48,7 @@ cd .worktrees/codex/<task-slug>
 
 Only after entering the isolated worktree should mutation begin.
 
-If `.worktrees/` is not ignored, do not silently edit `.gitignore` from the preflight snippet, and do not edit `.gitignore` in the primary checkout. Prefer an already ignored worktree root or an external worktree path outside the primary checkout. If the repository needs a `.gitignore` setup change, make that change from an isolated branch/worktree, validate it with `git check-ignore`, and include it in the Iteration Record.
-
-If project rules require a different ignored worktree root, use that root instead. If `.gitignore` has unrelated user changes or cannot be safely edited, ask before changing it and record the blocker.
+If `.worktrees/` is not ignored, do not silently edit `.gitignore` from a primary checkout. Prefer an already ignored root or an external worktree path. If the repository needs a `.gitignore` setup change, make that change from an isolated branch/worktree when possible, validate it with `git check-ignore`, and record it.
 
 ## Lifecycle
 
@@ -42,7 +56,7 @@ Keep the isolated worktree until the PR/MR has merged or the task branch has bee
 
 ## Unsafe pattern
 
-Avoid:
+Avoid direct mutation in the primary checkout, including:
 
 ```bash
 git checkout -b <branch-name>
@@ -50,7 +64,7 @@ git checkout -b <branch-name>
 git switch -c <branch-name>
 ```
 
-inside the primary `main`/`master` checkout. Also avoid direct file edits or deletes in that checkout.
+Also avoid direct file edits or deletes in that checkout.
 
 ## Existing changes
 

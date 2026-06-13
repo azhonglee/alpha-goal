@@ -4,4 +4,4 @@ interface:
   default_prompt: "Use $verify to map acceptance to fresh evidence and judge the final claim boundary."
 
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true

@@ -27,7 +27,7 @@
 
 ## Invocation policy
 
-`skills/alpha-goal/agents/openai.yaml` allows implicit invocation. Downstream stage skills set `policy.allow_implicit_invocation: false` so they can be invoked explicitly or selected by `alpha-goal` without competing during ordinary task matching.
+All stage skills set `policy.allow_implicit_invocation: true`; entry requirements and route boundaries still decide whether `alpha-goal`, `loop`, or `verify` should act.
 
 默认主路径是：
 
