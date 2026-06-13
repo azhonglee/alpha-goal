@@ -135,7 +135,7 @@ For implementation or debug handoff, create a Goal Contract covering these seman
 - technical context findings;
 - condensed transcript when useful.
 
-Default durable paths, only after safety approval:
+Default durable paths:
 
 - context: `.alpha-goal/context/YYYYMMDD-<slug>.md`
 - transcript: `.alpha-goal/interviews/YYYYMMDD-<slug>.md`
