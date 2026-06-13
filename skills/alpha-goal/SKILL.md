@@ -35,7 +35,7 @@ Derive a short `<slug>` for the goal boundary. Do not create empty directories.
 
 Artifact safety gate:
 
-- Before writing `.alpha-goal/`, confirm it is gitignored. If not ignored, do not silently edit `.gitignore`; use chat-only artifacts, an already approved path, or ask before changing ignore rules.
+- Write `.alpha-goal/` artifacts only when that path is gitignored or explicitly approved; otherwise stay chat-only.
 - Before writing tracked artifacts such as `docs/design/YYYYMMDD-<slug>.md`, confirm the request calls for a durable contract or the user/repo workflow already approves it.
 - Record artifact status as `none`, `chat-only`, `created`, `updated`, or `blocked`.
 
