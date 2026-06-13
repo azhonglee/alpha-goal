@@ -9,7 +9,7 @@ Use this skill to convert an unclear engineering request into a safe next route.
 
 ## Boundaries
 
-- Do not edit implementation files, push, open PRs/MRs, deploy, or claim implementation completion. You may create only the isolated branch/worktree needed to safely store reviewed Goal Contract artifacts or prepare a later `loop` handoff; do not use that setup as permission to mutate implementation code.
+- Do not edit implementation files, push, open PRs/MRs, deploy, or claim implementation completion; follow repository isolation rules for any allowed artifact work.
 - Write process artifacts only after the artifact safety gate. If unsafe, keep artifacts in chat.
 - Ask only for user-owned decisions. Discover codebase facts yourself before asking about internals.
 - Use `request_user_input` by default when user input is needed and the runtime provides it; use plain assistant messages when structured input is unavailable or would obscure the needed open-ended context.
