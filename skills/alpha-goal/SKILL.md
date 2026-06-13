@@ -76,6 +76,8 @@ Interview loop:
 - Stay on the same thread while the answer is vague; breadth without pressure is not progress.
 - Re-score ambiguity after each answer and show progress.
 - Continue while ambiguity is materially above threshold, readiness gates are open, pressure pass is incomplete for a contract handoff, or the user changes the target.
+- If the user stops clarification before readiness gates close, summarize unresolved gaps and proceed only with a narrowed route or explicit risk acceptance.
+- For long interviews, respect the selected depth profile's practical cap; at the cap, crystallize the safest available output and list unresolved gaps.
 
 Clarity dimensions:
 
@@ -152,7 +154,7 @@ Self-review the output against the route:
 - Are codebase facts labeled as evidence, and guesses labeled as inference?
 - Would the next agent know what not to do?
 
-For broad or high-risk contracts, request independent review when available without leaking intended answers. Ask the user to confirm only user-owned decisions. If the user changes requirements, return to clarification.
+For broad or high-risk contracts, request independent review when available without leaking intended answers. Ask the user to confirm only user-owned decisions. If the user rejects, changes, or narrows requirements, return to clarification.
 
 After review, handoff to `loop` for mutation or `verify` for a completion/readiness claim. Do not commit the contract, push, or open PRs/MRs unless the user or repository workflow already authorizes that side effect.
 
