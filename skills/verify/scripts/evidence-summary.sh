@@ -55,6 +55,22 @@ else
   echo "git diff --cached --check: fail"
 fi
 
+
+section "worktree and ignore hints"
+git worktree list 2>/dev/null || true
+if root="$(git rev-parse --show-toplevel 2>/dev/null)" && [ -n "$root" ]; then
+  (
+    cd "$root"
+    for path in .worktrees/codex/preflight-check .alpha-goal/preflight-check; do
+      if git check-ignore -q "$path"; then
+        echo "$path: ignored"
+      else
+        echo "$path: NOT ignored or not applicable"
+      fi
+    done
+  )
+fi
+
 section "recent commits"
 git log --oneline -5 2>/dev/null || true
 

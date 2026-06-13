@@ -10,7 +10,7 @@
 - 只有 ownership 独立且共享文件/生成物不冲突时并行。
 - 要求 receipt：`DONE`、`DONE_WITH_CONCERNS`、`NEEDS_CONTEXT`、`BLOCKED`。
 - 接受前检查 delegated files、ownership、evidence、concerns。
-- Delegated output 不绕过 Goal Contract、Iteration Record、Verification Verdict、risk-tier evidence 或 final checks。
+- Delegated output 不绕过 Goal Contract、Iteration Record、Verification Verdict、strongest-risk evidence 或 final checks。
 
 ## Ownership boundaries
 
