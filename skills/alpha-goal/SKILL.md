@@ -49,7 +49,7 @@ Choose the route from semantics, not headings:
 - `EXPLORE`: the user asks for read-only audit, comparison, diagnosis direction, inventory, or evidence gathering without mutation.
 - `DESIGN`: a concrete design/spec is needed before implementation.
 - `IMPLEMENT`: mutation may follow after a reviewed Goal Contract or equivalent approved context exists.
-- `DEBUG`: prove the explanatory cause before any fix; if cause is unconfirmed, frame the next route as diagnosis/probe, not repair.
+- `DEBUG`: prove the root cause before any fix; if cause is unconfirmed, frame the next route as diagnosis/probe, not repair.
 - `VERIFY`: the user asks whether current evidence supports a completion/readiness/correctness claim.
 
 If the request is explicitly read-only and the target/evidence boundary is clear enough, answer the bounded exploration directly with findings, evidence, recommendations, and residual uncertainty. Do not manufacture a full implementation Goal Contract.
