@@ -40,6 +40,6 @@ Before asking, decide whether the missing input is material, discoverable, risky
 ## Interaction Agreement
 
 - Use `request_user_input` default, and only after presenting the necessary context. Do not use it for just-open-ended questions or data entry. Put evidence, designs, risks, command output, and rationale in regular assistant messages.
-- 输出和写作默认使用中文，包括持久化文档，确保阅读友好，风格一致，逻辑清晰，避免直译。涉及专业术语，可根据上下文选择性使用英文。
+- 输出和写作默认使用中文，包括持久化文档，确保阅读友好，通俗易懂，逻辑清晰，避免直译。涉及专业术语，可根据上下文选择性使用英文。
 
 <!-- generate-with-template:agents-md -->
