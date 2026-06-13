@@ -103,7 +103,7 @@ $loop 根据上面的 Goal Contract 做一轮最小变更。
 $verify 检查当前 diff、测试和声明边界，判断是否可以最终交付。
 ```
 
-只有 `alpha-goal` 适合隐式触发。下游阶段技能的 `allow_implicit_invocation` 都是 `false`。
+`alpha-goal`、`loop` 和 `verify` 都允许隐式触发；实际路由仍由各 skill 的 entry requirements 和 claim/contract 边界约束。
 
 ## 设计原则
 

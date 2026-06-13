@@ -19,8 +19,8 @@ REQUIRED_SKILLS = ["alpha-goal", "loop", "verify"]
 SKILLS_DIR = "skills"
 IMPLICIT_POLICY = {
     "alpha-goal": "true",
-    "loop": "false",
-    "verify": "false",
+    "loop": "true",
+    "verify": "true",
 }
 ALLOWED_FRONT_MATTER_KEYS = {"name", "description"}
 MIN_SHORT_DESCRIPTION_LEN = 25
