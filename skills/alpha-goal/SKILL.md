@@ -12,7 +12,7 @@ Use this skill to convert an unclear engineering request into a safe next route.
 - Do not edit implementation files, push, open PRs/MRs, deploy, or claim implementation completion; follow repository isolation rules for any allowed artifact work.
 - Write process artifacts only after the artifact safety gate. If unsafe, keep artifacts in chat.
 - Ask only for user-owned decisions. Discover codebase facts yourself before asking about internals.
-- Use `request_user_input` by default when user input is needed and the runtime provides it; use plain assistant messages when structured input is unavailable or would obscure the needed open-ended context.
+- Use `request_user_input` by default when user input is needed and the runtime provides it.
 - Choose the safest process that can make the next route reliable; keep it as small as safety allows. Avoid ceremony that does not reduce ambiguity or risk.
 
 ## Process
