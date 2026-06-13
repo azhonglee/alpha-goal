@@ -48,7 +48,8 @@ Choose the route from semantics, not headings:
 - `CLARIFY`: intent, outcome, scope, non-goals, constraints, or acceptance are unclear.
 - `EXPLORE`: the user asks for read-only audit, comparison, diagnosis direction, inventory, or evidence gathering without mutation.
 - `DESIGN`: a concrete design/spec is needed before implementation.
-- `IMPLEMENT` or `DEBUG`: mutation may follow, but only after a reviewed Goal Contract or equivalent approved context exists.
+- `IMPLEMENT`: mutation may follow after a reviewed Goal Contract or equivalent approved context exists.
+- `DEBUG`: prove the explanatory cause before any fix; if cause is unconfirmed, frame the next route as diagnosis/probe, not repair.
 - `VERIFY`: the user asks whether current evidence supports a completion/readiness/correctness claim.
 
 If the request is explicitly read-only and the target/evidence boundary is clear enough, answer the bounded exploration directly with findings, evidence, recommendations, and residual uncertainty. Do not manufacture a full implementation Goal Contract.
@@ -98,6 +99,7 @@ Readiness gates:
 - non-goals or excluded scope are explicit;
 - decision boundaries state what the agent may decide without confirmation;
 - acceptance/evidence expectations are testable enough for the next route;
+- diagnostic goals define the evidence that authorizes repair; until then, repair is out of scope;
 - one pressure pass revisits an earlier answer with evidence, assumption, or tradeoff probing.
 
 Append interview summaries to `.alpha-goal/interviews/`.
@@ -130,6 +132,7 @@ For implementation or debug handoff, create a Goal Contract covering these seman
 - in-scope and out-of-scope / non-goals;
 - decision boundaries, constraints, and assumptions resolved;
 - testable acceptance criteria and evidence expectations;
+- for diagnostic goals: symptom, observations, competing hypotheses, cause-evidence needed, and repair authorization gate;
 - pressure-pass findings;
 - brownfield evidence vs inference;
 - technical context findings;
@@ -154,8 +157,8 @@ Self-review the output against the route:
 
 For broad or high-risk contracts, request independent review when available without leaking intended answers. Ask the user to confirm only user-owned decisions. If the user rejects, changes, or narrows requirements, return to clarification.
 
-After self-review and user acceptance of a Goal Contract, commit the Goal Contract and handoff to `loop` for mutation. For read-only exploration or verify routes, handoff without creating a contract commit unless the accepted output is a durable contract. Push, PR/MR creation, deployment, or other external side effects still require explicit authorization.
+After self-review and user acceptance of a Goal Contract, commit it and handoff to `loop` for the next approved slice. For diagnostic contracts, the first loop slice is diagnosis/probe unless repair is already authorized by evidence. For read-only exploration or verify routes, handoff without creating a contract commit unless the accepted output is a durable contract. Push, PR/MR creation, deployment, or other external side effects still require explicit authorization.
 
 ## Final checklist
 
-Artifact safety recorded; context captured; route is explicit; ambiguity shown when clarifying; non-goals and decision boundaries closed or blocker recorded; pressure pass complete when a Goal Contract is produced; output matches route; no implementation mutation performed.
+Artifact safety recorded; context captured; route is explicit; ambiguity shown when clarifying; non-goals and decision boundaries closed or blocker recorded; diagnostic contracts state whether repair is authorized; pressure pass complete when a Goal Contract is produced; output matches route; no implementation mutation performed.
