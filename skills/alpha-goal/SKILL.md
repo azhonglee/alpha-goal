@@ -100,7 +100,7 @@ Readiness gates:
 - acceptance/evidence expectations are testable enough for the next route;
 - one pressure pass revisits an earlier answer with evidence, assumption, or tradeoff probing.
 
-Append interview summaries to `.alpha-goal/interviews/` only when artifact safety passes; otherwise keep the transcript summary in chat.
+Append interview summaries to `.alpha-goal/interviews/`.
 
 ### 4. Pressure-test
 
