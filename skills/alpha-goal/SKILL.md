@@ -155,10 +155,10 @@ Self-review the output against the route:
 - Are codebase facts labeled as evidence, and guesses labeled as inference?
 - Would the next agent know what not to do?
 
-For broad or high-risk contracts, request independent review when available without leaking intended answers. Ask the user to confirm only user-owned decisions. If the user rejects, changes, or narrows requirements, return to clarification.
+For broad or high-risk contracts, request independent review when available without leaking intended answers. Treat Goal Contract acceptance as a user-owned decision: when a handoff contract is ready, ask the user to accept, reject, or change it. If the user rejects, changes, or narrows requirements, return to clarification.
 
 After self-review and user acceptance of a Goal Contract, commit it and handoff to `loop` for the next approved slice. For diagnostic contracts, the first loop slice is diagnosis/probe unless repair is already authorized by evidence. For read-only exploration or verify routes, handoff without creating a contract commit unless the accepted output is a durable contract. Push, PR/MR creation, deployment, or other external side effects still require explicit authorization.
 
 ## Final checklist
 
-Artifact safety recorded; context captured; route is explicit; ambiguity shown when clarifying; non-goals and decision boundaries closed or blocker recorded; diagnostic contracts state whether repair is authorized; pressure pass complete when a Goal Contract is produced; output matches route; no implementation mutation performed.
+Artifact safety recorded; context captured; route is explicit; ambiguity shown when clarifying; non-goals and decision boundaries closed or blocker recorded; diagnostic contracts state whether repair is authorized; handoff contract accepted or blocker stated; pressure pass complete when a Goal Contract is produced; output matches route; no implementation mutation performed.
