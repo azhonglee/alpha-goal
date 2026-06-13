@@ -3,133 +3,102 @@ name: loop
 description: Run one bounded goal iteration under an existing user-reviewed Goal Contract. Dynamic planning, execution, and feedback.
 ---
 
-<Purpose>
+# Loop
 
-Advance one bounded iteration under an existing Goal Contract. Do not redefine the goal. If new evidence breaks the contract, target/scope boundary, acceptance, or claim boundary, stop and return to `alpha-goal`.
+Advance one bounded iteration under an approved Goal Contract or equivalent context. Do not redefine the goal. If new evidence breaks the target, scope, acceptance, non-goals, decision boundaries, or claim boundary, stop and return to `alpha-goal`.
 
-Each iteration has three phases:
+## Entry requirements before mutation
 
-1. `Dynamic planning`: choose the suitable slice, evidence floor, isolation path, and loop mode.
-2. `Execution`: run the slice through mutation, read-only exploration, debug probes, tests, or evidence collection.
-3. `Feedback`: interpret results, handle user/reviewer/test feedback, then continue, pivot, reframe, review, or verify.
-</Purpose>
+All must be true before editing implementation files:
 
-<EntryRequirements>
+- approved context semantically identifies desired outcome, included scope, excluded scope/non-goals, decision boundaries, constraints, and acceptance/evidence expectations;
+- target/scope boundary and final claim boundary are clear enough to decide changed files and final wording;
+- applicable local rules and active durable specs/plans have been read;
+- repo, worktree, submodule, ownership, dirty-state, and user-change boundaries are understood;
+- isolated edit path is ready, or creating it is the first setup mutation;
+- `.worktrees/`, `.alpha-goal/`, or alternative process-artifact paths are gitignored or explicitly approved;
+- strongest material risk, loop mode, evidence floor, and mutation preflight are recorded.
 
-Before mutation, all of these must be true:
+Before mutation, cite the contract source you actually read: file path, chat excerpt, or explicit equivalent context. If it is not locally available or included in the prompt, do not infer it from phrases like "existing Goal Contract".
 
-- a reviewed Goal Contract, interview summary, chat-only contract, or equivalent approved context exists; exact headings are not required;
-- enough semantic content exists to identify desired outcome, included scope, excluded scope/non-goals, decision boundaries, constraints, and acceptance/evidence expectations;
-- target/scope boundary and claim boundary are clear enough to decide changed files and final claim wording;
-- applicable local rules have been read;
-- mutation preflight is recorded;
-- isolated edit path is known, or its creation is the first setup mutation;
-- risk tier and evidence floor are chosen during dynamic planning before mutation;
-- repo, worktree, submodule, and ownership boundaries are understood;
-- `.worktrees/`, `.alpha-goal/`, or alternative paths are gitignored or explicitly approved;
-- active durable spec/plan, if any, has been read.
-
-If required semantics are missing, ambiguous, or contradicted, do not mutate. Return `alpha-goal`. Do not block merely because the approved context uses different headings or structure.
-</EntryRequirements>
+If these semantics are missing, ambiguous, unavailable, or contradicted, do not mutate. Return to `alpha-goal`. Do not reject valid context merely because it uses different headings.
 
 Load bundled resources only when needed:
 
-- `references/worktree-safety.md`: create or verify isolated edit paths.
-- `references/execution-boundaries.md`: delegated work, ownership, submodules, generated output, or user-owned changes.
-- `references/loop-modes.md`: choose mode and evidence shape.
-- `references/plan-template.md`: durable dynamic plan.
-- `references/iteration-record-schema.md`: Iteration Record fields.
-- `scripts/mutation-preflight.sh`: read-only git and path preflight.
+- `references/worktree-safety.md`: isolated edit paths and primary-checkout safety.
+- `references/execution-boundaries.md`: delegation, ownership, submodules, generated output, or user-owned changes.
+- `references/loop-modes.md`: mode choice, evidence type, debug receipt, and decisions.
+- `references/plan-template.md`: durable dynamic plans for multi-slice or handoff-heavy work.
+- `references/iteration-record-schema.md`: compact Iteration Record semantics.
+- `scripts/mutation-preflight.sh`: read-only git/path preflight.
 
-<Process>
-
-Iteration can be executed in two modes:
-1. `Native`: default mode. If you can use `goals` / equivalent, use this mode.
-2. `Custom`: fallback mode like this:
+## Process
 
 ```text
-Generate Goal Objective -> Dynamic planning -> Execution -> Feedback -> Next iteration
-                                                                     -> Verify
-                                                                     
+Plan this slice -> Execute -> Interpret feedback -> Record -> Route next
 ```
-## Native mode
 
-1. Call `create_goal` with an objective that restates the Goal Contract.
-2. Set `token_budget` only if the user explicitly provides one.
-3. Execute the workflow to completion.
-4. Validate the final state before claiming success.
-5. Call `update_goal` with `complete` only when the objective is actually achieved.
-6. Do not create a goal for ordinary task requests that do not explicitly ask for one.
+### 1. Plan this slice
 
-If native mode is not available, use custom mode.
+Dynamic planning answers only the current iteration:
 
-## Custom mode
+- the most useful coherent acceptance-relevant slice that can be completed and verified now;
+- fresh evidence needed after the slice;
+- files, modules, repos, generated outputs, and ownership surfaces allowed to change;
+- strongest material risk and evidence floor;
+- success, failure, feedback, and reframe routes;
+- whether a durable plan is necessary.
 
-### Phase 1: Generate Goal Objective
+Create or update a durable plan only for multiple independent loops, modules, repos, handoff/recovery needs, rollback/compatibility decisions, contested ownership, or user request. Small patches can record the plan in the Iteration Record.
 
-Generate a goal objective with goal contract and interview summary.
+If persistent goal tooling is already active, align the slice with that objective. Do not create a new persistent goal unless the user explicitly requested that runtime behavior.
 
-### Phase 2: Dynamic planning
+### 2. Execute
 
-Dynamic planning is not a waterfall plan. It answers only this iteration:
+- Run or manually record mutation preflight before edits.
+- For a mutation slice, make one coherent change and collect the evidence needed for that change.
+- For a read-only/probe slice, do not mutate; produce evidence, diagnosis, or route decisions only.
+- Stay inside the approved target, scope, non-goals, and claim boundary.
+- Preserve unrelated user changes; never stash, revert, move, or overwrite them without approval.
+- For debug work, identify and record the root cause before patching; if root cause is not confirmed, do not fix—return a bounded diagnostic, gather more evidence, or block.
+- Use subagents only for independent ownership surfaces and inspect their files, evidence, and concerns before accepting results.
+- Stop and return to `alpha-goal` when evidence points to a different target/entity/API/repo or changes the user-owned decision boundary.
 
-- suitable acceptance progress;
-- fresh evidence needed;
-- files, modules, and ownership boundaries allowed to change;
-- route for success, failure, and feedback;
-- whether a durable plan is needed.
-
-Create or update a durable plan only for multiple independent loops, modules, repos, handoff, recovery, rollback/compatibility decisions, or user request. For that case, read `references/plan-template.md`. Small patches do not need durable plans.
-
-### Phase 3: Execution
-
-- Make the suitable coherent change.
-- Prefer evidence: tests, assertions, lint/typecheck/build, runtime/manual probes, and diff review.
-- Stay inside the claim boundary.
-- Preserve unrelated user changes.
-- Stop with `alpha-goal` if target/entity/API/log evidence contradicts the contract.
-- For debug work, collect falsifiable evidence before patching.
-- If the same failure thread repeats three times without new evidence, enter feedback judgment and consider independent review.
-
-Forbidden unless the user explicitly requests it and risk is recorded:
+Forbidden unless explicitly requested and risk is recorded:
 
 - editing or deleting files in a primary `main`/`master` checkout;
-- creating a branch inside a primary `main`/`master` checkout;
-- creating branch/worktree before target closure;
-- mutating a candidate repo not selected by the Goal Contract;
-- crossing repo, worktree, submodule, or ownership boundary without authorization;
-- unrelated cleanup or refactor;
-- final completion claims from ITERATE.
+- creating a branch in a primary checkout when an isolated worktree should be used;
+- creating a branch/worktree before the target is closed;
+- mutating a candidate repo not selected by the approved context;
+- crossing repo, worktree, submodule, or ownership boundaries;
+- unrelated cleanup, broad formatting, or opportunistic refactor;
+- final completion claims from `loop`.
 
-### Phase 4: Feedback
+### 3. Interpret feedback
 
-Feedback covers:
+Consider test/build/lint/probe output, user or reviewer feedback, runtime evidence, stale specs/plans, implementation risk, and claim-boundary gaps.
 
-- test, build, lint, and probe output;
-- reviewer or user feedback;
-- new target, scope, entity, API, or log evidence;
-- implementation risk, missing evidence, and claim-boundary gaps;
-- architecture, scope, ownership, review-dispute, or claim-boundary risk;
-- whether active spec/plan is stale.
+Choose one decision:
 
-Decisions:
+- `continue`: route works; another iteration should proceed.
+- `pivot`: evidence breaks the current route; change plan or return to `alpha-goal`.
+- `expand`: goal remains valid but scope grew; usually return to `alpha-goal` or request review.
+- `harden`: behavior is mostly in place but evidence, edge cases, compatibility, or cleanup are insufficient.
+- `finish`: acceptance appears met; enter `verify`.
 
-- `continue`: current route works; run another iteration.
-- `pivot`: evidence breaks the route; return `alpha-goal` or change the dynamic plan.
-- `expand`: goal remains valid but scope grew; usually return `alpha-goal` or review.
-- `harden`: core behavior is done but evidence or risk is insufficient.
-- `finish`: acceptance appears met; enter verify.
+If the same failure thread repeats three times without new evidence, stop patching and make a feedback judgment; consider independent review if available.
 
-Patch independent review for architecture, scope, ownership, review-dispute, or claim-boundary risk, etc. Correct any acceptance mistakes before moving on.
+### 4. Record
 
-### Phase 5: Next iteration
+Produce an Iteration Record proportional to risk. Keep low-risk records short, but preserve the core semantics: contract/context used, dynamic plan, preflight, execution, local evidence, feedback, acceptance delta, risks, decision, and next route. Use `references/iteration-record-schema.md` when exact field meanings are needed.
 
-Enter the next iteration if not blocked.
+Do not make final completion claims in an Iteration Record. Completion judgment belongs to `verify`.
 
-### Phase 6: Verify
+### 5. Route next
 
-Enter `verify` with your claim until you are 100% confident the goal is met.
+The next skill after `loop` can only be `alpha-goal` or `verify`. Continuing implementation means another iteration within the current `loop`, not a handoff to a different skill.
 
-</Process>
-
-Do not make final completion claims in an Iteration Record. Completion judgment belongs to `verify`. `BLOCKED` routes back to `alpha-goal`.
+- `ITERATION_CONTINUES`: run another slice in the current `loop`.
+- `ITERATION_READY_FOR_VERIFY`: enter `verify` with the current claim and evidence.
+- `RETURN_TO_ALPHA_GOAL`: enter `alpha-goal` to clarify or reframe before more mutation.
+- `BLOCKED`: report the blocker and smallest missing input, permission, tool, data, or environment.

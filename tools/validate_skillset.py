@@ -19,8 +19,8 @@ REQUIRED_SKILLS = ["alpha-goal", "loop", "verify"]
 SKILLS_DIR = "skills"
 IMPLICIT_POLICY = {
     "alpha-goal": "true",
-    "loop": "false",
-    "verify": "false",
+    "loop": "true",
+    "verify": "true",
 }
 ALLOWED_FRONT_MATTER_KEYS = {"name", "description"}
 MIN_SHORT_DESCRIPTION_LEN = 25
@@ -295,10 +295,11 @@ def check_consistency(root: Path) -> bool:
         text = alpha_goal.read_text(encoding="utf-8")
         for phrase in [
             "Artifact safety gate",
-            "not mandatory headings",
-            "equivalent wording",
-            "Enter `loop`",
-            "</Process>",
+            "chat-only",
+            "Route",
+            "bounded exploration",
+            "Goal Contract",
+            "handoff to `loop`",
             ".alpha-goal/",
             "docs/design/YYYYMMDD-<slug>.md",
         ]:
@@ -309,8 +310,7 @@ def check_consistency(root: Path) -> bool:
             "non-goal semantics": ["non-goals", "out-of-scope", "excluded scope"],
             "decision-boundary semantics": ["decision boundaries", "what you may decide", "user-owned decisions"],
             "acceptance semantics": ["acceptance criteria", "success criteria", "acceptance/evidence"],
-            "user-input tooling semantics": ["request_user_input", "structured user-input tooling"],
-            "open-ended question semantics": ["plain assistant messages", "open-ended socratic questions"],
+            "user-input tooling semantics": ["request_user_input"],
         }
         for label, options in semantic_groups.items():
             if not any(option in lower_text for option in options):
@@ -322,16 +322,23 @@ def check_consistency(root: Path) -> bool:
             ok = fail("skills/loop/references/loop-modes.md: missing compact low-risk Debug Receipt guidance")
         if "return to `alpha-goal` instead of forcing the evidence into the old target" not in text:
             ok = fail("skills/loop/references/loop-modes.md: missing wrong-target debug reframe guidance")
+        if "dominant uncertainty" not in text:
+            ok = fail("skills/loop/references/loop-modes.md: missing decision-axis mode guidance")
 
     if verify.exists():
         text = verify.read_text(encoding="utf-8")
-        if "low-risk local bug fixes without a formal RCA claim" not in text:
-            ok = fail("skills/verify/SKILL.md: missing low-risk local bug verification boundary")
+        if "Bug fixes and root-cause claims need `ROOT_CAUSE_CONFIRMED`" not in text:
+            ok = fail("skills/verify/SKILL.md: missing root-cause-first verification boundary")
+        for phrase in ["proportional", "lower-boundary test cannot prove a higher-boundary", "strongest material risk"]:
+            if phrase not in text:
+                ok = fail(f"skills/verify/SKILL.md: missing proportional verification guidance {phrase!r}")
 
     if worktree_safety.exists():
         text = worktree_safety.read_text(encoding="utf-8")
         if ".alpha-goal/" not in text:
             ok = fail("skills/loop/references/worktree-safety.md: missing .alpha-goal/ ignore guidance")
+        if "Isolation is valid when" not in text:
+            ok = fail("skills/loop/references/worktree-safety.md: missing generalized isolation validity guidance")
 
     if install_script.exists():
         text = install_script.read_text(encoding="utf-8")
