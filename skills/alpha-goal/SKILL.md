@@ -156,7 +156,7 @@ Self-review the output against the route:
 
 For broad or high-risk contracts, request independent review when available without leaking intended answers. Ask the user to confirm only user-owned decisions. If the user rejects, changes, or narrows requirements, return to clarification.
 
-After review, handoff to `loop` for mutation or `verify` for a completion/readiness claim. Do not commit the contract, push, or open PRs/MRs unless the user or repository workflow already authorizes that side effect.
+After self-review and user acceptance of a Goal Contract, commit the Goal Contract and handoff to `loop` for mutation. For read-only exploration or verify routes, handoff without creating a contract commit unless the accepted output is a durable contract. Push, PR/MR creation, deployment, or other external side effects still require explicit authorization.
 
 ## Final checklist
 
