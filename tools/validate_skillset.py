@@ -311,6 +311,8 @@ def check_consistency(root: Path) -> bool:
             "pressure-test lens",
             "smallest useful design/spec",
             "Diagnostic contract",
+            "Only an accepted Goal Contract",
+            "not execution handoff artifacts",
             "current alpha-goal responsibility boundary",
         ]:
             if phrase not in text:
