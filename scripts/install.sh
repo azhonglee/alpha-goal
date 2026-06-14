@@ -639,7 +639,8 @@ run_skillset_validation() {
 
   local output
   if ! output="$(python3 "$repo_root/tools/validate_skillset.py" "$repo_root" 2>&1)"; then
-    echo "$output" >&2
+    echo "Validation failed (tools/validate_skillset.py). Re-run with --verbose for full output." >&2
+    printf '%s\n' "$output" | grep '^FAIL ' >&2 || true
     exit 1
   fi
 }
