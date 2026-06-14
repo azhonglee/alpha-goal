@@ -18,7 +18,7 @@ Use this skill to convert an unclear engineering request into a safe next action
 ## Process
 
 ```text
-Discover proportionally -> Clarify if needed -> Pressure-test proportionally -> Crystallize -> Review / handoff
+Discover proportionally -> Clarify if needed -> Pressure-test proportionally -> Crystallize -> Review -> Handoff
 ```
 
 ### 1. Discover proportionally
@@ -152,32 +152,31 @@ Default durable paths:
 - transcript: `.alpha-goal/interviews/YYYYMMDD-<slug>.md`
 - Goal Contract: `docs/design/YYYYMMDD-<slug>.md`
 
-### 5. Review / handoff
+### 5. Review
 
-Self-review the output against the artifact, evidence, and next-action boundary:
+Self-review the artifact against the evidence and boundaries. If review fails, return to the earliest phase that can fix the failure: Discover for missing facts, Clarify for user-owned uncertainty, Pressure-test for weak assumptions or boundaries, or Crystallize for an invalid artifact.
+
+Review checks:
 
 - Does it answer the actual user request rather than a process template?
 - Are non-goals, decision boundaries, and claim boundaries explicit enough?
 - Are codebase facts labeled as evidence, and guesses labeled as inference?
 - Would the next agent know what not to do?
-- Are recommended next steps resolved as `AUTO_PROBE`, `ASK_USER`, or `BLOCKED`?
-- If a safe read-only diagnostic probe remains, did we run it instead of merely recommending it?
-
-Resolve next safe actions before ending:
-
-- Continue an `AUTO_PROBE` when a read-only fact, code inspection, log query, local evidence check, or diagnostic probe is safely discoverable inside the current alpha-goal boundary and needs no new permission, mutation, external side effect, or user-owned judgment.
-- Ask with `request_user_input` when the next step requires a user-owned decision, permission request, external side effect, mutation, data repair, push, PR/MR, deployment, credential use, risk acceptance, or claim-boundary decision.
-- Block when missing permission, tool, data, environment, or safe-state prevents progress; state the concrete blocker.
-- Hand off to execution only after an accepted Goal Contract; probes that execute the contract belong to the authorized execution phase.
-- For diagnostic work, run only probes needed to define or validate the diagnostic boundary before handoff; do not run accepted diagnostic execution-plan probes inside `alpha-goal`.
+- If a safe read-only diagnostic probe remains inside the current alpha-goal boundary, return to Discover and run it instead of merely recommending it.
+- If the next step requires a user-owned decision, permission request, external side effect, mutation, data repair, push, PR/MR, deployment, credential use, risk acceptance, or claim-boundary decision, return to Clarify and ask with `request_user_input` when available.
+- If missing permission, tool, data, environment, or safe-state prevents progress, return to Crystallize and state the concrete blocker.
+- For diagnostic work, keep only probes needed to define or validate the diagnostic boundary inside `alpha-goal`; probes that execute an accepted diagnostic plan belong to `loop`.
 
 For broad or high-risk contracts, request independent review when available without leaking intended answers.
 
-Treat Goal Contract acceptance as a user-owned decision: when an execution handoff contract is ready, use `request_user_input` to ask the user to accept, reject, or change it.
-If the user rejects, changes, or narrows requirements, return to clarification.
+### 6. Handoff
 
-After self-review and user acceptance of a Goal Contract, commit allowed process artifacts respecting repository isolation and artifact safety rules, then hand off the next approved slice to the authorized execution phase, such as `loop`. Without an accepted Goal Contract, do not hand off to execution. For diagnostic contracts, the first execution slice is diagnosis/probe unless repair is already authorized by evidence. For read-only exploration outputs, leave `alpha-goal` without creating a contract commit unless the accepted output is a durable contract. Push, PR/MR creation, deployment, or other external side effects still require explicit authorization.
+Handoff means passing an accepted Goal Contract to `loop` or another authorized execution phase. Non-contract artifacts return to the user or inform a later Goal Contract; they do not hand off to execution.
+
+Treat Goal Contract acceptance as a user-owned decision: when an execution handoff contract is ready, use `request_user_input` to ask the user to accept, reject, or change it. If the user rejects, changes, or narrows requirements, return to Clarify.
+
+After self-review and user acceptance of a Goal Contract, commit allowed process artifacts respecting repository isolation and artifact safety rules, then hand off the next approved slice to the authorized execution phase, such as `loop`. Without an accepted Goal Contract, do not hand off to execution. For diagnostic contracts, the first execution slice is diagnosis/probe unless repair is already authorized by evidence. Push, PR/MR creation, deployment, or other external side effects still require explicit authorization.
 
 ## Final checklist
 
-Artifact safety recorded; context captured; discovery depth matched downstream authority; ambiguity shown when clarifying; non-goals and decision boundaries closed or blocker recorded; diagnostic contracts state whether repair is authorized; execution handoff has an accepted Goal Contract, or blocker/non-execution output is stated; pressure pass complete when a Goal Contract is produced; artifact matches the safe next action; next safe actions resolved with auto-probes executed, user decisions asked, or blockers stated; no implementation mutation performed.
+Artifact safety recorded; context captured; discovery depth matched downstream authority; ambiguity shown when clarifying; non-goals and decision boundaries closed or blocker recorded; diagnostic contracts state whether repair is authorized; review passed or returned to the needed earlier phase; execution handoff has an accepted Goal Contract, or non-contract output/blocker returns to the user; pressure pass complete when a Goal Contract is produced; artifact matches the safe next action; no implementation mutation performed.
