@@ -2,3 +2,5 @@ interface:
   display_name: "Alpha Goal"
   short_description: "Clarify goals and safe routes"
   default_prompt: "Use $alpha-goal to clarify ambiguous engineering goals, frame read-only exploration, or produce a Goal Contract before iteration."
+policy:
+  allow_implicit_invocation: true

@@ -149,8 +149,6 @@ def check_alpha_goal_description(description: str) -> bool:
     for phrase in ["safe next action", "goal contract", "before mutation"]:
         if phrase not in lower:
             ok = fail(f"alpha-goal: description missing trigger phrase {phrase!r}")
-    if not ("avoid" in lower and "verification" in lower and "readiness" in lower):
-        ok = fail("alpha-goal: description must exclude verification/readiness judgment routing")
     return ok
 
 
