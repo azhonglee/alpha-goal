@@ -276,7 +276,7 @@ def check_consistency(root: Path) -> bool:
     if alpha_goal.exists():
         text = alpha_goal.read_text(encoding="utf-8")
         for phrase in [
-            "Artifact safety gate",
+            "artifact safety gate",
             "chat-only",
             "Discover proportionally",
             "Bounded exploration answer",
@@ -289,12 +289,10 @@ def check_consistency(root: Path) -> bool:
             "pressure-test lens",
             "smallest useful design/spec",
             "Diagnostic contract",
-            "Calibrate discovery depth by downstream authority",
-            "Only an accepted Goal Contract",
-            "not implementation handoff artifacts",
+            "Calibrate discovery depth by the highest authority",
+            "accepted Goal Contract to `loop`",
+            "implementation handoff artifact",
             "current alpha-goal boundary",
-            "do not perform implementation mutation in the same run",
-            "must not override this mutation boundary",
             "Review fails if implementation mutation has started",
         ]:
             if phrase not in text:
