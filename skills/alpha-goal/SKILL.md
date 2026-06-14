@@ -36,9 +36,9 @@ Collect evidence about:
 Calibrate discovery depth by downstream authority, not by rigid request categories:
 
 - For a bounded read-only answer, discover enough to answer within a stated boundary or identify the safe auto-probe still needed.
-- For a design/spec, discover enough context to know which tradeoffs, non-goals, and mutation prerequisites must be resolved.
-- For a Goal Contract, discover whether target, scope, non-goals, decision boundaries, and acceptance/evidence expectations can be closed; later phases close and pressure-test them.
-- For diagnostic work, discover the symptom, observations, and competing hypotheses enough to decide whether more probe work is needed before any repair authorization.
+- For design work, discover enough to identify which tradeoffs, non-goals, and mutation prerequisites must be resolved.
+- For mutation work, discover enough to identify whether target, scope, non-goals, decision boundaries, and acceptance/evidence expectations can be closed; later phases close and pressure-test them.
+- For diagnostic work, discover enough to distinguish the symptom, observations, and competing hypotheses before any repair authorization.
 - For a possible blocker, discover enough to distinguish user-owned decisions from missing permission, unavailable tool/data/environment, or external-side-effect authorization; crystallization names the smallest blocker.
 
 Verification/completion/readiness judgment requests are out of scope for `alpha-goal` unless the claim, scope, or evidence boundary itself is unclear; otherwise they belong to `verify`.
@@ -152,20 +152,6 @@ Default durable paths:
 - transcript: `.alpha-goal/interviews/YYYYMMDD-<slug>.md`
 - Goal Contract: `docs/design/YYYYMMDD-<slug>.md`
 
-### Next safe action gate
-
-Before ending with recommendations, next steps, or a handoff note, decide for each next step whether it is:
-
-- `AUTO_PROBE`: a safely discoverable read-only fact, code inspection, log query, local evidence check, or diagnostic probe that stays inside current target/scope and does not require new permission, mutation, external side effects, or user-owned judgment.
-- `ASK_USER`: a decision about target, scope, acceptance, non-goals, risk acceptance, permission request, external side effect, mutation, data repair, push, PR/MR, deployment, credential use, or claim boundary.
-- `BLOCKED`: missing permission, tool, data, environment, or safe-state condition prevents progress.
-
-Do not stop with a bare recommendation when an `AUTO_PROBE` remains inside the current alpha-goal responsibility boundary. Continue the probe in the same turn when budget and context allow, or state the concrete blocker. After an accepted Goal Contract, probes that execute the contract belong to the authorized execution phase.
-
-Use `request_user_input` when an `ASK_USER` next step is required and the runtime provides it.
-
-For diagnostic work, run safely executable probes that are necessary to define or validate the diagnostic boundary. Do not run probes that belong to an accepted diagnostic execution plan after handoff.
-
 ### 5. Review / handoff
 
 Self-review the output against the artifact, evidence, and next-action boundary:
@@ -176,6 +162,14 @@ Self-review the output against the artifact, evidence, and next-action boundary:
 - Would the next agent know what not to do?
 - Are recommended next steps resolved as `AUTO_PROBE`, `ASK_USER`, or `BLOCKED`?
 - If a safe read-only diagnostic probe remains, did we run it instead of merely recommending it?
+
+Resolve next safe actions before ending:
+
+- Continue an `AUTO_PROBE` when a read-only fact, code inspection, log query, local evidence check, or diagnostic probe is safely discoverable inside the current alpha-goal boundary and needs no new permission, mutation, external side effect, or user-owned judgment.
+- Ask with `request_user_input` when the next step requires a user-owned decision, permission request, external side effect, mutation, data repair, push, PR/MR, deployment, credential use, risk acceptance, or claim-boundary decision.
+- Block when missing permission, tool, data, environment, or safe-state prevents progress; state the concrete blocker.
+- Hand off to execution only after an accepted Goal Contract; probes that execute the contract belong to the authorized execution phase.
+- For diagnostic work, run only probes needed to define or validate the diagnostic boundary before handoff; do not run accepted diagnostic execution-plan probes inside `alpha-goal`.
 
 For broad or high-risk contracts, request independent review when available without leaking intended answers.
 

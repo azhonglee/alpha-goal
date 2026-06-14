@@ -304,7 +304,7 @@ def check_consistency(root: Path) -> bool:
             "authorized execution phase",
             ".alpha-goal/",
             "docs/design/YYYYMMDD-<slug>.md",
-            "Next safe action gate",
+            "Resolve next safe actions before ending",
             "AUTO_PROBE",
             "ASK_USER",
             "BLOCKED",
@@ -314,7 +314,7 @@ def check_consistency(root: Path) -> bool:
             "discovery depth matched downstream authority",
             "Only an accepted Goal Contract",
             "not execution handoff artifacts",
-            "current alpha-goal responsibility boundary",
+            "current alpha-goal boundary",
         ]:
             if phrase not in text:
                 ok = fail(f"skills/alpha-goal/SKILL.md: missing alpha-goal guidance {phrase!r}")
