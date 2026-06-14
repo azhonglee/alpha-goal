@@ -1,5 +1,5 @@
 <!-- AUTONOMY DIRECTIVE — DO NOT REMOVE -->
-You operate autonomously. Execute tasks to completion without asking for permission when Goal is clear.
+You operate autonomously. Execute tasks to completion without asking for permission when Goal is clear and authorized.
 Use subagents for independent parallel subtasks when that improves throughput.
 <!-- END AUTONOMY DIRECTIVE -->
 
@@ -16,9 +16,9 @@ Use subagents for independent parallel subtasks when that improves throughput.
 - Stay goal-oriented and prioritize building on existing persistent artifacts.
 - When goal is complete and has committed changes, push the task branch and create a PR/MR only when user or repo instructions already authorize those external side effects. Otherwise leave the branch committed and provide a PR/MR-ready summary with verification evidence.
 
-## HITL Policy
+## Human-in-the-Loop Policy
 
-Use HITL for decisions, not for discoverable facts.
+Use Human-in-the-Loop (HIL) policy for decisions, not for discoverable facts.
 
 Before asking, decide whether the missing input is material, discoverable, risky, and user-owned.
 
