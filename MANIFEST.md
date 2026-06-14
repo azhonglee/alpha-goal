@@ -25,10 +25,6 @@
 | `skills/verify/scripts/evidence-summary.sh` | No | Prints changed files, diff stat, diff check status, and recent commits. |
 | `tools/validate_skillset.py` | No | Checks skill front matter, invocation metadata, bundled references/scripts, install docs, templates, `skills/` layout, and selected consistency rules. |
 
-## Invocation policy
-
-All stage skills set `policy.allow_implicit_invocation: true`; entry requirements and route boundaries still decide whether `alpha-goal`, `loop`, or `verify` should act.
-
 默认主路径是：
 
 ```text

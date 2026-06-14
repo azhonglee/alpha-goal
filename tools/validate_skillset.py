@@ -2,7 +2,7 @@
 """Validate a local Codex alpha-goal skillset layout.
 
 This intentionally stays lightweight and dependency-free. It checks skill
-metadata, invocation policy, discoverability of bundled references/scripts,
+metadata, discoverability of bundled references/scripts,
 basic shell syntax for helper scripts, and install-document coverage.
 It does not validate Codex runtime behavior.
 """
@@ -17,11 +17,6 @@ import tomllib
 
 REQUIRED_SKILLS = ["alpha-goal", "loop", "verify"]
 SKILLS_DIR = "skills"
-IMPLICIT_POLICY = {
-    "alpha-goal": "true",
-    "loop": "true",
-    "verify": "true",
-}
 ALLOWED_FRONT_MATTER_KEYS = {"name", "description"}
 MIN_SHORT_DESCRIPTION_LEN = 25
 MAX_SHORT_DESCRIPTION_LEN = 64
@@ -68,7 +63,7 @@ def contains_cjk(text: str) -> bool:
 
 def parse_openai_yaml_metadata(text: str) -> dict[str, dict[str, str]]:
     """Parse the constrained agents/openai.yaml shape without external dependencies."""
-    data: dict[str, dict[str, str]] = {"interface": {}, "policy": {}}
+    data: dict[str, dict[str, str]] = {"interface": {}}
     section: str | None = None
     seen_paths: set[tuple[str, str]] = set()
 
@@ -107,7 +102,6 @@ def check_openai_yaml(skill: str, openai_yaml: Path) -> bool:
         return fail(f"{skill}: invalid agents/openai.yaml: {exc}")
 
     interface = data["interface"]
-    policy = data["policy"]
     missing_interface = REQUIRED_OPENAI_INTERFACE_KEYS - set(interface)
     if missing_interface:
         ok = fail(f"{skill}: missing interface field(s): {sorted(missing_interface)}")
@@ -127,18 +121,6 @@ def check_openai_yaml(skill: str, openai_yaml: Path) -> bool:
     default_prompt = interface.get("default_prompt", "")
     if default_prompt and f"${skill}" not in default_prompt:
         ok = fail(f"{skill}: default_prompt should mention ${skill}")
-
-    policy_keys = set(policy)
-    if policy_keys != {"allow_implicit_invocation"}:
-        ok = fail(f"{skill}: policy must contain only allow_implicit_invocation, got {sorted(policy_keys)}")
-    implicit_value = policy.get("allow_implicit_invocation")
-    if implicit_value not in {"true", "false"}:
-        ok = fail(f"{skill}: allow_implicit_invocation must be true or false, got {implicit_value!r}")
-    elif implicit_value != IMPLICIT_POLICY[skill]:
-        ok = fail(
-            f"{skill}: allow_implicit_invocation is {implicit_value!r}, "
-            f"expected {IMPLICIT_POLICY[skill]!r}"
-        )
 
     return ok
 
