@@ -175,7 +175,7 @@ Handoff means passing an accepted Goal Contract to `loop`. Non-contract artifact
 
 Treat Goal Contract acceptance as a user-owned decision: when a `loop` handoff contract is ready, use `request_user_input` to ask the user to accept, reject, or change it. If the user rejects, changes, or narrows requirements, return to Clarify.
 
-After self-review and user acceptance of a Goal Contract, commit allowed process artifacts respecting repository isolation and artifact safety rules, then hand off the approved slice to `loop`. Without an accepted Goal Contract, do not hand off to `loop` or any implementation agent. For diagnostic contracts, the first `loop` slice is diagnosis/probe unless repair is already authorized by evidence. Push, PR/MR creation, deployment, or other external side effects remain separate actions and still require explicit authorization.
+After self-review and user acceptance of a Goal Contract, commit allowed process artifacts respecting repository isolation and artifact safety rules, then hand off the approved slice to `loop`. Without an accepted Goal Contract, do not hand off to `loop` or any implementation agent. For diagnostic contracts, hand off a repair slice only when the Goal Contract records root-cause evidence and explicitly authorizes repair; otherwise the first `loop` slice is diagnosis/probe. Push, PR/MR creation, deployment, or other external side effects remain separate actions and still require explicit authorization.
 
 ## Final checklist
 
