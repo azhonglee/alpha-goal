@@ -49,7 +49,7 @@ Common output targets:
 
 - `Clarifying question`: use when target, scope, non-goals, decision boundaries, constraints, or acceptance/evidence expectations would otherwise be guessed.
 - `Bounded exploration answer`: use for read-only audit, comparison, diagnosis direction, inventory, or evidence gathering when the boundary is clear enough to answer without mutation.
-- `Design/spec`: use when a concrete design decision is needed before implementation handoff.
+- `Design/spec`: use when a concrete design decision is needed before a future Goal Contract or execution handoff.
 - `Goal Contract`: use when mutation appears appropriate after the goal is clear; prepare context for an authorized execution phase such as `loop`, but do not implement inside `alpha-goal`.
 - `Diagnostic contract`: use when debugging needs handoff; include symptom, observations, competing hypotheses, root-cause evidence needed, and repair authorization gate.
 - `Return-to-user decision/blocker`: use when the next step requires a user-owned decision, permission, external side effect, risk acceptance, or missing data/tool/environment.
@@ -58,10 +58,12 @@ Raise the evidence bar when the output authorizes more downstream action:
 
 - Exploration can use bounded evidence and labeled uncertainty.
 - Design needs enough evidence to justify tradeoffs, non-goals, and mutation prerequisites.
-- Goal Contract needs target, scope, non-goals, decision boundaries, acceptance/evidence expectations, and user acceptance before handoff.
-- Diagnostic Contract needs evidence that defines the symptom and competing hypotheses; repair is not authorized until root-cause evidence is sufficient.
+- Goal Contract needs target, scope, non-goals, decision boundaries, acceptance/evidence expectations, and user acceptance before execution handoff.
+- Diagnostic Contract is a Goal Contract for debugging; it needs evidence that defines the symptom and competing hypotheses, and repair is not authorized until root-cause evidence is sufficient.
 
 Verification/completion/readiness judgment requests are out of scope for `alpha-goal` unless the claim, scope, or evidence boundary itself is unclear; otherwise they belong to `verify`.
+
+Only an accepted Goal Contract can hand off work to `loop` or another execution phase. Bounded exploration answers, clarifying questions, design/spec outputs, and blockers can inform a later Goal Contract, but they are not execution handoff artifacts by themselves.
 
 When the request is read-only, prefer safe evidence collection before asking, unless the target, claim boundary, or external access decision is user-owned. Before ending, apply the next safe action gate; do not manufacture a full implementation Goal Contract.
 
@@ -149,7 +151,7 @@ For `Goal Contract` or `Diagnostic contract`, create a Goal Contract covering th
 - technical context findings;
 - condensed transcript when useful.
 
-For `Design/spec`, produce the smallest useful design/spec that resolves the decision boundary: options considered, chosen direction, tradeoffs, non-goals, acceptance implications, and what must be true before mutation. Convert it to a Goal Contract only when implementation handoff is requested or clearly authorized.
+For `Design/spec`, produce the smallest useful design/spec that resolves the decision boundary: options considered, chosen direction, tradeoffs, non-goals, acceptance implications, and what must be true before mutation. It is not an execution handoff artifact; convert it to an accepted Goal Contract before any `loop` or execution handoff.
 
 Default durable paths:
 
@@ -186,11 +188,11 @@ Self-review the output against the output target, evidence bar, and next action 
 
 For broad or high-risk contracts, request independent review when available without leaking intended answers.
 
-Treat Goal Contract acceptance as a user-owned decision: when a handoff contract is ready, use `request_user_input` to ask the user to accept, reject, or change it.
+Treat Goal Contract acceptance as a user-owned decision: when an execution handoff contract is ready, use `request_user_input` to ask the user to accept, reject, or change it.
 If the user rejects, changes, or narrows requirements, return to clarification.
 
-After self-review and user acceptance of a Goal Contract, commit allowed process artifacts respecting repository isolation and artifact safety rules, then hand off the next approved slice to the authorized execution phase, such as `loop`. For diagnostic contracts, the first execution slice is diagnosis/probe unless repair is already authorized by evidence. For read-only exploration outputs, leave `alpha-goal` without creating a contract commit unless the accepted output is a durable contract. Push, PR/MR creation, deployment, or other external side effects still require explicit authorization.
+After self-review and user acceptance of a Goal Contract, commit allowed process artifacts respecting repository isolation and artifact safety rules, then hand off the next approved slice to the authorized execution phase, such as `loop`. Without an accepted Goal Contract, do not hand off to execution. For diagnostic contracts, the first execution slice is diagnosis/probe unless repair is already authorized by evidence. For read-only exploration outputs, leave `alpha-goal` without creating a contract commit unless the accepted output is a durable contract. Push, PR/MR creation, deployment, or other external side effects still require explicit authorization.
 
 ## Final checklist
 
-Artifact safety recorded; context captured; output target and evidence bar are explicit; ambiguity shown when clarifying; non-goals and decision boundaries closed or blocker recorded; diagnostic contracts state whether repair is authorized; handoff contract accepted or blocker stated; pressure pass complete when a Goal Contract is produced; output matches the chosen target; next safe actions resolved with auto-probes executed, user decisions asked, or blockers stated; no implementation mutation performed.
+Artifact safety recorded; context captured; output target and evidence bar are explicit; ambiguity shown when clarifying; non-goals and decision boundaries closed or blocker recorded; diagnostic contracts state whether repair is authorized; execution handoff has an accepted Goal Contract, or blocker/non-execution output is stated; pressure pass complete when a Goal Contract is produced; output matches the chosen target; next safe actions resolved with auto-probes executed, user decisions asked, or blockers stated; no implementation mutation performed.
