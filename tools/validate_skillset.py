@@ -309,7 +309,7 @@ def check_consistency(root: Path) -> bool:
             "pressure-test lens",
             "smallest useful design/spec",
             "Diagnostic contract",
-            "discovery depth matched downstream authority",
+            "Calibrate discovery depth by downstream authority",
             "Only an accepted Goal Contract",
             "not implementation handoff artifacts",
             "current alpha-goal boundary",
