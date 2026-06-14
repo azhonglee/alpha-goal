@@ -55,8 +55,6 @@ Dynamic planning answers only the current iteration:
 
 Create or update a durable plan only for multiple independent loops, modules, repos, handoff/recovery needs, external side effects, irreversible/high-risk changes, rollback/compatibility decisions, contested ownership, or user request. Small patches can record the plan in the Iteration Record.
 
-If persistent goal tooling is already active, align the slice with that objective. Do not create a new persistent goal unless the user explicitly requested that runtime behavior.
-
 ### 2. Execute
 
 - Run mutation preflight, or record an equivalent manual preflight before edits; low-risk slices may use compact manual evidence, while dirty state, generated output, submodules, cross-file behavior, or user changes require fuller preflight.
@@ -120,7 +118,10 @@ Classify feedback before deciding:
 - reframe feedback: target, scope, acceptance, non-goals, constraints, decision boundaries, authorization, or final claim changed;
 - blocker feedback: missing permission, tool, data, environment, or user-owned decision.
 
-If the same failure thread repeats three times without new evidence, stop patching and make a feedback judgment; consider independent review if available.
+Stop when:
+- evidence no longer improves
+- risk materially increases
+- same failure repeats
 
 ### 4. Decide next route
 

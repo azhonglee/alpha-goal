@@ -106,7 +106,7 @@ Use each pressure-test lens at most once when it reduces real uncertainty. Press
 - `contrarian`: challenge the core assumption.
 - `simplifier`: ask for the smallest useful scope.
 - `ontologist`: reframe symptoms into the underlying entity, state, or cause.
-- `evidence-checker`: How would we know we are wrong?
+- `evidence-checker`: how would we know we are wrong?
 
 Follow-up ladder:
 
@@ -134,7 +134,7 @@ For Goal Contracts, use any concise headings that cover the needed semantics:
 - decision boundaries, constraints, and assumptions resolved;
 - testable acceptance criteria and evidence expectations;
 - for diagnostic goals: symptom, observations, competing hypotheses, cause-evidence needed, and repair authorization gate;
-- pressure-pass findings;
+- pressure-test findings;
 - brownfield evidence vs inference;
 - technical context findings;
 - condensed transcript when useful.
