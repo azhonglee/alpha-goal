@@ -1,6 +1,6 @@
 ---
 name: alpha-goal
-description: Turn ambiguous engineering/debug/design requests into a safe next action before mutation. Use for under-specified goals, target/scope uncertainty, decision-boundary gaps, bounded read-only exploration, or preparing a Goal Contract for loop.
+description: Turn ambiguous or high-risk engineering/debug/design requests into a safe next action before mutation. Use for under-specified goals, production or log_id bug reports, root-cause-before-fix debugging, target/scope uncertainty, decision-boundary gaps, bounded read-only exploration, or preparing a Goal Contract for loop.
 ---
 
 # Alpha Goal
