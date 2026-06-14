@@ -14,6 +14,8 @@ Use this skill to convert an unclear engineering request into a safe next action
 - Ask only for user-owned decisions. Discover codebase facts yourself before asking about internals.
 - Use `request_user_input` by default when user input is needed and the runtime provides it.
 - Goal Contract acceptance authorizes only handoff to `loop`; it does not authorize push, PR/MR creation, deployment, data repair, permission requests, or other external side effects in this skill.
+- When this skill is active, do not perform implementation mutation in the same run. You may gather evidence, run read-only probes, create allowed process artifacts, or produce a Goal Contract. Implementation edits belong to `loop` after an accepted Goal Contract handoff.
+- Downstream implementation skills or repo workflows may inform evidence, but they must not override this mutation boundary. If implementation workflow is needed, hand off through `loop` after Goal Contract acceptance.
 - Choose the lightest safe handling that can make the next action reliable; keep it as small as safety allows. Avoid ceremony that does not reduce ambiguity or risk.
 
 ## Process
@@ -163,6 +165,7 @@ Review checks:
 - Are non-goals, decision boundaries, and claim boundaries explicit enough?
 - Are codebase facts labeled as evidence, and guesses labeled as inference?
 - Would the next agent know what not to do?
+- Review fails if implementation mutation has started before an accepted Goal Contract or equivalent accepted context exists; stop, report the boundary breach, and return to Crystallize/Handoff.
 - If a safe read-only diagnostic probe remains inside the current alpha-goal boundary, return to Discover and run it instead of merely recommending it.
 - If the next step requires a user-owned decision, permission request, external side effect, mutation, data repair, push, PR/MR, deployment, credential use, risk acceptance, or claim-boundary decision, return to Clarify and ask with `request_user_input` when available.
 - If missing permission, tool, data, environment, or safe-state prevents progress, return to Crystallize and state the concrete blocker.
@@ -172,7 +175,7 @@ For broad or high-risk contracts, request independent review when available with
 
 ### 6. Handoff
 
-Handoff means passing an accepted Goal Contract to `loop`. Non-contract artifacts return to the user or inform a later Goal Contract; they do not hand off to implementation.
+Handoff means passing an accepted Goal Contract to `loop`. Non-contract artifacts return to the user or inform a later Goal Contract; they do not hand off to implementation. Do not treat handoff as permission for the same alpha-goal run to start implementation work.
 
 Treat Goal Contract acceptance as a user-owned decision: when a `loop` handoff contract is ready, use `request_user_input` to ask the user to accept, reject, or change it. If the user rejects, changes, or narrows requirements, return to Clarify.
 
