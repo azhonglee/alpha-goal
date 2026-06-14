@@ -50,7 +50,8 @@ Choose the route from semantics, not headings:
 - `DESIGN`: a concrete design/spec is needed before implementation.
 - `IMPLEMENT`: mutation may follow after a reviewed Goal Contract or equivalent approved context exists.
 - `DEBUG`: prove the root cause before any fix; if cause is unconfirmed, frame the next route as diagnosis/probe, not repair.
-- `VERIFY`: the user asks whether current evidence supports a completion/readiness/correctness claim.
+
+Verification/completion/readiness judgment requests should use `verify` directly, not `alpha-goal`; only clarify with `alpha-goal` when the claim, scope, or evidence boundary itself is unclear.
 
 If the request is explicitly read-only and the target/evidence boundary is clear enough, answer the bounded exploration directly with findings, evidence, routed next steps, and residual uncertainty. Before ending, apply the next-step routing gate; do not manufacture a full implementation Goal Contract.
 
@@ -176,7 +177,7 @@ For broad or high-risk contracts, request independent review when available with
 Treat Goal Contract acceptance as a user-owned decision: when a handoff contract is ready, use `request_user_input` to ask the user to accept, reject, or change it.
 If the user rejects, changes, or narrows requirements, return to clarification.
 
-After self-review and user acceptance of a Goal Contract, commit it and handoff to `loop` for the next approved slice. For diagnostic contracts, the first loop slice is diagnosis/probe unless repair is already authorized by evidence. For read-only exploration or verify routes, handoff without creating a contract commit unless the accepted output is a durable contract. Push, PR/MR creation, deployment, or other external side effects still require explicit authorization.
+After self-review and user acceptance of a Goal Contract, commit it and handoff to `loop` for the next approved slice. For diagnostic contracts, the first loop slice is diagnosis/probe unless repair is already authorized by evidence. For read-only exploration routes, handoff without creating a contract commit unless the accepted output is a durable contract. Push, PR/MR creation, deployment, or other external side effects still require explicit authorization.
 
 ## Final checklist
 
