@@ -13,13 +13,13 @@ Use this skill to convert an unclear engineering request into a safe next action
 - Write process artifacts only after the artifact safety gate. If unsafe, keep artifacts in chat.
 - Ask only for user-owned decisions. Discover codebase facts yourself before asking about internals.
 - Use `request_user_input` by default when user input is needed and the runtime provides it.
-- Goal Contract acceptance authorizes only handoff to `loop`; it does not authorize push, PR/MR creation, deployment, data repair, permission requests, or other external side effects.
+- Goal Contract acceptance authorizes only handoff to `loop`; it does not authorize push, PR/MR creation, deployment, data repair, permission requests, or other external side effects in this skill.
 - Choose the lightest safe handling that can make the next action reliable; keep it as small as safety allows. Avoid ceremony that does not reduce ambiguity or risk.
 
 ## Process
 
 ```text
-Discover proportionally -> Clarify if needed -> Pressure-test proportionally -> Crystallize -> Review -> Handoff
+Discover proportionally -> Clarify -> Pressure-test proportionally -> Crystallize -> Review -> Handoff
 ```
 
 ### 1. Discover proportionally
@@ -58,7 +58,7 @@ Minimum context can be compact: task statement, desired outcome, probable intent
 
 Announce only the state that helps the user decide or follow the next action. For simple read-only exploration, a lightweight boundary note is enough; report depth, ambiguity, or artifact location only when they materially affect clarification, persistence, or handoff.
 
-### 2. Clarify if needed
+### 2. Clarify
 
 Do a clarity check every time, but ask only when material user-owned uncertainty remains. Return to clarification when target, scope, non-goals, decision boundaries, evidence needs, or next safe action would otherwise be guessed.
 
@@ -178,6 +178,3 @@ Treat Goal Contract acceptance as a user-owned decision: when a `loop` handoff c
 
 After self-review and user acceptance of a Goal Contract, commit allowed process artifacts respecting repository isolation and artifact safety rules, then hand off the approved slice to `loop`. Without an accepted Goal Contract, do not hand off to `loop` or any implementation agent. For diagnostic contracts, hand off a repair slice only when the Goal Contract records root-cause evidence and explicitly authorizes repair; otherwise the first `loop` slice is diagnosis/probe.
 
-## Final checklist
-
-Artifact safety recorded; context captured; discovery depth matched downstream authority; ambiguity shown when clarifying; non-goals and decision boundaries closed or blocker recorded; diagnostic contracts state whether repair is authorized; review passed or returned to the needed earlier phase; `loop` handoff has an accepted Goal Contract, or non-contract output/blocker returns to the user; pressure pass complete when a Goal Contract is produced; artifact matches the safe next action; no implementation mutation performed.
