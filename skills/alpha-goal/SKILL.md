@@ -5,7 +5,7 @@ description: Clarify ambiguous engineering goals with Socratic interview, ambigu
 
 # Alpha Goal
 
-Use this skill to convert an unclear engineering request into a safe next action. The output may be a Goal Contract, a bounded read-only exploration answer, or a return-to-user decision; do not force every request into the same artifact.
+Use this skill to convert an unclear engineering request into a safe next action. The output may be a Goal Contract, a bounded read-only exploration answer, a design/spec, or a return-to-user decision; do not force every request into the same artifact.
 
 ## Boundaries
 
@@ -18,18 +18,32 @@ Use this skill to convert an unclear engineering request into a safe next action
 ## Process
 
 ```text
-Discover -> Decide output target and evidence bar -> Clarify if needed -> Pressure-test proportionally -> Crystallize -> Review / next safe action
+Discover proportionally -> Clarify if needed -> Pressure-test proportionally -> Crystallize -> Review / handoff
 ```
 
-### 1. Discover
+### 1. Discover proportionally
 
-Collect just enough evidence to choose a safe output target and evidence bar:
+Collect just enough evidence to make the next action safe:
 
 - user intent, desired outcome, stated solution, constraints;
 - target repo/path/service/module and likely codebase touchpoints;
 - candidate repos in workspaces or aggregators;
 - existing work or durable specs when likely;
 - unknowns, non-goals, decision-boundary risks, and acceptance/evidence gaps.
+
+Calibrate discovery depth by what the next action would authorize, not by rigid request categories:
+
+- A bounded read-only answer needs enough evidence to answer within a stated boundary and label uncertainty.
+- A design/spec needs enough evidence to justify tradeoffs, non-goals, and mutation prerequisites.
+- A Goal Contract needs target, scope, non-goals, decision boundaries, acceptance/evidence expectations, and user acceptance before execution handoff.
+- A diagnostic contract is a Goal Contract for debugging; it needs evidence that defines the symptom and competing hypotheses, and repair is not authorized until root-cause evidence is sufficient.
+- A return-to-user decision/blocker needs the smallest missing user-owned decision, permission, external side effect, risk acceptance, tool, data, or environment.
+
+Verification/completion/readiness judgment requests are out of scope for `alpha-goal` unless the claim, scope, or evidence boundary itself is unclear; otherwise they belong to `verify`.
+
+Only an accepted Goal Contract can hand off work to `loop` or another execution phase. Bounded exploration answers, clarifying questions, design/spec outputs, and blockers can inform a later Goal Contract, but they are not execution handoff artifacts by themselves.
+
+When the request is read-only, prefer safe evidence collection before asking, unless the target, claim boundary, or external access decision is user-owned. Before ending, apply the next safe action gate; do not manufacture a full implementation Goal Contract.
 
 Derive a short `<slug>` for the goal boundary. Do not create empty directories.
 
@@ -41,35 +55,9 @@ Minimum context can be compact: task statement, desired outcome, probable intent
 
 Announce only the state that helps the user decide or follow the next action. For simple read-only exploration, a lightweight boundary note is enough; report depth, ambiguity, or artifact location only when they materially affect clarification, persistence, or handoff.
 
-### 2. Decide output target and evidence bar
+### 2. Clarify if needed
 
-Do not classify requests into rigid categories. Decide what safe output is needed now and what evidence bar must be met before producing it. Use labels only to describe the output target, not to force a workflow path.
-
-Common output targets:
-
-- `Clarifying question`: use when target, scope, non-goals, decision boundaries, constraints, or acceptance/evidence expectations would otherwise be guessed.
-- `Bounded exploration answer`: use for read-only audit, comparison, diagnosis direction, inventory, or evidence gathering when the boundary is clear enough to answer without mutation.
-- `Design/spec`: use when a concrete design decision is needed before a future Goal Contract or execution handoff.
-- `Goal Contract`: use when mutation appears appropriate after the goal is clear; prepare context for an authorized execution phase such as `loop`, but do not implement inside `alpha-goal`.
-- `Diagnostic contract`: use when debugging needs handoff; include symptom, observations, competing hypotheses, root-cause evidence needed, and repair authorization gate.
-- `Return-to-user decision/blocker`: use when the next step requires a user-owned decision, permission, external side effect, risk acceptance, or missing data/tool/environment.
-
-Raise the evidence bar when the output authorizes more downstream action:
-
-- Exploration can use bounded evidence and labeled uncertainty.
-- Design needs enough evidence to justify tradeoffs, non-goals, and mutation prerequisites.
-- Goal Contract needs target, scope, non-goals, decision boundaries, acceptance/evidence expectations, and user acceptance before execution handoff.
-- Diagnostic Contract is a Goal Contract for debugging; it needs evidence that defines the symptom and competing hypotheses, and repair is not authorized until root-cause evidence is sufficient.
-
-Verification/completion/readiness judgment requests are out of scope for `alpha-goal` unless the claim, scope, or evidence boundary itself is unclear; otherwise they belong to `verify`.
-
-Only an accepted Goal Contract can hand off work to `loop` or another execution phase. Bounded exploration answers, clarifying questions, design/spec outputs, and blockers can inform a later Goal Contract, but they are not execution handoff artifacts by themselves.
-
-When the request is read-only, prefer safe evidence collection before asking, unless the target, claim boundary, or external access decision is user-owned. Before ending, apply the next safe action gate; do not manufacture a full implementation Goal Contract.
-
-Return to clarification when target, scope, non-goals, decision boundaries, evidence bar, or next safe action would otherwise be guessed.
-
-### 3. Clarify only material user-owned uncertainty
+Do a clarity check every time, but ask only when material user-owned uncertainty remains. Return to clarification when target, scope, non-goals, decision boundaries, evidence needs, or next safe action would otherwise be guessed.
 
 Depth profiles are calibration aids, not ceremony:
 
@@ -88,7 +76,7 @@ Clarification cycle:
 - Stay on the same thread while the answer is vague; breadth without pressure is not progress.
 - Re-score ambiguity after each answer and show progress.
 - Continue while ambiguity is materially above threshold, readiness gates are open, pressure pass is incomplete for a contract handoff, or the user changes the target.
-- If the user stops clarification before readiness gates close, summarize unresolved gaps and proceed only by narrowing the output target, asking for explicit risk acceptance, or handing off with unresolved gaps clearly bounded.
+- If the user stops clarification before readiness gates close, summarize unresolved gaps and proceed only by narrowing the artifact, asking for explicit risk acceptance, or handing off with unresolved gaps clearly bounded.
 - For long interviews, respect the selected depth profile's practical cap; at the cap, crystallize the safest available output and list unresolved gaps.
 
 Clarity dimensions:
@@ -117,9 +105,9 @@ Readiness gates:
 
 When durable interview state is useful and the artifact safety gate passes, append interview summaries to `.alpha-goal/interviews/`; otherwise keep the summary in chat.
 
-### 4. Pressure-test
+### 3. Pressure-test proportionally
 
-Use each pressure-test lens at most once when it reduces real uncertainty. Pressure-test proportionally: optional for simple bounded exploration, useful for design, and required before a Goal Contract or diagnostic handoff:
+Use each pressure-test lens at most once when it reduces real uncertainty. Pressure-test is optional for simple bounded exploration, useful for design, and required before a Goal Contract or diagnostic handoff.
 
 - `contrarian`: challenge the core assumption.
 - `simplifier`: ask for the smallest useful scope.
@@ -132,11 +120,16 @@ Follow-up ladder:
 3. Force a boundary or tradeoff: exclude, defer, or reject something.
 4. If still symptom-level, reframe toward root cause or essence.
 
-### 5. Crystallize
+### 4. Crystallize
 
-Produce the lightest artifact that satisfies the chosen output target and evidence bar.
+Produce the lightest artifact that makes the next action safe:
 
-For `Goal Contract` or `Diagnostic contract`, create a Goal Contract covering these semantics with any concise headings:
+- `Clarifying question` or `Return-to-user decision/blocker`: name the missing user-owned decision, risk acceptance, permission, tool, data, or environment.
+- `Bounded exploration answer`: provide findings, evidence, residual uncertainty, and resolved next actions; state whether a Goal Contract is needed before mutation.
+- `Design/spec`: provide the smallest useful design/spec that resolves the decision boundary: options considered, chosen direction, tradeoffs, non-goals, acceptance implications, and what must be true before mutation. It is not an execution handoff artifact; convert it to an accepted Goal Contract before any `loop` or execution handoff.
+- `Goal Contract` or `Diagnostic contract`: create a Goal Contract covering the relevant semantics below.
+
+For Goal Contracts, use any concise headings that cover the needed semantics:
 
 - metadata: profile, rounds, final ambiguity, threshold, context type;
 - context snapshot reference/path or chat-only note;
@@ -151,15 +144,11 @@ For `Goal Contract` or `Diagnostic contract`, create a Goal Contract covering th
 - technical context findings;
 - condensed transcript when useful.
 
-For `Design/spec`, produce the smallest useful design/spec that resolves the decision boundary: options considered, chosen direction, tradeoffs, non-goals, acceptance implications, and what must be true before mutation. It is not an execution handoff artifact; convert it to an accepted Goal Contract before any `loop` or execution handoff.
-
 Default durable paths:
 
 - context: `.alpha-goal/context/YYYYMMDD-<slug>.md`
 - transcript: `.alpha-goal/interviews/YYYYMMDD-<slug>.md`
 - Goal Contract: `docs/design/YYYYMMDD-<slug>.md`
-
-For read-only exploration, output findings, evidence, residual uncertainty, resolved next actions, and whether a Goal Contract is needed before any mutation. Before ending, apply the next safe action gate: continue safe read-only probes, ask for user-owned decisions, or state blockers.
 
 ### Next safe action gate
 
@@ -175,9 +164,9 @@ Use `request_user_input` when an `ASK_USER` next step is required and the runtim
 
 For diagnostic work, run safely executable probes that are necessary to define or validate the diagnostic boundary. Do not run probes that belong to an accepted diagnostic execution plan after handoff.
 
-### 6. Review and next action
+### 5. Review / handoff
 
-Self-review the output against the output target, evidence bar, and next action boundary:
+Self-review the output against the artifact, evidence, and next-action boundary:
 
 - Does it answer the actual user request rather than a process template?
 - Are non-goals, decision boundaries, and claim boundaries explicit enough?
@@ -195,4 +184,4 @@ After self-review and user acceptance of a Goal Contract, commit allowed process
 
 ## Final checklist
 
-Artifact safety recorded; context captured; output target and evidence bar are explicit; ambiguity shown when clarifying; non-goals and decision boundaries closed or blocker recorded; diagnostic contracts state whether repair is authorized; execution handoff has an accepted Goal Contract, or blocker/non-execution output is stated; pressure pass complete when a Goal Contract is produced; output matches the chosen target; next safe actions resolved with auto-probes executed, user decisions asked, or blockers stated; no implementation mutation performed.
+Artifact safety recorded; context captured; discovery depth matched downstream authority; ambiguity shown when clarifying; non-goals and decision boundaries closed or blocker recorded; diagnostic contracts state whether repair is authorized; execution handoff has an accepted Goal Contract, or blocker/non-execution output is stated; pressure pass complete when a Goal Contract is produced; artifact matches the safe next action; next safe actions resolved with auto-probes executed, user decisions asked, or blockers stated; no implementation mutation performed.

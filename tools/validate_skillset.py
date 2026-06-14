@@ -298,8 +298,8 @@ def check_consistency(root: Path) -> bool:
         for phrase in [
             "Artifact safety gate",
             "chat-only",
-            "Decide output target and evidence bar",
-            "bounded exploration",
+            "Discover proportionally",
+            "Bounded exploration answer",
             "Goal Contract",
             "authorized execution phase",
             ".alpha-goal/",
@@ -311,6 +311,7 @@ def check_consistency(root: Path) -> bool:
             "pressure-test lens",
             "smallest useful design/spec",
             "Diagnostic contract",
+            "discovery depth matched downstream authority",
             "Only an accepted Goal Contract",
             "not execution handoff artifacts",
             "current alpha-goal responsibility boundary",
