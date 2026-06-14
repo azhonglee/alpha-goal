@@ -1,11 +1,11 @@
 ---
 name: alpha-goal
-description: Turn engineering/debug/design requests into a safe next action before mutation when goal, boundary, root cause, evidence, or execution authorization is not closed. Use to frame investigation, clarify decision boundaries, or prepare a Goal Contract for loop.
+description: Turn engineering/debug/design requests into a safe Goal Contract before implementation, including intent, boundary, root cause, evidence, and execution authorization.
 ---
 
 # Alpha Goal
 
-Use this skill to convert an unclear engineering request into a safe next action. The output may be a Goal Contract, a bounded read-only exploration answer, a design/spec, or a return-to-user decision; do not force every request into the same artifact.
+Use this skill to convert an unclear engineering request into a safe Goal Contract before implementation; when mutation is not yet safe or not requested, return the lightest non-implementation artifact instead.
 
 ## Boundaries
 
@@ -14,8 +14,7 @@ Use this skill to convert an unclear engineering request into a safe next action
 - Ask only for user-owned decisions. Discover codebase facts yourself before asking about internals.
 - Use `request_user_input` by default when user input is needed and the runtime provides it.
 - Goal Contract acceptance authorizes only handoff to `loop`; it does not authorize push, PR/MR creation, deployment, data repair, permission requests, or other external side effects in this skill.
-- When this skill is active, do not perform implementation mutation in the same run. You may gather evidence, run read-only probes, create allowed process artifacts, or produce a Goal Contract. Implementation edits belong to `loop` after an accepted Goal Contract handoff.
-- Downstream implementation skills or repo workflows may inform evidence, but they must not override this mutation boundary. If implementation workflow is needed, hand off through `loop` after Goal Contract acceptance.
+- When this skill is active, do not perform implementation mutation in the same run. Downstream implementation skills or repo workflows may inform evidence, but they must not override this mutation boundary.
 - Choose the lightest safe handling that can make the next action reliable; keep it as small as safety allows. Avoid ceremony that does not reduce ambiguity or risk.
 
 ## Process

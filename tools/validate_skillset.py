@@ -128,7 +128,7 @@ def check_openai_yaml(skill: str, openai_yaml: Path) -> bool:
 def check_alpha_goal_description(description: str) -> bool:
     ok = True
     lower = description.lower()
-    for phrase in ["safe next action", "goal contract", "before mutation", "root cause", "evidence"]:
+    for phrase in ["safe goal contract", "goal contract", "before implementation", "root cause", "evidence"]:
         if phrase not in lower:
             ok = fail(f"alpha-goal: description missing trigger phrase {phrase!r}")
     return ok
