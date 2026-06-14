@@ -1,6 +1,6 @@
 ---
 name: alpha-goal
-description: Turn engineering/debug/design requests into a safe next action before mutation. Use for production or log_id bug reports, root-cause-before-fix debugging, under-specified goals, target/scope uncertainty, bounded read-only exploration, or preparing a Goal Contract for loop.
+description: Turn engineering/debug/design requests into a safe next action before mutation when goal, boundary, root cause, evidence, or execution authorization is not closed. Use to frame investigation, clarify decision boundaries, or prepare a Goal Contract for loop.
 ---
 
 # Alpha Goal
