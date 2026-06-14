@@ -23,7 +23,9 @@ Discover proportionally -> Clarify if needed -> Pressure-test proportionally -> 
 
 ### 1. Discover proportionally
 
-Collect just enough evidence to make the next action safe:
+Collect initial evidence to locate the goal boundary and decide what must be clarified, pressure-tested, or crystallized later. Discover identifies material gaps; it does not replace clarification, pressure-testing, or crystallization.
+
+Collect evidence about:
 
 - user intent, desired outcome, stated solution, constraints;
 - target repo/path/service/module and likely codebase touchpoints;
@@ -31,13 +33,13 @@ Collect just enough evidence to make the next action safe:
 - existing work or durable specs when likely;
 - unknowns, non-goals, decision-boundary risks, and acceptance/evidence gaps.
 
-Calibrate discovery depth by what the next action would authorize, not by rigid request categories:
+Calibrate discovery depth by downstream authority, not by rigid request categories:
 
-- A bounded read-only answer needs enough evidence to answer within a stated boundary and label uncertainty.
-- A design/spec needs enough evidence to justify tradeoffs, non-goals, and mutation prerequisites.
-- A Goal Contract needs target, scope, non-goals, decision boundaries, acceptance/evidence expectations, and user acceptance before execution handoff.
-- A diagnostic contract is a Goal Contract for debugging; it needs evidence that defines the symptom and competing hypotheses, and repair is not authorized until root-cause evidence is sufficient.
-- A return-to-user decision/blocker needs the smallest missing user-owned decision, permission, external side effect, risk acceptance, tool, data, or environment.
+- For a bounded read-only answer, discover enough to answer within a stated boundary or identify the safe auto-probe still needed.
+- For a design/spec, discover enough context to know which tradeoffs, non-goals, and mutation prerequisites must be resolved.
+- For a Goal Contract, discover whether target, scope, non-goals, decision boundaries, and acceptance/evidence expectations can be closed; later phases close and pressure-test them.
+- For diagnostic work, discover the symptom, observations, and competing hypotheses enough to decide whether more probe work is needed before any repair authorization.
+- For a possible blocker, discover enough to distinguish user-owned decisions from missing permission, unavailable tool/data/environment, or external-side-effect authorization; crystallization names the smallest blocker.
 
 Verification/completion/readiness judgment requests are out of scope for `alpha-goal` unless the claim, scope, or evidence boundary itself is unclear; otherwise they belong to `verify`.
 
