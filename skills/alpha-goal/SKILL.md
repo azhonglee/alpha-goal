@@ -1,6 +1,6 @@
 ---
 name: alpha-goal
-description: Clarify ambiguous engineering goals with Socratic interview, ambiguity scoring, pressure tests, and a compact Goal Contract before implementation mutation. Use for broad requests, missing acceptance criteria before implementation, target/scope uncertainty, decision-boundary discovery, read-only exploration framing, or preparing an accepted Goal Contract for `loop`. Do not use for verification/completion/readiness judgments unless the claim or evidence boundary is unclear.
+description: Clarify ambiguous engineering/debug/design goals before mutation through discovery, focused clarification, pressure testing, and Goal Contracts. Use for under-specified requests, target/scope uncertainty, decision-boundary discovery, bounded read-only exploration, or preparing a Goal Contract for loop. Avoid verification/completion/readiness judgments unless their claim or evidence boundary is unclear.
 ---
 
 # Alpha Goal
