@@ -301,7 +301,7 @@ def check_consistency(root: Path) -> bool:
             "Discover proportionally",
             "Bounded exploration answer",
             "Goal Contract",
-            "authorized execution phase",
+            "Handoff means passing an accepted Goal Contract to `loop`",
             ".alpha-goal/",
             "docs/design/YYYYMMDD-<slug>.md",
             "return to the earliest phase",
@@ -311,7 +311,7 @@ def check_consistency(root: Path) -> bool:
             "Diagnostic contract",
             "discovery depth matched downstream authority",
             "Only an accepted Goal Contract",
-            "not execution handoff artifacts",
+            "not implementation handoff artifacts",
             "current alpha-goal boundary",
         ]:
             if phrase not in text:
