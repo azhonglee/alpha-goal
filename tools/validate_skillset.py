@@ -302,6 +302,10 @@ def check_consistency(root: Path) -> bool:
             "handoff to `loop`",
             ".alpha-goal/",
             "docs/design/YYYYMMDD-<slug>.md",
+            "Next-step routing gate",
+            "AUTO_PROBE",
+            "ASK_USER",
+            "BLOCKED",
         ]:
             if phrase not in text:
                 ok = fail(f"skills/alpha-goal/SKILL.md: missing alpha-goal guidance {phrase!r}")

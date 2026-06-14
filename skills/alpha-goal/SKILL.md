@@ -52,7 +52,7 @@ Choose the route from semantics, not headings:
 - `DEBUG`: prove the root cause before any fix; if cause is unconfirmed, frame the next route as diagnosis/probe, not repair.
 - `VERIFY`: the user asks whether current evidence supports a completion/readiness/correctness claim.
 
-If the request is explicitly read-only and the target/evidence boundary is clear enough, answer the bounded exploration directly with findings, evidence, recommendations, and residual uncertainty. Do not manufacture a full implementation Goal Contract.
+If the request is explicitly read-only and the target/evidence boundary is clear enough, answer the bounded exploration directly with findings, evidence, routed next steps, and residual uncertainty. Before ending, apply the next-step routing gate; do not manufacture a full implementation Goal Contract.
 
 Return to clarification when route, target, scope, non-goals, decision boundaries, or final claim would otherwise be guessed.
 
@@ -144,7 +144,21 @@ Default durable paths:
 - transcript: `.alpha-goal/interviews/YYYYMMDD-<slug>.md`
 - Goal Contract: `docs/design/YYYYMMDD-<slug>.md`
 
-For read-only exploration, output findings, evidence, recommendations, residual uncertainty, and whether a Goal Contract is needed before any mutation.
+For read-only exploration, output findings, evidence, residual uncertainty, routed next steps, and whether a Goal Contract is needed before any mutation. Before ending, apply the next-step routing gate: continue safe read-only probes, ask for user-owned decisions, or state blockers.
+
+### Next-step routing gate
+
+Before ending with recommendations, next steps, or a handoff note, classify each next step:
+
+- `AUTO_PROBE`: a safely discoverable read-only fact, code inspection, log query, local evidence check, or diagnostic probe that stays inside current target/scope and does not require new permission, mutation, external side effects, or user-owned judgment.
+- `ASK_USER`: a decision about target, scope, acceptance, non-goals, risk acceptance, permission request, external side effect, mutation, data repair, push, PR/MR, deployment, credential use, or final claim boundary.
+- `BLOCKED`: missing permission, tool, data, environment, or safe-state condition prevents progress.
+
+Do not stop with a bare recommendation when an `AUTO_PROBE` remains. Continue the probe in the same turn when budget and context allow, or state the concrete blocker.
+
+Use `request_user_input` when an `ASK_USER` next step is required and the runtime provides it.
+
+For `DEBUG` routes, a recommended diagnostic probe is not a final answer when it is safely executable. Run it unless it requires mutation, external side effects, new permissions, or changes target/scope/acceptance/claim boundary.
 
 ### 6. Review and handoff
 
@@ -154,11 +168,16 @@ Self-review the output against the route:
 - Are non-goals, decision boundaries, and claim boundaries explicit enough?
 - Are codebase facts labeled as evidence, and guesses labeled as inference?
 - Would the next agent know what not to do?
+- Are recommended next steps classified as `AUTO_PROBE`, `ASK_USER`, or `BLOCKED`?
+- If a safe read-only diagnostic probe remains, did we run it instead of merely recommending it?
 
-For broad or high-risk contracts, request independent review when available without leaking intended answers. Treat Goal Contract acceptance as a user-owned decision: when a handoff contract is ready, ask the user to accept, reject, or change it. If the user rejects, changes, or narrows requirements, return to clarification.
+For broad or high-risk contracts, request independent review when available without leaking intended answers.
+
+Treat Goal Contract acceptance as a user-owned decision: when a handoff contract is ready, use `request_user_input` to ask the user to accept, reject, or change it.
+If the user rejects, changes, or narrows requirements, return to clarification.
 
 After self-review and user acceptance of a Goal Contract, commit it and handoff to `loop` for the next approved slice. For diagnostic contracts, the first loop slice is diagnosis/probe unless repair is already authorized by evidence. For read-only exploration or verify routes, handoff without creating a contract commit unless the accepted output is a durable contract. Push, PR/MR creation, deployment, or other external side effects still require explicit authorization.
 
 ## Final checklist
 
-Artifact safety recorded; context captured; route is explicit; ambiguity shown when clarifying; non-goals and decision boundaries closed or blocker recorded; diagnostic contracts state whether repair is authorized; handoff contract accepted or blocker stated; pressure pass complete when a Goal Contract is produced; output matches route; no implementation mutation performed.
+Artifact safety recorded; context captured; route is explicit; ambiguity shown when clarifying; non-goals and decision boundaries closed or blocker recorded; diagnostic contracts state whether repair is authorized; handoff contract accepted or blocker stated; pressure pass complete when a Goal Contract is produced; output matches route; next steps routed with auto-probes executed, user decisions asked, or blockers stated; no implementation mutation performed.
