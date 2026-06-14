@@ -146,10 +146,10 @@ def check_openai_yaml(skill: str, openai_yaml: Path) -> bool:
 def check_alpha_goal_description(description: str) -> bool:
     ok = True
     lower = description.lower()
-    for phrase in ["socratic", "goal contract", "implementation mutation"]:
+    for phrase in ["discovery", "goal contract", "before mutation"]:
         if phrase not in lower:
             ok = fail(f"alpha-goal: description missing trigger phrase {phrase!r}")
-    if not ("do not use" in lower and "verification" in lower and "readiness" in lower):
+    if not ("avoid" in lower and "verification" in lower and "readiness" in lower):
         ok = fail("alpha-goal: description must exclude verification/readiness judgment routing")
     return ok
 
