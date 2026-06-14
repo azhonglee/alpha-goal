@@ -13,6 +13,7 @@ Use this skill to convert an unclear engineering request into a safe next action
 - Write process artifacts only after the artifact safety gate. If unsafe, keep artifacts in chat.
 - Ask only for user-owned decisions. Discover codebase facts yourself before asking about internals.
 - Use `request_user_input` by default when user input is needed and the runtime provides it.
+- Goal Contract acceptance authorizes only handoff to `loop`; it does not authorize push, PR/MR creation, deployment, data repair, permission requests, or other external side effects.
 - Choose the lightest safe handling that can make the next action reliable; keep it as small as safety allows. Avoid ceremony that does not reduce ambiguity or risk.
 
 ## Process
@@ -175,7 +176,7 @@ Handoff means passing an accepted Goal Contract to `loop`. Non-contract artifact
 
 Treat Goal Contract acceptance as a user-owned decision: when a `loop` handoff contract is ready, use `request_user_input` to ask the user to accept, reject, or change it. If the user rejects, changes, or narrows requirements, return to Clarify.
 
-After self-review and user acceptance of a Goal Contract, commit allowed process artifacts respecting repository isolation and artifact safety rules, then hand off the approved slice to `loop`. Without an accepted Goal Contract, do not hand off to `loop` or any implementation agent. For diagnostic contracts, hand off a repair slice only when the Goal Contract records root-cause evidence and explicitly authorizes repair; otherwise the first `loop` slice is diagnosis/probe. Push, PR/MR creation, deployment, or other external side effects remain separate actions and still require explicit authorization.
+After self-review and user acceptance of a Goal Contract, commit allowed process artifacts respecting repository isolation and artifact safety rules, then hand off the approved slice to `loop`. Without an accepted Goal Contract, do not hand off to `loop` or any implementation agent. For diagnostic contracts, hand off a repair slice only when the Goal Contract records root-cause evidence and explicitly authorizes repair; otherwise the first `loop` slice is diagnosis/probe.
 
 ## Final checklist
 
