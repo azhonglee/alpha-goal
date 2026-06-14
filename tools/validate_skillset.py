@@ -311,6 +311,9 @@ def check_consistency(root: Path) -> bool:
             "Only an accepted Goal Contract",
             "not implementation handoff artifacts",
             "current alpha-goal boundary",
+            "do not perform implementation mutation in the same run",
+            "must not override this mutation boundary",
+            "Review fails if implementation mutation has started",
         ]:
             if phrase not in text:
                 ok = fail(f"skills/alpha-goal/SKILL.md: missing alpha-goal guidance {phrase!r}")
