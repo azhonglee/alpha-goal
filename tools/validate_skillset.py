@@ -298,19 +298,19 @@ def check_consistency(root: Path) -> bool:
         for phrase in [
             "Artifact safety gate",
             "chat-only",
-            "Choose an alpha-goal mode",
+            "Decide output target and evidence bar",
             "bounded exploration",
             "Goal Contract",
-            "CONTRACT",
-            "handoff to `loop`",
+            "authorized execution phase",
             ".alpha-goal/",
             "docs/design/YYYYMMDD-<slug>.md",
-            "Next-step routing gate",
+            "Next safe action gate",
             "AUTO_PROBE",
             "ASK_USER",
             "BLOCKED",
             "pressure-test lens",
             "smallest useful design/spec",
+            "Diagnostic contract",
             "current alpha-goal responsibility boundary",
         ]:
             if phrase not in text:
