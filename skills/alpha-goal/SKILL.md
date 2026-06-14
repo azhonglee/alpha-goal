@@ -14,8 +14,7 @@ Use this skill to convert an unclear engineering request into a safe Goal Contra
 - Ask only for user-owned decisions. Discover codebase facts yourself before asking about internals.
 - Use `request_user_input` by default when user input is needed and the runtime provides it.
 - Goal Contract acceptance authorizes only handoff to `loop`; it does not authorize push, PR/MR creation, deployment, data repair, permission requests, or other external side effects in this skill.
-- When this skill is active, do not perform implementation mutation in the same run. Downstream implementation skills or repo workflows may inform evidence, but they must not override this mutation boundary.
-- Choose the lightest safe handling that can make the next action reliable; keep it as small as safety allows. Avoid ceremony that does not reduce ambiguity or risk.
+- Keep the contract work proportional: gather what makes the Goal Contract reliable, and avoid ceremony that does not reduce ambiguity, risk, or handoff uncertainty.
 
 ## Process
 
@@ -25,39 +24,30 @@ Discover proportionally -> Clarify -> Pressure-test proportionally -> Crystalliz
 
 ### 1. Discover proportionally
 
-Collect initial evidence to locate the goal boundary and decide what must be clarified, pressure-tested, or crystallized later. Discover identifies material gaps; it does not replace clarification, pressure-testing, or crystallization.
+Objective:
+- Discover exists to identify uncertainty, not to eliminate it.
 
-Collect evidence about:
-
+Collect context around:
 - user intent, desired outcome, stated solution, constraints;
 - target repo/path/service/module and likely codebase touchpoints;
-- candidate repos in workspaces or aggregators;
 - existing work or durable specs when likely;
 - unknowns, non-goals, decision-boundary risks, and acceptance/evidence gaps.
 
-Calibrate discovery depth by downstream authority, not by rigid request categories:
+Calibrate discovery depth by the highest authority that may be exercised next.
+Discover is sufficient when additional facts are unlikely to change:
+- authority,
+- scope,
+- risk,
+- decision boundaries,
+- or the next safe action.
 
-- For a bounded read-only answer, discover enough to answer within a stated boundary or identify the safe auto-probe still needed.
-- For design work, discover enough to identify which tradeoffs, non-goals, and mutation prerequisites must be resolved.
-- For mutation work, discover enough to identify whether target, scope, non-goals, decision boundaries, and acceptance/evidence expectations can be closed; later phases close and pressure-test them.
-- For diagnostic work, discover enough to distinguish the symptom, observations, and competing hypotheses before any repair authorization.
-- For a possible blocker, discover enough to distinguish user-owned decisions from missing permission, unavailable tool/data/environment, or external-side-effect authorization; crystallization names the smallest blocker.
-
-Verification/completion/readiness judgment requests are out of scope for `alpha-goal` unless the claim, scope, or evidence boundary itself is unclear; otherwise they belong to `verify`.
-
-Only an accepted Goal Contract can hand off work to `loop`. Bounded exploration answers, clarifying questions, design/spec outputs, and blockers can inform a later Goal Contract, but they are not implementation handoff artifacts by themselves.
-
-When the request is read-only, prefer safe evidence collection before asking, unless the target, claim boundary, or external access decision is user-owned. Before ending, apply the next safe action gate; do not manufacture a full implementation Goal Contract.
+For diagnostic work, distinguish symptoms, observations, and competing hypotheses. Do not assume repair authorization merely because a plausible root cause exists.
 
 Derive a short `<slug>` for the goal boundary. Do not create empty directories.
 
-Artifact safety gate:
+Minimum context can be compact: task statement, desired outcome, probable intent, known evidence, constraints, unknowns, decision-boundary gaps, and likely touchpoints. Store it at `.alpha-goal/context/YYYYMMDD-<slug>.md` when `.alpha-goal/` is gitignored, otherwise stay chat-only.
 
-- Write `.alpha-goal/` artifacts only when that path is gitignored or explicitly approved; otherwise stay chat-only.
-
-Minimum context can be compact: task statement, desired outcome, probable intent, known evidence, constraints, unknowns, decision-boundary gaps, and likely touchpoints. Store it at `.alpha-goal/context/YYYYMMDD-<slug>.md` only when the gate passes.
-
-Announce only the state that helps the user decide or follow the next action. For simple read-only exploration, a lightweight boundary note is enough; report depth, ambiguity, or artifact location only when they materially affect clarification, persistence, or handoff.
+Announce the state that helps the user decide or follow the next action.
 
 ### 2. Clarify
 
@@ -116,6 +106,7 @@ Use each pressure-test lens at most once when it reduces real uncertainty. Press
 - `contrarian`: challenge the core assumption.
 - `simplifier`: ask for the smallest useful scope.
 - `ontologist`: reframe symptoms into the underlying entity, state, or cause.
+- `evidence-checker`: How would we know we are wrong?
 
 Follow-up ladder:
 
