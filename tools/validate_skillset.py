@@ -149,6 +149,8 @@ def check_alpha_goal_description(description: str) -> bool:
     for phrase in ["socratic", "goal contract", "implementation mutation"]:
         if phrase not in lower:
             ok = fail(f"alpha-goal: description missing trigger phrase {phrase!r}")
+    if not ("do not use" in lower and "verification" in lower and "readiness" in lower):
+        ok = fail("alpha-goal: description must exclude verification/readiness judgment routing")
     return ok
 
 
@@ -296,9 +298,10 @@ def check_consistency(root: Path) -> bool:
         for phrase in [
             "Artifact safety gate",
             "chat-only",
-            "Route",
+            "Choose an alpha-goal mode",
             "bounded exploration",
             "Goal Contract",
+            "CONTRACT",
             "handoff to `loop`",
             ".alpha-goal/",
             "docs/design/YYYYMMDD-<slug>.md",
@@ -306,6 +309,9 @@ def check_consistency(root: Path) -> bool:
             "AUTO_PROBE",
             "ASK_USER",
             "BLOCKED",
+            "pressure-test lens",
+            "smallest useful design/spec",
+            "current alpha-goal responsibility boundary",
         ]:
             if phrase not in text:
                 ok = fail(f"skills/alpha-goal/SKILL.md: missing alpha-goal guidance {phrase!r}")
