@@ -8,8 +8,6 @@ import stat
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-SKILLS = ROOT / "skills"
 FRONTMATTER_RE = re.compile(r"\A---\n(.*?)\n---\n", re.S)
 FIELD_RE = re.compile(r"^(name|description):\s*(.+?)\s*$", re.M)
 
@@ -22,20 +20,22 @@ def parse_frontmatter(text: str) -> dict[str, str]:
 
 
 def main() -> int:
+    root = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path(__file__).resolve().parents[1]
+    skills = root / "skills"
     errors: list[str] = []
     warnings: list[str] = []
 
-    if not SKILLS.is_dir():
-        errors.append(f"missing skills directory: {SKILLS}")
-        print_report(errors, warnings)
+    if not skills.is_dir():
+        errors.append(f"missing skills directory: {skills}")
+        print_report(root, errors, warnings)
         return 1
 
-    for bad in ROOT.rglob("__MACOSX"):
-        errors.append(f"macOS metadata directory found: {bad.relative_to(ROOT)}")
-    for bad in ROOT.rglob("._*"):
-        errors.append(f"macOS resource fork file found: {bad.relative_to(ROOT)}")
+    for bad in root.rglob("__MACOSX"):
+        errors.append(f"macOS metadata directory found: {bad.relative_to(root)}")
+    for bad in root.rglob("._*"):
+        errors.append(f"macOS resource fork file found: {bad.relative_to(root)}")
 
-    skill_dirs = sorted(p for p in SKILLS.iterdir() if p.is_dir())
+    skill_dirs = sorted(p for p in skills.iterdir() if p.is_dir())
     if not skill_dirs:
         errors.append("no skill directories found")
 
@@ -65,15 +65,15 @@ def main() -> int:
             if script.is_file() and script.suffix in {".sh", ".py"}:
                 mode = script.stat().st_mode
                 if not (mode & stat.S_IXUSR):
-                    warnings.append(f"{script.relative_to(ROOT)} is not user-executable")
+                    warnings.append(f"{script.relative_to(root)} is not user-executable")
 
-    print_report(errors, warnings)
+    print_report(root, errors, warnings)
     return 1 if errors else 0
 
 
-def print_report(errors: list[str], warnings: list[str]) -> None:
+def print_report(root: Path, errors: list[str], warnings: list[str]) -> None:
     print("Skill suite validation")
-    print(f"root: {ROOT}")
+    print(f"root: {root}")
     if errors:
         print("\nERRORS:")
         for e in errors:
