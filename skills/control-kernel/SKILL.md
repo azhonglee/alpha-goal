@@ -71,6 +71,7 @@ Use this routing table:
 Before routing to an execution-capable path, ensure:
 
 - the reference state is explicit enough to detect error;
+- an execution route has a candidate Control Law: target error, control variable, expected effect, sensor threshold, fallback;
 - the actuator boundary says what may change and what must not change;
 - observer signals are available or a missing-observer blocker is stated;
 - disturbances and couplings are either bounded or routed to modeling/synthesis;
@@ -87,6 +88,7 @@ Control Route:
 - Active state:
 - Dominant uncertainty:
 - Error signal:
+- Control law:
 - Selected skill:
 - Why this skill:
 - Required context to load or ask for:

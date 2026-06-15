@@ -30,6 +30,7 @@ If system boundary, sensors, actuators, disturbances, or coupling are unclear en
 - `references/execution-boundaries.md`: delegation, ownership, submodules, generated output, and user-owned changes.
 - `references/loop-modes.md`: mode choice, evidence type, debug receipt, and route decisions.
 - `references/plan-template.md`: durable dynamic plans for multi-slice or handoff-heavy work.
+- `references/control-law.md`: target error, control variable, expected effect, sensor threshold, fallback action. Load before any mutation or diagnostic-probe slice.
 - `references/iteration-record-schema.md`: compact or formal Iteration Record semantics.
 - `references/auto-execution.md`: when to execute the next pass automatically versus recommend or pause.
 - `scripts/mutation-preflight.sh`: read-only git/path preflight.
@@ -50,6 +51,7 @@ Dynamic planning answers only the current iteration:
 
 - the smallest coherent acceptance-relevant slice that can be completed and observed now;
 - the error signal this slice is expected to reduce, using the ledger or Goal Contract as reference;
+- the Control Law for the slice: target error, control variable, expected effect, sensor threshold, fallback action;
 - control variables to change and variables intentionally held constant;
 - fresh evidence needed after the slice and how it will be sensed;
 - files, modules, repos, generated outputs, and ownership surfaces allowed to change;
@@ -58,6 +60,8 @@ Dynamic planning answers only the current iteration:
 - strongest material risk and evidence floor;
 - success, failure, feedback, and reframe routes;
 - whether a durable plan is necessary.
+
+Before executing a mutation or diagnostic-probe slice, emit a compact `Control Law:` block or an equivalent clearly labeled plan section. Do not execute if the target error, approved control variable, observable sensor threshold, or fallback action is missing.
 
 Create or update a durable plan only for multiple independent loops, modules, repos, handoff/recovery needs, external side effects, irreversible/high-risk changes, rollback/compatibility decisions, contested ownership, or user request.
 
@@ -114,9 +118,11 @@ Classify evidence:
 - `exploration evidence`: maps possibilities only;
 - `blocked evidence`: shows missing environment, tool, data, or permission.
 
+Also record whether the observed sensor feedback crossed the Control Law threshold or whether fallback/reframe is required.
+
 ### 5. Compare error and decide route
 
-Compare current state against the reference, not against effort spent.
+Compare current state against the reference and Control Law, not against effort spent. If observed feedback does not match the expected effect or threshold, choose hardening, fallback, reframe, or blocker instead of treating the action as successful.
 
 Choose one primary route:
 
@@ -138,6 +144,7 @@ Produce an Iteration Record before handoff, blocking, or materially changing dir
 - action or probe;
 - fresh evidence and evidence class;
 - acceptance delta and error remaining;
+- control law result: expected effect, observed feedback, threshold status, fallback or adjustment;
 - feedback and disturbances;
 - ledger update: input state, error signal, control action, sensor feedback, residual error, and next state;
 - route decision;

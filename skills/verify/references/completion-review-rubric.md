@@ -12,6 +12,7 @@ Return `PASS_TO_FINAL` only when:
 - fresh checks ran after the last material change, or substitute evidence is explicitly sufficient for a narrowed claim;
 - feedback is handled, out of scope, or routed elsewhere;
 - strongest material risk has matching evidence;
+- material control actions have sensor feedback that meets the stated Control Law threshold, or residual error/fallback is reflected in the verdict;
 - bug/root-cause claims have valid root-cause evidence;
 - final claim does not exceed tested or observed boundary.
 

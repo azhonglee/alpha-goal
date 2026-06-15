@@ -11,6 +11,7 @@ Iteration Record:
 - Action:
 - Evidence:
 - Error/acceptance delta:
+- Control law result:
 - Ledger update:
 - Decision:
 - Next:
@@ -25,6 +26,7 @@ Add when relevant:
 - `Changed files`: intentional touched paths when there is a diff.
 - `Generated artifacts`: generated files, reports, binaries, or documents.
 - `Acceptance delta`: criteria covered, partially covered, or uncovered.
+- `Control law result`: target error, expected effect, observed feedback, threshold status, fallback, and residual error for mutation or diagnostic-probe slices.
 - `Feedback handling`: user, reviewer, test, runtime, or advisory feedback that changed the route.
 - `Risk/ownership`: cross-boundary, generated-output, migration, compatibility, concurrency, data, security, or observability risk.
 - `Ledger update`: input state, error signal, control action, sensor feedback, residual error, route decision, and next state when the task spans skills or turns.

@@ -10,6 +10,7 @@
 | 被控对象 / plant | 代码库、产品、文档、数据流或组织流程 |
 | 状态变量 | 需求清晰度、实现状态、测试状态、风险、证据覆盖率 |
 | 传感器 / observer | repo 快照、日志、测试、人工反馈、审查意见 |
+| 控制律 / control law | `loop` 中的 target error、control variable、expected effect、sensor threshold 和 fallback action |
 | 控制器 / actuator | `loop` 的有界迭代、诊断、修复、加固 |
 | 比较器 / error detector | `verify` 对“目标、证据、最终声明”的误差判定 |
 | 状态记忆 / memory | `.alpha-goal/control-state/` 中的 Closed-loop Ledger，跨阶段记录 reference、state、error、action、feedback 和 next route |

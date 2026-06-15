@@ -27,6 +27,13 @@ Control Model:
   - Authority:
   - Reversibility:
   - Risk:
+- Candidate control laws:
+  - Target error:
+  - Control variable:
+  - Candidate action or probe:
+  - Sensor:
+  - Threshold / tolerance:
+  - Risk/fallback:
 - Disturbances:
 - Coupling map:
 - Observability rating:

@@ -39,6 +39,7 @@ Create or update a plan when:
 - Included:
 - Excluded:
 - Claim boundary supported:
+- Control law:
 - Control variables:
 - Variables held constant:
 
@@ -50,9 +51,9 @@ Create or update a plan when:
 
 ## Execution Slices
 
-| ID | Goal | Status | Dependencies | Evidence gate | Feedback route |
+| ID | Goal | Control law | Status | Dependencies | Evidence gate | Feedback route |
 | --- | --- | --- | --- | --- | --- |
-| S1 |  | pending | none |  |  |
+| S1 |  |  | pending | none |  |  |
 
 Status values: pending, in_progress, done, blocked, superseded.
 

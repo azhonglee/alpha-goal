@@ -40,6 +40,7 @@ Closed-loop Ledger:
   - Active route:
   - Dominant uncertainty:
   - Last error signal:
+  - Last control law:
   - Last control action:
   - Last sensor feedback:
   - Residual error:
@@ -49,6 +50,12 @@ Closed-loop Ledger:
     - Input state:
     - Selected skill:
     - Error signal:
+    - Control law:
+      - Target error:
+      - Control variable:
+      - Expected effect:
+      - Sensor threshold:
+      - Fallback action:
     - Control action or probe:
     - Variables changed:
     - Variables held constant:
@@ -65,12 +72,12 @@ Closed-loop Ledger:
 - `meta-synthesis`: record synthesized objectives, user-owned decisions, and unresolved stakeholder conflicts that affect the reference.
 - `system-model`: record plant boundary, state variables, sensors, actuators, disturbances, coupling, and model adequacy.
 - `alpha-goal`: record or update the reference state, acceptance evidence, claim boundary, actuator boundary, and stop/reframe triggers.
-- `loop`: append each bounded control cycle: action/probe, feedback, error delta, and next route.
+- `loop`: append each bounded control cycle: Control Law, action/probe, feedback, error delta, and next route.
 - `verify`: compare ledger state, evidence, and final claim; record final verdict or residual gap.
 
 ## Update rules
 
-- Update the ledger when reference, plant model, actuator boundary, evidence floor, route, or residual error changes materially.
+- Update the ledger when reference, plant model, Control Law, actuator boundary, evidence floor, route, or residual error changes materially.
 - Do not duplicate full command output; link or summarize evidence and point to `.alpha-goal/evidence/` when durable logs are needed.
 - Do not store secrets, tokens, credentials, private user data, or production-only sensitive records.
 - Label stale or superseded state instead of silently overwriting it.

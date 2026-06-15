@@ -22,6 +22,7 @@ Verification Verdict:
 - Contract review:
 - System model review:
 - Artifact review:
+- Control law review:
 - Claim boundary:
 - Risk/evidence review:
 - Fresh checks run:
@@ -53,6 +54,17 @@ For each acceptance expectation:
 - status: `covered`, `partially covered`, `not covered`, `blocked`, or `not applicable`.
 
 Root-cause claims should record symptom, first divergence point, narrowed component, excluded alternatives, and remaining uncertainty.
+
+## Control law review
+
+For each material control action or diagnostic probe:
+
+- target error;
+- expected effect;
+- sensor and threshold;
+- observed feedback;
+- threshold status: `met`, `partially met`, `not met`, `blocked`, or `not applicable`;
+- fallback or residual error.
 
 ## Final claim allowed
 

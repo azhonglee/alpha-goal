@@ -87,6 +87,7 @@ Ask:
 - Can the desired state be reached through small reversible control actions?
 - Are there coupled outputs where changing one variable destabilizes another?
 - Is a diagnostic probe safer than a repair action?
+- What sensor threshold would show that a candidate control action reduced the target error?
 
 Classify control quality:
 
@@ -131,6 +132,7 @@ Control Model:
 - State variables:
 - Sensors:
 - Actuators:
+- Candidate control laws:
 - Disturbances/couplings:
 - Observability:
 - Controllability:
@@ -152,6 +154,12 @@ Control Model:
 - Outputs:
 - Sensors and evidence boundary:
 - Actuators and authority boundary:
+- Candidate control laws:
+  - Target error:
+  - Control variable:
+  - Candidate action or probe:
+  - Sensor and threshold:
+  - Risk/fallback:
 - Disturbances:
 - Coupling map:
 - Stability conditions:
