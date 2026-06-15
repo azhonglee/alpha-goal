@@ -4,7 +4,7 @@ Use this reference when a task spans multiple skills, may resume across turns, o
 
 ## Purpose
 
-The ledger is a control-state memory, not a work diary. Keep only information that changes routing, safety, evidence, or final claim judgment. The full `Control Route` belongs here by default; the TUI should show only a compact `Route Summary` unless the user asks for full route details or file persistence is blocked.
+The ledger is a control-state memory and artifact index, not a work diary. Keep only information that changes routing, safety, evidence, or final claim judgment. The full `Control Route` belongs here by default; other full stage artifacts belong in their own `.alpha-goal/` subdirectories. The TUI should show compact summaries unless the user asks for full details, file persistence is blocked, or a user-owned decision needs review.
 
 Default durable path:
 
@@ -16,6 +16,17 @@ Optional append-only machine log:
 
 ```text
 .alpha-goal/iterations/YYYYMMDD-<slug>.jsonl
+```
+
+Default full artifact paths:
+
+```text
+.alpha-goal/context/YYYYMMDD-<slug>-goal-contract.md
+.alpha-goal/models/YYYYMMDD-<slug>-system-model.md
+.alpha-goal/synthesis/YYYYMMDD-<slug>-decision-synthesis.md
+.alpha-goal/iterations/YYYYMMDD-<slug>.md
+.alpha-goal/evidence/
+.alpha-goal/verification/YYYYMMDD-<slug>-verdict.md
 ```
 
 Default behavior is to write the ledger under `.alpha-goal/`. Before the first write in a repository, check whether `.alpha-goal/` is ignored. If it is not ignored and the repo root `.gitignore` is writable, add this line before writing ledger artifacts:
@@ -33,6 +44,13 @@ Closed-loop Ledger:
 - Task slug:
 - Last updated:
 - Ledger path:
+- Artifact registry:
+  - Goal Contract:
+  - System Model:
+  - Decision Synthesis:
+  - Iteration Records:
+  - Evidence:
+  - Verification Verdict:
 - Latest Control Route:
   Control Route:
   - Ledger path:
@@ -116,17 +134,18 @@ Closed-loop Ledger:
 ## Stage responsibilities
 
 - `alpha-goal`: discover or initialize the ledger, classify active control state, write the full `Latest Control Route`, and show only a compact `Route Summary` in the TUI by default.
-- `decision-synthesis`: read the latest route before synthesis; record synthesized objectives, Synthesis Rounds, user-owned decisions, unresolved stakeholder conflicts, and route-relevant updates.
-- `system-model`: read the latest route before modeling; record plant boundary, state variables, sensors, actuators, Controller Hierarchy, Disturbance Register, coupling, and model adequacy.
-- `goal-contract`: read the latest route before changing the reference; record or update the reference state, Indicator Handoff, acceptance evidence, claim boundary, actuator boundary, and stop/reframe triggers.
-- `control-loop`: read the latest route before mutation/probe; append each bounded control cycle: Control Law, disturbance update, adaptive learning, action/probe, feedback, error delta, and next route.
-- `evidence-verify`: read the latest route before verdict; compare ledger state, indicator evidence, disturbance handling, adaptive learning, and final claim; record final verdict or residual gap.
+- `decision-synthesis`: read the latest route before synthesis; write the full Decision Synthesis Record under `.alpha-goal/synthesis/`, update the artifact registry and route-relevant synthesis state, and show `Synthesis Summary` in the TUI by default.
+- `system-model`: read the latest route before modeling; write the full Control Model under `.alpha-goal/models/`, update the artifact registry and model-relevant state, and show `Model Summary` in the TUI by default.
+- `goal-contract`: read the latest route before changing the reference; write the full Goal Contract under `.alpha-goal/context/`, update the artifact registry and reference state, and show `Contract Summary` in the TUI by default.
+- `control-loop`: read the latest route before mutation/probe; write full Iteration Records under `.alpha-goal/iterations/`, durable logs under `.alpha-goal/evidence/` when needed, update the artifact registry and control state, and show `Iteration Summary` in the TUI by default.
+- `evidence-verify`: read the latest route before verdict; write the full Verification Verdict under `.alpha-goal/verification/`, update the artifact registry and final comparator state, and show `Verification Summary` in the TUI by default.
 
 ## Update rules
 
-- Update the ledger when reference, Indicator Handoff, plant model, Controller Hierarchy, Disturbance Register, Adaptive Learning Record, Control Law, actuator boundary, evidence floor, route, selected skill, next action, or residual error changes materially.
+- Update the ledger when reference, Indicator Handoff, plant model, Controller Hierarchy, Disturbance Register, Adaptive Learning Record, Control Law, actuator boundary, evidence floor, artifact path, route, selected skill, next action, or residual error changes materially.
 - Treat `.alpha-goal/control-state/` as the source of truth for cross-skill route fields. Do not require later skills to reconstruct `Control Route` from the visible TUI summary.
-- TUI output should default to:
+- Treat the artifact registry as the source of truth for locating full stage outputs. Do not duplicate full Goal Contracts, Control Models, Decision Synthesis Records, Iteration Records, or Verification Verdicts inside the ledger unless file persistence is blocked.
+- TUI output should default to compact summaries:
 
 ```text
 Route Summary:
@@ -137,6 +156,7 @@ Route Summary:
 - Next:
 ```
 
+- Stage summaries should use the same shape: result, evidence or reason, boundary, artifact path, and next action. Print full artifacts in chat only when the user asks, persistence is blocked, or a decision/risk requires explicit user review.
 - Do not duplicate full command output; link or summarize evidence and point to `.alpha-goal/evidence/` when durable logs are needed.
 - Do not store secrets, tokens, credentials, private user data, or production-only sensitive records.
 - Label stale or superseded state instead of silently overwriting it.

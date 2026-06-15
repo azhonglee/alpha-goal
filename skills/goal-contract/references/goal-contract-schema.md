@@ -2,6 +2,8 @@
 
 Use this reference when a durable or handoff-ready contract is needed.
 
+Persist the full contract at `.alpha-goal/context/YYYYMMDD-<slug>-goal-contract.md` by default. The TUI should show `Contract Summary` with reference, scope boundary, evidence, artifact path, and next action unless full chat output is required.
+
 ```text
 Goal Contract:
 - Title:
@@ -51,6 +53,11 @@ Goal Contract:
   - First loop mode:
   - Evidence floor:
   - Stop or reframe triggers:
+- Ledger update:
+  - Control-state path:
+  - Artifact path:
+  - Latest error signal:
+  - Next route:
 ```
 
 A contract can be compact when risk is low, but it must preserve reference state, scope, non-goals, decision boundary, acceptance evidence, and claim boundary.

@@ -134,6 +134,8 @@ Produce the lightest safe artifact:
 - `Goal Contract`: authorize a bounded `control-loop` handoff after user acceptance.
 - `Diagnostic Contract`: authorize diagnosis first, and repair only after recorded root-cause evidence.
 
+Persist full artifacts under `.alpha-goal/context/` by default and update the Closed-loop Ledger artifact registry. Show a compact `Contract Summary` in the TUI by default. Print the full contract in chat only when the user asks, file persistence is blocked, or explicit user acceptance requires reviewing all contract fields in the conversation.
+
 Goal Contract schema:
 
 ```text
@@ -150,13 +152,24 @@ Goal Contract:
 - Diagnostic gate: symptom, hypotheses, cause-evidence needed, repair authorization gate, if applicable
 - Pressure-test findings: assumption/tradeoff/evidence probes
 - Handoff: accepted indicators, allowed first loop mode, evidence floor, stop/reframe triggers
-- Ledger update: `.alpha-goal/control-state/YYYYMMDD-<slug>.md` path, latest error signal, next route, or explicit no-write reason
+- Ledger update: `.alpha-goal/control-state/YYYYMMDD-<slug>.md` path, artifact path, latest error signal, next route, or explicit no-write reason
+```
+
+TUI summary:
+
+```text
+Contract Summary:
+- Reference:
+- Scope boundary:
+- Evidence:
+- Artifact:
+- Next:
 ```
 
 Default durable paths:
 
 ```text
-.alpha-goal/context/YYYYMMDD-<slug>.md
+.alpha-goal/context/YYYYMMDD-<slug>-goal-contract.md
 .alpha-goal/control-state/YYYYMMDD-<slug>.md
 docs/design/YYYYMMDD-<slug>-goal-contract.md
 .alpha-goal/interviews/YYYYMMDD-<slug>.md
@@ -181,4 +194,4 @@ If review fails, return to the earliest phase that can fix it.
 
 Handoff means passing a user-accepted Goal Contract to `control-loop`. Non-contract artifacts inform later work but do not authorize implementation.
 
-When a contract is ready, ask the user to accept, reject, or change it unless the runtime already contains explicit acceptance. If accepted, update `.alpha-goal/control-state/YYYYMMDD-<slug>.md` with reference, current state, actuator boundary, evidence floor, and next route before handoff. If `.alpha-goal/` is not ignored, add it to the repo root `.gitignore` first. If writing is explicitly forbidden or impossible, include the ledger state in chat and state the no-write reason. If rejected or changed, return to clarification.
+When a contract is ready, ask the user to accept, reject, or change it unless the runtime already contains explicit acceptance. If accepted, update `.alpha-goal/control-state/YYYYMMDD-<slug>.md` with reference, current state, actuator boundary, evidence floor, artifact path, and next route before handoff. If `.alpha-goal/` is not ignored, add it to the repo root `.gitignore` first. If writing is explicitly forbidden or impossible, include the ledger state and full contract in chat and state the no-write reason. If rejected or changed, return to clarification.

@@ -143,7 +143,9 @@ Do not choose `ITERATION_READY_FOR_VERIFY` merely because implementation is done
 
 ### 6. Record
 
-Produce an Iteration Record before handoff, blocking, or materially changing direction. Use compact records for low-risk passes, but preserve:
+Persist a full Iteration Record under `.alpha-goal/iterations/YYYYMMDD-<slug>.md` before handoff, blocking, or materially changing direction. Use `.alpha-goal/iterations/YYYYMMDD-<slug>.jsonl` only when an append-only machine log is useful. Store bulky command output, logs, screenshots, or traces under `.alpha-goal/evidence/` and link to them from the record. Update the Closed-loop Ledger artifact registry and show a compact `Iteration Summary` in the TUI by default.
+
+Print the full Iteration Record in chat only when the user asks, file persistence is blocked, or a blocker/risk requires explicit user review. Compact records are still acceptable for low-risk passes, but preserve:
 
 - approved context and boundary;
 - dynamic plan and preflight;
@@ -156,6 +158,17 @@ Produce an Iteration Record before handoff, blocking, or materially changing dir
 - ledger update: input state, error signal, disturbance update, control action, sensor feedback, residual error, and next state;
 - route decision;
 - next action.
+
+TUI summary:
+
+```text
+Iteration Summary:
+- Action:
+- Feedback:
+- Residual error:
+- Artifact:
+- Next:
+```
 
 Do not make final completion claims in the Iteration Record. Completion judgment belongs to `evidence-verify`.
 

@@ -103,7 +103,7 @@ Return exactly one verdict:
 
 ### 5. Output
 
-Produce a Verification Verdict proportional to risk.
+Persist the full Verification Verdict under `.alpha-goal/verification/YYYYMMDD-<slug>-verdict.md` by default and update the Closed-loop Ledger artifact registry. Show a compact `Verification Summary` in the TUI by default. Print the full verdict in chat only when the user asks, file persistence is blocked, or the final claim requires explicit user review.
 
 Compact:
 
@@ -116,6 +116,18 @@ Verification Verdict:
 - Gaps:
 - Required next step:
 - Final claim allowed:
+- Artifact:
+```
+
+TUI summary:
+
+```text
+Verification Summary:
+- Verdict:
+- Claim boundary:
+- Evidence:
+- Artifact:
+- Next:
 ```
 
 Full:
@@ -139,6 +151,7 @@ Verification Verdict:
 - Unresolved gaps:
 - Required next step:
 - Final claim allowed:
+- Ledger update:
 ```
 
 Routing:

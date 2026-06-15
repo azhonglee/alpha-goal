@@ -1,6 +1,6 @@
 # Verification Verdict Schema
 
-Use this full schema for formal acceptance records, merge-ready or ship-ready judgments, high-risk claims, contested evidence, or handoff. For low-risk checks, a compact verdict is enough if it preserves the semantics.
+Use this full schema for formal acceptance records, merge-ready or ship-ready judgments, high-risk claims, contested evidence, or handoff. For low-risk checks, a compact verdict is enough if it preserves the semantics. Persist the full verdict at `.alpha-goal/verification/YYYYMMDD-<slug>-verdict.md` by default. The TUI should show `Verification Summary` with verdict, claim boundary, evidence, artifact path, and next action unless full chat output is required.
 
 ## Compact verdict
 
@@ -10,6 +10,7 @@ Verification Verdict:
 - Evidence coverage:
 - Claim allowed:
 - Gaps:
+- Artifact:
 - Next step:
 ```
 
@@ -34,6 +35,11 @@ Verification Verdict:
 - Unresolved gaps:
 - Required next step:
 - Final claim allowed:
+- Ledger update:
+  - Control-state path:
+  - Artifact path:
+  - Verdict:
+  - Next route:
 ```
 
 ## Verdict

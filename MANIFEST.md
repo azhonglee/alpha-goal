@@ -34,8 +34,14 @@
 
 | Path | Purpose |
 |---|---|
-| `.alpha-goal/control-state/YYYYMMDD-<slug>.md` | Optional Closed-loop Ledger for cross-stage control state: full Latest Control Route, reference, current state, Synthesis Round, Indicator Handoff, Controller Hierarchy, Disturbance Register, Control Law, Adaptive Learning Record, feedback, residual error, and next route. |
+| `.alpha-goal/control-state/YYYYMMDD-<slug>.md` | Optional Closed-loop Ledger for cross-stage control state and artifact registry: full Latest Control Route, reference, current state, artifact paths, feedback, residual error, and next route. |
+| `.alpha-goal/context/YYYYMMDD-<slug>-goal-contract.md` | Optional full Goal Contract artifact. |
+| `.alpha-goal/models/YYYYMMDD-<slug>-system-model.md` | Optional full Control Model artifact. |
+| `.alpha-goal/synthesis/YYYYMMDD-<slug>-decision-synthesis.md` | Optional full Decision Synthesis Record artifact. |
+| `.alpha-goal/iterations/YYYYMMDD-<slug>.md` | Optional full Iteration Record artifact. |
 | `.alpha-goal/iterations/YYYYMMDD-<slug>.jsonl` | Optional append-only cycle log for machine-readable loop history. |
+| `.alpha-goal/evidence/` | Optional durable evidence, logs, screenshots, traces, or check outputs referenced by records. |
+| `.alpha-goal/verification/YYYYMMDD-<slug>-verdict.md` | Optional full Verification Verdict artifact. |
 
 默认主路径是：
 

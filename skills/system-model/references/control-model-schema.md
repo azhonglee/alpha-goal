@@ -1,5 +1,7 @@
 # Control Model Schema
 
+Persist the full model at `.alpha-goal/models/YYYYMMDD-<slug>-system-model.md` by default. The TUI should show `Model Summary` with boundary, observability, controllability, artifact path, and recommended route unless full chat output is required.
+
 ```text
 Control Model:
 - Title:
@@ -63,6 +65,11 @@ Control Model:
 - Missing sensors or authority:
 - Model adequacy:
 - Ledger update:
+  - Control-state path:
+  - Artifact path:
+  - Model changes:
+  - Residual model uncertainty:
+  - Next route:
 - Recommended route:
 ```
 

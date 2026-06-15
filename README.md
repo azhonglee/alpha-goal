@@ -14,7 +14,7 @@
 | 控制律 / control law | `control-loop` 中的 target error、control variable、expected effect、sensor threshold 和 fallback action |
 | 控制器 / actuator | `control-loop` 的有界迭代、诊断、修复、加固 |
 | 比较器 / error detector | `evidence-verify` 对“目标、证据、最终声明”的误差判定 |
-| 状态记忆 / memory | `.alpha-goal/control-state/` 中的 Closed-loop Ledger，跨阶段记录完整 Control Route、reference、state、error、action、feedback 和 next route |
+| 状态记忆 / memory | `.alpha-goal/control-state/` 中的 Closed-loop Ledger，跨阶段记录完整 Control Route、artifact registry、reference、state、error、action、feedback 和 next route |
 | 自适应学习 / adaptive learning | `control-loop` 从反馈失配中记录可复用的 threshold、strategy、route 或假设修正 |
 | 分层协同控制 | `system-model` 中的 Controller Hierarchy，识别 global/local controller、coupling variable、arbitration 和 escalation |
 | 鲁棒性 / disturbance handling | `system-model` 中的 Disturbance Register，记录 likelihood、impact、sensor、containment 和 route trigger |
@@ -115,4 +115,4 @@ scripts/           # 安装脚本
 tools/             # 本仓库校验工具
 ```
 
-运行中如需跨阶段恢复状态，默认使用 `.alpha-goal/control-state/YYYYMMDD-<slug>.md` 记录 Closed-loop Ledger，包括完整 `Latest Control Route`、Synthesis Round、Indicator Handoff、Controller Hierarchy、Disturbance Register、Control Law、Adaptive Learning Record、error、feedback 和 next route。TUI 默认只展示短的 `Route Summary`，下游技能从 `.alpha-goal/control-state/` 读取完整路由字段。写入前检查 `.alpha-goal/` 是否已被忽略；如果仓库根 `.gitignore` 缺少 `.alpha-goal/`，先加入该条目再写 ledger。
+运行中如需跨阶段恢复状态，默认使用 `.alpha-goal/control-state/YYYYMMDD-<slug>.md` 记录 Closed-loop Ledger，包括完整 `Latest Control Route`、artifact registry、Synthesis Round、Indicator Handoff、Controller Hierarchy、Disturbance Register、Control Law、Adaptive Learning Record、error、feedback 和 next route。完整阶段产物按类型写入 `.alpha-goal/context/`、`.alpha-goal/models/`、`.alpha-goal/synthesis/`、`.alpha-goal/iterations/`、`.alpha-goal/evidence/` 和 `.alpha-goal/verification/`；ledger 只保留状态和路径索引。TUI 默认只展示短的 `Route Summary`、`Contract Summary`、`Model Summary`、`Synthesis Summary`、`Iteration Summary` 或 `Verification Summary`，下游技能从 `.alpha-goal/` 读取完整字段。写入前检查 `.alpha-goal/` 是否已被忽略；如果仓库根 `.gitignore` 缺少 `.alpha-goal/`，先加入该条目再写 ledger。

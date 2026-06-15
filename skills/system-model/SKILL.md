@@ -165,7 +165,7 @@ Stabilization strategies:
 
 ### 6. Judge model adequacy
 
-Output either a compact or full Control Model.
+Persist the full Control Model under `.alpha-goal/models/YYYYMMDD-<slug>-system-model.md` by default and update the Closed-loop Ledger artifact registry. Show a compact `Model Summary` in the TUI by default. Print the full model in chat only when the user asks, file persistence is blocked, or a modeling gap requires explicit user review.
 
 Compact model:
 
@@ -183,6 +183,17 @@ Control Model:
 - Controllability:
 - Model adequacy:
 - Ledger update:
+- Recommended route:
+```
+
+TUI summary:
+
+```text
+Model Summary:
+- Boundary:
+- Observability:
+- Controllability:
+- Artifact:
 - Recommended route:
 ```
 
@@ -221,7 +232,7 @@ Control Model:
 - Stability conditions:
 - Missing information:
 - Model adequacy: sufficient | sufficient with narrowed claim | insufficient | blocked
-- Ledger update: `.alpha-goal/control-state/YYYYMMDD-<slug>.md` path, model changes, residual model uncertainty, next route, or explicit no-write reason
+- Ledger update: `.alpha-goal/control-state/YYYYMMDD-<slug>.md` path, artifact path, model changes, residual model uncertainty, next route, or explicit no-write reason
 - Recommended route: goal-contract | control-loop | evidence-verify | decision-synthesis | blocker
 ```
 

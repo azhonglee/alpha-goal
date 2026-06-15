@@ -1,6 +1,6 @@
 # Iteration Record Schema
 
-Use this reference when a loop result needs a durable or handoff-ready record. Keep it proportional: include fields only when they affect judgment, handoff, recovery, or accountability.
+Use this reference when a loop result needs a durable or handoff-ready record. Keep it proportional: include fields only when they affect judgment, handoff, recovery, or accountability. Persist the full record at `.alpha-goal/iterations/YYYYMMDD-<slug>.md` by default, with bulky evidence under `.alpha-goal/evidence/`. The TUI should show `Iteration Summary` with action, feedback, residual error, artifact path, and next action unless full chat output is required.
 
 ## Compact record
 
@@ -13,6 +13,11 @@ Iteration Record:
 - Error/acceptance delta:
 - Control law result:
 - Ledger update:
+  - Control-state path:
+  - Artifact path:
+  - Evidence paths:
+  - Residual error:
+  - Route decision:
 - Decision:
 - Next:
 ```
