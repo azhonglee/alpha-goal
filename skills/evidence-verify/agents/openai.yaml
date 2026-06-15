@@ -1,0 +1,4 @@
+interface:
+  display_name: "Evidence Verify"
+  short_description: "Judge evidence and claim boundary"
+  default_prompt: "Use $evidence-verify to compare fresh evidence, Indicator Handoff, Control Law, Adaptive Learning, and claim boundary."

@@ -91,6 +91,8 @@ repo_root="$(cd "$script_dir/.." && pwd -P)"
 source_skill_root="$repo_root/skills"
 install_link_name="alpha-goal"
 install_source="$source_skill_root"
+validation_tool="$repo_root/tools/validate_skills.ts"
+validation_tool_label="tools/validate_skills.ts"
 
 normalize_path() {
   python3 - "$1" <<'PY'
@@ -632,14 +634,20 @@ PY
 }
 
 run_skillset_validation() {
+  if [[ ! -f "$validation_tool" ]]; then
+    echo "Missing validation tool: $validation_tool" >&2
+    exit 1
+  fi
+
   if [[ "$verbose" == true ]]; then
-    python3 "$repo_root/tools/validate_skillset.py" "$repo_root"
+    npx --yes tsx "$validation_tool" "$repo_root"
     return
   fi
 
   local output
-  if ! output="$(python3 "$repo_root/tools/validate_skillset.py" "$repo_root" 2>&1)"; then
-    echo "$output" >&2
+  if ! output="$(npx --yes tsx "$validation_tool" "$repo_root" 2>&1)"; then
+    echo "Validation failed ($validation_tool_label). Re-run with --verbose for full output." >&2
+    printf '%s\n' "$output" | grep -E '^(ERRORS:|- |FAIL )' >&2 || true
     exit 1
   fi
 }
@@ -655,7 +663,7 @@ print_summary() {
 
   echo "Alpha Goal skillset $status: $installed -> $target_root"
   echo "Codex home: $codex_home"
-  echo "Validation: passed (tools/validate_skillset.py)"
+  echo "Validation: passed ($validation_tool_label)"
   if [[ "$sync_user_templates" == true ]]; then
     echo "User templates: AGENTS.md $agents_action, config.toml $config_action"
   else
@@ -677,7 +685,7 @@ fi
 
 run_skillset_validation
 
-required_skills=(alpha-goal loop verify)
+required_skills=(alpha-goal goal-contract system-model control-loop evidence-verify decision-synthesis)
 skill_files=()
 for skill_name in "${required_skills[@]}"; do
   skill_file="$source_skill_root/$skill_name/SKILL.md"
@@ -692,7 +700,7 @@ shopt -s nullglob
 discovered_skill_files=("$source_skill_root"/*/SKILL.md)
 shopt -u nullglob
 if [[ "${#discovered_skill_files[@]}" -ne "${#required_skills[@]}" ]]; then
-  echo "Unexpected skill set under $source_skill_root; run tools/validate_skillset.py for details." >&2
+  echo "Unexpected skill set under $source_skill_root; run $validation_tool_label for details." >&2
   exit 1
 fi
 
@@ -714,11 +722,14 @@ for support_name in adapters tools templates scripts; do
   remove_legacy_support_link "$support_name"
 done
 
-for skill_name in loop verify; do
+for skill_name in "${required_skills[@]}"; do
+  if [[ "$skill_name" == "$install_link_name" ]]; then
+    continue
+  fi
   remove_obsolete_skill_link "$skill_name"
 done
 
-for obsolete_skill in goal-frame goal-loop goal-iterate goal-review goal-verify; do
+for obsolete_skill in control-kernel loop verify meta-synthesis goal-frame goal-loop goal-iterate goal-review goal-verify; do
   remove_obsolete_skill_link "$obsolete_skill"
 done
 

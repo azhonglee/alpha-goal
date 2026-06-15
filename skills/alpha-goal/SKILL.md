@@ -1,164 +1,129 @@
 ---
 name: alpha-goal
-description: Clarify ambiguous engineering goals with Socratic interview, ambiguity scoring, pressure tests, and a compact Goal Contract before implementation mutation. Use for broad requests, missing acceptance criteria, target/scope uncertainty, decision-boundary discovery, read-only exploration framing, or handoff to loop.
+description: "Route engineering, debugging, design, and verification work through the closed-loop control skill suite: goal-contract, system-model, control-loop, evidence-verify, and decision-synthesis. Use when the next skill or control boundary is unclear."
 ---
 
 # Alpha Goal
 
-Use this skill to convert an unclear engineering request into a safe next route. The output may be a Goal Contract, a bounded read-only exploration answer, or a return-to-user decision; do not force every request into the same artifact.
+Use this skill to select and stabilize the next action in the skill suite. It is a router and control governor, not an implementation skill.
+
+## Cybernetic frame
+
+Treat the user request as a control problem:
+
+- `reference`: desired outcome, acceptance criteria, and final claim boundary;
+- `plant`: repository, product, data flow, document system, workflow, or organization being changed;
+- `state`: what is currently known about goal, scope, implementation, evidence, risk, and blockers;
+- `observer`: tests, logs, diffs, runtime probes, user feedback, reviewer feedback, and read-only repository facts;
+- `actuator`: bounded changes made by `control-loop` under an approved Goal Contract;
+- `comparator`: `evidence-verify`, which compares fresh evidence against the reference and claim boundary;
+- `memory`: a Closed-loop Ledger that carries reference, current state, error, control action, feedback, and route history across skills;
+- `adaptation`: Adaptive Learning Records that correct reusable control assumptions without silently changing scope or authority;
+- `disturbance`: changing requirements, dirty working tree, missing tools, flaky tests, conflicting specs, hidden ownership, broad claims, or external side effects, tracked through a Disturbance Register when material.
 
 ## Boundaries
 
-- Do not edit implementation files, push, open PRs/MRs, deploy, or claim implementation completion; follow repository isolation rules for any allowed artifact work.
-- Write process artifacts only after the artifact safety gate. If unsafe, keep artifacts in chat.
-- Ask only for user-owned decisions. Discover codebase facts yourself before asking about internals.
-- Use `request_user_input` by default when user input is needed and the runtime provides it.
-- Choose the safest process that can make the next route reliable; keep it as small as safety allows. Avoid ceremony that does not reduce ambiguity or risk.
+- Do not mutate implementation files, deploy, push, open PRs/MRs, repair data, or claim completion.
+- Do not bypass `goal-contract` when the desired reference state is ambiguous.
+- Do not bypass `system-model` when observability, controllability, ownership, or coupling is unclear enough to affect safe action.
+- Do not bypass `evidence-verify` when making a completion, correctness, readiness, merge, ship, or safety claim.
+- Keep routing proportional: choose the smallest next skill that reduces material uncertainty.
+- Default to durable process memory under `.alpha-goal/`. Before the first write in a repository, ensure `.alpha-goal/` is ignored; if it is missing from the repo root `.gitignore`, add `.alpha-goal/` there before writing ledger artifacts.
+- Use chat-only ledger state only when the user explicitly forbids file writes, no repository path exists, or `.gitignore` cannot be updated safely.
+
+## Load resources when needed
+
+- `references/cybernetic-routing.md`: route selection and stability failure patterns.
+- `references/closed-loop-ledger.md`: cross-stage state memory schema and update rules.
 
 ## Process
 
 ```text
-Discover -> Route -> Clarify/Explore -> Pressure-test -> Crystallize -> Review -> Handoff
+Classify state -> Select next skill -> Check stability gates -> Persist route card -> Show route summary
 ```
 
-### 1. Discover
+### 1. Classify state
 
-Collect just enough evidence to choose a safe route:
+Identify the current dominant uncertainty. If a Closed-loop Ledger exists, read its latest reference, current state, residual error, and route decision before classifying:
 
-- user intent, desired outcome, stated solution, constraints;
-- target repo/path/service/module and likely codebase touchpoints;
-- candidate repos in workspaces or aggregators;
-- existing work or durable specs when likely;
-- unknowns, non-goals, decision-boundary risks, and acceptance/evidence gaps.
+- unclear target, intent, scope, non-goals, acceptance, or authorization -> goal ambiguity;
+- unclear plant boundary, state variables, observability, controllability, disturbances, or coupling -> model ambiguity;
+- unclear controller hierarchy, local/global objective conflict, or coupling arbitration -> coordination ambiguity;
+- approved goal exists and a bounded action can improve evidence or implementation -> execution need;
+- repeated residual error, failed threshold, or contradicted control assumption -> adaptation need;
+- work appears done but claim/evidence boundary is unresolved -> verification need;
+- many stakeholders, weak quantification, conflicting values, or complex giant-system behavior -> synthesis need;
+- missing tool, permission, data, environment, or user-owned decision -> blocker.
 
-Derive a short `<slug>` for the goal boundary. Do not create empty directories.
+If no ledger exists and the task is likely to span multiple skills, initialize `.alpha-goal/control-state/YYYYMMDD-<slug>.md` after ensuring `.alpha-goal/` is ignored. Add `.alpha-goal/` to the repo root `.gitignore` first when needed.
 
-Artifact safety gate:
+### 2. Select next skill
 
-- Write `.alpha-goal/` artifacts only when that path is gitignored or explicitly approved; otherwise stay chat-only.
+Use this routing table:
 
-Minimum context can be compact: task statement, desired outcome, probable intent, known evidence, constraints, unknowns, decision-boundary gaps, and likely touchpoints. Store it at `.alpha-goal/context/YYYYMMDD-<slug>.md` only when the gate passes.
+| Current state | Next skill | Reason |
+| --- | --- | --- |
+| User asks for implementation but goal boundary is unclear | `goal-contract` | define reference/setpoint before control action |
+| Goal is broad and system structure is unclear | `system-model` then `goal-contract` | model the plant before writing the contract |
+| Multiple local controllers can affect one global objective | `system-model` or `decision-synthesis` | map hierarchy, coupling, arbitration, and user-owned priorities |
+| Active approved Goal Contract exists and mutation/probe is needed | `control-loop` | execute one bounded control action and collect feedback |
+| Evidence bundle exists and a final claim is proposed | `evidence-verify` | compare output state to reference and claim boundary |
+| Problem is socio-technical, strategic, multi-agent, or complex giant-system-like | `decision-synthesis` | synthesize qualitative and quantitative views before contract |
+| Required user-owned decision or external permission is missing | user clarification / blocker | do not invent authority |
 
-Announce only the state that helps the user decide or follow the route. For simple `EXPLORE`, a lightweight route note is enough; report depth, ambiguity, or artifact location only when they materially affect clarification, persistence, or handoff.
+### 3. Check stability gates
 
-### 2. Route
+Before routing to an execution-capable path, ensure:
 
-Choose the route from semantics, not headings:
+- the reference state is explicit enough to detect error;
+- an execution route has a candidate Control Law: target error, control variable, expected effect, sensor threshold, fallback;
+- the actuator boundary says what may change and what must not change;
+- observer signals are available or a missing-observer blocker is stated;
+- qualitative objectives have accepted indicators or explicitly missing sensors before execution claims depend on them;
+- material disturbances are registered with likelihood, impact, sensor, containment, and route trigger, or routed to modeling/synthesis/user/blocker;
+- prior Adaptive Learning Records are applied only when reuse conditions hold and invalidation conditions do not hold;
+- the ledger records the last error signal and why the selected next skill reduces it, or chat-only state is explicitly justified by a no-write constraint;
+- final claims will be checked by `evidence-verify` rather than stated by the executor.
 
-- `CLARIFY`: intent, outcome, scope, non-goals, constraints, or acceptance are unclear.
-- `EXPLORE`: the user asks for read-only audit, comparison, diagnosis direction, inventory, or evidence gathering without mutation.
-- `DESIGN`: a concrete design/spec is needed before implementation.
-- `IMPLEMENT`: mutation may follow after a reviewed Goal Contract or equivalent approved context exists.
-- `DEBUG`: prove the explanatory cause before any fix; if cause is unconfirmed, frame the next route as diagnosis/probe, not repair.
-- `VERIFY`: the user asks whether current evidence supports a completion/readiness/correctness claim.
+### 4. Persist route card and show summary
 
-If the request is explicitly read-only and the target/evidence boundary is clear enough, answer the bounded exploration directly with findings, evidence, recommendations, and residual uncertainty. Do not manufacture a full implementation Goal Contract.
+Persist the full route card to the Closed-loop Ledger by default. Do not print the full card in the TUI unless the user explicitly asks for it, persistence is blocked, or the route is high-risk enough that the user must review every field before continuing.
 
-Return to clarification when route, target, scope, non-goals, decision boundaries, or final claim would otherwise be guessed.
-
-### 3. Clarify
-
-Depth profiles are calibration aids, not ceremony:
-
-- `quick`: pre-PRD or low-risk framing; target ambiguity around `<= 0.30`; normally 1-5 rounds.
-- `standard`: default; target ambiguity around `<= 0.20`; stop as soon as remaining uncertainty no longer changes scope, acceptance, risk, or authority.
-- `deep`: broad or high-risk; target ambiguity around `<= 0.15`; use multiple rounds only while each round reduces material uncertainty.
-
-Interview loop:
-
-- Ask one high-leverage question per round.
-- Ask about intent, outcome, scope, non-goals, and decision boundaries before implementation detail.
-- Target the weakest clarity dimension after stage priority:
-  1. intent, outcome, scope, non-goals, decision boundaries;
-  2. constraints and success criteria;
-  3. brownfield context.
-- Stay on the same thread while the answer is vague; breadth without pressure is not progress.
-- Re-score ambiguity after each answer and show progress.
-- Continue while ambiguity is materially above threshold, readiness gates are open, pressure pass is incomplete for a contract handoff, or the user changes the target.
-- If the user stops clarification before readiness gates close, summarize unresolved gaps and proceed only with a narrowed route or explicit risk acceptance.
-- For long interviews, respect the selected depth profile's practical cap; at the cap, crystallize the safest available output and list unresolved gaps.
-
-Clarity dimensions:
-
-- Intent Clarity: why this matters.
-- Outcome Clarity: what end state is wanted.
-- Scope Clarity: what is included and excluded.
-- Constraint Clarity: technical or business limits.
-- Success Criteria Clarity: how completion will be judged.
-- Context Clarity: brownfield facts and existing-work relationship.
-
-Scoring is a self-check, not a proof. Use `high / medium / low` unless numeric rigor helps the user or risk level. If using numbers:
+Write or update this section in `.alpha-goal/control-state/YYYYMMDD-<slug>.md`:
 
 ```text
-Greenfield ambiguity = 1 - (intent*0.30 + outcome*0.25 + scope*0.20 + constraints*0.15 + success*0.10)
-Brownfield ambiguity = 1 - (intent*0.25 + outcome*0.20 + scope*0.20 + constraints*0.15 + success*0.10 + context*0.10)
+Latest Control Route:
+Control Route:
+- Ledger path:
+- Active state:
+- Dominant uncertainty:
+- Error signal:
+- Control law:
+- Indicator handoff:
+- Adaptive learning:
+- Controller hierarchy:
+- Disturbance register:
+- Selected skill:
+- Why this skill:
+- Required context to load or ask for:
+- Safety boundary:
+- Next action:
 ```
 
-Readiness gates:
+Then show only a TUI-friendly summary as a Markdown table:
 
-- non-goals or excluded scope are explicit;
-- decision boundaries state what the agent may decide without confirmation;
-- acceptance/evidence expectations are testable enough for the next route;
-- diagnostic goals define the evidence that authorizes repair; until then, repair is out of scope;
-- one pressure pass revisits an earlier answer with evidence, assumption, or tradeoff probing.
+```markdown
+Route Summary
 
-Append interview summaries to `.alpha-goal/interviews/`.
+| Field | Value |
+| --- | --- |
+| Route | |
+| Why | |
+| Boundary | |
+| Ledger | |
+| Next | |
+```
 
-### 4. Pressure-test
+The summary must be enough for the user to understand the selected route without reading a long field list. Keep each table value concise; put long reasoning in the ledger artifact. Other skills must recover the full route from `.alpha-goal/control-state/` instead of relying on the TUI transcript. If writing is explicitly forbidden or impossible, include the full `Control Route` in chat and state the no-write reason in `Ledger`.
 
-Use each mode at most once when it reduces real uncertainty:
-
-- `contrarian`: challenge the core assumption.
-- `simplifier`: ask for the smallest useful scope.
-- `ontologist`: reframe symptoms into the underlying entity, state, or cause.
-
-Follow-up ladder:
-
-1. Ask for a concrete example, counterexample, or evidence signal.
-2. Probe the assumption or dependency that makes the answer true.
-3. Force a boundary or tradeoff: exclude, defer, or reject something.
-4. If still symptom-level, reframe toward root cause or essence.
-
-### 5. Crystallize
-
-Produce the lightest artifact that makes the next route safe.
-
-For implementation or debug handoff, create a Goal Contract covering these semantics with any concise headings:
-
-- metadata: profile, rounds, final ambiguity, threshold, context type;
-- context snapshot reference/path or chat-only note;
-- clarity breakdown;
-- intent and desired outcome;
-- in-scope and out-of-scope / non-goals;
-- decision boundaries, constraints, and assumptions resolved;
-- testable acceptance criteria and evidence expectations;
-- for diagnostic goals: symptom, observations, competing hypotheses, cause-evidence needed, and repair authorization gate;
-- pressure-pass findings;
-- brownfield evidence vs inference;
-- technical context findings;
-- condensed transcript when useful.
-
-Default durable paths:
-
-- context: `.alpha-goal/context/YYYYMMDD-<slug>.md`
-- transcript: `.alpha-goal/interviews/YYYYMMDD-<slug>.md`
-- Goal Contract: `docs/design/YYYYMMDD-<slug>.md`
-
-For read-only exploration, output findings, evidence, recommendations, residual uncertainty, and whether a Goal Contract is needed before any mutation.
-
-### 6. Review and handoff
-
-Self-review the output against the route:
-
-- Does it answer the actual user request rather than a process template?
-- Are non-goals, decision boundaries, and claim boundaries explicit enough?
-- Are codebase facts labeled as evidence, and guesses labeled as inference?
-- Would the next agent know what not to do?
-
-For broad or high-risk contracts, request independent review when available without leaking intended answers. Treat Goal Contract acceptance as a user-owned decision: when a handoff contract is ready, ask the user to accept, reject, or change it. If the user rejects, changes, or narrows requirements, return to clarification.
-
-After self-review and user acceptance of a Goal Contract, commit it and handoff to `loop` for the next approved slice. For diagnostic contracts, the first loop slice is diagnosis/probe unless repair is already authorized by evidence. For read-only exploration or verify routes, handoff without creating a contract commit unless the accepted output is a durable contract. Push, PR/MR creation, deployment, or other external side effects still require explicit authorization.
-
-## Final checklist
-
-Artifact safety recorded; context captured; route is explicit; ambiguity shown when clarifying; non-goals and decision boundaries closed or blocker recorded; diagnostic contracts state whether repair is authorized; handoff contract accepted or blocker stated; pressure pass complete when a Goal Contract is produced; output matches route; no implementation mutation performed.
+If the user explicitly named a skill and the route is safe, respect that selection and state any residual gates.
