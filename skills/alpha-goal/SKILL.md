@@ -1,6 +1,6 @@
 ---
 name: alpha-goal
-description: Convert ambiguous engineering, debugging, design, or artifact requests into a safe Goal Contract: reference state, scope, non-goals, decision boundaries, acceptance evidence, and implementation authorization.
+description: "Convert ambiguous engineering, debugging, design, or artifact requests into a safe Goal Contract: reference state, scope, non-goals, decision boundaries, acceptance evidence, and implementation authorization."
 ---
 
 # Alpha Goal

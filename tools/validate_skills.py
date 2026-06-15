@@ -2,21 +2,53 @@
 """Lightweight validation for a local Agent Skills suite."""
 from __future__ import annotations
 
-import os
 import re
 import stat
 import sys
 from pathlib import Path
 
 FRONTMATTER_RE = re.compile(r"\A---\n(.*?)\n---\n", re.S)
-FIELD_RE = re.compile(r"^(name|description):\s*(.+?)\s*$", re.M)
+FIELD_RE = re.compile(r"^([A-Za-z0-9_-]+):\s*(.*?)\s*$")
+ALLOWED_FRONTMATTER_KEYS = {"name", "description"}
 
 
 def parse_frontmatter(text: str) -> dict[str, str]:
     m = FRONTMATTER_RE.match(text)
     if not m:
-        return {}
-    return {k: v.strip().strip('"\'') for k, v in FIELD_RE.findall(m.group(1))}
+        raise ValueError("missing YAML frontmatter block")
+
+    data: dict[str, str] = {}
+    for lineno, line in enumerate(m.group(1).splitlines(), start=2):
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        field = FIELD_RE.match(line)
+        if not field:
+            raise ValueError(f"line {lineno}: unsupported frontmatter syntax")
+
+        key, raw_value = field.groups()
+        value = raw_value.strip()
+        if key not in ALLOWED_FRONTMATTER_KEYS:
+            raise ValueError(f"line {lineno}: unsupported frontmatter key {key!r}")
+        if key in data:
+            raise ValueError(f"line {lineno}: duplicate frontmatter key {key!r}")
+        if not value:
+            raise ValueError(f"line {lineno}: empty frontmatter value for {key!r}")
+
+        quoted = (
+            len(value) >= 2
+            and value[0] == value[-1]
+            and value[0] in {"'", '"'}
+        )
+        if not quoted and re.search(r":\s", value):
+            raise ValueError(
+                f"line {lineno}: quote frontmatter value containing ': '"
+            )
+
+        data[key] = value[1:-1] if quoted else value
+
+    return data
 
 
 def main() -> int:
@@ -46,7 +78,11 @@ def main() -> int:
             errors.append(f"{d.name}: missing SKILL.md")
             continue
         text = md.read_text(encoding="utf-8")
-        fm = parse_frontmatter(text)
+        try:
+            fm = parse_frontmatter(text)
+        except ValueError as exc:
+            errors.append(f"{d.name}: invalid SKILL.md frontmatter: {exc}")
+            continue
         name = fm.get("name")
         desc = fm.get("description")
         if not name:

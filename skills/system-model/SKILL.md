@@ -1,6 +1,6 @@
 ---
 name: system-model
-description: Build a control-system model before engineering action: controlled object, state variables, observability, controllability, actuators, disturbances, coupling, and evidence sensors. Use for architecture, debugging, brownfield, or complex-system uncertainty.
+description: "Build a control-system model before engineering action: controlled object, state variables, observability, controllability, actuators, disturbances, coupling, and evidence sensors. Use for architecture, debugging, brownfield, or complex-system uncertainty."
 ---
 
 # System Model

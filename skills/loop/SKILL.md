@@ -1,6 +1,6 @@
 ---
 name: loop
-description: Run bounded control iterations under an approved Goal Contract: plan one slice, execute or probe safely, sense feedback, compare error, record evidence, and route to continue, harden, verify, reframe, or block.
+description: "Run bounded control iterations under an approved Goal Contract: plan one slice, execute or probe safely, sense feedback, compare error, record evidence, and route to continue, harden, verify, reframe, or block."
 ---
 
 # Loop

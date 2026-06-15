@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Judge whether fresh evidence satisfies an active Goal Contract and supports completion, correctness, safety, merge readiness, ship readiness, or a narrowed final claim. Use for final comparator/error-boundary decisions, not implementation.
+description: "Judge whether fresh evidence satisfies an active Goal Contract and supports completion, correctness, safety, merge readiness, ship readiness, or a narrowed final claim. Use for final comparator/error-boundary decisions, not implementation."
 ---
 
 # Verify
