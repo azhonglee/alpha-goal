@@ -1,6 +1,6 @@
 ---
 name: meta-synthesis
-description: "Apply Qian-style meta-synthesis to complex engineering or socio-technical systems: integrate qualitative judgment, quantitative evidence, stakeholder constraints, models, contradictions, and user-owned decisions before forming a Goal Contract."
+description: "Apply meta-synthesis to complex engineering or socio-technical systems: integrate qualitative judgment, quantitative evidence, stakeholder constraints, models, contradictions, and user-owned decisions before forming a Goal Contract."
 ---
 
 # Meta Synthesis

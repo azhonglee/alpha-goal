@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Compatibility entry point for validating this skill suite.
 
-The qian cybernetic suite uses tools/validate_skills.py as the canonical
+The closed-loop control suite uses tools/validate_skills.py as the canonical
 validator. Keep this wrapper so older docs, scripts, and local habits that run
 tools/validate_skillset.py continue to validate the current six-skill layout.
 """

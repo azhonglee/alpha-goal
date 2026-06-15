@@ -27,7 +27,7 @@
 | `skills/system-model/scripts/repo-sensor-snapshot.sh` | No | Prints a repository sensor snapshot for system modeling and observability checks. |
 | `skills/loop/scripts/mutation-preflight.sh` | No | Prints git root, branch, status, worktrees, local rule files, ignored worktree/evidence paths, and submodules. |
 | `skills/verify/scripts/evidence-summary.sh` | No | Prints changed files, diff stat, diff check status, and recent commits. |
-| `tools/validate_skills.py` | No | Canonical lightweight validator for the qian six-skill suite. |
+| `tools/validate_skills.py` | No | Canonical lightweight validator for the closed-loop six-skill suite. |
 | `tools/validate_skillset.py` | No | Compatibility wrapper for older validation commands; delegates to `tools/validate_skills.py`. |
 
 默认主路径是：

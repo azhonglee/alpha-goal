@@ -1,4 +1,4 @@
-# 钱学森工程控制论式 Alpha Goal 技能集
+# 闭环控制式 Alpha Goal 技能集
 
 本仓库维护一组给 Codex 使用的 Agent Skills。当前分支把原有 `alpha-goal`、`loop`、`verify` 三段式流程扩展为六技能闭环控制套件：先形成目标参考输入，再建模系统状态，随后有界执行、采集反馈并独立验证。
 

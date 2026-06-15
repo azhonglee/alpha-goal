@@ -1,6 +1,6 @@
 ---
 name: control-kernel
-description: "Route engineering, debugging, design, and verification work through the Qian-style closed-loop skill suite: alpha-goal, system-model, loop, verify, and meta-synthesis. Use when the next skill or control boundary is unclear."
+description: "Route engineering, debugging, design, and verification work through the closed-loop control skill suite: alpha-goal, system-model, loop, verify, and meta-synthesis. Use when the next skill or control boundary is unclear."
 ---
 
 # Control Kernel
