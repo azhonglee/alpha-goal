@@ -57,7 +57,13 @@ const root = commandOutput("git", ["rev-parse", "--show-toplevel"]).trim();
 if (root) {
   for (const candidate of [".worktrees/codex/preflight-check", ".alpha-goal/preflight-check"]) {
     const ignored = commandSucceeds("git", ["check-ignore", "-q", candidate], { cwd: root });
-    console.log(`${candidate}: ${ignored ? "ignored" : "NOT ignored or not applicable"}`);
+    if (ignored) {
+      console.log(`${candidate}: ignored`);
+    } else if (candidate.startsWith(".alpha-goal/")) {
+      console.log(`${candidate}: NOT ignored; add .alpha-goal/ to the repo root .gitignore before writing process artifacts`);
+    } else {
+      console.log(`${candidate}: NOT ignored or not applicable`);
+    }
   }
 }
 

@@ -102,7 +102,13 @@ section("ignore checks");
 if (root && isDirectory(root)) {
   for (const candidate of [worktreeCheckPath, scratchCheckPath]) {
     const ignored = commandSucceeds("git", ["check-ignore", "-q", candidate], { cwd: root });
-    console.log(`${candidate}: ${ignored ? "ignored" : "NOT ignored or outside ignore rules"}`);
+    if (ignored) {
+      console.log(`${candidate}: ignored`);
+    } else if (candidate.startsWith(".alpha-goal/")) {
+      console.log(`${candidate}: NOT ignored; add .alpha-goal/ to the repo root .gitignore before writing process artifacts`);
+    } else {
+      console.log(`${candidate}: NOT ignored or outside ignore rules`);
+    }
   }
 } else {
   console.log("<unknown root>");

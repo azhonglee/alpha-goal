@@ -28,7 +28,8 @@ Treat the user request as a control problem:
 - Do not bypass `system-model` when observability, controllability, ownership, or coupling is unclear enough to affect safe action.
 - Do not bypass `evidence-verify` when making a completion, correctness, readiness, merge, ship, or safety claim.
 - Keep routing proportional: choose the smallest next skill that reduces material uncertainty.
-- Do not write `.alpha-goal/` artifacts unless `.alpha-goal/` is ignored or the user explicitly approved the process-artifact path.
+- Default to durable process memory under `.alpha-goal/`. Before the first write in a repository, ensure `.alpha-goal/` is ignored; if it is missing from the repo root `.gitignore`, add `.alpha-goal/` there before writing ledger artifacts.
+- Use chat-only ledger state only when the user explicitly forbids file writes, no repository path exists, or `.gitignore` cannot be updated safely.
 
 ## Load resources when needed
 
@@ -54,7 +55,7 @@ Identify the current dominant uncertainty. If a Closed-loop Ledger exists, read 
 - many stakeholders, weak quantification, conflicting values, or complex giant-system behavior -> synthesis need;
 - missing tool, permission, data, environment, or user-owned decision -> blocker.
 
-If no ledger exists and the task is likely to span multiple skills, initialize one in chat or at `.alpha-goal/control-state/YYYYMMDD-<slug>.md` after the artifact safety gate.
+If no ledger exists and the task is likely to span multiple skills, initialize `.alpha-goal/control-state/YYYYMMDD-<slug>.md` after ensuring `.alpha-goal/` is ignored. Add `.alpha-goal/` to the repo root `.gitignore` first when needed.
 
 ### 2. Select next skill
 
@@ -81,7 +82,7 @@ Before routing to an execution-capable path, ensure:
 - qualitative objectives have accepted indicators or explicitly missing sensors before execution claims depend on them;
 - material disturbances are registered with likelihood, impact, sensor, containment, and route trigger, or routed to modeling/synthesis/user/blocker;
 - prior Adaptive Learning Records are applied only when reuse conditions hold and invalidation conditions do not hold;
-- the ledger or chat state records the last error signal and why the selected next skill reduces it;
+- the ledger records the last error signal and why the selected next skill reduces it, or chat-only state is explicitly justified by a no-write constraint;
 - final claims will be checked by `evidence-verify` rather than stated by the executor.
 
 ### 4. Emit route card

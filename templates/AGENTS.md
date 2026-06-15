@@ -31,7 +31,7 @@ Before asking, decide whether the missing input is material, discoverable, risky
 
 ## Isolation Principles
 
-- Ensure `.worktrees/` is ignored before placing repository-local worktrees there, and keep `.alpha-goal/` ignored for runtime evidence, reviews, and scratch artifacts.
+- Ensure `.worktrees/` is ignored before placing repository-local worktrees there. Default runtime evidence, reviews, scratch artifacts, and Closed-loop Ledger files go under `.alpha-goal/`; if `.alpha-goal/` is missing from the repo root `.gitignore`, add `.alpha-goal/` before writing those artifacts.
 - Use repository-local worktrees to isolate changes per goal/task batch. Create them under `<repo>/.worktrees/codex/<task-slug>/` unless the repository already defines a stricter convention or the path is not technically usable.
 - In monorepos, create the worktree under the owning subrepo's `.worktrees/codex/<task-slug>/`.
 - Never edit/delete directly on main/master; always work in a worktree.

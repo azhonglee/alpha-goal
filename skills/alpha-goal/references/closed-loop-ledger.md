@@ -18,7 +18,13 @@ Optional append-only machine log:
 .alpha-goal/iterations/YYYYMMDD-<slug>.jsonl
 ```
 
-Before writing, confirm `.alpha-goal/` is ignored or the user explicitly approved another process-artifact path. If writing is unsafe, keep the ledger in chat and name the missing artifact path.
+Default behavior is to write the ledger under `.alpha-goal/`. Before the first write in a repository, check whether `.alpha-goal/` is ignored. If it is not ignored and the repo root `.gitignore` is writable, add this line before writing ledger artifacts:
+
+```gitignore
+.alpha-goal/
+```
+
+Treat adding `.alpha-goal/` to `.gitignore` as a process-artifact setup mutation, not an implementation mutation. Use chat-only ledger state only when the user explicitly forbids file writes, no repository path exists, or `.gitignore` cannot be updated safely; state that reason in the `Ledger path` field.
 
 ## Ledger schema
 

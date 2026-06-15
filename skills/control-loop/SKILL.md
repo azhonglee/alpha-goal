@@ -12,13 +12,13 @@ Use this skill to advance an approved goal through bounded iterations. It is the
 All must be true before editing implementation files:
 
 - an approved Goal Contract or equivalent context identifies reference state, desired outcome, included scope, excluded scope/non-goals, decision boundaries, constraints, acceptance evidence, and claim boundary;
-- current ledger or chat state is read when available, especially last residual error, control action, feedback, and route decision;
+- current `.alpha-goal/control-state/` ledger is read when available, especially last residual error, control action, feedback, and route decision; if no file ledger exists, use chat state only with an explicit no-write reason;
 - current Disturbance Register is read when available, especially material likelihood, impact, sensor, containment, and route triggers;
 - target/scope boundary and final claim boundary are clear enough to decide changed files and final wording;
 - applicable local rules, durable specs, and active plans have been read;
 - repository, worktree, submodule, ownership, dirty-state, and unrelated user-change boundaries are understood;
 - isolated edit path is ready, or creating it is the first explicitly recorded setup mutation;
-- `.worktrees/`, `.alpha-goal/`, or alternative process-artifact paths are ignored or explicitly approved;
+- `.worktrees/` is ignored or otherwise safe for isolated edits, and `.alpha-goal/` is ignored; if `.alpha-goal/` is missing from the repo root `.gitignore`, add it before writing process artifacts;
 - strongest material risk, loop mode, evidence floor, and mutation preflight are recorded.
 
 Before mutation, cite the contract source actually read: file path, chat excerpt, or explicit equivalent context. If it is unavailable, do not infer it from phrases like “existing Goal Contract”; return to `goal-contract`.
@@ -79,7 +79,7 @@ Preflight must answer:
 - is the current checkout primary, linked worktree, or otherwise unsafe?
 - what unrelated user changes exist?
 - which local rule files apply?
-- are process-artifact paths ignored or approved?
+- is `.alpha-goal/` ignored, or has `.alpha-goal/` just been added to the repo root `.gitignore` before writing process artifacts?
 - what evidence floor is required by the strongest material risk?
 
 ### 3. Execute or probe

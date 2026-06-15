@@ -35,10 +35,10 @@ Treat the current checkout as primary when:
 git worktree list
 git status --short
 git check-ignore -q .worktrees/codex/<task-slug> || printf 'CHECK: default worktree path is not ignored here\n'
-git check-ignore -q .alpha-goal/preflight-check || printf 'CHECK: .alpha-goal/ is not ignored here\n'
+git check-ignore -q .alpha-goal/preflight-check || printf 'CHECK: add .alpha-goal/ to the repo root .gitignore before writing process artifacts\n'
 ```
 
-These checks evaluate default candidates only. If the approved path differs, check that path instead.
+These checks evaluate default candidates only. If `.alpha-goal/` is not ignored, add `.alpha-goal/` to the repo root `.gitignore` before writing ledger, evidence, review, or scratch artifacts. If the approved path differs, check that path instead.
 
 ## Safe pattern
 

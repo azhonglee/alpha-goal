@@ -133,6 +133,10 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "closed-loop ledger records cross-stage control memory",
     "skills/alpha-goal/references/closed-loop-ledger.md",
     [
+      "Default behavior",
+      ".alpha-goal/",
+      ".gitignore",
+      "process-artifact setup mutation",
       "Reference",
       "Current state",
       "Last error signal",
@@ -420,6 +424,7 @@ export function main(args = process.argv.slice(2)): number {
   }
 
   validateTypeScriptScriptSurface(root, errors, warnings);
+  validateRuntimeArtifactIgnore(root, errors);
   validateLegacyScriptReferences(root, errors);
   validateLegacySkillReferences(root, errors);
   validateSemanticSmokeTests(root, errors);
@@ -457,6 +462,22 @@ function validateTypeScriptScriptSurface(root: string, errors: string[], warning
         warnings.push(`${rel} has a shebang but is not user-executable`);
       }
     }
+  }
+}
+
+function validateRuntimeArtifactIgnore(root: string, errors: string[]): void {
+  const gitignore = path.join(root, ".gitignore");
+  if (!isFile(gitignore)) {
+    errors.push("missing .gitignore with required .alpha-goal/ runtime artifact ignore");
+    return;
+  }
+
+  const lines = fs
+    .readFileSync(gitignore, "utf8")
+    .split(/\r?\n/)
+    .map((line) => line.trim());
+  if (!lines.includes(".alpha-goal/")) {
+    errors.push(".gitignore must include .alpha-goal/ for default ledger and runtime artifacts");
   }
 }
 

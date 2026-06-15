@@ -21,8 +21,8 @@ In engineering-cybernetics terms, this skill defines the setpoint and safe contr
 ## Boundaries
 
 - Do not edit implementation files, push, open PRs/MRs, deploy, repair data, request credentials, or claim implementation completion.
-- Write process artifacts only after the artifact safety gate; otherwise keep the result in chat.
-- Before writing `.alpha-goal/control-state/`, confirm `.alpha-goal/` is ignored or an alternative path is explicitly approved.
+- Default to writing process artifacts under `.alpha-goal/`. Before the first write in a repository, ensure `.alpha-goal/` is ignored; if it is missing from the repo root `.gitignore`, add `.alpha-goal/` there before writing ledger artifacts.
+- Keep ledger state in chat only when the user explicitly forbids file writes, no repository path exists, or `.gitignore` cannot be updated safely.
 - Ask only for user-owned decisions. Discover codebase or document facts yourself when safe and available.
 - Goal Contract acceptance authorizes only handoff to `control-loop`; it does not authorize push, deployment, data repair, production actions, or external side effects.
 - For diagnostics, do not assume repair authorization merely because a plausible cause exists. Define what evidence authorizes repair.
@@ -150,10 +150,10 @@ Goal Contract:
 - Diagnostic gate: symptom, hypotheses, cause-evidence needed, repair authorization gate, if applicable
 - Pressure-test findings: assumption/tradeoff/evidence probes
 - Handoff: accepted indicators, allowed first loop mode, evidence floor, stop/reframe triggers
-- Ledger update: path or chat-only state, latest error signal, next route
+- Ledger update: `.alpha-goal/control-state/YYYYMMDD-<slug>.md` path, latest error signal, next route, or explicit no-write reason
 ```
 
-Default durable paths when safe and useful:
+Default durable paths:
 
 ```text
 .alpha-goal/context/YYYYMMDD-<slug>.md
@@ -172,7 +172,7 @@ Self-review the artifact:
 - Are observed facts labeled separately from inference?
 - Would `control-loop` know what not to do?
 - Would `evidence-verify` know what evidence is required?
-- Would a later skill recover reference, current state, last error, and next route from the ledger or chat state?
+- Would a later skill recover reference, current state, last error, and next route from `.alpha-goal/control-state/` or an explicitly justified no-write chat state?
 - Does any next step require user permission, risk acceptance, credentials, external side effects, data repair, push, PR/MR, deployment, or production access?
 
 If review fails, return to the earliest phase that can fix it.
@@ -181,4 +181,4 @@ If review fails, return to the earliest phase that can fix it.
 
 Handoff means passing a user-accepted Goal Contract to `control-loop`. Non-contract artifacts inform later work but do not authorize implementation.
 
-When a contract is ready, ask the user to accept, reject, or change it unless the runtime already contains explicit acceptance. If accepted, update the ledger with reference, current state, actuator boundary, evidence floor, and next route before handoff when artifact writing is safe; otherwise include the ledger state in chat. If rejected or changed, return to clarification.
+When a contract is ready, ask the user to accept, reject, or change it unless the runtime already contains explicit acceptance. If accepted, update `.alpha-goal/control-state/YYYYMMDD-<slug>.md` with reference, current state, actuator boundary, evidence floor, and next route before handoff. If `.alpha-goal/` is not ignored, add it to the repo root `.gitignore` first. If writing is explicitly forbidden or impossible, include the ledger state in chat and state the no-write reason. If rejected or changed, return to clarification.

@@ -115,4 +115,4 @@ scripts/           # 安装脚本
 tools/             # 本仓库校验工具
 ```
 
-运行中如需跨阶段恢复状态，优先使用 `.alpha-goal/control-state/YYYYMMDD-<slug>.md` 记录 Closed-loop Ledger，包括 Synthesis Round、Indicator Handoff、Controller Hierarchy、Disturbance Register、Control Law、Adaptive Learning Record、error、feedback 和 next route。写入前必须确认 `.alpha-goal/` 已被忽略，或使用用户明确批准的替代路径。
+运行中如需跨阶段恢复状态，默认使用 `.alpha-goal/control-state/YYYYMMDD-<slug>.md` 记录 Closed-loop Ledger，包括 Synthesis Round、Indicator Handoff、Controller Hierarchy、Disturbance Register、Control Law、Adaptive Learning Record、error、feedback 和 next route。写入前检查 `.alpha-goal/` 是否已被忽略；如果仓库根 `.gitignore` 缺少 `.alpha-goal/`，先加入该条目再写 ledger。

@@ -221,7 +221,7 @@ Control Model:
 - Stability conditions:
 - Missing information:
 - Model adequacy: sufficient | sufficient with narrowed claim | insufficient | blocked
-- Ledger update: path or chat-only state, model changes, residual model uncertainty, next route
+- Ledger update: `.alpha-goal/control-state/YYYYMMDD-<slug>.md` path, model changes, residual model uncertainty, next route, or explicit no-write reason
 - Recommended route: goal-contract | control-loop | evidence-verify | decision-synthesis | blocker
 ```
 

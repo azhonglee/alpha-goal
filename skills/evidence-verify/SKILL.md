@@ -20,7 +20,7 @@ A positive verdict needs proportional semantic evidence for:
 - Iteration Record or equivalent diff/evidence bundle;
 - Control Law result for each material `control-loop` slice, when a mutation or diagnostic probe was used;
 - Indicator Handoff handling when qualitative objectives or synthesis metrics affect acceptance evidence;
-- Closed-loop Ledger or equivalent chat state when the work crossed skills or turns;
+- Closed-loop Ledger from `.alpha-goal/control-state/` when the work crossed skills or turns, or explicit no-write chat state when file writing was forbidden or impossible;
 - Disturbance Register handling when material disturbances affected route, evidence, or risk;
 - Adaptive Learning Record handling when feedback changed thresholds, strategy, route, or reusable assumptions;
 - Debug Receipt when the claim is a bug or root-cause fix;
@@ -68,7 +68,7 @@ Confirm:
 - Iteration Record goal type, control slice, execution, feedback, learning, and evidence match the final diff/artifact;
 - changed files match target and avoid non-goals;
 - mutation evidence comes from an isolated or approved edit path;
-- `.worktrees/` and process-artifact paths, if used, are ignored or approved;
+- `.worktrees/` is ignored or otherwise safe, and `.alpha-goal/` is ignored before ledger/evidence artifacts are written; if `.alpha-goal/` was missing from the repo root `.gitignore`, the setup mutation is included in the evidence;
 - checks ran after the last material change, or missing checks have a stated blocker/substitute evidence;
 - failing output is understood and does not contradict the final claim;
 - feedback is handled, out of scope, or routed elsewhere.
