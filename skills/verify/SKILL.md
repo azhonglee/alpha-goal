@@ -18,6 +18,7 @@ A positive verdict needs proportional semantic evidence for:
 - reference state, desired outcome, included scope, excluded scope/non-goals, decision boundaries, constraints, and claim boundary;
 - current durable spec/plan/model if referenced;
 - Iteration Record or equivalent diff/evidence bundle;
+- Closed-loop Ledger or equivalent chat state when the work crossed skills or turns;
 - Debug Receipt when the claim is a bug or root-cause fix;
 - strongest material risk and matching evidence floor;
 - fresh final-target repo/artifact status and applicable project rules;
@@ -55,6 +56,7 @@ Confirm:
 
 - approved context is current or explicitly superseded;
 - Goal Contract, system model, durable spec, and plan are semantically aligned or contradictions are routed;
+- ledger reference, current state, residual error, and latest route decision are aligned with fresh evidence or explicitly superseded;
 - Iteration Record goal type, control slice, execution, feedback, learning, and evidence match the final diff/artifact;
 - changed files match target and avoid non-goals;
 - mutation evidence comes from an isolated or approved edit path;
@@ -117,6 +119,7 @@ Verification Verdict:
 - Contract/model/artifact review:
 - Claim boundary:
 - Risk/evidence review:
+- Ledger review:
 - Fresh checks run:
 - Diff/scope review:
 - Feedback review:

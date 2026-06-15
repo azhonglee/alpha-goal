@@ -12,6 +12,7 @@
 | 传感器 / observer | repo 快照、日志、测试、人工反馈、审查意见 |
 | 控制器 / actuator | `loop` 的有界迭代、诊断、修复、加固 |
 | 比较器 / error detector | `verify` 对“目标、证据、最终声明”的误差判定 |
+| 状态记忆 / memory | `.alpha-goal/control-state/` 中的 Closed-loop Ledger，跨阶段记录 reference、state、error、action、feedback 和 next route |
 | 复杂巨系统综合集成 | `meta-synthesis` 对复杂、多主体、弱量化问题的综合研判 |
 | 总调度器 | `control-kernel` 根据当前系统状态选择 Skill 和下一步 |
 
@@ -106,3 +107,5 @@ templates/         # 可同步到 Codex home 的用户配置模板
 scripts/           # 安装脚本
 tools/             # 本仓库校验工具
 ```
+
+运行中如需跨阶段恢复状态，优先使用 `.alpha-goal/control-state/YYYYMMDD-<slug>.md` 记录 Closed-loop Ledger。写入前必须确认 `.alpha-goal/` 已被忽略，或使用用户明确批准的替代路径。

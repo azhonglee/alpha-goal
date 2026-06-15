@@ -26,6 +26,7 @@ Do not use for localized low-risk tasks with clear acceptance and direct evidenc
 - Do not invent stakeholder preferences or user-owned risk decisions.
 - Do not treat a synthesis as implementation authorization. Convert the selected direction into a Goal Contract via `alpha-goal` before mutation.
 - Separate facts, expert judgments, assumptions, hypotheses, scenarios, and decisions.
+- When a Closed-loop Ledger exists, update only synthesis-relevant state: objective conflicts, user-owned decisions, scenario assumptions, and the recommended route.
 
 ## Process
 
@@ -123,6 +124,7 @@ Meta-Synthesis Record:
 - Decision boundaries:
 - Risks and explicit acceptances:
 - Minimum viable Goal Contract candidate:
+- Ledger update:
 - Route:
 ```
 

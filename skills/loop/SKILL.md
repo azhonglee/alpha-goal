@@ -12,6 +12,7 @@ Use this skill to advance an approved goal through bounded iterations. It is the
 All must be true before editing implementation files:
 
 - an approved Goal Contract or equivalent context identifies reference state, desired outcome, included scope, excluded scope/non-goals, decision boundaries, constraints, acceptance evidence, and claim boundary;
+- current ledger or chat state is read when available, especially last residual error, control action, feedback, and route decision;
 - target/scope boundary and final claim boundary are clear enough to decide changed files and final wording;
 - applicable local rules, durable specs, and active plans have been read;
 - repository, worktree, submodule, ownership, dirty-state, and unrelated user-change boundaries are understood;
@@ -48,6 +49,7 @@ A single `loop` run may perform multiple bounded passes when context, authorizat
 Dynamic planning answers only the current iteration:
 
 - the smallest coherent acceptance-relevant slice that can be completed and observed now;
+- the error signal this slice is expected to reduce, using the ledger or Goal Contract as reference;
 - control variables to change and variables intentionally held constant;
 - fresh evidence needed after the slice and how it will be sensed;
 - files, modules, repos, generated outputs, and ownership surfaces allowed to change;
@@ -137,6 +139,7 @@ Produce an Iteration Record before handoff, blocking, or materially changing dir
 - fresh evidence and evidence class;
 - acceptance delta and error remaining;
 - feedback and disturbances;
+- ledger update: input state, error signal, control action, sensor feedback, residual error, and next state;
 - route decision;
 - next action.
 
@@ -145,7 +148,7 @@ Do not make final completion claims in the Iteration Record. Completion judgment
 ### 7. Route next
 
 - For `ITERATION_CONTINUES` or `ITERATION_HARDEN`, do not stop at “recommended next step” when the next pass is already authorized, safe, and actionable. Apply the auto-execution test in `references/auto-execution.md`, then either start the next bounded pass immediately or record the concrete stop reason.
-- For `ITERATION_READY_FOR_VERIFY`, hand off to `verify` with the current claim, Goal Contract, diff/artifact evidence, and fresh checks.
+- For `ITERATION_READY_FOR_VERIFY`, hand off to `verify` with the current claim, Goal Contract, ledger state, diff/artifact evidence, and fresh checks.
 - For `RETURN_TO_ALPHA_GOAL`, stop mutation and revise the contract.
 - For `RETURN_TO_SYSTEM_MODEL`, stop mutation and model the system boundary.
 - For `BLOCKED`, stop and report the smallest missing input, permission, tool, data, environment, or safe-state condition.

@@ -34,6 +34,7 @@ Control Model:
 - Stability conditions:
 - Missing sensors or authority:
 - Model adequacy:
+- Ledger update:
 - Recommended route:
 ```
 

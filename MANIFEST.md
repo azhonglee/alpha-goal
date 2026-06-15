@@ -30,6 +30,13 @@
 | `tools/validate_skills.py` | No | Canonical lightweight validator for the closed-loop six-skill suite. |
 | `tools/validate_skillset.py` | No | Compatibility wrapper for older validation commands; delegates to `tools/validate_skills.py`. |
 
+## Runtime Artifacts
+
+| Path | Purpose |
+|---|---|
+| `.alpha-goal/control-state/YYYYMMDD-<slug>.md` | Optional Closed-loop Ledger for cross-stage control state: reference, current state, error, control action, feedback, residual error, and next route. |
+| `.alpha-goal/iterations/YYYYMMDD-<slug>.jsonl` | Optional append-only cycle log for machine-readable loop history. |
+
 默认主路径是：
 
 ```text

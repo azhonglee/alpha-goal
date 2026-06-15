@@ -11,6 +11,7 @@ Iteration Record:
 - Action:
 - Evidence:
 - Error/acceptance delta:
+- Ledger update:
 - Decision:
 - Next:
 ```
@@ -26,6 +27,7 @@ Add when relevant:
 - `Acceptance delta`: criteria covered, partially covered, or uncovered.
 - `Feedback handling`: user, reviewer, test, runtime, or advisory feedback that changed the route.
 - `Risk/ownership`: cross-boundary, generated-output, migration, compatibility, concurrency, data, security, or observability risk.
+- `Ledger update`: input state, error signal, control action, sensor feedback, residual error, route decision, and next state when the task spans skills or turns.
 - `Debug Receipt`: required for bug/root-cause claims.
 - `Delegation receipt`: required when subagents own an independent surface.
 

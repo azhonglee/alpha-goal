@@ -17,6 +17,7 @@ The optional steps are not ceremony:
 - Use `alpha-goal` when the reference/setpoint is unstable.
 - Use `loop` only after the reference and actuator boundary are stable enough.
 - Use `verify` whenever a completion/readiness/correctness claim is at stake.
+- Carry the Closed-loop Ledger across stages when a task spans skills or turns.
 
 ## Stability failure patterns
 

@@ -15,12 +15,14 @@ In engineering-cybernetics terms, this skill defines the setpoint and safe contr
 - `error signal`: what would count as mismatch between desired and current state;
 - `actuator boundary`: what `loop` may change, probe, or delegate;
 - `sensor plan`: what evidence can observe success, failure, or root cause;
+- `control memory`: the ledger state that preserves reference/current/error/route history across stages;
 - `stability conditions`: non-goals, stop conditions, claim boundary, and reframe triggers.
 
 ## Boundaries
 
 - Do not edit implementation files, push, open PRs/MRs, deploy, repair data, request credentials, or claim implementation completion.
 - Write process artifacts only after the artifact safety gate; otherwise keep the result in chat.
+- Before writing `.alpha-goal/control-state/`, confirm `.alpha-goal/` is ignored or an alternative path is explicitly approved.
 - Ask only for user-owned decisions. Discover codebase or document facts yourself when safe and available.
 - Goal Contract acceptance authorizes only handoff to `loop`; it does not authorize push, deployment, data repair, production actions, or external side effects.
 - For diagnostics, do not assume repair authorization merely because a plausible cause exists. Define what evidence authorizes repair.
@@ -41,6 +43,8 @@ Collect enough context to classify the problem:
 - existing work, durable specs, incidents, logs, tickets, or prior decisions;
 - unknowns that affect authority, scope, risk, acceptance, decision boundaries, or claim wording;
 - for brownfield work, facts observed directly versus inferences.
+
+If a Closed-loop Ledger exists, read it before changing the Goal Contract. If it conflicts with current user intent or fresh facts, label the superseded state and reframe instead of silently continuing.
 
 If the system boundary or feedback signals are too unclear to write a reliable contract, route to `system-model` first and return with a model summary.
 
@@ -137,12 +141,14 @@ Goal Contract:
 - Diagnostic gate: symptom, hypotheses, cause-evidence needed, repair authorization gate, if applicable
 - Pressure-test findings: assumption/tradeoff/evidence probes
 - Handoff: allowed first loop mode, evidence floor, stop/reframe triggers
+- Ledger update: path or chat-only state, latest error signal, next route
 ```
 
 Default durable paths when safe and useful:
 
 ```text
 .alpha-goal/context/YYYYMMDD-<slug>.md
+.alpha-goal/control-state/YYYYMMDD-<slug>.md
 docs/design/YYYYMMDD-<slug>-goal-contract.md
 .alpha-goal/interviews/YYYYMMDD-<slug>.md
 ```
@@ -156,6 +162,7 @@ Self-review the artifact:
 - Are observed facts labeled separately from inference?
 - Would `loop` know what not to do?
 - Would `verify` know what evidence is required?
+- Would a later skill recover reference, current state, last error, and next route from the ledger or chat state?
 - Does any next step require user permission, risk acceptance, credentials, external side effects, data repair, push, PR/MR, deployment, or production access?
 
 If review fails, return to the earliest phase that can fix it.
@@ -164,4 +171,4 @@ If review fails, return to the earliest phase that can fix it.
 
 Handoff means passing a user-accepted Goal Contract to `loop`. Non-contract artifacts inform later work but do not authorize implementation.
 
-When a contract is ready, ask the user to accept, reject, or change it unless the runtime already contains explicit acceptance. If accepted, preserve allowed process artifacts and hand off. If rejected or changed, return to clarification.
+When a contract is ready, ask the user to accept, reject, or change it unless the runtime already contains explicit acceptance. If accepted, update the ledger with reference, current state, actuator boundary, evidence floor, and next route before handoff when artifact writing is safe; otherwise include the ledger state in chat. If rejected or changed, return to clarification.

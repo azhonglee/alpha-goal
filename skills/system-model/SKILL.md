@@ -25,6 +25,7 @@ Use `system-model` when any of these are true:
 - Do not decide user-owned goals, risk acceptance, or business tradeoffs.
 - Do not over-model simple low-risk work where target, scope, evidence, and ownership are already clear.
 - Label observed facts, inferred structure, assumptions, and missing sensors separately.
+- If a Closed-loop Ledger exists, update only model-relevant state: plant boundary, state variables, sensors, actuators, disturbances, coupling, and model adequacy.
 
 ## Process
 
@@ -41,6 +42,8 @@ Define the system of interest:
 - interfaces crossing the boundary;
 - ownership boundary: repo, worktree, submodule, team, data owner, or product surface;
 - time boundary: current behavior, migration phase, release window, incident window, or historical state.
+
+If a ledger exists, compare its plant/current-state assumptions to observed facts. Mark stale assumptions before routing back to `alpha-goal` or `loop`.
 
 If a repository is available and read-only inspection is safe, use `scripts/repo-sensor-snapshot.sh` or equivalent manual checks to gather structure, status, and local rules.
 
@@ -132,6 +135,7 @@ Control Model:
 - Observability:
 - Controllability:
 - Model adequacy:
+- Ledger update:
 - Recommended route:
 ```
 
@@ -153,6 +157,7 @@ Control Model:
 - Stability conditions:
 - Missing information:
 - Model adequacy: sufficient | sufficient with narrowed claim | insufficient | blocked
+- Ledger update: path or chat-only state, model changes, residual model uncertainty, next route
 - Recommended route: alpha-goal | loop | verify | meta-synthesis | blocker
 ```
 
