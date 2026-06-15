@@ -30,6 +30,7 @@ If system boundary, sensors, actuators, disturbances, or coupling are unclear en
 - `references/loop-modes.md`: mode choice, evidence type, debug receipt, and route decisions.
 - `references/plan-template.md`: durable dynamic plans for multi-slice or handoff-heavy work.
 - `references/iteration-record-schema.md`: compact or formal Iteration Record semantics.
+- `references/auto-execution.md`: when to execute the next pass automatically versus recommend or pause.
 - `scripts/mutation-preflight.sh`: read-only git/path preflight.
 
 ## Iteration process
@@ -40,7 +41,7 @@ Each pass is a control cycle:
 Plan control slice -> Preflight -> Execute or probe -> Sense feedback -> Compare error -> Record -> Route
 ```
 
-A single `loop` run may perform multiple bounded passes when context, authorization, risk, and user-owned decisions remain stable and each pass is recorded proportionally.
+A single `loop` run may perform multiple bounded passes when context, authorization, risk, and user-owned decisions remain stable and each pass is recorded proportionally. If the next pass is safe and deterministic under `references/auto-execution.md`, execute it instead of merely listing it as a suggestion.
 
 ### 1. Plan control slice
 
@@ -143,7 +144,7 @@ Do not make final completion claims in the Iteration Record. Completion judgment
 
 ### 7. Route next
 
-- For `ITERATION_CONTINUES` or `ITERATION_HARDEN`, start the next bounded pass only when context, risk, budget, and authorization remain stable; otherwise record the recommended next pass and pause.
+- For `ITERATION_CONTINUES` or `ITERATION_HARDEN`, do not stop at “recommended next step” when the next pass is already authorized, safe, and actionable. Apply the auto-execution test in `references/auto-execution.md`, then either start the next bounded pass immediately or record the concrete stop reason.
 - For `ITERATION_READY_FOR_VERIFY`, hand off to `verify` with the current claim, Goal Contract, diff/artifact evidence, and fresh checks.
 - For `RETURN_TO_ALPHA_GOAL`, stop mutation and revise the contract.
 - For `RETURN_TO_SYSTEM_MODEL`, stop mutation and model the system boundary.
