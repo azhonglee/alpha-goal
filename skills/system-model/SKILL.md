@@ -165,7 +165,7 @@ Stabilization strategies:
 
 ### 6. Judge model adequacy
 
-Persist the full Control Model under `.alpha-goal/models/YYYYMMDD-<slug>-system-model.md` by default and update the Closed-loop Ledger artifact registry. Show a compact `Model Summary` in the TUI by default. Print the full model in chat only when the user asks, file persistence is blocked, or a modeling gap requires explicit user review.
+Persist the full Control Model under `.alpha-goal/models/YYYYMMDD-<slug>-system-model.md` by default and update the Closed-loop Ledger artifact registry. Show a compact Markdown-table `Model Summary` in the TUI by default. Print the full model in chat only when the user asks, file persistence is blocked, or a modeling gap requires explicit user review.
 
 Compact model:
 
@@ -188,13 +188,16 @@ Control Model:
 
 TUI summary:
 
-```text
-Model Summary:
-- Boundary:
-- Observability:
-- Controllability:
-- Artifact:
-- Recommended route:
+```markdown
+Model Summary
+
+| Field | Value |
+| --- | --- |
+| Boundary | |
+| Observability | |
+| Controllability | |
+| Artifact | |
+| Recommended route | |
 ```
 
 Full model:

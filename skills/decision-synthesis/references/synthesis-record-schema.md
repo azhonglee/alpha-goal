@@ -1,6 +1,6 @@
 # Decision Synthesis Record Schema
 
-Persist the full record at `.alpha-goal/synthesis/YYYYMMDD-<slug>-decision-synthesis.md` by default. The TUI should show `Synthesis Summary` with core tension, recommended direction, user decision, artifact path, and next action unless full chat output is required.
+Persist the full record at `.alpha-goal/synthesis/YYYYMMDD-<slug>-decision-synthesis.md` by default. The TUI should show a Markdown-table `Synthesis Summary` with core tension, recommended direction, user decision, artifact path, and next action unless full chat output is required.
 
 ```text
 Decision Synthesis Record:

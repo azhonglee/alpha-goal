@@ -110,17 +110,20 @@ Control Route:
 - Next action:
 ```
 
-Then show only a TUI-friendly summary:
+Then show only a TUI-friendly summary as a Markdown table:
 
-```text
-Route Summary:
-- Route:
-- Why:
-- Boundary:
-- Ledger:
-- Next:
+```markdown
+Route Summary
+
+| Field | Value |
+| --- | --- |
+| Route | |
+| Why | |
+| Boundary | |
+| Ledger | |
+| Next | |
 ```
 
-The summary must be enough for the user to understand the selected route without reading a long field list. Other skills must recover the full route from `.alpha-goal/control-state/` instead of relying on the TUI transcript. If writing is explicitly forbidden or impossible, include the full `Control Route` in chat and state the no-write reason in `Ledger`.
+The summary must be enough for the user to understand the selected route without reading a long field list. Keep each table value concise; put long reasoning in the ledger artifact. Other skills must recover the full route from `.alpha-goal/control-state/` instead of relying on the TUI transcript. If writing is explicitly forbidden or impossible, include the full `Control Route` in chat and state the no-write reason in `Ledger`.
 
 If the user explicitly named a skill and the route is safe, respect that selection and state any residual gates.

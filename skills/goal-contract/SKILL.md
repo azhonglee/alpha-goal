@@ -134,7 +134,7 @@ Produce the lightest safe artifact:
 - `Goal Contract`: authorize a bounded `control-loop` handoff after user acceptance.
 - `Diagnostic Contract`: authorize diagnosis first, and repair only after recorded root-cause evidence.
 
-Persist full artifacts under `.alpha-goal/context/` by default and update the Closed-loop Ledger artifact registry. Show a compact `Contract Summary` in the TUI by default. Print the full contract in chat only when the user asks, file persistence is blocked, or explicit user acceptance requires reviewing all contract fields in the conversation.
+Persist full artifacts under `.alpha-goal/context/` by default and update the Closed-loop Ledger artifact registry. Show a compact Markdown-table `Contract Summary` in the TUI by default. Print the full contract in chat only when the user asks, file persistence is blocked, or explicit user acceptance requires reviewing all contract fields in the conversation.
 
 Goal Contract schema:
 
@@ -157,13 +157,16 @@ Goal Contract:
 
 TUI summary:
 
-```text
-Contract Summary:
-- Reference:
-- Scope boundary:
-- Evidence:
-- Artifact:
-- Next:
+```markdown
+Contract Summary
+
+| Field | Value |
+| --- | --- |
+| Reference | |
+| Scope boundary | |
+| Evidence | |
+| Artifact | |
+| Next | |
 ```
 
 Default durable paths:

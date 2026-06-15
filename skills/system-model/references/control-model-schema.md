@@ -1,6 +1,6 @@
 # Control Model Schema
 
-Persist the full model at `.alpha-goal/models/YYYYMMDD-<slug>-system-model.md` by default. The TUI should show `Model Summary` with boundary, observability, controllability, artifact path, and recommended route unless full chat output is required.
+Persist the full model at `.alpha-goal/models/YYYYMMDD-<slug>-system-model.md` by default. The TUI should show a Markdown-table `Model Summary` with boundary, observability, controllability, artifact path, and recommended route unless full chat output is required.
 
 ```text
 Control Model:

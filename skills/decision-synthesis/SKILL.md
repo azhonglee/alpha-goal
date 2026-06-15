@@ -115,7 +115,7 @@ If a stakeholder conflict cannot be resolved, return a decision request rather t
 
 ### 6. Produce synthesis record
 
-Persist the full Decision Synthesis Record under `.alpha-goal/synthesis/YYYYMMDD-<slug>-decision-synthesis.md` by default and update the Closed-loop Ledger artifact registry. Show a compact `Synthesis Summary` in the TUI by default. Print the full synthesis in chat only when the user asks, file persistence is blocked, or a user-owned decision requires reviewing the full tradeoff in the conversation.
+Persist the full Decision Synthesis Record under `.alpha-goal/synthesis/YYYYMMDD-<slug>-decision-synthesis.md` by default and update the Closed-loop Ledger artifact registry. Show a compact Markdown-table `Synthesis Summary` in the TUI by default. Print the full synthesis in chat only when the user asks, file persistence is blocked, or a user-owned decision requires reviewing the full tradeoff in the conversation.
 
 Compact record fields:
 
@@ -135,13 +135,16 @@ Decision Synthesis Record:
 
 TUI summary:
 
-```text
-Synthesis Summary:
-- Core tension:
-- Recommended direction:
-- User decision:
-- Artifact:
-- Next:
+```markdown
+Synthesis Summary
+
+| Field | Value |
+| --- | --- |
+| Core tension | |
+| Recommended direction | |
+| User decision | |
+| Artifact | |
+| Next | |
 ```
 
 Full artifact fields:

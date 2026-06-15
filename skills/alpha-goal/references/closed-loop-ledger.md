@@ -133,30 +133,33 @@ Closed-loop Ledger:
 
 ## Stage responsibilities
 
-- `alpha-goal`: discover or initialize the ledger, classify active control state, write the full `Latest Control Route`, and show only a compact `Route Summary` in the TUI by default.
-- `decision-synthesis`: read the latest route before synthesis; write the full Decision Synthesis Record under `.alpha-goal/synthesis/`, update the artifact registry and route-relevant synthesis state, and show `Synthesis Summary` in the TUI by default.
-- `system-model`: read the latest route before modeling; write the full Control Model under `.alpha-goal/models/`, update the artifact registry and model-relevant state, and show `Model Summary` in the TUI by default.
-- `goal-contract`: read the latest route before changing the reference; write the full Goal Contract under `.alpha-goal/context/`, update the artifact registry and reference state, and show `Contract Summary` in the TUI by default.
-- `control-loop`: read the latest route before mutation/probe; write full Iteration Records under `.alpha-goal/iterations/`, durable logs under `.alpha-goal/evidence/` when needed, update the artifact registry and control state, and show `Iteration Summary` in the TUI by default.
-- `evidence-verify`: read the latest route before verdict; write the full Verification Verdict under `.alpha-goal/verification/`, update the artifact registry and final comparator state, and show `Verification Summary` in the TUI by default.
+- `alpha-goal`: discover or initialize the ledger, classify active control state, write the full `Latest Control Route`, and show only a Markdown-table `Route Summary` in the TUI by default.
+- `decision-synthesis`: read the latest route before synthesis; write the full Decision Synthesis Record under `.alpha-goal/synthesis/`, update the artifact registry and route-relevant synthesis state, and show a Markdown-table `Synthesis Summary` in the TUI by default.
+- `system-model`: read the latest route before modeling; write the full Control Model under `.alpha-goal/models/`, update the artifact registry and model-relevant state, and show a Markdown-table `Model Summary` in the TUI by default.
+- `goal-contract`: read the latest route before changing the reference; write the full Goal Contract under `.alpha-goal/context/`, update the artifact registry and reference state, and show a Markdown-table `Contract Summary` in the TUI by default.
+- `control-loop`: read the latest route before mutation/probe; write full Iteration Records under `.alpha-goal/iterations/`, durable logs under `.alpha-goal/evidence/` when needed, update the artifact registry and control state, and show a Markdown-table `Iteration Summary` in the TUI by default.
+- `evidence-verify`: read the latest route before verdict; write the full Verification Verdict under `.alpha-goal/verification/`, update the artifact registry and final comparator state, and show a Markdown-table `Verification Summary` in the TUI by default.
 
 ## Update rules
 
 - Update the ledger when reference, Indicator Handoff, plant model, Controller Hierarchy, Disturbance Register, Adaptive Learning Record, Control Law, actuator boundary, evidence floor, artifact path, route, selected skill, next action, or residual error changes materially.
 - Treat `.alpha-goal/control-state/` as the source of truth for cross-skill route fields. Do not require later skills to reconstruct `Control Route` from the visible TUI summary.
 - Treat the artifact registry as the source of truth for locating full stage outputs. Do not duplicate full Goal Contracts, Control Models, Decision Synthesis Records, Iteration Records, or Verification Verdicts inside the ledger unless file persistence is blocked.
-- TUI output should default to compact summaries:
+- TUI output should default to compact Markdown table summaries:
 
-```text
-Route Summary:
-- Route:
-- Why:
-- Boundary:
-- Ledger:
-- Next:
+```markdown
+Route Summary
+
+| Field | Value |
+| --- | --- |
+| Route | |
+| Why | |
+| Boundary | |
+| Ledger | |
+| Next | |
 ```
 
-- Stage summaries should use the same shape: result, evidence or reason, boundary, artifact path, and next action. Print full artifacts in chat only when the user asks, persistence is blocked, or a decision/risk requires explicit user review.
+- Stage summaries should use the same two-column Markdown table shape: field and value. Values should be concise and point to artifact paths for long details. If a runtime cannot render Markdown tables, use a compact two-column plain-text table instead of bullet lists. Print full artifacts in chat only when the user asks, persistence is blocked, or a decision/risk requires explicit user review.
 - Do not duplicate full command output; link or summarize evidence and point to `.alpha-goal/evidence/` when durable logs are needed.
 - Do not store secrets, tokens, credentials, private user data, or production-only sensitive records.
 - Label stale or superseded state instead of silently overwriting it.

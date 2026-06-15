@@ -2,7 +2,7 @@
 
 Use this reference when a durable or handoff-ready contract is needed.
 
-Persist the full contract at `.alpha-goal/context/YYYYMMDD-<slug>-goal-contract.md` by default. The TUI should show `Contract Summary` with reference, scope boundary, evidence, artifact path, and next action unless full chat output is required.
+Persist the full contract at `.alpha-goal/context/YYYYMMDD-<slug>-goal-contract.md` by default. The TUI should show a Markdown-table `Contract Summary` with reference, scope boundary, evidence, artifact path, and next action unless full chat output is required.
 
 ```text
 Goal Contract:

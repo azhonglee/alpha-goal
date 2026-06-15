@@ -103,7 +103,7 @@ Return exactly one verdict:
 
 ### 5. Output
 
-Persist the full Verification Verdict under `.alpha-goal/verification/YYYYMMDD-<slug>-verdict.md` by default and update the Closed-loop Ledger artifact registry. Show a compact `Verification Summary` in the TUI by default. Print the full verdict in chat only when the user asks, file persistence is blocked, or the final claim requires explicit user review.
+Persist the full Verification Verdict under `.alpha-goal/verification/YYYYMMDD-<slug>-verdict.md` by default and update the Closed-loop Ledger artifact registry. Show a compact Markdown-table `Verification Summary` in the TUI by default. Print the full verdict in chat only when the user asks, file persistence is blocked, or the final claim requires explicit user review.
 
 Compact:
 
@@ -121,13 +121,16 @@ Verification Verdict:
 
 TUI summary:
 
-```text
-Verification Summary:
-- Verdict:
-- Claim boundary:
-- Evidence:
-- Artifact:
-- Next:
+```markdown
+Verification Summary
+
+| Field | Value |
+| --- | --- |
+| Verdict | |
+| Claim boundary | |
+| Evidence | |
+| Artifact | |
+| Next | |
 ```
 
 Full:
