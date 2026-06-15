@@ -23,6 +23,8 @@ Verification Verdict:
 - System model review:
 - Artifact review:
 - Control law review:
+- Indicator handoff review:
+- Adaptive learning review:
 - Claim boundary:
 - Risk/evidence review:
 - Fresh checks run:
@@ -65,6 +67,29 @@ For each material control action or diagnostic probe:
 - observed feedback;
 - threshold status: `met`, `partially met`, `not met`, `blocked`, or `not applicable`;
 - fallback or residual error.
+
+## Indicator handoff review
+
+For each material qualitative objective or synthesis metric:
+
+- operational definition;
+- sensor / evidence source;
+- timing;
+- threshold or tolerance;
+- evidence boundary;
+- status: `covered`, `partially covered`, `not covered`, `blocked`, or `not applicable`.
+
+## Adaptive learning review
+
+For each material learning record:
+
+- learning trigger;
+- observed mismatch;
+- evidence;
+- adjustment;
+- reuse condition;
+- invalidation condition;
+- whether the final claim stays inside the evidence boundary.
 
 ## Final claim allowed
 

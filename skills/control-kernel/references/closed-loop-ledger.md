@@ -31,6 +31,12 @@ Closed-loop Ledger:
   - Desired outcome:
   - Acceptance evidence:
   - Claim boundary:
+  - Indicator handoff:
+    - Qualitative objective:
+    - Metric/proxy:
+    - Sensor:
+    - Threshold/tolerance:
+    - Evidence boundary:
 - Current state:
   - Observed facts:
   - Inferences:
@@ -42,6 +48,11 @@ Closed-loop Ledger:
     - Sensor:
     - Containment:
     - Route trigger:
+  - Controller hierarchy:
+    - Global controller:
+    - Local controllers:
+    - Coupling variables:
+    - Arbitration/escalation:
 - Control state:
   - Active route:
   - Dominant uncertainty:
@@ -50,6 +61,12 @@ Closed-loop Ledger:
   - Last control action:
   - Last sensor feedback:
   - Residual error:
+  - Adaptive learning:
+    - Learning trigger:
+    - Observed mismatch:
+    - Adjustment:
+    - Reuse condition:
+    - Invalidation condition:
   - Next route:
 - Cycle log:
   - Cycle:
@@ -66,6 +83,7 @@ Closed-loop Ledger:
     - Variables changed:
     - Variables held constant:
     - Disturbance register update:
+    - Adaptive learning record:
     - Sensor feedback:
     - Evidence boundary:
     - Residual error:
@@ -77,14 +95,14 @@ Closed-loop Ledger:
 
 - `control-kernel`: discover or initialize the ledger, classify active control state, and write route decisions.
 - `meta-synthesis`: record synthesized objectives, Synthesis Rounds, user-owned decisions, and unresolved stakeholder conflicts that affect the reference.
-- `system-model`: record plant boundary, state variables, sensors, actuators, Disturbance Register, coupling, and model adequacy.
-- `alpha-goal`: record or update the reference state, acceptance evidence, claim boundary, actuator boundary, and stop/reframe triggers.
-- `loop`: append each bounded control cycle: Control Law, disturbance update, action/probe, feedback, error delta, and next route.
-- `verify`: compare ledger state, disturbance handling, evidence, and final claim; record final verdict or residual gap.
+- `system-model`: record plant boundary, state variables, sensors, actuators, Controller Hierarchy, Disturbance Register, coupling, and model adequacy.
+- `alpha-goal`: record or update the reference state, Indicator Handoff, acceptance evidence, claim boundary, actuator boundary, and stop/reframe triggers.
+- `loop`: append each bounded control cycle: Control Law, disturbance update, adaptive learning, action/probe, feedback, error delta, and next route.
+- `verify`: compare ledger state, indicator evidence, disturbance handling, adaptive learning, and final claim; record final verdict or residual gap.
 
 ## Update rules
 
-- Update the ledger when reference, plant model, Disturbance Register, Control Law, actuator boundary, evidence floor, route, or residual error changes materially.
+- Update the ledger when reference, Indicator Handoff, plant model, Controller Hierarchy, Disturbance Register, Adaptive Learning Record, Control Law, actuator boundary, evidence floor, route, or residual error changes materially.
 - Do not duplicate full command output; link or summarize evidence and point to `.alpha-goal/evidence/` when durable logs are needed.
 - Do not store secrets, tokens, credentials, private user data, or production-only sensitive records.
 - Label stale or superseded state instead of silently overwriting it.

@@ -26,6 +26,13 @@ Meta-Synthesis Record:
   - User-owned decision:
   - Next hypothesis to verify:
   - Route trigger:
+- Indicator handoff:
+  - Qualitative objective:
+  - Metric/proxy:
+  - Operational definition:
+  - Sensor:
+  - Threshold/tolerance:
+  - Evidence boundary:
 - Subsystems and interactions:
 - State variables:
 - Constraints:

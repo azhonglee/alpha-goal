@@ -32,6 +32,7 @@ If system boundary, sensors, actuators, disturbances, or coupling are unclear en
 - `references/loop-modes.md`: mode choice, evidence type, debug receipt, and route decisions.
 - `references/plan-template.md`: durable dynamic plans for multi-slice or handoff-heavy work.
 - `references/control-law.md`: target error, control variable, expected effect, sensor threshold, fallback action. Load before any mutation or diagnostic-probe slice.
+- `references/adaptive-learning.md`: record reusable corrections when feedback contradicts a Control Law, threshold, model, or route assumption.
 - `references/iteration-record-schema.md`: compact or formal Iteration Record semantics.
 - `references/auto-execution.md`: when to execute the next pass automatically versus recommend or pause.
 - `scripts/mutation-preflight.sh`: read-only git/path preflight.
@@ -58,6 +59,7 @@ Dynamic planning answers only the current iteration:
 - files, modules, repos, generated outputs, and ownership surfaces allowed to change;
 - assumptions, disturbances, and stop conditions for reframe, block, or unsafe execution;
 - material Disturbance Register entries and how this slice will monitor or contain them;
+- prior Adaptive Learning Records and whether their reuse or invalidation conditions apply;
 - expected artifacts, side effects, cleanup, rollback, or containment needs;
 - strongest material risk and evidence floor;
 - success, failure, feedback, and reframe routes;
@@ -122,6 +124,7 @@ Classify evidence:
 
 Also record whether the observed sensor feedback crossed the Control Law threshold or whether fallback/reframe is required.
 If a registered disturbance trigger fires, route according to the register instead of continuing the planned slice.
+If feedback contradicts the Control Law, threshold, model, or route assumption in a reusable way, load `references/adaptive-learning.md` and create an Adaptive Learning Record before the next pass.
 
 ### 5. Compare error and decide route
 
@@ -148,6 +151,7 @@ Produce an Iteration Record before handoff, blocking, or materially changing dir
 - fresh evidence and evidence class;
 - acceptance delta and error remaining;
 - control law result: expected effect, observed feedback, threshold status, fallback or adjustment;
+- adaptive learning update: trigger, observed mismatch, adjustment, reuse condition, invalidation condition;
 - feedback and disturbances;
 - ledger update: input state, error signal, disturbance update, control action, sensor feedback, residual error, and next state;
 - route decision;

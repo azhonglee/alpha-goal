@@ -27,6 +27,12 @@ Control Model:
   - Authority:
   - Reversibility:
   - Risk:
+- Indicator handoff to sensors:
+  - Indicator:
+  - Sensor:
+  - Timing:
+  - Threshold / tolerance:
+  - Evidence boundary:
 - Candidate control laws:
   - Target error:
   - Control variable:
@@ -45,6 +51,12 @@ Control Model:
   - Route trigger:
   - Owner or decision boundary:
 - Coupling map:
+- Controller hierarchy:
+  - Global controller:
+  - Local controllers:
+  - Coupling variables:
+  - Arbitration rule:
+  - Escalation trigger:
 - Observability rating:
 - Controllability rating:
 - Stability conditions:

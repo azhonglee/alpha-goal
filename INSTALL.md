@@ -28,7 +28,7 @@ CODEX_HOME=/path/to/codex-home scripts/install.sh
 
 脚本会：
 
-- 安装前运行源码中的 `tools/validate_skills.py` 校验六技能套件的结构、引用可发现性和闭环语义烟测。
+- 安装前运行源码中的 `tools/validate_skills.py` 校验六技能套件的结构、引用可发现性、闭环语义烟测和 fixture contract checks。
 - 创建 `${CODEX_HOME:-$HOME/.codex}/skills/alpha-goal` 软链接，目标是本仓库的 `skills/` 目录。
 - 默认更新 Codex home 的 `AGENTS.md` 中带 `generate-with-template:agents-md` 标记的受管理模板块，并只补齐 `config.toml` 中缺失的模板设置；模板只补齐 multi-agent、child AGENTS 和结构化 `request_user_input` 相关开关，不设置 `sandbox_mode`、休眠行为或不稳定特性警告抑制项。
 - 自动替换指向本仓库旧顶层布局或旧 `skills/alpha-goal` 目录的 `alpha-goal` 软链接。
@@ -96,6 +96,7 @@ Expected behavior:
 - It should frame a read-only discovery/audit boundary.
 - It should read the requested `SKILL.md` and relevant `references/` files as the audit target.
 - It should return findings, evidence, recommendations, and residual uncertainty, not only a Goal Contract.
+- It should create an Indicator Handoff when qualitative objectives need measurable acceptance evidence.
 - It should not run `loop` or `verify` because no mutation or completion claim is requested.
 
 ```text
@@ -106,6 +107,7 @@ Expected behavior:
 
 - It should identify the install script, validators, docs, templates, symlink target, and temporary `CODEX_HOME` smoke test as relevant system parts.
 - It should distinguish observed evidence from inferred risks.
+- It should produce a Controller Hierarchy when multiple repos, agents, teams, or modules can change a shared objective.
 - It should produce a Disturbance Register with likelihood, impact, sensor, containment, and route trigger when install drift or environment issues can affect the claim.
 - It should not mutate files.
 
@@ -116,6 +118,7 @@ $meta-synthesis 多团队对迁移方案目标、风险和成功指标有冲突�
 Expected behavior:
 
 - It should run at least one Synthesis Round that combines human/expert judgment, machine evidence or available metrics, conflicts, user-owned decisions, and next hypotheses.
+- It should emit an Indicator Handoff candidate for success metrics that should become Goal Contract evidence.
 - It should route to `alpha-goal`, `system-model`, user, or blocker instead of treating a list of opinions as a final plan.
 
 ```text
@@ -126,7 +129,7 @@ Expected behavior:
 
 - It should run or manually record mutation preflight.
 - It should refuse mutation if target is not closed or edit path is unsafe.
-- It should produce an Iteration Record with dynamic plan, execution, and feedback.
+- It should produce an Iteration Record with dynamic plan, execution, feedback, and Adaptive Learning Record when feedback contradicts a reusable control assumption.
 
 ```text
 $verify 检查当前 diff、测试和声明边界，判断是否可以最终交付。
@@ -136,5 +139,6 @@ Expected behavior:
 
 - It should map acceptance items to fresh evidence.
 - It should review contract acceptance and claim boundary.
+- It should review Indicator Handoff and Adaptive Learning Record boundaries when present.
 - It should produce a Verification Verdict with judgment.
 - It should route to final, next iteration, reframe, or blocked.

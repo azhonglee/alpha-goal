@@ -1,4 +1,4 @@
 interface:
   display_name: "Loop"
   short_description: "Execute bounded control cycles"
-  default_prompt: "Use $loop to run one bounded control iteration under the current Goal Contract, then record evidence and route."
+  default_prompt: "Use $loop to run one bounded control iteration under the current Goal Contract, then record evidence, Adaptive Learning, and route."

@@ -1,6 +1,6 @@
 ---
 name: system-model
-description: "Build a control-system model before engineering action: controlled object, state variables, observability, controllability, actuators, disturbances, coupling, and evidence sensors. Use for architecture, debugging, brownfield, or complex-system uncertainty."
+description: "Build a control-system model before engineering action: controlled object, state variables, observability, controllability, actuators, disturbances, coupling, controller hierarchy, and evidence sensors. Use for architecture, debugging, brownfield, or complex-system uncertainty."
 ---
 
 # System Model
@@ -32,6 +32,7 @@ Use `system-model` when any of these are true:
 - `references/control-model-schema.md`: produce a durable or handoff-ready Control Model.
 - `references/observability-controllability-check.md`: rate sensor and actuator adequacy.
 - `references/disturbance-register.md`: record disturbance likelihood, impact, sensor, containment, and route trigger.
+- `references/controller-hierarchy.md`: map global/local controllers, coupling variables, arbitration, and escalation.
 
 ## Process
 
@@ -47,6 +48,7 @@ Define the system of interest:
 - external actors and environment;
 - interfaces crossing the boundary;
 - ownership boundary: repo, worktree, submodule, team, data owner, or product surface;
+- controller hierarchy: global controller, local controllers, coordination boundary, or none material;
 - time boundary: current behavior, migration phase, release window, incident window, or historical state.
 
 If a ledger exists, compare its plant/current-state assumptions to observed facts. Mark stale assumptions before routing back to `alpha-goal` or `loop`.
@@ -62,6 +64,7 @@ Map:
 - outputs: UI behavior, responses, files, metrics, logs, tests, artifacts, reports;
 - sensors: tests, logs, static analysis, diffs, runtime probes, examples, screenshots, user feedback, review comments;
 - actuators: code edits, config changes, migrations, prompts, scripts, documentation, process changes, test changes;
+- indicator handoff: metrics/proxies, operational definitions, thresholds/tolerances, and evidence boundaries from `alpha-goal` or `meta-synthesis`;
 - disturbances: flaky dependencies, dirty working tree, clock/time zone, environment drift, missing credentials, concurrent edits, ambiguous specs.
 
 ### 3. Check observability
@@ -105,6 +108,20 @@ User-owned decisions:
 ```
 
 ### 5. Map coupling and disturbances
+
+Create a clearly labeled Controller Hierarchy / Coordination Map when multiple local controllers can affect the same global objective. Load `references/controller-hierarchy.md` when controller ownership, arbitration, or escalation is unclear.
+
+```text
+Controller Hierarchy:
+- Global controller:
+- Local controller:
+- Coupling variables:
+- Arbitration rule:
+- Escalation trigger:
+- Recommended coordination route:
+```
+
+Do not collapse material multi-controller relationships into a prose coordination section. A Control Model is incomplete if it names multiple local controllers that can affect one global objective but does not either emit a `Controller Hierarchy:` block or explicitly state `Controller hierarchy: none material`.
 
 Create a compact coupling map. Use a matrix only when it clarifies risk.
 
@@ -159,6 +176,7 @@ Control Model:
 - Sensors:
 - Actuators:
 - Candidate control laws:
+- Controller hierarchy:
 - Disturbance register:
 - Coupling map:
 - Observability:
@@ -181,6 +199,7 @@ Control Model:
 - Outputs:
 - Sensors and evidence boundary:
 - Actuators and authority boundary:
+- Indicator handoff to sensors:
 - Candidate control laws:
   - Target error:
   - Control variable:
@@ -194,6 +213,11 @@ Control Model:
   - Containment:
   - Route trigger:
 - Coupling map:
+- Controller hierarchy:
+  - Global objective:
+  - Local controllers:
+  - Coupling variables:
+  - Arbitration/escalation:
 - Stability conditions:
 - Missing information:
 - Model adequacy: sufficient | sufficient with narrowed claim | insufficient | blocked

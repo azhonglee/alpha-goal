@@ -26,6 +26,15 @@ Goal Contract:
   - Disturbances:
   - Couplings:
   - Stability conditions:
+- Indicator handoff:
+  - Qualitative objective:
+  - Metric or proxy:
+  - Operational definition:
+  - Sensor / evidence source:
+  - Measurement timing:
+  - Threshold / tolerance:
+  - Evidence boundary:
+  - Owner or decision boundary:
 - Decision boundaries:
   - Agent-owned:
   - User-owned:

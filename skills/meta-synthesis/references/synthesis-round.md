@@ -23,6 +23,7 @@ Synthesis Round:
   - Current value:
   - Target or threshold:
   - Measurement gap:
+- Indicator handoff candidate:
 - Conflict or contradiction:
 - Integrated update:
 - User-owned decision:
@@ -30,10 +31,22 @@ Synthesis Round:
 - Route trigger: alpha-goal | system-model | loop | verify | user | blocker
 ```
 
+```text
+Indicator Handoff:
+- Qualitative objective:
+- Metric or proxy:
+- Operational definition:
+- Sensor / evidence source:
+- Threshold / tolerance:
+- Evidence boundary:
+- Route trigger:
+```
+
 ## Rules
 
 - Use qualitative judgment to select objectives, scenarios, and tradeoffs; use quantitative evidence to constrain claims and detect error.
 - Do not average away conflicts. Name the owner, evidence basis, and decision boundary.
 - If a metric is unavailable, name a proxy or missing sensor instead of inventing precision.
+- Pass accepted indicators to `alpha-goal` as an Indicator Handoff with operational definition, sensor, threshold/tolerance, and evidence boundary.
 - If user priority, risk acceptance, budget, timeline, or scope changes are required, route to user instead of deciding silently.
 - Stop rounds when a stable Goal Contract candidate, system-model question, user decision, or blocker is the smallest next action.

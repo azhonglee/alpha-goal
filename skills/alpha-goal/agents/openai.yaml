@@ -1,4 +1,4 @@
 interface:
   display_name: "Alpha Goal"
-  short_description: "Clarify goals into contracts"
-  default_prompt: "Use $alpha-goal to form a Goal Contract: reference state, scope, non-goals, evidence, and handoff boundary."
+  short_description: "Form measurable goal contracts"
+  default_prompt: "Use $alpha-goal to form a Goal Contract with reference state, scope, non-goals, Indicator Handoff, evidence, and handoff boundary."

@@ -95,6 +95,7 @@ Each round must connect:
 - machine evidence, model output, tests, logs, metrics, or probes;
 - the conflict, contradiction, or missing sensor;
 - any metric/proxy that could turn qualitative judgment into bounded evidence;
+- the Indicator Handoff candidate that should become acceptance or sensor evidence;
 - the user-owned decision or next hypothesis that would reduce uncertainty.
 
 Stop when the smallest next action is clear: a Goal Contract candidate, a system-model question, a user decision, a blocker, or a bounded validation hypothesis.
@@ -126,6 +127,7 @@ Meta-Synthesis Record:
 - User-owned decisions:
 - Non-goals:
 - Evidence needed:
+- Indicator handoff:
 - Route:
 ```
 
@@ -140,6 +142,7 @@ Meta-Synthesis Record:
 - Qualitative judgments:
 - Quantitative signals:
 - Synthesis rounds:
+- Indicator handoff:
 - Contradictions and tradeoffs:
 - Scenarios:
 - Candidate strategies:
@@ -153,7 +156,7 @@ Meta-Synthesis Record:
 
 ### 7. Route
 
-- Route to `alpha-goal` when a stable recommended direction can become a Goal Contract.
+- Route to `alpha-goal` when a stable recommended direction and Indicator Handoff can become a Goal Contract.
 - Route to `system-model` when subsystem boundary or feedback signals remain unclear.
 - Route to user when a user-owned decision, risk acceptance, budget/timeline tradeoff, or stakeholder priority is required.
 - Route to `loop` only if a valid Goal Contract already exists and synthesis merely narrowed the next slice without changing authorization.

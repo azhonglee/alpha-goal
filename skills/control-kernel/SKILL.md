@@ -18,6 +18,7 @@ Treat the user request as a control problem:
 - `actuator`: bounded changes made by `loop` under an approved Goal Contract;
 - `comparator`: `verify`, which compares fresh evidence against the reference and claim boundary;
 - `memory`: a Closed-loop Ledger that carries reference, current state, error, control action, feedback, and route history across skills;
+- `adaptation`: Adaptive Learning Records that correct reusable control assumptions without silently changing scope or authority;
 - `disturbance`: changing requirements, dirty working tree, missing tools, flaky tests, conflicting specs, hidden ownership, broad claims, or external side effects, tracked through a Disturbance Register when material.
 
 ## Boundaries
@@ -46,7 +47,9 @@ Identify the current dominant uncertainty. If a Closed-loop Ledger exists, read 
 
 - unclear target, intent, scope, non-goals, acceptance, or authorization -> goal ambiguity;
 - unclear plant boundary, state variables, observability, controllability, disturbances, or coupling -> model ambiguity;
+- unclear controller hierarchy, local/global objective conflict, or coupling arbitration -> coordination ambiguity;
 - approved goal exists and a bounded action can improve evidence or implementation -> execution need;
+- repeated residual error, failed threshold, or contradicted control assumption -> adaptation need;
 - work appears done but claim/evidence boundary is unresolved -> verification need;
 - many stakeholders, weak quantification, conflicting values, or complex giant-system behavior -> synthesis need;
 - missing tool, permission, data, environment, or user-owned decision -> blocker.
@@ -61,6 +64,7 @@ Use this routing table:
 | --- | --- | --- |
 | User asks for implementation but goal boundary is unclear | `alpha-goal` | define reference/setpoint before control action |
 | Goal is broad and system structure is unclear | `system-model` then `alpha-goal` | model the plant before writing the contract |
+| Multiple local controllers can affect one global objective | `system-model` or `meta-synthesis` | map hierarchy, coupling, arbitration, and user-owned priorities |
 | Active approved Goal Contract exists and mutation/probe is needed | `loop` | execute one bounded control action and collect feedback |
 | Evidence bundle exists and a final claim is proposed | `verify` | compare output state to reference and claim boundary |
 | Problem is socio-technical, strategic, multi-agent, or complex giant-system-like | `meta-synthesis` | synthesize qualitative and quantitative views before contract |
@@ -74,7 +78,9 @@ Before routing to an execution-capable path, ensure:
 - an execution route has a candidate Control Law: target error, control variable, expected effect, sensor threshold, fallback;
 - the actuator boundary says what may change and what must not change;
 - observer signals are available or a missing-observer blocker is stated;
+- qualitative objectives have accepted indicators or explicitly missing sensors before execution claims depend on them;
 - material disturbances are registered with likelihood, impact, sensor, containment, and route trigger, or routed to modeling/synthesis/user/blocker;
+- prior Adaptive Learning Records are applied only when reuse conditions hold and invalidation conditions do not hold;
 - the ledger or chat state records the last error signal and why the selected next skill reduces it;
 - final claims will be checked by `verify` rather than stated by the executor.
 
@@ -89,6 +95,9 @@ Control Route:
 - Dominant uncertainty:
 - Error signal:
 - Control law:
+- Indicator handoff:
+- Adaptive learning:
+- Controller hierarchy:
 - Disturbance register:
 - Selected skill:
 - Why this skill:

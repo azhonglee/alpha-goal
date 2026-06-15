@@ -27,6 +27,7 @@ Add when relevant:
 - `Generated artifacts`: generated files, reports, binaries, or documents.
 - `Acceptance delta`: criteria covered, partially covered, or uncovered.
 - `Control law result`: target error, expected effect, observed feedback, threshold status, fallback, and residual error for mutation or diagnostic-probe slices.
+- `Adaptive Learning Record`: trigger, observed mismatch, adjustment, reuse condition, and invalidation condition when feedback changes future control behavior.
 - `Feedback handling`: user, reviewer, test, runtime, or advisory feedback that changed the route.
 - `Risk/ownership`: cross-boundary, generated-output, migration, compatibility, concurrency, data, security, or observability risk.
 - `Ledger update`: input state, error signal, control action, sensor feedback, residual error, route decision, and next state when the task spans skills or turns.

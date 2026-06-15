@@ -29,6 +29,7 @@ SEMANTIC_SMOKE_TESTS = [
             "acceptance evidence",
             "claim boundary",
             "decision boundaries",
+            "Indicator Handoff",
         ],
     ),
     (
@@ -39,6 +40,8 @@ SEMANTIC_SMOKE_TESTS = [
             "Observability",
             "Controllability",
             "Candidate control laws",
+            "Controller Hierarchy",
+            "none material",
             "Disturbance Register",
             "none material",
         ],
@@ -52,6 +55,7 @@ SEMANTIC_SMOKE_TESTS = [
             "control variable",
             "sensor threshold",
             "fallback",
+            "Adaptive Learning Record",
             "ledger update",
         ],
     ),
@@ -70,6 +74,7 @@ SEMANTIC_SMOKE_TESTS = [
         "skills/meta-synthesis/SKILL.md",
         [
             "Synthesis Round",
+            "Indicator Handoff",
             "Qualitative judgments",
             "Quantitative signals",
             "User-owned decisions",
@@ -82,6 +87,9 @@ SEMANTIC_SMOKE_TESTS = [
         [
             "Closed-loop Ledger",
             "Control Law",
+            "Indicator Handoff",
+            "Adaptive Learning",
+            "Controller Hierarchy",
             "Disturbance Register",
             "Error signal",
             "Selected skill",
@@ -108,6 +116,7 @@ SEMANTIC_SMOKE_TESTS = [
             "Sensor feedback",
             "Route decision",
             "Next state",
+            "Adaptive learning",
         ],
     ),
     (
@@ -132,8 +141,107 @@ SEMANTIC_SMOKE_TESTS = [
             "Conflict or contradiction",
             "User-owned decision",
             "Next hypothesis to verify",
+            "Indicator handoff candidate",
         ],
     ),
+    (
+        "indicator handoff turns qualitative goals into evidence signals",
+        "skills/alpha-goal/references/indicator-handoff.md",
+        [
+            "Operational definition",
+            "Sensor / evidence source",
+            "Measurement timing or frequency",
+            "Threshold / tolerance",
+            "Evidence boundary",
+            "Route trigger",
+        ],
+    ),
+    (
+        "controller hierarchy maps local controllers to global objective",
+        "skills/system-model/references/controller-hierarchy.md",
+        [
+            "Global controller",
+            "Local controller",
+            "Coupling variables",
+            "Arbitration rule",
+            "Escalation trigger",
+            "Recommended coordination route",
+            "none material",
+        ],
+    ),
+    (
+        "adaptive learning records reusable control corrections",
+        "skills/loop/references/adaptive-learning.md",
+        [
+            "Learning trigger",
+            "Observed mismatch",
+            "Adjustment",
+            "Reuse condition",
+            "Invalidation condition",
+            "Ledger update",
+        ],
+    ),
+]
+
+FIXTURE_CONTRACT_TESTS = [
+    {
+        "name": "complex migration conflict uses synthesis and indicator handoff",
+        "prompt": "多团队迁移目标、风险、窗口、成功指标冲突，先综合研判。",
+        "paths": [
+            "skills/meta-synthesis/SKILL.md",
+            "skills/meta-synthesis/references/synthesis-round.md",
+        ],
+        "schema_blocks": [
+            "Meta-Synthesis Record:",
+            "Synthesis Round:",
+            "Indicator Handoff:",
+        ],
+        "route_terms": ["user", "alpha-goal", "system-model", "blocker"],
+    },
+    {
+        "name": "qualitative objective becomes measurable contract evidence",
+        "prompt": "把用户体验更稳定转成可验证 Goal Contract。",
+        "paths": [
+            "skills/alpha-goal/SKILL.md",
+            "skills/alpha-goal/references/indicator-handoff.md",
+        ],
+        "schema_blocks": ["Goal Contract:", "Indicator Handoff:"],
+        "route_terms": ["loop", "system-model", "verify", "block"],
+    },
+    {
+        "name": "multi-controller system maps hierarchy before mutation",
+        "prompt": "多个团队和模块都能改变同一上线目标，先建模。",
+        "paths": [
+            "skills/system-model/SKILL.md",
+            "skills/system-model/references/controller-hierarchy.md",
+        ],
+        "schema_blocks": ["Control Model:", "Controller Hierarchy:"],
+        "route_terms": ["alpha-goal", "loop", "meta-synthesis", "blocker"],
+    },
+    {
+        "name": "feedback mismatch creates adaptive learning before next loop",
+        "prompt": "上轮控制律阈值没命中，但方向有效，继续下一轮。",
+        "paths": [
+            "skills/loop/SKILL.md",
+            "skills/loop/references/adaptive-learning.md",
+        ],
+        "schema_blocks": ["Control Law:", "Adaptive Learning Record:"],
+        "route_terms": ["ITERATION_CONTINUES", "ITERATION_HARDEN", "RETURN_TO_SYSTEM_MODEL"],
+    },
+    {
+        "name": "verification checks learned thresholds and indicator evidence",
+        "prompt": "检查当前声明是否可以最终交付。",
+        "paths": [
+            "skills/verify/SKILL.md",
+            "skills/verify/references/verification-verdict-schema.md",
+        ],
+        "schema_blocks": [
+            "Verification Verdict:",
+            "Indicator handoff review",
+            "Adaptive learning review",
+        ],
+        "route_terms": ["PASS_TO_FINAL", "NEXT_ITERATION", "REFRAME", "BLOCKED"],
+    },
 ]
 
 
@@ -246,6 +354,7 @@ def main() -> int:
                 )
 
     validate_semantic_smoke_tests(root, errors)
+    validate_fixture_contract_tests(root, errors)
 
     print_report(root, errors, warnings)
     return 1 if errors else 0
@@ -265,6 +374,59 @@ def validate_semantic_smoke_tests(root: Path, errors: list[str]) -> None:
                 f"semantic smoke test {scenario!r} failed in {rel_path}: "
                 f"missing {', '.join(missing)}"
             )
+
+
+def validate_fixture_contract_tests(root: Path, errors: list[str]) -> None:
+    for fixture in FIXTURE_CONTRACT_TESTS:
+        name = str(fixture["name"])
+        prompt = str(fixture["prompt"])
+        paths = [str(path) for path in fixture["paths"]]
+        schema_blocks = [str(block) for block in fixture["schema_blocks"]]
+        route_terms = [str(term) for term in fixture["route_terms"]]
+
+        if not prompt.strip():
+            errors.append(f"fixture contract {name!r}: empty prompt")
+            continue
+
+        combined_parts = []
+        missing_paths = []
+        for rel_path in paths:
+            path = root / rel_path
+            if not path.is_file():
+                missing_paths.append(rel_path)
+                continue
+            combined_parts.append(path.read_text(encoding="utf-8"))
+
+        if missing_paths:
+            errors.append(
+                f"fixture contract {name!r}: missing paths {', '.join(missing_paths)}"
+            )
+            continue
+
+        combined = "\n".join(combined_parts)
+        missing_blocks = [
+            block for block in schema_blocks if not has_schema_block(combined, block)
+        ]
+        if missing_blocks:
+            errors.append(
+                f"fixture contract {name!r}: missing schema blocks "
+                f"{', '.join(missing_blocks)}"
+            )
+
+        lower = combined.lower()
+        missing_routes = [term for term in route_terms if term.lower() not in lower]
+        if missing_routes:
+            errors.append(
+                f"fixture contract {name!r}: missing route terms "
+                f"{', '.join(missing_routes)}"
+            )
+
+
+def has_schema_block(text: str, label: str) -> bool:
+    stripped_label = re.escape(label.strip())
+    block_pattern = re.compile(r"```(?:text)?\n(?:(?!```).)*" + stripped_label, re.S)
+    heading_pattern = re.compile(r"^#{1,6}\s+" + stripped_label.rstrip(":"), re.M)
+    return bool(block_pattern.search(text) or heading_pattern.search(text))
 
 
 def print_report(root: Path, errors: list[str], warnings: list[str]) -> None:

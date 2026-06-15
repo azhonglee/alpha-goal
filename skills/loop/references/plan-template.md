@@ -42,6 +42,7 @@ Create or update a plan when:
 - Control law:
 - Control variables:
 - Variables held constant:
+- Adaptive learning records applied:
 
 ## Triggering Evidence
 
@@ -51,9 +52,9 @@ Create or update a plan when:
 
 ## Execution Slices
 
-| ID | Goal | Control law | Status | Dependencies | Evidence gate | Feedback route |
-| --- | --- | --- | --- | --- | --- |
-| S1 |  |  | pending | none |  |  |
+| ID | Goal | Control law | Learning applied | Status | Dependencies | Evidence gate | Feedback route |
+| --- | --- | --- | --- | --- | --- | --- |
+| S1 |  |  | none | pending | none |  |  |
 
 Status values: pending, in_progress, done, blocked, superseded.
 
@@ -82,6 +83,7 @@ Status values: pending, in_progress, done, blocked, superseded.
   - Changed:
   - Reason:
   - Evidence:
+  - Learning:
 
 ## Open Questions
 
