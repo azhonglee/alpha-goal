@@ -53,7 +53,7 @@ Define the system of interest:
 
 If a ledger exists, compare its plant/current-state assumptions to observed facts. Mark stale assumptions before routing back to `alpha-goal` or `loop`.
 
-If a repository is available and read-only inspection is safe, use `scripts/repo-sensor-snapshot.sh` or equivalent manual checks to gather structure, status, and local rules.
+If a repository is available and read-only inspection is safe, use `npx --yes tsx scripts/repo-sensor-snapshot.ts` or equivalent manual checks to gather structure, status, and local rules.
 
 ### 2. Identify state and signals
 

@@ -34,13 +34,15 @@
 
 默认安装到真实 Codex home，并在 `$HOME/.codex/skills/` 下创建一个 `alpha-goal` 软链接，指向本仓库的 `skills/`：
 
+安装脚本会通过 `npx --yes tsx` 运行 TypeScript 校验器，因此本机需要可用的 Node.js/npm。
+
 ```bash
 scripts/install.sh
 ```
 
 脚本会执行以下操作：
 
-- 运行 `tools/validate_skills.py` 校验六技能套件的结构、引用可发现性、闭环语义烟测和 fixture contract checks。
+- 运行 `tools/validate_skills.ts` 校验六技能套件的结构、引用可发现性、闭环语义烟测和 fixture contract checks。
 - 创建 `${CODEX_HOME:-$HOME/.codex}/skills/alpha-goal` 软链接，目标是本仓库的 `skills/` 目录。
 - 默认把 `templates/AGENTS.md` 合并到 Codex home 的 `AGENTS.md`，并把 `templates/config.toml` 中缺失的设置补齐到 Codex home 的 `config.toml`。
 - 用户配置模板只补齐 multi-agent、child AGENTS 和结构化 `request_user_input` 相关开关；不会修改 sandbox 权限、休眠行为，也不会抑制不稳定特性警告。
@@ -78,13 +80,13 @@ scripts/install.sh --verbose
 推荐校验命令：
 
 ```bash
-python3 tools/validate_skills.py .
+npx --yes tsx tools/validate_skills.ts .
 ```
 
-兼容旧命令：
+兼容校验入口：
 
 ```bash
-python3 tools/validate_skillset.py .
+npx --yes tsx tools/validate_skillset.ts .
 ```
 
 校验器检查目录结构、元数据、脚本权限、macOS 元数据残留、reference 可发现性、关键闭环字段的 semantic smoke tests，以及典型 prompt 对应的 schema/route fixture contract checks。它仍不能证明技能在真实任务中的触发时机、验证边界或验收判断一定正确。
@@ -94,7 +96,7 @@ python3 tools/validate_skillset.py .
 ```bash
 tmp_codex_home="$(mktemp -d)"
 CODEX_HOME="$tmp_codex_home" scripts/install.sh
-python3 tools/validate_skills.py .
+npx --yes tsx tools/validate_skills.ts .
 rm -rf "$tmp_codex_home"
 ```
 

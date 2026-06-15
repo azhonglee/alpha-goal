@@ -24,11 +24,11 @@
 | Path | Mutates state? | Purpose |
 |---|---:|---|
 | `scripts/install.sh` | Yes | Creates one `${CODEX_HOME:-$HOME/.codex}/skills/alpha-goal` symlink to the repository `skills/` tree, replaces same-repo legacy skill links, merges user config templates by default unless `--no-sync-user-templates` is passed, cleans legacy support links, validates the six-skill suite, and validates the target symlink. |
-| `skills/system-model/scripts/repo-sensor-snapshot.sh` | No | Prints a repository sensor snapshot for system modeling and observability checks. |
-| `skills/loop/scripts/mutation-preflight.sh` | No | Prints git root, branch, status, worktrees, local rule files, ignored worktree/evidence paths, and submodules. |
-| `skills/verify/scripts/evidence-summary.sh` | No | Prints changed files, diff stat, diff check status, and recent commits. |
-| `tools/validate_skills.py` | No | Canonical lightweight validator for the closed-loop six-skill suite, including reference discoverability, semantic smoke checks, and fixture contract checks. |
-| `tools/validate_skillset.py` | No | Compatibility wrapper for older validation commands; delegates to `tools/validate_skills.py`. |
+| `skills/system-model/scripts/repo-sensor-snapshot.ts` | No | Prints a repository sensor snapshot for system modeling and observability checks. |
+| `skills/loop/scripts/mutation-preflight.ts` | No | Prints git root, branch, status, worktrees, local rule files, ignored worktree/evidence paths, and submodules. |
+| `skills/verify/scripts/evidence-summary.ts` | No | Prints changed files, diff stat, diff check status, and recent commits. |
+| `tools/validate_skills.ts` | No | Canonical lightweight validator for the closed-loop six-skill suite, including reference discoverability, semantic smoke checks, and fixture contract checks. |
+| `tools/validate_skillset.ts` | No | Compatibility wrapper for older validation commands; delegates to `tools/validate_skills.ts`. |
 
 ## Runtime Artifacts
 

@@ -8,6 +8,8 @@ scripts/install.sh
 
 默认 Codex home 是 `$HOME/.codex`，脚本会创建 `$HOME/.codex/skills/alpha-goal` 软链接，目标是本仓库的 `skills/`。该 `skills/` 树内包含六个必需技能：
 
+安装脚本会通过 `npx --yes tsx` 运行 TypeScript 校验器，因此本机需要可用的 Node.js/npm。
+
 ```text
 control-kernel
 alpha-goal
@@ -28,7 +30,7 @@ CODEX_HOME=/path/to/codex-home scripts/install.sh
 
 脚本会：
 
-- 安装前运行源码中的 `tools/validate_skills.py` 校验六技能套件的结构、引用可发现性、闭环语义烟测和 fixture contract checks。
+- 安装前运行源码中的 `tools/validate_skills.ts` 校验六技能套件的结构、引用可发现性、闭环语义烟测和 fixture contract checks。
 - 创建 `${CODEX_HOME:-$HOME/.codex}/skills/alpha-goal` 软链接，目标是本仓库的 `skills/` 目录。
 - 默认更新 Codex home 的 `AGENTS.md` 中带 `generate-with-template:agents-md` 标记的受管理模板块，并只补齐 `config.toml` 中缺失的模板设置；模板只补齐 multi-agent、child AGENTS 和结构化 `request_user_input` 相关开关，不设置 `sandbox_mode`、休眠行为或不稳定特性警告抑制项。
 - 自动替换指向本仓库旧顶层布局或旧 `skills/alpha-goal` 目录的 `alpha-goal` 软链接。
@@ -65,14 +67,14 @@ scripts/install.sh --verbose
 ```bash
 tmp_codex_home="$(mktemp -d)"
 CODEX_HOME="$tmp_codex_home" scripts/install.sh
-python3 tools/validate_skills.py .
+npx --yes tsx tools/validate_skills.ts .
 rm -rf "$tmp_codex_home"
 ```
 
-兼容旧校验命令：
+兼容校验入口：
 
 ```bash
-python3 tools/validate_skillset.py .
+npx --yes tsx tools/validate_skillset.ts .
 ```
 
 ## Smoke test prompts

@@ -34,7 +34,7 @@ A positive verdict needs proportional semantic evidence for:
 - `references/verification-verdict-schema.md`: field semantics for formal verdicts.
 - `references/completion-review-rubric.md`: final delivery, merge-ready, ship-ready, or production-sensitive evidence floor.
 - `references/claim-boundary-check.md`: prevent final claims exceeding evidence.
-- `scripts/evidence-summary.sh`: read-only diff/status evidence.
+- `scripts/evidence-summary.ts`: read-only diff/status evidence.
 
 ## Process
 

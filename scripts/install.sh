@@ -91,8 +91,8 @@ repo_root="$(cd "$script_dir/.." && pwd -P)"
 source_skill_root="$repo_root/skills"
 install_link_name="alpha-goal"
 install_source="$source_skill_root"
-validation_tool="$repo_root/tools/validate_skills.py"
-validation_tool_label="tools/validate_skills.py"
+validation_tool="$repo_root/tools/validate_skills.ts"
+validation_tool_label="tools/validate_skills.ts"
 
 normalize_path() {
   python3 - "$1" <<'PY'
@@ -640,12 +640,12 @@ run_skillset_validation() {
   fi
 
   if [[ "$verbose" == true ]]; then
-    python3 "$validation_tool" "$repo_root"
+    npx --yes tsx "$validation_tool" "$repo_root"
     return
   fi
 
   local output
-  if ! output="$(python3 "$validation_tool" "$repo_root" 2>&1)"; then
+  if ! output="$(npx --yes tsx "$validation_tool" "$repo_root" 2>&1)"; then
     echo "Validation failed ($validation_tool_label). Re-run with --verbose for full output." >&2
     printf '%s\n' "$output" | grep -E '^(ERRORS:|- |FAIL )' >&2 || true
     exit 1

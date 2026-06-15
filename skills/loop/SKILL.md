@@ -35,7 +35,7 @@ If system boundary, sensors, actuators, disturbances, or coupling are unclear en
 - `references/adaptive-learning.md`: record reusable corrections when feedback contradicts a Control Law, threshold, model, or route assumption.
 - `references/iteration-record-schema.md`: compact or formal Iteration Record semantics.
 - `references/auto-execution.md`: when to execute the next pass automatically versus recommend or pause.
-- `scripts/mutation-preflight.sh`: read-only git/path preflight.
+- `scripts/mutation-preflight.ts`: read-only git/path preflight.
 
 ## Iteration process
 
@@ -71,7 +71,7 @@ Create or update a durable plan only for multiple independent loops, modules, re
 
 ### 2. Preflight
 
-Run `scripts/mutation-preflight.sh` or record equivalent manual facts before mutation. Low-risk slices may use compact preflight; dirty state, generated outputs, submodules, cross-file behavior, or user changes require fuller preflight.
+Run `npx --yes tsx scripts/mutation-preflight.ts` or record equivalent manual facts before mutation. Low-risk slices may use compact preflight; dirty state, generated outputs, submodules, cross-file behavior, or user changes require fuller preflight.
 
 Preflight must answer:
 
