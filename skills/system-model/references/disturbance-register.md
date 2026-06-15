@@ -30,7 +30,7 @@ Disturbance Register:
 - reduce slice size and change one control variable at a time;
 - add a sensor before changing behavior;
 - freeze or record assumptions before acting;
-- route to `meta-synthesis` for stakeholder conflict;
+- route to `decision-synthesis` for stakeholder conflict;
 - route to user/blocker for authority, credentials, external side effects, or risk acceptance.
 
-Do not route to `loop` when a high-impact or unknown-impact disturbance lacks a sensor, containment, and route trigger.
+Do not route to `control-loop` when a high-impact or unknown-impact disturbance lacks a sensor, containment, and route trigger.

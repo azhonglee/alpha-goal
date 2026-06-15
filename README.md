@@ -1,34 +1,34 @@
 # 闭环控制式 Alpha Goal 技能集
 
-本仓库维护一组给 Codex 使用的 Agent Skills。当前分支把原有 `alpha-goal`、`loop`、`verify` 三段式流程扩展为六技能闭环控制套件：先形成目标参考输入，再建模系统状态，随后有界执行、采集反馈并独立验证。
+本仓库维护一组给 Codex 使用的 Agent Skills。当前分支以 `alpha-goal` 作为总入口，把目标契约、系统建模、有界执行、证据验证和复杂决策综合组织成六技能闭环控制套件。
 
 核心映射：
 
 | 工程控制论概念 | 在本 Skills 套件中的角色 |
 | --- | --- |
-| 参考输入 / 期望状态 | `alpha-goal` 生成的 Goal Contract |
+| 参考输入 / 期望状态 | `goal-contract` 生成的 Goal Contract |
 | 被控对象 / plant | 代码库、产品、文档、数据流或组织流程 |
 | 状态变量 | 需求清晰度、实现状态、测试状态、风险、证据覆盖率 |
 | 传感器 / observer | repo 快照、日志、测试、人工反馈、审查意见 |
-| 指标交接 / indicator handoff | `alpha-goal` 把定性目标转成 metric/proxy、sensor、threshold 和 evidence boundary |
-| 控制律 / control law | `loop` 中的 target error、control variable、expected effect、sensor threshold 和 fallback action |
-| 控制器 / actuator | `loop` 的有界迭代、诊断、修复、加固 |
-| 比较器 / error detector | `verify` 对“目标、证据、最终声明”的误差判定 |
+| 指标交接 / indicator handoff | `goal-contract` 把定性目标转成 metric/proxy、sensor、threshold 和 evidence boundary |
+| 控制律 / control law | `control-loop` 中的 target error、control variable、expected effect、sensor threshold 和 fallback action |
+| 控制器 / actuator | `control-loop` 的有界迭代、诊断、修复、加固 |
+| 比较器 / error detector | `evidence-verify` 对“目标、证据、最终声明”的误差判定 |
 | 状态记忆 / memory | `.alpha-goal/control-state/` 中的 Closed-loop Ledger，跨阶段记录 reference、state、error、action、feedback 和 next route |
-| 自适应学习 / adaptive learning | `loop` 从反馈失配中记录可复用的 threshold、strategy、route 或假设修正 |
+| 自适应学习 / adaptive learning | `control-loop` 从反馈失配中记录可复用的 threshold、strategy、route 或假设修正 |
 | 分层协同控制 | `system-model` 中的 Controller Hierarchy，识别 global/local controller、coupling variable、arbitration 和 escalation |
 | 鲁棒性 / disturbance handling | `system-model` 中的 Disturbance Register，记录 likelihood、impact、sensor、containment 和 route trigger |
-| 复杂巨系统综合集成 | `meta-synthesis` 的 Synthesis Round，把定性判断、机器证据、量化指标、冲突和用户裁决迭代收敛 |
-| 总调度器 | `control-kernel` 根据当前系统状态选择 Skill 和下一步 |
+| 复杂巨系统综合集成 | `decision-synthesis` 的 Synthesis Round，把定性判断、机器证据、量化指标、冲突和用户裁决迭代收敛 |
+| 总调度器 | `alpha-goal` 根据当前系统状态选择 Skill 和下一步 |
 
 ## 六个技能
 
-- `control-kernel`：闭环调度和 Skill 路由。
-- `alpha-goal`：把含糊请求转为可执行、可验证、可移交的 Goal Contract，并承接 Indicator Handoff。
+- `alpha-goal`：闭环总入口，负责 Skill 路由、稳定性检查和跨阶段状态记忆。
+- `goal-contract`：把含糊请求转为可执行、可验证、可移交的 Goal Contract，并承接 Indicator Handoff。
 - `system-model`：建立被控对象模型，识别状态变量、观测信号、可控变量、分层控制、扰动登记和耦合。
-- `loop`：在已批准 Goal Contract 下执行有界迭代，采集反馈、记录自适应学习并路由。
-- `verify`：独立判断证据是否支持完成、可合并、可发布或窄化声明，并审查指标和学习记录边界。
-- `meta-synthesis`：处理复杂系统、多利益相关方、弱结构化需求与高不确定性决策，并通过 Synthesis Round 收敛。
+- `control-loop`：在已批准 Goal Contract 下执行有界迭代，采集反馈、记录自适应学习并路由。
+- `evidence-verify`：独立判断证据是否支持完成、可合并、可发布或窄化声明，并审查指标和学习记录边界。
+- `decision-synthesis`：处理复杂系统、多利益相关方、弱结构化需求与高不确定性决策，并通过 Synthesis Round 收敛。
 
 ## 安装
 
@@ -104,12 +104,12 @@ rm -rf "$tmp_codex_home"
 
 ```text
 skills/
-  control-kernel/  # 闭环调度和路由
-  alpha-goal/      # 目标澄清和 Goal Contract
+  alpha-goal/      # 闭环总入口和路由
+  goal-contract/   # 目标澄清和 Goal Contract
   system-model/    # 系统状态、可观测性和可控性建模
-  loop/            # 有界迭代执行和反馈
-  verify/          # 证据边界和完成判断
-  meta-synthesis/  # 复杂系统综合研判
+  control-loop/    # 有界迭代执行和反馈
+  evidence-verify/ # 证据边界和完成判断
+  decision-synthesis/  # 复杂系统综合研判
 templates/         # 可同步到 Codex home 的用户配置模板
 scripts/           # 安装脚本
 tools/             # 本仓库校验工具

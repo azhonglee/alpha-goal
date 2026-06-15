@@ -17,7 +17,7 @@ Use `system-model` when any of these are true:
 - observability is weak: logs, tests, probes, or feedback signals are missing or stale;
 - controllability is weak: it is unclear what variables may be changed safely;
 - the work is architectural, migratory, integration-heavy, production-facing, or high blast-radius;
-- `alpha-goal` cannot produce a reliable Goal Contract without a plant model.
+- `goal-contract` cannot produce a reliable Goal Contract without a plant model.
 
 ## Boundaries
 
@@ -51,7 +51,7 @@ Define the system of interest:
 - controller hierarchy: global controller, local controllers, coordination boundary, or none material;
 - time boundary: current behavior, migration phase, release window, incident window, or historical state.
 
-If a ledger exists, compare its plant/current-state assumptions to observed facts. Mark stale assumptions before routing back to `alpha-goal` or `loop`.
+If a ledger exists, compare its plant/current-state assumptions to observed facts. Mark stale assumptions before routing back to `goal-contract` or `control-loop`.
 
 If a repository is available and read-only inspection is safe, use `npx --yes tsx scripts/repo-sensor-snapshot.ts` or equivalent manual checks to gather structure, status, and local rules.
 
@@ -64,7 +64,7 @@ Map:
 - outputs: UI behavior, responses, files, metrics, logs, tests, artifacts, reports;
 - sensors: tests, logs, static analysis, diffs, runtime probes, examples, screenshots, user feedback, review comments;
 - actuators: code edits, config changes, migrations, prompts, scripts, documentation, process changes, test changes;
-- indicator handoff: metrics/proxies, operational definitions, thresholds/tolerances, and evidence boundaries from `alpha-goal` or `meta-synthesis`;
+- indicator handoff: metrics/proxies, operational definitions, thresholds/tolerances, and evidence boundaries from `goal-contract` or `decision-synthesis`;
 - disturbances: flaky dependencies, dirty working tree, clock/time zone, environment drift, missing credentials, concurrent edits, ambiguous specs.
 
 ### 3. Check observability
@@ -151,7 +151,7 @@ Disturbance Register:
 
 Do not collapse material disturbances into a prose risk list. A Control Model is incomplete if it names material disturbances but does not either emit a Disturbance Register or explicitly state `Disturbance register: none material`.
 
-High-impact or unknown-impact disturbances must have a sensor, containment, and route trigger before routing to `loop`.
+High-impact or unknown-impact disturbances must have a sensor, containment, and route trigger before routing to `control-loop`.
 
 Stabilization strategies:
 
@@ -160,8 +160,8 @@ Stabilization strategies:
 - add or reuse a sensor before changing behavior;
 - sequence changes so one control variable moves at a time;
 - monitor registered disturbance sensors and route when a trigger fires;
-- return to `alpha-goal` if coupling changes scope or claim boundary;
-- route to `meta-synthesis` if objectives or stakeholders conflict.
+- return to `goal-contract` if coupling changes scope or claim boundary;
+- route to `decision-synthesis` if objectives or stakeholders conflict.
 
 ### 6. Judge model adequacy
 
@@ -222,7 +222,7 @@ Control Model:
 - Missing information:
 - Model adequacy: sufficient | sufficient with narrowed claim | insufficient | blocked
 - Ledger update: path or chat-only state, model changes, residual model uncertainty, next route
-- Recommended route: alpha-goal | loop | verify | meta-synthesis | blocker
+- Recommended route: goal-contract | control-loop | evidence-verify | decision-synthesis | blocker
 ```
 
-Route to `alpha-goal` when the model is sufficient to write or revise a Goal Contract. Route to `loop` only when an approved Goal Contract already exists and this model merely informs the next bounded slice. Route to `verify` only when comparing evidence to a claim is the next action.
+Route to `goal-contract` when the model is sufficient to write or revise a Goal Contract. Route to `control-loop` only when an approved Goal Contract already exists and this model merely informs the next bounded slice. Route to `evidence-verify` only when comparing evidence to a claim is the next action.

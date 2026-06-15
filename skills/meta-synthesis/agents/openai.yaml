@@ -1,4 +1,0 @@
-interface:
-  display_name: "Meta Synthesis"
-  short_description: "Synthesize complex-system decisions"
-  default_prompt: "Use $meta-synthesis to run Synthesis Rounds and produce Indicator Handoff candidates before forming a Goal Contract."

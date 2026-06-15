@@ -11,12 +11,12 @@ scripts/install.sh
 安装脚本会通过 `npx --yes tsx` 运行 TypeScript 校验器，因此本机需要可用的 Node.js/npm。
 
 ```text
-control-kernel
 alpha-goal
+goal-contract
 system-model
-loop
-verify
-meta-synthesis
+control-loop
+evidence-verify
+decision-synthesis
 ```
 
 ## 安装到指定 Codex home
@@ -80,17 +80,17 @@ npx --yes tsx tools/validate_skillset.ts .
 ## Smoke test prompts
 
 ```text
-$control-kernel 帮我判断这个任务应该走哪个 skill，并说明下一步边界。
+$alpha-goal 帮我判断这个任务应该走哪个 skill，并说明下一步边界。
 ```
 
 Expected behavior:
 
-- It should classify whether the task needs goal framing, system modeling, bounded iteration, verification, or meta-synthesis.
+- It should classify whether the task needs goal framing, system modeling, bounded iteration, verification, or decision synthesis.
 - It should avoid mutation unless the requested phase and edit boundary are clear.
 - It should surface missing target, acceptance, evidence, or side-effect boundaries before implementation.
 
 ```text
-$alpha-goal 对本仓库 skill 和 references 做只读一致性审计，不要改文件。
+$goal-contract 对本仓库 skill 和 references 做只读一致性审计，不要改文件。
 ```
 
 Expected behavior:
@@ -99,7 +99,7 @@ Expected behavior:
 - It should read the requested `SKILL.md` and relevant `references/` files as the audit target.
 - It should return findings, evidence, recommendations, and residual uncertainty, not only a Goal Contract.
 - It should create an Indicator Handoff when qualitative objectives need measurable acceptance evidence.
-- It should not run `loop` or `verify` because no mutation or completion claim is requested.
+- It should not run `control-loop` or `evidence-verify` because no mutation or completion claim is requested.
 
 ```text
 $system-model 这个仓库的安装链路现在有失败，先建模可观测信号、可控变量和扰动，不要改文件。
@@ -114,17 +114,17 @@ Expected behavior:
 - It should not mutate files.
 
 ```text
-$meta-synthesis 多团队对迁移方案目标、风险和成功指标有冲突，先做综合研判，不要改文件。
+$decision-synthesis 多团队对迁移方案目标、风险和成功指标有冲突，先做综合研判，不要改文件。
 ```
 
 Expected behavior:
 
 - It should run at least one Synthesis Round that combines human/expert judgment, machine evidence or available metrics, conflicts, user-owned decisions, and next hypotheses.
 - It should emit an Indicator Handoff candidate for success metrics that should become Goal Contract evidence.
-- It should route to `alpha-goal`, `system-model`, user, or blocker instead of treating a list of opinions as a final plan.
+- It should route to `goal-contract`, `system-model`, user, or blocker instead of treating a list of opinions as a final plan.
 
 ```text
-$loop 根据上面的 Goal Contract 做一轮最小变更。
+$control-loop 根据上面的 Goal Contract 做一轮最小变更。
 ```
 
 Expected behavior:
@@ -134,7 +134,7 @@ Expected behavior:
 - It should produce an Iteration Record with dynamic plan, execution, feedback, and Adaptive Learning Record when feedback contradicts a reusable control assumption.
 
 ```text
-$verify 检查当前 diff、测试和声明边界，判断是否可以最终交付。
+$evidence-verify 检查当前 diff、测试和声明边界，判断是否可以最终交付。
 ```
 
 Expected behavior:

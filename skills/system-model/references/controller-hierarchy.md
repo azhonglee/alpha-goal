@@ -29,5 +29,5 @@ Controller Hierarchy:
 - Use the hierarchy to keep local optimization from destabilizing the global objective.
 - Name coupling variables that multiple controllers can change or observe.
 - Do not let a local controller decide global priority, risk acceptance, budget, timeline, production impact, or final claim.
-- If controllers conflict on objective priority, risk, or authority, route to `meta-synthesis` or user.
+- If controllers conflict on objective priority, risk, or authority, route to `decision-synthesis` or user.
 - If the hierarchy exposes missing plant, sensor, actuator, or coupling facts, route to `system-model` before mutation.

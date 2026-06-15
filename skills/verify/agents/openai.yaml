@@ -1,4 +1,0 @@
-interface:
-  display_name: "Verify"
-  short_description: "Judge evidence and claim boundary"
-  default_prompt: "Use $verify to compare fresh evidence, Indicator Handoff, Control Law, Adaptive Learning, and claim boundary."

@@ -685,7 +685,7 @@ fi
 
 run_skillset_validation
 
-required_skills=(control-kernel alpha-goal system-model loop verify meta-synthesis)
+required_skills=(alpha-goal goal-contract system-model control-loop evidence-verify decision-synthesis)
 skill_files=()
 for skill_name in "${required_skills[@]}"; do
   skill_file="$source_skill_root/$skill_name/SKILL.md"
@@ -729,7 +729,7 @@ for skill_name in "${required_skills[@]}"; do
   remove_obsolete_skill_link "$skill_name"
 done
 
-for obsolete_skill in goal-frame goal-loop goal-iterate goal-review goal-verify; do
+for obsolete_skill in control-kernel loop verify meta-synthesis goal-frame goal-loop goal-iterate goal-review goal-verify; do
   remove_obsolete_skill_link "$obsolete_skill"
 done
 

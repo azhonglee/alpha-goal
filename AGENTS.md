@@ -2,14 +2,14 @@
 
 ## Project Structure & Module Organization
 
-本仓库维护 `alpha-goal` Codex 技能包。技能源码统一位于 `skills/`：核心入口是 `skills/alpha-goal/SKILL.md`；阶段技能位于 `skills/loop/`、`skills/verify/`。各技能的详细规则放在本技能 `references/` 下，脚本放在本技能 `scripts/` 下。`templates/` 是可选用户配置模板，`scripts/install.sh` 负责软链接安装，`tools/validate_skillset.ts` 用于本地布局校验。`README.md`、`INSTALL.md`、`MANIFEST.md` 应与这些路径和命令保持一致。
+本仓库维护 `alpha-goal` Codex 技能包。技能源码统一位于 `skills/`：核心入口是 `skills/alpha-goal/SKILL.md`；目标契约技能位于 `skills/goal-contract/`，执行与验证阶段技能位于 `skills/control-loop/`、`skills/evidence-verify/`。各技能的详细规则放在本技能 `references/` 下，脚本放在本技能 `scripts/` 下。`templates/` 是可选用户配置模板，`scripts/install.sh` 负责软链接安装，`tools/validate_skillset.ts` 用于本地布局校验。`README.md`、`INSTALL.md`、`MANIFEST.md` 应与这些路径和命令保持一致。
 
 ## Build, Test, and Development Commands
 
 - `npx --yes tsx tools/validate_skillset.ts .`：验证必需技能目录和 front matter。
 - `bash -n scripts/install.sh`：检查安装脚本语法。
-- `npx --yes tsx skills/loop/scripts/mutation-preflight.ts`：检查迭代阶段脚本可运行。
-- `npx --yes tsx skills/verify/scripts/evidence-summary.ts`：检查验证阶段脚本可运行。
+- `npx --yes tsx skills/control-loop/scripts/mutation-preflight.ts`：检查迭代阶段脚本可运行。
+- `npx --yes tsx skills/evidence-verify/scripts/evidence-summary.ts`：检查验证阶段脚本可运行。
 - `python3 -c 'import pathlib,tomllib; tomllib.loads(pathlib.Path("templates/config.toml").read_text())'`：验证配置模板可解析。
 - 使用临时 `CODEX_HOME` 执行 `scripts/install.sh`，并从源码仓库运行 `tools/validate_skillset.ts`，验证安装说明可执行。
 

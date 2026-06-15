@@ -9,12 +9,12 @@ const FRONTMATTER_RE = /^---\n(.*?)\n---\n/s;
 const FIELD_RE = /^([A-Za-z0-9_-]+):\s*(.*?)\s*$/;
 const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
 const REQUIRED_SKILL_NAMES = new Set([
-  "control-kernel",
   "alpha-goal",
+  "goal-contract",
   "system-model",
-  "loop",
-  "verify",
-  "meta-synthesis",
+  "control-loop",
+  "evidence-verify",
+  "decision-synthesis",
 ]);
 
 const LEGACY_SCRIPT_REFERENCES = [
@@ -28,10 +28,25 @@ const LEGACY_SCRIPT_REFERENCES = [
   "evidence-summary.sh",
 ];
 
+const LEGACY_SKILL_REFERENCES = [
+  "$control-kernel",
+  "$loop",
+  "$verify",
+  "$meta-synthesis",
+  "`control-kernel`",
+  "`loop`",
+  "`verify`",
+  "`meta-synthesis`",
+  "skills/control-kernel",
+  "skills/loop",
+  "skills/verify",
+  "skills/meta-synthesis",
+];
+
 const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
   [
     "ambiguous requirement can become a bounded Goal Contract",
-    "skills/alpha-goal/SKILL.md",
+    "skills/goal-contract/SKILL.md",
     [
       "Goal Contract",
       "reference state",
@@ -57,7 +72,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
   ],
   [
     "execution feedback requires control law and ledger state",
-    "skills/loop/SKILL.md",
+    "skills/control-loop/SKILL.md",
     [
       "Control Law",
       "target error",
@@ -70,7 +85,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
   ],
   [
     "insufficient evidence routes to next iteration instead of final",
-    "skills/verify/SKILL.md",
+    "skills/evidence-verify/SKILL.md",
     [
       "Evidence coverage",
       "NEXT_ITERATION",
@@ -80,7 +95,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
   ],
   [
     "complex multi-party conflict uses human-machine synthesis rounds",
-    "skills/meta-synthesis/SKILL.md",
+    "skills/decision-synthesis/SKILL.md",
     [
       "Synthesis Round",
       "Indicator Handoff",
@@ -92,7 +107,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
   ],
   [
     "router preserves closed-loop state and disturbance handling",
-    "skills/control-kernel/SKILL.md",
+    "skills/alpha-goal/SKILL.md",
     [
       "Closed-loop Ledger",
       "Control Law",
@@ -106,7 +121,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
   ],
   [
     "claim boundary prevents overbroad final claims",
-    "skills/verify/SKILL.md",
+    "skills/evidence-verify/SKILL.md",
     [
       "Claim boundary",
       "Highest practical evidence-supported boundary",
@@ -116,7 +131,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
   ],
   [
     "closed-loop ledger records cross-stage control memory",
-    "skills/control-kernel/references/closed-loop-ledger.md",
+    "skills/alpha-goal/references/closed-loop-ledger.md",
     [
       "Reference",
       "Current state",
@@ -142,7 +157,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
   ],
   [
     "synthesis round combines judgment, evidence, metrics, and decisions",
-    "skills/meta-synthesis/references/synthesis-round.md",
+    "skills/decision-synthesis/references/synthesis-round.md",
     [
       "Human/expert judgments",
       "Machine evidence and models",
@@ -155,7 +170,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
   ],
   [
     "indicator handoff turns qualitative goals into evidence signals",
-    "skills/alpha-goal/references/indicator-handoff.md",
+    "skills/goal-contract/references/indicator-handoff.md",
     [
       "Operational definition",
       "Sensor / evidence source",
@@ -180,7 +195,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
   ],
   [
     "adaptive learning records reusable control corrections",
-    "skills/loop/references/adaptive-learning.md",
+    "skills/control-loop/references/adaptive-learning.md",
     [
       "Learning trigger",
       "Observed mismatch",
@@ -197,21 +212,21 @@ const FIXTURE_CONTRACT_TESTS = [
     name: "complex migration conflict uses synthesis and indicator handoff",
     prompt: "多团队迁移目标、风险、窗口、成功指标冲突，先综合研判。",
     paths: [
-      "skills/meta-synthesis/SKILL.md",
-      "skills/meta-synthesis/references/synthesis-round.md",
+      "skills/decision-synthesis/SKILL.md",
+      "skills/decision-synthesis/references/synthesis-round.md",
     ],
-    schema_blocks: ["Meta-Synthesis Record:", "Synthesis Round:", "Indicator Handoff:"],
-    route_terms: ["user", "alpha-goal", "system-model", "blocker"],
+    schema_blocks: ["Decision Synthesis Record:", "Synthesis Round:", "Indicator Handoff:"],
+    route_terms: ["user", "goal-contract", "system-model", "blocker"],
   },
   {
     name: "qualitative objective becomes measurable contract evidence",
     prompt: "把用户体验更稳定转成可验证 Goal Contract。",
     paths: [
-      "skills/alpha-goal/SKILL.md",
-      "skills/alpha-goal/references/indicator-handoff.md",
+      "skills/goal-contract/SKILL.md",
+      "skills/goal-contract/references/indicator-handoff.md",
     ],
     schema_blocks: ["Goal Contract:", "Indicator Handoff:"],
-    route_terms: ["loop", "system-model", "verify", "block"],
+    route_terms: ["control-loop", "system-model", "evidence-verify", "block"],
   },
   {
     name: "multi-controller system maps hierarchy before mutation",
@@ -221,14 +236,14 @@ const FIXTURE_CONTRACT_TESTS = [
       "skills/system-model/references/controller-hierarchy.md",
     ],
     schema_blocks: ["Control Model:", "Controller Hierarchy:"],
-    route_terms: ["alpha-goal", "loop", "meta-synthesis", "blocker"],
+    route_terms: ["goal-contract", "control-loop", "decision-synthesis", "blocker"],
   },
   {
     name: "feedback mismatch creates adaptive learning before next loop",
     prompt: "上轮控制律阈值没命中，但方向有效，继续下一轮。",
     paths: [
-      "skills/loop/SKILL.md",
-      "skills/loop/references/adaptive-learning.md",
+      "skills/control-loop/SKILL.md",
+      "skills/control-loop/references/adaptive-learning.md",
     ],
     schema_blocks: ["Control Law:", "Adaptive Learning Record:"],
     route_terms: [
@@ -241,8 +256,8 @@ const FIXTURE_CONTRACT_TESTS = [
     name: "verification checks learned thresholds and indicator evidence",
     prompt: "检查当前声明是否可以最终交付。",
     paths: [
-      "skills/verify/SKILL.md",
-      "skills/verify/references/verification-verdict-schema.md",
+      "skills/evidence-verify/SKILL.md",
+      "skills/evidence-verify/references/verification-verdict-schema.md",
     ],
     schema_blocks: [
       "Verification Verdict:",
@@ -406,6 +421,7 @@ export function main(args = process.argv.slice(2)): number {
 
   validateTypeScriptScriptSurface(root, errors, warnings);
   validateLegacyScriptReferences(root, errors);
+  validateLegacySkillReferences(root, errors);
   validateSemanticSmokeTests(root, errors);
   validateFixtureContractTests(root, errors);
 
@@ -464,6 +480,37 @@ function validateLegacyScriptReferences(root: string, errors: string[]): void {
     for (const legacy of LEGACY_SCRIPT_REFERENCES) {
       if (text.includes(legacy)) {
         errors.push(`${rel}: legacy non-TypeScript script reference remains: ${legacy}`);
+      }
+    }
+  }
+}
+
+function validateLegacySkillReferences(root: string, errors: string[]): void {
+  const checkedFiles = [
+    "AGENTS.md",
+    "README.md",
+    "INSTALL.md",
+    "MANIFEST.md",
+    ...walk(path.join(root, "skills"))
+      .filter((file) => {
+        if (!isFile(file)) {
+          return false;
+        }
+        const rel = relative(root, file);
+        return rel.endsWith(".md") || rel.endsWith("/agents/openai.yaml");
+      })
+      .map((file) => relative(root, file)),
+  ];
+
+  for (const rel of checkedFiles) {
+    const file = path.join(root, rel);
+    if (!isFile(file)) {
+      continue;
+    }
+    const text = fs.readFileSync(file, "utf8");
+    for (const legacy of LEGACY_SKILL_REFERENCES) {
+      if (text.includes(legacy)) {
+        errors.push(`${rel}: legacy skill reference remains: ${legacy}`);
       }
     }
   }

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Control Kernel"
-  short_description: "Route the closed-loop skill suite"
-  default_prompt: "Use $control-kernel to choose the next closed-loop skill route, stability boundary, indicator, disturbance, hierarchy, and learning gates."
