@@ -1,21 +1,40 @@
-# Alpha Goal 技能集
+# 闭环控制式 Alpha Goal 技能集
 
-本仓库提供一组 Alpha Goal skills，帮助 Codex 把非平凡工程任务按“目标澄清、契约生成、迭代执行、验收判断”推进。
+本仓库维护一组给 Codex 使用的 Agent Skills。当前分支以 `alpha-goal` 作为总入口，把目标契约、系统建模、有界执行、证据验证和复杂决策综合组织成六技能闭环控制套件。
 
-```text
-INTENT -> ALPHA-GOAL(discovery + interview + contract) -> ITERATE(dynamic plan -> execution -> feedback) -> VERIFY -> FINAL
-                                                    ^--------------------------------------------|
-```
+核心映射：
 
-核心思路：
+| 工程控制论概念 | 在本 Skills 套件中的角色 |
+| --- | --- |
+| 参考输入 / 期望状态 | `goal-contract` 生成的 Goal Contract |
+| 被控对象 / plant | 代码库、产品、文档、数据流或组织流程 |
+| 状态变量 | 需求清晰度、实现状态、测试状态、风险、证据覆盖率 |
+| 传感器 / observer | repo 快照、日志、测试、人工反馈、审查意见 |
+| 指标交接 / indicator handoff | `goal-contract` 把定性目标转成 metric/proxy、sensor、threshold 和 evidence boundary |
+| 控制律 / control law | `control-loop` 中的 target error、control variable、expected effect、sensor threshold 和 fallback action |
+| 控制器 / actuator | `control-loop` 的有界迭代、诊断、修复、加固 |
+| 比较器 / error detector | `evidence-verify` 对“目标、证据、最终声明”的误差判定 |
+| 状态记忆 / memory | `.alpha-goal/control-state/` 中的 Closed-loop Ledger，跨阶段记录完整 Control Route、artifact registry、reference、state、error、action、feedback 和 next route |
+| 自适应学习 / adaptive learning | `control-loop` 从反馈失配中记录可复用的 threshold、strategy、route 或假设修正 |
+| 分层协同控制 | `system-model` 中的 Controller Hierarchy，识别 global/local controller、coupling variable、arbitration 和 escalation |
+| 鲁棒性 / disturbance handling | `system-model` 中的 Disturbance Register，记录 likelihood、impact、sensor、containment 和 route trigger |
+| 复杂巨系统综合集成 | `decision-synthesis` 的 Synthesis Round，把定性判断、机器证据、量化指标、冲突和用户裁决迭代收敛 |
+| 总调度器 | `alpha-goal` 根据当前系统状态选择 Skill 和下一步 |
 
-- `alpha-goal`：执行 Discovery + Socratic interview，产出 Goal Contract，并决定下一入口。
-- `loop`：按 Goal type 执行三段循环：dynamic planning、execution、feedback。
-- `verify`：验收 acceptance，判断证据是否支持最终 claim。
+## 六个技能
+
+- `alpha-goal`：闭环总入口，负责 Skill 路由、稳定性检查和跨阶段状态记忆。
+- `goal-contract`：把含糊请求转为可执行、可验证、可移交的 Goal Contract，并承接 Indicator Handoff。
+- `system-model`：建立被控对象模型，识别状态变量、观测信号、可控变量、分层控制、扰动登记和耦合。
+- `control-loop`：在已批准 Goal Contract 下执行有界迭代，采集反馈、记录自适应学习并路由。
+- `evidence-verify`：独立判断证据是否支持完成、可合并、可发布或窄化声明，并审查指标和学习记录边界。
+- `decision-synthesis`：处理复杂系统、多利益相关方、弱结构化需求与高不确定性决策，并通过 Synthesis Round 收敛。
 
 ## 安装
 
 默认安装到真实 Codex home，并在 `$HOME/.codex/skills/` 下创建一个 `alpha-goal` 软链接，指向本仓库的 `skills/`：
+
+安装脚本会通过 `npx --yes tsx` 运行 TypeScript 校验器，因此本机需要可用的 Node.js/npm。
 
 ```bash
 scripts/install.sh
@@ -23,11 +42,13 @@ scripts/install.sh
 
 脚本会执行以下操作：
 
+- 运行 `tools/validate_skills.ts` 校验六技能套件的结构、引用可发现性、闭环语义烟测和 fixture contract checks。
 - 创建 `${CODEX_HOME:-$HOME/.codex}/skills/alpha-goal` 软链接，目标是本仓库的 `skills/` 目录。
-- 默认把 `templates/AGENTS.md` 合并到 Codex home 的 `AGENTS.md`，并把 `templates/config.toml` 中缺失的设置补齐到 Codex home 的 `config.toml`；模板只补齐 multi-agent、child AGENTS 和结构化 `request_user_input` 相关开关，不设置 sandbox 权限、休眠行为或不稳定特性警告抑制项。
-- 自动替换指向本仓库旧顶层布局或旧 `skills/alpha-goal` 目录的 `alpha-goal` 软链接，并清理旧版本可能留在目标 `skills/` 下、且指向本仓库的 `loop`、`verify`、obsolete `goal-frame`、`goal-loop` 或支持目录旧软链接。
-- 校验目标 `skills/alpha-goal` 软链接是否指向当前仓库的 `skills/` 目录，并能通过该链接访问所有必需 skill。
-- 安装前运行源码中的 `tools/validate_skillset.py` 校验技能包布局。`validate_skillset.py` 只验证布局、元数据、引用可发现性和少量一致性规则；不能证明实际路由、误触发、reference 加载策略或验证边界正确。
+- 默认把 `templates/AGENTS.md` 合并到 Codex home 的 `AGENTS.md`，并把 `templates/config.toml` 中缺失的设置补齐到 Codex home 的 `config.toml`。
+- 用户配置模板只补齐 multi-agent、child AGENTS 和结构化 `request_user_input` 相关开关；不会修改 sandbox 权限、休眠行为，也不会抑制不稳定特性警告。
+- 自动替换指向本仓库旧顶层布局或旧 `skills/alpha-goal` 目录的 `alpha-goal` 软链接。
+- 清理旧版本可能留在目标 `skills/` 下、且指向本仓库的直连技能软链接。
+- 校验目标 `skills/alpha-goal` 软链接是否指向当前仓库的 `skills/` 目录，并能通过该链接访问全部六个必需 skill。
 
 安装到其他位置：
 
@@ -42,7 +63,7 @@ CODEX_HOME=/path/to/codex-home scripts/install.sh
 scripts/install.sh --force
 ```
 
-只安装 skill symlink，不同步用户级模板：
+只安装 skill 软链接，不同步用户级模板：
 
 ```bash
 scripts/install.sh --no-sync-user-templates
@@ -54,105 +75,44 @@ scripts/install.sh --no-sync-user-templates
 scripts/install.sh --verbose
 ```
 
-## 仓库结构
+## 校验
 
-```text
-skills/
-  alpha-goal/
-  loop/
-  verify/
-templates/
-scripts/
-tools/
+推荐校验命令：
+
+```bash
+npx --yes tsx tools/validate_skills.ts .
 ```
 
-各技能目录包含 `SKILL.md`，可选 `references/`、`scripts/` 和 `agents/openai.yaml`。
+兼容校验入口：
 
-## 用户配置模板
+```bash
+npx --yes tsx tools/validate_skillset.ts .
+```
 
-`templates/AGENTS.md` 和 `templates/config.toml` 默认同步到 Codex home。执行前应确认这些默认值适合当前用户环境。模板只补齐 multi-agent、child AGENTS 和结构化 `request_user_input` 相关开关，不改变 sandbox 权限、休眠行为，也不抑制不稳定特性警告。
+校验器检查目录结构、元数据、脚本权限、macOS 元数据残留、reference 可发现性、关键闭环字段的 semantic smoke tests，以及典型 prompt 对应的 schema/route fixture contract checks。它仍不能证明技能在真实任务中的触发时机、验证边界或验收判断一定正确。
 
-本地验证建议使用临时 `CODEX_HOME`：
+建议先用临时 `CODEX_HOME` 验证安装流程：
 
 ```bash
 tmp_codex_home="$(mktemp -d)"
 CODEX_HOME="$tmp_codex_home" scripts/install.sh
-python3 tools/validate_skillset.py .
+npx --yes tsx tools/validate_skills.ts .
 rm -rf "$tmp_codex_home"
 ```
 
-## 推荐调用方式
-
-通常直接走总入口：
+## 仓库结构
 
 ```text
-$alpha-goal 帮我实现这个需求：...
+skills/
+  alpha-goal/      # 闭环总入口和路由
+  goal-contract/   # 目标澄清和 Goal Contract
+  system-model/    # 系统状态、可观测性和可控性建模
+  control-loop/    # 有界迭代执行和反馈
+  evidence-verify/ # 证据边界和完成判断
+  decision-synthesis/  # 复杂系统综合研判
+templates/         # 可同步到 Codex home 的用户配置模板
+scripts/           # 安装脚本
+tools/             # 本仓库校验工具
 ```
 
-只读但需要目标/规则/证据边界发现：
-
-```text
-$alpha-goal 对这个仓库做只读一致性审计，不要改文件。
-```
-
-显式调用阶段：
-
-```text
-$alpha-goal 先把这个需求 frame 清楚，不要改文件。
-$loop 根据上面的 Goal Contract 做一轮最小变更。
-$verify 检查当前 diff、测试和声明边界，判断是否可以最终交付。
-```
-
-`alpha-goal`、`loop` 和 `verify` 都允许隐式触发；实际路由仍由各 skill 的 entry requirements 和 claim/contract 边界约束。
-
-## 设计原则
-
-- `alpha-goal` 承担 Discovery、Socratic interview、ambiguity scoring、Goal Contract 和路由；不做实现 mutation，不做最终完成声明。
-- Goal Contract 覆盖 intent、scope、non-goals、decision boundaries、constraints、acceptance 和 evidence；小任务可保持紧凑。
-- 写入 `.alpha-goal/` 或 `docs/design/` 前确认路径已 gitignored 或用户明确批准；否则在对话中输出 chat-only contract。
-- ITERATE 以 dynamic planning、execution、feedback 为核心；本轮主导不确定性决定证据形状。
-- 普通反馈在 loop feedback phase 处理；改变目标、范围、验收或声明边界的反馈回到 `alpha-goal`。
-- VERIFY 只做验收和判断；最终完成声明基于 Verification Verdict。
-- Alpha Goal 的 process artifacts 只表示流程产物；业务域对象应记录在 Goal Contract 的 Scope、Acceptance、Evidence 中。
-- Debug 必须先确认根因再修复；不能只靠 plausible patch。
-- 阶段内辅助脚本只作为只读证据收集工具，不替代工程判断。
-- 项目特有命令和约定应放在目标仓库的 `AGENTS.md`，不要塞进这些跨仓库 skill。
-
-## 默认产物路径
-
-优先沿用目标仓库已有约定。没有约定时：
-
-- goal contract：`docs/design/YYYYMMDD-<slug>.md`
-- plan：`docs/plans/YYYYMMDD-<slug>-plan.md`
-- context snapshot：`.alpha-goal/context/YYYYMMDD-<slug>.md`
-- interview transcript：`.alpha-goal/interviews/YYYYMMDD-<slug>.md`
-- review receipt：`.alpha-goal/reviews/YYYYMMDD-<slug>-review.md`
-- command/output evidence：`.alpha-goal/evidence/YYYYMMDD-<slug>/`
-- scratch artifacts：`.alpha-goal/tmp/YYYYMMDD-<slug>/`
-
-写入 `.alpha-goal/` 前确认它已被 gitignored。若未忽略，不要静默修改 `.gitignore`；改用已批准路径，或在 Goal Contract 中记录用户明确同意的持久化路径。
-
-## 阶段输出
-
-阶段输出契约的权威来源在各阶段 `SKILL.md` 和同级 `references/`：
-
-- `alpha-goal`：Goal Contract，覆盖 intent、outcome、scope、non-goals、decision boundary、constraints、acceptance/evidence 等语义；不要求固定字段名。
-- `loop`：Iteration Record，包含 Dynamic plan、Execution、Feedback、Local evidence、Acceptance delta 和下一步判断。
-- `verify`：Verification Verdict，包含 Acceptance evidence matrix、Contract review、Claim boundary、Judgment 和 Final claim allowed。
-
-## 调优建议
-
-如果输出太长，可以减少解释文字，但保留会改变判断或交接的关键语义：
-
-- Goal Contract 的 outcome / scope 语义
-- Goal Contract 的 non-goals / decision-boundary 语义
-- Goal Contract 的 acceptance / evidence 语义
-- `Iteration Record.Dynamic plan`
-- `Iteration Record.Execution`
-- `Iteration Record.Feedback`
-- `Iteration Record.Local evidence`
-- `Verification Verdict.Acceptance evidence matrix`
-- `Verification Verdict.Judgment`
-- `Verification Verdict.Final claim allowed`
-
-如果这些 skill 漏掉某个仓库的关键约定，应优先把约定写进目标仓库的 `AGENTS.md`，或新增专门 adapter reference，不要让核心 skill 过度复杂。
+运行中如需跨阶段恢复状态，默认使用 `.alpha-goal/control-state/YYYYMMDD-<slug>.md` 记录 Closed-loop Ledger，包括完整 `Latest Control Route`、artifact registry、Synthesis Round、Indicator Handoff、Controller Hierarchy、Disturbance Register、Control Law、Adaptive Learning Record、error、feedback 和 next route。完整阶段产物按类型写入 `.alpha-goal/context/`、`.alpha-goal/models/`、`.alpha-goal/synthesis/`、`.alpha-goal/iterations/`、`.alpha-goal/evidence/` 和 `.alpha-goal/verification/`；ledger 只保留状态和路径索引。TUI 默认只展示 Markdown 表格形式的 `Route Summary`、`Contract Summary`、`Model Summary`、`Synthesis Summary`、`Iteration Summary` 或 `Verification Summary`，下游技能从 `.alpha-goal/` 读取完整字段。写入前检查 `.alpha-goal/` 是否已被忽略；如果仓库根 `.gitignore` 缺少 `.alpha-goal/`，先加入该条目再写 ledger。
