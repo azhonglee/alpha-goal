@@ -34,7 +34,16 @@ Control Model:
   - Sensor:
   - Threshold / tolerance:
   - Risk/fallback:
-- Disturbances:
+- Disturbance register:
+  - Disturbance:
+  - Source:
+  - Likelihood:
+  - Impact:
+  - Affected state/control variable:
+  - Sensor:
+  - Containment:
+  - Route trigger:
+  - Owner or decision boundary:
 - Coupling map:
 - Observability rating:
 - Controllability rating:

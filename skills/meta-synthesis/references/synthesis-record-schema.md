@@ -15,6 +15,17 @@ Meta-Synthesis Record:
   - Decision owner:
 - Qualitative judgments:
 - Quantitative signals:
+- Synthesis rounds:
+  - Round:
+  - Core question or hypothesis:
+  - Human/expert judgments:
+  - Machine evidence and models:
+  - Quantitative indicators:
+  - Conflict or contradiction:
+  - Integrated update:
+  - User-owned decision:
+  - Next hypothesis to verify:
+  - Route trigger:
 - Subsystems and interactions:
 - State variables:
 - Constraints:

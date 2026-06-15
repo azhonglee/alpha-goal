@@ -16,6 +16,13 @@
 - Does one intended action affect multiple outputs or owners?
 - Is a diagnostic probe required before a repair action?
 
+## Disturbance questions
+
+- Which disturbance could invalidate the model, route, evidence floor, or final claim?
+- What sensor detects the disturbance before or immediately after action?
+- What containment keeps the disturbance from expanding blast radius?
+- What route trigger sends the work to `alpha-goal`, `system-model`, `meta-synthesis`, user, or blocker?
+
 ## Ratings
 
 - `strong`: enough signals/control variables exist for direct bounded action.

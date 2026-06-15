@@ -28,6 +28,11 @@ In engineering-cybernetics terms, this skill defines the setpoint and safe contr
 - For diagnostics, do not assume repair authorization merely because a plausible cause exists. Define what evidence authorizes repair.
 - Keep proportionality: gather only what materially changes scope, risk, authority, evidence, or next safe action.
 
+## Load resources when needed
+
+- `references/ambiguity-scoring.md`: score uncertainty only when it changes clarification effort or handoff safety.
+- `references/goal-contract-schema.md`: produce a durable or handoff-ready Goal Contract.
+
 ## Process
 
 ```text

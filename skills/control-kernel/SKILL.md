@@ -18,7 +18,7 @@ Treat the user request as a control problem:
 - `actuator`: bounded changes made by `loop` under an approved Goal Contract;
 - `comparator`: `verify`, which compares fresh evidence against the reference and claim boundary;
 - `memory`: a Closed-loop Ledger that carries reference, current state, error, control action, feedback, and route history across skills;
-- `disturbance`: changing requirements, dirty working tree, missing tools, flaky tests, conflicting specs, hidden ownership, broad claims, or external side effects.
+- `disturbance`: changing requirements, dirty working tree, missing tools, flaky tests, conflicting specs, hidden ownership, broad claims, or external side effects, tracked through a Disturbance Register when material.
 
 ## Boundaries
 
@@ -74,7 +74,7 @@ Before routing to an execution-capable path, ensure:
 - an execution route has a candidate Control Law: target error, control variable, expected effect, sensor threshold, fallback;
 - the actuator boundary says what may change and what must not change;
 - observer signals are available or a missing-observer blocker is stated;
-- disturbances and couplings are either bounded or routed to modeling/synthesis;
+- material disturbances are registered with likelihood, impact, sensor, containment, and route trigger, or routed to modeling/synthesis/user/blocker;
 - the ledger or chat state records the last error signal and why the selected next skill reduces it;
 - final claims will be checked by `verify` rather than stated by the executor.
 
@@ -89,6 +89,7 @@ Control Route:
 - Dominant uncertainty:
 - Error signal:
 - Control law:
+- Disturbance register:
 - Selected skill:
 - Why this skill:
 - Required context to load or ask for:

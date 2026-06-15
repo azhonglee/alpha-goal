@@ -13,6 +13,7 @@ All must be true before editing implementation files:
 
 - an approved Goal Contract or equivalent context identifies reference state, desired outcome, included scope, excluded scope/non-goals, decision boundaries, constraints, acceptance evidence, and claim boundary;
 - current ledger or chat state is read when available, especially last residual error, control action, feedback, and route decision;
+- current Disturbance Register is read when available, especially material likelihood, impact, sensor, containment, and route triggers;
 - target/scope boundary and final claim boundary are clear enough to decide changed files and final wording;
 - applicable local rules, durable specs, and active plans have been read;
 - repository, worktree, submodule, ownership, dirty-state, and unrelated user-change boundaries are understood;
@@ -56,6 +57,7 @@ Dynamic planning answers only the current iteration:
 - fresh evidence needed after the slice and how it will be sensed;
 - files, modules, repos, generated outputs, and ownership surfaces allowed to change;
 - assumptions, disturbances, and stop conditions for reframe, block, or unsafe execution;
+- material Disturbance Register entries and how this slice will monitor or contain them;
 - expected artifacts, side effects, cleanup, rollback, or containment needs;
 - strongest material risk and evidence floor;
 - success, failure, feedback, and reframe routes;
@@ -119,6 +121,7 @@ Classify evidence:
 - `blocked evidence`: shows missing environment, tool, data, or permission.
 
 Also record whether the observed sensor feedback crossed the Control Law threshold or whether fallback/reframe is required.
+If a registered disturbance trigger fires, route according to the register instead of continuing the planned slice.
 
 ### 5. Compare error and decide route
 
@@ -146,7 +149,7 @@ Produce an Iteration Record before handoff, blocking, or materially changing dir
 - acceptance delta and error remaining;
 - control law result: expected effect, observed feedback, threshold status, fallback or adjustment;
 - feedback and disturbances;
-- ledger update: input state, error signal, control action, sensor feedback, residual error, and next state;
+- ledger update: input state, error signal, disturbance update, control action, sensor feedback, residual error, and next state;
 - route decision;
 - next action.
 

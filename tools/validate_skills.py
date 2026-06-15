@@ -10,6 +10,131 @@ from pathlib import Path
 FRONTMATTER_RE = re.compile(r"\A---\n(.*?)\n---\n", re.S)
 FIELD_RE = re.compile(r"^([A-Za-z0-9_-]+):\s*(.*?)\s*$")
 ALLOWED_FRONTMATTER_KEYS = {"name", "description"}
+REQUIRED_SKILL_NAMES = {
+    "control-kernel",
+    "alpha-goal",
+    "system-model",
+    "loop",
+    "verify",
+    "meta-synthesis",
+}
+
+SEMANTIC_SMOKE_TESTS = [
+    (
+        "ambiguous requirement can become a bounded Goal Contract",
+        "skills/alpha-goal/SKILL.md",
+        [
+            "Goal Contract",
+            "reference state",
+            "acceptance evidence",
+            "claim boundary",
+            "decision boundaries",
+        ],
+    ),
+    (
+        "unclear system boundary routes through control modeling",
+        "skills/system-model/SKILL.md",
+        [
+            "System boundary",
+            "Observability",
+            "Controllability",
+            "Candidate control laws",
+            "Disturbance Register",
+            "none material",
+        ],
+    ),
+    (
+        "execution feedback requires control law and ledger state",
+        "skills/loop/SKILL.md",
+        [
+            "Control Law",
+            "target error",
+            "control variable",
+            "sensor threshold",
+            "fallback",
+            "ledger update",
+        ],
+    ),
+    (
+        "insufficient evidence routes to next iteration instead of final",
+        "skills/verify/SKILL.md",
+        [
+            "Evidence coverage",
+            "NEXT_ITERATION",
+            "NARROW_CLAIM_AND_FINAL",
+            "Final claim allowed",
+        ],
+    ),
+    (
+        "complex multi-party conflict uses human-machine synthesis rounds",
+        "skills/meta-synthesis/SKILL.md",
+        [
+            "Synthesis Round",
+            "Qualitative judgments",
+            "Quantitative signals",
+            "User-owned decisions",
+            "Route",
+        ],
+    ),
+    (
+        "router preserves closed-loop state and disturbance handling",
+        "skills/control-kernel/SKILL.md",
+        [
+            "Closed-loop Ledger",
+            "Control Law",
+            "Disturbance Register",
+            "Error signal",
+            "Selected skill",
+        ],
+    ),
+    (
+        "claim boundary prevents overbroad final claims",
+        "skills/verify/SKILL.md",
+        [
+            "Claim boundary",
+            "Highest practical evidence-supported boundary",
+            "Gap",
+            "Final claim allowed",
+        ],
+    ),
+    (
+        "closed-loop ledger records cross-stage control memory",
+        "skills/control-kernel/references/closed-loop-ledger.md",
+        [
+            "Reference",
+            "Current state",
+            "Last error signal",
+            "Control law",
+            "Sensor feedback",
+            "Route decision",
+            "Next state",
+        ],
+    ),
+    (
+        "disturbance register has robust monitoring and containment fields",
+        "skills/system-model/references/disturbance-register.md",
+        [
+            "Likelihood",
+            "Impact",
+            "Sensor",
+            "Containment",
+            "Route trigger",
+            "none material",
+        ],
+    ),
+    (
+        "synthesis round combines judgment, evidence, metrics, and decisions",
+        "skills/meta-synthesis/references/synthesis-round.md",
+        [
+            "Human/expert judgments",
+            "Machine evidence and models",
+            "Quantitative indicators",
+            "Conflict or contradiction",
+            "User-owned decision",
+            "Next hypothesis to verify",
+        ],
+    ),
+]
 
 
 def parse_frontmatter(text: str) -> dict[str, str]:
@@ -70,6 +195,13 @@ def main() -> int:
     skill_dirs = sorted(p for p in skills.iterdir() if p.is_dir())
     if not skill_dirs:
         errors.append("no skill directories found")
+    discovered_skill_names = {p.name for p in skill_dirs}
+    missing_required = REQUIRED_SKILL_NAMES - discovered_skill_names
+    unexpected = discovered_skill_names - REQUIRED_SKILL_NAMES
+    for name in sorted(missing_required):
+        errors.append(f"missing required skill directory: skills/{name}")
+    for name in sorted(unexpected):
+        errors.append(f"unexpected skill directory: skills/{name}")
 
     names: set[str] = set()
     for d in skill_dirs:
@@ -103,8 +235,36 @@ def main() -> int:
                 if not (mode & stat.S_IXUSR):
                     warnings.append(f"{script.relative_to(root)} is not user-executable")
 
+        references = sorted((d / "references").glob("*")) if (d / "references").is_dir() else []
+        for ref in references:
+            if not ref.is_file():
+                continue
+            rel_ref = f"references/{ref.name}"
+            if rel_ref not in text:
+                errors.append(
+                    f"{d.name}: reference is not discoverable from SKILL.md: {rel_ref}"
+                )
+
+    validate_semantic_smoke_tests(root, errors)
+
     print_report(root, errors, warnings)
     return 1 if errors else 0
+
+
+def validate_semantic_smoke_tests(root: Path, errors: list[str]) -> None:
+    for scenario, rel_path, required_terms in SEMANTIC_SMOKE_TESTS:
+        path = root / rel_path
+        if not path.is_file():
+            errors.append(f"semantic smoke test {scenario!r}: missing {rel_path}")
+            continue
+
+        text = path.read_text(encoding="utf-8").lower()
+        missing = [term for term in required_terms if term.lower() not in text]
+        if missing:
+            errors.append(
+                f"semantic smoke test {scenario!r} failed in {rel_path}: "
+                f"missing {', '.join(missing)}"
+            )
 
 
 def print_report(root: Path, errors: list[str], warnings: list[str]) -> None:

@@ -14,17 +14,18 @@
 | 控制器 / actuator | `loop` 的有界迭代、诊断、修复、加固 |
 | 比较器 / error detector | `verify` 对“目标、证据、最终声明”的误差判定 |
 | 状态记忆 / memory | `.alpha-goal/control-state/` 中的 Closed-loop Ledger，跨阶段记录 reference、state、error、action、feedback 和 next route |
-| 复杂巨系统综合集成 | `meta-synthesis` 对复杂、多主体、弱量化问题的综合研判 |
+| 鲁棒性 / disturbance handling | `system-model` 中的 Disturbance Register，记录 likelihood、impact、sensor、containment 和 route trigger |
+| 复杂巨系统综合集成 | `meta-synthesis` 的 Synthesis Round，把定性判断、机器证据、量化指标、冲突和用户裁决迭代收敛 |
 | 总调度器 | `control-kernel` 根据当前系统状态选择 Skill 和下一步 |
 
 ## 六个技能
 
 - `control-kernel`：闭环调度和 Skill 路由。
 - `alpha-goal`：把含糊请求转为可执行、可验证、可移交的 Goal Contract。
-- `system-model`：建立被控对象模型，识别状态变量、观测信号、可控变量、扰动和耦合。
+- `system-model`：建立被控对象模型，识别状态变量、观测信号、可控变量、扰动登记和耦合。
 - `loop`：在已批准 Goal Contract 下执行有界迭代，采集反馈并路由。
 - `verify`：独立判断证据是否支持完成、可合并、可发布或窄化声明。
-- `meta-synthesis`：处理复杂系统、多利益相关方、弱结构化需求与高不确定性决策。
+- `meta-synthesis`：处理复杂系统、多利益相关方、弱结构化需求与高不确定性决策，并通过 Synthesis Round 收敛。
 
 ## 安装
 
@@ -36,7 +37,7 @@ scripts/install.sh
 
 脚本会执行以下操作：
 
-- 运行 `tools/validate_skills.py` 校验六技能套件。
+- 运行 `tools/validate_skills.py` 校验六技能套件的结构、引用可发现性和闭环语义烟测。
 - 创建 `${CODEX_HOME:-$HOME/.codex}/skills/alpha-goal` 软链接，目标是本仓库的 `skills/` 目录。
 - 默认把 `templates/AGENTS.md` 合并到 Codex home 的 `AGENTS.md`，并把 `templates/config.toml` 中缺失的设置补齐到 Codex home 的 `config.toml`。
 - 用户配置模板只补齐 multi-agent、child AGENTS 和结构化 `request_user_input` 相关开关；不会修改 sandbox 权限、休眠行为，也不会抑制不稳定特性警告。
@@ -83,7 +84,7 @@ python3 tools/validate_skills.py .
 python3 tools/validate_skillset.py .
 ```
 
-校验器只检查目录结构、元数据、脚本权限和 macOS 元数据残留；它不能证明技能在真实任务中的路由、触发时机、验证边界或验收判断一定正确。
+校验器检查目录结构、元数据、脚本权限、macOS 元数据残留、reference 可发现性，以及关键闭环字段的 semantic smoke tests。它仍不能证明技能在真实任务中的触发时机、验证边界或验收判断一定正确。
 
 建议先用临时 `CODEX_HOME` 验证安装流程：
 
@@ -109,4 +110,4 @@ scripts/           # 安装脚本
 tools/             # 本仓库校验工具
 ```
 
-运行中如需跨阶段恢复状态，优先使用 `.alpha-goal/control-state/YYYYMMDD-<slug>.md` 记录 Closed-loop Ledger。写入前必须确认 `.alpha-goal/` 已被忽略，或使用用户明确批准的替代路径。
+运行中如需跨阶段恢复状态，优先使用 `.alpha-goal/control-state/YYYYMMDD-<slug>.md` 记录 Closed-loop Ledger，包括 Synthesis Round、Disturbance Register、Control Law、error、feedback 和 next route。写入前必须确认 `.alpha-goal/` 已被忽略，或使用用户明确批准的替代路径。

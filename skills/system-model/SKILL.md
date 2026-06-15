@@ -27,6 +27,12 @@ Use `system-model` when any of these are true:
 - Label observed facts, inferred structure, assumptions, and missing sensors separately.
 - If a Closed-loop Ledger exists, update only model-relevant state: plant boundary, state variables, sensors, actuators, disturbances, coupling, and model adequacy.
 
+## Load resources when needed
+
+- `references/control-model-schema.md`: produce a durable or handoff-ready Control Model.
+- `references/observability-controllability-check.md`: rate sensor and actuator adequacy.
+- `references/disturbance-register.md`: record disturbance likelihood, impact, sensor, containment, and route trigger.
+
 ## Process
 
 ```text
@@ -111,12 +117,32 @@ Coupling Map:
   - Isolation strategy:
 ```
 
+Create a clearly labeled Disturbance Register for material disturbances. Load `references/disturbance-register.md` when disturbance likelihood, impact, sensor, containment, or route trigger is not obvious.
+
+```text
+Disturbance Register:
+- Disturbance:
+  - Source:
+  - Likelihood:
+  - Impact:
+  - Affected state/control variable:
+  - Sensor:
+  - Containment:
+  - Route trigger:
+  - Owner or decision boundary:
+```
+
+Do not collapse material disturbances into a prose risk list. A Control Model is incomplete if it names material disturbances but does not either emit a Disturbance Register or explicitly state `Disturbance register: none material`.
+
+High-impact or unknown-impact disturbances must have a sensor, containment, and route trigger before routing to `loop`.
+
 Stabilization strategies:
 
 - isolate worktree or ownership surface;
 - reduce slice size;
 - add or reuse a sensor before changing behavior;
 - sequence changes so one control variable moves at a time;
+- monitor registered disturbance sensors and route when a trigger fires;
 - return to `alpha-goal` if coupling changes scope or claim boundary;
 - route to `meta-synthesis` if objectives or stakeholders conflict.
 
@@ -133,7 +159,8 @@ Control Model:
 - Sensors:
 - Actuators:
 - Candidate control laws:
-- Disturbances/couplings:
+- Disturbance register:
+- Coupling map:
 - Observability:
 - Controllability:
 - Model adequacy:
@@ -160,7 +187,12 @@ Control Model:
   - Candidate action or probe:
   - Sensor and threshold:
   - Risk/fallback:
-- Disturbances:
+- Disturbance register:
+  - Disturbance:
+  - Likelihood/impact:
+  - Sensor:
+  - Containment:
+  - Route trigger:
 - Coupling map:
 - Stability conditions:
 - Missing information:

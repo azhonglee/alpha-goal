@@ -20,6 +20,7 @@ A positive verdict needs proportional semantic evidence for:
 - Iteration Record or equivalent diff/evidence bundle;
 - Control Law result for each material `loop` slice, when a mutation or diagnostic probe was used;
 - Closed-loop Ledger or equivalent chat state when the work crossed skills or turns;
+- Disturbance Register handling when material disturbances affected route, evidence, or risk;
 - Debug Receipt when the claim is a bug or root-cause fix;
 - strongest material risk and matching evidence floor;
 - fresh final-target repo/artifact status and applicable project rules;
@@ -59,6 +60,7 @@ Confirm:
 - Goal Contract, system model, durable spec, and plan are semantically aligned or contradictions are routed;
 - ledger reference, current state, residual error, and latest route decision are aligned with fresh evidence or explicitly superseded;
 - each material Control Law identifies a target error, approved control variable, expected effect, sensor threshold, observed feedback, and fallback handling;
+- each material Disturbance Register entry has sensor evidence, containment, route-trigger handling, or an explicit residual gap;
 - Iteration Record goal type, control slice, execution, feedback, learning, and evidence match the final diff/artifact;
 - changed files match target and avoid non-goals;
 - mutation evidence comes from an isolated or approved edit path;
@@ -123,6 +125,7 @@ Verification Verdict:
 - Risk/evidence review:
 - Control law review:
 - Ledger review:
+- Disturbance review:
 - Fresh checks run:
 - Diff/scope review:
 - Feedback review:

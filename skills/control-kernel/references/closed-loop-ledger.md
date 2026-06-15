@@ -36,6 +36,12 @@ Closed-loop Ledger:
   - Inferences:
   - Unknowns:
   - Active risks/disturbances:
+  - Disturbance register:
+    - Disturbance:
+    - Likelihood/impact:
+    - Sensor:
+    - Containment:
+    - Route trigger:
 - Control state:
   - Active route:
   - Dominant uncertainty:
@@ -59,6 +65,7 @@ Closed-loop Ledger:
     - Control action or probe:
     - Variables changed:
     - Variables held constant:
+    - Disturbance register update:
     - Sensor feedback:
     - Evidence boundary:
     - Residual error:
@@ -69,15 +76,15 @@ Closed-loop Ledger:
 ## Stage responsibilities
 
 - `control-kernel`: discover or initialize the ledger, classify active control state, and write route decisions.
-- `meta-synthesis`: record synthesized objectives, user-owned decisions, and unresolved stakeholder conflicts that affect the reference.
-- `system-model`: record plant boundary, state variables, sensors, actuators, disturbances, coupling, and model adequacy.
+- `meta-synthesis`: record synthesized objectives, Synthesis Rounds, user-owned decisions, and unresolved stakeholder conflicts that affect the reference.
+- `system-model`: record plant boundary, state variables, sensors, actuators, Disturbance Register, coupling, and model adequacy.
 - `alpha-goal`: record or update the reference state, acceptance evidence, claim boundary, actuator boundary, and stop/reframe triggers.
-- `loop`: append each bounded control cycle: Control Law, action/probe, feedback, error delta, and next route.
-- `verify`: compare ledger state, evidence, and final claim; record final verdict or residual gap.
+- `loop`: append each bounded control cycle: Control Law, disturbance update, action/probe, feedback, error delta, and next route.
+- `verify`: compare ledger state, disturbance handling, evidence, and final claim; record final verdict or residual gap.
 
 ## Update rules
 
-- Update the ledger when reference, plant model, Control Law, actuator boundary, evidence floor, route, or residual error changes materially.
+- Update the ledger when reference, plant model, Disturbance Register, Control Law, actuator boundary, evidence floor, route, or residual error changes materially.
 - Do not duplicate full command output; link or summarize evidence and point to `.alpha-goal/evidence/` when durable logs are needed.
 - Do not store secrets, tokens, credentials, private user data, or production-only sensitive records.
 - Label stale or superseded state instead of silently overwriting it.

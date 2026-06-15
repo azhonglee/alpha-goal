@@ -28,10 +28,17 @@ Do not use for localized low-risk tasks with clear acceptance and direct evidenc
 - Separate facts, expert judgments, assumptions, hypotheses, scenarios, and decisions.
 - When a Closed-loop Ledger exists, update only synthesis-relevant state: objective conflicts, user-owned decisions, scenario assumptions, and the recommended route.
 
+## Load resources when needed
+
+- `references/complexity-triage.md`: classify simple, complicated, complex, or complex-giant-like requests.
+- `references/stakeholder-decision-boundaries.md`: distinguish recommendation from user-owned decisions.
+- `references/synthesis-round.md`: run human-machine qualitative/quantitative convergence rounds.
+- `references/synthesis-record-schema.md`: produce a durable or handoff-ready Meta-Synthesis Record.
+
 ## Process
 
 ```text
-Triage complexity -> Collect perspectives -> Build synthesis map -> Resolve decisions -> Produce synthesis record -> Route
+Triage complexity -> Collect perspectives -> Build synthesis map -> Run synthesis rounds -> Resolve decisions -> Produce synthesis record -> Route
 ```
 
 ### 1. Triage complexity
@@ -78,7 +85,21 @@ Synthesis Map:
 
 Use quantitative evidence when available, but do not force false precision. Qualitative judgments must be labeled and tied to the owner or source.
 
-### 4. Resolve decisions
+### 4. Run synthesis rounds
+
+For `complex` and `complex-giant-like` cases, or whenever perspectives conflict, run one or more `Synthesis Round` records before resolving decisions. Load `references/synthesis-round.md` for the schema.
+
+Each round must connect:
+
+- human or expert judgment and its decision owner;
+- machine evidence, model output, tests, logs, metrics, or probes;
+- the conflict, contradiction, or missing sensor;
+- any metric/proxy that could turn qualitative judgment into bounded evidence;
+- the user-owned decision or next hypothesis that would reduce uncertainty.
+
+Stop when the smallest next action is clear: a Goal Contract candidate, a system-model question, a user decision, a blocker, or a bounded validation hypothesis.
+
+### 5. Resolve decisions
 
 Identify:
 
@@ -91,7 +112,7 @@ Identify:
 
 If a stakeholder conflict cannot be resolved, return a decision request rather than choosing silently.
 
-### 5. Produce synthesis record
+### 6. Produce synthesis record
 
 Compact output:
 
@@ -99,6 +120,7 @@ Compact output:
 Meta-Synthesis Record:
 - Complexity class:
 - Core tension:
+- Latest synthesis round:
 - Integrated view:
 - Recommended direction:
 - User-owned decisions:
@@ -117,6 +139,7 @@ Meta-Synthesis Record:
 - Evidence and models:
 - Qualitative judgments:
 - Quantitative signals:
+- Synthesis rounds:
 - Contradictions and tradeoffs:
 - Scenarios:
 - Candidate strategies:
@@ -128,7 +151,7 @@ Meta-Synthesis Record:
 - Route:
 ```
 
-### 6. Route
+### 7. Route
 
 - Route to `alpha-goal` when a stable recommended direction can become a Goal Contract.
 - Route to `system-model` when subsystem boundary or feedback signals remain unclear.
