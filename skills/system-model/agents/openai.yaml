@@ -1,0 +1,4 @@
+interface:
+  display_name: "System Model"
+  short_description: "Model plant, sensors, actuators"
+  default_prompt: "Use $system-model to map system boundary, state variables, sensors, actuators, disturbances, and coupling before execution."

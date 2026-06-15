@@ -1,0 +1,4 @@
+interface:
+  display_name: "Meta Synthesis"
+  short_description: "Synthesize complex-system decisions"
+  default_prompt: "Use $meta-synthesis to integrate qualitative and quantitative perspectives for a complex system before forming a Goal Contract."

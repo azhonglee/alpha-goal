@@ -1,36 +1,59 @@
 # Execution Boundaries
 
-当 iteration 涉及 subagents、ownership 不清、多路径、generated outputs、跨 repo/worktree/submodule 或用户未提交改动时使用。
+Use this reference for subagents, unclear ownership, multi-path work, generated outputs, cross-repo/worktree/submodule work, or unrelated user changes.
 
 ## Subagent delegation
 
-只把边界清楚、相互独立的工作交给 subagents。
+Delegate only bounded, independent work.
 
-- 提供 task id、scope、working directory、ownership surface、approved context/contract/plan 证据、constraints、expected evidence、return contract。
-- 只有 ownership 独立且共享文件/生成物不冲突时并行。
-- 要求 receipt：`DONE`、`DONE_WITH_CONCERNS`、`NEEDS_CONTEXT`、`BLOCKED`。
-- 接受前检查 delegated files、ownership、evidence、concerns。
-- Delegated output 不绕过 Goal Contract、Iteration Record、Verification Verdict、strongest-risk evidence 或 final checks。
+Provide:
+
+- task id;
+- scope and working directory;
+- ownership surface;
+- approved contract/plan evidence;
+- constraints and non-goals;
+- expected evidence;
+- return receipt schema.
+
+Receipt labels:
+
+- `DONE`
+- `DONE_WITH_CONCERNS`
+- `NEEDS_CONTEXT`
+- `BLOCKED`
+
+Accept delegated output only after checking files, ownership, evidence, and concerns. Delegation never bypasses Goal Contract, Iteration Record, Verification Verdict, strongest-risk evidence, or final checks.
 
 ## Ownership boundaries
 
-编辑前识别：
+Before editing, identify:
 
-- repository root 和 current branch；
-- 当前目录是否 linked worktree；
-- dirty state 和 unrelated user changes；
-- 每个 touched path 的 owning git root；
-- nested `.git` 或 submodules；
-- 适用 `AGENTS.md`、`AGENTS.override.md`、`CLAUDE.md`、`code_review.md`。
+- repository root and current branch;
+- whether current directory is a linked worktree;
+- dirty state and unrelated user changes;
+- owning git root for every touched path;
+- nested `.git` directories and submodules;
+- local rule files such as `AGENTS.md`, `AGENTS.override.md`, `CLAUDE.md`, or `code_review.md`.
 
-Approved context 未明确包含并授权的 repo、worktree、submodule 或 ownership boundary，不得修改。
+Do not modify a repo, worktree, submodule, generated-output owner, or process boundary unless approved by the Goal Contract or user.
+
+## Generated outputs
+
+When generated files are involved:
+
+- identify generator source and generated target;
+- change the source when possible rather than only the generated output;
+- run or record the generator command if required;
+- avoid partial regeneration that rewrites unrelated surfaces;
+- record generated artifacts in the Iteration Record.
 
 ## User and unrelated changes
 
-若有无关用户改动：
+If unrelated user changes exist:
 
-- 不覆盖；
-- 避免 broad formatting；
-- 使用 targeted edits；
-- 在 Iteration Record 里说明；
-- stash、revert 或 move 前先问。
+- do not overwrite them;
+- avoid broad formatting;
+- use targeted edits;
+- state how they were preserved;
+- ask before stash, revert, move, or cleanup.

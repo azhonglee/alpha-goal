@@ -12,7 +12,13 @@ Isolation is valid when the edit path is:
 - recorded before mutation;
 - compatible with project rules and unrelated user changes.
 
-The default candidate path is `.worktrees/codex/<task-slug>/`, but project rules or an already approved external worktree path may override it.
+Default candidate path:
+
+```text
+.worktrees/codex/<task-slug>/
+```
+
+Project rules or an already approved external worktree path may override it.
 
 ## Primary checkout warning signs
 
@@ -25,8 +31,6 @@ Treat the current checkout as primary when:
 
 ## Read-only preflight
 
-Start with facts, not mutation:
-
 ```bash
 git worktree list
 git status --short
@@ -34,11 +38,11 @@ git check-ignore -q .worktrees/codex/<task-slug> || printf 'CHECK: default workt
 git check-ignore -q .alpha-goal/preflight-check || printf 'CHECK: .alpha-goal/ is not ignored here\n'
 ```
 
-Those checks evaluate default candidates only. If the approved path differs, check that path instead.
+These checks evaluate default candidates only. If the approved path differs, check that path instead.
 
 ## Safe pattern
 
-If `.worktrees/` is ignored and matches the project rules, create a repository-local worktree from the owning repo or subrepo:
+If `.worktrees/` is ignored and matches project rules:
 
 ```bash
 mkdir -p .worktrees/codex
@@ -48,23 +52,16 @@ cd .worktrees/codex/<task-slug>
 
 Only after entering the isolated worktree should mutation begin.
 
-If `.worktrees/` is not ignored, do not silently edit `.gitignore` from a primary checkout. Prefer an already ignored root or an external worktree path. If the repository needs a `.gitignore` setup change, make that change from an isolated branch/worktree when possible, validate it with `git check-ignore`, and record it.
-
-## Lifecycle
-
-Keep the isolated worktree until the PR/MR has merged or the task branch has been locally merged into the target branch. Delete the worktree only after that merge boundary is complete. Do not proactively merge the task branch into `main` or `master` locally.
-
 ## Unsafe pattern
 
 Avoid direct mutation in the primary checkout, including:
 
 ```bash
 git checkout -b <branch-name>
-# or
 git switch -c <branch-name>
 ```
 
-Also avoid direct file edits or deletes in that checkout.
+Also avoid direct edits or deletes in that checkout unless explicitly approved and risk is recorded.
 
 ## Existing changes
 
@@ -73,5 +70,5 @@ If unrelated user changes exist:
 - do not overwrite them;
 - avoid broad formatting commands;
 - use targeted edits;
-- mention the unrelated changes in the Iteration Record;
+- mention them in the Iteration Record;
 - ask before stashing, reverting, or moving them.

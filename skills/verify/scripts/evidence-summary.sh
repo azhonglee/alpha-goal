@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-section() {
-  printf '\n== %s ==\n' "$1"
-}
+section() { printf '\n== %s ==\n' "$1"; }
 
 section "cwd"
 pwd
@@ -54,7 +52,6 @@ if git diff --cached --check; then
 else
   echo "git diff --cached --check: fail"
 fi
-
 
 section "worktree and ignore hints"
 git worktree list 2>/dev/null || true

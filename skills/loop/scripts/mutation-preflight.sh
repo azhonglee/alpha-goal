@@ -41,9 +41,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-section() {
-  printf '\n== %s ==\n' "$1"
-}
+section() { printf '\n== %s ==\n' "$1"; }
 
 section "cwd"
 pwd
@@ -178,7 +176,7 @@ git submodule status 2>/dev/null || echo "<none or unavailable>"
 section "preflight gaps to decide manually"
 echo "primary_checkout: infer from worktree list, branch/default branch hints, and project rules"
 echo "isolated_edit_path: valid when not primary checkout, inside approved owner boundary, ignored or external, and recorded before mutation"
-echo "mutation_allowed: decide from Goal Contract, project rules, dirty state, ownership, and evidence needs"
+echo "mutation_allowed: decide from Goal Contract, system model, project rules, dirty state, ownership, and evidence needs"
 
 section "reminder"
 echo "This script is read-only. It reports facts and candidate path checks; it does not decide whether mutation is safe."

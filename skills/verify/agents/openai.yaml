@@ -1,4 +1,4 @@
 interface:
   display_name: "Verify"
-  short_description: "Judge acceptance evidence"
-  default_prompt: "Use $verify to map acceptance to fresh evidence and judge the final claim boundary."
+  short_description: "Judge evidence and claim boundary"
+  default_prompt: "Use $verify to compare fresh evidence against the Goal Contract and decide the final claim boundary."

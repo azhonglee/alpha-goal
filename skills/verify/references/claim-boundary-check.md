@@ -1,10 +1,10 @@
 # Claim Boundary Check
 
-用来防止 final claim 超过证据。
+Use this to prevent final claims from exceeding evidence.
 
 ## Boundary ladder
 
-A claim may move from a local artifact toward broader behavior only when fresh evidence crosses the relevant interface boundary. Typical examples are:
+A claim can move from local artifact toward broader behavior only when fresh evidence crosses the relevant interface boundary:
 
 - local helper/function;
 - module/class/reducer;
@@ -12,9 +12,9 @@ A claim may move from a local artifact toward broader behavior only when fresh e
 - API/RPC endpoint;
 - data/state lifecycle;
 - user-visible product behavior;
-- production/tenant/compliance boundary.
+- production/tenant/compliance/safety boundary.
 
-This is not an exhaustive taxonomy. State the actual boundary if these examples do not fit. Do not use lower-boundary evidence to claim higher-boundary success.
+State the actual boundary if these examples do not fit. Never use lower-boundary evidence to claim higher-boundary success.
 
 ## Required comparison
 
@@ -22,15 +22,13 @@ This is not an exhaustive taxonomy. State the actual boundary if these examples 
 Claim boundary:
 - User wording:
 - Implemented boundary:
-- Tested boundary:
-- Highest practical boundary:
+- Tested/observed boundary:
+- Highest practical evidence-supported boundary:
 - Gap:
 - Final claim allowed:
 ```
 
 ## Common overclaims
-
-These are examples, not a case list:
 
 - testing a helper but claiming product flow fixed;
 - reading a diff but claiming runtime behavior verified;
@@ -44,5 +42,5 @@ These are examples, not a case list:
 - Evidence covers user wording: `PASS_TO_FINAL`.
 - Local goal is satisfied but wording is broader: `NARROW_CLAIM_AND_FINAL`.
 - User needs broader evidence: `NEXT_ITERATION`.
-- Contract boundary is wrong: `REFRAME`.
-- Environment, permission, or data is missing: `BLOCKED`.
+- Contract/model boundary is wrong: `REFRAME`.
+- Environment, permission, tool, or data is missing: `BLOCKED`.

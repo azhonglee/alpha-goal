@@ -1,34 +1,29 @@
 # Plan Template
 
-仅当 `loop` 判断需要 durable dynamic plan 时使用。Plan 是当前执行视图和增量历史，不是 approval gate 或 waterfall。
+Use only when `loop` needs a durable dynamic plan. A plan is the current execution view and incremental history; it is not an approval gate and must not rewrite the Goal Contract.
 
-Plan 不得重写 Goal Contract 的 intent、desired outcome、success criteria、non-goals、constraints、decision boundaries，或任何 active durable spec。
-
-默认路径：
+Default path:
 
 ```text
 docs/plans/YYYYMMDD-<slug>-plan.md
 ```
 
-`<slug>` 命名 goal boundary，不命名实现方法。
+Create or update a plan when:
 
-创建或更新 plan 的条件：
+- multiple independent loops, modules, repos, submodules, or ownership surfaces need sequencing;
+- recovery or handoff must survive chat history loss;
+- migration, architecture, rollback, compatibility, or evidence sequencing decisions need persistence;
+- loop evidence changes the route materially;
+- user requests a plan, execution artifact, handoff route, or status artifact.
 
-- 多个独立 loop、模块、repo、submodule 或 ownership surface 需要 durable sequencing；
-- 需要 chat history 之外的恢复或 handoff；
-- 多 workstream 或 contested ownership 需要协调；
-- migration、architecture、rollback、compatibility、evidence sequencing 决策需要持久化；
-- loop evidence 推翻旧路线，新路线需要可追溯；
-- 用户要求 plan、execution artifact、handoff route 或 status artifact。
-
-无法写 artifact 时，在 Iteration Record 的 `Dynamic plan` 记录。
+```text
+# Plan
 
 ## Metadata
-
 - Title:
 - Status: draft | reviewed | approved | superseded
 - Related Goal Contract:
-- Related spec:
+- Related system model:
 - Owner:
 - Strongest material risk:
 - Approval basis:
@@ -37,13 +32,15 @@ docs/plans/YYYYMMDD-<slug>-plan.md
 
 ## Current Strategy
 
-用 2-5 句说明当前路线、关键 tradeoff，以及为什么这是最小可行路线。
+2-5 sentences explaining the current route, key tradeoff, and why this is the smallest viable route.
 
 ## Active Boundary
 
 - Included:
 - Excluded:
 - Claim boundary supported:
+- Control variables:
+- Variables held constant:
 
 ## Triggering Evidence
 
@@ -57,7 +54,7 @@ docs/plans/YYYYMMDD-<slug>-plan.md
 | --- | --- | --- | --- | --- | --- |
 | S1 |  | pending | none |  |  |
 
-Status: `pending`, `in_progress`, `done`, `blocked`, `superseded`。
+Status values: pending, in_progress, done, blocked, superseded.
 
 ## Decisions
 
@@ -65,7 +62,7 @@ Status: `pending`, `in_progress`, `done`, `blocked`, `superseded`。
   - Reason:
   - Evidence:
 
-## Risks And Watchpoints
+## Risks and Watchpoints
 
 - Strongest material risk:
   - Mitigation:
@@ -75,12 +72,12 @@ Status: `pending`, `in_progress`, `done`, `blocked`, `superseded`。
 
 - Target-final-state checks:
 - Commands or manual probes:
-- Evidence that must be fresh after final material change:
+- Evidence fresh after final material change:
 - Checks intentionally out of scope:
 
 ## Change Log
 
-- Version or time:
+- Time/version:
   - Changed:
   - Reason:
   - Evidence:
@@ -88,3 +85,4 @@ Status: `pending`, `in_progress`, `done`, `blocked`, `superseded`。
 ## Open Questions
 
 -
+```
