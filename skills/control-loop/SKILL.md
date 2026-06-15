@@ -12,7 +12,7 @@ Use this skill to advance an approved goal through bounded iterations. It is the
 All must be true before editing implementation files:
 
 - an approved Goal Contract or equivalent context identifies reference state, desired outcome, included scope, excluded scope/non-goals, decision boundaries, constraints, acceptance evidence, and claim boundary;
-- current `.alpha-goal/control-state/` ledger is read when available, especially last residual error, control action, feedback, and route decision; if no file ledger exists, use chat state only with an explicit no-write reason;
+- current `.alpha-goal/control-state/` ledger is read when available, especially `Latest Control Route`, selected skill, safety boundary, next action, last residual error, control action, feedback, and route decision; if no file ledger exists, use chat state only with an explicit no-write reason;
 - current Disturbance Register is read when available, especially material likelihood, impact, sensor, containment, and route triggers;
 - target/scope boundary and final claim boundary are clear enough to decide changed files and final wording;
 - applicable local rules, durable specs, and active plans have been read;

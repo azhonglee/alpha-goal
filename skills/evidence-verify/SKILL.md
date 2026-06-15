@@ -20,7 +20,7 @@ A positive verdict needs proportional semantic evidence for:
 - Iteration Record or equivalent diff/evidence bundle;
 - Control Law result for each material `control-loop` slice, when a mutation or diagnostic probe was used;
 - Indicator Handoff handling when qualitative objectives or synthesis metrics affect acceptance evidence;
-- Closed-loop Ledger from `.alpha-goal/control-state/` when the work crossed skills or turns, or explicit no-write chat state when file writing was forbidden or impossible;
+- Closed-loop Ledger from `.alpha-goal/control-state/`, including `Latest Control Route`, when the work crossed skills or turns, or explicit no-write chat state when file writing was forbidden or impossible;
 - Disturbance Register handling when material disturbances affected route, evidence, or risk;
 - Adaptive Learning Record handling when feedback changed thresholds, strategy, route, or reusable assumptions;
 - Debug Receipt when the claim is a bug or root-cause fix;
@@ -60,7 +60,7 @@ Confirm:
 
 - approved context is current or explicitly superseded;
 - Goal Contract, system model, durable spec, and plan are semantically aligned or contradictions are routed;
-- ledger reference, current state, residual error, and latest route decision are aligned with fresh evidence or explicitly superseded;
+- ledger reference, current state, latest control route, residual error, and latest route decision are aligned with fresh evidence or explicitly superseded;
 - each material Control Law identifies a target error, approved control variable, expected effect, sensor threshold, observed feedback, and fallback handling;
 - each material Indicator Handoff maps qualitative objective to operational definition, sensor, threshold/tolerance, timing, and evidence boundary;
 - each material Disturbance Register entry has sensor evidence, containment, route-trigger handling, or an explicit residual gap;

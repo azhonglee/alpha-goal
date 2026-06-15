@@ -17,7 +17,7 @@ The optional steps are not ceremony:
 - Use `goal-contract` when the reference/setpoint is unstable.
 - Use `control-loop` only after the reference and actuator boundary are stable enough.
 - Use `evidence-verify` whenever a completion/readiness/correctness claim is at stake.
-- Carry the Closed-loop Ledger across stages when a task spans skills or turns.
+- Carry the Closed-loop Ledger across stages when a task spans skills or turns. The full `Control Route` is persisted under `.alpha-goal/control-state/`; the TUI should show only a compact `Route Summary` by default.
 
 ## Stability failure patterns
 

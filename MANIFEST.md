@@ -34,11 +34,11 @@
 
 | Path | Purpose |
 |---|---|
-| `.alpha-goal/control-state/YYYYMMDD-<slug>.md` | Optional Closed-loop Ledger for cross-stage control state: reference, current state, Synthesis Round, Indicator Handoff, Controller Hierarchy, Disturbance Register, Control Law, Adaptive Learning Record, feedback, residual error, and next route. |
+| `.alpha-goal/control-state/YYYYMMDD-<slug>.md` | Optional Closed-loop Ledger for cross-stage control state: full Latest Control Route, reference, current state, Synthesis Round, Indicator Handoff, Controller Hierarchy, Disturbance Register, Control Law, Adaptive Learning Record, feedback, residual error, and next route. |
 | `.alpha-goal/iterations/YYYYMMDD-<slug>.jsonl` | Optional append-only cycle log for machine-readable loop history. |
 
 默认主路径是：
 
 ```text
-INTENT -> CONTROL-KERNEL(route/stability) -> ALPHA-GOAL(reference input) -> SYSTEM-MODEL(if needed) -> LOOP(feedback control) -> VERIFY(error detection) -> FINAL
+INTENT -> alpha-goal(route/stability) -> decision-synthesis? -> system-model? -> goal-contract(reference input) -> control-loop(feedback control) -> evidence-verify(error detection) -> FINAL
 ```

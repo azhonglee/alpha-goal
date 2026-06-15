@@ -1,10 +1,10 @@
 # Closed-loop Ledger
 
-Use this reference when a task spans multiple skills, may resume across turns, or needs durable state to prevent the loop from losing reference, error, action, or feedback history.
+Use this reference when a task spans multiple skills, may resume across turns, or needs durable state to prevent the loop from losing reference, error, action, route decision, or feedback history.
 
 ## Purpose
 
-The ledger is a control-state memory, not a work diary. Keep only information that changes routing, safety, evidence, or final claim judgment.
+The ledger is a control-state memory, not a work diary. Keep only information that changes routing, safety, evidence, or final claim judgment. The full `Control Route` belongs here by default; the TUI should show only a compact `Route Summary` unless the user asks for full route details or file persistence is blocked.
 
 Default durable path:
 
@@ -33,6 +33,22 @@ Closed-loop Ledger:
 - Task slug:
 - Last updated:
 - Ledger path:
+- Latest Control Route:
+  Control Route:
+  - Ledger path:
+  - Active state:
+  - Dominant uncertainty:
+  - Error signal:
+  - Control law:
+  - Indicator handoff:
+  - Adaptive learning:
+  - Controller hierarchy:
+  - Disturbance register:
+  - Selected skill:
+  - Why this skill:
+  - Required context to load or ask for:
+  - Safety boundary:
+  - Next action:
 - Reference:
   - Desired outcome:
   - Acceptance evidence:
@@ -99,16 +115,28 @@ Closed-loop Ledger:
 
 ## Stage responsibilities
 
-- `alpha-goal`: discover or initialize the ledger, classify active control state, and write route decisions.
-- `decision-synthesis`: record synthesized objectives, Synthesis Rounds, user-owned decisions, and unresolved stakeholder conflicts that affect the reference.
-- `system-model`: record plant boundary, state variables, sensors, actuators, Controller Hierarchy, Disturbance Register, coupling, and model adequacy.
-- `goal-contract`: record or update the reference state, Indicator Handoff, acceptance evidence, claim boundary, actuator boundary, and stop/reframe triggers.
-- `control-loop`: append each bounded control cycle: Control Law, disturbance update, adaptive learning, action/probe, feedback, error delta, and next route.
-- `evidence-verify`: compare ledger state, indicator evidence, disturbance handling, adaptive learning, and final claim; record final verdict or residual gap.
+- `alpha-goal`: discover or initialize the ledger, classify active control state, write the full `Latest Control Route`, and show only a compact `Route Summary` in the TUI by default.
+- `decision-synthesis`: read the latest route before synthesis; record synthesized objectives, Synthesis Rounds, user-owned decisions, unresolved stakeholder conflicts, and route-relevant updates.
+- `system-model`: read the latest route before modeling; record plant boundary, state variables, sensors, actuators, Controller Hierarchy, Disturbance Register, coupling, and model adequacy.
+- `goal-contract`: read the latest route before changing the reference; record or update the reference state, Indicator Handoff, acceptance evidence, claim boundary, actuator boundary, and stop/reframe triggers.
+- `control-loop`: read the latest route before mutation/probe; append each bounded control cycle: Control Law, disturbance update, adaptive learning, action/probe, feedback, error delta, and next route.
+- `evidence-verify`: read the latest route before verdict; compare ledger state, indicator evidence, disturbance handling, adaptive learning, and final claim; record final verdict or residual gap.
 
 ## Update rules
 
-- Update the ledger when reference, Indicator Handoff, plant model, Controller Hierarchy, Disturbance Register, Adaptive Learning Record, Control Law, actuator boundary, evidence floor, route, or residual error changes materially.
+- Update the ledger when reference, Indicator Handoff, plant model, Controller Hierarchy, Disturbance Register, Adaptive Learning Record, Control Law, actuator boundary, evidence floor, route, selected skill, next action, or residual error changes materially.
+- Treat `.alpha-goal/control-state/` as the source of truth for cross-skill route fields. Do not require later skills to reconstruct `Control Route` from the visible TUI summary.
+- TUI output should default to:
+
+```text
+Route Summary:
+- Route:
+- Why:
+- Boundary:
+- Ledger:
+- Next:
+```
+
 - Do not duplicate full command output; link or summarize evidence and point to `.alpha-goal/evidence/` when durable logs are needed.
 - Do not store secrets, tokens, credentials, private user data, or production-only sensitive records.
 - Label stale or superseded state instead of silently overwriting it.

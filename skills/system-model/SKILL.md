@@ -25,7 +25,7 @@ Use `system-model` when any of these are true:
 - Do not decide user-owned goals, risk acceptance, or business tradeoffs.
 - Do not over-model simple low-risk work where target, scope, evidence, and ownership are already clear.
 - Label observed facts, inferred structure, assumptions, and missing sensors separately.
-- If a Closed-loop Ledger exists, update only model-relevant state: plant boundary, state variables, sensors, actuators, disturbances, coupling, and model adequacy.
+- If a Closed-loop Ledger exists, read its `Latest Control Route` from `.alpha-goal/control-state/` before modeling and update only model-relevant state: plant boundary, state variables, sensors, actuators, disturbances, coupling, and model adequacy.
 
 ## Load resources when needed
 
@@ -51,7 +51,7 @@ Define the system of interest:
 - controller hierarchy: global controller, local controllers, coordination boundary, or none material;
 - time boundary: current behavior, migration phase, release window, incident window, or historical state.
 
-If a ledger exists, compare its plant/current-state assumptions to observed facts. Mark stale assumptions before routing back to `goal-contract` or `control-loop`.
+If a ledger exists, compare its latest route, plant/current-state assumptions, and next action to observed facts. Mark stale assumptions before routing back to `goal-contract`, `alpha-goal`, or `control-loop`.
 
 If a repository is available and read-only inspection is safe, use `npx --yes tsx scripts/repo-sensor-snapshot.ts` or equivalent manual checks to gather structure, status, and local rules.
 

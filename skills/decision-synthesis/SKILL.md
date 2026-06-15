@@ -26,7 +26,7 @@ Do not use for localized low-risk tasks with clear acceptance and direct evidenc
 - Do not invent stakeholder preferences or user-owned risk decisions.
 - Do not treat a synthesis as implementation authorization. Convert the selected direction into a Goal Contract via `goal-contract` before mutation.
 - Separate facts, expert judgments, assumptions, hypotheses, scenarios, and decisions.
-- When a Closed-loop Ledger exists, update only synthesis-relevant state: objective conflicts, user-owned decisions, scenario assumptions, and the recommended route.
+- When a Closed-loop Ledger exists, read its `Latest Control Route` from `.alpha-goal/control-state/` before synthesis and update only synthesis-relevant state: objective conflicts, user-owned decisions, scenario assumptions, and the recommended route.
 
 ## Load resources when needed
 

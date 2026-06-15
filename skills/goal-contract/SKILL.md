@@ -51,7 +51,7 @@ Collect enough context to classify the problem:
 - unknowns that affect authority, scope, risk, acceptance, decision boundaries, or claim wording;
 - for brownfield work, facts observed directly versus inferences.
 
-If a Closed-loop Ledger exists, read it before changing the Goal Contract. If it conflicts with current user intent or fresh facts, label the superseded state and reframe instead of silently continuing.
+If a Closed-loop Ledger exists, read its `Latest Control Route` and current control state before changing the Goal Contract. Recover route fields from `.alpha-goal/control-state/`, not from the TUI summary. If it conflicts with current user intent or fresh facts, label the superseded state and reframe instead of silently continuing.
 
 If the system boundary or feedback signals are too unclear to write a reliable contract, route to `system-model` first and return with a model summary.
 
@@ -172,7 +172,7 @@ Self-review the artifact:
 - Are observed facts labeled separately from inference?
 - Would `control-loop` know what not to do?
 - Would `evidence-verify` know what evidence is required?
-- Would a later skill recover reference, current state, last error, and next route from `.alpha-goal/control-state/` or an explicitly justified no-write chat state?
+- Would a later skill recover reference, current state, latest control route, last error, and next route from `.alpha-goal/control-state/` or an explicitly justified no-write chat state?
 - Does any next step require user permission, risk acceptance, credentials, external side effects, data repair, push, PR/MR, deployment, or production access?
 
 If review fails, return to the earliest phase that can fix it.

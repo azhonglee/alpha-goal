@@ -39,7 +39,7 @@ Treat the user request as a control problem:
 ## Process
 
 ```text
-Classify state -> Select next skill -> Check stability gates -> Emit route card
+Classify state -> Select next skill -> Check stability gates -> Persist route card -> Show route summary
 ```
 
 ### 1. Classify state
@@ -85,13 +85,16 @@ Before routing to an execution-capable path, ensure:
 - the ledger records the last error signal and why the selected next skill reduces it, or chat-only state is explicitly justified by a no-write constraint;
 - final claims will be checked by `evidence-verify` rather than stated by the executor.
 
-### 4. Emit route card
+### 4. Persist route card and show summary
 
-Output a compact card:
+Persist the full route card to the Closed-loop Ledger by default. Do not print the full card in the TUI unless the user explicitly asks for it, persistence is blocked, or the route is high-risk enough that the user must review every field before continuing.
+
+Write or update this section in `.alpha-goal/control-state/YYYYMMDD-<slug>.md`:
 
 ```text
+Latest Control Route:
 Control Route:
-- Ledger:
+- Ledger path:
 - Active state:
 - Dominant uncertainty:
 - Error signal:
@@ -106,5 +109,18 @@ Control Route:
 - Safety boundary:
 - Next action:
 ```
+
+Then show only a TUI-friendly summary:
+
+```text
+Route Summary:
+- Route:
+- Why:
+- Boundary:
+- Ledger:
+- Next:
+```
+
+The summary must be enough for the user to understand the selected route without reading a long field list. Other skills must recover the full route from `.alpha-goal/control-state/` instead of relying on the TUI transcript. If writing is explicitly forbidden or impossible, include the full `Control Route` in chat and state the no-write reason in `Ledger`.
 
 If the user explicitly named a skill and the route is safe, respect that selection and state any residual gates.
