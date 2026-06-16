@@ -293,44 +293,44 @@ const SIDECAR_FIXTURE_TRACE = [
 const RUNTIME_SIDECAR_NEGATIVE_CASES: Array<[string, string]> = [
   [
     "control-loop-without-approved-contract",
-    "control-loop 运行态结构化索引需要已批准的 goal-contract 结构化索引",
+    "control-loop 运行态结构化伴随文件需要已批准的 goal-contract 结构化伴随文件",
   ],
   [
     "final-without-verification",
-    "最终路由需要带 PASS_TO_FINAL 或 NARROW_CLAIM_AND_FINAL 的 verification-verdict 结构化索引",
+    "最终路由需要带 PASS_TO_FINAL 或 NARROW_CLAIM_AND_FINAL 的 verification-verdict 结构化伴随文件",
   ],
-  ["broken-incoming-edge", "没有先前结构化索引连接 decision-synthesis -> system-model"],
-  ["divergent-reference-id", "运行态结构化索引必须共享同一个 reference_id"],
-  ["missing-artifact-path", "结构化索引缺少必填键 \"artifact_path\""],
-  ["missing-reference-id", "到达行动或最终路由的运行态结构化索引必须共享一个有意义的 reference_id"],
-  ["stage-decision-policy", "goal-contract 结构化索引 stage_decision 必须是下列值之一"],
+  ["broken-incoming-edge", "没有先前结构化伴随文件连接 decision-synthesis -> system-model"],
+  ["divergent-reference-id", "运行态结构化伴随文件必须共享同一个 reference_id"],
+  ["missing-artifact-path", "结构化伴随文件缺少必填键 \"artifact_path\""],
+  ["missing-reference-id", "到达行动或最终路由的运行态结构化伴随文件必须共享一个有意义的 reference_id"],
+  ["stage-decision-policy", "goal-contract 结构化伴随文件 stage_decision 必须是下列值之一"],
   [
     "synthesis-control-loop-without-contract",
-    "路由到 control-loop 需要先前已批准的 goal-contract 结构化索引",
+    "路由到 control-loop 需要先前已批准的 goal-contract 结构化伴随文件",
   ],
   [
     "final-with-nonpassing-verdict",
-    "最终路由需要带 PASS_TO_FINAL 或 NARROW_CLAIM_AND_FINAL 的 verification-verdict 结构化索引",
+    "最终路由需要带 PASS_TO_FINAL 或 NARROW_CLAIM_AND_FINAL 的 verification-verdict 结构化伴随文件",
   ],
   [
     "late-approved-contract",
-    "已批准的 goal-contract 结构化索引不得晚于 control-loop 路由",
+    "已批准的 goal-contract 结构化伴随文件不得晚于 control-loop 路由",
   ],
   [
     "system-model-control-loop-without-contract",
-    "路由到 control-loop 需要先前已批准的 goal-contract 结构化索引",
+    "路由到 control-loop 需要先前已批准的 goal-contract 结构化伴随文件",
   ],
   [
     "late-final-verdict",
-    "最终 verification-verdict 结构化索引不得晚于最终路由",
+    "最终 verification-verdict 结构化伴随文件不得晚于最终路由",
   ],
   [
     "late-incoming-edge",
-    "前置结构化索引记录不得晚于当前路由",
+    "前置结构化伴随文件记录不得晚于当前路由",
   ],
   [
     "claim-boundary-mismatch",
-    "前置结构化索引记录必须共享 reference_id 或 claim_boundary",
+    "前置结构化伴随文件记录必须共享 reference_id 或 claim_boundary",
   ],
 ];
 
@@ -564,7 +564,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "skills/alpha-goal/references/cybernetic-conformance.md",
     [
       "状态转移",
-      "结构化索引",
+      "结构化伴随文件",
       "旧产物路径",
       "行动前必须有参考状态",
       "声明前必须有传感器",
@@ -646,7 +646,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "界面展示",
       "执行检查",
       "内部产物格式",
-      "结构化索引是机器可读的摘要与索引",
+      "结构化伴随文件是机器可读的摘要与索引",
       "内部产物示例",
       "不是默认 TUI 展示",
       "只有用户要求",
@@ -656,7 +656,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "信号噪声",
       "置信度",
       "阻尼 / 防振荡",
-      "影响范围上限",
+      "饱和 / 约束边界",
     ],
   ],
   [
@@ -667,7 +667,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "信号噪声",
       "置信度",
       "阻尼 / 防振荡",
-      "影响范围上限",
+      "饱和 / 约束边界",
     ],
   ],
   [
@@ -689,7 +689,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "信号噪声",
       "置信度",
       "阻尼 / 防振荡",
-      "影响范围上限",
+      "饱和 / 约束边界",
     ],
   ],
   [
@@ -700,7 +700,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "信号噪声",
       "置信度",
       "阻尼 / 防振荡",
-      "影响范围上限",
+      "饱和 / 约束边界",
     ],
   ],
   [
@@ -793,20 +793,20 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
       "| 失败处理 |",
       "| 问题 | 目标误差 |",
       "| 本轮动作 | 控制变量、控制动作或探测 |",
-      "| 主要风险 | 信号噪声、阻尼 / 防振荡、影响范围上限，或最强实质风险 |",
+      "| 主要风险 | 信号噪声、阻尼 / 防振荡、饱和 / 约束边界，或最强实质风险 |",
       "| 失败处理 | 失败处理、停止或重新界定触发条件 |",
     ],
   },
   {
-    name: "控制律内部结构区分结构化索引和聊天展示",
+    name: "控制律内部结构区分结构化伴随文件和聊天展示",
     path: "skills/control-loop/references/control-law.md",
     anchor: "## 内部结构",
     block_scope: "section",
     required_terms: [
       "内部产物格式",
       "不是默认 TUI 展示格式",
-      "结构化索引是机器可读的摘要与索引",
-      "不要把结构化索引文件当成完整控制律",
+      "结构化伴随文件是机器可读的摘要与索引",
+      "不要把结构化伴随文件当成完整控制律",
     ],
   },
   {
@@ -980,7 +980,7 @@ const RAW_CONTROL_LAW_FIELD_PATTERNS = [
   "信号噪声",
   "置信度",
   "阻尼 / 防振荡",
-  "影响范围上限",
+  "饱和 / 约束边界",
   "反馈时机",
   "停止 / 重新界定触发条件",
 ];
@@ -1050,11 +1050,18 @@ const LEGACY_OUTPUT_TITLE_TERMS = [
   "综合集成研讨厅",
   "指标交接",
   "扰动登记",
+  "结构化索引",
+  "影响范围上限",
+  "影响范围约束",
   "饱和 / 影响范围约束",
   "停止 / 重构触发条件",
   "停止或重构触发条件",
   "Schema 辅助索引",
   "Schema 辅助索引路径",
+  "代理可决策",
+  "持久化规范",
+  "绿地模糊度",
+  "重新集成",
   "控制器 / actuator",
   "| Field | Value |",
 ];
@@ -1618,14 +1625,14 @@ function validateSchemaSidecarContract(root: string, errors: string[]): void {
   const rel = "skills/alpha-goal/references/cybernetic-conformance.md";
   const file = path.join(root, rel);
   if (!isFile(file)) {
-    errors.push(`结构化索引契约缺少 ${rel}`);
+    errors.push(`结构化伴随文件契约缺少 ${rel}`);
     return;
   }
 
   const text = fs.readFileSync(file, "utf8");
   const match = text.match(/```json\s*([\s\S]*?)```/);
   if (!match) {
-    errors.push(`${rel}: 缺少 JSON Schema 结构化索引示例块`);
+    errors.push(`${rel}: 缺少 JSON Schema 结构化伴随文件示例块`);
     return;
   }
 
@@ -1633,23 +1640,23 @@ function validateSchemaSidecarContract(root: string, errors: string[]): void {
   try {
     schema = JSON.parse(match[1]);
   } catch (error) {
-    errors.push(`${rel}: JSON Schema 结构化索引块无效: ${errorMessage(error)}`);
+    errors.push(`${rel}: JSON Schema 结构化伴随文件块无效: ${errorMessage(error)}`);
     return;
   }
 
   if (schema.$schema !== "https://json-schema.org/draft/2020-12/schema") {
-    errors.push(`${rel}: 结构化索引必须声明 JSON Schema draft 2020-12`);
+    errors.push(`${rel}: 结构化伴随文件必须声明 JSON Schema draft 2020-12`);
   }
   if (schema.type !== "object") {
-    errors.push(`${rel}: 结构化索引根类型必须是 object`);
+    errors.push(`${rel}: 结构化伴随文件根类型必须是 object`);
   }
   if (schema.additionalProperties !== false) {
-    errors.push(`${rel}: 结构化索引必须把 additionalProperties 设为 false`);
+    errors.push(`${rel}: 结构化伴随文件必须把 additionalProperties 设为 false`);
   }
 
   validateExactStringSet(
     rel,
-    "结构化索引必填键列表",
+    "结构化伴随文件必填键列表",
     schema.required,
     SIDECAR_REQUIRED_KEYS,
     errors,
@@ -1657,18 +1664,18 @@ function validateSchemaSidecarContract(root: string, errors: string[]): void {
 
   const properties = objectValue(schema.properties);
   if (!properties) {
-    errors.push(`${rel}: 结构化索引缺少 properties 对象`);
+    errors.push(`${rel}: 结构化伴随文件缺少 properties 对象`);
     return;
   }
 
   for (const key of SIDECAR_REQUIRED_KEYS) {
     if (!Object.hasOwn(properties, key)) {
-      errors.push(`${rel}: 结构化索引 properties 遗漏 ${JSON.stringify(key)}`);
+      errors.push(`${rel}: 结构化伴随文件 properties 遗漏 ${JSON.stringify(key)}`);
     }
   }
   for (const key of Object.keys(properties)) {
     if (!SIDECAR_REQUIRED_KEY_SET.has(key)) {
-      errors.push(`${rel}: 结构化索引 properties 包含非预期键 ${JSON.stringify(key)}`);
+      errors.push(`${rel}: 结构化伴随文件 properties 包含非预期键 ${JSON.stringify(key)}`);
     }
   }
 
@@ -1690,7 +1697,7 @@ function validateSchemaSidecarContract(root: string, errors: string[]): void {
   ];
   for (const term of responsibilityBoundaryTerms) {
     if (!text.includes(term)) {
-      errors.push(`${rel}: 结构化索引责任边界必须提到 ${JSON.stringify(term)}`);
+      errors.push(`${rel}: 结构化伴随文件责任边界必须提到 ${JSON.stringify(term)}`);
     }
   }
 
@@ -1704,7 +1711,7 @@ function validateSchemaSidecarContract(root: string, errors: string[]): void {
 function validateSchemaSidecarFixtures(root: string, errors: string[]): void {
   const dir = path.join(root, SIDECAR_FIXTURE_DIR);
   if (!isDirectory(dir)) {
-    errors.push(`结构化索引样例目录缺失: ${SIDECAR_FIXTURE_DIR}`);
+    errors.push(`结构化伴随文件样例目录缺失: ${SIDECAR_FIXTURE_DIR}`);
     return;
   }
 
@@ -1718,7 +1725,7 @@ function validateSchemaSidecarFixtures(root: string, errors: string[]): void {
 
   for (const name of actualFiles) {
     if (!expectedFiles.has(name)) {
-      errors.push(`${SIDECAR_FIXTURE_DIR}/${name}: 非预期的结构化索引样例`);
+      errors.push(`${SIDECAR_FIXTURE_DIR}/${name}: 非预期的结构化伴随文件样例`);
     }
   }
 
@@ -1726,7 +1733,7 @@ function validateSchemaSidecarFixtures(root: string, errors: string[]): void {
     const rel = `${SIDECAR_FIXTURE_DIR}/${kind}.json`;
     const file = path.join(root, rel);
     if (!isFile(file)) {
-      errors.push(`结构化索引样例缺失: ${rel}`);
+      errors.push(`结构化伴随文件样例缺失: ${rel}`);
       continue;
     }
 
@@ -1734,12 +1741,12 @@ function validateSchemaSidecarFixtures(root: string, errors: string[]): void {
     try {
       const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-        errors.push(`${rel}: 结构化索引样例必须是 JSON object`);
+        errors.push(`${rel}: 结构化伴随文件样例必须是 JSON object`);
         continue;
       }
       fixture = parsed as Record<string, unknown>;
     } catch (error) {
-      errors.push(`${rel}: JSON schema 结构化索引样例无效: ${errorMessage(error)}`);
+      errors.push(`${rel}: JSON schema 结构化伴随文件样例无效: ${errorMessage(error)}`);
       continue;
     }
 
@@ -1753,32 +1760,32 @@ function validateSchemaSidecarFixtures(root: string, errors: string[]): void {
 function validateRuntimeSidecarFixtureSets(root: string, errors: string[]): void {
   const dir = path.join(root, RUNTIME_SIDECAR_FIXTURE_DIR);
   if (!isDirectory(dir)) {
-    errors.push(`运行期结构化索引样例目录缺失: ${RUNTIME_SIDECAR_FIXTURE_DIR}`);
+    errors.push(`运行期结构化伴随文件样例目录缺失: ${RUNTIME_SIDECAR_FIXTURE_DIR}`);
     return;
   }
 
   const validRoot = path.join(dir, "valid");
   if (!isDirectory(validRoot)) {
-    errors.push(`运行期结构化索引样例缺少 valid 目录: ${RUNTIME_SIDECAR_FIXTURE_DIR}/valid`);
+    errors.push(`运行期结构化伴随文件样例缺少 valid 目录: ${RUNTIME_SIDECAR_FIXTURE_DIR}/valid`);
   } else {
     const validCases = fixtureCaseDirs(validRoot);
     const expectedValidNames = new Set(RUNTIME_SIDECAR_VALID_CASES);
     for (const caseDir of validCases) {
       const name = path.basename(caseDir);
       if (!expectedValidNames.has(name)) {
-      errors.push(`${relative(root, caseDir)}: 非预期的 valid 运行期结构化索引样例`);
+      errors.push(`${relative(root, caseDir)}: 非预期的 valid 运行期结构化伴随文件样例`);
       }
     }
     for (const caseName of RUNTIME_SIDECAR_VALID_CASES) {
       const caseDir = path.join(validRoot, caseName);
       if (!isDirectory(caseDir)) {
-      errors.push(`运行期结构化索引样例缺少 valid case ${caseName}`);
+      errors.push(`运行期结构化伴随文件样例缺少 valid case ${caseName}`);
         continue;
       }
       const localErrors = validateRuntimeSidecarFixtureCase(root, caseDir);
       if (localErrors.length > 0) {
         errors.push(
-          `${relative(root, caseDir)}: valid 运行期结构化索引样例失败: ${localErrors.join("; ")}`,
+          `${relative(root, caseDir)}: valid 运行期结构化伴随文件样例失败: ${localErrors.join("; ")}`,
         );
       }
     }
@@ -1786,7 +1793,7 @@ function validateRuntimeSidecarFixtureSets(root: string, errors: string[]): void
 
   const negativeRoot = path.join(dir, "negative");
   if (!isDirectory(negativeRoot)) {
-    errors.push(`运行期结构化索引样例缺少 negative 目录: ${RUNTIME_SIDECAR_FIXTURE_DIR}/negative`);
+    errors.push(`运行期结构化伴随文件样例缺少 negative 目录: ${RUNTIME_SIDECAR_FIXTURE_DIR}/negative`);
     return;
   }
 
@@ -1794,14 +1801,14 @@ function validateRuntimeSidecarFixtureSets(root: string, errors: string[]): void
   for (const caseDir of fixtureCaseDirs(negativeRoot)) {
     const name = path.basename(caseDir);
     if (!expectedNegativeNames.has(name)) {
-      errors.push(`${relative(root, caseDir)}: 非预期的 negative 运行期结构化索引样例`);
+      errors.push(`${relative(root, caseDir)}: 非预期的 negative 运行期结构化伴随文件样例`);
     }
   }
 
   for (const [caseName, expectedError] of RUNTIME_SIDECAR_NEGATIVE_CASES) {
     const caseDir = path.join(negativeRoot, caseName);
     if (!isDirectory(caseDir)) {
-      errors.push(`运行期结构化索引样例缺少 negative case ${caseName}`);
+      errors.push(`运行期结构化伴随文件样例缺少 negative case ${caseName}`);
       continue;
     }
 
@@ -1809,7 +1816,7 @@ function validateRuntimeSidecarFixtureSets(root: string, errors: string[]): void
     if (!localErrors.some((error) => error.includes(expectedError))) {
       const actual = localErrors.length > 0 ? localErrors.join("; ") : "无错误";
       errors.push(
-        `${relative(root, caseDir)}: negative 运行期结构化索引样例应包含错误 ${JSON.stringify(expectedError)}，实际为 ${actual}`,
+        `${relative(root, caseDir)}: negative 运行期结构化伴随文件样例应包含错误 ${JSON.stringify(expectedError)}，实际为 ${actual}`,
       );
     }
   }
@@ -1823,7 +1830,7 @@ function validateRuntimeSidecarFixtureCase(root: string, caseDir: string): strin
     .sort();
 
   if (files.length === 0) {
-    localErrors.push(`${relative(root, caseDir)}: 运行期样例 case 没有 JSON 结构化索引`);
+    localErrors.push(`${relative(root, caseDir)}: 运行期样例 case 没有 JSON 结构化伴随文件`);
     return localErrors;
   }
 
@@ -1832,7 +1839,7 @@ function validateRuntimeSidecarFixtureCase(root: string, caseDir: string): strin
     const fixtureRel = relative(caseDir, file);
     const match = fixtureRel.match(/^([^/]+)\/schema\/([^/]+\.json)$/);
     if (!match) {
-      localErrors.push(`${rel}: 运行期样例结构化索引必须位于 <task_slug>/schema/ 下`);
+      localErrors.push(`${rel}: 运行期样例结构化伴随文件必须位于 <task_slug>/schema/ 下`);
       continue;
     }
 
@@ -1845,18 +1852,18 @@ function validateRuntimeSidecarFixtureCase(root: string, caseDir: string): strin
     try {
       const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-        localErrors.push(`${rel}: 运行期样例结构化索引必须是 JSON object`);
+        localErrors.push(`${rel}: 运行期样例结构化伴随文件必须是 JSON object`);
         continue;
       }
       sidecar = parsed as Record<string, unknown>;
     } catch (error) {
-      localErrors.push(`${rel}: 运行期样例结构化索引 JSON 无效: ${errorMessage(error)}`);
+      localErrors.push(`${rel}: 运行期样例结构化伴随文件 JSON 无效: ${errorMessage(error)}`);
       continue;
     }
 
     const artifactKind = stringValue(sidecar.artifact_kind);
     if (!artifactKind || !SIDECAR_ARTIFACT_KINDS.includes(artifactKind)) {
-      localErrors.push(`${rel}: 运行期样例结构化索引的 artifact_kind 未知`);
+      localErrors.push(`${rel}: 运行期样例结构化伴随文件的 artifact_kind 未知`);
       continue;
     }
     if (!sidecarFilenameMatchesKind(artifactKind, path.basename(file))) {
@@ -1884,12 +1891,12 @@ function validateConcreteSidecarFixture(
 ): void {
   for (const key of SIDECAR_REQUIRED_KEYS) {
     if (!Object.hasOwn(fixture, key)) {
-      errors.push(`${rel}: 结构化索引缺少必填键 ${JSON.stringify(key)}`);
+      errors.push(`${rel}: 结构化伴随文件缺少必填键 ${JSON.stringify(key)}`);
     }
   }
   for (const key of Object.keys(fixture)) {
     if (!SIDECAR_REQUIRED_KEY_SET.has(key)) {
-      errors.push(`${rel}: 结构化索引包含不支持的键 ${JSON.stringify(key)}`);
+      errors.push(`${rel}: 结构化伴随文件包含不支持的键 ${JSON.stringify(key)}`);
     }
   }
 
@@ -1904,7 +1911,7 @@ function validateConcreteSidecarFixture(
   if (!taskSlug) {
     errors.push(`${rel}: task_slug 必须是非空字符串`);
   } else if (expectedTaskSlug && taskSlug !== expectedTaskSlug) {
-    errors.push(`${rel}: task_slug ${JSON.stringify(taskSlug)} 必须匹配结构化索引目录 ${expectedTaskSlug}`);
+    errors.push(`${rel}: task_slug ${JSON.stringify(taskSlug)} 必须匹配结构化伴随文件目录 ${expectedTaskSlug}`);
   } else if (!SIDECAR_TASK_SLUG_RE.test(taskSlug)) {
     errors.push(`${rel}: task_slug 必须匹配 YYYYMMDD-<slug>，实际为 ${JSON.stringify(taskSlug)}`);
   }
@@ -1972,11 +1979,11 @@ function validateConcreteSidecarFixture(
   const stagePolicy = SIDECAR_STAGE_POLICIES[expectedKind];
   if (stagePolicy) {
     if (routeState && routeState !== stagePolicy.routeState) {
-      errors.push(`${rel}: ${expectedKind} 结构化索引 route_state 必须是 ${stagePolicy.routeState}`);
+      errors.push(`${rel}: ${expectedKind} 结构化伴随文件 route_state 必须是 ${stagePolicy.routeState}`);
     }
     if (stageDecision && !stagePolicy.stageDecisions.includes(stageDecision)) {
       errors.push(
-        `${rel}: ${expectedKind} 结构化索引 stage_decision 必须是下列值之一: ${stagePolicy.stageDecisions.join(", ")}`,
+        `${rel}: ${expectedKind} 结构化伴随文件 stage_decision 必须是下列值之一: ${stagePolicy.stageDecisions.join(", ")}`,
       );
     }
   }
@@ -1989,7 +1996,7 @@ function validateConcreteSidecarFixture(
     errors.push(`${rel}: 路由进入 control-loop 要求 authorization_status=approved`);
   }
   if (routeState === "control-loop" && authorizationStatus !== "approved") {
-    errors.push(`${rel}: control-loop 结构化索引要求 authorization_status=approved`);
+    errors.push(`${rel}: control-loop 结构化伴随文件要求 authorization_status=approved`);
   }
   if (
     expectedKind === "decision-synthesis" &&
@@ -2015,18 +2022,18 @@ function validateConcreteSidecarFixture(
 
   if (expectedKind === "decision-synthesis") {
     if (!isMeaningfulSidecarValue(fixture.next_route)) {
-      errors.push(`${rel}: decision-synthesis 结构化索引要求 next_route`);
+      errors.push(`${rel}: decision-synthesis 结构化伴随文件要求 next_route`);
     }
     if (
       !isMeaningfulSidecarValue(fixture.reference_id) &&
       !isMeaningfulSidecarValue(fixture.claim_boundary)
     ) {
-      errors.push(`${rel}: decision-synthesis 结构化索引要求 reference_id 或 claim_boundary`);
+      errors.push(`${rel}: decision-synthesis 结构化伴随文件要求 reference_id 或 claim_boundary`);
     }
   } else {
     for (const key of STAGE_REQUIRED_SIDECAR_KEYS[expectedKind] ?? []) {
       if (!isMeaningfulSidecarValue(fixture[key])) {
-        errors.push(`${rel}: ${expectedKind} 结构化索引要求有意义的 ${key}`);
+        errors.push(`${rel}: ${expectedKind} 结构化伴随文件要求有意义的 ${key}`);
       }
     }
   }
@@ -2054,23 +2061,23 @@ function validateRuntimeSchemaSidecars(root: string, errors: string[]): void {
     try {
       const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-        errors.push(`${rel}: 运行态结构化索引必须是 JSON object`);
+        errors.push(`${rel}: 运行态结构化伴随文件必须是 JSON object`);
         continue;
       }
       sidecar = parsed as Record<string, unknown>;
     } catch (error) {
-      errors.push(`${rel}: 运行态结构化索引 JSON 无效: ${errorMessage(error)}`);
+      errors.push(`${rel}: 运行态结构化伴随文件 JSON 无效: ${errorMessage(error)}`);
       continue;
     }
 
     const artifactKind = stringValue(sidecar.artifact_kind);
     if (!artifactKind || !SIDECAR_ARTIFACT_KINDS.includes(artifactKind)) {
-      errors.push(`${rel}: 运行态结构化索引的 artifact_kind 未知`);
+      errors.push(`${rel}: 运行态结构化伴随文件的 artifact_kind 未知`);
       continue;
     }
 
     if (!sidecarFilenameMatchesKind(artifactKind, path.basename(file))) {
-      errors.push(`${rel}: 运行态结构化索引文件名与 artifact_kind ${artifactKind} 不匹配`);
+      errors.push(`${rel}: 运行态结构化伴随文件的文件名与 artifact_kind ${artifactKind} 不匹配`);
     }
 
     const taskSlug = rel.match(/^\.alpha-goal\/([^/]+)\//)?.[1];
@@ -2122,18 +2129,18 @@ function validateRuntimeSidecarTraceGroups(
       const missingReference = sidecars.some((sidecar) => !stringValue(sidecar.reference_id));
       if (missingReference) {
         errors.push(
-          `${relPrefix}: 到达行动或最终路由的运行态结构化索引必须共享一个有意义的 reference_id`,
+          `${relPrefix}: 到达行动或最终路由的运行态结构化伴随文件必须共享一个有意义的 reference_id`,
         );
       }
     }
     if (referenceIds.size > 1) {
-      errors.push(`${relPrefix}: 运行态结构化索引必须共享同一个 reference_id`);
+      errors.push(`${relPrefix}: 运行态结构化伴随文件必须共享同一个 reference_id`);
     }
 
     const hasControlLoop = sidecars.some((sidecar) => sidecar.route_state === "control-loop");
     const approvedContracts = sidecars.filter(isApprovedControlContractSidecar);
     if (hasControlLoop && approvedContracts.length === 0) {
-      errors.push(`${relPrefix}: control-loop 运行态结构化索引需要已批准的 goal-contract 结构化索引`);
+      errors.push(`${relPrefix}: control-loop 运行态结构化伴随文件需要已批准的 goal-contract 结构化伴随文件`);
     }
 
     const finalVerifiers = sidecars.filter(isFinalVerificationVerdictSidecar);
@@ -2141,7 +2148,7 @@ function validateRuntimeSidecarTraceGroups(
     for (const sidecar of sidecars) {
       const artifactPath = stringValue(sidecar.artifact_path);
       if (checkArtifactFiles && artifactPath && !isFile(path.join(root, artifactPath))) {
-        errors.push(`${relPrefix}: 结构化索引 artifact_path 不存在: ${artifactPath}`);
+        errors.push(`${relPrefix}: 结构化伴随文件 artifact_path 不存在: ${artifactPath}`);
       }
 
       const priorRoute = nullableStringValue(sidecar.prior_route);
@@ -2154,18 +2161,18 @@ function validateRuntimeSidecarTraceGroups(
       ) {
         const support = approvedContractSupport(sidecar, approvedContracts);
         if (support === "missing") {
-          errors.push(`${relPrefix}: 路由到 control-loop 需要先前已批准的 goal-contract 结构化索引`);
+          errors.push(`${relPrefix}: 路由到 control-loop 需要先前已批准的 goal-contract 结构化伴随文件`);
         } else if (support === "late") {
-          errors.push(`${relPrefix}: 已批准的 goal-contract 结构化索引不得晚于 control-loop 路由`);
+          errors.push(`${relPrefix}: 已批准的 goal-contract 结构化伴随文件不得晚于 control-loop 路由`);
         }
       }
 
       if (routeState === "control-loop") {
         const support = approvedContractSupport(sidecar, approvedContracts);
         if (support === "missing") {
-          errors.push(`${relPrefix}: control-loop 运行态结构化索引需要已批准的 goal-contract 结构化索引`);
+          errors.push(`${relPrefix}: control-loop 运行态结构化伴随文件需要已批准的 goal-contract 结构化伴随文件`);
         } else if (support === "late") {
-          errors.push(`${relPrefix}: 已批准的 goal-contract 结构化索引不得晚于 control-loop 路由`);
+          errors.push(`${relPrefix}: 已批准的 goal-contract 结构化伴随文件不得晚于 control-loop 路由`);
         }
       }
 
@@ -2173,10 +2180,10 @@ function validateRuntimeSidecarTraceGroups(
         const support = finalVerifierSupport(sidecar, finalVerifiers);
         if (support === "missing") {
           errors.push(
-            `${relPrefix}: 最终路由需要带 PASS_TO_FINAL 或 NARROW_CLAIM_AND_FINAL 的 verification-verdict 结构化索引`,
+            `${relPrefix}: 最终路由需要带 PASS_TO_FINAL 或 NARROW_CLAIM_AND_FINAL 的 verification-verdict 结构化伴随文件`,
           );
         } else if (support === "late") {
-          errors.push(`${relPrefix}: 最终 verification-verdict 结构化索引不得晚于最终路由`);
+          errors.push(`${relPrefix}: 最终 verification-verdict 结构化伴随文件不得晚于最终路由`);
         }
       }
 
@@ -2188,7 +2195,7 @@ function validateRuntimeSidecarTraceGroups(
         (candidate) => candidate.route_state === priorRoute && candidate.next_route === routeState,
       );
       if (incomingSources.length === 0) {
-        errors.push(`${relPrefix}: 没有先前结构化索引连接 ${priorRoute} -> ${routeState}`);
+        errors.push(`${relPrefix}: 没有先前结构化伴随文件连接 ${priorRoute} -> ${routeState}`);
         continue;
       }
 
@@ -2196,9 +2203,9 @@ function validateRuntimeSidecarTraceGroups(
         traceAnchorsCompatible(sidecar, candidate),
       );
       if (compatibleIncomingSources.length === 0) {
-        errors.push(`${relPrefix}: 前置结构化索引记录必须共享 reference_id 或 claim_boundary`);
+        errors.push(`${relPrefix}: 前置结构化伴随文件记录必须共享 reference_id 或 claim_boundary`);
       } else if (!hasPriorOrSameGeneratedAt(sidecar, compatibleIncomingSources)) {
-        errors.push(`${relPrefix}: 前置结构化索引记录不得晚于当前路由`);
+        errors.push(`${relPrefix}: 前置结构化伴随文件记录不得晚于当前路由`);
       }
     }
   }
@@ -2244,11 +2251,11 @@ function validateSchemaSidecarFixtureTrace(
   }
 
   if (taskSlugs.size !== 1) {
-    errors.push(`结构化索引样例轨迹必须只使用一个 task_slug，实际为 ${[...taskSlugs].join(", ")}`);
+    errors.push(`结构化伴随文件样例轨迹必须只使用一个 task_slug，实际为 ${[...taskSlugs].join(", ")}`);
   }
   if (referenceIds.size !== 1) {
     errors.push(
-      `结构化索引样例轨迹必须只使用一个 reference_id，实际为 ${[...referenceIds].join(", ")}`,
+      `结构化伴随文件样例轨迹必须只使用一个 reference_id，实际为 ${[...referenceIds].join(", ")}`,
     );
   }
 }
@@ -2640,12 +2647,12 @@ function validateSchemaEnum(
 ): void {
   const property = objectValue(properties[propertyName]);
   if (!property) {
-    errors.push(`${rel}: 结构化索引属性 ${propertyName} 必须是 object`);
+    errors.push(`${rel}: 结构化伴随文件属性 ${propertyName} 必须是 object`);
     return;
   }
   validateExactStringSet(
     rel,
-    `结构化索引 ${propertyName} enum`,
+    `结构化伴随文件 ${propertyName} enum`,
     property.enum,
     expectedValues,
     errors,
@@ -2661,13 +2668,13 @@ function validateNullableRouteSchemaEnum(
 ): void {
   const property = objectValue(properties[propertyName]);
   if (!property) {
-    errors.push(`${rel}: 结构化索引属性 ${propertyName} 必须是 object`);
+    errors.push(`${rel}: 结构化伴随文件属性 ${propertyName} 必须是 object`);
     return;
   }
 
   validateExactStringOrNullSet(
     rel,
-    `结构化索引 ${propertyName} enum`,
+    `结构化伴随文件 ${propertyName} enum`,
     property.enum,
     expectedValues,
     true,

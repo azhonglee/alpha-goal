@@ -2,14 +2,14 @@
 
 需要形成可持久化或可交接的目标契约时，使用本参考。
 
-默认把完整契约持久化到 `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/goal-contract.json` 写入结构化索引。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `契约摘要`，包含参考状态、范围边界、证据、产物路径和下一步动作。
+默认把完整契约持久化到 `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/goal-contract.json` 写入结构化伴随文件。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `契约摘要`，包含参考状态、范围边界、证据、产物路径和下一步动作。
 
 ```text
 目标契约:
 - 标题:
 - 负责人 / 请求方:
 - 日期 / slug:
-- 配置名称: quick | standard | deep
+- 配置档位: quick | standard | deep
 - 参考状态:
   - 期望结果:
   - 最终声明边界:
@@ -38,7 +38,7 @@
   - 证据边界:
   - 负责人或决策边界:
 - 决策边界:
-  - 代理可决策:
+  - 智能体可决策:
   - 用户自有:
 - 约束:
 - 已解决假设:
@@ -56,7 +56,7 @@
 - 台账更新:
   - 控制状态路径:
   - 产物路径:
-  - 结构化索引路径:
+  - 结构化伴随文件路径:
   - 最新误差信号:
   - 下一路由:
 ```

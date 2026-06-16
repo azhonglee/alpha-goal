@@ -1,6 +1,6 @@
 # 决策综合记录结构定义
 
-默认把完整记录持久化到 `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/decision-synthesis.json` 写入结构化索引。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `综合摘要`，包含核心张力、推荐方向、用户裁决、产物路径和下一步动作。
+默认把完整记录持久化到 `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/decision-synthesis.json` 写入结构化伴随文件。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `综合摘要`，包含核心张力、推荐方向、用户裁决、产物路径和下一步动作。
 
 ```text
 决策综合记录:
@@ -56,7 +56,7 @@
 - 台账更新:
   - 控制状态路径:
   - 产物路径:
-  - 结构化索引路径:
+  - 结构化伴随文件路径:
   - 综合状态变更:
   - 下一路由:
 - 路由:

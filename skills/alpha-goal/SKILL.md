@@ -18,7 +18,7 @@ description: "把工程、调试、设计和验证工作路由到闭环控制技
 - `actuator`: `control-loop` 在已批准目标契约下执行的有界变更；
 - `comparator`: `evidence-verify`，用于把新鲜证据与参考状态、声明边界进行比较；
 - `memory`: 在技能之间保存参考状态、当前状态、误差、控制动作、反馈和路由历史的闭环台账；
-- `adaptation`: 修正可复用控制假设的自适应学习记录，不得静默改变范围或权限；
+- `adaptation`: 修正可复用控制假设的自适应学习记录，不得静默改变范围或授权；
 - `disturbance`: 需求变化、脏工作区、缺失工具、不稳定测试、冲突规范、隐藏归属、过宽声明或外部副作用；实质扰动用扰动记录追踪。
 
 ## 边界
@@ -36,7 +36,7 @@ description: "把工程、调试、设计和验证工作路由到闭环控制技
 - `references/cybernetic-routing.md`: 路由选择和稳定性失效模式。
 - `references/closed-loop-ledger.md`: 跨阶段状态记忆结构和更新规则。
 - `references/artifact-layout.md`: 任务级 `.alpha-goal/YYYYMMDD-<slug>/xxx` 运行态产物布局。
-- `references/cybernetic-conformance.md`: 状态转移、结构化索引和闭环不变量检查。
+- `references/cybernetic-conformance.md`: 状态转移、结构化伴随文件和闭环不变量检查。
 
 ## 流程
 

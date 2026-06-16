@@ -24,7 +24,7 @@
 - 每个目标、任务批次或可恢复工作流只创建一次 `.alpha-goal/YYYYMMDD-<slug>/`。
 - 把 `control-state.md` 作为跨技能事实来源，记录路由、参考状态、当前状态、残余误差、最新控制动作、最新传感器反馈、产物登记和下一路由。
 - 大体量命令输出、日志、截图、轨迹和原始证据存放到 `evidence/`；从阶段记录链接它们，而不是粘贴进聊天。
-- 可选机器可读结构化索引存放到 `schema/`，可行时使用与产物相同的文件主干，例如 `schema/goal-contract.json`。
+- 可选机器可读结构化伴随文件存放到 `schema/`，可行时使用与产物相同的文件主干，例如 `schema/goal-contract.json`。
 - 不要直接在 `.alpha-goal/` 下使用旧分类目录，例如 `context/`、`models/`、`control-state/`、`iterations/`、`evidence/` 或 `verification/`。
 - 如果文件持久化受阻，在聊天中打印产物，并在通常应出现产物路径的位置说明无法写入原因。
 
@@ -41,7 +41,7 @@
 - 计划: .alpha-goal/YYYYMMDD-<slug>/plan.md
 - 迭代记录: .alpha-goal/YYYYMMDD-<slug>/iterations/
 - 证据: .alpha-goal/YYYYMMDD-<slug>/evidence/
-- 结构化索引: .alpha-goal/YYYYMMDD-<slug>/schema/
+- 结构化伴随文件: .alpha-goal/YYYYMMDD-<slug>/schema/
 - 验证结论: .alpha-goal/YYYYMMDD-<slug>/verification-verdict.md
 - 一致性报告: .alpha-goal/YYYYMMDD-<slug>/conformance-report.md
 ```

@@ -646,7 +646,7 @@ run_skillset_validation() {
   local output
   if ! output="$(npx --yes tsx "$validation_tool" "$repo_root" 2>&1)"; then
     echo "校验失败 ($validation_tool_label)。如需完整输出，请加 --verbose 重新运行。" >&2
-    printf '%s\n' "$output" | grep -E '^(ERRORS:|- |FAIL )' >&2 || true
+    printf '%s\n' "$output" | grep -E '^(错误:|ERRORS:|- |失败 |FAIL )' >&2 || true
     exit 1
   fi
 }
