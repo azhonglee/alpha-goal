@@ -1,69 +1,80 @@
 ---
 name: alpha-goal
-description: "把目标、边界、执行或验证不清的工作路由到闭环控制技能套件：goal-contract、system-model、control-loop、evidence-verify 和 decision-synthesis。下一技能、目标契约、控制边界或验收边界不清时使用；目标清楚的普通实现任务不需要先使用本技能，但进入本套件后仍必须遵守对应阶段闸门。"
+description: "澄清需求，把含糊的工程、调试、设计或产物请求转成安全的目标契约：参考状态、范围、非目标、决策边界、验收证据和实现授权。"
 ---
 
 # Alpha Goal
 
-只做路由，不实现。分层只影响展示、加载和持久化，不降低目标契约、授权、控制律、证据或最终声明闸门。
+执行前定义参考状态、完整语义、范围、非目标、决策边界、验收证据、声明边界和用户授权。不编辑实现，不授权 push / 部署 / 数据修复 / 外部副作用。
 
-关键词：闭环台账、最新控制路由、控制律、指标转译、自适应学习、控制器层级、扰动记录、误差信号、选定技能、TUI、不得收缩目标语义。
+关键词：目标契约、参考状态、验收证据、声明边界、决策边界、指标转译、候选解释、完整语义候选、选定语义、未选解释、用户裁决依据、待用户确认的候选、产物路径。
 
-资源：`references/artifact-layout.md`、`references/closed-loop-ledger.md`、`references/cybernetic-conformance.md`、`references/cybernetic-routing.md`。
+## 量化模糊度闸门
 
-## 边界
-
-- 目标、范围、非目标、验收或授权不清 -> `goal-contract`。
-- 被控对象、可观测性、可控性、耦合或归属不清 -> `system-model`。
-- 多方冲突、弱量化或开放复杂巨系统 -> `decision-synthesis`。
-- 最终声明、正确性、可合并、可发布或安全性 -> `evidence-verify`。
-- 进入 `control-loop` 必须来自已批准的 `goal-contract`。
-- 写 `.alpha-goal/` 前确认已忽略；运行态产物用 `.alpha-goal/YYYYMMDD-<slug>/xxx`。
-
-## 分层
-
-| 分层 | 场景 | 产物 |
-| --- | --- | --- |
-| `inline` | 单轮、低风险、无需恢复 | 聊天摘要 |
-| `persisted` | 跨技能、多轮、需恢复或有扰动 | `.alpha-goal/YYYYMMDD-<slug>/control-state.md` |
-| `audited` | 高风险、外部副作用、审计或敏感声明 | `persisted` + schema sidecar |
-
-## 路由闸门
-
-- 若同一请求有多种合理解释且会改变实现范围、接口或数据来源，先回 `goal-contract`；围绕用户真正要解决的问题澄清，不要选择当前接口最容易支持的一种。
-- 目标契约已被用户明确接受；草案 / 待确认时下一路由必须是 `user`。
-- 执行前已有目标误差、控制变量、预期效果、传感器阈值、失败处理和边界。
-- 最终声明只能由 `evidence-verify` 检查。
-
-## 持久化路由卡并展示摘要
+必须量化，不使用定性等级，不选择配置档位。清楚的 `inline` 只压缩展示和持久化形式，仍保留分值依据；模糊度必须 `<= 0.15`。
 
 ```text
-最新控制路由:
-控制路由:
-- 台账路径:
-- 活跃状态:
-- 误差信号:
-- 控制律:
-- 指标转译:
-- 自适应学习:
-- 控制器层级:
-- 扰动记录:
-- 选定技能:
-- 安全边界:
-- 下一步:
+新建场景模糊度 = 1 - (intent*0.25 + outcome*0.25 + scope*0.20 + constraints*0.15 + success*0.15)
+存量系统模糊度 = 1 - (intent*0.20 + outcome*0.20 + scope*0.18 + constraints*0.14 + success*0.14 + context*0.14)
+控制模糊度 = 1 - (reference*0.25 + actuator_boundary*0.20 + sensor_plan*0.20 + disturbance_bounds*0.15 + claim_boundary*0.20)
 ```
 
-随后只展示适合 TUI 阅读的 Markdown 表格摘要：
+语义清晰度不够、关键维度无法赋值，或多种解释会改变实现范围、接口或数据来源时，先澄清，不得交接给 `control-loop`。
+关键词必须收敛为唯一的产品 / 工程语义；不得把现有接口能力误当成用户真正诉求。
+
+## 就绪闸门
+
+- 目标和结果能检测误差；范围、非目标、验收、声明边界明确。
+- 完整语义覆盖候选解释、取舍依据和覆盖边界；不得把任一候选解释写成选定语义。
+- 只问用户自有决策；事实自行发现。
+- 在不裁剪目标语义的前提下，找最小安全执行方案。
+- 目标契约默认是草案；待用户确认时下一路由是 `user`。
+- 用户明确接受同一契约版本后，才可写 `stage_decision: CONTRACT_APPROVED` 和 `authorization_status: approved`。
+- 草案 sidecar 使用 `stage_decision: ROUTE_TO_USER` 和 `authorization_status: pending`。
+
+## 产物
+
+`inline` 展示 `契约摘要`；`persisted` / `audited` 写 `.alpha-goal/YYYYMMDD-<slug>/alpha-goal.md` 和 `.alpha-goal/YYYYMMDD-<slug>/control-state.md`。
+
+目标契约结构:
+
+```text
+目标契约:
+- 参考状态:
+- 语义对齐:
+- 模糊度数值:
+- 分值依据:
+- 范围:
+- 控制模型:
+- 指标转译:
+- 验收标准:
+- 交接:
+- 台账更新:
+```
+
+TUI 摘要:
 
 ```markdown
-路由摘要
+契约摘要
 
 | 字段 | 内容 |
 | --- | --- |
-| 路由 | |
-| 原因 | |
-| 边界 | |
+| 参考 | |
+| 语义状态 | |
+| 模糊度 | |
+| 范围边界 | |
+| 证据 | |
+| 产物 | |
 | 下一步 | |
 ```
 
-摘要应让用户不读长字段列表也能理解路由。不能写文件时，在聊天中包含完整 `控制路由` 并说明原因。
+持久化路径:
+
+```text
+.alpha-goal/YYYYMMDD-<slug>/alpha-goal.md
+.alpha-goal/YYYYMMDD-<slug>/control-state.md
+```
+
+## 交接
+
+契约准备好后，请用户接受、拒绝或修改。接受后交接参考状态、完整语义取舍、模糊度结果、范围、非目标、证据下限、声明边界和执行器边界；否则停在 `user`。`system-model` 只能作为条件升级分支，不能代替本技能授权执行。

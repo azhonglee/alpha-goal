@@ -704,7 +704,7 @@ fi
 
 run_skillset_validation
 
-required_skills=(alpha-goal goal-contract system-model control-loop evidence-verify decision-synthesis)
+required_skills=(alpha-goal system-model control-loop evidence-verify)
 skill_files=()
 for skill_name in "${required_skills[@]}"; do
   skill_file="$source_skill_root/$skill_name/SKILL.md"

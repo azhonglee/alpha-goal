@@ -1,9 +1,9 @@
 {
-  "artifact_kind": "goal-contract",
+  "artifact_kind": "alpha-goal",
   "task_slug": "20260616-neg-late-contract",
-  "artifact_path": ".alpha-goal/20260616-neg-late-contract/goal-contract.md",
+  "artifact_path": ".alpha-goal/20260616-neg-late-contract/alpha-goal.md",
   "reference_id": "ref-neg-late-contract",
-  "route_state": "goal-contract",
+  "route_state": "alpha-goal",
   "prior_route": "alpha-goal",
   "next_route": "control-loop",
   "target_error": "approved contract was recorded after mutation",

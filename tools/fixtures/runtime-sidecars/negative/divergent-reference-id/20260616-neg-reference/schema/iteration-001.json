@@ -4,7 +4,7 @@
   "artifact_path": ".alpha-goal/20260616-neg-reference/iterations/001-reference-split.md",
   "reference_id": "ref-neg-reference-b",
   "route_state": "control-loop",
-  "prior_route": "goal-contract",
+  "prior_route": "alpha-goal",
   "next_route": "evidence-verify",
   "target_error": "runtime trace has split references",
   "control_variable": "reference_id continuity",

@@ -7,7 +7,7 @@ description: "判断新鲜证据是否满足活跃目标契约，并支持完成
 
 独立比较器：判断最终状态是否匹配参考状态，拟声明是否在证据范围内。无完成、正确、安全、可合并、可发布或窄化声明需求时，不使用本技能。
 
-资源：`references/verification-verdict-schema.md`、`references/completion-review-rubric.md`、`references/claim-boundary-check.md`、`scripts/evidence-summary.ts`。
+脚本：`scripts/evidence-summary.ts` 用于汇总证据。
 
 ## 检查
 
@@ -67,4 +67,4 @@ TUI 摘要:
 - 下一路由:
 ```
 
-路由：`PASS_TO_FINAL` 可最终答复；`NARROW_CLAIM_AND_FINAL` 必须说明窄化；`NEXT_ITERATION` 返回 `control-loop`；`REFRAME` 返回 `goal-contract` 或 `system-model`；`BLOCKED` 报告最小缺失条件。
+路由：`PASS_TO_FINAL` 可最终答复；`NARROW_CLAIM_AND_FINAL` 必须说明窄化；`NEXT_ITERATION` 返回 `control-loop`；`REFRAME` 返回 `alpha-goal` 或 `system-model`；`BLOCKED` 报告最小缺失条件。

@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-本仓库维护 `alpha-goal` Codex 技能包。技能源码统一位于 `skills/`：核心入口是 `skills/alpha-goal/SKILL.md`；目标契约技能位于 `skills/goal-contract/`，执行与验证阶段技能位于 `skills/control-loop/`、`skills/evidence-verify/`。各技能的详细规则放在本技能 `references/` 下，脚本放在本技能 `scripts/` 下。`templates/` 是可选用户配置模板，`scripts/install.sh` 负责软链接安装，`tools/validate_skillset.ts` 用于本地布局校验。`README.md`、`INSTALL.md`、`MANIFEST.md` 应与这些路径和命令保持一致。
+本仓库维护 `alpha-goal` Codex 技能包。技能源码统一位于 `skills/`：目标契约入口是 `skills/alpha-goal/SKILL.md`；条件建模技能位于 `skills/system-model/`；执行与验证阶段技能位于 `skills/control-loop/`、`skills/evidence-verify/`。核心规则直接放在各技能 `SKILL.md`；脚本放在本技能 `scripts/` 下。`templates/` 是可选用户配置模板，`scripts/install.sh` 负责软链接安装，`tools/validate_skillset.ts` 用于本地布局校验。`README.md`、`INSTALL.md`、`MANIFEST.md` 应与这些路径和命令保持一致。
 
 ## Build, Test, and Development Commands
 
@@ -15,7 +15,7 @@
 
 ## Coding Style & Naming Conventions
 
-创建或修改技能时，参考 OpenAI Codex 的 Create a Skill 指南，并优先使用 `skill-creator`。技能目录使用短横线命名，必须包含 `SKILL.md`。`SKILL.md` 保持短小，把详细规则放进同级 `references/`；技能辅助脚本和 `tools/` 校验工具使用 TypeScript。`scripts/install.sh` 是保留的 Bash 安装入口，保持 `set -euo pipefail`。Markdown 文档保持简洁、可执行，路径和命令使用反引号。
+创建或修改技能时，参考 OpenAI Codex 的 Create a Skill 指南，并优先使用 `skill-creator`。技能目录使用短横线命名，必须包含 `SKILL.md`。`SKILL.md` 保持短小但自洽，避免为了形式拆出短引用文件；技能辅助脚本和 `tools/` 校验工具使用 TypeScript。`scripts/install.sh` 是保留的 Bash 安装入口，保持 `set -euo pipefail`。Markdown 文档保持简洁、可执行，路径和命令使用反引号。
 
 设计skill时，需要考虑以下几点：
 

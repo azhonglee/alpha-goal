@@ -1,9 +1,9 @@
 {
-  "artifact_kind": "goal-contract",
+  "artifact_kind": "alpha-goal",
   "task_slug": "20260616-neg-final-verdict",
-  "artifact_path": ".alpha-goal/20260616-neg-final-verdict/goal-contract.md",
+  "artifact_path": ".alpha-goal/20260616-neg-final-verdict/alpha-goal.md",
   "reference_id": "ref-neg-final-verdict",
-  "route_state": "goal-contract",
+  "route_state": "alpha-goal",
   "prior_route": "alpha-goal",
   "next_route": "control-loop",
   "target_error": "final route is backed only by a non-passing verifier",

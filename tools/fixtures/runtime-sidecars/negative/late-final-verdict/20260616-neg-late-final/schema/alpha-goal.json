@@ -1,9 +1,9 @@
 {
-  "artifact_kind": "goal-contract",
+  "artifact_kind": "alpha-goal",
   "task_slug": "20260616-neg-late-final",
-  "artifact_path": ".alpha-goal/20260616-neg-late-final/goal-contract.md",
+  "artifact_path": ".alpha-goal/20260616-neg-late-final/alpha-goal.md",
   "reference_id": "ref-neg-late-final",
-  "route_state": "goal-contract",
+  "route_state": "alpha-goal",
   "prior_route": "alpha-goal",
   "next_route": "control-loop",
   "target_error": "final claim is earlier than supporting verifier",

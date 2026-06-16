@@ -5,13 +5,13 @@ description: "在已批准目标契约下运行有界控制迭代：规划一个
 
 # 控制循环
 
-只在已批准目标契约下执行或探测；`alpha-goal`、`system-model`、`decision-synthesis` 不能推断授权。已批准契约保留完整目标语义、参考状态、范围 / 非目标、声明边界、用户意图解释和产品 / 工程语义；不能裁剪契约语义。
+只在已批准目标契约下执行或探测；`alpha-goal`、`system-model` 不能推断授权。已批准契约保留完整目标语义、参考状态、范围 / 非目标、声明边界、用户意图解释和产品 / 工程语义；不能裁剪契约语义。
 
-资源：`references/control-law.md`、`references/worktree-safety.md`、`references/execution-boundaries.md`、`references/loop-modes.md`、`references/adaptive-learning.md`、`references/iteration-record-schema.md`、`references/auto-execution.md`、`references/plan-template.md`、`scripts/mutation-preflight.ts`。
+脚本：`scripts/mutation-preflight.ts` 用于执行前突变安全检查。
 
 ## 入口
 
-读取 `最新控制路由`、上一残余误差、边界和路由决策。多种解释会改变实现范围、接口或数据来源时，返回 `goal-contract`，不要任选一种开始实现，也不要只实现当前字段 / 接口能承载的子集。系统边界、传感器、执行器、扰动或耦合不清时，到 `system-model`。
+读取 `最新控制路由`、上一残余误差、边界和路由决策。多种解释会改变实现范围、接口或数据来源时，返回 `alpha-goal`，不要任选一种开始实现，也不要只实现当前字段 / 接口能承载的子集。系统边界、传感器、执行器、扰动或耦合不清时，到 `system-model`。
 
 ## 执行
 

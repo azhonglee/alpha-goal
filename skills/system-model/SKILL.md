@@ -5,9 +5,7 @@ description: "在工程行动前建立控制系统模型：被控对象、状态
 
 # 系统建模
 
-行动前边界、状态或反馈不清时使用。默认只读；不改实现、不授权执行、不声明完成。模型只把事实交给 `goal-contract`，不能直接进入 `control-loop`。
-
-资源：`references/control-model-schema.md`、`references/observability-controllability-check.md`、`references/disturbance-register.md`、`references/controller-hierarchy.md`。
+行动前边界、状态或反馈不清时使用。默认只读；不改实现、不授权执行、不声明完成。模型只把事实交给 `alpha-goal`，不能直接进入 `control-loop`；最终必须回到 `alpha-goal` 固化目标契约。
 
 ## 流程
 
@@ -63,4 +61,4 @@ TUI 摘要:
 - 推荐路由:
 ```
 
-推荐路由不得把目标语义压缩成最小版本。执行前先到 `goal-contract`；仅比较证据与声明时到 `evidence-verify`。推荐路由: `goal-contract` | `evidence-verify` | `decision-synthesis` | `blocker`。
+推荐路由不得把目标语义压缩成最小版本。执行前先到 `alpha-goal`。推荐路由: `alpha-goal` | `blocker`。

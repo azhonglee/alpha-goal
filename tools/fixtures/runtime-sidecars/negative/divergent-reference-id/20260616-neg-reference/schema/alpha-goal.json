@@ -1,9 +1,9 @@
 {
-  "artifact_kind": "goal-contract",
+  "artifact_kind": "alpha-goal",
   "task_slug": "20260616-neg-reference",
-  "artifact_path": ".alpha-goal/20260616-neg-reference/goal-contract.md",
+  "artifact_path": ".alpha-goal/20260616-neg-reference/alpha-goal.md",
   "reference_id": "ref-neg-reference-a",
-  "route_state": "goal-contract",
+  "route_state": "alpha-goal",
   "prior_route": "system-model",
   "next_route": "control-loop",
   "target_error": "runtime trace has split references",

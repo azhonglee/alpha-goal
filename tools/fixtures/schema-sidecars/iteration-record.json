@@ -4,7 +4,7 @@
   "artifact_path": ".alpha-goal/20260616-cybernetic-fixture/iterations/001-tighten-validator.md",
   "reference_id": "ref-cybernetic-fixture",
   "route_state": "control-loop",
-  "prior_route": "goal-contract",
+  "prior_route": "alpha-goal",
   "next_route": "evidence-verify",
   "target_error": "validator does not catch schema sidecar drift",
   "control_variable": "validator checks and committed fixtures",

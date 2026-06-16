@@ -1,8 +1,8 @@
 {
-  "artifact_kind": "goal-contract",
+  "artifact_kind": "alpha-goal",
   "task_slug": "20260616-neg-artifact-path",
   "reference_id": "ref-neg-artifact-path",
-  "route_state": "goal-contract",
+  "route_state": "alpha-goal",
   "prior_route": "system-model",
   "next_route": "control-loop",
   "target_error": "sidecar omits artifact path",

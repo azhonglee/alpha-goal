@@ -4,7 +4,7 @@
   "artifact_path": ".alpha-goal/20260616-runtime-fixture/iterations/001-tighten-validator.md",
   "reference_id": "ref-runtime-fixture",
   "route_state": "control-loop",
-  "prior_route": "goal-contract",
+  "prior_route": "alpha-goal",
   "next_route": "evidence-verify",
   "target_error": "validator must catch runtime trace drift",
   "control_variable": "runtime sidecar fixtures",

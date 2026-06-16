@@ -4,8 +4,8 @@
   "artifact_path": ".alpha-goal/20260616-runtime-fixture/system-model.md",
   "reference_id": "ref-runtime-fixture",
   "route_state": "system-model",
-  "prior_route": "decision-synthesis",
-  "next_route": "goal-contract",
+  "prior_route": null,
+  "next_route": "alpha-goal",
   "target_error": "unclear plant boundary and sensors",
   "control_variable": "system model fields",
   "sensor": "observability and controllability review",
@@ -13,7 +13,7 @@
   "evidence_boundary": "artifact",
   "residual_error": "remaining contract drafting",
   "claim_boundary": "runtime fixture documents a bounded system model sidecar",
-  "stage_decision": "ROUTE_TO_GOAL_CONTRACT",
+  "stage_decision": "ROUTE_TO_ALPHA_GOAL",
   "authorization_status": "not-required",
   "generated_at": "2026-06-16T00:00:00Z"
 }

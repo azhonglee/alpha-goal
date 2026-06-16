@@ -1,9 +1,9 @@
 {
-  "artifact_kind": "goal-contract",
+  "artifact_kind": "alpha-goal",
   "task_slug": "20260616-runtime-fixture",
-  "artifact_path": ".alpha-goal/20260616-runtime-fixture/goal-contract.md",
+  "artifact_path": ".alpha-goal/20260616-runtime-fixture/alpha-goal.md",
   "reference_id": "ref-runtime-fixture",
-  "route_state": "goal-contract",
+  "route_state": "alpha-goal",
   "prior_route": "system-model",
   "next_route": "control-loop",
   "target_error": "unclear reference and acceptance evidence",

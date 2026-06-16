@@ -4,7 +4,7 @@
   "artifact_path": ".alpha-goal/20260616-neg-final/iterations/001-final-gap.md",
   "reference_id": "ref-neg-final",
   "route_state": "control-loop",
-  "prior_route": "goal-contract",
+  "prior_route": "alpha-goal",
   "next_route": "evidence-verify",
   "target_error": "final route is missing verification",
   "control_variable": "final claim gate",
