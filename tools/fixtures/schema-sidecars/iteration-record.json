@@ -1,0 +1,17 @@
+{
+  "artifact_kind": "iteration-record",
+  "task_slug": "20260616-cybernetic-fixture",
+  "artifact_path": ".alpha-goal/20260616-cybernetic-fixture/iterations/001-tighten-validator.md",
+  "reference_id": "ref-cybernetic-fixture",
+  "route_state": "control-loop",
+  "prior_route": "goal-contract",
+  "next_route": "evidence-verify",
+  "target_error": "validator does not catch schema sidecar drift",
+  "control_variable": "validator checks and committed fixtures",
+  "sensor": "npx --yes tsx tools/validate_skillset.ts .",
+  "threshold_or_tolerance": "validation passes and fails on malformed fixture fields",
+  "evidence_boundary": "module",
+  "residual_error": "runtime sidecars are not scanned unless supplied to the repository validator",
+  "claim_boundary": "fixture documents a bounded iteration record sidecar",
+  "generated_at": "2026-06-16T00:00:00Z"
+}

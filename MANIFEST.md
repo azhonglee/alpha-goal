@@ -16,6 +16,7 @@
 | Directory | Purpose |
 |---|---|
 | `tools/` | 本地校验工具。 |
+| `tools/fixtures/schema-sidecars/` | 提交内 schema sidecar 回归样本，用于校验任务级 artifact path、路由状态、状态转换和阶段必填字段。 |
 | `templates/` | 默认同步的用户级 Codex 配置模板；不包含 sandbox 权限、休眠行为或不稳定特性警告抑制项。 |
 | `scripts/` | 安装脚本。 |
 
@@ -27,7 +28,7 @@
 | `skills/system-model/scripts/repo-sensor-snapshot.ts` | No | Prints a repository sensor snapshot for system modeling and observability checks. |
 | `skills/control-loop/scripts/mutation-preflight.ts` | No | Prints git root, branch, status, worktrees, local rule files, ignored worktree/evidence paths, and submodules. |
 | `skills/evidence-verify/scripts/evidence-summary.ts` | No | Prints changed files, diff stat, diff check status, and recent commits. |
-| `tools/validate_skills.ts` | No | Canonical lightweight validator for the closed-loop six-skill suite, including reference discoverability, task-scoped artifact layout checks, semantic smoke checks, legacy path guards, and fixture contract checks. |
+| `tools/validate_skills.ts` | No | Canonical lightweight validator for the closed-loop six-skill suite, including reference discoverability, task-scoped artifact layout checks, schema sidecar fixture/runtime checks, route consistency checks, semantic smoke checks, legacy path guards, and fixture contract checks. |
 | `tools/validate_skillset.ts` | No | Compatibility wrapper for older validation commands; delegates to `tools/validate_skills.ts`. |
 
 ## Runtime Artifacts

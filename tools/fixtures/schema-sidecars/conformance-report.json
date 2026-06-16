@@ -1,0 +1,17 @@
+{
+  "artifact_kind": "conformance-report",
+  "task_slug": "20260616-cybernetic-fixture",
+  "artifact_path": ".alpha-goal/20260616-cybernetic-fixture/conformance-report.md",
+  "reference_id": "ref-cybernetic-fixture",
+  "route_state": "evidence-verify",
+  "prior_route": "control-loop",
+  "next_route": "final",
+  "target_error": "strategy conformance may only be asserted in prose",
+  "control_variable": "conformance report checks",
+  "sensor": "state transition, artifact layout, and legacy path validation",
+  "threshold_or_tolerance": "all conformance checks pass or route to next iteration",
+  "evidence_boundary": "artifact",
+  "residual_error": "none known for fixture",
+  "claim_boundary": "fixture documents a bounded conformance report sidecar",
+  "generated_at": "2026-06-16T00:00:00Z"
+}

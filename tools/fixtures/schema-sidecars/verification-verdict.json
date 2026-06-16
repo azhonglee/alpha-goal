@@ -1,0 +1,17 @@
+{
+  "artifact_kind": "verification-verdict",
+  "task_slug": "20260616-cybernetic-fixture",
+  "artifact_path": ".alpha-goal/20260616-cybernetic-fixture/verification-verdict.md",
+  "reference_id": "ref-cybernetic-fixture",
+  "route_state": "evidence-verify",
+  "prior_route": "control-loop",
+  "next_route": "final",
+  "target_error": "final claim may exceed evidence",
+  "control_variable": "claim boundary verdict",
+  "sensor": "fresh validation command output",
+  "threshold_or_tolerance": "evidence covers the narrowed claim boundary",
+  "evidence_boundary": "module",
+  "residual_error": "none known for fixture",
+  "claim_boundary": "fixture documents a bounded verification verdict sidecar",
+  "generated_at": "2026-06-16T00:00:00Z"
+}

@@ -93,6 +93,85 @@ const SIDECAR_ROUTE_STATES = [
   "blocker",
 ];
 
+const SIDECAR_FIXTURE_DIR = "tools/fixtures/schema-sidecars";
+const SIDECAR_TASK_SLUG_RE = /^\d{8}-[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+const SIDECAR_EVIDENCE_BOUNDARIES = [
+  "artifact",
+  "helper",
+  "module",
+  "service",
+  "user-visible",
+  "production",
+  "safety",
+  "custom",
+];
+
+const STAGE_REQUIRED_SIDECAR_KEYS: Record<string, string[]> = {
+  "goal-contract": ["reference_id", "claim_boundary", "evidence_boundary", "next_route"],
+  "system-model": ["sensor", "evidence_boundary", "next_route"],
+  "iteration-record": [
+    "target_error",
+    "control_variable",
+    "sensor",
+    "threshold_or_tolerance",
+    "residual_error",
+    "next_route",
+  ],
+  "verification-verdict": [
+    "sensor",
+    "evidence_boundary",
+    "claim_boundary",
+    "residual_error",
+    "next_route",
+  ],
+  "conformance-report": [
+    "artifact_path",
+    "route_state",
+    "prior_route",
+    "next_route",
+    "residual_error",
+    "claim_boundary",
+  ],
+};
+
+const ROUTE_TRANSITIONS: Record<string, string[]> = {
+  START: ["alpha-goal"],
+  "alpha-goal": [
+    "decision-synthesis",
+    "system-model",
+    "goal-contract",
+    "control-loop",
+    "evidence-verify",
+    "user",
+    "blocker",
+  ],
+  "decision-synthesis": [
+    "goal-contract",
+    "system-model",
+    "control-loop",
+    "evidence-verify",
+    "user",
+    "blocker",
+  ],
+  "system-model": [
+    "goal-contract",
+    "control-loop",
+    "evidence-verify",
+    "decision-synthesis",
+    "blocker",
+  ],
+  "goal-contract": ["control-loop", "system-model", "user", "blocker"],
+  "control-loop": [
+    "control-loop",
+    "evidence-verify",
+    "alpha-goal",
+    "system-model",
+    "blocker",
+  ],
+  "evidence-verify": ["final", "control-loop", "goal-contract", "system-model", "blocker"],
+};
+
 const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
   [
     "ambiguous requirement can become a bounded Goal Contract",
@@ -607,6 +686,9 @@ export function main(args = process.argv.slice(2)): number {
   validateLegacySkillReferences(root, errors);
   validateLegacyArtifactPathReferences(root, errors);
   validateSchemaSidecarContract(root, errors);
+  validateSchemaSidecarFixtures(root, errors);
+  validateRuntimeSchemaSidecars(root, errors);
+  validateCyberneticRouteConsistency(root, errors);
   validateSemanticSmokeTests(root, errors);
   validateFixtureContractTests(root, errors);
 
@@ -620,6 +702,9 @@ function validateTypeScriptScriptSurface(root: string, errors: string[], warning
       return false;
     }
     const rel = relative(root, file);
+    if (rel.startsWith("tools/fixtures/")) {
+      return false;
+    }
     return (
       rel.startsWith("tools/") ||
       /^skills\/[^/]+\/scripts\//.test(rel)
@@ -661,18 +746,29 @@ function validateRuntimeArtifactIgnore(root: string, errors: string[]): void {
   }
 }
 
-function validateLegacyScriptReferences(root: string, errors: string[]): void {
-  const checkedFiles = [
+function documentationFiles(root: string): string[] {
+  const rootDocs = [
     "AGENTS.md",
     "README.md",
+    "README.zh-CN.md",
     "INSTALL.md",
     "MANIFEST.md",
-    ...walk(path.join(root, "skills"))
-      .filter((file) => isFile(file) && path.basename(file) === "SKILL.md")
-      .map((file) => relative(root, file)),
+    "templates/AGENTS.md",
   ];
+  const skillDocs = walk(path.join(root, "skills"))
+    .filter((file) => {
+      if (!isFile(file)) {
+        return false;
+      }
+      const rel = relative(root, file);
+      return rel.endsWith(".md") || rel.endsWith("/agents/openai.yaml");
+    })
+    .map((file) => relative(root, file));
+  return [...new Set([...rootDocs, ...skillDocs])].sort();
+}
 
-  for (const rel of checkedFiles) {
+function validateLegacyScriptReferences(root: string, errors: string[]): void {
+  for (const rel of documentationFiles(root)) {
     const file = path.join(root, rel);
     if (!isFile(file)) {
       continue;
@@ -687,23 +783,7 @@ function validateLegacyScriptReferences(root: string, errors: string[]): void {
 }
 
 function validateLegacySkillReferences(root: string, errors: string[]): void {
-  const checkedFiles = [
-    "AGENTS.md",
-    "README.md",
-    "INSTALL.md",
-    "MANIFEST.md",
-    ...walk(path.join(root, "skills"))
-      .filter((file) => {
-        if (!isFile(file)) {
-          return false;
-        }
-        const rel = relative(root, file);
-        return rel.endsWith(".md") || rel.endsWith("/agents/openai.yaml");
-      })
-      .map((file) => relative(root, file)),
-  ];
-
-  for (const rel of checkedFiles) {
+  for (const rel of documentationFiles(root)) {
     const file = path.join(root, rel);
     if (!isFile(file)) {
       continue;
@@ -718,25 +798,7 @@ function validateLegacySkillReferences(root: string, errors: string[]): void {
 }
 
 function validateLegacyArtifactPathReferences(root: string, errors: string[]): void {
-  const checkedFiles = [
-    "AGENTS.md",
-    "README.md",
-    "README.zh-CN.md",
-    "INSTALL.md",
-    "MANIFEST.md",
-    "templates/AGENTS.md",
-    ...walk(path.join(root, "skills"))
-      .filter((file) => {
-        if (!isFile(file)) {
-          return false;
-        }
-        const rel = relative(root, file);
-        return rel.endsWith(".md") || rel.endsWith("/agents/openai.yaml");
-      })
-      .map((file) => relative(root, file)),
-  ];
-
-  for (const rel of checkedFiles) {
+  for (const rel of documentationFiles(root)) {
     const file = path.join(root, rel);
     if (!isFile(file)) {
       continue;
@@ -796,6 +858,239 @@ function validateSchemaSidecarContract(root: string, errors: string[]): void {
   for (const kind of SIDECAR_ARTIFACT_KINDS) {
     if (!text.includes(`- \`${kind}\``)) {
       errors.push(`${rel}: stage-specific required keys omit ${kind}`);
+    }
+  }
+}
+
+function validateSchemaSidecarFixtures(root: string, errors: string[]): void {
+  const dir = path.join(root, SIDECAR_FIXTURE_DIR);
+  if (!isDirectory(dir)) {
+    errors.push(`schema sidecar fixtures: missing ${SIDECAR_FIXTURE_DIR}`);
+    return;
+  }
+
+  const expectedFiles = new Set(SIDECAR_ARTIFACT_KINDS.map((kind) => `${kind}.json`));
+  const actualFiles = fs
+    .readdirSync(dir, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
+    .map((entry) => entry.name)
+    .sort();
+
+  for (const name of actualFiles) {
+    if (!expectedFiles.has(name)) {
+      errors.push(`${SIDECAR_FIXTURE_DIR}/${name}: unexpected schema sidecar fixture`);
+    }
+  }
+
+  for (const kind of SIDECAR_ARTIFACT_KINDS) {
+    const rel = `${SIDECAR_FIXTURE_DIR}/${kind}.json`;
+    const file = path.join(root, rel);
+    if (!isFile(file)) {
+      errors.push(`schema sidecar fixtures: missing ${rel}`);
+      continue;
+    }
+
+    let fixture: Record<string, unknown>;
+    try {
+      const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        errors.push(`${rel}: schema sidecar fixture must be a JSON object`);
+        continue;
+      }
+      fixture = parsed as Record<string, unknown>;
+    } catch (error) {
+      errors.push(`${rel}: invalid JSON schema sidecar fixture: ${errorMessage(error)}`);
+      continue;
+    }
+
+    validateConcreteSidecarFixture(rel, fixture, kind, errors);
+  }
+}
+
+function validateConcreteSidecarFixture(
+  rel: string,
+  fixture: Record<string, unknown>,
+  expectedKind: string,
+  errors: string[],
+  expectedTaskSlug?: string,
+): void {
+  for (const key of SIDECAR_REQUIRED_KEYS) {
+    if (!Object.hasOwn(fixture, key)) {
+      errors.push(`${rel}: schema sidecar missing required key ${JSON.stringify(key)}`);
+    }
+  }
+
+  const artifactKind = stringValue(fixture.artifact_kind);
+  if (!artifactKind) {
+    errors.push(`${rel}: artifact_kind must be a non-empty string`);
+  } else if (artifactKind !== expectedKind) {
+    errors.push(`${rel}: artifact_kind ${JSON.stringify(artifactKind)} must equal ${expectedKind}`);
+  }
+
+  const taskSlug = stringValue(fixture.task_slug);
+  if (!taskSlug) {
+    errors.push(`${rel}: task_slug must be a non-empty string`);
+  } else if (expectedTaskSlug && taskSlug !== expectedTaskSlug) {
+    errors.push(`${rel}: task_slug ${JSON.stringify(taskSlug)} must match sidecar directory ${expectedTaskSlug}`);
+  } else if (!SIDECAR_TASK_SLUG_RE.test(taskSlug)) {
+    errors.push(`${rel}: task_slug must match YYYYMMDD-<slug>, got ${JSON.stringify(taskSlug)}`);
+  }
+
+  const artifactPath = stringValue(fixture.artifact_path);
+  if (!artifactPath) {
+    errors.push(`${rel}: artifact_path must be a non-empty string`);
+  } else if (taskSlug && !artifactPath.startsWith(`.alpha-goal/${taskSlug}/`)) {
+    errors.push(`${rel}: artifact_path must stay under .alpha-goal/${taskSlug}/`);
+  } else if (!artifactPath.endsWith(".md")) {
+    errors.push(`${rel}: artifact_path must point to the Markdown stage artifact`);
+  }
+
+  const routeState = stringValue(fixture.route_state);
+  if (!routeState || !SIDECAR_ROUTE_STATES.includes(routeState)) {
+    errors.push(`${rel}: route_state must be one of ${SIDECAR_ROUTE_STATES.join(", ")}`);
+  }
+
+  const priorRoute = nullableStringValue(fixture.prior_route);
+  if (priorRoute === undefined) {
+    errors.push(`${rel}: prior_route must be a route string or null`);
+  } else if (priorRoute !== null && !isRouteToken(priorRoute)) {
+    errors.push(`${rel}: prior_route has unknown route token ${JSON.stringify(priorRoute)}`);
+  }
+
+  const nextRoute = nullableStringValue(fixture.next_route);
+  if (!nextRoute) {
+    errors.push(`${rel}: next_route must be a non-empty route string`);
+  } else if (!isRouteToken(nextRoute)) {
+    errors.push(`${rel}: next_route has unknown route token ${JSON.stringify(nextRoute)}`);
+  }
+
+  if (priorRoute && routeState && isRouteToken(priorRoute) && !canTransition(priorRoute, routeState)) {
+    errors.push(`${rel}: invalid prior transition ${priorRoute} -> ${routeState}`);
+  }
+  if (routeState && nextRoute && isRouteToken(nextRoute) && !canTransition(routeState, nextRoute)) {
+    errors.push(`${rel}: invalid next transition ${routeState} -> ${nextRoute}`);
+  }
+
+  const evidenceBoundary = stringValue(fixture.evidence_boundary);
+  if (!evidenceBoundary) {
+    errors.push(`${rel}: evidence_boundary must be a non-empty string`);
+  } else if (!SIDECAR_EVIDENCE_BOUNDARIES.includes(evidenceBoundary)) {
+    errors.push(`${rel}: evidence_boundary has unsupported value ${JSON.stringify(evidenceBoundary)}`);
+  }
+
+  const generatedAt = stringValue(fixture.generated_at);
+  if (!generatedAt) {
+    errors.push(`${rel}: generated_at must be a non-empty ISO-8601 string`);
+  } else if (Number.isNaN(Date.parse(generatedAt)) || !generatedAt.includes("T")) {
+    errors.push(`${rel}: generated_at must parse as ISO-8601, got ${JSON.stringify(generatedAt)}`);
+  }
+
+  if (expectedKind === "decision-synthesis") {
+    if (!isMeaningfulSidecarValue(fixture.next_route)) {
+      errors.push(`${rel}: decision-synthesis sidecar requires next_route`);
+    }
+    if (
+      !isMeaningfulSidecarValue(fixture.reference_id) &&
+      !isMeaningfulSidecarValue(fixture.claim_boundary)
+    ) {
+      errors.push(`${rel}: decision-synthesis sidecar requires reference_id or claim_boundary`);
+    }
+  } else {
+    for (const key of STAGE_REQUIRED_SIDECAR_KEYS[expectedKind] ?? []) {
+      if (!isMeaningfulSidecarValue(fixture[key])) {
+        errors.push(`${rel}: ${expectedKind} sidecar requires meaningful ${key}`);
+      }
+    }
+  }
+}
+
+function validateRuntimeSchemaSidecars(root: string, errors: string[]): void {
+  const runtimeRoot = path.join(root, ".alpha-goal");
+  if (!isDirectory(runtimeRoot)) {
+    return;
+  }
+
+  const sidecarFiles = walk(runtimeRoot).filter((file) => {
+    if (!isFile(file) || !file.endsWith(".json")) {
+      return false;
+    }
+    const rel = relative(root, file);
+    return /^\.alpha-goal\/[^/]+\/schema\/[^/]+\.json$/.test(rel);
+  });
+
+  for (const file of sidecarFiles) {
+    const rel = relative(root, file);
+    let sidecar: Record<string, unknown>;
+    try {
+      const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        errors.push(`${rel}: runtime schema sidecar must be a JSON object`);
+        continue;
+      }
+      sidecar = parsed as Record<string, unknown>;
+    } catch (error) {
+      errors.push(`${rel}: invalid runtime schema sidecar JSON: ${errorMessage(error)}`);
+      continue;
+    }
+
+    const artifactKind = stringValue(sidecar.artifact_kind);
+    if (!artifactKind || !SIDECAR_ARTIFACT_KINDS.includes(artifactKind)) {
+      errors.push(`${rel}: runtime schema sidecar has unknown artifact_kind`);
+      continue;
+    }
+
+    const taskSlug = rel.match(/^\.alpha-goal\/([^/]+)\//)?.[1];
+    validateConcreteSidecarFixture(rel, sidecar, artifactKind, errors, taskSlug);
+  }
+}
+
+function validateCyberneticRouteConsistency(root: string, errors: string[]): void {
+  const conformanceRel = "skills/alpha-goal/references/cybernetic-conformance.md";
+  const synthesisRel = "skills/decision-synthesis/SKILL.md";
+  const synthesisRoundRel = "skills/decision-synthesis/references/synthesis-round.md";
+  const conformance = readRequiredText(root, conformanceRel, errors);
+  const synthesis = readRequiredText(root, synthesisRel, errors);
+  const synthesisRound = readRequiredText(root, synthesisRoundRel, errors);
+
+  if (conformance) {
+    for (const [from, targets] of Object.entries(ROUTE_TRANSITIONS)) {
+      const transition = `${from} -> ${targets.join(" | ")}`;
+      if (!conformance.includes(transition)) {
+        errors.push(`${conformanceRel}: missing route transition ${transition}`);
+      }
+    }
+
+    const requiredGuards = [
+      "`decision-synthesis -> control-loop` is valid only when an approved Goal Contract already exists",
+      "`decision-synthesis -> evidence-verify` is valid only when synthesis did not authorize mutation",
+      "`system-model -> control-loop` is valid only when an approved Goal Contract exists",
+    ];
+    for (const guard of requiredGuards) {
+      if (!conformance.includes(guard)) {
+        errors.push(`${conformanceRel}: missing conditional transition guard ${guard}`);
+      }
+    }
+  }
+
+  if (synthesis) {
+    const requiredRoutes = [
+      "Route to `evidence-verify` only when synthesis did not authorize mutation",
+      "Route to `control-loop` only if a valid Goal Contract already exists",
+      "Route to `goal-contract` when a stable recommended direction",
+      "Route to `system-model` when subsystem boundary or feedback signals remain unclear",
+    ];
+    for (const route of requiredRoutes) {
+      if (!synthesis.includes(route)) {
+        errors.push(`${synthesisRel}: missing decision-synthesis route rule ${route}`);
+      }
+    }
+  }
+
+  if (synthesisRound) {
+    const routeTrigger =
+      "Route trigger: goal-contract | system-model | control-loop | evidence-verify | user | blocker";
+    if (!synthesisRound.includes(routeTrigger)) {
+      errors.push(`${synthesisRoundRel}: missing complete route trigger list`);
     }
   }
 }
@@ -869,6 +1164,38 @@ function hasSchemaBlock(text: string, label: string): boolean {
   const blockPattern = new RegExp("```(?:text)?\\n(?:(?!```).)*" + escaped, "s");
   const headingPattern = new RegExp("^#{1,6}\\s+" + headingLabel, "m");
   return blockPattern.test(text) || headingPattern.test(text);
+}
+
+function readRequiredText(root: string, rel: string, errors: string[]): string | undefined {
+  const file = path.join(root, rel);
+  if (!isFile(file)) {
+    errors.push(`missing required text file: ${rel}`);
+    return undefined;
+  }
+  return fs.readFileSync(file, "utf8");
+}
+
+function stringValue(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim().length > 0 ? value : undefined;
+}
+
+function nullableStringValue(value: unknown): string | null | undefined {
+  if (value === null) {
+    return null;
+  }
+  return stringValue(value);
+}
+
+function isMeaningfulSidecarValue(value: unknown): boolean {
+  return value !== null && value !== undefined && String(value).trim().length > 0;
+}
+
+function isRouteToken(value: string): boolean {
+  return value === "START" || SIDECAR_ROUTE_STATES.includes(value);
+}
+
+function canTransition(from: string, to: string): boolean {
+  return (ROUTE_TRANSITIONS[from] ?? []).includes(to);
 }
 
 function printReport(root: string, errors: string[], warnings: string[]): void {
