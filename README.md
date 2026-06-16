@@ -1,8 +1,17 @@
 # 闭环控制式 Alpha Goal 技能集
 
-本仓库维护一组给 Codex 使用的 Agent Skills。当前分支以 `alpha-goal` 作为总入口，把目标契约、系统建模、有界执行、证据验证和复杂决策综合组织成六技能闭环控制套件。
+Alpha Goal Skills 是以 `alpha-goal` 作为总入口，把目标契约、系统建模、有界执行、证据验证和复杂决策综合组织成六技能闭环控制套件。
 
-核心映射：
+## 六个技能
+
+- `alpha-goal`：闭环总入口，负责 Skill 路由、稳定性检查和跨阶段状态记忆。
+- `goal-contract`：把含糊请求转为可执行、可验证、可移交的 Goal Contract，并承接 Indicator Handoff。
+- `system-model`：建立被控对象模型，识别状态变量、观测信号、可控变量、分层控制、扰动登记和耦合。
+- `control-loop`：在已批准 Goal Contract 下执行有界迭代，采集反馈、记录自适应学习并路由。
+- `evidence-verify`：独立判断证据是否支持完成、可合并、可发布或窄化声明，并审查指标和学习记录边界。
+- `decision-synthesis`：处理复杂系统、多利益相关方、弱结构化需求与高不确定性决策，并通过 Synthesis Round 收敛。
+
+控制论核心概念映射：
 
 | 工程控制论概念 | 在本 Skills 套件中的角色 |
 | --- | --- |
@@ -20,15 +29,6 @@
 | 鲁棒性 / disturbance handling | `system-model` 中的 Disturbance Register，记录 likelihood、impact、sensor、containment 和 route trigger |
 | 复杂巨系统综合集成 | `decision-synthesis` 的 Synthesis Round，把定性判断、机器证据、量化指标、冲突和用户裁决迭代收敛 |
 | 总调度器 | `alpha-goal` 根据当前系统状态选择 Skill 和下一步 |
-
-## 六个技能
-
-- `alpha-goal`：闭环总入口，负责 Skill 路由、稳定性检查和跨阶段状态记忆。
-- `goal-contract`：把含糊请求转为可执行、可验证、可移交的 Goal Contract，并承接 Indicator Handoff。
-- `system-model`：建立被控对象模型，识别状态变量、观测信号、可控变量、分层控制、扰动登记和耦合。
-- `control-loop`：在已批准 Goal Contract 下执行有界迭代，采集反馈、记录自适应学习并路由。
-- `evidence-verify`：独立判断证据是否支持完成、可合并、可发布或窄化声明，并审查指标和学习记录边界。
-- `decision-synthesis`：处理复杂系统、多利益相关方、弱结构化需求与高不确定性决策，并通过 Synthesis Round 收敛。
 
 ## 安装
 
@@ -50,55 +50,17 @@ scripts/install.sh
 - 清理旧版本可能留在目标 `skills/` 下、且指向本仓库的直连技能软链接。
 - 校验目标 `skills/alpha-goal` 软链接是否指向当前仓库的 `skills/` 目录，并能通过该链接访问全部六个必需 skill。
 
-安装到其他位置：
-
-```bash
-scripts/install.sh --codex-home /path/to/codex-home
-CODEX_HOME=/path/to/codex-home scripts/install.sh
-```
-
-替换已有同名软链接：
-
-```bash
-scripts/install.sh --force
-```
-
-只安装 skill 软链接，不同步用户级模板：
-
-```bash
-scripts/install.sh --no-sync-user-templates
-```
-
-排查安装过程：
-
-```bash
-scripts/install.sh --verbose
-```
+更多安装模式（指定 `CODEX_HOME`、替换已有软链接、跳过用户级模板同步、排查安装过程）和临时 `CODEX_HOME` smoke test 见 [INSTALL.md](INSTALL.md)。
 
 ## 校验
 
-推荐校验命令：
+修改技能、脚本、模板或文档后，至少运行：
 
 ```bash
 npx --yes tsx tools/validate_skills.ts .
 ```
 
-兼容校验入口：
-
-```bash
-npx --yes tsx tools/validate_skillset.ts .
-```
-
-校验器检查目录结构、元数据、脚本权限、macOS 元数据残留、reference 可发现性、关键闭环字段的 semantic smoke tests，以及典型 prompt 对应的 schema/route fixture contract checks。它仍不能证明技能在真实任务中的触发时机、验证边界或验收判断一定正确。
-
-建议先用临时 `CODEX_HOME` 验证安装流程：
-
-```bash
-tmp_codex_home="$(mktemp -d)"
-CODEX_HOME="$tmp_codex_home" scripts/install.sh
-npx --yes tsx tools/validate_skills.ts .
-rm -rf "$tmp_codex_home"
-```
+旧命令 `tools/validate_skillset.ts` 仍作为兼容入口。涉及安装行为时，按 [INSTALL.md](INSTALL.md) 使用临时 `CODEX_HOME` 做 smoke test，避免污染真实用户配置。
 
 ## 仓库结构
 
@@ -115,4 +77,7 @@ scripts/           # 安装脚本
 tools/             # 本仓库校验工具
 ```
 
-运行中如需跨阶段恢复状态，默认使用 `.alpha-goal/control-state/YYYYMMDD-<slug>.md` 记录 Closed-loop Ledger，包括完整 `Latest Control Route`、artifact registry、Synthesis Round、Indicator Handoff、Controller Hierarchy、Disturbance Register、Control Law、Adaptive Learning Record、error、feedback 和 next route。完整阶段产物按类型写入 `.alpha-goal/context/`、`.alpha-goal/models/`、`.alpha-goal/synthesis/`、`.alpha-goal/iterations/`、`.alpha-goal/evidence/` 和 `.alpha-goal/verification/`；ledger 只保留状态和路径索引。TUI 默认只展示 Markdown 表格形式的 `Route Summary`、`Contract Summary`、`Model Summary`、`Synthesis Summary`、`Iteration Summary` 或 `Verification Summary`，下游技能从 `.alpha-goal/` 读取完整字段。写入前检查 `.alpha-goal/` 是否已被忽略；如果仓库根 `.gitignore` 缺少 `.alpha-goal/`，先加入该条目再写 ledger。
+运行中如需跨阶段恢复状态，默认使用 `.alpha-goal/control-state/YYYYMMDD-<slug>.md` 记录 Closed-loop Ledger，包括完整 `Latest Control Route`、artifact registry、Synthesis Round、Indicator Handoff、Controller Hierarchy、Disturbance Register、Control Law、Adaptive Learning Record、error、feedback 和 next route。
+完整阶段产物按类型写入 `.alpha-goal/context/`、`.alpha-goal/models/`、`.alpha-goal/synthesis/`、`.alpha-goal/iterations/`、`.alpha-goal/evidence/` 和 `.alpha-goal/verification/`；ledger 只保留状态和路径索引。
+TUI 默认只展示 Markdown 表格形式的 `Route Summary`、`Contract Summary`、`Model Summary`、`Synthesis Summary`、`Iteration Summary` 或 `Verification Summary`，下游技能从 `.alpha-goal/` 读取完整字段。
+写入前检查 `.alpha-goal/` 是否已被忽略；如果仓库根 `.gitignore` 缺少 `.alpha-goal/`，先加入该条目再写 ledger。
