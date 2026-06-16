@@ -32,7 +32,7 @@ Add when relevant:
 - `已变更文件`: intentional touched paths when there is a diff.
 - `生成产物`: generated files, reports, binaries, or documents.
 - `验收变化`: criteria covered, partially covered, or uncovered.
-- `控制律结果`: target error, expected effect, observed feedback, threshold status, feedback latency, signal noise, confidence, damping / anti-oscillation, saturation / containment, fallback, and residual error for mutation or diagnostic-probe slices.
+- `控制律结果`: 对变更或诊断探测切片，记录目标误差、预期效果、已观察反馈、阈值状态、反馈延迟、信号噪声、置信度、阻尼 / 防振荡、影响范围上限、失败处理和残余误差。
 - `自适应学习记录`: trigger, observed mismatch, adjustment, reuse condition, and invalidation condition when feedback changes future control behavior.
 - `反馈处理`: user, reviewer, test, runtime, or advisory feedback that changed the route.
 - `风险 / 归属`: cross-boundary, generated-output, migration, compatibility, concurrency, data, security, or observability risk.

@@ -28,7 +28,7 @@ The round is a human-machine convergence mechanism, not a meeting transcript. Ke
   - 当前值:
   - 目标或阈值:
   - 测量缺口:
-- 指标交接候选:
+- 指标转译候选:
 - 冲突或矛盾:
 - 综合更新:
 - 用户自有决策:
@@ -37,7 +37,7 @@ The round is a human-machine convergence mechanism, not a meeting transcript. Ke
 ```
 
 ```text
-指标交接:
+指标转译:
 - 定性目标:
 - 指标或代理:
 - 操作化定义:
@@ -47,11 +47,11 @@ The round is a human-machine convergence mechanism, not a meeting transcript. Ke
 - 路由触发条件:
 ```
 
-## Rules
+## 规则
 
 - Use qualitative judgment to select objectives, scenarios, and tradeoffs; use quantitative evidence to constrain claims and detect error.
 - Do not average away conflicts. Name the owner, evidence basis, and decision boundary.
 - If a metric is unavailable, name a proxy or missing sensor instead of inventing precision.
-- Pass accepted indicators to `goal-contract` as an 指标交接 with operational definition, sensor, threshold/tolerance, and evidence boundary.
+- 把已接受指标作为 指标转译 传递给 `goal-contract`，并包含操作化定义、传感器、阈值 / 容差和证据边界。
 - If user priority, risk acceptance, budget, timeline, or scope changes are required, route to user instead of deciding silently.
 - Stop rounds when a stable 目标契约 candidate, system-model question, user decision, or blocker is the smallest next action.

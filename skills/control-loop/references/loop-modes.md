@@ -1,8 +1,8 @@
-# Loop Modes
+# 循环模式
 
 A mode names the dominant uncertainty in the current iteration; it is not an extra ceremony layer.
 
-## Choose by dominant uncertainty
+## 按主导不确定性选择
 
 - `discovery`: unknown target, owner, behavior, rules, logs, or existing work.
 - `debug`: unknown cause or first divergence point.
@@ -13,7 +13,7 @@ A mode names the dominant uncertainty in the current iteration; it is not an ext
 - `hardening`: core behavior appears done but evidence, edge cases, compatibility, cleanup, docs, or observability remain weak.
 - `evidence-audit`: implementation may already exist, but evidence quality and claim boundary are uncertain.
 
-## Evidence shape
+## 证据形态
 
 Evidence is useful only if it can change the next decision.
 
@@ -48,7 +48,7 @@ Status rules:
 
 - `ROOT_CAUSE_CONFIRMED`: evidence identifies the first divergence point, links entity/state to the interface boundary, and bounds material alternatives enough to support the fix surface.
 - `HYPOTHESIS_TESTED`: a falsifiable hypothesis was tested with a bounded probe, instrumentation, or reversible change that does not alter the intended fix surface.
-- `MITIGATION_APPLIED`: authorized containment or risk reduction was applied without claiming root-cause repair.
+- `MITIGATION_APPLIED`: 已应用授权控制措施或风险降低措施，但不声明根因已修复。
 - `NOT_REPRODUCED`: reproduction was attempted but not observed; do not claim fixed.
 - `BLOCKED`: missing logs, commands, files, environment, data, or scope prevents diagnosis.
 

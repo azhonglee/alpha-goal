@@ -7,7 +7,7 @@ description: "Convert ambiguous engineering, debugging, design, or artifact requ
 
 Use this skill to form the reference state for a controlled engineering effort. It turns intent into a 目标契约 before any mutation-capable iteration begins.
 
-## Control interpretation
+## 控制论解释
 
 In engineering-cybernetics terms, this skill defines the setpoint and safe control boundary:
 
@@ -18,7 +18,7 @@ In engineering-cybernetics terms, this skill defines the setpoint and safe contr
 - `control memory`: the ledger state that preserves reference/current/error/route history across stages;
 - `stability conditions`: non-goals, stop conditions, claim boundary, and reframe triggers.
 
-## Boundaries
+## 边界
 
 - Do not edit implementation files, push, open PRs/MRs, deploy, repair data, request credentials, or claim implementation completion.
 - Default to writing process artifacts under `.alpha-goal/`. Before the first write in a repository, ensure `.alpha-goal/` is ignored; if it is missing from the repo root `.gitignore`, add `.alpha-goal/` there before writing ledger artifacts.
@@ -28,13 +28,13 @@ In engineering-cybernetics terms, this skill defines the setpoint and safe contr
 - For diagnostics, do not assume repair authorization merely because a plausible cause exists. Define what evidence authorizes repair.
 - Keep proportionality: gather only what materially changes scope, risk, authority, evidence, or next safe action.
 
-## Load resources when needed
+## 按需加载资源
 
 - `references/ambiguity-scoring.md`: score uncertainty only when it changes clarification effort or handoff safety.
 - `references/indicator-handoff.md`: convert qualitative objectives or synthesis indicators into measurable evidence.
 - `references/goal-contract-schema.md`: produce a durable or handoff-ready 目标契约.
 
-## Process
+## 流程
 
 ```text
 Observe request -> Model uncertainty -> Clarify -> Pressure-test -> Crystallize -> Review -> Handoff
@@ -100,7 +100,7 @@ Readiness gates before handoff:
 - included scope and excluded non-goals are clear;
 - decision boundaries state what the agent may decide without confirmation;
 - acceptance criteria and evidence expectations are testable enough for the next action;
-- material qualitative goals have an 指标交接 with sensor, threshold or tolerance, and evidence boundary, or an explicit missing-sensor gap;
+- 实质性定性目标应有 指标转译，并包含传感器、阈值或容差、证据边界；否则明确缺失传感器缺口；
 - diagnostic contracts define symptoms, observations, hypotheses, and root-cause evidence needed before repair;
 - claim boundary states what final wording may and may not say;
 - at least one pressure pass has checked an assumption, example, counterexample, or tradeoff for non-trivial work.
@@ -145,13 +145,13 @@ Persist full artifacts under `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md` by d
 - 当前状态: 已观察事实、推断、未解决不确定性
 - 范围: 范围内、范围外、非目标
 - 控制模型: 被控对象、允许的控制变量、可观测信号、扰动、耦合风险
-- 指标交接: 定性目标、指标 / 代理、操作化定义、传感器、测量时机、阈值 / 容差、证据边界、负责人、路由触发条件
+- 指标转译: 定性目标、指标 / 代理、操作化定义、传感器、测量时机、阈值 / 容差、证据边界、负责人、路由触发条件
 - 决策边界: agent 可决策事项与用户自有决策
 - 约束与假设: 已解决假设与条件
 - 验收标准: 可验证的证据预期
 - 诊断闸门: 症状、假设、所需原因证据、修复授权闸门（如适用）
 - 压力测试发现: 假设 / 取舍 / 证据探测
-- 交接: 已接受指标、允许的首轮循环模式、证据下限、停止 / 重构触发条件
+- 交接: 已接受指标、允许的首轮循环模式、证据下限、停止 / 重新界定触发条件
 - 台账更新: `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 路径、产物路径、可选结构化索引路径、最新误差信号、下一路由，或明确的无法写入原因
 ```
 

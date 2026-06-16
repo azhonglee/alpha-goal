@@ -3,11 +3,11 @@ name: evidence-verify
 description: "Judge whether fresh evidence satisfies an active 目标契约 and supports completion, correctness, safety, merge readiness, ship readiness, or a narrowed final claim. Use for final comparator/error-boundary decisions, not implementation."
 ---
 
-# Evidence Verify
+# 证据验证
 
 Use this skill as the independent comparator in the closed loop. It judges whether the observed final state matches the reference state and whether the proposed claim stays within evidence.
 
-## Entry
+## 入口
 
 Use when there is an active or recoverable approved context and the user, `goal-contract`, `control-loop`, or `alpha-goal` asks whether work is done, correct, safe, ready to merge, ready to ship, or ready for a narrowed final claim.
 
@@ -19,9 +19,9 @@ A positive verdict needs proportional semantic evidence for:
 - current durable spec/plan/model if referenced;
 - 迭代记录 or equivalent diff/evidence bundle;
 - 控制律 result for each material `control-loop` slice, including latency/noise/confidence and stability guards when a mutation or diagnostic probe was used;
-- 指标交接 handling when qualitative objectives or synthesis metrics affect acceptance evidence;
+- 当定性目标或综合指标影响验收证据时，包含 指标转译 处理；
 - 闭环台账 from `.alpha-goal/YYYYMMDD-<slug>/control-state.md`, including `最新控制路由`, when the work crossed skills or turns, or explicit no-write chat state when file writing was forbidden or impossible;
-- 扰动登记 handling when material disturbances affected route, evidence, or risk;
+- 当实质扰动影响路由、证据或风险时，包含 扰动记录 处理；
 - 自适应学习记录 handling when feedback changed thresholds, strategy, route, or reusable assumptions;
 - 调试回执 when the claim is a bug or root-cause fix;
 - strongest material risk and matching evidence floor;
@@ -29,14 +29,14 @@ A positive verdict needs proportional semantic evidence for:
 - exact commands/probes/checks and outcomes, or explicit blocker/substitute evidence;
 - feedback handling for user/reviewer/test/runtime feedback.
 
-## Load resources when needed
+## 按需加载资源
 
 - `references/verification-verdict-schema.md`: field semantics for formal verdicts.
 - `references/completion-review-rubric.md`: final delivery, merge-ready, ship-ready, or production-sensitive evidence floor.
 - `references/claim-boundary-check.md`: prevent final claims exceeding evidence.
 - `scripts/evidence-summary.ts`: read-only diff/status evidence.
 
-## Process
+## 流程
 
 ```text
 Map acceptance -> Inspect artifacts -> Check claim boundary -> Judge verdict -> Route
@@ -61,9 +61,9 @@ Confirm:
 - approved context is current or explicitly superseded;
 - 目标契约, system model, durable spec, and plan are semantically aligned or contradictions are routed;
 - ledger reference, current state, latest control route, residual error, and latest route decision are aligned with fresh evidence or explicitly superseded;
-- each material 控制律 identifies a target error, approved control variable, expected effect, sensor threshold, observed feedback, feedback latency, signal noise when material, confidence, damping / anti-oscillation, saturation / containment, and fallback handling;
-- each material 指标交接 maps qualitative objective to operational definition, sensor, threshold/tolerance, timing, and evidence boundary;
-- each material 扰动登记 entry has sensor evidence, containment, route-trigger handling, or an explicit residual gap;
+- 每个实质 控制律 都应识别目标误差、已批准控制变量、预期效果、传感器阈值、已观察反馈、反馈延迟、实质信号噪声、置信度、阻尼 / 防振荡、影响范围上限和失败处理；
+- 每个实质 指标转译 都应把定性目标映射到操作化定义、传感器、阈值 / 容差、测量时机和证据边界；
+- 每个实质 扰动记录 条目都应包含传感器证据、控制措施、路由触发处理，或明确的残余缺口；
 - each material 自适应学习记录 has evidence, adjustment, reuse condition, invalidation condition, and no unsupported broad generalization;
 - 迭代记录 goal type, control slice, execution, feedback, learning, and evidence match the final diff/artifact;
 - changed files match target and avoid non-goals;
@@ -144,7 +144,7 @@ TUI 摘要:
 - 声明边界:
 - 风险 / 证据复核:
 - 控制律复核:
-- 指标交接复核:
+- 指标转译复核:
 - 自适应学习复核:
 - 台账复核:
 - 扰动复核:

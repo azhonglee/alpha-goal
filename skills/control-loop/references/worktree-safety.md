@@ -1,8 +1,8 @@
-# Worktree Safety
+# 工作树安全
 
 Use this reference when mutation could pollute a primary checkout or cross an ownership boundary.
 
-## Isolation rule
+## 隔离规则
 
 Isolation is valid when the edit path is:
 
@@ -20,7 +20,7 @@ Default candidate path:
 
 Project rules or an already approved external worktree path may override it.
 
-## Primary checkout warning signs
+## 主检出目录警示信号
 
 Treat the current checkout as primary when:
 
@@ -29,7 +29,7 @@ Treat the current checkout as primary when:
 - project rules say not to edit the main checkout;
 - branch/worktree state is unknown.
 
-## Read-only preflight
+## 只读预检
 
 ```bash
 git worktree list
@@ -40,7 +40,7 @@ git check-ignore -q .alpha-goal/preflight-check || printf 'CHECK: add .alpha-goa
 
 These checks evaluate default candidates only. If `.alpha-goal/` is not ignored, add `.alpha-goal/` to the repo root `.gitignore` before writing ledger, evidence, review, or scratch artifacts. If the approved path differs, check that path instead.
 
-## Safe pattern
+## 安全模式
 
 If `.worktrees/` is ignored and matches project rules:
 
@@ -52,7 +52,7 @@ cd .worktrees/codex/<task-slug>
 
 Only after entering the isolated worktree should mutation begin.
 
-## Unsafe pattern
+## 不安全模式
 
 Avoid direct mutation in the primary checkout, including:
 
@@ -63,7 +63,7 @@ git switch -c <branch-name>
 
 Also avoid direct edits or deletes in that checkout unless explicitly approved and risk is recorded.
 
-## Existing changes
+## 既有变更
 
 If unrelated user changes exist:
 

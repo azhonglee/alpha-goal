@@ -1,4 +1,4 @@
-# Stakeholder Decision Boundaries
+# 利益相关方决策边界
 
 The agent may recommend but must not silently decide:
 

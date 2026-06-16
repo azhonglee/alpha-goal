@@ -1,8 +1,8 @@
-# Claim Boundary Check
+# 声明边界检查
 
 Use this to prevent final claims from exceeding evidence.
 
-## Boundary ladder
+## 边界阶梯
 
 A claim can move from local artifact toward broader behavior only when fresh evidence crosses the relevant interface boundary:
 
@@ -16,7 +16,7 @@ A claim can move from local artifact toward broader behavior only when fresh evi
 
 State the actual boundary if these examples do not fit. Never use lower-boundary evidence to claim higher-boundary success.
 
-## Required comparison
+## 必要比较
 
 ```text
 声明边界:
@@ -28,7 +28,7 @@ State the actual boundary if these examples do not fit. Never use lower-boundary
 - 允许的最终声明:
 ```
 
-## Common overclaims
+## 常见过度声明
 
 - testing a helper but claiming product flow fixed;
 - reading a diff but claiming runtime behavior verified;

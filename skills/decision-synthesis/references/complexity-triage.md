@@ -1,13 +1,13 @@
-# Complexity Triage
+# 复杂度分流
 
-## Classes
+## 分类
 
 - `simple`: clear goal, clear path, direct feedback.
 - `complicated`: many parts, but objective and decomposition are stable.
 - `complex`: feedback loops, adaptation, ambiguous objective, or conflicting priorities.
 - `complex-giant-like`: many interacting human/technical subsystems, weak observability, high stakes, and no single complete model.
 
-## Signals that synthesis is needed
+## 需要综合的信号
 
 - optimizing one subsystem harms another;
 - stakeholders disagree on success;
@@ -16,7 +16,7 @@
 - model uncertainty is high but action pressure is also high;
 - irreversible decisions depend on assumptions.
 
-## Exit criteria
+## 退出标准
 
 Synthesis is sufficient when it identifies:
 

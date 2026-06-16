@@ -392,7 +392,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "acceptance evidence",
       "claim boundary",
       "decision boundaries",
-      "指标交接",
+      "指标转译",
       ".alpha-goal/YYYYMMDD-<slug>/goal-contract.md",
       ".alpha-goal/YYYYMMDD-<slug>/control-state.md",
       "契约摘要",
@@ -410,7 +410,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "候选控制律",
       "控制器层级",
       "无实质项",
-      "扰动登记",
+      "扰动记录",
       "无实质项",
       ".alpha-goal/YYYYMMDD-<slug>/system-model.md",
       ".alpha-goal/YYYYMMDD-<slug>/control-state.md",
@@ -423,20 +423,20 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "skills/control-loop/SKILL.md",
     [
       "执行检查",
-      "Chinese titles by default",
-      "explicitly asks for another language",
+      "默认使用中文标题",
+      "明确要求其他语言",
       "问题",
       "本轮动作",
       "验收证据",
-      "persisted 控制律",
-      "Do not print the raw `控制律:` block in the TUI by default",
-      "user asks",
-      "persistence is blocked",
-      "high-risk",
+      "持久化 控制律",
+      "默认不要在 TUI 打印原始 `控制律:` 块",
+      "用户要求",
+      "持久化受阻",
+      "高风险",
       "目标误差",
       "控制变量",
       "传感器阈值",
-      "fallback",
+      "失败处理",
       "最新控制路由",
       "自适应学习记录",
       ".alpha-goal/YYYYMMDD-<slug>/iterations",
@@ -464,7 +464,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "skills/decision-synthesis/SKILL.md",
     [
       "综合轮次",
-      "指标交接",
+      "指标转译",
       "定性判断",
       "定量信号",
       "综合研判工作台",
@@ -486,10 +486,10 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "| 字段 | 内容 |",
       "TUI",
       "控制律",
-      "指标交接",
+      "指标转译",
       "自适应学习",
       "控制器层级",
-      "扰动登记",
+      "扰动记录",
       "误差信号",
       "选定技能",
     ],
@@ -508,16 +508,16 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "closed-loop ledger records cross-stage control memory",
     "skills/alpha-goal/references/closed-loop-ledger.md",
     [
-      "Default behavior",
+      "默认行为",
       ".alpha-goal/",
       ".gitignore",
-      "process-artifact setup mutation",
+      "流程产物初始化变更",
       ".alpha-goal/YYYYMMDD-<slug>/",
       "最新控制路由",
-      "Artifact registry",
+      "产物登记",
       "路由摘要",
       "| 字段 | 内容 |",
-      "source of truth",
+      "事实来源",
       ".alpha-goal/YYYYMMDD-<slug>/goal-contract.md",
       ".alpha-goal/YYYYMMDD-<slug>/system-model.md",
       ".alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md",
@@ -533,9 +533,9 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "下一状态",
       "自适应学习",
       "执行检查",
-      "Chinese titles by default",
-      "Chinese titles by default",
-      "raw internal 控制律 blocks",
+      "默认使用带中文标题",
+      "不展示多语言模板",
+      "原始内部 控制律 块",
     ],
   ],
   [
@@ -561,7 +561,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "skills/alpha-goal/references/cybernetic-conformance.md",
     [
       "状态迁移",
-      "Schema 辅助索引",
+      "结构化索引",
       "legacy artifact path",
       "reference before action",
       "sensor before claim",
@@ -595,7 +595,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "冲突或矛盾",
       "用户自有决策",
       "下一个待验证假设",
-      "指标交接候选",
+      "指标转译候选",
     ],
   ],
   [
@@ -642,18 +642,18 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "内部结构",
       "界面投影",
       "执行检查",
-      "internal artifact syntax only",
-      "Schema 辅助索引是机器可读的摘要与索引",
+      "内部产物语法",
+      "结构化索引是机器可读的摘要与索引",
       "内部产物示例",
-      "not the default TUI projection",
-      "Print the raw `控制律:` block in chat only when the user asks",
-      "persistence is blocked",
-      "high-risk",
+      "不是默认 TUI 投影",
+      "只有在用户要求",
+      "持久化受阻",
+      "高风险",
       "反馈延迟",
       "信号噪声",
       "置信度",
       "阻尼 / 防振荡",
-      "饱和 / 影响范围约束",
+      "影响范围上限",
     ],
   ],
   [
@@ -664,7 +664,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "信号噪声",
       "置信度",
       "阻尼 / 防振荡",
-      "饱和 / 影响范围约束",
+      "影响范围上限",
     ],
   ],
   [
@@ -672,32 +672,32 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "skills/control-loop/SKILL.md",
     [
       "执行检查",
-      "Chinese titles by default",
-      "explicitly asks for another language",
+      "默认使用中文标题",
+      "明确要求其他语言",
       "问题",
       "本轮动作",
       "主要风险",
-      "persisted 控制律",
-      "Do not print the raw `控制律:` block in the TUI by default",
-      "user asks",
-      "persistence is blocked",
-      "high-risk",
+      "持久化 控制律",
+      "默认不要在 TUI 打印原始 `控制律:` 块",
+      "用户要求",
+      "持久化受阻",
+      "高风险",
       "反馈延迟",
       "信号噪声",
       "置信度",
       "阻尼 / 防振荡",
-      "饱和 / 影响范围约束",
+      "影响范围上限",
     ],
   ],
   [
     "evidence verify checks dynamic control law fields",
     "skills/evidence-verify/SKILL.md",
     [
-      "feedback latency",
-      "signal noise",
-      "confidence",
-      "damping / anti-oscillation",
-      "saturation / containment",
+      "反馈延迟",
+      "信号噪声",
+      "置信度",
+      "阻尼 / 防振荡",
+      "影响范围上限",
     ],
   ],
   [
@@ -705,12 +705,12 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "skills/decision-synthesis/references/meta-synthesis-hall.md",
     [
       "综合研判工作台",
-      "Human role",
-      "Machine role",
-      "Hypothesis bank",
-      "Model registry",
-      "Convergence condition",
-      "Dissent",
+      "人类角色",
+      "机器角色",
+      "假设库",
+      "模型登记",
+      "收敛条件",
+      "异议",
     ],
   ],
 ];
@@ -724,7 +724,7 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
       "- 参考状态:",
       "- 范围:",
       "- 控制模型:",
-      "- 指标交接:",
+      "- 指标转译:",
       "- 验收标准:",
       "- 交接:",
       "- 台账更新:",
@@ -740,7 +740,7 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
       "- 传感器与证据边界:",
       "- 执行器与授权边界:",
       "- 候选控制律:",
-      "- 扰动登记:",
+      "- 扰动记录:",
       "- 控制器层级:",
       "- 推荐路由:",
     ],
@@ -761,7 +761,7 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
   {
     name: "control loop execution check keeps user-facing table fields",
     path: "skills/control-loop/SKILL.md",
-    anchor: "TUI pre-action check:",
+    anchor: "TUI 执行前检查:",
     block_scope: "section",
     required_terms: [
       "执行检查",
@@ -771,8 +771,8 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
       "| 验收证据 |",
       "| 主要风险 |",
       "| 失败处理 |",
-      "Chinese titles by default",
-      "without showing multiple language templates",
+      "默认使用中文标题",
+      "不同时展示多语言模板",
     ],
   },
   {
@@ -790,8 +790,8 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
       "| 失败处理 |",
       "| 问题 | 目标误差 |",
       "| 本轮动作 | 控制变量加控制动作或探测 |",
-      "| 主要风险 | 信号噪声、阻尼 / 防振荡、饱和 / 影响范围约束，或最强实质风险 |",
-      "| 失败处理 | 失败处理加停止 / 重构触发条件 |",
+      "| 主要风险 | 信号噪声、阻尼 / 防振荡、影响范围上限，或最强实质风险 |",
+      "| 失败处理 | 失败处理加停止 / 重新界定触发条件 |",
     ],
   },
   {
@@ -800,10 +800,10 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
     anchor: "## 内部结构",
     block_scope: "section",
     required_terms: [
-      "internal artifact syntax only",
-      "not the default TUI shape",
-      "Schema 辅助索引是机器可读的摘要与索引",
-      "do not treat a sidecar as the full 控制律",
+      "内部产物语法",
+      "不是默认 TUI 形态",
+      "结构化索引是机器可读的摘要与索引",
+      "不要把结构化索引文件当成完整 控制律",
     ],
   },
   {
@@ -812,9 +812,9 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
     anchor: "## 内部产物示例",
     block_scope: "section",
     required_terms: [
-      "persisted artifact",
-      "not the default TUI projection",
-      "Do not paste it into chat",
+      "持久化产物",
+      "不是默认 TUI 投影",
+      "不要把它作为默认执行前展示",
       "控制律:",
     ],
   },
@@ -835,11 +835,11 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
     path: "skills/decision-synthesis/SKILL.md",
     anchor: "### 7. Route",
     required_terms: [
-      "Route to `goal-contract`",
-      "Route to `system-model`",
-      "Route to user",
-      "Route to `evidence-verify` only when synthesis did not authorize mutation",
-      "Route to `control-loop` only if a valid 目标契约 already exists",
+      "路由到 `goal-contract`",
+      "路由到 `system-model`",
+      "路由到用户",
+      "路由到 `evidence-verify`",
+      "路由到 `control-loop`",
     ],
   },
 ];
@@ -848,7 +848,7 @@ const DEFAULT_TUI_PROJECTION_GUARDS = [
   {
     name: "control loop pre-action TUI",
     path: "skills/control-loop/SKILL.md",
-    anchor: "TUI pre-action check:",
+    anchor: "TUI 执行前检查:",
     end_anchor: "Create or update a durable plan",
   },
   {
@@ -922,6 +922,14 @@ const LEGACY_OUTPUT_TITLE_TERMS = [
   "Cybernetic Conformance Report:",
   "Meta-Synthesis Hall",
   "综合集成厅",
+  "指标交接",
+  "扰动登记",
+  "饱和 / 影响范围约束",
+  "停止 / 重构触发条件",
+  "停止或重构触发条件",
+  "Schema 辅助索引",
+  "Schema 辅助索引路径",
+  "控制器 / actuator",
   "| Field | Value |",
 ];
 
@@ -997,7 +1005,7 @@ const FIXTURE_CONTRACT_TESTS = [
       "skills/decision-synthesis/SKILL.md",
       "skills/decision-synthesis/references/synthesis-round.md",
     ],
-    schema_blocks: ["决策综合记录:", "综合轮次:", "指标交接:"],
+    schema_blocks: ["决策综合记录:", "综合轮次:", "指标转译:"],
     route_terms: ["user", "goal-contract", "system-model", "blocker"],
   },
   {
@@ -1010,7 +1018,7 @@ const FIXTURE_CONTRACT_TESTS = [
       "skills/goal-contract/SKILL.md",
       "skills/goal-contract/references/indicator-handoff.md",
     ],
-    schema_blocks: ["目标契约:", "指标交接:"],
+    schema_blocks: ["目标契约:", "指标转译:"],
     route_terms: ["control-loop", "system-model", "evidence-verify", "block"],
   },
   {
@@ -1056,7 +1064,7 @@ const FIXTURE_CONTRACT_TESTS = [
     ],
     schema_blocks: [
       "验证结论:",
-      "指标交接复核",
+      "指标转译复核",
       "自适应学习复核",
     ],
     route_terms: ["PASS_TO_FINAL", "NEXT_ITERATION", "REFRAME", "BLOCKED"],
@@ -2146,10 +2154,10 @@ function validateCyberneticRouteConsistency(root: string, errors: string[]): voi
 
   if (synthesis) {
     const requiredRoutes = [
-      "Route to `evidence-verify` only when synthesis did not authorize mutation",
-      "Route to `control-loop` only if a valid 目标契约 already exists",
-      "Route to `goal-contract` when a stable recommended direction",
-      "Route to `system-model` when subsystem boundary or feedback signals remain unclear",
+      "路由到 `evidence-verify`",
+      "路由到 `control-loop`",
+      "路由到 `goal-contract`",
+      "路由到 `system-model`",
     ];
     for (const route of requiredRoutes) {
       if (!synthesis.includes(route)) {
@@ -2803,24 +2811,24 @@ function sidecarFilenameMatchesKind(kind: string, filename: string): boolean {
 }
 
 function printReport(root: string, errors: string[], warnings: string[]): void {
-  console.log("Skill suite validation");
-  console.log(`root: ${root}`);
+  console.log("技能套件校验");
+  console.log(`根目录: ${root}`);
   if (errors.length > 0) {
-    console.log("\nERRORS:");
+    console.log("\n错误:");
     for (const error of errors) {
       console.log(`- ${error}`);
     }
   }
   if (warnings.length > 0) {
-    console.log("\nWARNINGS:");
+    console.log("\n警告:");
     for (const warning of warnings) {
       console.log(`- ${warning}`);
     }
   }
   if (errors.length === 0 && warnings.length === 0) {
-    console.log("PASS: all checks passed");
+    console.log("通过: 所有检查通过");
   } else if (errors.length === 0) {
-    console.log("PASS with warnings");
+    console.log("通过，但存在警告");
   }
 }
 

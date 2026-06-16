@@ -24,7 +24,7 @@ If material multi-controller relationships exist, output a clearly labeled `控�
 - 推荐协同路由:
 ```
 
-## Rules
+## 规则
 
 - Use the hierarchy to keep local optimization from destabilizing the global objective.
 - Name coupling variables that multiple controllers can change or observe.

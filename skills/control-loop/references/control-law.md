@@ -4,7 +4,7 @@ Use this reference when planning or reviewing a `control-loop` slice that change
 
 ## 界面投影
 
-Show a concise `执行检查` table in the TUI by default. Use Chinese titles and field labels unless the user explicitly asks for another language:
+TUI 默认展示简短的 `执行检查` 表。除非用户明确要求其他语言，否则使用中文标题和中文字段名：
 
 ```markdown
 执行检查
@@ -19,7 +19,7 @@ Show a concise `执行检查` table in the TUI by default. Use Chinese titles an
 | 失败处理 | |
 ```
 
-Use the table as a human-readable projection of the internal 控制律. Keep the TUI values short enough to scan. Put long reasoning, exact thresholds, and stability guards in the persisted 控制律. Print the raw `控制律:` block in chat only when the user asks, persistence is blocked, or a high-risk slice requires explicit review of every field before mutation.
+把表格作为内部 控制律 的可读投影。TUI 值保持短小、易扫读；较长推理、精确阈值和稳定性保护放入持久化 控制律。只有在用户要求、持久化受阻，或高风险切片需要变更前逐项复核字段时，才在聊天中打印原始 `控制律:` 块。
 
 字段映射如下:
 
@@ -27,14 +27,14 @@ Use the table as a human-readable projection of the internal 控制律. Keep the
 | --- | --- |
 | 问题 | 目标误差 |
 | 本轮动作 | 控制变量加控制动作或探测 |
-| 保持不变 | 保持不变的变量加饱和 / 影响范围约束 |
+| 保持不变 | 保持不变的变量加影响范围上限 |
 | 验收证据 | 传感器加阈值 / 容差 |
-| 主要风险 | 信号噪声、阻尼 / 防振荡、饱和 / 影响范围约束，或最强实质风险 |
-| 失败处理 | 失败处理加停止 / 重构触发条件 |
+| 主要风险 | 信号噪声、阻尼 / 防振荡、影响范围上限，或最强实质风险 |
+| 失败处理 | 失败处理加停止 / 重新界定触发条件 |
 
 ## 内部结构
 
-Persist this full schema in the 迭代记录 or 闭环台账 when it affects recovery, audit, or verification. It is internal artifact syntax only, not the default TUI shape. Schema 辅助索引是机器可读的摘要与索引；do not treat a sidecar as the full 控制律 unless its schema is explicitly extended.
+当控制律影响恢复、审计或验证时，把完整结构持久化到 迭代记录 或 闭环台账。它只是内部产物语法，不是默认 TUI 形态。结构化索引是机器可读的摘要与索引；除非结构化索引格式明确扩展，否则不要把结构化索引文件当成完整 控制律。
 
 ```text
 控制律:
@@ -49,13 +49,13 @@ Persist this full schema in the 迭代记录 or 闭环台账 when it affects rec
 - 信号噪声:
 - 置信度:
 - 阻尼 / 防振荡:
-- 饱和 / 影响范围约束:
+- 影响范围上限:
 - 反馈时机:
 - 失败处理:
-- 停止 / 重构触发条件:
+- 停止 / 重新界定触发条件:
 ```
 
-## Rules
+## 规则
 
 - `目标误差` must be stated as a mismatch between reference state and current state, not as effort already spent.
 - `控制变量` must be inside the approved actuator boundary.
@@ -66,13 +66,13 @@ Persist this full schema in the 迭代记录 or 闭环台账 when it affects rec
 - `信号噪声` states known flakiness, stale evidence risk, or ambiguous sensor interpretation.
 - `置信度` is low | medium | high and reflects causal certainty, not optimism.
 - `阻尼 / 防振荡` names the guard that prevents repeated broad rewrites, route flapping, or over-correction.
-- `饱和 / 影响范围约束` names the maximum allowed blast radius for this slice and the boundary that must not be crossed.
+- `影响范围上限` 命名本切片允许的最大影响范围，以及不得跨越的边界。
 - `失败处理` must not silently expand scope, authority, or risk.
 - If no sensor can observe the expected effect, route to `system-model` or return `BLOCKED`.
 
 ## 内部产物示例
 
-This example is for the persisted artifact, not the default TUI projection. Do not paste it into chat as the default pre-action display.
+此示例用于持久化产物，不是默认 TUI 投影。不要把它作为默认执行前展示直接贴到聊天中。
 
 ```text
 控制律:
@@ -87,8 +87,8 @@ This example is for the persisted artifact, not the default TUI projection. Do n
 - 信号噪声: parser differences between strict YAML and the local frontmatter parser.
 - 置信度: high, because parser failure directly names the invalid syntax.
 - 阻尼 / 防振荡: change only scalar quoting, then rerun the parser before touching descriptions.
-- 饱和 / 影响范围约束: do not rename skills or rewrite description semantics.
+- 影响范围上限: 不重命名技能，不改写 description 语义。
 - 反馈时机: after the quoting change.
 - 失败处理: inspect remaining frontmatter syntax and tighten validator.
-- 停止 / 重构触发条件: parser still fails or description semantics must change.
+- 停止 / 重新界定触发条件: parser 仍失败，或 description 语义必须改变。
 ```

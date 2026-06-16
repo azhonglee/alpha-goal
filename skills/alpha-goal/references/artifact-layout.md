@@ -1,4 +1,4 @@
-# Task-Scoped Artifact Layout
+# 任务级产物布局
 
 Use one task run directory for every durable runtime artifact:
 
@@ -19,7 +19,7 @@ Use one task run directory for every durable runtime artifact:
   interviews.md
 ```
 
-## Rules
+## 规则
 
 - Create `.alpha-goal/YYYYMMDD-<slug>/` once per goal, task batch, or resumable workstream.
 - Keep `control-state.md` as the cross-skill source of truth for route, reference, current state, residual error, latest control action, latest sensor feedback, artifact registry, and next route.
@@ -28,7 +28,7 @@ Use one task run directory for every durable runtime artifact:
 - Do not use legacy category directories directly under `.alpha-goal/`, such as `context/`, `models/`, `control-state/`, `iterations/`, `evidence/`, or `verification/`.
 - If file persistence is blocked, print the artifact in chat and state the no-write reason where the artifact path would normally appear.
 
-## Artifact registry fields
+## 产物登记字段
 
 Record paths relative to the repository root:
 
@@ -41,7 +41,7 @@ Record paths relative to the repository root:
 - 计划: .alpha-goal/YYYYMMDD-<slug>/plan.md
 - 迭代记录: .alpha-goal/YYYYMMDD-<slug>/iterations/
 - 证据: .alpha-goal/YYYYMMDD-<slug>/evidence/
-- Schema 辅助索引: .alpha-goal/YYYYMMDD-<slug>/schema/
+- 结构化索引: .alpha-goal/YYYYMMDD-<slug>/schema/
 - 验证结论: .alpha-goal/YYYYMMDD-<slug>/verification-verdict.md
 - 一致性报告: .alpha-goal/YYYYMMDD-<slug>/conformance-report.md
 ```

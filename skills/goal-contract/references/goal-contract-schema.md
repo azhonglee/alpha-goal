@@ -28,7 +28,7 @@ Persist the full contract at `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md` by d
   - 扰动:
   - 耦合:
   - 稳定性条件:
-- 指标交接:
+- 指标转译:
   - 定性目标:
   - 指标或代理:
   - 操作化定义:
@@ -52,7 +52,7 @@ Persist the full contract at `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md` by d
 - 交接:
   - 首轮循环模式:
   - 证据下限:
-  - 停止或重构触发条件:
+  - 停止或重新界定触发条件:
 - 台账更新:
   - 控制状态路径:
   - 产物路径:

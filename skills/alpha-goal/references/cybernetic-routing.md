@@ -1,8 +1,8 @@
-# Cybernetic Routing Reference
+# 控制论路由参考
 
 Use this reference when a request could activate multiple skills.
 
-## Closed-loop order
+## 闭环顺序
 
 A stable route usually follows:
 
@@ -19,7 +19,7 @@ The optional steps are not ceremony:
 - Use `evidence-verify` whenever a completion/readiness/correctness claim is at stake.
 - Carry the 闭环台账 across stages when a task spans skills or turns. The full `控制路由` is persisted under `.alpha-goal/YYYYMMDD-<slug>/control-state.md`; the TUI should show only a compact Markdown-table `路由摘要` by default.
 
-## Stability failure patterns
+## 稳定性失败模式
 
 - Implementation before setpoint: code changes start while acceptance is vague.
 - Sensor failure: final claim relies on old, low-boundary, or missing evidence.
@@ -30,6 +30,6 @@ The optional steps are not ceremony:
 - Memory drift: artifacts are written outside `.alpha-goal/YYYYMMDD-<slug>/`, making later recovery or validation ambiguous.
 - Comparator bypass: `control-loop` claims final completion without `evidence-verify`.
 
-## Minimal intervention rule
+## 最小干预规则
 
 Route to the smallest skill that can reduce the current error. Do not run a full modeling or synthesis phase for a localized low-risk task with clear acceptance and direct evidence.

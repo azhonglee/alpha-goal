@@ -1,11 +1,11 @@
-# 扰动登记
+# 扰动记录
 
-Use a 扰动登记 when external change, hidden coupling, unreliable tooling, unclear ownership, or environmental drift can change the route, evidence floor, or safety boundary.
+当外部变化、隐藏耦合、不可靠工具、归属不清或环境漂移可能改变路由、证据下限或安全边界时，使用 扰动记录。
 
-If material disturbances exist, output a clearly labeled `扰动登记:` block. If none exist, state `扰动登记: 无实质项`. Do not replace the register with an unlabeled prose risk list.
+如果存在实质扰动，输出清晰标记的 `扰动记录:` 块。如果不存在，写明 `扰动记录: 无实质项`。不要用未标记的散文式风险列表替代记录。
 
 ```text
-扰动登记:
+扰动记录:
 - 扰动:
   - 来源:
   - 可能性: low | medium | high | unknown
@@ -17,14 +17,14 @@ If material disturbances exist, output a clearly labeled `扰动登记:` block. 
   - 负责人或决策边界:
 ```
 
-## Rating guidance
+## 评级指引
 
 - `low`: unlikely or low blast radius; record only if it affects sequencing.
 - `medium`: plausible and could change evidence, slice size, or fallback.
-- `high`: likely or high blast radius; requires containment before mutation.
+- `high`: 可能发生或影响范围大；变更前需要控制措施。
 - `unknown`: treat as material when impact could be medium or high.
 
-## Containment patterns
+## 控制措施模式
 
 - isolate worktree, environment, data copy, or ownership surface;
 - reduce slice size and change one control variable at a time;
@@ -33,4 +33,4 @@ If material disturbances exist, output a clearly labeled `扰动登记:` block. 
 - route to `decision-synthesis` for stakeholder conflict;
 - route to user/blocker for authority, credentials, external side effects, or risk acceptance.
 
-Do not route to `control-loop` when a high-impact or unknown-impact disturbance lacks a sensor, containment, and route trigger.
+当高影响或影响未知的扰动缺少传感器、控制措施和路由触发条件时，不要路由到 `control-loop`。

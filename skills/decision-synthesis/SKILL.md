@@ -7,7 +7,7 @@ description: "Apply decision-synthesis to complex engineering or socio-technical
 
 Use this skill when the problem behaves like a complex system rather than a simple implementation task. It helps synthesize goals and decision boundaries before `goal-contract`, `system-model`, or `control-loop` proceeds.
 
-## When to use
+## 使用时机
 
 Use when the request includes:
 
@@ -20,7 +20,7 @@ Use when the request includes:
 
 Do not use for localized low-risk tasks with clear acceptance and direct evidence.
 
-## Boundaries
+## 边界
 
 - Do not mutate implementation files, deploy, push, repair data, or claim final completion.
 - Do not invent stakeholder preferences or user-owned risk decisions.
@@ -28,7 +28,7 @@ Do not use for localized low-risk tasks with clear acceptance and direct evidenc
 - Separate facts, expert judgments, assumptions, hypotheses, scenarios, and decisions.
 - When a 闭环台账 exists, read its `最新控制路由` from `.alpha-goal/YYYYMMDD-<slug>/control-state.md` before synthesis and update only synthesis-relevant state: objective conflicts, user-owned decisions, scenario assumptions, and the recommended route.
 
-## Load resources when needed
+## 按需加载资源
 
 - `references/complexity-triage.md`: classify simple, complicated, complex, or complex-giant-like requests.
 - `references/stakeholder-decision-boundaries.md`: distinguish recommendation from user-owned decisions.
@@ -36,7 +36,7 @@ Do not use for localized low-risk tasks with clear acceptance and direct evidenc
 - `references/synthesis-record-schema.md`: produce a durable or handoff-ready 决策综合记录.
 - `references/meta-synthesis-hall.md`: use a metasynthetic workspace (`综合研判工作台`) to preserve roles, hypothesis bank, model registry, dissent, and convergence conditions.
 
-## Process
+## 流程
 
 ```text
 Triage complexity -> Collect perspectives -> Build synthesis map -> Run synthesis rounds -> Resolve decisions -> Produce synthesis record -> Route
@@ -96,8 +96,8 @@ Each round must connect:
 - machine evidence, model output, tests, logs, metrics, or probes;
 - 综合研判工作台状态：多种假设、模型或利益相关方视角仍然活跃时的工作区状态;
 - the conflict, contradiction, or missing sensor;
-- any metric/proxy that could turn qualitative judgment into bounded evidence;
-- the 指标交接 candidate that should become acceptance or sensor evidence;
+- 任何能把定性判断转成有界证据的指标或代理；
+- 应成为验收证据或传感器证据的 指标转译 候选；
 - the user-owned decision or next hypothesis that would reduce uncertainty.
 
 Stop when the smallest next action is clear: a 目标契约 candidate, a system-model question, a user decision, a blocker, or a bounded validation hypothesis.
@@ -132,7 +132,7 @@ Persist the full 决策综合记录 under `.alpha-goal/YYYYMMDD-<slug>/decision-
 - 用户自有决策:
 - 非目标:
 - 所需证据:
-- 指标交接:
+- 指标转译:
 - 路由:
 ```
 
@@ -162,7 +162,7 @@ TUI 摘要:
 - 定量信号:
 - 综合研判工作台:
 - 综合轮次:
-- 指标交接:
+- 指标转译:
 - 矛盾与取舍:
 - 场景:
 - 候选策略:
@@ -176,8 +176,8 @@ TUI 摘要:
 
 ### 7. Route
 
-- Route to `goal-contract` when a stable recommended direction and 指标交接 can become a 目标契约.
-- Route to `system-model` when subsystem boundary or feedback signals remain unclear.
-- Route to user when a user-owned decision, risk acceptance, budget/timeline tradeoff, or stakeholder priority is required.
-- Route to `evidence-verify` only when synthesis did not authorize mutation and the next action is comparing an existing evidence bundle to a proposed claim.
-- Route to `control-loop` only if a valid 目标契约 already exists and synthesis merely narrowed the next slice without changing authorization.
+- 当稳定推荐方向和 指标转译 可以形成 目标契约 时，路由到 `goal-contract`。
+- 当子系统边界或反馈信号仍不清楚时，路由到 `system-model`。
+- 当需要用户自有决策、风险接受、预算 / 时间取舍或利益相关方优先级时，路由到用户。
+- 只有当综合未授权变更，且下一动作是把既有证据包与拟声明比较时，才路由到 `evidence-verify`。
+- 只有当已有有效 目标契约，且综合只是收窄下一切片、没有改变授权时，才路由到 `control-loop`。

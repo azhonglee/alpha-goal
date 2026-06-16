@@ -2,14 +2,14 @@
 
 Use the metasynthetic workspace (`综合研判工作台`) when a complex or complex-giant-like task needs human-machine synthesis before the next 目标契约, system model, or user decision. It corresponds to the “综合集成研讨厅” idea in the metasynthetic systems approach, but uses a more direct product-facing label for skill outputs.
 
-## Roles
+## 角色
 
-- Human role: choose values, priorities, risk acceptance, scope tradeoffs, and final decision boundaries.
-- Machine role: gather evidence, compare models, surface contradictions, generate scenarios, test hypotheses, and convert accepted qualitative objectives into indicators.
-- Expert role: provide domain judgment, constraints, failure modes, and confidence labels when available.
-- Controller role: keep the round bounded, record dissent, and stop when the smallest safe next route is clear.
+- 人类角色：选择价值取向、优先级、风险接受、范围取舍和最终决策边界。
+- 机器角色：收集证据、比较模型、暴露矛盾、生成场景、测试假设，并把已接受的定性目标转成指标。
+- 专家角色：在可用时提供领域判断、约束、失效模式和置信度标签。
+- 控制器角色：保持轮次有界，记录异议，并在最小安全下一路由清晰时停止。
 
-## Working memory
+## 工作记忆
 
 ```text
 综合研判工作台:
@@ -35,11 +35,11 @@ Use the metasynthetic workspace (`综合研判工作台`) when a complex or comp
 - 路由:
 ```
 
-## Rules
+## 规则
 
 - Move from qualitative to quantitative only where a metric or proxy can observe a material objective without false precision.
 - Preserve dissent when stakeholders, models, or evidence disagree; do not average away conflicts.
-- Keep a Hypothesis bank for unresolved explanations and route to `system-model` when the missing fact is plant, sensor, actuator, disturbance, or coupling.
-- Keep a Model registry for competing mental models, empirical models, simulations, or stakeholder perspectives.
-- Name a Convergence condition before leaving synthesis: stable 目标契约 candidate, system-model question, user-owned decision, bounded validation hypothesis, or blocker.
+- 保留假设库，用于未解决解释；当缺失事实属于被控对象、传感器、执行器、扰动或耦合时，路由到 `system-model`。
+- 保留模型登记，用于竞争性心智模型、经验模型、仿真或利益相关方视角。
+- 离开综合前先命名收敛条件：稳定的 目标契约 候选、system-model 问题、用户自有决策、有界验证假设或 blocker。
 - Route to user when priority, budget, schedule, risk acceptance, production impact, or final claim ownership is the active uncertainty.

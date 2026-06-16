@@ -45,9 +45,9 @@ Persist the full model at `.alpha-goal/YYYYMMDD-<slug>/system-model.md` by defau
   - 信号噪声:
   - 置信度:
   - 阻尼 / 防振荡:
-  - 饱和 / 影响范围约束:
+  - 影响范围上限:
   - 风险 / 失败处理:
-- 扰动登记:
+- 扰动记录:
   - 扰动:
   - 来源:
   - 可能性:

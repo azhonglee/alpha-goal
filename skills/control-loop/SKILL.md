@@ -3,17 +3,17 @@ name: control-loop
 description: "Run bounded control iterations under an approved 目标契约: plan one slice, execute or probe safely, sense feedback, compare error, record evidence, and route to continue, harden, evidence-verify, reframe, or block."
 ---
 
-# Control Loop
+# 控制循环
 
 Use this skill to advance an approved goal through bounded iterations. It is the controller/actuator stage of the suite.
 
-## Entry requirements before mutation
+## 变更前入口要求
 
 All must be true before editing implementation files:
 
 - an approved 目标契约 or equivalent context identifies reference state, desired outcome, included scope, excluded scope/non-goals, decision boundaries, constraints, acceptance evidence, and claim boundary;
 - current `.alpha-goal/YYYYMMDD-<slug>/control-state.md` ledger is read when available, especially `最新控制路由`, selected skill, safety boundary, next action, last residual error, control action, feedback, and route decision; if no file ledger exists, use chat state only with an explicit no-write reason;
-- current 扰动登记 is read when available, especially material likelihood, impact, sensor, containment, and route triggers;
+- 可用时读取当前 扰动记录，尤其关注实质扰动的可能性、影响、传感器、控制措施和路由触发条件；
 - target/scope boundary and final claim boundary are clear enough to decide changed files and final wording;
 - applicable local rules, durable specs, and active plans have been read;
 - repository, worktree, submodule, ownership, dirty-state, and unrelated user-change boundaries are understood;
@@ -25,7 +25,7 @@ Before mutation, cite the contract source actually read: file path, chat excerpt
 
 If system boundary, sensors, actuators, disturbances, or coupling are unclear enough to affect safe action, route to `system-model` before mutation.
 
-## Load resources when needed
+## 按需加载资源
 
 - `references/worktree-safety.md`: isolated edit paths and primary-checkout safety.
 - `references/execution-boundaries.md`: delegation, ownership, submodules, generated output, and user-owned changes.
@@ -37,7 +37,7 @@ If system boundary, sensors, actuators, disturbances, or coupling are unclear en
 - `references/auto-execution.md`: when to execute the next pass automatically versus recommend or pause.
 - `scripts/mutation-preflight.ts`: read-only git/path preflight.
 
-## Iteration process
+## 迭代流程
 
 Each pass is a control cycle:
 
@@ -53,25 +53,25 @@ Dynamic planning answers only the current iteration:
 
 - the smallest coherent acceptance-relevant slice that can be completed and observed now;
 - the error signal this slice is expected to reduce, using the ledger or 目标契约 as reference;
-- the 控制律 for the slice: 目标误差、控制变量、预期效果、传感器阈值、反馈延迟、信号噪声、置信度、阻尼 / 防振荡、饱和 / 影响范围约束和失败处理;
+- the 控制律 for the slice: 目标误差、控制变量、预期效果、传感器阈值、反馈延迟、信号噪声、置信度、阻尼 / 防振荡、影响范围上限和失败处理;
 - control variables to change and variables intentionally held constant;
 - fresh evidence needed after the slice and how it will be sensed;
 - files, modules, repos, generated outputs, and ownership surfaces allowed to change;
 - assumptions, disturbances, and stop conditions for reframe, block, or unsafe execution;
-- material 扰动登记 entries and how this slice will monitor or contain them;
+- 实质 扰动记录 条目，以及本切片如何监测或约束它们；
 - prior 自适应学习记录 and whether their reuse or invalidation conditions apply;
-- expected artifacts, side effects, cleanup, rollback, or containment needs;
+- 预期产物、副作用、清理、回滚或控制措施需求；
 - strongest material risk and evidence floor;
 - success, failure, feedback, and reframe routes;
 - whether a durable plan is necessary.
 
-Before executing a mutation or diagnostic-probe slice, prepare the full 控制律 and persist it in the 迭代记录 or 闭环台账. Do not print the raw `控制律:` block in the TUI by default. Show a user-facing `执行检查` table instead, then execute only if the 目标误差, approved 控制变量, observable 传感器阈值, and 失败处理 are present in the persisted 控制律. For repeated, noisy, broad, or high-risk loops, the persisted 控制律 must also include 反馈延迟、信号噪声、置信度、阻尼 / 防振荡、饱和 / 影响范围约束 before acting again.
+Before executing a mutation or diagnostic-probe slice, prepare the full 控制律 and persist it in the 迭代记录 or 闭环台账. 默认不要在 TUI 打印原始 `控制律:` 块；改用面向用户的 `执行检查` 表。仅当持久化 控制律 已包含目标误差、已批准控制变量、可观测传感器阈值和失败处理时，才执行动作。对重复、噪声大、范围广或高风险循环，持久化 控制律 还必须包含反馈延迟、信号噪声、置信度、阻尼 / 防振荡和影响范围上限，才能再次行动。
 
-Print the raw `控制律:` block in chat only when the user asks for it, file persistence is blocked, or the slice is high-risk enough that the user must review every control field before mutation.
+只有在用户要求、文件持久化受阻，或切片风险高到必须让用户逐项复核控制字段时，才在聊天中打印原始 `控制律:` 块。
 
-TUI pre-action check:
+TUI 执行前检查:
 
-Use Chinese titles by default, with Chinese field labels. If the user explicitly asks for another language, translate the same field semantics without showing multiple language templates.
+默认使用中文标题和中文字段名。如果用户明确要求其他语言，只翻译同一组字段语义，不同时展示多语言模板。
 
 ```markdown
 执行检查
@@ -86,7 +86,7 @@ Use Chinese titles by default, with Chinese field labels. If the user explicitly
 | 失败处理 | |
 ```
 
-字段映射：`问题` 取自目标误差；`本轮动作` 取自控制变量和控制动作；`保持不变` 取自保持不变的变量和影响范围约束；`验收证据` 取自传感器和阈值；`主要风险` 取自信号噪声、阻尼 / 防振荡、饱和 / 影响范围约束或最强实质风险；`失败处理` 取自失败处理或停止 / 重构触发条件。表格内容保持简短，完整控制律指向持久化产物。
+字段映射：`问题` 取自目标误差；`本轮动作` 取自控制变量和控制动作；`保持不变` 取自保持不变的变量和影响范围上限；`验收证据` 取自传感器和阈值；`主要风险` 取自信号噪声、阻尼 / 防振荡、影响范围上限或最强实质风险；`失败处理` 取自失败处理或停止 / 重新界定触发条件。表格内容保持简短，完整控制律指向持久化产物。
 
 Create or update a durable plan only for multiple independent loops, modules, repos, handoff/recovery needs, external side effects, irreversible/high-risk changes, rollback/compatibility decisions, contested ownership, or user request.
 
@@ -110,7 +110,7 @@ Preflight must answer:
 - Preserve and interpret failing outputs; do not hide, rerun away, or summarize them as success.
 - Preserve unrelated user changes; never stash, revert, move, or overwrite them without approval.
 - Prefer targeted edits; defer unrelated cleanup unless necessary for the approved slice and recorded as risk-reducing.
-- Record artifacts, generated outputs, side effects, cleanup, and rollback/containment actions as they occur.
+- 在产物、生成输出、副作用、清理和回滚 / 控制措施发生时记录它们。
 - Stay inside the approved target, scope, non-goals, constraints, authorization, and claim boundary.
 
 For debugging, identify and record root cause before repair. If root cause is not confirmed, limit changes to diagnostic probes, reversible instrumentation, or explicitly hypothesis-testing slices that do not alter the intended fix surface.
@@ -173,7 +173,7 @@ Print the full 迭代记录 in chat only when the user asks, file persistence is
 - 动作或探测;
 - 最新证据与证据类别;
 - 验收变化与剩余误差;
-- 控制律结果: 预期效果、已观察反馈、阈值状态、反馈延迟、信号噪声、置信度、阻尼 / 防振荡、饱和 / 影响范围约束、失败处理或调整;
+- 控制律结果: 预期效果、已观察反馈、阈值状态、反馈延迟、信号噪声、置信度、阻尼 / 防振荡、影响范围上限、失败处理或调整;
 - 自适应学习更新: 触发条件、已观察偏差、调整、复用条件、失效条件;
 - 反馈与扰动;
 - 台账更新: 输入状态、误差信号、扰动更新、控制动作、传感器反馈、残余误差和下一状态;

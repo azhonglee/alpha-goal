@@ -34,7 +34,7 @@ Persist the full record at `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md` b
   - 用户自有决策:
   - 下一个待验证假设:
   - 路由触发条件:
-- 指标交接:
+- 指标转译:
   - 定性目标:
   - 指标 / 代理:
   - 操作化定义:

@@ -21,7 +21,7 @@ This is not a retrospective essay. Record only learning that changes a future co
 - 台账更新:
 ```
 
-## Rules
+## 规则
 
 - Learn from residual error, threshold miss, repeated fallback, failed probe, contradicted model, or user/reviewer feedback.
 - Do not convert a local observation into a broad rule unless the evidence boundary supports it.

@@ -1,8 +1,8 @@
-# Execution Boundaries
+# 执行边界
 
 Use this reference for subagents, unclear ownership, multi-path work, generated outputs, cross-repo/worktree/submodule work, or unrelated user changes.
 
-## Subagent delegation
+## 子代理委托
 
 Delegate only bounded, independent work.
 
@@ -25,7 +25,7 @@ Receipt labels:
 
 Accept delegated output only after checking files, ownership, evidence, and concerns. Delegation never bypasses 目标契约, 迭代记录, 验证结论, strongest-risk evidence, or final checks.
 
-## Ownership boundaries
+## 所有权边界
 
 Before editing, identify:
 
@@ -38,7 +38,7 @@ Before editing, identify:
 
 Do not modify a repo, worktree, submodule, generated-output owner, or process boundary unless approved by the 目标契约 or user.
 
-## Generated outputs
+## 生成产物
 
 When generated files are involved:
 
@@ -48,7 +48,7 @@ When generated files are involved:
 - avoid partial regeneration that rewrites unrelated surfaces;
 - record generated artifacts in the 迭代记录.
 
-## User and unrelated changes
+## 用户变更与无关变更
 
 If unrelated user changes exist:
 

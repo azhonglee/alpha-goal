@@ -64,8 +64,8 @@ For simple work, `alpha-goal` chooses the smallest viable path. When target, sys
 | Skill | Responsibility | Trigger |
 | --- | --- | --- |
 | `alpha-goal` | Closed-loop entry point, skill routing, stability checks, and cross-stage state memory | The next step may be framing, modeling, execution, verification, or synthesis |
-| `goal-contract` | Produces an executable, verifiable, handoff-ready 目标契约 and 指标交接 | Goal, scope, acceptance, non-goals, or authorization boundaries are unclear |
-| `system-model` | Models plant, state, observer, actuator, 控制器层级, 扰动登记, and coupling | System boundary, observability, controllability, disturbances, or coupling affect safe action |
+| `goal-contract` | Produces an executable, verifiable, handoff-ready 目标契约 and 指标转译 | Goal, scope, acceptance, non-goals, or authorization boundaries are unclear |
+| `system-model` | Models plant, state, observer, actuator, 控制器层级, 扰动记录, and coupling | System boundary, observability, controllability, disturbances, or coupling affect safe action |
 | `control-loop` | Runs bounded iterations under an approved 目标契约, collects feedback, and records 自适应学习记录 | The goal is clear and the next step is execution, diagnosis, repair, or hardening |
 | `evidence-verify` | Judges whether evidence supports completion, merge-readiness, ship-readiness, or a narrowed claim | Work appears done and needs independent evidence and claim-boundary review |
 | `decision-synthesis` | Uses 综合轮次 to combine qualitative judgment, machine evidence, metrics, conflicts, and user decisions | The problem has multiple teams, multiple goals, high uncertainty, or complex-system dynamics |
@@ -84,7 +84,7 @@ For simple work, `alpha-goal` chooses the smallest viable path. When target, sys
 | Memory | The 闭环台账 under `.alpha-goal/YYYYMMDD-<slug>/control-state.md`, recording reference, state, error, action, feedback, and next route |
 | Indicator handoff | Mapping qualitative goals to metrics/proxies, sensors, thresholds, and evidence boundaries |
 | Adaptive learning | Bounded reusable corrections when feedback invalidates a threshold, strategy, route, or assumption |
-| Disturbance handling | 扰动登记 entries with likelihood, impact, sensor, containment, and route trigger |
+| Disturbance handling | 扰动记录 entries with likelihood, impact, sensor, containment, and route trigger |
 | Hierarchical control | 控制器层级 for global/local controllers, coupling variables, arbitration, and escalation |
 | Complex-system synthesis | `decision-synthesis` 综合轮次 for conflicts, evidence, indicators, and user decisions |
 | Artifact layout | Task-scoped runtime artifacts under `.alpha-goal/YYYYMMDD-<slug>/xxx` |

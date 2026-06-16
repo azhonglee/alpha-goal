@@ -7,7 +7,7 @@ description: "Route engineering, debugging, design, and verification work throug
 
 Use this skill to select and stabilize the next action in the skill suite. It is a router and control governor, not an implementation skill.
 
-## Cybernetic frame
+## 控制论框架
 
 Treat the user request as a control problem:
 
@@ -19,9 +19,9 @@ Treat the user request as a control problem:
 - `comparator`: `evidence-verify`, which compares fresh evidence against the reference and claim boundary;
 - `memory`: a 闭环台账 that carries reference, current state, error, control action, feedback, and route history across skills;
 - `adaptation`: 自适应学习记录 that correct reusable control assumptions without silently changing scope or authority;
-- `disturbance`: changing requirements, dirty working tree, missing tools, flaky tests, conflicting specs, hidden ownership, broad claims, or external side effects, tracked through a 扰动登记 when material.
+- `disturbance`: changing requirements, dirty working tree, missing tools, flaky tests, conflicting specs, hidden ownership, broad claims, or external side effects; material items are tracked through 扰动记录.
 
-## Boundaries
+## 边界
 
 - Do not mutate implementation files, deploy, push, open PRs/MRs, repair data, or claim completion.
 - Do not bypass `goal-contract` when the desired reference state is ambiguous.
@@ -31,14 +31,14 @@ Treat the user request as a control problem:
 - Default to durable process memory under `.alpha-goal/`. Before the first write in a repository, ensure `.alpha-goal/` is ignored; if it is missing from the repo root `.gitignore`, add `.alpha-goal/` there before writing ledger artifacts.
 - Use chat-only ledger state only when the user explicitly forbids file writes, no repository path exists, or `.gitignore` cannot be updated safely.
 
-## Load resources when needed
+## 按需加载资源
 
 - `references/cybernetic-routing.md`: route selection and stability failure patterns.
 - `references/closed-loop-ledger.md`: cross-stage state memory schema and update rules.
 - `references/artifact-layout.md`: task-scoped `.alpha-goal/YYYYMMDD-<slug>/xxx` runtime artifact layout.
 - `references/cybernetic-conformance.md`: state transition, schema sidecar, and closed-loop invariant checks.
 
-## Process
+## 流程
 
 ```text
 Classify state -> Select next skill -> Check stability gates -> Persist route card -> Show route summary
@@ -82,7 +82,7 @@ Before routing to an execution-capable path, ensure:
 - the actuator boundary says what may change and what must not change;
 - observer signals are available or a missing-observer blocker is stated;
 - qualitative objectives have accepted indicators or explicitly missing sensors before execution claims depend on them;
-- material disturbances are registered with likelihood, impact, sensor, containment, and route trigger, or routed to modeling/synthesis/user/blocker;
+- 实质扰动必须记录可能性、影响、传感器、控制措施和路由触发条件；否则路由到建模、综合、用户或 blocker；
 - prior 自适应学习记录 are applied only when reuse conditions hold and invalidation conditions do not hold;
 - the ledger records the last error signal and why the selected next skill reduces it, or chat-only state is explicitly justified by a no-write constraint;
 - final claims will be checked by `evidence-verify` rather than stated by the executor.
@@ -103,10 +103,10 @@ Write or update this section in `.alpha-goal/YYYYMMDD-<slug>/control-state.md`:
 - 主导不确定性:
 - 误差信号:
 - 控制律:
-- 指标交接:
+- 指标转译:
 - 自适应学习:
 - 控制器层级:
-- 扰动登记:
+- 扰动记录:
 - 选定技能:
 - 选择理由:
 - 需加载或询问的上下文:

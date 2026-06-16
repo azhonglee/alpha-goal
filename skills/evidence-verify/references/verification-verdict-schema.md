@@ -25,7 +25,7 @@ Use this full schema for formal acceptance records, merge-ready or ship-ready ju
 - 产物复核:
 - 控制律复核:
   - 动态与稳定性复核:
-- 指标交接复核:
+- 指标转译复核:
 - 自适应学习复核:
 - 声明边界:
 - 风险 / 证据复核:
@@ -67,21 +67,21 @@ Root-cause claims should record symptom, first divergence point, narrowed compon
 
 ## 控制律复核
 
-For each material control action or diagnostic probe:
+对每个实质控制动作或诊断探测记录：
 
-- target error;
-- expected effect;
-- sensor and threshold;
-- observed feedback;
-- feedback latency;
-- signal noise;
-- confidence;
-- damping / anti-oscillation;
-- saturation / containment;
-- threshold status: `met`, `partially met`, `not met`, `blocked`, or `not applicable`;
-- fallback or residual error.
+- 目标误差;
+- 预期效果;
+- 传感器与阈值;
+- 已观察反馈;
+- 反馈延迟;
+- 信号噪声;
+- 置信度;
+- 阻尼 / 防振荡;
+- 影响范围上限;
+- 阈值状态: `met`, `partially met`, `not met`, `blocked`, or `not applicable`;
+- 失败处理或残余误差.
 
-## 指标交接复核
+## 指标转译复核
 
 For each material qualitative objective or synthesis metric:
 

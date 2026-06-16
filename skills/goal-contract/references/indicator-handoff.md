@@ -1,9 +1,9 @@
-# 指标交接
+# 指标转译
 
-Use an 指标交接 when qualitative goals, 综合轮次 indicators, or acceptance expectations must become observable evidence for `system-model`, `control-loop`, or `evidence-verify`.
+当定性目标、综合轮次指标或验收预期需要转成 `system-model`、`control-loop` 或 `evidence-verify` 可观察的证据时，使用 指标转译。
 
 ```text
-指标交接:
+指标转译:
 - 定性目标:
 - 指标或代理:
 - 操作化定义:
@@ -17,7 +17,7 @@ Use an 指标交接 when qualitative goals, 综合轮次 indicators, or acceptan
 - 路由触发条件:
 ```
 
-## Rules
+## 规则
 
 - Convert only material objectives into indicators; avoid false precision for preferences that should remain qualitative.
 - Every indicator must name a sensor or explicitly name the missing sensor.

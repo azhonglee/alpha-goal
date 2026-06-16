@@ -1,14 +1,14 @@
-# Ambiguity Scoring
+# 模糊度评分
 
 Scoring is a steering aid. It should reduce unnecessary clarification while preventing unsafe handoff.
 
-## Qualitative scoring
+## 定性评分
 
 - `low`: remaining uncertainty will not change scope, authority, evidence, or final claim.
 - `medium`: uncertainty might change a slice plan or evidence floor; clarify or narrow before mutation.
 - `high`: uncertainty can change goal, owner, target, non-goals, safety, or authorization; do not hand off to `control-loop`.
 
-## Numeric scoring
+## 数值评分
 
 Use 0.0 to 1.0 clarity scores, then compute ambiguity.
 

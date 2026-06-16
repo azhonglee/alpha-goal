@@ -3,11 +3,11 @@ name: system-model
 description: "Build a control-system model before engineering action: controlled object, state variables, observability, controllability, actuators, disturbances, coupling, controller hierarchy, and evidence sensors. Use for architecture, debugging, brownfield, or complex-system uncertainty."
 ---
 
-# System Model
+# 系统建模
 
 Use this skill when safe execution depends on understanding the system boundary and feedback signals. It is read-only unless the user explicitly asks for a modeling artifact and artifact creation is safe.
 
-## When to use
+## 使用时机
 
 Use `system-model` when any of these are true:
 
@@ -19,7 +19,7 @@ Use `system-model` when any of these are true:
 - the work is architectural, migratory, integration-heavy, production-facing, or high blast-radius;
 - `goal-contract` cannot produce a reliable 目标契约 without a plant model.
 
-## Boundaries
+## 边界
 
 - Do not mutate implementation files, repair data, push, deploy, or claim completion.
 - Do not decide user-owned goals, risk acceptance, or business tradeoffs.
@@ -28,14 +28,14 @@ Use `system-model` when any of these are true:
 - If a 闭环台账 exists, read its `最新控制路由` from `.alpha-goal/YYYYMMDD-<slug>/control-state.md` before modeling and update only model-relevant state: plant boundary, state variables, sensors, actuators, disturbances, coupling, and model adequacy.
 - Independently review and update the model if needed before routing back to `goal-contract`, `alpha-goal`, or `control-loop`.
 
-## Load resources when needed
+## 按需加载资源
 
 - `references/control-model-schema.md`: produce a durable or handoff-ready 控制模型.
 - `references/observability-controllability-check.md`: rate sensor and actuator adequacy.
-- `references/disturbance-register.md`: record disturbance likelihood, impact, sensor, containment, and route trigger.
+- `references/disturbance-register.md`: 记录扰动的可能性、影响、传感器、控制措施和路由触发条件。
 - `references/controller-hierarchy.md`: map global/local controllers, coupling variables, arbitration, and escalation.
 
-## Process
+## 流程
 
 ```text
 Set boundary -> Identify state and signals -> Check observability/controllability -> Map coupling/disturbance -> Judge model adequacy -> Route
@@ -135,10 +135,10 @@ Create a compact coupling map. Use a matrix only when it clarifies risk.
   - 隔离策略:
 ```
 
-Create a clearly labeled 扰动登记 for material disturbances. Load `references/disturbance-register.md` when disturbance likelihood, impact, sensor, containment, or route trigger is not obvious.
+为实质扰动创建清晰标记的 扰动记录。当扰动的可能性、影响、传感器、控制措施或路由触发条件不明显时，加载 `references/disturbance-register.md`。
 
 ```text
-扰动登记:
+扰动记录:
 - 扰动:
   - 来源:
   - 可能性:
@@ -150,9 +150,9 @@ Create a clearly labeled 扰动登记 for material disturbances. Load `reference
   - 负责人或决策边界:
 ```
 
-Do not collapse material disturbances into a prose risk list. A 控制模型 is incomplete if it names material disturbances but does not either emit a 扰动登记 or explicitly state `扰动登记: 无实质项`.
+不要把实质扰动压缩成散文式风险列表。如果 控制模型 命名了实质扰动，却既没有输出 扰动记录，也没有明确写明 `扰动记录: 无实质项`，该模型就是不完整的。
 
-High-impact or unknown-impact disturbances must have a sensor, containment, and route trigger before routing to `control-loop`.
+高影响或影响未知的扰动必须先具备传感器、控制措施和路由触发条件，才能路由到 `control-loop`。
 
 Stabilization strategies:
 
@@ -178,7 +178,7 @@ Persist the full 控制模型 under `.alpha-goal/YYYYMMDD-<slug>/system-model.md
 - 执行器:
 - 候选控制律:
 - 控制器层级:
-- 扰动登记:
+- 扰动记录:
 - 耦合图:
 - 可观测性:
 - 可控性:
@@ -224,9 +224,9 @@ TUI 摘要:
   - 信号噪声:
   - 置信度:
   - 阻尼 / 防振荡:
-  - 饱和 / 影响范围约束:
+  - 影响范围上限:
   - 风险 / 失败处理:
-- 扰动登记:
+- 扰动记录:
   - 扰动:
   - 可能性 / 影响:
   - 传感器:

@@ -1,8 +1,8 @@
-# Cybernetic Conformance
+# 控制论一致性
 
 Use this reference when checking whether a task actually followed the closed-loop control model, not just whether documents contain control vocabulary.
 
-## State transition checks
+## 状态迁移检查
 
 Valid high-level route transitions:
 
@@ -23,7 +23,7 @@ Reject or reframe these transitions. A no-write chat state may replace persisted
 - final claim before `evidence-verify`.
 - implementation mutation from a primary checkout when an isolated worktree is required.
 
-## Invariants
+## 不变量
 
 - reference before action: a 目标契约 or equivalent context identifies target, scope, non-goals, authority, acceptance evidence, and claim boundary before mutation.
 - plant before broad control: system boundary, sensors, actuators, disturbances, and coupling are modeled before high-blast-radius action.
@@ -38,9 +38,9 @@ Conditional transition rules:
 - `decision-synthesis -> evidence-verify` is valid only when synthesis did not authorize mutation and the next action is comparing an existing evidence bundle to a proposed claim.
 - `system-model -> control-loop` is valid only when an approved 目标契约 exists and the model only updates plant, sensor, actuator, disturbance, or coupling facts within that contract.
 
-## Schema 辅助索引
+## 结构化索引
 
-When a task is long-running, high-risk, or likely to resume, emit a machine-readable Schema 辅助索引 in `.alpha-goal/YYYYMMDD-<slug>/schema/` for the stage artifact. The sidecar is a compact summary and index for routing, traceability, and machine checks; it does not replace the full Markdown stage artifact or the persisted full 控制律. The sidecar is JSON and must satisfy this base JSON Schema. The TypeScript validator additionally enforces artifact-kind path matching, stage-specific required fields, transition guards, authorization rules, fixture trace, runtime trace continuity, evidence boundaries, stage decisions, and claim boundaries:
+When a task is long-running, high-risk, or likely to resume, emit a machine-readable 结构化索引 in `.alpha-goal/YYYYMMDD-<slug>/schema/` for the stage artifact. The sidecar is a compact summary and index for routing, traceability, and machine checks; it does not replace the full Markdown stage artifact or the persisted full 控制律. The sidecar is JSON and must satisfy this base JSON Schema. The TypeScript validator additionally enforces artifact-kind path matching, stage-specific required fields, transition guards, authorization rules, fixture trace, runtime trace continuity, evidence boundaries, stage decisions, and claim boundaries:
 
 ```json
 {
@@ -225,7 +225,7 @@ Use `.alpha-goal/YYYYMMDD-<slug>/conformance-report.md` when a final or handoff 
 - 行动前参考状态: pass | fail
 - 控制律完整性: pass | fail
 - 扰动处理: pass | fail | not applicable
-- 指标交接: pass | fail | not applicable
+- 指标转译: pass | fail | not applicable
 - 声明前传感器: pass | fail
 - 最终结论前比较器: pass | fail
 - 旧产物路径扫描: pass | fail
