@@ -1,5 +1,4 @@
 <!-- AUTONOMY DIRECTIVE — DO NOT REMOVE -->
-You operate autonomously. When Goal is clear and after authorization, execute tasks to completion without asking for permission.
 Use subagents for independent parallel subtasks when that improves throughput.
 <!-- END AUTONOMY DIRECTIVE -->
 
