@@ -10,6 +10,7 @@ Execute the next bounded pass immediately when all are true:
 - the next action is concrete enough to run now, with known target paths, commands, probes, or evidence sensors;
 - it remains inside the approved Goal Contract, scope, non-goals, constraints, authorization, and claim boundary;
 - the next pass has a Control Law with target error, approved control variable, expected effect, sensor threshold, and fallback action;
+- repeated, noisy, or broad loops have explicit feedback latency, signal noise, confidence, damping / anti-oscillation, and saturation / containment;
 - it does not require a user-owned decision, credential, secret, unavailable environment, external approval, deployment, push, PR/MR, or other external side effect;
 - it will not overwrite unrelated user changes, cross unclear ownership boundaries, or mutate a primary checkout unsafely;
 - risk has not increased enough to require reframing, system modeling, durable planning, or explicit acceptance;
@@ -25,6 +26,7 @@ Pause and record a recommendation only when at least one stop reason applies:
 - `AUTHORIZATION_MISSING`: mutation, external side effect, credential use, push, PR/MR, deployment, destructive action, or config change is not authorized.
 - `BOUNDARY_UNCLEAR`: repository, worktree, submodule, generated output, owner, or system boundary is unclear enough to affect safe action.
 - `CONTROL_LAW_UNCLEAR`: target error, control variable, expected effect, sensor threshold, or fallback action is missing.
+- `DYNAMICS_UNSTABLE`: feedback is delayed/noisy, the route is oscillating, or containment is unclear.
 - `RISK_ESCALATED`: the next pass introduces materially higher security, data, migration, compatibility, production, or rollback risk.
 - `BLOCKED_ENVIRONMENT`: required tool, data, log, service, dependency, credential, or environment is unavailable.
 - `BUDGET_OR_CONTEXT_INSUFFICIENT`: continuing would likely drop necessary evidence, rules, or active state.

@@ -14,6 +14,7 @@ Return `PASS_TO_FINAL` only when:
 - strongest material risk has matching evidence;
 - material qualitative objectives have Indicator Handoff evidence or an explicit narrowed claim;
 - material control actions have sensor feedback that meets the stated Control Law threshold, or residual error/fallback is reflected in the verdict;
+- material delayed/noisy feedback has latency, noise, confidence, damping, and containment reflected in the verdict before stable completion is claimed;
 - material Adaptive Learning Records are supported by evidence and do not broaden the final claim beyond the observed boundary;
 - bug/root-cause claims have valid root-cause evidence;
 - final claim does not exceed tested or observed boundary.

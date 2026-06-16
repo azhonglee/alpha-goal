@@ -1,6 +1,6 @@
 # Control Model Schema
 
-Persist the full model at `.alpha-goal/models/YYYYMMDD-<slug>-system-model.md` by default. The TUI should show a Markdown-table `Model Summary` with boundary, observability, controllability, artifact path, and recommended route unless full chat output is required.
+Persist the full model at `.alpha-goal/YYYYMMDD-<slug>/system-model.md` by default. When machine validation or resume safety matters, write a schema sidecar at `.alpha-goal/YYYYMMDD-<slug>/schema/system-model.json`. The TUI should show a Markdown-table `Model Summary` with boundary, observability, controllability, artifact path, and recommended route unless full chat output is required.
 
 ```text
 Control Model:
@@ -41,6 +41,11 @@ Control Model:
   - Candidate action or probe:
   - Sensor:
   - Threshold / tolerance:
+  - Feedback latency:
+  - Signal noise:
+  - Confidence:
+  - Damping / anti-oscillation:
+  - Saturation / containment:
   - Risk/fallback:
 - Disturbance register:
   - Disturbance:
@@ -67,6 +72,7 @@ Control Model:
 - Ledger update:
   - Control-state path:
   - Artifact path:
+  - Schema sidecar path:
   - Model changes:
   - Residual model uncertainty:
   - Next route:

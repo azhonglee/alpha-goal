@@ -17,7 +17,7 @@ The optional steps are not ceremony:
 - Use `goal-contract` when the reference/setpoint is unstable.
 - Use `control-loop` only after the reference and actuator boundary are stable enough.
 - Use `evidence-verify` whenever a completion/readiness/correctness claim is at stake.
-- Carry the Closed-loop Ledger across stages when a task spans skills or turns. The full `Control Route` is persisted under `.alpha-goal/control-state/`; the TUI should show only a compact Markdown-table `Route Summary` by default.
+- Carry the Closed-loop Ledger across stages when a task spans skills or turns. The full `Control Route` is persisted under `.alpha-goal/YYYYMMDD-<slug>/control-state.md`; the TUI should show only a compact Markdown-table `Route Summary` by default.
 
 ## Stability failure patterns
 
@@ -26,6 +26,8 @@ The optional steps are not ceremony:
 - Actuator overreach: executor mutates outside approved scope or ownership.
 - Coupled control: parallel changes hit shared generated outputs or submodules.
 - Disturbance denial: dirty state, tool gaps, or changing specs are treated as irrelevant.
+- Dynamic instability: delayed or noisy feedback causes repeated over-correction, route flapping, or broad rewrites without damping.
+- Memory drift: artifacts are written outside `.alpha-goal/YYYYMMDD-<slug>/`, making later recovery or validation ambiguous.
 - Comparator bypass: `control-loop` claims final completion without `evidence-verify`.
 
 ## Minimal intervention rule

@@ -67,7 +67,7 @@ scripts/install.sh --verbose
 ```bash
 tmp_codex_home="$(mktemp -d)"
 CODEX_HOME="$tmp_codex_home" scripts/install.sh
-npx --yes tsx tools/validate_skills.ts .
+npx --yes tsx tools/validate_skillset.ts .
 rm -rf "$tmp_codex_home"
 ```
 
@@ -88,6 +88,7 @@ Expected behavior:
 - It should classify whether the task needs goal framing, system modeling, bounded iteration, verification, or decision synthesis.
 - It should avoid mutation unless the requested phase and edit boundary are clear.
 - It should surface missing target, acceptance, evidence, or side-effect boundaries before implementation.
+- It should use `.alpha-goal/YYYYMMDD-<slug>/control-state.md` when durable state is needed.
 
 ```text
 $goal-contract 对本仓库 skill 和 references 做只读一致性审计，不要改文件。
@@ -120,6 +121,7 @@ $decision-synthesis 多团队对迁移方案目标、风险和成功指标有冲
 Expected behavior:
 
 - It should run at least one Synthesis Round that combines human/expert judgment, machine evidence or available metrics, conflicts, user-owned decisions, and next hypotheses.
+- For complex-giant-like work, it should use a Meta-Synthesis Hall with roles, a Hypothesis bank, a Model registry, dissent, and a convergence condition.
 - It should emit an Indicator Handoff candidate for success metrics that should become Goal Contract evidence.
 - It should route to `goal-contract`, `system-model`, user, or blocker instead of treating a list of opinions as a final plan.
 
@@ -131,6 +133,7 @@ Expected behavior:
 
 - It should run or manually record mutation preflight.
 - It should refuse mutation if target is not closed or edit path is unsafe.
+- Its Control Law should include feedback latency, signal noise, confidence, damping / anti-oscillation, and saturation / containment when feedback is repeated, noisy, broad, or high-risk.
 - It should produce an Iteration Record with dynamic plan, execution, feedback, and Adaptive Learning Record when feedback contradicts a reusable control assumption.
 
 ```text
@@ -141,6 +144,7 @@ Expected behavior:
 
 - It should map acceptance items to fresh evidence.
 - It should review contract acceptance and claim boundary.
+- It should check Control Law dynamics and cybernetic conformance when the evidence bundle includes those artifacts.
 - It should review Indicator Handoff and Adaptive Learning Record boundaries when present.
 - It should produce a Verification Verdict with judgment.
 - It should route to final, next iteration, reframe, or blocked.

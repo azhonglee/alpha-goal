@@ -25,7 +25,7 @@ Use `system-model` when any of these are true:
 - Do not decide user-owned goals, risk acceptance, or business tradeoffs.
 - Do not over-model simple low-risk work where target, scope, evidence, and ownership are already clear.
 - Label observed facts, inferred structure, assumptions, and missing sensors separately.
-- If a Closed-loop Ledger exists, read its `Latest Control Route` from `.alpha-goal/control-state/` before modeling and update only model-relevant state: plant boundary, state variables, sensors, actuators, disturbances, coupling, and model adequacy.
+- If a Closed-loop Ledger exists, read its `Latest Control Route` from `.alpha-goal/YYYYMMDD-<slug>/control-state.md` before modeling and update only model-relevant state: plant boundary, state variables, sensors, actuators, disturbances, coupling, and model adequacy.
 - Independently review and update the model if needed before routing back to `goal-contract`, `alpha-goal`, or `control-loop`.
 
 ## Load resources when needed
@@ -166,7 +166,7 @@ Stabilization strategies:
 
 ### 6. Judge model adequacy
 
-Persist the full Control Model under `.alpha-goal/models/YYYYMMDD-<slug>-system-model.md` by default and update the Closed-loop Ledger artifact registry. Show a compact Markdown-table `Model Summary` in the TUI by default. Print the full model in chat only when the user asks, file persistence is blocked, or a modeling gap requires explicit user review.
+Persist the full Control Model under `.alpha-goal/YYYYMMDD-<slug>/system-model.md` by default and update the Closed-loop Ledger artifact registry. Show a compact Markdown-table `Model Summary` in the TUI by default. Print the full model in chat only when the user asks, file persistence is blocked, or a modeling gap requires explicit user review.
 
 Compact model:
 
@@ -220,6 +220,11 @@ Control Model:
   - Control variable:
   - Candidate action or probe:
   - Sensor and threshold:
+  - Feedback latency:
+  - Signal noise:
+  - Confidence:
+  - Damping / anti-oscillation:
+  - Saturation / containment:
   - Risk/fallback:
 - Disturbance register:
   - Disturbance:
@@ -236,7 +241,7 @@ Control Model:
 - Stability conditions:
 - Missing information:
 - Model adequacy: sufficient | sufficient with narrowed claim | insufficient | blocked
-- Ledger update: `.alpha-goal/control-state/YYYYMMDD-<slug>.md` path, artifact path, model changes, residual model uncertainty, next route, or explicit no-write reason
+- Ledger update: `.alpha-goal/YYYYMMDD-<slug>/control-state.md` path, artifact path, optional schema sidecar path, model changes, residual model uncertainty, next route, or explicit no-write reason
 - Recommended route: goal-contract | control-loop | evidence-verify | decision-synthesis | blocker
 ```
 

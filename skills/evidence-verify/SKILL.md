@@ -18,9 +18,9 @@ A positive verdict needs proportional semantic evidence for:
 - reference state, desired outcome, included scope, excluded scope/non-goals, decision boundaries, constraints, and claim boundary;
 - current durable spec/plan/model if referenced;
 - Iteration Record or equivalent diff/evidence bundle;
-- Control Law result for each material `control-loop` slice, when a mutation or diagnostic probe was used;
+- Control Law result for each material `control-loop` slice, including latency/noise/confidence and stability guards when a mutation or diagnostic probe was used;
 - Indicator Handoff handling when qualitative objectives or synthesis metrics affect acceptance evidence;
-- Closed-loop Ledger from `.alpha-goal/control-state/`, including `Latest Control Route`, when the work crossed skills or turns, or explicit no-write chat state when file writing was forbidden or impossible;
+- Closed-loop Ledger from `.alpha-goal/YYYYMMDD-<slug>/control-state.md`, including `Latest Control Route`, when the work crossed skills or turns, or explicit no-write chat state when file writing was forbidden or impossible;
 - Disturbance Register handling when material disturbances affected route, evidence, or risk;
 - Adaptive Learning Record handling when feedback changed thresholds, strategy, route, or reusable assumptions;
 - Debug Receipt when the claim is a bug or root-cause fix;
@@ -61,7 +61,7 @@ Confirm:
 - approved context is current or explicitly superseded;
 - Goal Contract, system model, durable spec, and plan are semantically aligned or contradictions are routed;
 - ledger reference, current state, latest control route, residual error, and latest route decision are aligned with fresh evidence or explicitly superseded;
-- each material Control Law identifies a target error, approved control variable, expected effect, sensor threshold, observed feedback, and fallback handling;
+- each material Control Law identifies a target error, approved control variable, expected effect, sensor threshold, observed feedback, feedback latency, signal noise when material, confidence, damping / anti-oscillation, saturation / containment, and fallback handling;
 - each material Indicator Handoff maps qualitative objective to operational definition, sensor, threshold/tolerance, timing, and evidence boundary;
 - each material Disturbance Register entry has sensor evidence, containment, route-trigger handling, or an explicit residual gap;
 - each material Adaptive Learning Record has evidence, adjustment, reuse condition, invalidation condition, and no unsupported broad generalization;
@@ -70,6 +70,7 @@ Confirm:
 - mutation evidence comes from an isolated or approved edit path;
 - `.worktrees/` is ignored or otherwise safe, and `.alpha-goal/` is ignored before ledger/evidence artifacts are written; if `.alpha-goal/` was missing from the repo root `.gitignore`, the setup mutation is included in the evidence;
 - checks ran after the last material change, or missing checks have a stated blocker/substitute evidence;
+- repeated, noisy, or delayed feedback has not been overclaimed as stable final evidence;
 - failing output is understood and does not contradict the final claim;
 - feedback is handled, out of scope, or routed elsewhere.
 
@@ -103,7 +104,7 @@ Return exactly one verdict:
 
 ### 5. Output
 
-Persist the full Verification Verdict under `.alpha-goal/verification/YYYYMMDD-<slug>-verdict.md` by default and update the Closed-loop Ledger artifact registry. Show a compact Markdown-table `Verification Summary` in the TUI by default. Print the full verdict in chat only when the user asks, file persistence is blocked, or the final claim requires explicit user review.
+Persist the full Verification Verdict under `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md` by default and update the Closed-loop Ledger artifact registry. Show a compact Markdown-table `Verification Summary` in the TUI by default. Print the full verdict in chat only when the user asks, file persistence is blocked, or the final claim requires explicit user review.
 
 Compact:
 
@@ -155,6 +156,7 @@ Verification Verdict:
 - Required next step:
 - Final claim allowed:
 - Ledger update:
+  - Schema sidecar path:
 ```
 
 Routing:

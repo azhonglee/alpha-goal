@@ -27,21 +27,25 @@
 | `skills/system-model/scripts/repo-sensor-snapshot.ts` | No | Prints a repository sensor snapshot for system modeling and observability checks. |
 | `skills/control-loop/scripts/mutation-preflight.ts` | No | Prints git root, branch, status, worktrees, local rule files, ignored worktree/evidence paths, and submodules. |
 | `skills/evidence-verify/scripts/evidence-summary.ts` | No | Prints changed files, diff stat, diff check status, and recent commits. |
-| `tools/validate_skills.ts` | No | Canonical lightweight validator for the closed-loop six-skill suite, including reference discoverability, semantic smoke checks, and fixture contract checks. |
+| `tools/validate_skills.ts` | No | Canonical lightweight validator for the closed-loop six-skill suite, including reference discoverability, task-scoped artifact layout checks, semantic smoke checks, legacy path guards, and fixture contract checks. |
 | `tools/validate_skillset.ts` | No | Compatibility wrapper for older validation commands; delegates to `tools/validate_skills.ts`. |
 
 ## Runtime Artifacts
 
 | Path | Purpose |
 |---|---|
-| `.alpha-goal/control-state/YYYYMMDD-<slug>.md` | Optional Closed-loop Ledger for cross-stage control state and artifact registry: full Latest Control Route, reference, current state, artifact paths, feedback, residual error, and next route. |
-| `.alpha-goal/context/YYYYMMDD-<slug>-goal-contract.md` | Optional full Goal Contract artifact. |
-| `.alpha-goal/models/YYYYMMDD-<slug>-system-model.md` | Optional full Control Model artifact. |
-| `.alpha-goal/synthesis/YYYYMMDD-<slug>-decision-synthesis.md` | Optional full Decision Synthesis Record artifact. |
-| `.alpha-goal/iterations/YYYYMMDD-<slug>.md` | Optional full Iteration Record artifact. |
-| `.alpha-goal/iterations/YYYYMMDD-<slug>.jsonl` | Optional append-only cycle log for machine-readable loop history. |
-| `.alpha-goal/evidence/` | Optional durable evidence, logs, screenshots, traces, or check outputs referenced by records. |
-| `.alpha-goal/verification/YYYYMMDD-<slug>-verdict.md` | Optional full Verification Verdict artifact. |
+| `.alpha-goal/YYYYMMDD-<slug>/control-state.md` | Optional Closed-loop Ledger for cross-stage control state and artifact registry: full Latest Control Route, reference, current state, artifact paths, feedback, residual error, and next route. |
+| `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md` | Optional full Goal Contract artifact. |
+| `.alpha-goal/YYYYMMDD-<slug>/system-model.md` | Optional full Control Model artifact. |
+| `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md` | Optional full Decision Synthesis Record artifact. |
+| `.alpha-goal/YYYYMMDD-<slug>/plan.md` | Optional durable dynamic plan. |
+| `.alpha-goal/YYYYMMDD-<slug>/iterations/NN-<slice>.md` | Optional full Iteration Record artifact. |
+| `.alpha-goal/YYYYMMDD-<slug>/iterations/cycles.jsonl` | Optional append-only cycle log for machine-readable loop history. |
+| `.alpha-goal/YYYYMMDD-<slug>/evidence/` | Optional durable evidence, logs, screenshots, traces, or check outputs referenced by records. |
+| `.alpha-goal/YYYYMMDD-<slug>/schema/` | Optional machine-readable schema sidecars for durable artifacts. |
+| `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md` | Optional full Verification Verdict artifact. |
+| `.alpha-goal/YYYYMMDD-<slug>/conformance-report.md` | Optional Cybernetic Conformance Report for state-transition, evidence-boundary, and legacy-path checks. |
+| `.alpha-goal/YYYYMMDD-<slug>/interviews.md` | Optional discovery/interview notes when needed for a Goal Contract. |
 
 默认主路径是：
 

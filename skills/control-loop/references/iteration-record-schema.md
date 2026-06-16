@@ -1,6 +1,6 @@
 # Iteration Record Schema
 
-Use this reference when a loop result needs a durable or handoff-ready record. Keep it proportional: include fields only when they affect judgment, handoff, recovery, or accountability. Persist the full record at `.alpha-goal/iterations/YYYYMMDD-<slug>.md` by default, with bulky evidence under `.alpha-goal/evidence/`. The TUI should show a Markdown-table `Iteration Summary` with action, feedback, residual error, artifact path, and next action unless full chat output is required.
+Use this reference when a loop result needs a durable or handoff-ready record. Keep it proportional: include fields only when they affect judgment, handoff, recovery, or accountability. Persist the full record at `.alpha-goal/YYYYMMDD-<slug>/iterations/NN-<slice>.md` by default, with bulky evidence under `.alpha-goal/YYYYMMDD-<slug>/evidence/`. When machine validation or resume safety matters, write a schema sidecar under `.alpha-goal/YYYYMMDD-<slug>/schema/iteration-NN.json`. The TUI should show a Markdown-table `Iteration Summary` with action, feedback, residual error, artifact path, and next action unless full chat output is required.
 
 ## Compact record
 
@@ -15,6 +15,7 @@ Iteration Record:
 - Ledger update:
   - Control-state path:
   - Artifact path:
+  - Schema sidecar path:
   - Evidence paths:
   - Residual error:
   - Route decision:
@@ -31,7 +32,7 @@ Add when relevant:
 - `Changed files`: intentional touched paths when there is a diff.
 - `Generated artifacts`: generated files, reports, binaries, or documents.
 - `Acceptance delta`: criteria covered, partially covered, or uncovered.
-- `Control law result`: target error, expected effect, observed feedback, threshold status, fallback, and residual error for mutation or diagnostic-probe slices.
+- `Control law result`: target error, expected effect, observed feedback, threshold status, feedback latency, signal noise, confidence, damping / anti-oscillation, saturation / containment, fallback, and residual error for mutation or diagnostic-probe slices.
 - `Adaptive Learning Record`: trigger, observed mismatch, adjustment, reuse condition, and invalidation condition when feedback changes future control behavior.
 - `Feedback handling`: user, reviewer, test, runtime, or advisory feedback that changed the route.
 - `Risk/ownership`: cross-boundary, generated-output, migration, compatibility, concurrency, data, security, or observability risk.

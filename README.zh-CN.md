@@ -9,8 +9,9 @@ Alpha Goal 把 agentic software work 从“凭感觉推进”转成一个可观�
 ```text
 INTENT
   -> alpha-goal(route)
+  -> decision-synthesis?(objective conflicts)
+  -> system-model?(observer / actuator / disturbance)
   -> goal-contract(reference)
-  -> system-model(observer / actuator / disturbance)
   -> control-loop(bounded action + feedback)
   -> evidence-verify(error check)
   -> FINAL or NEXT LOOP
@@ -50,11 +51,11 @@ Alpha Goal 的核心判断很简单：没有参考状态，就没有控制；没
 Alpha Goal 把每个请求当作一个控制系统来处理：
 
 1. `alpha-goal` 判断当前主导不确定性，选择下一步 skill。
-2. `goal-contract` 把含糊请求转成目标、范围、非目标、验收证据和最终声明边界。
-3. `system-model` 建模被控对象、状态变量、观测信号、可控变量、扰动和耦合。
-4. `control-loop` 在已批准目标下执行一轮或多轮有界迭代，采集反馈并记录残余误差。
-5. `evidence-verify` 独立比较目标、证据和最终声明，判断是否可以交付或需要下一轮。
-6. `decision-synthesis` 处理复杂系统、多主体冲突和弱量化目标，把综合研判交接给后续闭环。
+2. `decision-synthesis` 处理复杂系统、多主体冲突和弱量化目标，把综合研判交接给后续闭环。
+3. `system-model` 在边界会影响安全行动时建模被控对象、状态变量、观测信号、可控变量、扰动和耦合。
+4. `goal-contract` 把含糊请求转成目标、范围、非目标、验收证据和最终声明边界。
+5. `control-loop` 在已批准目标下执行一轮或多轮有界迭代，采集反馈并记录残余误差。
+6. `evidence-verify` 独立比较目标、证据和最终声明，判断是否可以交付或需要下一轮。
 
 如果任务足够简单，`alpha-goal` 会选择最小可用路径；如果目标、系统或证据边界不清楚，它会先收敛边界，而不是直接动手。
 
@@ -78,14 +79,16 @@ Alpha Goal 把每个请求当作一个控制系统来处理：
 | 状态变量 / state | 需求清晰度、实现状态、测试状态、风险、证据覆盖率和 blocker |
 | 观测器 / observer | repo 快照、diff、测试、日志、运行探针、截图、人工反馈和 review 意见 |
 | 控制器 / actuator | `control-loop` 执行的有界改动、诊断、修复、加固或只读探针 |
-| 控制律 / control law | target error、control variable、expected effect、sensor threshold 和 fallback action |
+| 控制律 / control law | target error、control variable、expected effect、sensor threshold、feedback latency/noise、confidence、damping/containment 和 fallback action |
 | 比较器 / comparator | `evidence-verify` 对目标、证据和最终声明的误差判定 |
-| 状态记忆 / memory | `.alpha-goal/control-state/` 中的 Closed-loop Ledger，记录 reference、state、error、action、feedback 和 next route |
+| 状态记忆 / memory | `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 中的 Closed-loop Ledger，记录 reference、state、error、action、feedback 和 next route |
 | 指标交接 / indicator handoff | 把定性目标转成 metric/proxy、sensor、threshold 和 evidence boundary |
 | 自适应学习 / adaptive learning | 当反馈推翻阈值、策略、route 或假设时，记录可复用但有边界的修正 |
 | 扰动处理 / disturbance handling | 通过 Disturbance Register 记录 likelihood、impact、sensor、containment 和 route trigger |
 | 分层协同控制 | 通过 Controller Hierarchy 识别 global/local controller、coupling variable、arbitration 和 escalation |
 | 复杂系统综合集成 | 通过 `decision-synthesis` 的 Synthesis Round 收敛冲突、证据、指标和用户裁决 |
+| 产物布局 / artifact layout | 任务级运行产物统一放在 `.alpha-goal/YYYYMMDD-<slug>/xxx` 下 |
+| 控制论一致性 / cybernetic conformance | 用状态转移、schema sidecar 和旧路径检查验证闭环是否真正执行 |
 
 ## 快速开始
 
@@ -116,14 +119,15 @@ $alpha-goal your_task_description
 
 ## 状态记忆
 
-跨阶段恢复状态时，Alpha Goal 默认使用 `.alpha-goal/control-state/YYYYMMDD-<slug>.md` 记录 Closed-loop Ledger。
+跨阶段恢复状态时，Alpha Goal 默认使用 `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 记录 Closed-loop Ledger。
+同一任务的相关产物也放在该任务目录下，例如 `goal-contract.md`、`system-model.md`、`iterations/`、`evidence/` 和 `verification-verdict.md`。
 
 ## 校验
 
 修改技能、脚本、模板或文档后，至少运行：
 
 ```bash
-npx --yes tsx tools/validate_skills.ts .
+npx --yes tsx tools/validate_skillset.ts .
 ```
 
 涉及安装行为时，按 [INSTALL.md](INSTALL.md) 使用临时 `CODEX_HOME` 做 smoke test，避免污染真实用户配置。

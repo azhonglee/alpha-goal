@@ -26,7 +26,7 @@ Do not use for localized low-risk tasks with clear acceptance and direct evidenc
 - Do not invent stakeholder preferences or user-owned risk decisions.
 - Do not treat a synthesis as implementation authorization. Convert the selected direction into a Goal Contract via `goal-contract` before mutation.
 - Separate facts, expert judgments, assumptions, hypotheses, scenarios, and decisions.
-- When a Closed-loop Ledger exists, read its `Latest Control Route` from `.alpha-goal/control-state/` before synthesis and update only synthesis-relevant state: objective conflicts, user-owned decisions, scenario assumptions, and the recommended route.
+- When a Closed-loop Ledger exists, read its `Latest Control Route` from `.alpha-goal/YYYYMMDD-<slug>/control-state.md` before synthesis and update only synthesis-relevant state: objective conflicts, user-owned decisions, scenario assumptions, and the recommended route.
 
 ## Load resources when needed
 
@@ -34,6 +34,7 @@ Do not use for localized low-risk tasks with clear acceptance and direct evidenc
 - `references/stakeholder-decision-boundaries.md`: distinguish recommendation from user-owned decisions.
 - `references/synthesis-round.md`: run human-machine qualitative/quantitative convergence rounds.
 - `references/synthesis-record-schema.md`: produce a durable or handoff-ready Decision Synthesis Record.
+- `references/meta-synthesis-hall.md`: run a Meta-Synthesis Hall with roles, hypothesis bank, model registry, dissent, and convergence conditions.
 
 ## Process
 
@@ -87,12 +88,13 @@ Use quantitative evidence when available, but do not force false precision. Qual
 
 ### 4. Run synthesis rounds
 
-For `complex` and `complex-giant-like` cases, or whenever perspectives conflict, run one or more `Synthesis Round` records before resolving decisions. Load `references/synthesis-round.md` for the schema.
+For `complex` and `complex-giant-like` cases, or whenever perspectives conflict, run one or more `Synthesis Round` records before resolving decisions. Load `references/synthesis-round.md` for the schema. For complex-giant-like work, use the Meta-Synthesis Hall from `references/meta-synthesis-hall.md` to preserve roles, hypotheses, models, dissent, and convergence conditions.
 
 Each round must connect:
 
 - human or expert judgment and its decision owner;
 - machine evidence, model output, tests, logs, metrics, or probes;
+- Meta-Synthesis Hall state when many hypotheses, models, or stakeholder perspectives remain active;
 - the conflict, contradiction, or missing sensor;
 - any metric/proxy that could turn qualitative judgment into bounded evidence;
 - the Indicator Handoff candidate that should become acceptance or sensor evidence;
@@ -115,7 +117,7 @@ If a stakeholder conflict cannot be resolved, return a decision request rather t
 
 ### 6. Produce synthesis record
 
-Persist the full Decision Synthesis Record under `.alpha-goal/synthesis/YYYYMMDD-<slug>-decision-synthesis.md` by default and update the Closed-loop Ledger artifact registry. Show a compact Markdown-table `Synthesis Summary` in the TUI by default. Print the full synthesis in chat only when the user asks, file persistence is blocked, or a user-owned decision requires reviewing the full tradeoff in the conversation.
+Persist the full Decision Synthesis Record under `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md` by default and update the Closed-loop Ledger artifact registry. Show a compact Markdown-table `Synthesis Summary` in the TUI by default. Print the full synthesis in chat only when the user asks, file persistence is blocked, or a user-owned decision requires reviewing the full tradeoff in the conversation.
 
 Compact record fields:
 
@@ -123,6 +125,7 @@ Compact record fields:
 Decision Synthesis Record:
 - Complexity class:
 - Core tension:
+- Meta-Synthesis Hall:
 - Latest synthesis round:
 - Integrated view:
 - Recommended direction:
@@ -157,6 +160,7 @@ Decision Synthesis Record:
 - Evidence and models:
 - Qualitative judgments:
 - Quantitative signals:
+- Meta-Synthesis Hall:
 - Synthesis rounds:
 - Indicator handoff:
 - Contradictions and tradeoffs:
@@ -166,7 +170,7 @@ Decision Synthesis Record:
 - Decision boundaries:
 - Risks and explicit acceptances:
 - Minimum viable Goal Contract candidate:
-- Ledger update: `.alpha-goal/control-state/YYYYMMDD-<slug>.md` path, artifact path, synthesis state changes, next route, or explicit no-write reason
+- Ledger update: `.alpha-goal/YYYYMMDD-<slug>/control-state.md` path, artifact path, optional schema sidecar path, synthesis state changes, next route, or explicit no-write reason
 - Route:
 ```
 
@@ -175,4 +179,5 @@ Decision Synthesis Record:
 - Route to `goal-contract` when a stable recommended direction and Indicator Handoff can become a Goal Contract.
 - Route to `system-model` when subsystem boundary or feedback signals remain unclear.
 - Route to user when a user-owned decision, risk acceptance, budget/timeline tradeoff, or stakeholder priority is required.
+- Route to `evidence-verify` only when synthesis did not authorize mutation and the next action is comparing an existing evidence bundle to a proposed claim.
 - Route to `control-loop` only if a valid Goal Contract already exists and synthesis merely narrowed the next slice without changing authorization.

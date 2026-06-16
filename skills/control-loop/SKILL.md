@@ -12,7 +12,7 @@ Use this skill to advance an approved goal through bounded iterations. It is the
 All must be true before editing implementation files:
 
 - an approved Goal Contract or equivalent context identifies reference state, desired outcome, included scope, excluded scope/non-goals, decision boundaries, constraints, acceptance evidence, and claim boundary;
-- current `.alpha-goal/control-state/` ledger is read when available, especially `Latest Control Route`, selected skill, safety boundary, next action, last residual error, control action, feedback, and route decision; if no file ledger exists, use chat state only with an explicit no-write reason;
+- current `.alpha-goal/YYYYMMDD-<slug>/control-state.md` ledger is read when available, especially `Latest Control Route`, selected skill, safety boundary, next action, last residual error, control action, feedback, and route decision; if no file ledger exists, use chat state only with an explicit no-write reason;
 - current Disturbance Register is read when available, especially material likelihood, impact, sensor, containment, and route triggers;
 - target/scope boundary and final claim boundary are clear enough to decide changed files and final wording;
 - applicable local rules, durable specs, and active plans have been read;
@@ -31,7 +31,7 @@ If system boundary, sensors, actuators, disturbances, or coupling are unclear en
 - `references/execution-boundaries.md`: delegation, ownership, submodules, generated output, and user-owned changes.
 - `references/loop-modes.md`: mode choice, evidence type, debug receipt, and route decisions.
 - `references/plan-template.md`: durable dynamic plans for multi-slice or handoff-heavy work.
-- `references/control-law.md`: target error, control variable, expected effect, sensor threshold, fallback action. Load before any mutation or diagnostic-probe slice.
+- `references/control-law.md`: target error, control variable, expected effect, sensor threshold, latency/noise/confidence, damping, containment, and fallback action. Load before any mutation or diagnostic-probe slice.
 - `references/adaptive-learning.md`: record reusable corrections when feedback contradicts a Control Law, threshold, model, or route assumption.
 - `references/iteration-record-schema.md`: compact or formal Iteration Record semantics.
 - `references/auto-execution.md`: when to execute the next pass automatically versus recommend or pause.
@@ -53,7 +53,7 @@ Dynamic planning answers only the current iteration:
 
 - the smallest coherent acceptance-relevant slice that can be completed and observed now;
 - the error signal this slice is expected to reduce, using the ledger or Goal Contract as reference;
-- the Control Law for the slice: target error, control variable, expected effect, sensor threshold, fallback action;
+- the Control Law for the slice: target error, control variable, expected effect, sensor threshold, feedback latency, signal noise, confidence, damping / anti-oscillation, saturation / containment, and fallback action;
 - control variables to change and variables intentionally held constant;
 - fresh evidence needed after the slice and how it will be sensed;
 - files, modules, repos, generated outputs, and ownership surfaces allowed to change;
@@ -65,7 +65,7 @@ Dynamic planning answers only the current iteration:
 - success, failure, feedback, and reframe routes;
 - whether a durable plan is necessary.
 
-Before executing a mutation or diagnostic-probe slice, emit a compact `Control Law:` block or an equivalent clearly labeled plan section. Do not execute if the target error, approved control variable, observable sensor threshold, or fallback action is missing.
+Before executing a mutation or diagnostic-probe slice, emit a compact `Control Law:` block or an equivalent clearly labeled plan section. Do not execute if the target error, approved control variable, observable sensor threshold, or fallback action is missing. For repeated, noisy, broad, or high-risk loops, also include feedback latency, signal noise, confidence, damping / anti-oscillation, and saturation / containment before acting again.
 
 Create or update a durable plan only for multiple independent loops, modules, repos, handoff/recovery needs, external side effects, irreversible/high-risk changes, rollback/compatibility decisions, contested ownership, or user request.
 
@@ -122,7 +122,7 @@ Classify evidence:
 - `exploration evidence`: maps possibilities only;
 - `blocked evidence`: shows missing environment, tool, data, or permission.
 
-Also record whether the observed sensor feedback crossed the Control Law threshold or whether fallback/reframe is required.
+Also record whether the observed sensor feedback crossed the Control Law threshold, whether latency/noise make the signal inconclusive, and whether fallback/reframe is required.
 If a registered disturbance trigger fires, route according to the register instead of continuing the planned slice.
 If feedback contradicts the Control Law, threshold, model, or route assumption in a reusable way, load `references/adaptive-learning.md` and create an Adaptive Learning Record before the next pass.
 
@@ -143,7 +143,7 @@ Do not choose `ITERATION_READY_FOR_VERIFY` merely because implementation is done
 
 ### 6. Record
 
-Persist a full Iteration Record under `.alpha-goal/iterations/YYYYMMDD-<slug>.md` before handoff, blocking, or materially changing direction. Use `.alpha-goal/iterations/YYYYMMDD-<slug>.jsonl` only when an append-only machine log is useful. Store bulky command output, logs, screenshots, or traces under `.alpha-goal/evidence/` and link to them from the record. Update the Closed-loop Ledger artifact registry and show a compact Markdown-table `Iteration Summary` in the TUI by default.
+Persist a full Iteration Record under `.alpha-goal/YYYYMMDD-<slug>/iterations/NN-<slice>.md` before handoff, blocking, or materially changing direction. Use `.alpha-goal/YYYYMMDD-<slug>/iterations/cycles.jsonl` only when an append-only machine log is useful. Store bulky command output, logs, screenshots, or traces under `.alpha-goal/YYYYMMDD-<slug>/evidence/` and link to them from the record. Update the Closed-loop Ledger artifact registry and show a compact Markdown-table `Iteration Summary` in the TUI by default.
 
 Print the full Iteration Record in chat only when the user asks, file persistence is blocked, or a blocker/risk requires explicit user review. Compact records are still acceptable for low-risk passes, but preserve:
 
@@ -152,7 +152,7 @@ Print the full Iteration Record in chat only when the user asks, file persistenc
 - action or probe;
 - fresh evidence and evidence class;
 - acceptance delta and error remaining;
-- control law result: expected effect, observed feedback, threshold status, fallback or adjustment;
+- control law result: expected effect, observed feedback, threshold status, feedback latency, signal noise, confidence, damping / anti-oscillation, saturation / containment, fallback or adjustment;
 - adaptive learning update: trigger, observed mismatch, adjustment, reuse condition, invalidation condition;
 - feedback and disturbances;
 - ledger update: input state, error signal, disturbance update, control action, sensor feedback, residual error, and next state;

@@ -43,6 +43,56 @@ const LEGACY_SKILL_REFERENCES = [
   "skills/meta-synthesis",
 ];
 
+const LEGACY_ARTIFACT_PATH_REFERENCES = [
+  ".alpha-goal/control-state",
+  ".alpha-goal/context",
+  ".alpha-goal/models",
+  ".alpha-goal/synthesis",
+  ".alpha-goal/iterations",
+  ".alpha-goal/evidence",
+  ".alpha-goal/verification",
+  ".alpha-goal/interviews",
+];
+
+const SIDECAR_REQUIRED_KEYS = [
+  "artifact_kind",
+  "task_slug",
+  "artifact_path",
+  "reference_id",
+  "route_state",
+  "prior_route",
+  "next_route",
+  "target_error",
+  "control_variable",
+  "sensor",
+  "threshold_or_tolerance",
+  "evidence_boundary",
+  "residual_error",
+  "claim_boundary",
+  "generated_at",
+];
+
+const SIDECAR_ARTIFACT_KINDS = [
+  "goal-contract",
+  "system-model",
+  "decision-synthesis",
+  "iteration-record",
+  "verification-verdict",
+  "conformance-report",
+];
+
+const SIDECAR_ROUTE_STATES = [
+  "alpha-goal",
+  "decision-synthesis",
+  "system-model",
+  "goal-contract",
+  "control-loop",
+  "evidence-verify",
+  "final",
+  "user",
+  "blocker",
+];
+
 const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
   [
     "ambiguous requirement can become a bounded Goal Contract",
@@ -54,7 +104,8 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "claim boundary",
       "decision boundaries",
       "Indicator Handoff",
-      ".alpha-goal/context",
+      ".alpha-goal/YYYYMMDD-<slug>/goal-contract.md",
+      ".alpha-goal/YYYYMMDD-<slug>/control-state.md",
       "Contract Summary",
       "| Field | Value |",
       "artifact path",
@@ -72,7 +123,8 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "none material",
       "Disturbance Register",
       "none material",
-      ".alpha-goal/models",
+      ".alpha-goal/YYYYMMDD-<slug>/system-model.md",
+      ".alpha-goal/YYYYMMDD-<slug>/control-state.md",
       "Model Summary",
       "| Field | Value |",
     ],
@@ -88,8 +140,8 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "fallback",
       "Latest Control Route",
       "Adaptive Learning Record",
-      ".alpha-goal/iterations",
-      ".alpha-goal/evidence",
+      ".alpha-goal/YYYYMMDD-<slug>/iterations",
+      ".alpha-goal/YYYYMMDD-<slug>/evidence",
       "Iteration Summary",
       "| Field | Value |",
       "ledger update",
@@ -102,7 +154,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "Evidence coverage",
       "NEXT_ITERATION",
       "NARROW_CLAIM_AND_FINAL",
-      ".alpha-goal/verification",
+      ".alpha-goal/YYYYMMDD-<slug>/verification-verdict.md",
       "Verification Summary",
       "| Field | Value |",
       "Final claim allowed",
@@ -116,8 +168,9 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "Indicator Handoff",
       "Qualitative judgments",
       "Quantitative signals",
+      "Meta-Synthesis Hall",
       "User-owned decisions",
-      ".alpha-goal/synthesis",
+      ".alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md",
       "Synthesis Summary",
       "| Field | Value |",
       "Route",
@@ -128,7 +181,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "skills/alpha-goal/SKILL.md",
     [
       "Closed-loop Ledger",
-      ".alpha-goal/control-state",
+      ".alpha-goal/YYYYMMDD-<slug>/control-state.md",
       "Latest Control Route",
       "Route Summary",
       "| Field | Value |",
@@ -160,17 +213,18 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       ".alpha-goal/",
       ".gitignore",
       "process-artifact setup mutation",
+      ".alpha-goal/YYYYMMDD-<slug>/",
       "Latest Control Route",
       "Artifact registry",
       "Route Summary",
       "| Field | Value |",
       "source of truth",
-      ".alpha-goal/context",
-      ".alpha-goal/models",
-      ".alpha-goal/synthesis",
-      ".alpha-goal/iterations",
-      ".alpha-goal/evidence",
-      ".alpha-goal/verification",
+      ".alpha-goal/YYYYMMDD-<slug>/goal-contract.md",
+      ".alpha-goal/YYYYMMDD-<slug>/system-model.md",
+      ".alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md",
+      ".alpha-goal/YYYYMMDD-<slug>/iterations",
+      ".alpha-goal/YYYYMMDD-<slug>/evidence",
+      ".alpha-goal/YYYYMMDD-<slug>/verification-verdict.md",
       "Reference",
       "Current state",
       "Last error signal",
@@ -179,6 +233,39 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "Route decision",
       "Next state",
       "Adaptive learning",
+    ],
+  ],
+  [
+    "task-scoped artifact layout is explicit and complete",
+    "skills/alpha-goal/references/artifact-layout.md",
+    [
+      ".alpha-goal/YYYYMMDD-<slug>/",
+      "control-state.md",
+      "goal-contract.md",
+      "system-model.md",
+      "decision-synthesis.md",
+      "plan.md",
+      "iterations/",
+      "evidence/",
+      "verification-verdict.md",
+      "schema/",
+      "conformance-report.md",
+      "interviews.md",
+    ],
+  ],
+  [
+    "cybernetic conformance is machine-checkable",
+    "skills/alpha-goal/references/cybernetic-conformance.md",
+    [
+      "State transition",
+      "Schema sidecar",
+      "legacy artifact path",
+      "reference before action",
+      "sensor before claim",
+      "comparator before final",
+      "decision-synthesis -> control-loop",
+      "\"artifact_kind\"",
+      "Stage-specific required keys",
     ],
   ],
   [
@@ -241,6 +328,63 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "Reuse condition",
       "Invalidation condition",
       "Ledger update",
+    ],
+  ],
+  [
+    "control law captures dynamics and stability guards",
+    "skills/control-loop/references/control-law.md",
+    [
+      "Feedback latency",
+      "Signal noise",
+      "Confidence",
+      "Damping / anti-oscillation",
+      "Saturation / containment",
+    ],
+  ],
+  [
+    "system model propagates dynamic control law fields",
+    "skills/system-model/references/control-model-schema.md",
+    [
+      "Feedback latency",
+      "Signal noise",
+      "Confidence",
+      "Damping / anti-oscillation",
+      "Saturation / containment",
+    ],
+  ],
+  [
+    "control loop preserves dynamic control law fields",
+    "skills/control-loop/SKILL.md",
+    [
+      "feedback latency",
+      "signal noise",
+      "confidence",
+      "damping / anti-oscillation",
+      "saturation / containment",
+    ],
+  ],
+  [
+    "evidence verify checks dynamic control law fields",
+    "skills/evidence-verify/SKILL.md",
+    [
+      "feedback latency",
+      "signal noise",
+      "confidence",
+      "damping / anti-oscillation",
+      "saturation / containment",
+    ],
+  ],
+  [
+    "meta-synthesis hall operationalizes qualitative to quantitative convergence",
+    "skills/decision-synthesis/references/meta-synthesis-hall.md",
+    [
+      "Meta-Synthesis Hall",
+      "Human role",
+      "Machine role",
+      "Hypothesis bank",
+      "Model registry",
+      "Convergence condition",
+      "Dissent",
     ],
   ],
 ];
@@ -461,6 +605,8 @@ export function main(args = process.argv.slice(2)): number {
   validateRuntimeArtifactIgnore(root, errors);
   validateLegacyScriptReferences(root, errors);
   validateLegacySkillReferences(root, errors);
+  validateLegacyArtifactPathReferences(root, errors);
+  validateSchemaSidecarContract(root, errors);
   validateSemanticSmokeTests(root, errors);
   validateFixtureContractTests(root, errors);
 
@@ -567,6 +713,89 @@ function validateLegacySkillReferences(root: string, errors: string[]): void {
       if (text.includes(legacy)) {
         errors.push(`${rel}: legacy skill reference remains: ${legacy}`);
       }
+    }
+  }
+}
+
+function validateLegacyArtifactPathReferences(root: string, errors: string[]): void {
+  const checkedFiles = [
+    "AGENTS.md",
+    "README.md",
+    "README.zh-CN.md",
+    "INSTALL.md",
+    "MANIFEST.md",
+    "templates/AGENTS.md",
+    ...walk(path.join(root, "skills"))
+      .filter((file) => {
+        if (!isFile(file)) {
+          return false;
+        }
+        const rel = relative(root, file);
+        return rel.endsWith(".md") || rel.endsWith("/agents/openai.yaml");
+      })
+      .map((file) => relative(root, file)),
+  ];
+
+  for (const rel of checkedFiles) {
+    const file = path.join(root, rel);
+    if (!isFile(file)) {
+      continue;
+    }
+    const text = fs.readFileSync(file, "utf8");
+    for (const legacy of LEGACY_ARTIFACT_PATH_REFERENCES) {
+      if (text.includes(legacy)) {
+        errors.push(`${rel}: legacy artifact path remains: ${legacy}`);
+      }
+    }
+  }
+}
+
+function validateSchemaSidecarContract(root: string, errors: string[]): void {
+  const rel = "skills/alpha-goal/references/cybernetic-conformance.md";
+  const file = path.join(root, rel);
+  if (!isFile(file)) {
+    errors.push(`schema sidecar contract: missing ${rel}`);
+    return;
+  }
+
+  const text = fs.readFileSync(file, "utf8");
+  const match = text.match(/```json\s*([\s\S]*?)```/);
+  if (!match) {
+    errors.push(`${rel}: missing JSON Schema sidecar example block`);
+    return;
+  }
+
+  let schema: Record<string, unknown>;
+  try {
+    schema = JSON.parse(match[1]);
+  } catch (error) {
+    errors.push(`${rel}: invalid JSON Schema sidecar example: ${errorMessage(error)}`);
+    return;
+  }
+
+  for (const key of SIDECAR_REQUIRED_KEYS) {
+    if (!Object.hasOwn(schema, key)) {
+      errors.push(`${rel}: schema sidecar missing required key ${JSON.stringify(key)}`);
+    }
+  }
+
+  const artifactKind = String(schema.artifact_kind ?? "");
+  for (const kind of SIDECAR_ARTIFACT_KINDS) {
+    if (!artifactKind.includes(kind)) {
+      errors.push(`${rel}: schema sidecar artifact_kind omits ${kind}`);
+    }
+  }
+
+  const routeState = String(schema.route_state ?? "");
+  for (const state of SIDECAR_ROUTE_STATES) {
+    if (!routeState.includes(state)) {
+      errors.push(`${rel}: schema sidecar route_state omits ${state}`);
+    }
+  }
+
+  for (const kind of SIDECAR_ARTIFACT_KINDS) {
+    if (!text.includes(`- \`${kind}\``)) {
+      errors.push(`${rel}: stage-specific required keys omit ${kind}`);
     }
   }
 }

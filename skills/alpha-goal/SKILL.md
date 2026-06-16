@@ -1,6 +1,6 @@
 ---
 name: alpha-goal
-description: "Route engineering, debugging, design, and verification work through the closed-loop control skill suite: goal-contract, system-model, control-loop, evidence-verify, and decision-synthesis. Use when the next skill or control boundary is unclear. Use for any rengineering, debugging, design, or verification request."
+description: "Route engineering, debugging, design, and verification work through the closed-loop control skill suite: goal-contract, system-model, control-loop, evidence-verify, and decision-synthesis. Use when the next skill or control boundary is unclear. Use for any engineering, debugging, design, or verification request."
 ---
 
 # Alpha Goal
@@ -35,6 +35,8 @@ Treat the user request as a control problem:
 
 - `references/cybernetic-routing.md`: route selection and stability failure patterns.
 - `references/closed-loop-ledger.md`: cross-stage state memory schema and update rules.
+- `references/artifact-layout.md`: task-scoped `.alpha-goal/YYYYMMDD-<slug>/xxx` runtime artifact layout.
+- `references/cybernetic-conformance.md`: state transition, schema sidecar, and closed-loop invariant checks.
 
 ## Process
 
@@ -55,7 +57,7 @@ Identify the current dominant uncertainty. If a Closed-loop Ledger exists, read 
 - many stakeholders, weak quantification, conflicting values, or complex giant-system behavior -> synthesis need;
 - missing tool, permission, data, environment, or user-owned decision -> blocker.
 
-If no ledger exists and the task is likely to span multiple skills, initialize `.alpha-goal/control-state/YYYYMMDD-<slug>.md` after ensuring `.alpha-goal/` is ignored. Add `.alpha-goal/` to the repo root `.gitignore` first when needed.
+If no ledger exists and the task is likely to span multiple skills, initialize `.alpha-goal/YYYYMMDD-<slug>/control-state.md` after ensuring `.alpha-goal/` is ignored. Add `.alpha-goal/` to the repo root `.gitignore` first when needed.
 
 ### 2. Select next skill
 
@@ -76,7 +78,7 @@ Use this routing table:
 Before routing to an execution-capable path, ensure:
 
 - the reference state is explicit enough to detect error;
-- an execution route has a candidate Control Law: target error, control variable, expected effect, sensor threshold, fallback;
+- an execution route has a candidate Control Law: target error, control variable, expected effect, sensor threshold, fallback, and dynamics/stability guards when material;
 - the actuator boundary says what may change and what must not change;
 - observer signals are available or a missing-observer blocker is stated;
 - qualitative objectives have accepted indicators or explicitly missing sensors before execution claims depend on them;
@@ -84,12 +86,14 @@ Before routing to an execution-capable path, ensure:
 - prior Adaptive Learning Records are applied only when reuse conditions hold and invalidation conditions do not hold;
 - the ledger records the last error signal and why the selected next skill reduces it, or chat-only state is explicitly justified by a no-write constraint;
 - final claims will be checked by `evidence-verify` rather than stated by the executor.
+- runtime artifacts use the task-scoped layout from `references/artifact-layout.md`; legacy category paths are treated as validation failures.
+- complex, high-risk, resumed, or final handoffs must either produce a conformance report using `references/cybernetic-conformance.md` or state why the report is unnecessary for the narrowed claim.
 
 ### 4. Persist route card and show summary
 
 Persist the full route card to the Closed-loop Ledger by default. Do not print the full card in the TUI unless the user explicitly asks for it, persistence is blocked, or the route is high-risk enough that the user must review every field before continuing.
 
-Write or update this section in `.alpha-goal/control-state/YYYYMMDD-<slug>.md`:
+Write or update this section in `.alpha-goal/YYYYMMDD-<slug>/control-state.md`:
 
 ```text
 Latest Control Route:
@@ -124,6 +128,6 @@ Route Summary
 | Next | |
 ```
 
-The summary must be enough for the user to understand the selected route without reading a long field list. Keep each table value concise; put long reasoning in the ledger artifact. Other skills must recover the full route from `.alpha-goal/control-state/` instead of relying on the TUI transcript. If writing is explicitly forbidden or impossible, include the full `Control Route` in chat and state the no-write reason in `Ledger`.
+The summary must be enough for the user to understand the selected route without reading a long field list. Keep each table value concise; put long reasoning in the ledger artifact. Other skills must recover the full route from `.alpha-goal/YYYYMMDD-<slug>/control-state.md` instead of relying on the TUI transcript. If writing is explicitly forbidden or impossible, include the full `Control Route` in chat and state the no-write reason in `Ledger`.
 
 If the user explicitly named a skill and the route is safe, respect that selection and state any residual gates.

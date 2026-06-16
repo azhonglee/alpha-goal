@@ -9,8 +9,9 @@ Alpha Goal turns agentic software work from intuition-driven progress into an ob
 ```text
 INTENT
   -> alpha-goal(route)
+  -> decision-synthesis?(objective conflicts)
+  -> system-model?(observer / actuator / disturbance)
   -> goal-contract(reference)
-  -> system-model(observer / actuator / disturbance)
   -> control-loop(bounded action + feedback)
   -> evidence-verify(error check)
   -> FINAL or NEXT LOOP
@@ -50,11 +51,11 @@ You probably do not need Alpha Goal for:
 Alpha Goal treats every request as a control system:
 
 1. `alpha-goal` identifies the dominant uncertainty and routes to the next skill.
-2. `goal-contract` turns an ambiguous request into goals, scope, non-goals, acceptance evidence, and final claim boundaries.
-3. `system-model` models the plant, state variables, observation signals, control variables, disturbances, and coupling.
-4. `control-loop` runs one or more bounded iterations under an approved goal, collects feedback, and records residual error.
-5. `evidence-verify` independently compares the goal, evidence, and final claim to decide whether the work can be delivered or needs another loop.
-6. `decision-synthesis` handles complex systems, multi-party conflicts, and weakly quantified goals before handing off to the rest of the loop.
+2. `decision-synthesis` handles complex systems, multi-party conflicts, and weakly quantified goals before handing off to the rest of the loop.
+3. `system-model` models the plant, state variables, observation signals, control variables, disturbances, and coupling when those boundaries affect safe action.
+4. `goal-contract` turns an ambiguous request into goals, scope, non-goals, acceptance evidence, and final claim boundaries.
+5. `control-loop` runs one or more bounded iterations under an approved goal, collects feedback, and records residual error.
+6. `evidence-verify` independently compares the goal, evidence, and final claim to decide whether the work can be delivered or needs another loop.
 
 For simple work, `alpha-goal` chooses the smallest viable path. When target, system, or evidence boundaries are unclear, it closes those boundaries before acting.
 
@@ -78,14 +79,16 @@ For simple work, `alpha-goal` chooses the smallest viable path. When target, sys
 | State variables / state | Requirement clarity, implementation state, test state, risk, evidence coverage, and blockers |
 | Observer | Repository snapshots, diffs, tests, logs, runtime probes, screenshots, human feedback, and review comments |
 | Actuator | Bounded changes, diagnostics, repairs, hardening, or read-only probes run by `control-loop` |
-| Control law | Target error, control variable, expected effect, sensor threshold, and fallback action |
+| Control law | Target error, control variable, expected effect, sensor threshold, feedback latency/noise, confidence, damping/containment, and fallback action |
 | Comparator | `evidence-verify`, which checks error between the goal, evidence, and final claim |
-| Memory | The Closed-loop Ledger under `.alpha-goal/control-state/`, recording reference, state, error, action, feedback, and next route |
+| Memory | The Closed-loop Ledger under `.alpha-goal/YYYYMMDD-<slug>/control-state.md`, recording reference, state, error, action, feedback, and next route |
 | Indicator handoff | Mapping qualitative goals to metrics/proxies, sensors, thresholds, and evidence boundaries |
 | Adaptive learning | Bounded reusable corrections when feedback invalidates a threshold, strategy, route, or assumption |
 | Disturbance handling | Disturbance Register entries with likelihood, impact, sensor, containment, and route trigger |
 | Hierarchical control | Controller Hierarchy for global/local controllers, coupling variables, arbitration, and escalation |
 | Complex-system synthesis | `decision-synthesis` Synthesis Rounds for conflicts, evidence, indicators, and user decisions |
+| Artifact layout | Task-scoped runtime artifacts under `.alpha-goal/YYYYMMDD-<slug>/xxx` |
+| Cybernetic conformance | State-transition, schema sidecar, and legacy-path checks that verify the loop was followed |
 
 ## Quick Start
 
@@ -116,14 +119,15 @@ $alpha-goal your_task_description
 
 ## State Memory
 
-For cross-stage recovery, Alpha Goal uses `.alpha-goal/control-state/YYYYMMDD-<slug>.md` as the default Closed-loop Ledger.
+For cross-stage recovery, Alpha Goal uses `.alpha-goal/YYYYMMDD-<slug>/control-state.md` as the default Closed-loop Ledger.
+Related artifacts for the same task stay under that task directory, such as `goal-contract.md`, `system-model.md`, `iterations/`, `evidence/`, and `verification-verdict.md`.
 
 ## Validation
 
 After changing skills, scripts, templates, or documentation, run at least:
 
 ```bash
-npx --yes tsx tools/validate_skills.ts .
+npx --yes tsx tools/validate_skillset.ts .
 ```
 
 For installation behavior, use a temporary `CODEX_HOME` smoke test as described in [INSTALL.md](INSTALL.md), so real user configuration is not polluted.

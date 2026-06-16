@@ -4,29 +4,33 @@ Use this reference when a task spans multiple skills, may resume across turns, o
 
 ## Purpose
 
-The ledger is a control-state memory and artifact index, not a work diary. Keep only information that changes routing, safety, evidence, or final claim judgment. The full `Control Route` belongs here by default; other full stage artifacts belong in their own `.alpha-goal/` subdirectories. The TUI should show compact summaries unless the user asks for full details, file persistence is blocked, or a user-owned decision needs review.
+The ledger is a control-state memory and artifact index, not a work diary. Keep only information that changes routing, safety, evidence, or final claim judgment. The full `Control Route` belongs here by default; other full stage artifacts belong under the same task run directory, `.alpha-goal/YYYYMMDD-<slug>/`. The TUI should show compact summaries unless the user asks for full details, file persistence is blocked, or a user-owned decision needs review.
 
 Default durable path:
 
 ```text
-.alpha-goal/control-state/YYYYMMDD-<slug>.md
+.alpha-goal/YYYYMMDD-<slug>/control-state.md
 ```
 
 Optional append-only machine log:
 
 ```text
-.alpha-goal/iterations/YYYYMMDD-<slug>.jsonl
+.alpha-goal/YYYYMMDD-<slug>/iterations/cycles.jsonl
 ```
 
 Default full artifact paths:
 
 ```text
-.alpha-goal/context/YYYYMMDD-<slug>-goal-contract.md
-.alpha-goal/models/YYYYMMDD-<slug>-system-model.md
-.alpha-goal/synthesis/YYYYMMDD-<slug>-decision-synthesis.md
-.alpha-goal/iterations/YYYYMMDD-<slug>.md
-.alpha-goal/evidence/
-.alpha-goal/verification/YYYYMMDD-<slug>-verdict.md
+.alpha-goal/YYYYMMDD-<slug>/goal-contract.md
+.alpha-goal/YYYYMMDD-<slug>/system-model.md
+.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md
+.alpha-goal/YYYYMMDD-<slug>/plan.md
+.alpha-goal/YYYYMMDD-<slug>/iterations/NN-<slice>.md
+.alpha-goal/YYYYMMDD-<slug>/evidence/
+.alpha-goal/YYYYMMDD-<slug>/schema/
+.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md
+.alpha-goal/YYYYMMDD-<slug>/conformance-report.md
+.alpha-goal/YYYYMMDD-<slug>/interviews.md
 ```
 
 Default behavior is to write the ledger under `.alpha-goal/`. Before the first write in a repository, check whether `.alpha-goal/` is ignored. If it is not ignored and the repo root `.gitignore` is writable, add this line before writing ledger artifacts:
@@ -48,9 +52,13 @@ Closed-loop Ledger:
   - Goal Contract:
   - System Model:
   - Decision Synthesis:
+  - Plan:
   - Iteration Records:
   - Evidence:
+  - Schema sidecars:
   - Verification Verdict:
+  - Conformance Report:
+  - Interviews:
 - Latest Control Route:
   Control Route:
   - Ledger path:
@@ -118,6 +126,11 @@ Closed-loop Ledger:
       - Control variable:
       - Expected effect:
       - Sensor threshold:
+      - Feedback latency:
+      - Signal noise:
+      - Confidence:
+      - Damping / anti-oscillation:
+      - Saturation / containment:
       - Fallback action:
     - Control action or probe:
     - Variables changed:
@@ -133,18 +146,18 @@ Closed-loop Ledger:
 
 ## Stage responsibilities
 
-- `alpha-goal`: discover or initialize the ledger, classify active control state, write the full `Latest Control Route`, and show only a Markdown-table `Route Summary` in the TUI by default.
-- `decision-synthesis`: read the latest route before synthesis; write the full Decision Synthesis Record under `.alpha-goal/synthesis/`, update the artifact registry and route-relevant synthesis state, and show a Markdown-table `Synthesis Summary` in the TUI by default.
-- `system-model`: read the latest route before modeling; write the full Control Model under `.alpha-goal/models/`, update the artifact registry and model-relevant state, and show a Markdown-table `Model Summary` in the TUI by default.
-- `goal-contract`: read the latest route before changing the reference; write the full Goal Contract under `.alpha-goal/context/`, update the artifact registry and reference state, and show a Markdown-table `Contract Summary` in the TUI by default.
-- `control-loop`: read the latest route before mutation/probe; write full Iteration Records under `.alpha-goal/iterations/`, durable logs under `.alpha-goal/evidence/` when needed, update the artifact registry and control state, and show a Markdown-table `Iteration Summary` in the TUI by default.
-- `evidence-verify`: read the latest route before verdict; write the full Verification Verdict under `.alpha-goal/verification/`, update the artifact registry and final comparator state, and show a Markdown-table `Verification Summary` in the TUI by default.
+- `alpha-goal`: discover or initialize the ledger, classify active control state, write the full `Latest Control Route`, keep the artifact registry inside `.alpha-goal/YYYYMMDD-<slug>/`, and show only a Markdown-table `Route Summary` in the TUI by default.
+- `decision-synthesis`: read the latest route before synthesis; write the full Decision Synthesis Record under `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md`, update the artifact registry and route-relevant synthesis state, and show a Markdown-table `Synthesis Summary` in the TUI by default.
+- `system-model`: read the latest route before modeling; write the full Control Model under `.alpha-goal/YYYYMMDD-<slug>/system-model.md`, update the artifact registry and model-relevant state, and show a Markdown-table `Model Summary` in the TUI by default.
+- `goal-contract`: read the latest route before changing the reference; write the full Goal Contract under `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md`, update the artifact registry and reference state, and show a Markdown-table `Contract Summary` in the TUI by default.
+- `control-loop`: read the latest route before mutation/probe; write full Iteration Records under `.alpha-goal/YYYYMMDD-<slug>/iterations/`, durable logs under `.alpha-goal/YYYYMMDD-<slug>/evidence/` when needed, update the artifact registry and control state, and show a Markdown-table `Iteration Summary` in the TUI by default.
+- `evidence-verify`: read the latest route before verdict; write the full Verification Verdict under `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md`, update the artifact registry and final comparator state, and show a Markdown-table `Verification Summary` in the TUI by default.
 
 ## Update rules
 
-- Update the ledger when reference, Indicator Handoff, plant model, Controller Hierarchy, Disturbance Register, Adaptive Learning Record, Control Law, actuator boundary, evidence floor, artifact path, route, selected skill, next action, or residual error changes materially.
-- Treat `.alpha-goal/control-state/` as the source of truth for cross-skill route fields. Do not require later skills to reconstruct `Control Route` from the visible TUI summary.
-- Treat the artifact registry as the source of truth for locating full stage outputs. Do not duplicate full Goal Contracts, Control Models, Decision Synthesis Records, Iteration Records, or Verification Verdicts inside the ledger unless file persistence is blocked.
+- Update the ledger when reference, Indicator Handoff, plant model, Controller Hierarchy, Disturbance Register, Adaptive Learning Record, Control Law, actuator boundary, evidence floor, schema sidecar, conformance report, artifact path, route, selected skill, next action, or residual error changes materially.
+- Treat `.alpha-goal/YYYYMMDD-<slug>/control-state.md` as the source of truth for cross-skill route fields. Do not require later skills to reconstruct `Control Route` from the visible TUI summary.
+- Treat the artifact registry as the source of truth for locating full stage outputs. Do not duplicate full Goal Contracts, Control Models, Decision Synthesis Records, Iteration Records, schema sidecars, Conformance Reports, or Verification Verdicts inside the ledger unless file persistence is blocked.
 - TUI output should default to compact Markdown table summaries:
 
 ```markdown
@@ -160,7 +173,7 @@ Route Summary
 ```
 
 - Stage summaries should use the same two-column Markdown table shape: field and value. Values should be concise and point to artifact paths for long details. If a runtime cannot render Markdown tables, use a compact two-column plain-text table instead of bullet lists. Print full artifacts in chat only when the user asks, persistence is blocked, or a decision/risk requires explicit user review.
-- Do not duplicate full command output; link or summarize evidence and point to `.alpha-goal/evidence/` when durable logs are needed.
+- Do not duplicate full command output; link or summarize evidence and point to `.alpha-goal/YYYYMMDD-<slug>/evidence/` when durable logs are needed.
 - Do not store secrets, tokens, credentials, private user data, or production-only sensitive records.
 - Label stale or superseded state instead of silently overwriting it.
 - If the ledger conflicts with the current Goal Contract, system model, diff, or fresh evidence, route to `goal-contract`, `system-model`, or `evidence-verify` before further mutation.

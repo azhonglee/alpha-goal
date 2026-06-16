@@ -5,7 +5,7 @@ Use only when `control-loop` needs a durable dynamic plan. A plan is the current
 Default path:
 
 ```text
-docs/plans/YYYYMMDD-<slug>-plan.md
+.alpha-goal/YYYYMMDD-<slug>/plan.md
 ```
 
 Create or update a plan when:

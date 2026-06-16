@@ -18,6 +18,11 @@ Synthesis Round:
   - Boundary crossed:
   - Confidence:
   - Failure mode:
+- Meta-Synthesis Hall state:
+  - Hypothesis bank:
+  - Model registry:
+  - Dissent:
+  - Convergence condition:
 - Quantitative indicators:
   - Metric/proxy:
   - Current value:

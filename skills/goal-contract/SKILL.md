@@ -51,7 +51,7 @@ Collect enough context to classify the problem:
 - unknowns that affect authority, scope, risk, acceptance, decision boundaries, or claim wording;
 - for brownfield work, facts observed directly versus inferences.
 
-If a Closed-loop Ledger exists, read its `Latest Control Route` and current control state before changing the Goal Contract. Recover route fields from `.alpha-goal/control-state/`, not from the TUI summary. If it conflicts with current user intent or fresh facts, label the superseded state and reframe instead of silently continuing.
+If a Closed-loop Ledger exists, read its `Latest Control Route` and current control state before changing the Goal Contract. Recover route fields from `.alpha-goal/YYYYMMDD-<slug>/control-state.md`, not from the TUI summary. If it conflicts with current user intent or fresh facts, label the superseded state and reframe instead of silently continuing.
 
 If the system boundary or feedback signals are too unclear to write a reliable contract, route to `system-model` first and return with a model summary.
 
@@ -134,7 +134,7 @@ Produce the lightest safe artifact:
 - `Goal Contract`: authorize a bounded `control-loop` handoff after user acceptance.
 - `Diagnostic Contract`: authorize diagnosis first, and repair only after recorded root-cause evidence.
 
-Persist full artifacts under `.alpha-goal/context/` by default and update the Closed-loop Ledger artifact registry. Show a compact Markdown-table `Contract Summary` in the TUI by default. Print the full contract in chat only when the user asks, file persistence is blocked, or explicit user acceptance requires reviewing all contract fields in the conversation.
+Persist full artifacts under `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md` by default and update the Closed-loop Ledger artifact registry. Show a compact Markdown-table `Contract Summary` in the TUI by default. Print the full contract in chat only when the user asks, file persistence is blocked, or explicit user acceptance requires reviewing all contract fields in the conversation.
 
 Goal Contract schema:
 
@@ -152,7 +152,7 @@ Goal Contract:
 - Diagnostic gate: symptom, hypotheses, cause-evidence needed, repair authorization gate, if applicable
 - Pressure-test findings: assumption/tradeoff/evidence probes
 - Handoff: accepted indicators, allowed first loop mode, evidence floor, stop/reframe triggers
-- Ledger update: `.alpha-goal/control-state/YYYYMMDD-<slug>.md` path, artifact path, latest error signal, next route, or explicit no-write reason
+- Ledger update: `.alpha-goal/YYYYMMDD-<slug>/control-state.md` path, artifact path, optional schema sidecar path, latest error signal, next route, or explicit no-write reason
 ```
 
 TUI summary:
@@ -172,11 +172,12 @@ Contract Summary
 Default durable paths:
 
 ```text
-.alpha-goal/context/YYYYMMDD-<slug>-goal-contract.md
-.alpha-goal/control-state/YYYYMMDD-<slug>.md
-docs/design/YYYYMMDD-<slug>-goal-contract.md
-.alpha-goal/interviews/YYYYMMDD-<slug>.md
+.alpha-goal/YYYYMMDD-<slug>/goal-contract.md
+.alpha-goal/YYYYMMDD-<slug>/control-state.md
+.alpha-goal/YYYYMMDD-<slug>/interviews.md
 ```
+
+Write a committed design document outside `.alpha-goal/` only when the user or repository explicitly requests one.
 
 ### 6. Review
 
@@ -188,7 +189,7 @@ Self-review the artifact:
 - Are observed facts labeled separately from inference?
 - Would `control-loop` know what not to do?
 - Would `evidence-verify` know what evidence is required?
-- Would a later skill recover reference, current state, latest control route, last error, and next route from `.alpha-goal/control-state/` or an explicitly justified no-write chat state?
+- Would a later skill recover reference, current state, latest control route, last error, and next route from `.alpha-goal/YYYYMMDD-<slug>/control-state.md` or an explicitly justified no-write chat state?
 - Does any next step require user permission, risk acceptance, credentials, external side effects, data repair, push, PR/MR, deployment, or production access?
 
 If review fails, return to the earliest phase that can fix it.
@@ -198,5 +199,5 @@ If review fails, return to the earliest phase that can fix it.
 Handoff means passing a user-accepted Goal Contract to `control-loop`. Non-contract artifacts inform later work but do not authorize implementation.
 
 When a contract is ready, ask the user to accept, reject, or change it unless the runtime already contains explicit acceptance.
-- If accepted, update `.alpha-goal/control-state/YYYYMMDD-<slug>.md` with reference, current state, actuator boundary, evidence floor, artifact path, and next route before handoff. If `.alpha-goal/` is not ignored, add it to the repo root `.gitignore` first. If writing is explicitly forbidden or impossible, include the ledger state and full contract in chat and state the no-write reason.
+- If accepted, update `.alpha-goal/YYYYMMDD-<slug>/control-state.md` with reference, current state, actuator boundary, evidence floor, artifact path, and next route before handoff. If `.alpha-goal/` is not ignored, add it to the repo root `.gitignore` first. If writing is explicitly forbidden or impossible, include the ledger state and full contract in chat and state the no-write reason.
 - If rejected or changed, return to clarification.

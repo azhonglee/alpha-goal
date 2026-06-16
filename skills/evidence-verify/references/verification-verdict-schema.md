@@ -1,6 +1,6 @@
 # Verification Verdict Schema
 
-Use this full schema for formal acceptance records, merge-ready or ship-ready judgments, high-risk claims, contested evidence, or handoff. For low-risk checks, a compact verdict is enough if it preserves the semantics. Persist the full verdict at `.alpha-goal/verification/YYYYMMDD-<slug>-verdict.md` by default. The TUI should show a Markdown-table `Verification Summary` with verdict, claim boundary, evidence, artifact path, and next action unless full chat output is required.
+Use this full schema for formal acceptance records, merge-ready or ship-ready judgments, high-risk claims, contested evidence, or handoff. For low-risk checks, a compact verdict is enough if it preserves the semantics. Persist the full verdict at `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md` by default. When machine validation or resume safety matters, write a schema sidecar at `.alpha-goal/YYYYMMDD-<slug>/schema/verification-verdict.json`. The TUI should show a Markdown-table `Verification Summary` with verdict, claim boundary, evidence, artifact path, and next action unless full chat output is required.
 
 ## Compact verdict
 
@@ -24,6 +24,7 @@ Verification Verdict:
 - System model review:
 - Artifact review:
 - Control law review:
+  - Dynamics and stability review:
 - Indicator handoff review:
 - Adaptive learning review:
 - Claim boundary:
@@ -38,6 +39,7 @@ Verification Verdict:
 - Ledger update:
   - Control-state path:
   - Artifact path:
+  - Schema sidecar path:
   - Verdict:
   - Next route:
 ```
@@ -71,6 +73,11 @@ For each material control action or diagnostic probe:
 - expected effect;
 - sensor and threshold;
 - observed feedback;
+- feedback latency;
+- signal noise;
+- confidence;
+- damping / anti-oscillation;
+- saturation / containment;
 - threshold status: `met`, `partially met`, `not met`, `blocked`, or `not applicable`;
 - fallback or residual error.
 

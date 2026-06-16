@@ -2,7 +2,7 @@
 
 Use this reference when a durable or handoff-ready contract is needed.
 
-Persist the full contract at `.alpha-goal/context/YYYYMMDD-<slug>-goal-contract.md` by default. The TUI should show a Markdown-table `Contract Summary` with reference, scope boundary, evidence, artifact path, and next action unless full chat output is required.
+Persist the full contract at `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md` by default. When machine validation or resume safety matters, write a schema sidecar at `.alpha-goal/YYYYMMDD-<slug>/schema/goal-contract.json`. The TUI should show a Markdown-table `Contract Summary` with reference, scope boundary, evidence, artifact path, and next action unless full chat output is required.
 
 ```text
 Goal Contract:
@@ -56,6 +56,7 @@ Goal Contract:
 - Ledger update:
   - Control-state path:
   - Artifact path:
+  - Schema sidecar path:
   - Latest error signal:
   - Next route:
 ```
