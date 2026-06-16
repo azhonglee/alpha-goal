@@ -1,6 +1,6 @@
 # 决策综合记录结构定义
 
-默认把完整记录持久化到 `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/decision-synthesis.json` 写入 schema sidecar。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `综合摘要`，包含核心张力、推荐方向、用户裁决、产物路径和下一步动作。
+`persisted` 或 `audited` 任务把完整记录写到 `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/decision-synthesis.json` 写入 schema sidecar。低风险单轮综合只压缩输出形态，仍要保留足以支撑下一路由的张力、证据、用户裁决和残余不确定性。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `综合摘要`，包含核心张力、推荐方向、用户裁决、产物路径和下一步动作。
 
 ```text
 决策综合记录:

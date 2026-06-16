@@ -44,7 +44,7 @@ evidence-verify -> final | control-loop | goal-contract | system-model | blocker
 
 ## schema sidecar
 
-任务耗时较长、风险较高或可能需要恢复时，要在 `.alpha-goal/YYYYMMDD-<slug>/schema/` 下为阶段产物生成机器可读的 schema sidecar。该文件用于路由、追踪和机器检查，是紧凑摘要；它不替代完整 Markdown 阶段产物，也不替代持久化的完整控制律。sidecar 使用 JSON，必须满足下列基础 JSON Schema。TypeScript 校验器还会额外检查：产物类型与路径匹配、阶段专用必填字段、迁移闸门、授权规则、样例追踪、运行态追踪连续性、证据边界、阶段决策和声明边界。
+`audited` 任务，或需要机器校验、恢复安全性和跨轮追踪的 `persisted` 任务，要在 `.alpha-goal/YYYYMMDD-<slug>/schema/` 下为阶段产物生成机器可读的 schema sidecar。该文件用于路由、追踪和机器检查，是紧凑摘要；它不替代完整 Markdown 阶段产物，也不替代持久化的完整控制律。sidecar 使用 JSON，必须满足下列基础 JSON Schema。TypeScript 校验器还会额外检查：产物类型与路径匹配、阶段专用必填字段、迁移闸门、授权规则、样例追踪、运行态追踪连续性、证据边界、阶段决策和声明边界。
 
 ```json
 {

@@ -1,6 +1,6 @@
 # 迭代记录结构定义
 
-当循环结果需要可持久化或可交接的记录时，使用本参考。记录应与风险成比例：只有影响判断、交接、恢复或归责的字段才需要写入。默认把完整记录持久化到 `.alpha-goal/YYYYMMDD-<slug>/iterations/NN-<slice>.md`，大体量证据放在 `.alpha-goal/YYYYMMDD-<slug>/evidence/` 下。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/iteration-NN.json` 写入 schema sidecar。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `迭代摘要`，包含动作、反馈、残余误差、产物路径和下一步动作。
+当循环结果需要可持久化或可交接的记录时，使用本参考。记录应与风险成比例：只有影响判断、交接、恢复或归责的字段才需要写入。`persisted` 或 `audited` 任务把完整记录写到 `.alpha-goal/YYYYMMDD-<slug>/iterations/NN-<slice>.md`，大体量证据放在 `.alpha-goal/YYYYMMDD-<slug>/evidence/` 下。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/iteration-NN.json` 写入 schema sidecar。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `迭代摘要`，包含动作、反馈、残余误差、产物路径和下一步动作。
 
 ## 紧凑记录
 

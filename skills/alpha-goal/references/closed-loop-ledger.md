@@ -4,9 +4,13 @@
 
 ## 目的
 
-台账是控制状态记忆和产物索引，不是工作日记。只记录会影响路由、安全边界、证据或最终声明的信息。完整 `控制路由` 默认写在这里；其他阶段产物放在同一任务目录 `.alpha-goal/YYYYMMDD-<slug>/` 下。除非用户要求完整细节、文件持久化受阻，或用户自有决策需要复核，TUI 只展示紧凑摘要。
+台账是控制状态记忆和产物索引，不是工作日记。只记录会影响路由、安全边界、证据或最终声明的信息。低风险单轮任务可使用 `inline` 聊天态摘要；跨技能、多轮、需恢复或高风险任务才把完整 `控制路由` 写在这里。分层只改变记录位置和展示篇幅，不降低目标契约、控制律、证据或最终声明标准。其他阶段产物放在同一任务目录 `.alpha-goal/YYYYMMDD-<slug>/` 下。除非用户要求完整细节、文件持久化受阻，或用户自有决策需要复核，TUI 只展示紧凑摘要。
 
-默认持久化路径:
+## 默认行为
+
+`inline` 任务默认不写文件，只在聊天中保留紧凑路由摘要。`persisted` 和 `audited` 任务才使用以下持久化路径。
+
+持久化台账路径:
 
 ```text
 .alpha-goal/YYYYMMDD-<slug>/control-state.md
@@ -18,7 +22,7 @@
 .alpha-goal/YYYYMMDD-<slug>/iterations/cycles.jsonl
 ```
 
-默认完整产物路径:
+完整产物路径（按分层使用）:
 
 ```text
 .alpha-goal/YYYYMMDD-<slug>/goal-contract.md
@@ -33,13 +37,13 @@
 .alpha-goal/YYYYMMDD-<slug>/interviews.md
 ```
 
-默认行为：在 `.alpha-goal/` 下写入台账。仓库内首次写入前，先检查 `.alpha-goal/` 是否已被忽略。如果未被忽略且根目录 `.gitignore` 可写，先加入这一行，再写入台账产物：
+`persisted` 和 `audited` 分层在 `.alpha-goal/` 下写入台账。仓库内首次写入前，先检查 `.alpha-goal/` 是否已被忽略。如果未被忽略且根目录 `.gitignore` 可写，先加入这一行，再写入台账产物：
 
 ```gitignore
 .alpha-goal/
 ```
 
-把向 `.gitignore` 添加 `.alpha-goal/` 视为流程产物初始化变更，不视为实现变更。只有用户禁止写文件、没有仓库路径，或 `.gitignore` 无法安全更新时，才使用仅聊天态台账，并在 `台账路径` 字段说明原因。
+把向 `.gitignore` 添加 `.alpha-goal/` 视为流程产物初始化变更，不视为实现变更。`inline` 任务不需要写台账文件；用户禁止写文件、没有仓库路径，或 `.gitignore` 无法安全更新时，也使用仅聊天态台账，并在 `台账路径` 字段说明原因。
 
 ## 台账结构
 
@@ -146,16 +150,16 @@
 
 ## 阶段职责
 
-- `alpha-goal`: 发现或初始化台账，分类活跃控制状态，写入完整 `最新控制路由`。产物登记留在 `.alpha-goal/YYYYMMDD-<slug>/` 内；TUI 默认只显示 Markdown 表格 `路由摘要`。
-- `decision-synthesis`: 综合前读取最新路由。把完整决策综合记录写到 `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md`，更新产物登记和综合状态；TUI 默认显示 Markdown 表格 `综合摘要`。
-- `system-model`: 建模前读取最新路由。把完整控制模型写到 `.alpha-goal/YYYYMMDD-<slug>/system-model.md`，更新产物登记和模型状态；TUI 默认显示 Markdown 表格 `模型摘要`。
-- `goal-contract`: 修改参考输入前读取最新路由。把完整目标契约写到 `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md`，更新产物登记和参考状态；TUI 默认显示 Markdown 表格 `契约摘要`。
-- `control-loop`: 变更 / 探测前读取最新路由，并持久化控制律。反馈后写入迭代记录、证据路径和台账更新；TUI 只显示 `执行检查` 与 `迭代摘要`。
-- `evidence-verify`: 下结论前读取最新路由。把完整验证结论写到 `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md`，更新产物登记和最终比较器状态；TUI 默认显示 Markdown 表格 `验证摘要`。
+- `alpha-goal`: 发现或初始化台账，分类活跃控制状态；`persisted` / `audited` 写入完整 `最新控制路由`，`inline` 只展示 Markdown 表格 `路由摘要`。
+- `decision-synthesis`: 综合前读取最新路由；需要恢复、复核或交接时写完整决策综合记录，否则只展示 `综合摘要`。
+- `system-model`: 建模前读取最新路由；紧凑模型必须足以支撑目标契约，复杂或需恢复场景才写完整控制模型；TUI 默认显示 `模型摘要`。
+- `goal-contract`: 修改参考输入前读取最新路由；所有契约都必须保留完整目标语义和模糊度结果，`persisted` / `audited` 才写完整目标契约；TUI 默认显示 `契约摘要`。
+- `control-loop`: 变更 / 探测前完成控制律判断；需要恢复、交接或审计时持久化控制律。反馈后记录动作、证据、残余误差和路由；TUI 只显示 `执行检查` 与 `迭代摘要`。
+- `evidence-verify`: 下结论前读取最新路由；所有结论都必须比较新鲜证据、残余误差和声明边界，完整验证结论只在需要恢复、复核、发布或审计时持久化；TUI 默认显示 `验证摘要`。
 
 ## 更新规则
 
-- 当参考输入、指标转译、被控对象模型、控制器层级、扰动记录、自适应学习记录、控制律、执行器边界、证据下限、schema sidecar、一致性报告、产物路径、路由、选定技能、下一动作或残余误差发生实质变化时，更新台账。
+- `persisted` 和 `audited` 任务中，当参考输入、指标转译、被控对象模型、控制器层级、扰动记录、自适应学习记录、控制律、执行器边界、证据下限、schema sidecar、一致性报告、产物路径、路由、选定技能、下一动作或残余误差发生实质变化时，更新台账。
 - 把 `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 视为跨技能路由字段的事实来源。不要要求后续技能从可见 TUI 摘要重建 `控制路由`。
 - 把产物登记视为定位完整阶段输出的事实来源。除非文件持久化受阻，不要在台账内重复完整目标契约、控制模型、决策综合记录、迭代记录、schema sidecar、一致性报告或验证结论。
 - TUI 输出默认使用紧凑 Markdown 表格摘要：
@@ -168,7 +172,6 @@
 | 路由 | |
 | 原因 | |
 | 边界 | |
-| 台账 | |
 | 下一步 | |
 ```
 

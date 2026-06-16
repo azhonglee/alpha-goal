@@ -2,7 +2,7 @@
 
 需要形成可持久化或可交接的目标契约时，使用本参考。
 
-默认把完整契约持久化到 `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/goal-contract.json` 写入 schema sidecar。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `契约摘要`，包含参考状态、语义状态、范围边界、证据、产物路径和下一步动作。
+`persisted` 或 `audited` 契约把完整契约持久化到 `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/goal-contract.json` 写入 schema sidecar。`inline` 契约只是不写文件，聊天中仍要保留可执行契约摘要：参考状态、完整语义取舍、模糊度结果、范围 / 非目标、决策边界、验收证据、声明边界和确认状态。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `契约摘要`，包含参考状态、语义状态、模糊度结果、范围边界、证据、产物路径和下一步动作。
 
 目标契约默认是草案。用户确认前，下一路由写 `user`，schema sidecar 使用 `stage_decision: ROUTE_TO_USER` 和 `authorization_status: pending`。只有用户明确接受同一契约版本后，才写 `stage_decision: CONTRACT_APPROVED`、`authorization_status: approved` 并路由到 `control-loop`。
 

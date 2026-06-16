@@ -1,6 +1,6 @@
 # 验证结论结构定义
 
-正式验收记录、可合并 / 可发布判断、高风险声明、证据存在争议或需要交接时，使用完整结构定义。低风险检查只要语义完整，可以使用紧凑结论。默认把完整结论持久化到 `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/verification-verdict.json` 写入 schema sidecar。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `验证摘要`，包含结论、声明边界、证据、产物路径和下一步动作。
+正式验收记录、可合并 / 可发布判断、高风险声明、证据存在争议或需要交接时，使用完整结构定义。低风险检查可以使用紧凑结论，但不得降低证据新鲜度、声明边界、比较器或残余误差判断。`persisted` 或 `audited` 任务把完整结论写到 `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/verification-verdict.json` 写入 schema sidecar。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `验证摘要`，包含结论、声明边界、证据、产物路径和下一步动作。
 
 ## 紧凑结论
 

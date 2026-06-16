@@ -1,6 +1,6 @@
 # 控制模型结构定义
 
-默认把完整模型持久化到 `.alpha-goal/YYYYMMDD-<slug>/system-model.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/system-model.json` 写入 schema sidecar。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `模型摘要`，包含边界、可观测性、可控性、产物路径和推荐路由。
+`persisted` 或 `audited` 任务把完整模型写到 `.alpha-goal/YYYYMMDD-<slug>/system-model.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/system-model.json` 写入 schema sidecar。低风险 `inline` 建模只压缩输出形态，仍要覆盖足以支撑契约的系统边界、可观测性、可控性和残余不确定性。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `模型摘要`，包含边界、可观测性、可控性、产物路径和推荐路由。
 
 ```text
 控制模型:
