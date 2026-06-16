@@ -3,9 +3,12 @@
 Use before action when reference, evidence, or system boundary is uncertain.
 
 Discovery Record:
+- Task / probable intent:
 - Inspected facts/sources:
-- Fact conflicts or overloaded terms:
+- Fact labels: [from-code][auto-confirmed] / [from-code] / [from-research] / [from-user]
+- Doc/code/user terminology conflicts:
 - Unknowns classified: discoverable fact / fact needing confirmation / user-owned decision
+- Pressure pass: example / assumption / tradeoff / boundary scenario / not needed because ...
 - Human question: none / one high-leverage question
 
 Goal Contract:

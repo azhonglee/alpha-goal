@@ -9,7 +9,7 @@ Act as the front-end controller. Do not mutate files or make final claims. Reduc
 
 ## Kernel
 
-- Discovery interview: inspect safely discoverable facts first, then ask one high-leverage human question only for confirmation or user-owned decisions.
+- Discovery interview: preflight context, inspect safely discoverable facts, pressure-test assumptions, then ask one high-leverage human question only for confirmation or user-owned decisions.
 - Reference: desired state, scope, non-goals, acceptance evidence, claim boundary.
 - Plant/model: system boundary, state variables, sensors, actuators, ownership, coupling.
 - Synthesis: qualitative judgment + quantitative signals + user-owned decisions for complex work.
@@ -30,22 +30,27 @@ Do not load references by default. Use them only when the compact rules below ar
 Discover facts -> Frame -> Model -> Synthesize if needed -> Route -> Ledger handoff
 ```
 
-1. For vague or overloaded requests, run Discovery Interview before planning: read local rules/docs/code/contracts that are safe and relevant; record facts, conflicts, unknowns, and assumptions.
-2. Classify each gap as discoverable fact, fact needing confirmation, or user-owned decision. Do not ask for discoverable facts until inspected.
-3. Ask at most one high-leverage question per round, only when it changes target, scope, non-goals, acceptance evidence, decision boundaries, authority, risk acceptance, or final claim. Use `request_user_input` when available; otherwise ask plainly.
-4. If target/scope/evidence/claim/authority is unclear, frame it with a Goal Contract.
-5. If plant/sensor/actuator/ownership/coupling is unclear, produce a Control Model before execution.
-6. If qualitative, value-laden, multi-party, or weakly quantified objectives exist, synthesize and create Indicator Handoff before action/claims.
-7. If user-owned decisions, credentials, permissions, external side effects, public claims, or irreversible commitments are unresolved, ask/block.
-8. If explicit bounded action authority exists and material ambiguity is resolved, route to `control-loop`; `alpha-goal` may record authority but never creates it.
-9. If work appears done or any final/ready/safe/complete/repair claim is needed, route to `evidence-verify`.
+1. For vague, overloaded, or brownfield requests, run Discovery Interview before planning: inspect applicable rules/docs/code/contracts/context; record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps.
+2. Treat repo language as evidence, not authority. Cross-check user claims against discoverable code/docs; if sources conflict, name the conflict in the next confirmation question.
+3. Classify each gap as `[from-code][auto-confirmed]` descriptive fact, `[from-code]` inferred fact needing confirmation, `[from-research]` external fact, or `[from-user]` human decision. Do not ask for discoverable facts until inspected.
+4. Ask at most one high-leverage question per round, targeting the weakest readiness gate. Prefer intent/boundaries before implementation detail. Use `request_user_input` when available; otherwise ask plainly.
+5. Pressure-test answers before crystallizing: ask for an example, expose an assumption, force a tradeoff, or use one boundary-stressing scenario when behavior/handoff edges are unclear.
+6. Do not route to execution until intent, outcome, scope, non-goals, acceptance evidence, decision boundaries, claim boundary, and authority are explicit enough to observe error.
+7. If target/scope/evidence/claim/authority remains unclear, frame it with a Goal Contract.
+8. If plant/sensor/actuator/ownership/coupling remains unclear, produce a Control Model before execution.
+9. If qualitative, value-laden, multi-party, or weakly quantified objectives exist, synthesize and create Indicator Handoff before action/claims.
+10. If user-owned decisions, credentials, permissions, external side effects, public claims, or irreversible commitments are unresolved, ask/block.
+11. If explicit bounded action authority exists and material ambiguity is resolved, route to `control-loop`; `alpha-goal` may record authority but never creates it.
+12. If work appears done or any final/ready/safe/complete/repair claim is needed, route to `evidence-verify`.
 
 ## Stability gates
 
 Before execution-capable routing, verify:
 
-- relevant local facts were inspected before asking, or the missing observer is named;
-- remaining ambiguities are classified as confirmation needs or user-owned decisions;
+- preflight context intake inspected relevant local facts before asking, or the missing observer is named;
+- repo/doc/code terminology conflicts are surfaced, not silently resolved;
+- facts vs judgments are labeled and remaining ambiguities are confirmation needs or user-owned decisions;
+- at least one pressure pass occurred for non-trivial ambiguous work, or the reason it was unnecessary is recorded;
 - reference state is explicit enough to observe error;
 - actuator boundary says what may and may not change;
 - mutation/probe authority comes from explicit user/repo instruction, not an agent-written contract;

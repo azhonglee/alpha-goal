@@ -23,10 +23,10 @@ const LEGACY_SCRIPT_REFERENCES = [
 
 const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
   ["front controller frames/models/synthesizes/routes", "skills/alpha-goal/SKILL.md", [
-    "Discover facts -> Frame -> Model -> Synthesize", "Discovery interview", "discoverable facts", "one high-leverage", "Goal Contract", "Control Model", "Indicator Handoff", "user-owned decisions", "control-loop", "evidence-verify", "never creates", "Route Summary"
+    "Discover facts -> Frame -> Model -> Synthesize", "Discovery interview", "preflight context", "repo language as evidence", "[from-code][auto-confirmed]", "[from-user]", "one high-leverage", "weakest readiness gate", "Pressure-test", "non-goals", "decision boundaries", "Goal Contract", "Control Model", "Indicator Handoff", "user-owned decisions", "control-loop", "evidence-verify", "never creates", "Route Summary"
   ]],
   ["contract/model reference preserves pre-action discovery gates", "skills/alpha-goal/references/contract-and-model.md", [
-    "Discovery Record:", "Inspected facts/sources", "discoverable fact", "fact needing confirmation", "user-owned decision", "one high-leverage question", "Goal Contract:", "Control Model:", "Acceptance evidence", "Claim boundary", "Authorization class", "Disturbance Register", "Controller Hierarchy", "Candidate Control Law"
+    "Discovery Record:", "Task / probable intent", "Inspected facts/sources", "Fact labels", "[from-code][auto-confirmed]", "[from-research]", "[from-user]", "terminology conflicts", "discoverable fact", "fact needing confirmation", "user-owned decision", "Pressure pass", "one high-leverage question", "Goal Contract:", "Control Model:", "Non-goals", "Decision boundaries", "Acceptance evidence", "Claim boundary", "Authorization class", "Disturbance Register", "Controller Hierarchy", "Candidate Control Law"
   ]],
   ["synthesis reference preserves qualitative quantitative integration", "skills/alpha-goal/references/synthesis.md", [
     "Human/expert judgments", "Machine evidence/models", "Quantitative indicators", "Qualitative constraints", "User-owned decision", "Indicator handoff candidate"
