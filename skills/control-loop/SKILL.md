@@ -71,6 +71,23 @@ Print the raw `Control Law:` block in chat only when the user asks for it, file 
 
 TUI pre-action check:
 
+Use the user's language for the heading and field labels. For Chinese conversations, use:
+
+```markdown
+执行检查
+
+| 字段 | 内容 |
+| --- | --- |
+| 问题 | |
+| 本轮动作 | |
+| 保持不变 | |
+| 验收证据 | |
+| 主要风险 | |
+| 失败处理 | |
+```
+
+For English conversations, use:
+
 ```markdown
 Execution Check
 
@@ -84,7 +101,7 @@ Execution Check
 | Fallback | |
 ```
 
-Map `Problem` from target error, `Action` from control variable plus control action, `Held constant` from variables held constant and containment, `Evidence` from sensor plus threshold, `Main risk` from signal noise, damping, saturation, or strongest material risk, and `Fallback` from fallback action or stop/reframe trigger. Keep values concise and point to the persisted artifact for the full Control Law.
+Map `Problem` / `问题` from target error, `Action` / `本轮动作` from control variable plus control action, `Held constant` / `保持不变` from variables held constant and containment, `Evidence` / `验收证据` from sensor plus threshold, `Main risk` / `主要风险` from signal noise, damping, saturation, or strongest material risk, and `Fallback` / `失败处理` from fallback action or stop/reframe trigger. Keep values concise and point to the persisted artifact for the full Control Law.
 
 Create or update a durable plan only for multiple independent loops, modules, repos, handoff/recovery needs, external side effects, irreversible/high-risk changes, rollback/compatibility decisions, contested ownership, or user request.
 

@@ -40,7 +40,7 @@ Conditional transition rules:
 
 ## Schema sidecar
 
-When a task is long-running, high-risk, or likely to resume, emit a machine-readable Schema sidecar in `.alpha-goal/YYYYMMDD-<slug>/schema/` for the stage artifact. The sidecar is JSON and must satisfy this base JSON Schema. The TypeScript validator additionally enforces artifact-kind path matching, stage-specific required fields, transition guards, authorization rules, fixture trace, runtime trace continuity, evidence boundaries, stage decisions, and claim boundaries:
+When a task is long-running, high-risk, or likely to resume, emit a machine-readable Schema sidecar in `.alpha-goal/YYYYMMDD-<slug>/schema/` for the stage artifact. The sidecar is a compact summary and index for routing, traceability, and machine checks; it does not replace the full Markdown stage artifact or the persisted full Control Law. The sidecar is JSON and must satisfy this base JSON Schema. The TypeScript validator additionally enforces artifact-kind path matching, stage-specific required fields, transition guards, authorization rules, fixture trace, runtime trace continuity, evidence boundaries, stage decisions, and claim boundaries:
 
 ```json
 {

@@ -2,9 +2,54 @@
 
 Use this reference when planning or reviewing a `control-loop` slice that changes implementation, configuration, tests, documents, prompts, generated artifacts, or diagnostic probes. A control law explains why the selected action should reduce the target error and how feedback will decide the next route.
 
+## TUI Projection
+
+Show a concise `Execution Check` table in the TUI by default. Use the user's language for the heading and field labels. For Chinese conversations, use:
+
+```markdown
+执行检查
+
+| 字段 | 内容 |
+| --- | --- |
+| 问题 | |
+| 本轮动作 | |
+| 保持不变 | |
+| 验收证据 | |
+| 主要风险 | |
+| 失败处理 | |
+```
+
+For English conversations, use:
+
+```markdown
+Execution Check
+
+| Field | Value |
+| --- | --- |
+| Problem | |
+| Action | |
+| Held constant | |
+| Evidence | |
+| Main risk | |
+| Fallback | |
+```
+
+Use the table as a human-readable projection of the internal Control Law. Keep the TUI values short enough to scan. Put long reasoning, exact thresholds, and stability guards in the persisted Control Law. Print the raw `Control Law:` block in chat only when the user asks, persistence is blocked, or a high-risk slice requires explicit review of every field before mutation.
+
+Map fields as follows:
+
+| TUI field | Internal source |
+| --- | --- |
+| Problem / 问题 | Target error |
+| Action / 本轮动作 | Control variable plus control action or probe |
+| Held constant / 保持不变 | Variables held constant plus saturation / containment |
+| Evidence / 验收证据 | Sensor plus threshold / tolerance |
+| Main risk / 主要风险 | Signal noise, damping / anti-oscillation, saturation / containment, or strongest material risk |
+| Fallback / 失败处理 | Fallback action plus stop / reframe trigger |
+
 ## Internal Schema
 
-Persist this full schema in the Iteration Record, Closed-loop Ledger, or schema sidecar when it affects recovery, audit, or verification. It is not the default TUI shape.
+Persist this full schema in the Iteration Record or Closed-loop Ledger when it affects recovery, audit, or verification. It is internal artifact syntax only, not the default TUI shape. Schema sidecars are machine-readable summaries and indexes; do not treat a sidecar as the full Control Law unless its schema is explicitly extended.
 
 ```text
 Control Law:
@@ -25,36 +70,6 @@ Control Law:
 - Stop / reframe trigger:
 ```
 
-## TUI Projection
-
-Show a concise `Execution Check` table in the TUI by default. Use it as a human-readable projection of the internal Control Law:
-
-```markdown
-Execution Check
-
-| Field | Value |
-| --- | --- |
-| Problem | |
-| Action | |
-| Held constant | |
-| Evidence | |
-| Main risk | |
-| Fallback | |
-```
-
-Map fields as follows:
-
-| TUI field | Internal source |
-| --- | --- |
-| Problem | Target error |
-| Action | Control variable plus control action or probe |
-| Held constant | Variables held constant plus saturation / containment |
-| Evidence | Sensor plus threshold / tolerance |
-| Main risk | Signal noise, damping / anti-oscillation, saturation / containment, or strongest material risk |
-| Fallback | Fallback action plus stop / reframe trigger |
-
-Keep the TUI values short enough to scan. Put long reasoning, exact thresholds, and stability guards in the persisted Control Law. Print the raw `Control Law:` block in chat only when the user asks, persistence is blocked, or a high-risk slice requires explicit review of every field before mutation.
-
 ## Rules
 
 - `Target error` must be stated as a mismatch between reference state and current state, not as effort already spent.
@@ -70,7 +85,9 @@ Keep the TUI values short enough to scan. Put long reasoning, exact thresholds, 
 - `Fallback action` must not silently expand scope, authority, or risk.
 - If no sensor can observe the expected effect, route to `system-model` or return `BLOCKED`.
 
-## Example
+## Internal Artifact Example
+
+This example is for the persisted artifact, not the default TUI projection. Do not paste it into chat as the default pre-action display.
 
 ```text
 Control Law:

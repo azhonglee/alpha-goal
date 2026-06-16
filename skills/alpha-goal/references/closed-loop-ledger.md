@@ -172,7 +172,7 @@ Route Summary
 | Next | |
 ```
 
-- Stage summaries and the control-loop `Execution Check` should use the same two-column Markdown table shape: field and value. Values should be concise and point to artifact paths for long details. If a runtime cannot render Markdown tables, use a compact two-column plain-text table instead of bullet lists. Print full artifacts or raw internal Control Law blocks in chat only when the user asks, persistence is blocked, or a decision/risk requires explicit user review.
+- Stage summaries and the control-loop `Execution Check` / `执行检查` should use the same two-column Markdown table shape: field and value. Localize headings and field labels to the user's language while preserving the same semantics. Values should be concise and point to artifact paths for long details. If a runtime cannot render Markdown tables, use a compact two-column plain-text table instead of bullet lists. Print full artifacts or raw internal Control Law blocks in chat only when the user asks, persistence is blocked, or a decision/risk requires explicit user review.
 - Do not duplicate full command output; link or summarize evidence and point to `.alpha-goal/YYYYMMDD-<slug>/evidence/` when durable logs are needed.
 - Do not store secrets, tokens, credentials, private user data, or production-only sensitive records.
 - Label stale or superseded state instead of silently overwriting it.

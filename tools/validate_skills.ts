@@ -373,6 +373,15 @@ const ROUTE_TRANSITIONS: Record<string, string[]> = {
   "evidence-verify": ["final", "control-loop", "goal-contract", "system-model", "blocker"],
 };
 
+type StructuredBlockTest = {
+  name: string;
+  path: string;
+  anchor: string;
+  required_terms: string[];
+  block_scope?: "first-code-fence" | "section";
+  forbidden_terms?: string[];
+};
+
 const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
   [
     "ambiguous requirement can become a bounded Goal Contract",
@@ -414,6 +423,11 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "skills/control-loop/SKILL.md",
     [
       "Execution Check",
+      "Use the user's language",
+      "执行检查",
+      "问题",
+      "本轮动作",
+      "验收证据",
       "persisted Control Law",
       "Do not print the raw `Control Law:` block in the TUI by default",
       "user asks",
@@ -519,6 +533,8 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "Next state",
       "Adaptive learning",
       "Execution Check",
+      "执行检查",
+      "Localize headings and field labels",
       "raw internal Control Law blocks",
     ],
   ],
@@ -626,6 +642,11 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "Internal Schema",
       "TUI Projection",
       "Execution Check",
+      "执行检查",
+      "internal artifact syntax only",
+      "Schema sidecars are machine-readable summaries and indexes",
+      "Internal Artifact Example",
+      "not the default TUI projection",
       "Print the raw `Control Law:` block in chat only when the user asks",
       "persistence is blocked",
       "high-risk",
@@ -652,6 +673,11 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "skills/control-loop/SKILL.md",
     [
       "Execution Check",
+      "Use the user's language",
+      "执行检查",
+      "问题",
+      "本轮动作",
+      "主要风险",
       "persisted Control Law",
       "Do not print the raw `Control Law:` block in the TUI by default",
       "user asks",
@@ -690,7 +716,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
   ],
 ];
 
-const STRUCTURED_BLOCK_TESTS = [
+const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
   {
     name: "goal contract schema keeps executable handoff fields",
     path: "skills/goal-contract/SKILL.md",
@@ -737,7 +763,15 @@ const STRUCTURED_BLOCK_TESTS = [
     name: "control loop execution check keeps user-facing table fields",
     path: "skills/control-loop/SKILL.md",
     anchor: "TUI pre-action check:",
+    block_scope: "section",
     required_terms: [
+      "执行检查",
+      "| 问题 |",
+      "| 本轮动作 |",
+      "| 保持不变 |",
+      "| 验收证据 |",
+      "| 主要风险 |",
+      "| 失败处理 |",
       "Execution Check",
       "| Problem |",
       "| Action |",
@@ -745,6 +779,56 @@ const STRUCTURED_BLOCK_TESTS = [
       "| Evidence |",
       "| Main risk |",
       "| Fallback |",
+    ],
+  },
+  {
+    name: "control law TUI projection keeps localized table fields",
+    path: "skills/control-loop/references/control-law.md",
+    anchor: "## TUI Projection",
+    block_scope: "section",
+    required_terms: [
+      "执行检查",
+      "| 问题 |",
+      "| 本轮动作 |",
+      "| 保持不变 |",
+      "| 验收证据 |",
+      "| 主要风险 |",
+      "| 失败处理 |",
+      "Execution Check",
+      "| Problem |",
+      "| Action |",
+      "| Held constant |",
+      "| Evidence |",
+      "| Main risk |",
+      "| Fallback |",
+      "Problem / 问题",
+      "Action / 本轮动作",
+      "Main risk / 主要风险",
+      "Fallback / 失败处理",
+    ],
+  },
+  {
+    name: "control law internal schema separates sidecar and chat display",
+    path: "skills/control-loop/references/control-law.md",
+    anchor: "## Internal Schema",
+    block_scope: "section",
+    required_terms: [
+      "internal artifact syntax only",
+      "not the default TUI shape",
+      "Schema sidecars are machine-readable summaries and indexes",
+      "do not treat a sidecar as the full Control Law",
+    ],
+  },
+  {
+    name: "control law internal example is not default TUI",
+    path: "skills/control-loop/references/control-law.md",
+    anchor: "## Internal Artifact Example",
+    block_scope: "section",
+    required_terms: [
+      "persisted artifact",
+      "not the default TUI projection",
+      "Do not paste it into chat",
+      "Control Law:",
     ],
   },
   {
@@ -772,6 +856,22 @@ const STRUCTURED_BLOCK_TESTS = [
     ],
   },
 ];
+
+const DEFAULT_TUI_PROJECTION_GUARDS = [
+  {
+    name: "control loop pre-action TUI",
+    path: "skills/control-loop/SKILL.md",
+    anchor: "TUI pre-action check:",
+  },
+  {
+    name: "control law TUI projection",
+    path: "skills/control-loop/references/control-law.md",
+    anchor: "## TUI Projection",
+  },
+];
+
+const RAW_CONTROL_LAW_LINE_RE =
+  /(?:^|\n)\s*(?:Control Law:|- Target error:|- Control variable:|- Control action or probe:|- Variables held constant:|- Expected effect:|- Sensor:|- Threshold \/ tolerance:|- Feedback latency:|- Signal noise:|- Confidence:|- Damping \/ anti-oscillation:|- Saturation \/ containment:|- Feedback timing:|- Fallback action:|- Stop \/ reframe trigger:)/;
 
 const FIXTURE_CONTRACT_TESTS = [
   {
@@ -821,9 +921,10 @@ const FIXTURE_CONTRACT_TESTS = [
     expected_stage_decision: "ITERATION_HARDEN",
     paths: [
       "skills/control-loop/SKILL.md",
+      "skills/control-loop/references/control-law.md",
       "skills/control-loop/references/adaptive-learning.md",
     ],
-    schema_blocks: ["Execution Check", "Adaptive Learning Record:"],
+    schema_blocks: ["执行检查", "Execution Check", "Adaptive Learning Record:"],
     route_terms: [
       "ITERATION_CONTINUES",
       "ITERATION_HARDEN",
@@ -1014,6 +1115,7 @@ export function main(args = process.argv.slice(2)): number {
   validateCyberneticRouteConsistency(root, errors);
   validateSemanticSmokeTests(root, errors);
   validateStructuredBlockTests(root, errors);
+  validateDefaultTuiProjectionGuards(root, errors);
   validateFixtureContractTests(root, errors);
 
   printReport(root, errors, warnings);
@@ -1331,6 +1433,9 @@ function validateSchemaSidecarContract(root: string, errors: string[]): void {
 
   const responsibilityBoundaryTerms = [
     "base JSON Schema",
+    "compact summary and index",
+    "does not replace the full Markdown stage artifact",
+    "persisted full Control Law",
     "TypeScript validator additionally enforces",
     "runtime trace continuity",
   ];
@@ -1975,7 +2080,10 @@ function validateStructuredBlockTests(root: string, errors: string[]): void {
     }
 
     const text = fs.readFileSync(file, "utf8");
-    const block = textBlockAfterAnchor(text, fixture.anchor);
+    const block =
+      fixture.block_scope === "section"
+        ? textSectionAfterAnchor(text, fixture.anchor)
+        : textBlockAfterAnchor(text, fixture.anchor);
     if (!block) {
       errors.push(
         `structured block test ${JSON.stringify(fixture.name)} failed in ${fixture.path}: missing anchor ${fixture.anchor}`,
@@ -1987,6 +2095,39 @@ function validateStructuredBlockTests(root: string, errors: string[]): void {
     if (missing.length > 0) {
       errors.push(
         `structured block test ${JSON.stringify(fixture.name)} failed in ${fixture.path}: missing ${missing.join(", ")}`,
+      );
+    }
+
+    const forbidden = (fixture.forbidden_terms ?? []).filter((term) => block.includes(term));
+    if (forbidden.length > 0) {
+      errors.push(
+        `structured block test ${JSON.stringify(fixture.name)} failed in ${fixture.path}: forbidden ${forbidden.join(", ")}`,
+      );
+    }
+  }
+}
+
+function validateDefaultTuiProjectionGuards(root: string, errors: string[]): void {
+  for (const guard of DEFAULT_TUI_PROJECTION_GUARDS) {
+    const file = path.join(root, guard.path);
+    if (!isFile(file)) {
+      errors.push(`default TUI projection guard ${JSON.stringify(guard.name)}: missing ${guard.path}`);
+      continue;
+    }
+
+    const text = fs.readFileSync(file, "utf8");
+    const section = textSectionAfterAnchor(text, guard.anchor);
+    if (!section) {
+      errors.push(
+        `default TUI projection guard ${JSON.stringify(guard.name)} failed in ${guard.path}: missing anchor ${guard.anchor}`,
+      );
+      continue;
+    }
+
+    const match = section.match(RAW_CONTROL_LAW_LINE_RE);
+    if (match) {
+      errors.push(
+        `default TUI projection guard ${JSON.stringify(guard.name)} failed in ${guard.path}: default TUI section contains raw Control Law field ${JSON.stringify(match[0].trim())}`,
       );
     }
   }
@@ -2068,7 +2209,7 @@ function validateFixtureContractTests(root: string, errors: string[]): void {
 function hasSchemaBlock(text: string, label: string): boolean {
   const escaped = escapeRegex(label.trim());
   const headingLabel = escapeRegex(label.trim().replace(/:$/, ""));
-  const blockPattern = new RegExp("```(?:text)?\\n(?:(?!```).)*" + escaped, "s");
+  const blockPattern = new RegExp("```(?:[A-Za-z0-9_-]+)?\\n(?:(?!```).)*" + escaped, "s");
   const headingPattern = new RegExp("^#{1,6}\\s+" + headingLabel, "m");
   return blockPattern.test(text) || headingPattern.test(text);
 }
@@ -2089,6 +2230,20 @@ function textBlockAfterAnchor(text: string, anchor: string): string | undefined 
     }
   }
 
+  const nextHeading = after.slice(1).search(/\n#{1,3}\s+/);
+  if (nextHeading >= 0) {
+    return after.slice(0, nextHeading + 1);
+  }
+  return after;
+}
+
+function textSectionAfterAnchor(text: string, anchor: string): string | undefined {
+  const start = text.indexOf(anchor);
+  if (start < 0) {
+    return undefined;
+  }
+
+  const after = text.slice(start);
   const nextHeading = after.slice(1).search(/\n#{1,3}\s+/);
   if (nextHeading >= 0) {
     return after.slice(0, nextHeading + 1);
