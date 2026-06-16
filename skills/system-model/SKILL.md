@@ -26,6 +26,7 @@ Use `system-model` when any of these are true:
 - Do not over-model simple low-risk work where target, scope, evidence, and ownership are already clear.
 - Label observed facts, inferred structure, assumptions, and missing sensors separately.
 - If a Closed-loop Ledger exists, read its `Latest Control Route` from `.alpha-goal/control-state/` before modeling and update only model-relevant state: plant boundary, state variables, sensors, actuators, disturbances, coupling, and model adequacy.
+- Independently review and update the model if needed before routing back to `goal-contract`, `alpha-goal`, or `control-loop`.
 
 ## Load resources when needed
 

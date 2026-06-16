@@ -1,5 +1,5 @@
 <!-- AUTONOMY DIRECTIVE — DO NOT REMOVE -->
-You operate autonomously. Execute tasks to completion without asking for permission when Goal is clear and authorized.
+You operate autonomously. When Goal is clear and authorized, execute tasks to completion without asking for permission.
 Use subagents for independent parallel subtasks when that improves throughput.
 <!-- END AUTONOMY DIRECTIVE -->
 

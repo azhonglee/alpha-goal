@@ -197,4 +197,6 @@ If review fails, return to the earliest phase that can fix it.
 
 Handoff means passing a user-accepted Goal Contract to `control-loop`. Non-contract artifacts inform later work but do not authorize implementation.
 
-When a contract is ready, ask the user to accept, reject, or change it unless the runtime already contains explicit acceptance. If accepted, update `.alpha-goal/control-state/YYYYMMDD-<slug>.md` with reference, current state, actuator boundary, evidence floor, artifact path, and next route before handoff. If `.alpha-goal/` is not ignored, add it to the repo root `.gitignore` first. If writing is explicitly forbidden or impossible, include the ledger state and full contract in chat and state the no-write reason. If rejected or changed, return to clarification.
+When a contract is ready, ask the user to accept, reject, or change it unless the runtime already contains explicit acceptance.
+- If accepted, update `.alpha-goal/control-state/YYYYMMDD-<slug>.md` with reference, current state, actuator boundary, evidence floor, artifact path, and next route before handoff. If `.alpha-goal/` is not ignored, add it to the repo root `.gitignore` first. If writing is explicitly forbidden or impossible, include the ledger state and full contract in chat and state the no-write reason.
+- If rejected or changed, return to clarification.
