@@ -23,7 +23,7 @@ Use Human-in-the-Loop (HIL) policy for decisions, not for discoverable facts.
 Before asking, decide whether the missing input is material, discoverable, risky, and user-owned.
 
 - If it is safely discoverable, inspect local evidence first.
-- If it is under-specified but safe defaults exist, state the defaults and continue.
+- If it is under-specified but safe defaults exist, state the defaults and continue only for reversible operational details inside an already confirmed goal; never default target, scope, acceptance, non-goals, side effects, risk acceptance, authority, or final claim.
 - If it changes target, scope, acceptance, non-goals, side effects, risk acceptance, or final claim, ask before proceeding.
 - If it requires mutation, destructive action, external side effects, credentials, push, PR/MR, deployment, or real user config changes without prior authorization, ask before proceeding.
 - Ask one high-leverage question per round, backed by evidence already checked.

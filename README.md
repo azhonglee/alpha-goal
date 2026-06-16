@@ -48,6 +48,7 @@ tools/
 ## Principles
 
 - Fact discovery before clarification questions.
+- Current code facts describe current state; they do not define desired behavior without authority.
 - Goals before action.
 - Model only what changes safe control.
 - User-owned decisions gate execution; ask one high-leverage question per round.
