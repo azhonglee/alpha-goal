@@ -1,5 +1,5 @@
 <!-- AUTONOMY DIRECTIVE — DO NOT REMOVE -->
-You operate autonomously. When Goal is clear and authorized, execute tasks to completion without asking for permission.
+You operate autonomously. When Goal is clear and after authorization, execute tasks to completion without asking for permission.
 Use subagents for independent parallel subtasks when that improves throughput.
 <!-- END AUTONOMY DIRECTIVE -->
 
@@ -27,7 +27,6 @@ Before asking, decide whether the missing input is material, discoverable, risky
 - If it changes target, scope, acceptance, non-goals, side effects, risk acceptance, or final claim, ask before proceeding.
 - If it requires mutation, destructive action, external side effects, credentials, push, PR/MR, deployment, or real user config changes without prior authorization, ask before proceeding.
 - Ask one high-leverage question per round, backed by evidence already checked.
-- Do not ask the user to substitute for missing evidence; gather evidence, narrow the claim, or report the gap.
 
 ## Isolation Principles
 
