@@ -56,6 +56,8 @@ const LEGACY_ARTIFACT_PATH_REFERENCES = [
   ".alpha-goal/interviews",
 ];
 
+const MISLEADING_SEMANTIC_CONTRACTION_TERMS = ["最小语义"];
+
 const SIDECAR_REQUIRED_KEYS = [
   "artifact_kind",
   "task_slug",
@@ -210,7 +212,7 @@ const SIDECAR_STAGE_POLICIES: Record<
   },
   "goal-contract": {
     routeState: "goal-contract",
-    stageDecisions: ["CONTRACT_APPROVED", "CONTRACT_REFRAME", "BLOCKED"],
+    stageDecisions: ["ROUTE_TO_USER", "CONTRACT_APPROVED", "CONTRACT_REFRAME", "BLOCKED"],
   },
   "iteration-record": {
     routeState: "control-loop",
@@ -401,6 +403,16 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "唯一的产品 / 工程语义",
       "实现范围、接口或数据来源",
       "误当成用户真正诉求",
+      "完整语义候选",
+      "选定语义",
+      "未选解释",
+      "不得把执行切片的最小范围当成目标语义",
+      "目标契约默认是草案",
+      "待用户确认",
+      "stage_decision: ROUTE_TO_USER",
+      "authorization_status: pending",
+      "stage_decision: CONTRACT_APPROVED",
+      "authorization_status: approved",
       ".alpha-goal/YYYYMMDD-<slug>/goal-contract.md",
       ".alpha-goal/YYYYMMDD-<slug>/control-state.md",
       "契约摘要",
@@ -417,6 +429,10 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "可控性",
       "候选控制律",
       "控制器层级",
+      "完整语义候选",
+      "待确认取舍",
+      "目标契约需要固化的语义",
+      "不得把目标语义压缩成最小版本",
       "无实质项",
       "扰动记录",
       "无实质项",
@@ -445,6 +461,9 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "控制变量",
       "传感器阈值",
       "失败处理",
+      "完整目标语义",
+      "不能裁剪契约语义",
+      "在完整目标语义下",
       "用户意图解释",
       "产品 / 工程语义",
       "不要任选一种开始实现",
@@ -508,6 +527,9 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "多种合理解释",
       "用户真正要解决的问题",
       "当前接口最容易支持的一种",
+      "目标契约已被用户明确接受",
+      "下一路由必须是 `user`",
+      "不得收缩目标语义",
     ],
   ],
   [
@@ -681,6 +703,9 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "置信度",
       "阻尼 / 防振荡",
       "饱和条件 / 约束边界",
+      "完整语义候选",
+      "待确认取舍",
+      "目标契约需要固化的语义",
     ],
   ],
   [
@@ -738,6 +763,7 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
     anchor: "目标契约结构:",
     required_terms: [
       "- 参考状态:",
+      "- 语义对齐:",
       "- 范围:",
       "- 控制模型:",
       "- 指标转译:",
@@ -1160,14 +1186,14 @@ const FIXTURE_CONTRACT_TESTS = [
     name: "定性目标转成可测契约证据",
     prompt: "把“用户体验更稳定”转成可验证的目标契约。",
     prompt_terms: ["用户体验", "稳定", "可验证", "目标契约"],
-    expected_route: "control-loop",
-    expected_stage_decision: "CONTRACT_APPROVED",
+    expected_route: "user",
+    expected_stage_decision: "ROUTE_TO_USER",
     paths: [
       "skills/goal-contract/SKILL.md",
       "skills/goal-contract/references/indicator-handoff.md",
     ],
     schema_blocks: ["目标契约:", "指标转译:"],
-    route_terms: ["control-loop", "system-model", "evidence-verify", "阻塞"],
+    route_terms: ["完整语义候选", "接受、拒绝或修改", "ROUTE_TO_USER", "authorization_status: pending", "control-loop"],
   },
   {
     name: "多控制器系统在变更前映射层级",
@@ -1376,6 +1402,7 @@ export function main(args = process.argv.slice(2)): number {
   validateLegacyScriptReferences(root, errors);
   validateLegacySkillReferences(root, errors);
   validateLegacyArtifactPathReferences(root, errors);
+  validateMisleadingSemanticContractions(root, errors);
   validateTaskScopedArtifactPathShape(root, errors);
   validateSchemaSidecarContract(root, errors);
   validateSchemaSidecarFixtures(root, errors);
@@ -1604,6 +1631,21 @@ function validateLegacyArtifactPathReferences(root: string, errors: string[]): v
     for (const legacy of LEGACY_ARTIFACT_PATH_REFERENCES) {
       if (text.includes(legacy)) {
         errors.push(`${rel}: 仍残留旧产物路径: ${legacy}`);
+      }
+    }
+  }
+}
+
+function validateMisleadingSemanticContractions(root: string, errors: string[]): void {
+  for (const rel of documentationFiles(root)) {
+    const file = path.join(root, rel);
+    if (!isFile(file)) {
+      continue;
+    }
+    const text = fs.readFileSync(file, "utf8");
+    for (const term of MISLEADING_SEMANTIC_CONTRACTION_TERMS) {
+      if (text.includes(term)) {
+        errors.push(`${rel}: 目标契约语义不能写成 ${term}`);
       }
     }
   }

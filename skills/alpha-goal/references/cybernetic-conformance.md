@@ -26,6 +26,8 @@ evidence-verify -> final | control-loop | goal-contract | system-model | blocker
 ## 不变量
 
 - 行动前必须有参考状态：改动前，目标契约或等价上下文必须明确目标、范围、非目标、授权、验收证据和声明边界。
+- 行动前必须有用户确认：目标契约草案或待确认状态只能路由到 `user`；只有明确用户接受同一契约版本后，才能进入 `control-loop`。
+- 目标契约不得裁剪语义：目标契约要记录完整语义候选、选定语义、未选解释、取舍依据和覆盖边界；最小执行切片不能替代目标语义。
 - 大范围控制前必须建模被控对象：高影响面行动前，必须先建模系统边界、传感器、执行器、扰动和耦合。
 - 声明前必须有传感器：传感器必须足够新鲜，并且跨越与拟声明内容相同的边界。
 - 最终结论前必须有比较器：完成表述前，`evidence-verify` 必须比较证据、残余误差和最终声明边界。
@@ -207,7 +209,7 @@ evidence-verify -> final | control-loop | goal-contract | system-model | blocker
 
 阶段专用必填键:
 
-- `goal-contract`: `reference_id`, `claim_boundary`, `evidence_boundary`, `next_route`, `stage_decision`, `authorization_status`；路由到 `control-loop` 要求 `authorization_status: approved`。
+- `goal-contract`: `reference_id`, `claim_boundary`, `evidence_boundary`, `next_route`, `stage_decision`, `authorization_status`；用户确认前路由到 `user`，使用 `stage_decision: ROUTE_TO_USER` 和 `authorization_status: pending`；路由到 `control-loop` 要求 `stage_decision: CONTRACT_APPROVED` 和 `authorization_status: approved`。
 - `system-model`: `sensor`, `evidence_boundary`, `next_route`, `stage_decision`；路由到 `control-loop` 要求已有 `reference_id` 且 `authorization_status: approved`。
 - `decision-synthesis`: 有意义的 `next_route`，以及 `reference_id` 或 `claim_boundary` 至少一个；路由到 `control-loop` 要求已有 `reference_id` 且 `authorization_status: approved`。
 - `iteration-record`: `target_error`, `control_variable`, `sensor`, `threshold_or_tolerance`, `residual_error`, `next_route`, `stage_decision`, `authorization_status`。
