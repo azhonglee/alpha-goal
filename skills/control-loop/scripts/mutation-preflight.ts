@@ -8,10 +8,10 @@ let worktreeCheckPath = process.env.WORKTREE_CHECK_PATH ?? ".worktrees/codex/pre
 let scratchCheckPath = process.env.SCRATCH_CHECK_PATH ?? ".alpha-goal/preflight-check";
 let positionalCount = 0;
 
-const USAGE = `Usage: mutation-preflight.ts [--full] [WORKTREE_CHECK_PATH] [SCRATCH_CHECK_PATH]
+const USAGE = `用法：mutation-preflight.ts [--full] [WORKTREE_CHECK_PATH] [SCRATCH_CHECK_PATH]
 
-Read-only git/path snapshot for deciding whether mutation is safe.
-Default check paths are candidates, not requirements:
+只读 git / 路径快照，用于判断改动是否安全。
+默认检查路径只是候选项，不是硬性要求：
   .worktrees/codex/preflight-check
   .alpha-goal/preflight-check
 `;
@@ -30,7 +30,7 @@ for (let index = 2; index < process.argv.length; index += 1) {
     scratchCheckPath = arg;
     positionalCount += 1;
   } else {
-    process.stderr.write(`Unknown extra argument: ${arg}\n`);
+    process.stderr.write(`未知额外参数：${arg}\n`);
     process.stderr.write(USAGE);
     process.exit(2);
   }
@@ -38,12 +38,12 @@ for (let index = 2; index < process.argv.length; index += 1) {
 
 const currentDir = process.cwd();
 
-section("cwd");
+section("当前目录");
 console.log(currentDir);
 
 if (!commandSucceeds("git", ["--version"])) {
   section("git");
-  console.log("git: not found");
+  console.log("git: 未找到");
   process.exit(0);
 }
 
@@ -56,13 +56,13 @@ if (!commandSucceeds("git", ["rev-parse", "--is-inside-work-tree"])) {
 const root = commandOutput("git", ["rev-parse", "--show-toplevel"]).trim();
 const branch = commandOutput("git", ["branch", "--show-current"]).trim();
 
-section("git root");
+section("git 根目录");
 console.log(root || "<unknown>");
 
-section("branch");
+section("分支");
 console.log(branch || "<detached-or-unknown>");
 
-section("default branch hints");
+section("默认分支提示");
 const remoteHead = commandOutput("git", ["symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD"]).trim();
 console.log(`origin_head: ${remoteHead || "<unknown>"}`);
 if (["main", "master", "trunk"].includes(branch)) {
@@ -76,10 +76,10 @@ if (["main", "master", "trunk"].includes(branch)) {
 section("status --short");
 printCommand("git", ["status", "--short"]);
 
-section("worktree list");
+section("worktree 列表");
 printCommand("git", ["worktree", "list"]);
 
-section("checkout classification");
+section("检出目录分类");
 const commonDir = commandOutput("git", ["rev-parse", "--git-common-dir"]).trim();
 if (root && fs.existsSync(path.join(root, ".git")) && fs.statSync(path.join(root, ".git")).isFile()) {
   console.log("linked_worktree: yes");
@@ -90,31 +90,31 @@ if (root && commonDir) {
   const commonAbs = path.resolve(root, commonDir);
   console.log(`git_common_dir: ${fs.existsSync(commonAbs) ? fs.realpathSync(commonAbs) : commonDir}`);
 }
-console.log("declared_isolated_edit_path: record manually from approved context");
-console.log("primary_checkout_risk: infer from branch, linked_worktree, worktree list, and project rules");
+console.log("declared_isolated_edit_path: 从已批准上下文手工记录");
+console.log("primary_checkout_risk: 根据分支、linked_worktree、worktree 列表和项目规则推断");
 if (/(^|\/)\.worktrees(\/|$)|(^|\/)worktrees(\/|$)/.test(root)) {
-  console.log("worktree_path_hint: current root path contains a worktrees segment");
+  console.log("worktree_path_hint: 当前根路径包含 worktrees 片段");
 } else {
-  console.log("worktree_path_hint: no default worktrees segment detected");
+  console.log("worktree_path_hint: 未检测到默认 worktrees 片段");
 }
 
-section("ignore checks");
+section("忽略规则检查");
 if (root && isDirectory(root)) {
   for (const candidate of [worktreeCheckPath, scratchCheckPath]) {
     const ignored = commandSucceeds("git", ["check-ignore", "-q", candidate], { cwd: root });
     if (ignored) {
       console.log(`${candidate}: ignored`);
     } else if (candidate.startsWith(".alpha-goal/")) {
-      console.log(`${candidate}: NOT ignored; add .alpha-goal/ to the repo root .gitignore before writing process artifacts`);
+      console.log(`${candidate}: 未被忽略；写流程产物前先把 .alpha-goal/ 加入仓库根目录 .gitignore`);
     } else {
-      console.log(`${candidate}: NOT ignored or outside ignore rules`);
+      console.log(`${candidate}: 未被忽略，或不在忽略规则范围内`);
     }
   }
 } else {
   console.log("<unknown root>");
 }
 
-section("ancestor rule files");
+section("祖先规则文件");
 if (root && isDirectory(root)) {
   for (const file of ancestorRuleFiles(currentDir, root)) {
     console.log(file);
@@ -124,7 +124,7 @@ if (root && isDirectory(root)) {
 }
 
 if (fullScan) {
-  section("local rule files: full scan");
+  section("本地规则文件：完整扫描");
   if (root && isDirectory(root)) {
     for (const file of findFiles(root, 100, isRuleFile)) {
       console.log(file);
@@ -133,11 +133,11 @@ if (fullScan) {
     console.log("<unknown root>");
   }
 } else {
-  section("local rule files: full scan skipped");
-  console.log("Use --full if planned changes cross directories not covered by ancestor rules.");
+  section("本地规则文件：已跳过完整扫描");
+  console.log("如果计划改动会跨越祖先规则未覆盖的目录，使用 --full。");
 }
 
-section("nested git directories near root");
+section("根目录附近的嵌套 git 目录");
 if (root && isDirectory(root)) {
   for (const file of findFiles(root, 4, (entry) => entry.name === ".git", 2)) {
     console.log(file);
@@ -146,17 +146,17 @@ if (root && isDirectory(root)) {
   console.log("<unknown root>");
 }
 
-section("submodules");
+section("子模块");
 const submodules = commandOutput("git", ["submodule", "status"]).trimEnd();
-console.log(submodules || "<none or unavailable>");
+console.log(submodules || "<无或不可用>");
 
-section("preflight gaps to decide manually");
-console.log("primary_checkout: infer from worktree list, branch/default branch hints, and project rules");
-console.log("isolated_edit_path: valid when not primary checkout, inside approved owner boundary, ignored or external, and recorded before mutation");
-console.log("mutation_allowed: decide from Goal Contract, system model, project rules, dirty state, ownership, and evidence needs");
+section("需手工判断的预检缺口");
+console.log("primary_checkout: 根据 worktree 列表、分支 / 默认分支提示和项目规则推断");
+console.log("isolated_edit_path: 非主检出区、位于已批准归属边界内、被忽略或外部路径，且改动前已记录时有效");
+console.log("mutation_allowed: 根据目标契约、系统模型、项目规则、脏状态、归属和证据需求判断");
 
-section("reminder");
-console.log("This script is read-only. It reports facts and candidate path checks; it does not decide whether mutation is safe.");
+section("提醒");
+console.log("本脚本只读。它报告事实和候选路径检查，不代替安全改动决策。");
 
 function section(name: string): void {
   console.log(`\n== ${name} ==`);

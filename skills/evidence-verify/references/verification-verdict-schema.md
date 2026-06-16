@@ -1,6 +1,6 @@
-# 验证结论 Schema
+# 验证结论结构定义
 
-Use this full schema for formal acceptance records, merge-ready or ship-ready judgments, high-risk claims, contested evidence, or handoff. For low-risk checks, a compact verdict is enough if it preserves the semantics. Persist the full verdict at `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md` by default. When machine validation or resume safety matters, write a schema sidecar at `.alpha-goal/YYYYMMDD-<slug>/schema/verification-verdict.json`. The TUI should show a Markdown-table `验证摘要` with verdict, claim boundary, evidence, artifact path, and next action unless full chat output is required.
+正式验收记录、可合并 / 可发布判断、高风险声明、证据存在争议或需要交接时，使用完整结构定义。低风险检查只要语义完整，可以使用紧凑结论。默认把完整结论持久化到 `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/verification-verdict.json` 写入结构化索引。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `验证摘要`，包含结论、声明边界、证据、产物路径和下一步动作。
 
 ## 紧凑结论
 
@@ -46,7 +46,7 @@ Use this full schema for formal acceptance records, merge-ready or ship-ready ju
 
 ## 结论
 
-Exactly one:
+只能选择一个：
 
 - `PASS_TO_FINAL`
 - `NARROW_CLAIM_AND_FINAL`
@@ -56,14 +56,14 @@ Exactly one:
 
 ## 验收证据矩阵
 
-For each acceptance expectation:
+对每条验收期望记录：
 
-- evidence;
-- boundary;
-- freshness;
-- status: `covered`, `partially covered`, `not covered`, `blocked`, or `not applicable`.
+- 证据；
+- 边界；
+- 新鲜度；
+- 状态：`covered`、`partially covered`、`not covered`、`blocked` 或 `not applicable`。
 
-Root-cause claims should record symptom, first divergence point, narrowed component, excluded alternatives, and remaining uncertainty.
+根因声明应记录症状、首次分叉点、已收窄组件、已排除备选项和剩余不确定性。
 
 ## 控制律复核
 
@@ -78,32 +78,32 @@ Root-cause claims should record symptom, first divergence point, narrowed compon
 - 置信度;
 - 阻尼 / 防振荡;
 - 影响范围上限;
-- 阈值状态: `met`, `partially met`, `not met`, `blocked`, or `not applicable`;
+- 阈值状态: `met`、`partially met`、`not met`、`blocked` 或 `not applicable`;
 - 失败处理或残余误差.
 
 ## 指标转译复核
 
-For each material qualitative objective or synthesis metric:
+对每个实质性的定性目标或综合指标记录：
 
-- operational definition;
-- sensor / evidence source;
-- timing;
-- threshold or tolerance;
-- evidence boundary;
-- status: `covered`, `partially covered`, `not covered`, `blocked`, or `not applicable`.
+- 操作化定义；
+- 传感器 / 证据来源；
+- 时机；
+- 阈值或容差；
+- 证据边界；
+- 状态：`covered`、`partially covered`、`not covered`、`blocked` 或 `not applicable`。
 
 ## 自适应学习复核
 
-For each material learning record:
+对每条实质性的学习记录记录：
 
-- learning trigger;
-- observed mismatch;
-- evidence;
-- adjustment;
-- reuse condition;
-- invalidation condition;
-- whether the final claim stays inside the evidence boundary.
+- 学习触发条件；
+- 已观察不匹配；
+- 证据；
+- 调整内容；
+- 复用条件；
+- 失效条件；
+- 最终声明是否仍在证据边界内。
 
 ## 允许的最终声明
 
-Write the widest final statement that fresh evidence supports. It must not imply broader product, integration, production, tenant, security, or safety validation than evidence shows.
+最终声明应写到新鲜证据能够支持的最大范围，但不能暗示证据以外的产品、集成、生产、租户、安全或安全性验证。

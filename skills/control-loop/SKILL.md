@@ -1,71 +1,71 @@
 ---
 name: control-loop
-description: "Run bounded control iterations under an approved 目标契约: plan one slice, execute or probe safely, sense feedback, compare error, record evidence, and route to continue, harden, evidence-verify, reframe, or block."
+description: "在已批准目标契约下运行有界控制迭代：规划一个切片，安全执行或探测，感知反馈，比较误差，记录证据，并路由到继续、加固、evidence-verify、重新界定或阻塞。"
 ---
 
 # 控制循环
 
-Use this skill to advance an approved goal through bounded iterations. It is the controller/actuator stage of the suite.
+使用本技能通过有界迭代推进已批准目标。它是技能套件中的控制器 / 执行器阶段。
 
 ## 变更前入口要求
 
-All must be true before editing implementation files:
+编辑实现文件前，以下条件必须全部成立：
 
-- an approved 目标契约 or equivalent context identifies reference state, desired outcome, included scope, excluded scope/non-goals, decision boundaries, constraints, acceptance evidence, and claim boundary;
-- current `.alpha-goal/YYYYMMDD-<slug>/control-state.md` ledger is read when available, especially `最新控制路由`, selected skill, safety boundary, next action, last residual error, control action, feedback, and route decision; if no file ledger exists, use chat state only with an explicit no-write reason;
+- 已批准目标契约或等价上下文明确参考状态、期望结果、范围内事项、排除范围 / 非目标、决策边界、约束、验收证据和声明边界；
+- 可用时读取当前 `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 台账，尤其是 `最新控制路由`、选定技能、安全边界、下一动作、上一残余误差、控制动作、反馈和路由决策；如果没有文件台账，只能在有明确无法写入理由时使用聊天状态；
 - 可用时读取当前 扰动记录，尤其关注实质扰动的可能性、影响、传感器、控制措施和路由触发条件；
-- target/scope boundary and final claim boundary are clear enough to decide changed files and final wording;
-- applicable local rules, durable specs, and active plans have been read;
-- repository, worktree, submodule, ownership, dirty-state, and unrelated user-change boundaries are understood;
-- isolated edit path is ready, or creating it is the first explicitly recorded setup mutation;
-- `.worktrees/` is ignored or otherwise safe for isolated edits, and `.alpha-goal/` is ignored; if `.alpha-goal/` is missing from the repo root `.gitignore`, add it before writing process artifacts;
-- strongest material risk, loop mode, evidence floor, and mutation preflight are recorded.
+- 目标 / 范围边界和最终声明边界足够清楚，能够决定要改哪些文件以及最终措辞；
+- 已读取适用的本地规则、持久化规范和活跃计划；
+- 已理解仓库、worktree、子模块、归属、脏状态和无关用户变更边界；
+- 隔离编辑路径已就绪，或创建它是第一项明确记录的初始化改动；
+- `.worktrees/` 已被忽略或对隔离编辑足够安全，且 `.alpha-goal/` 已被忽略；如果仓库根目录 `.gitignore` 缺少 `.alpha-goal/`，先加入该条目，再写流程产物；
+- 已记录最强实质风险、循环模式、证据下限和变更预检。
 
-Before mutation, cite the contract source actually read: file path, chat excerpt, or explicit equivalent context. If it is unavailable, do not infer it from phrases like “existing 目标契约”; return to `goal-contract`.
+改动前，引用实际读取过的契约来源：文件路径、聊天摘录或明确的等价上下文。如果来源不可用，不要从“已有目标契约”这类表述推断，返回 `goal-contract`。
 
-If system boundary, sensors, actuators, disturbances, or coupling are unclear enough to affect safe action, route to `system-model` before mutation.
+如果系统边界、传感器、执行器、扰动或耦合不清楚到会影响安全行动，改动前先路由到 `system-model`。
 
 ## 按需加载资源
 
-- `references/worktree-safety.md`: isolated edit paths and primary-checkout safety.
-- `references/execution-boundaries.md`: delegation, ownership, submodules, generated output, and user-owned changes.
-- `references/loop-modes.md`: mode choice, evidence type, debug receipt, and route decisions.
-- `references/plan-template.md`: durable dynamic plans for multi-slice or handoff-heavy work.
-- `references/control-law.md`: 目标误差、控制变量、预期效果、传感器阈值、延迟 / 噪声 / 置信度、阻尼、影响范围约束和失败处理。Load before any mutation or diagnostic-probe slice.
-- `references/adaptive-learning.md`: record reusable corrections when feedback contradicts a 控制律, threshold, model, or route assumption.
-- `references/iteration-record-schema.md`: compact or formal 迭代记录 semantics.
-- `references/auto-execution.md`: when to execute the next pass automatically versus recommend or pause.
-- `scripts/mutation-preflight.ts`: read-only git/path preflight.
+- `references/worktree-safety.md`: 隔离编辑路径和主检出目录安全。
+- `references/execution-boundaries.md`: 委托、归属、子模块、生成输出和用户自有变更。
+- `references/loop-modes.md`: 模式选择、证据类型、调试回执和路由决策。
+- `references/plan-template.md`: 多切片或重交接任务的持久化动态计划。
+- `references/control-law.md`: 目标误差、控制变量、预期效果、传感器阈值、延迟 / 噪声 / 置信度、阻尼、影响范围上限和失败处理。任何变更或诊断探测切片前都要加载。
+- `references/adaptive-learning.md`: 当反馈反驳控制律、阈值、模型或路由假设时，记录可复用修正。
+- `references/iteration-record-schema.md`: 紧凑或正式迭代记录语义。
+- `references/auto-execution.md`: 何时自动执行下一轮，何时建议或暂停。
+- `scripts/mutation-preflight.ts`: 只读 git / 路径预检。
 
 ## 迭代流程
 
-Each pass is a control cycle:
+每一轮都是一个控制循环：
 
 ```text
-Plan control slice -> Preflight -> Execute or probe -> Sense feedback -> Compare error -> Record -> Route
+规划控制切片 -> 预检 -> 执行或探测 -> 感知反馈 -> 比较误差 -> 记录 -> 路由
 ```
 
-A single `control-loop` run may perform multiple bounded passes when context, authorization, risk, and user-owned decisions remain stable and each pass is recorded proportionally. If the next pass is safe and deterministic under `references/auto-execution.md`, execute it instead of merely listing it as a suggestion.
+当上下文、授权、风险和用户自有决策保持稳定，且每轮都按比例记录时，单次 `control-loop` 可以执行多轮有界循环。如果下一轮根据 `references/auto-execution.md` 是安全且确定的，应直接执行，而不是只把它列为建议。
 
-### 1. Plan control slice
+### 1. 规划控制切片
 
-Dynamic planning answers only the current iteration:
+动态计划只回答当前迭代：
 
-- the smallest coherent acceptance-relevant slice that can be completed and observed now;
-- the error signal this slice is expected to reduce, using the ledger or 目标契约 as reference;
+- 当前能完成且能观测的、与验收相关的最小连贯切片；
+- 本切片预期降低的误差信号，以台账或目标契约为参考；
 - the 控制律 for the slice: 目标误差、控制变量、预期效果、传感器阈值、反馈延迟、信号噪声、置信度、阻尼 / 防振荡、影响范围上限和失败处理;
-- control variables to change and variables intentionally held constant;
-- fresh evidence needed after the slice and how it will be sensed;
-- files, modules, repos, generated outputs, and ownership surfaces allowed to change;
-- assumptions, disturbances, and stop conditions for reframe, block, or unsafe execution;
+- 要改变的控制变量，以及刻意保持不变的变量；
+- 切片后需要的新鲜证据，以及如何感知它；
+- 允许变更的文件、模块、仓库、生成输出和归属表面；
+- 会触发重新界定、阻塞或不安全执行的假设、扰动和停止条件；
 - 实质 扰动记录 条目，以及本切片如何监测或约束它们；
-- prior 自适应学习记录 and whether their reuse or invalidation conditions apply;
+- 既有自适应学习记录，以及其复用或失效条件是否适用；
 - 预期产物、副作用、清理、回滚或控制措施需求；
-- strongest material risk and evidence floor;
-- success, failure, feedback, and reframe routes;
-- whether a durable plan is necessary.
+- 最强实质风险和证据下限；
+- 成功、失败、反馈和重新界定路由；
+- 是否需要持久化计划。
 
-Before executing a mutation or diagnostic-probe slice, prepare the full 控制律 and persist it in the 迭代记录 or 闭环台账. 默认不要在 TUI 打印原始 `控制律:` 块；改用面向用户的 `执行检查` 表。仅当持久化 控制律 已包含目标误差、已批准控制变量、可观测传感器阈值和失败处理时，才执行动作。对重复、噪声大、范围广或高风险循环，持久化 控制律 还必须包含反馈延迟、信号噪声、置信度、阻尼 / 防振荡和影响范围上限，才能再次行动。
+执行变更或诊断探测切片前，准备完整控制律，并将其持久化到迭代记录或闭环台账。默认不要在 TUI 打印原始 `控制律:` 块；改用面向用户的 `执行检查` 表。仅当持久化控制律已包含目标误差、已批准控制变量、可观测传感器阈值和失败处理时，才执行动作。对重复、噪声大、范围广或高风险循环，持久化控制律还必须包含反馈延迟、信号噪声、置信度、阻尼 / 防振荡和影响范围上限，才能再次行动。
 
 只有在用户要求、文件持久化受阻，或切片风险高到必须让用户逐项复核控制字段时，才在聊天中打印原始 `控制律:` 块。
 
@@ -88,85 +88,85 @@ TUI 执行前检查:
 
 字段映射：`问题` 取自目标误差；`本轮动作` 取自控制变量和控制动作；`保持不变` 取自保持不变的变量和影响范围上限；`验收证据` 取自传感器和阈值；`主要风险` 取自信号噪声、阻尼 / 防振荡、影响范围上限或最强实质风险；`失败处理` 取自失败处理或停止 / 重新界定触发条件。表格内容保持简短，完整控制律指向持久化产物。
 
-Create or update a durable plan only for multiple independent loops, modules, repos, handoff/recovery needs, external side effects, irreversible/high-risk changes, rollback/compatibility decisions, contested ownership, or user request.
+只有存在多个独立循环、模块、仓库、交接 / 恢复需求、外部副作用、不可逆 / 高风险变更、回滚 / 兼容性决策、有争议归属或用户请求时，才创建或更新持久化计划。
 
-### 2. Preflight
+### 2. 预检
 
-Run `npx --yes tsx scripts/mutation-preflight.ts` or record equivalent manual facts before mutation. Low-risk slices may use compact preflight; dirty state, generated outputs, submodules, cross-file behavior, or user changes require fuller preflight.
+改动前运行 `npx --yes tsx scripts/mutation-preflight.ts`，或记录等价手工事实。低风险切片可以使用紧凑预检；脏状态、生成输出、子模块、跨文件行为或用户变更需要更完整预检。
 
-Preflight must answer:
+预检必须回答：
 
-- am I in the intended repository and boundary?
-- is the current checkout primary, linked worktree, or otherwise unsafe?
-- what unrelated user changes exist?
-- which local rule files apply?
-- is `.alpha-goal/` ignored, or has `.alpha-goal/` just been added to the repo root `.gitignore` before writing process artifacts?
-- what evidence floor is required by the strongest material risk?
+- 我是否位于预期仓库和边界内？
+- 当前检出目录是主检出区、关联 worktree，还是其他不安全状态？
+- 存在哪些无关用户变更？
+- 适用哪些本地规则文件？
+- `.alpha-goal/` 是否已被忽略，或是否已在写流程产物前刚加入仓库根目录 `.gitignore`？
+- 最强实质风险要求什么证据下限？
 
-### 3. Execute or probe
+### 3. 执行或探测
 
-- For a mutation slice, make one coherent targeted change unless the approved slice explicitly requires coordinated edits.
-- For a read-only/probe slice, do not mutate; produce evidence, diagnosis, or a route decision.
-- Preserve and interpret failing outputs; do not hide, rerun away, or summarize them as success.
-- Preserve unrelated user changes; never stash, revert, move, or overwrite them without approval.
-- Prefer targeted edits; defer unrelated cleanup unless necessary for the approved slice and recorded as risk-reducing.
+- 对变更切片，做一个连贯且定向的改动，除非已批准切片明确需要协同编辑。
+- 对只读 / 探测切片，不做改动；只产出证据、诊断或路由决策。
+- 保留并解释失败输出；不要隐藏、反复重跑掩盖，或把它总结成成功。
+- 保留无关用户变更；未经批准，绝不 stash、revert、移动或覆盖它们。
+- 优先定向编辑；无关清理延后，除非它对已批准切片必要且已记录为风险降低。
 - 在产物、生成输出、副作用、清理和回滚 / 控制措施发生时记录它们。
-- Stay inside the approved target, scope, non-goals, constraints, authorization, and claim boundary.
+- 保持在已批准目标、范围、非目标、约束、授权和声明边界内。
 
-For debugging, identify and record root cause before repair. If root cause is not confirmed, limit changes to diagnostic probes, reversible instrumentation, or explicitly hypothesis-testing slices that do not alter the intended fix surface.
+调试时，修复前必须识别并记录根因。如果根因未确认，变更只能限于诊断探针、可逆 instrumentation，或明确用于验证假设且不改变目标修复面的切片。
 
-Use subagents only for independent ownership surfaces, read-only review, evidence audit, test/log analysis, or risk assessment. Do not allow overlapping mutation without coordination, and inspect returned evidence before accepting it.
+只在独立归属表面、只读评审、证据审计、测试 / 日志分析或风险评估中使用子代理。没有协调时，不允许重叠改动；接受结果前先检查返回证据。
 
-Forbidden unless explicitly requested and risk is recorded:
+除非用户明确要求且已记录风险，否则禁止：
 
-- editing or deleting files in a primary `main`/`master`/`trunk` checkout;
-- creating a branch in a primary checkout when an isolated worktree should be used;
-- mutating a candidate repo not selected by the approved context;
-- crossing repo, worktree, submodule, or ownership boundaries;
-- unrelated broad formatting or opportunistic refactor;
-- final completion, merge-ready, ship-ready, production-safe, or root-cause-fixed claims.
+- 在主 `main` / `master` / `trunk` 检出区编辑或删除文件；
+- 在应使用隔离 worktree 时，在主检出区创建分支；
+- 改动未被已批准上下文选中的候选仓库；
+- 跨越仓库、worktree、子模块或归属边界；
+- 无关的大范围格式化或顺手机会式重构；
+- 作出最终完成、可合并、可发布、生产安全或根因已修复声明。
 
-### 4. Sense feedback
+### 4. 感知反馈
 
-Collect fresh feedback after the material action:
+实质动作后采集新鲜反馈：
 
-- tests, builds, linters, type checks, runtime probes, logs, screenshots, diffs, or manual inspection;
-- user, reviewer, or subagent feedback;
-- stale, contradicted, or newly discovered specs/plans/rules;
-- environment, permission, dependency, data, or upstream-state changes;
-- regression, compatibility, migration, security, observability, or data-risk signals.
+- 测试、构建、lint、类型检查、运行探针、日志、截图、diff 或人工检查；
+- 用户、评审或子代理反馈；
+- 过期、相互矛盾或新发现的规范 / 计划 / 规则；
+- 环境、权限、依赖、数据或上游状态变化；
+- 回归、兼容性、迁移、安全、可观测性或数据风险信号。
 
-Classify evidence:
+证据分类：
 
-- `gate evidence`: can satisfy acceptance or claim boundary;
-- `advisory evidence`: identifies risk but does not prove completion;
-- `exploration evidence`: maps possibilities only;
-- `blocked evidence`: shows missing environment, tool, data, or permission.
+- `gate evidence`: 可以满足验收或声明边界；
+- `advisory evidence`: 识别风险，但不能证明完成；
+- `exploration evidence`: 只用于映射可能性；
+- `blocked evidence`: 表明缺少环境、工具、数据或权限。
 
-Also record whether the observed sensor feedback crossed the 控制律 threshold, whether latency/noise make the signal inconclusive, and whether fallback/reframe is required.
-If a registered disturbance trigger fires, route according to the register instead of continuing the planned slice.
-If feedback contradicts the 控制律, threshold, model, or route assumption in a reusable way, load `references/adaptive-learning.md` and create an 自适应学习记录 before the next pass.
+同时记录已观察传感器反馈是否跨过控制律阈值、延迟 / 噪声是否让信号无法定论，以及是否需要失败处理 / 重新界定。
+如果已登记扰动的触发条件命中，按扰动记录路由，不继续原计划切片。
+如果反馈以可复用的方式反驳控制律、阈值、模型或路由假设，下一轮前加载 `references/adaptive-learning.md` 并创建自适应学习记录。
 
-### 5. Compare error and decide route
+### 5. 比较误差并决定路由
 
-Compare current state against the reference and 控制律, not against effort spent. If observed feedback does not match the expected effect or threshold, choose hardening, fallback, reframe, or blocker instead of treating the action as successful.
+把当前状态与参考状态和控制律比较，而不是与已投入工作量比较。如果已观察反馈不匹配预期效果或阈值，选择加固、失败处理、重新界定或阻塞，不要把动作视为成功。
 
-Choose one primary route:
+选择一个主路由：
 
-- `ITERATION_CONTINUES`: goal remains valid and another bounded slice should proceed or be recommended.
-- `ITERATION_HARDEN`: implementation direction is valid but evidence, edge cases, compatibility, cleanup, or observability are insufficient.
-- `ITERATION_READY_FOR_VERIFY`: acceptance appears covered and the evidence bundle is ready for independent `evidence-verify`.
-- `RETURN_TO_ALPHA_GOAL`: target, scope, acceptance, non-goals, constraints, decision boundaries, authorization, or final claim changed or is unreliable.
-- `RETURN_TO_SYSTEM_MODEL`: plant boundary, sensors, actuators, disturbances, or coupling became materially unclear.
-- `BLOCKED`: missing permission, tool, data, environment, credential, or user-owned decision prevents safe progress.
+- `ITERATION_CONTINUES`: 目标仍有效，应继续或建议另一个有界切片。
+- `ITERATION_HARDEN`: 实现方向有效，但证据、边界情况、兼容性、清理或可观测性不足。
+- `ITERATION_READY_FOR_VERIFY`: 验收看起来已覆盖，证据包可交给独立 `evidence-verify`。
+- `RETURN_TO_ALPHA_GOAL`: 目标、范围、验收、非目标、约束、决策边界、授权或最终声明已改变或不可靠。
+- `RETURN_TO_SYSTEM_MODEL`: 被控对象边界、传感器、执行器、扰动或耦合变得实质不清。
+- `BLOCKED`: 缺少权限、工具、数据、环境、凭证或用户自有决策，无法安全推进。
 
-Do not choose `ITERATION_READY_FOR_VERIFY` merely because implementation is done. Choose it only when fresh evidence plausibly covers acceptance and claim boundary.
+不要仅因为实现已完成就选择 `ITERATION_READY_FOR_VERIFY`。只有当新鲜证据看起来能覆盖验收和声明边界时，才选择它。
 
-### 6. Record
+### 6. 记录
 
-Persist a full 迭代记录 under `.alpha-goal/YYYYMMDD-<slug>/iterations/NN-<slice>.md` before handoff, blocking, or materially changing direction. Use `.alpha-goal/YYYYMMDD-<slug>/iterations/cycles.jsonl` only when an append-only machine log is useful. Store bulky command output, logs, screenshots, or traces under `.alpha-goal/YYYYMMDD-<slug>/evidence/` and link to them from the record. Update the 闭环台账 artifact registry and show a compact Markdown-table `迭代摘要` in the TUI by default.
+交接、阻塞或实质改变方向前，把完整迭代记录持久化到 `.alpha-goal/YYYYMMDD-<slug>/iterations/NN-<slice>.md`。只有当追加式机器日志有用时，才使用 `.alpha-goal/YYYYMMDD-<slug>/iterations/cycles.jsonl`。大体量命令输出、日志、截图或轨迹存放到 `.alpha-goal/YYYYMMDD-<slug>/evidence/`，并从记录中链接。更新闭环台账产物登记，并在 TUI 默认展示紧凑 Markdown 表格 `迭代摘要`。
 
-Print the full 迭代记录 in chat only when the user asks, file persistence is blocked, or a blocker/risk requires explicit user review. Compact records are still acceptable for low-risk passes, but preserve:
+只有当用户要求、文件持久化受阻，或阻塞 / 风险需要用户显式复核时，才在聊天中打印完整迭代记录。低风险轮次仍可使用紧凑记录，但必须保留：
 
 - 已批准上下文与边界;
 - 动态计划与预检;
@@ -194,12 +194,12 @@ TUI 摘要:
 | 下一步 | |
 ```
 
-Do not make final completion claims in the 迭代记录. Completion judgment belongs to `evidence-verify`.
+不要在迭代记录中作出最终完成声明。完成判断属于 `evidence-verify`。
 
-### 7. Route next
+### 7. 路由下一步
 
-- For `ITERATION_CONTINUES` or `ITERATION_HARDEN`, do not stop at “recommended next step” when the next pass is already authorized, safe, and actionable. Apply the auto-execution test in `references/auto-execution.md`, then either start the next bounded pass immediately or record the concrete stop reason.
-- For `ITERATION_READY_FOR_VERIFY`, hand off to `evidence-verify` with the current claim, 目标契约, ledger state, diff/artifact evidence, and fresh checks.
-- For `RETURN_TO_ALPHA_GOAL`, stop mutation and revise the contract.
-- For `RETURN_TO_SYSTEM_MODEL`, stop mutation and model the system boundary.
-- For `BLOCKED`, stop and report the smallest missing input, permission, tool, data, environment, or safe-state condition.
+- 对 `ITERATION_CONTINUES` 或 `ITERATION_HARDEN`，如果下一轮已授权、安全且可执行，不要停在“建议下一步”。先应用 `references/auto-execution.md` 的自动执行测试，然后立即开始下一有界轮次，或记录具体停止原因。
+- 对 `ITERATION_READY_FOR_VERIFY`，携带当前声明、目标契约、台账状态、diff / 产物证据和新鲜检查交接给 `evidence-verify`。
+- 对 `RETURN_TO_ALPHA_GOAL`，停止改动并修订契约。
+- 对 `RETURN_TO_SYSTEM_MODEL`，停止改动并建模系统边界。
+- 对 `BLOCKED`，停止并报告最小缺失输入、权限、工具、数据、环境或安全状态条件。

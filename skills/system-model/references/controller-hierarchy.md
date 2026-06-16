@@ -1,8 +1,8 @@
 # 控制器层级
 
-Use a 控制器层级（协同图）when a task has multiple subsystems, teams, repos, agents, modules, services, or objectives that can act as local controllers under a shared goal.
+当任务包含多个子系统、团队、仓库、智能体、模块、服务或目标，并且它们都能在共享目标下充当局部控制器时，使用控制器层级（协同图）。
 
-If material multi-controller relationships exist, output a clearly labeled `控制器层级:` block. If none exist, state `控制器层级: 无实质项`. Do not replace the hierarchy with an unlabeled prose coordination section.
+如果存在实质多控制器关系，输出清晰标记的 `控制器层级:` 块。如果不存在，写明 `控制器层级: 无实质项`。不要用未标记的散文式协同段落替代层级结构。
 
 ```text
 控制器层级:
@@ -26,8 +26,8 @@ If material multi-controller relationships exist, output a clearly labeled `控�
 
 ## 规则
 
-- Use the hierarchy to keep local optimization from destabilizing the global objective.
-- Name coupling variables that multiple controllers can change or observe.
-- Do not let a local controller decide global priority, risk acceptance, budget, timeline, production impact, or final claim.
-- If controllers conflict on objective priority, risk, or authority, route to `decision-synthesis` or user.
-- If the hierarchy exposes missing plant, sensor, actuator, or coupling facts, route to `system-model` before mutation.
+- 用层级结构防止局部优化破坏全局目标。
+- 命名多个控制器可以改变或观察的耦合变量。
+- 不允许局部控制器决定全局优先级、风险接受、预算、时间线、生产影响或最终声明。
+- 如果控制器在目标优先级、风险或权限上冲突，路由到 `decision-synthesis` 或用户。
+- 如果层级结构暴露出缺失的被控对象、传感器、执行器或耦合事实，改动前路由到 `system-model`。

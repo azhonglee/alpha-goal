@@ -2,30 +2,30 @@
 
 ## 可观测性问题
 
-- Can the available signals distinguish success from failure?
-- Can the available signals distinguish root cause from correlation?
-- Are signals fresh after the last material change?
-- Do signals cross the same boundary as the proposed claim?
-- Are logs/tests/probes connected to the affected entity and state transition?
+- 可用信号能否区分成功和失败？
+- 可用信号能否区分根因和相关性？
+- 信号是否晚于最后一次实质变更？
+- 信号是否跨越了与拟声明内容相同的边界？
+- 日志 / 测试 / 探针是否连接到受影响实体和状态迁移？
 
 ## 可控性问题
 
-- Which variables can be changed inside the approved scope?
-- Which variables require external authority or user-owned decisions?
-- Are control actions reversible or safely containable?
-- Does one intended action affect multiple outputs or owners?
-- Is a diagnostic probe required before a repair action?
+- 哪些变量可以在已批准范围内改变？
+- 哪些变量需要外部权限或用户自有决策？
+- 控制动作是否可逆或可安全约束？
+- 一个拟行动作是否影响多个输出或负责人？
+- 修复动作前是否需要诊断探针？
 
 ## 扰动问题
 
-- Which disturbance could invalidate the model, route, evidence floor, or final claim?
-- What sensor detects the disturbance before or immediately after action?
+- 哪些扰动可能让模型、路由、证据下限或最终声明失效？
+- 哪个传感器能在行动前或行动后立即检测该扰动？
 - 哪些控制措施能阻止扰动扩大影响范围？
 - 哪些路由触发条件会把工作送到 `goal-contract`、`system-model`、`decision-synthesis`、用户或 blocker？
 
 ## 评级
 
-- `strong`: enough signals/control variables exist for direct bounded action.
-- `adequate`: action is possible with explicit limitations or narrowed claim.
-- `weak`: a model, sensor, or user decision is needed before mutation.
-- `blocked`: missing environment, data, credentials, permission, or evidence prevents meaningful progress.
+- `strong`: 信号 / 控制变量足够支持直接有界行动。
+- `adequate`: 可以行动，但需要明确限制或窄化声明。
+- `weak`: 改动前需要模型、传感器或用户决策。
+- `blocked`: 缺少环境、数据、凭证、权限或证据，无法取得有意义进展。

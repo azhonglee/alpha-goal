@@ -1,6 +1,6 @@
 # 控制律
 
-Use this reference when planning or reviewing a `control-loop` slice that changes implementation, configuration, tests, documents, prompts, generated artifacts, or diagnostic probes. A control law explains why the selected action should reduce the target error and how feedback will decide the next route.
+规划或复核会改变实现、配置、测试、文档、提示词、生成产物或诊断探针的 `control-loop` 切片时，使用本参考。控制律说明为什么所选动作应当降低目标误差，以及反馈如何决定下一路由。
 
 ## 界面投影
 
@@ -57,18 +57,18 @@ TUI 默认展示简短的 `执行检查` 表。除非用户明确要求其他语
 
 ## 规则
 
-- `目标误差` must be stated as a mismatch between reference state and current state, not as effort already spent.
-- `控制变量` must be inside the approved actuator boundary.
-- `预期效果` must name the state change the action should cause.
-- `传感器` must be fresh enough and cross the boundary needed by the claim.
-- `阈值 / 容差` may be qualitative, but it must be explicit enough to decide continue, harden, verify, reframe, or block.
-- `反馈延迟` states when the expected signal should change and when waiting is safer than another control action.
-- `信号噪声` states known flakiness, stale evidence risk, or ambiguous sensor interpretation.
-- `置信度` is low | medium | high and reflects causal certainty, not optimism.
-- `阻尼 / 防振荡` names the guard that prevents repeated broad rewrites, route flapping, or over-correction.
+- `目标误差` 必须表述为参考状态与当前状态之间的不匹配，而不是已投入工作量。
+- `控制变量` 必须位于已批准的执行器边界内。
+- `预期效果` 必须命名动作应导致的状态变化。
+- `传感器` 必须足够新鲜，并跨越声明所需边界。
+- `阈值 / 容差` 可以是定性的，但必须足够明确，能决定继续、加固、验证、重新界定或阻塞。
+- `反馈延迟` 说明预期信号何时应变化，以及何时等待比追加控制动作更安全。
+- `信号噪声` 说明已知不稳定性、证据过期风险或传感器解释歧义。
+- `置信度` 取 low | medium | high，反映因果确定性，而不是乐观程度。
+- `阻尼 / 防振荡` 命名用于防止反复大范围改写、路由摆动或过度修正的保护措施。
 - `影响范围上限` 命名本切片允许的最大影响范围，以及不得跨越的边界。
-- `失败处理` must not silently expand scope, authority, or risk.
-- If no sensor can observe the expected effect, route to `system-model` or return `BLOCKED`.
+- `失败处理` 不得静默扩大范围、权限或风险。
+- 如果没有传感器能观测预期效果，路由到 `system-model` 或返回 `BLOCKED`。
 
 ## 内部产物示例
 
@@ -76,19 +76,19 @@ TUI 默认展示简短的 `执行检查` 表。除非用户明确要求其他语
 
 ```text
 控制律:
-- 目标误差: SKILL.md frontmatter fails YAML loading.
-- 控制变量: description scalar quoting.
-- 控制动作或探测: quote description values containing colon-space.
-- 保持不变的变量: skill names and description semantics.
-- 预期效果: all skill frontmatter blocks parse as YAML.
-- 传感器: YAML.safe_load over skills/*/SKILL.md.
-- 阈值 / 容差: every SKILL.md has name and description after parsing.
-- 反馈延迟: immediately after the quoting change.
-- 信号噪声: parser differences between strict YAML and the local frontmatter parser.
-- 置信度: high, because parser failure directly names the invalid syntax.
-- 阻尼 / 防振荡: change only scalar quoting, then rerun the parser before touching descriptions.
+- 目标误差: SKILL.md frontmatter 无法通过 YAML 解析。
+- 控制变量: description 标量的引号写法。
+- 控制动作或探测: 为包含冒号空格的 description 值加引号。
+- 保持不变的变量: 技能名和 description 语义。
+- 预期效果: 所有技能 frontmatter 都能解析为 YAML。
+- 传感器: 对 skills/*/SKILL.md 执行 YAML.safe_load。
+- 阈值 / 容差: 解析后每个 SKILL.md 都有 name 和 description。
+- 反馈延迟: 加引号改动后立即检查。
+- 信号噪声: 严格 YAML 解析器与本地 frontmatter 解析器可能存在差异。
+- 置信度: high，因为解析失败直接指向无效语法。
+- 阻尼 / 防振荡: 只改标量引号，重跑解析器后再触碰 description。
 - 影响范围上限: 不重命名技能，不改写 description 语义。
-- 反馈时机: after the quoting change.
-- 失败处理: inspect remaining frontmatter syntax and tighten validator.
+- 反馈时机: 加引号改动后。
+- 失败处理: 检查剩余 frontmatter 语法并收紧校验器。
 - 停止 / 重新界定触发条件: parser 仍失败，或 description 语义必须改变。
 ```

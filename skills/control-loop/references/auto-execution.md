@@ -1,46 +1,46 @@
 # 自动执行边界
 
-Use this reference when an 迭代记录 has a `下一步` action, especially when the wording might become a passive “recommended next step”. The loop controller should continue acting when it is safe to do so; recommendation-only output is a stop decision that needs a reason.
+当迭代记录包含 `下一步` 动作时使用本参考，尤其是措辞可能退化成被动“建议下一步”时。循环控制器在安全时应继续行动；只输出建议本身就是停止决策，必须说明理由。
 
 ## 默认姿态
 
-Execute the next bounded pass immediately when all are true:
+以下条件全部成立时，立即执行下一有界轮次：
 
-- the current route is `ITERATION_CONTINUES` or `ITERATION_HARDEN`;
-- the next action is concrete enough to run now, with known target paths, commands, probes, or evidence sensors;
-- it remains inside the approved 目标契约, scope, non-goals, constraints, authorization, and claim boundary;
-- the next pass has a 控制律 with target error, approved control variable, expected effect, sensor threshold, and fallback action;
+- 当前路由是 `ITERATION_CONTINUES` 或 `ITERATION_HARDEN`；
+- 下一动作足够具体，可立即执行，且目标路径、命令、探针或证据传感器已知；
+- 下一动作仍位于已批准目标契约、范围、非目标、约束、授权和声明边界内；
+- 下一轮已有控制律，包含目标误差、已批准控制变量、预期效果、传感器阈值和失败处理；
 - 对重复、噪声大或影响范围广的循环，已明确反馈延迟、信号噪声、置信度、阻尼 / 防振荡和影响范围上限；
-- it does not require a user-owned decision, credential, secret, unavailable environment, external approval, deployment, push, PR/MR, or other external side effect;
-- it will not overwrite unrelated user changes, cross unclear ownership boundaries, or mutate a primary checkout unsafely;
-- risk has not increased enough to require reframing, system modeling, durable planning, or explicit acceptance;
-- context and budget are sufficient to perform the pass and record evidence.
+- 不需要用户自有决策、凭证、密钥、不可用环境、外部批准、部署、push、PR/MR 或其他外部副作用；
+- 不会覆盖无关用户变更、跨越不清楚的归属边界，或不安全地改动主检出区；
+- 风险没有升高到需要重新界定、系统建模、持久化计划或显式接受；
+- 上下文和预算足以执行该轮并记录证据。
 
-Read-only probes, local inspections, local tests, local builds, local linters, and targeted reversible diagnostics normally satisfy this test when their scope and evidence value are clear.
+只读探针、本地检查、本地测试、本地构建、本地 lint 和定向可逆诊断，在范围和证据价值清楚时通常满足该测试。
 
 ## 停止而非执行
 
-Pause and record a recommendation only when at least one stop reason applies:
+只有至少一个停止原因成立时，才暂停并记录建议：
 
-- `USER_DECISION_REQUIRED`: target, acceptance, non-goal, risk acceptance, or final claim is user-owned.
-- `AUTHORIZATION_MISSING`: mutation, external side effect, credential use, push, PR/MR, deployment, destructive action, or config change is not authorized.
-- `BOUNDARY_UNCLEAR`: repository, worktree, submodule, generated output, owner, or system boundary is unclear enough to affect safe action.
-- `CONTROL_LAW_UNCLEAR`: target error, control variable, expected effect, sensor threshold, or fallback action is missing.
+- `USER_DECISION_REQUIRED`: 目标、验收、非目标、风险接受或最终声明属于用户自有决策。
+- `AUTHORIZATION_MISSING`: 变更、外部副作用、凭证使用、push、PR/MR、部署、破坏性动作或配置变更未授权。
+- `BOUNDARY_UNCLEAR`: 仓库、worktree、子模块、生成输出、负责人或系统边界不清楚到会影响安全行动。
+- `CONTROL_LAW_UNCLEAR`: 缺少目标误差、控制变量、预期效果、传感器阈值或失败处理。
 - `DYNAMICS_UNSTABLE`: 反馈延迟或噪声大，路由振荡，或控制措施不清楚。
-- `RISK_ESCALATED`: the next pass introduces materially higher security, data, migration, compatibility, production, or rollback risk.
-- `BLOCKED_ENVIRONMENT`: required tool, data, log, service, dependency, credential, or environment is unavailable.
-- `BUDGET_OR_CONTEXT_INSUFFICIENT`: continuing would likely drop necessary evidence, rules, or active state.
-- `VERIFY_HANDOFF`: acceptance appears covered and independent `evidence-verify` should judge completion.
+- `RISK_ESCALATED`: 下一轮引入显著更高的安全、数据、迁移、兼容性、生产或回滚风险。
+- `BLOCKED_ENVIRONMENT`: 必需工具、数据、日志、服务、依赖、凭证或环境不可用。
+- `BUDGET_OR_CONTEXT_INSUFFICIENT`: 继续执行很可能丢失必要证据、规则或活跃状态。
+- `VERIFY_HANDOFF`: 验收看起来已覆盖，应由独立 `evidence-verify` 判断完成。
 
-When pausing, name the stop reason and the smallest concrete next action. Avoid vague phrasing such as “建议下一步” without the reason execution did not continue.
+暂停时，命名停止原因和最小具体下一动作。避免只写“建议下一步”却不说明为什么没有继续执行。
 
 ## 输出规则
 
-For every `下一步` field, use one of these forms:
+每个 `下一步` 字段使用下列形式之一：
 
 ```text
 下一步: 自动执行 <有界轮次>，因为 <安全 / 可执行原因>。
 下一步: 暂停；<STOP_REASON>；建议 <有界轮次>。
 ```
 
-If a next action is read-only and already authorized, the expected form is `auto-executing`, followed by actually performing the pass before responding.
+如果下一动作是只读且已授权，预期形式是 `auto-executing`，并且在回复前实际执行该轮。

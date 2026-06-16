@@ -1,50 +1,50 @@
 ---
 name: evidence-verify
-description: "Judge whether fresh evidence satisfies an active 目标契约 and supports completion, correctness, safety, merge readiness, ship readiness, or a narrowed final claim. Use for final comparator/error-boundary decisions, not implementation."
+description: "判断新鲜证据是否满足活跃目标契约，并支持完成、正确性、安全性、可合并、可发布或窄化最终声明。用于最终比较器 / 误差边界决策，不用于实现。"
 ---
 
 # 证据验证
 
-Use this skill as the independent comparator in the closed loop. It judges whether the observed final state matches the reference state and whether the proposed claim stays within evidence.
+把本技能作为闭环中的独立比较器。它判断已观察最终状态是否匹配参考状态，以及拟声明内容是否仍在证据范围内。
 
 ## 入口
 
-Use when there is an active or recoverable approved context and the user, `goal-contract`, `control-loop`, or `alpha-goal` asks whether work is done, correct, safe, ready to merge, ready to ship, or ready for a narrowed final claim.
+当存在活跃或可恢复的已批准上下文，并且用户、`goal-contract`、`control-loop` 或 `alpha-goal` 询问工作是否完成、正确、安全、可合并、可发布，或是否可给出窄化最终声明时使用。
 
-Do not use it for ordinary advisory review, security scan, or read-only audit without a completion/readiness/correctness claim.
+如果没有完成 / 就绪 / 正确性声明，不要把本技能用于普通建议性 review、安全扫描或只读审计。
 
-A positive verdict needs proportional semantic evidence for:
+正向结论需要与风险成比例的语义证据，覆盖：
 
-- reference state, desired outcome, included scope, excluded scope/non-goals, decision boundaries, constraints, and claim boundary;
-- current durable spec/plan/model if referenced;
-- 迭代记录 or equivalent diff/evidence bundle;
-- 控制律 result for each material `control-loop` slice, including latency/noise/confidence and stability guards when a mutation or diagnostic probe was used;
-- 当定性目标或综合指标影响验收证据时，包含 指标转译 处理；
-- 闭环台账 from `.alpha-goal/YYYYMMDD-<slug>/control-state.md`, including `最新控制路由`, when the work crossed skills or turns, or explicit no-write chat state when file writing was forbidden or impossible;
+- 参考状态、期望结果、范围内事项、排除范围 / 非目标、决策边界、约束和声明边界；
+- 被引用的当前持久化规范 / 计划 / 模型；
+- 迭代记录或等价 diff / 证据包；
+- 每个实质 `control-loop` 切片的控制律结果；使用变更或诊断探测时，还要包含延迟 / 噪声 / 置信度和稳定性保护；
+- 当定性目标或综合指标影响验收证据时，包含指标转译处理；
+- 当工作跨技能或跨轮次时，包含来自 `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 的闭环台账，包括 `最新控制路由`；如果文件写入被禁止或不可能，则包含明确的无写入聊天状态；
 - 当实质扰动影响路由、证据或风险时，包含 扰动记录 处理；
-- 自适应学习记录 handling when feedback changed thresholds, strategy, route, or reusable assumptions;
-- 调试回执 when the claim is a bug or root-cause fix;
-- strongest material risk and matching evidence floor;
-- fresh final-target repo/artifact status and applicable project rules;
-- exact commands/probes/checks and outcomes, or explicit blocker/substitute evidence;
-- feedback handling for user/reviewer/test/runtime feedback.
+- 当反馈改变阈值、策略、路由或可复用假设时，包含自适应学习记录处理；
+- 当声明涉及 bug 或根因修复时，包含调试回执；
+- 最强实质风险和匹配的证据下限；
+- 新鲜的最终目标仓库 / 产物状态和适用项目规则；
+- 精确命令 / 探针 / 检查及结果，或明确阻塞项 / 替代证据；
+- 对用户 / 评审 / 测试 / 运行态反馈的处理。
 
 ## 按需加载资源
 
-- `references/verification-verdict-schema.md`: field semantics for formal verdicts.
-- `references/completion-review-rubric.md`: final delivery, merge-ready, ship-ready, or production-sensitive evidence floor.
-- `references/claim-boundary-check.md`: prevent final claims exceeding evidence.
-- `scripts/evidence-summary.ts`: read-only diff/status evidence.
+- `references/verification-verdict-schema.md`: 正式结论字段语义。
+- `references/completion-review-rubric.md`: 最终交付、可合并、可发布或生产敏感场景的证据下限。
+- `references/claim-boundary-check.md`: 防止最终声明超出证据。
+- `scripts/evidence-summary.ts`: 只读 diff / 状态证据。
 
 ## 流程
 
 ```text
-Map acceptance -> Inspect artifacts -> Check claim boundary -> Judge verdict -> Route
+映射验收 -> 检查产物 -> 检查声明边界 -> 判断结论 -> 路由
 ```
 
-### 1. Map acceptance
+### 1. 映射验收
 
-For each acceptance or evidence expectation, identify fresh final-state evidence, boundary, and status:
+对每条验收或证据期望，识别新鲜最终状态证据、边界和状态：
 
 - `covered`
 - `partially covered`
@@ -52,33 +52,33 @@ For each acceptance or evidence expectation, identify fresh final-state evidence
 - `blocked`
 - `not applicable`
 
-Evidence must match the claim boundary. A lower-boundary test cannot prove a higher-boundary user-visible, service, production, tenant, compliance, or safety claim.
+证据必须匹配声明边界。低边界测试不能证明更高边界的用户可见、服务、生产、租户、合规或安全声明。
 
-### 2. Inspect artifacts and risk
+### 2. 检查产物与风险
 
-Confirm:
+确认：
 
-- approved context is current or explicitly superseded;
-- 目标契约, system model, durable spec, and plan are semantically aligned or contradictions are routed;
-- ledger reference, current state, latest control route, residual error, and latest route decision are aligned with fresh evidence or explicitly superseded;
+- 已批准上下文仍是当前状态，或已明确被取代；
+- 目标契约、系统模型、持久化规范和计划语义一致，或矛盾已被路由；
+- 台账中的参考状态、当前状态、最新控制路由、残余误差和最新路由决策与新鲜证据一致，或已明确被取代；
 - 每个实质 控制律 都应识别目标误差、已批准控制变量、预期效果、传感器阈值、已观察反馈、反馈延迟、实质信号噪声、置信度、阻尼 / 防振荡、影响范围上限和失败处理；
-- 每个实质 指标转译 都应把定性目标映射到操作化定义、传感器、阈值 / 容差、测量时机和证据边界；
+- 每个实质指标转译都应把定性目标映射到操作化定义、传感器、阈值 / 容差、测量时机和证据边界；
 - 每个实质 扰动记录 条目都应包含传感器证据、控制措施、路由触发处理，或明确的残余缺口；
-- each material 自适应学习记录 has evidence, adjustment, reuse condition, invalidation condition, and no unsupported broad generalization;
-- 迭代记录 goal type, control slice, execution, feedback, learning, and evidence match the final diff/artifact;
-- changed files match target and avoid non-goals;
-- mutation evidence comes from an isolated or approved edit path;
-- `.worktrees/` is ignored or otherwise safe, and `.alpha-goal/` is ignored before ledger/evidence artifacts are written; if `.alpha-goal/` was missing from the repo root `.gitignore`, the setup mutation is included in the evidence;
-- checks ran after the last material change, or missing checks have a stated blocker/substitute evidence;
-- repeated, noisy, or delayed feedback has not been overclaimed as stable final evidence;
-- failing output is understood and does not contradict the final claim;
-- feedback is handled, out of scope, or routed elsewhere.
+- 每条实质自适应学习记录都有证据、调整、复用条件、失效条件，且没有无证据支持的宽泛泛化；
+- 迭代记录中的目标类型、控制切片、执行、反馈、学习和证据与最终 diff / 产物匹配；
+- 已变更文件匹配目标且避开非目标；
+- 变更证据来自隔离或已批准的编辑路径；
+- `.worktrees/` 已被忽略或足够安全，且写入台账 / 证据产物前 `.alpha-goal/` 已被忽略；如果仓库根目录 `.gitignore` 原本缺少 `.alpha-goal/`，初始化改动已包含在证据中；
+- 检查在最后一次实质变更后运行；如果缺少检查，已有阻塞项 / 替代证据说明；
+- 没有把重复、噪声大或延迟反馈过度声明为稳定最终证据；
+- 失败输出已被理解，且不反驳最终声明；
+- 反馈已处理、属于范围外，或已路由到其他位置。
 
-Bug/root-cause fixes need `ROOT_CAUSE_CONFIRMED` before repair-complete claims. `NOT_REPRODUCED` or `BLOCKED` does not support a repair-complete claim.
+bug / 根因修复需要先有 `ROOT_CAUSE_CONFIRMED`，才能作出修复完成声明。`NOT_REPRODUCED` 或 `BLOCKED` 不支持修复完成声明。
 
-### 3. Check claim boundary
+### 3. 检查声明边界
 
-Compare:
+比较：
 
 ```text
 声明边界:
@@ -90,21 +90,21 @@ Compare:
 - 允许的最终声明:
 ```
 
-If user wording is product-level but evidence is helper-level, choose either `NEXT_ITERATION` for broader evidence or `NARROW_CLAIM_AND_FINAL` with explicit narrowed wording.
+如果用户措辞是产品级，但证据只是辅助函数级，选择 `NEXT_ITERATION` 获取更宽证据，或选择 `NARROW_CLAIM_AND_FINAL` 并明确窄化措辞。
 
-### 4. Judge verdict
+### 4. 判断结论
 
-Return exactly one verdict:
+只返回一个结论：
 
-- `PASS_TO_FINAL`: evidence covers acceptance and claim boundary.
-- `NARROW_CLAIM_AND_FINAL`: local target is satisfied, but final wording must be narrower than the user request.
-- `NEXT_ITERATION`: direction is valid, but implementation, evidence, hardening, or cleanup is still needed.
-- `REFRAME`: 目标契约, system model, target/scope, non-goals, acceptance, existing-work relationship, or claim boundary is wrong or incomplete.
-- `BLOCKED`: environment, data, permission, credential, tool, or user-owned risk/scope decision is missing.
+- `PASS_TO_FINAL`: 证据覆盖验收和声明边界。
+- `NARROW_CLAIM_AND_FINAL`: 局部目标已满足，但最终措辞必须窄于用户请求。
+- `NEXT_ITERATION`: 方向有效，但仍需要实现、证据、加固或清理。
+- `REFRAME`: 目标契约、系统模型、目标 / 范围、非目标、验收、既有工作关系或声明边界错误或不完整。
+- `BLOCKED`: 缺少环境、数据、权限、凭证、工具，或用户自有风险 / 范围决策。
 
-### 5. Output
+### 5. 输出
 
-Persist the full 验证结论 under `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md` by default and update the 闭环台账 artifact registry. Show a compact Markdown-table `验证摘要` in the TUI by default. Print the full verdict in chat only when the user asks, file persistence is blocked, or the final claim requires explicit user review.
+默认把完整验证结论持久化到 `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md`，并更新闭环台账的产物登记。TUI 默认展示紧凑 Markdown 表格 `验证摘要`。只有当用户要求、文件持久化受阻，或最终声明需要用户显式复核时，才在聊天中打印完整结论。
 
 紧凑版:
 
@@ -161,8 +161,8 @@ TUI 摘要:
 
 路由:
 
-- `PASS_TO_FINAL`: final answer may claim completion inside the verified boundary.
-- `NARROW_CLAIM_AND_FINAL`: final answer must state the narrowed claim and remaining higher-boundary gap.
-- `NEXT_ITERATION`: return to `control-loop`; do not claim completion.
-- `REFRAME`: return to `goal-contract` or `system-model`; do not continue mutation.
-- `BLOCKED`: report blocker and smallest missing input or permission.
+- `PASS_TO_FINAL`: 最终答复可以在已验证边界内声明完成。
+- `NARROW_CLAIM_AND_FINAL`: 最终答复必须说明窄化声明和剩余高边界缺口。
+- `NEXT_ITERATION`: 返回 `control-loop`；不要声明完成。
+- `REFRAME`: 返回 `goal-contract` 或 `system-model`；不要继续改动。
+- `BLOCKED`: 报告阻塞项和最小缺失输入或权限。

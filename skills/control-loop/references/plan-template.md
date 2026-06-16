@@ -1,6 +1,6 @@
 # 计划模板
 
-Use only when `control-loop` needs a durable dynamic plan. A plan is the current execution view and incremental history; it is not an approval gate and must not rewrite the 目标契约.
+仅在 `control-loop` 需要持久化动态计划时使用。计划是当前执行视图和增量历史，不是审批闸门，也不得改写目标契约。
 
 默认路径:
 
@@ -8,13 +8,13 @@ Use only when `control-loop` needs a durable dynamic plan. A plan is the current
 .alpha-goal/YYYYMMDD-<slug>/plan.md
 ```
 
-Create or update a plan when:
+以下情况创建或更新计划：
 
-- multiple independent loops, modules, repos, submodules, or ownership surfaces need sequencing;
-- recovery or handoff must survive chat history loss;
-- migration, architecture, rollback, compatibility, or evidence sequencing decisions need persistence;
-- loop evidence changes the route materially;
-- user requests a plan, execution artifact, handoff route, or status artifact.
+- 多个独立循环、模块、仓库、子模块或归属表面需要排序；
+- 恢复或交接需要在聊天历史丢失后仍可继续；
+- 迁移、架构、回滚、兼容性或证据顺序决策需要持久化；
+- 循环证据实质改变路由；
+- 用户要求计划、执行产物、交接路线或状态产物。
 
 ```text
 # 计划
@@ -32,7 +32,7 @@ Create or update a plan when:
 
 ## 当前策略
 
-2-5 sentences explaining the current route, key tradeoff, and why this is the smallest viable route.
+用 2 到 5 句说明当前路由、关键取舍，以及为什么这是最小可行路线。
 
 ## 活跃边界
 
@@ -56,7 +56,7 @@ Create or update a plan when:
 | --- | --- | --- | --- | --- | --- | --- |
 | S1 |  |  | none | pending | none |  |  |
 
-Status values: pending, in_progress, done, blocked, superseded.
+状态值：pending、in_progress、done、blocked、superseded。
 
 ## 决策
 

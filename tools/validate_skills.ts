@@ -293,41 +293,44 @@ const SIDECAR_FIXTURE_TRACE = [
 const RUNTIME_SIDECAR_NEGATIVE_CASES: Array<[string, string]> = [
   [
     "control-loop-without-approved-contract",
-    "control-loop runtime sidecar requires an approved goal-contract sidecar",
+    "control-loop 运行态结构化索引需要已批准的 goal-contract 结构化索引",
   ],
-  ["final-without-verification", "final route requires a verification-verdict sidecar"],
-  ["broken-incoming-edge", "no prior sidecar connects decision-synthesis -> system-model"],
-  ["divergent-reference-id", "runtime sidecars must share one reference_id"],
-  ["missing-artifact-path", "schema sidecar missing required key \"artifact_path\""],
-  ["missing-reference-id", "runtime sidecars that reach action or final routes must share one meaningful reference_id"],
+  [
+    "final-without-verification",
+    "最终路由需要带 PASS_TO_FINAL 或 NARROW_CLAIM_AND_FINAL 的 verification-verdict 结构化索引",
+  ],
+  ["broken-incoming-edge", "没有先前结构化索引连接 decision-synthesis -> system-model"],
+  ["divergent-reference-id", "运行态结构化索引必须共享同一个 reference_id"],
+  ["missing-artifact-path", "结构化索引缺少必填键 \"artifact_path\""],
+  ["missing-reference-id", "到达行动或最终路由的运行态结构化索引必须共享一个有意义的 reference_id"],
   ["stage-decision-policy", "goal-contract sidecar stage_decision must be one of"],
   [
     "synthesis-control-loop-without-contract",
-    "routing to control-loop requires a prior approved goal-contract sidecar",
+    "路由到 control-loop 需要先前已批准的 goal-contract 结构化索引",
   ],
   [
     "final-with-nonpassing-verdict",
-    "final route requires a verification-verdict sidecar with PASS_TO_FINAL or NARROW_CLAIM_AND_FINAL",
+    "最终路由需要带 PASS_TO_FINAL 或 NARROW_CLAIM_AND_FINAL 的 verification-verdict 结构化索引",
   ],
   [
     "late-approved-contract",
-    "approved goal-contract sidecar must not be later than control-loop route",
+    "已批准的 goal-contract 结构化索引不得晚于 control-loop 路由",
   ],
   [
     "system-model-control-loop-without-contract",
-    "routing to control-loop requires a prior approved goal-contract sidecar",
+    "路由到 control-loop 需要先前已批准的 goal-contract 结构化索引",
   ],
   [
     "late-final-verdict",
-    "final verification-verdict sidecar must not be later than final route",
+    "最终 verification-verdict 结构化索引不得晚于最终路由",
   ],
   [
     "late-incoming-edge",
-    "prior sidecar edge must not be later than current route",
+    "先前结构化索引边不得晚于当前路由",
   ],
   [
     "claim-boundary-mismatch",
-    "prior sidecar edge must share reference_id or claim_boundary",
+    "先前结构化索引边必须共享 reference_id 或 claim_boundary",
   ],
 ];
 
@@ -388,10 +391,10 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "skills/goal-contract/SKILL.md",
     [
       "目标契约",
-      "reference state",
-      "acceptance evidence",
-      "claim boundary",
-      "decision boundaries",
+      "参考状态",
+      "验收证据",
+      "声明边界",
+      "决策边界",
       "指标转译",
       ".alpha-goal/YYYYMMDD-<slug>/goal-contract.md",
       ".alpha-goal/YYYYMMDD-<slug>/control-state.md",
@@ -419,7 +422,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     ],
   ],
   [
-    "execution feedback requires control law and ledger state",
+    "执行反馈需要控制律和台账状态",
     "skills/control-loop/SKILL.md",
     [
       "执行检查",
@@ -428,7 +431,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "问题",
       "本轮动作",
       "验收证据",
-      "持久化 控制律",
+      "持久化控制律",
       "默认不要在 TUI 打印原始 `控制律:` 块",
       "用户要求",
       "持久化受阻",
@@ -562,10 +565,10 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     [
       "状态迁移",
       "结构化索引",
-      "legacy artifact path",
-      "reference before action",
-      "sensor before claim",
-      "comparator before final",
+      "旧产物路径",
+      "行动前必须有参考状态",
+      "声明前必须有传感器",
+      "最终结论前必须有比较器",
       "decision-synthesis -> control-loop",
       "\"artifact_kind\"",
       "\"stage_decision\"",
@@ -677,7 +680,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "问题",
       "本轮动作",
       "主要风险",
-      "持久化 控制律",
+      "持久化控制律",
       "默认不要在 TUI 打印原始 `控制律:` 块",
       "用户要求",
       "持久化受阻",
@@ -833,7 +836,7 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
   {
     name: "decision synthesis route rules preserve mutation guard",
     path: "skills/decision-synthesis/SKILL.md",
-    anchor: "### 7. Route",
+    anchor: "### 7. 路由",
     required_terms: [
       "路由到 `goal-contract`",
       "路由到 `system-model`",
@@ -849,7 +852,7 @@ const DEFAULT_TUI_PROJECTION_GUARDS = [
     name: "control loop pre-action TUI",
     path: "skills/control-loop/SKILL.md",
     anchor: "TUI 执行前检查:",
-    end_anchor: "Create or update a durable plan",
+    end_anchor: "只有存在多个独立循环",
   },
   {
     name: "control law TUI projection",
@@ -1019,7 +1022,7 @@ const FIXTURE_CONTRACT_TESTS = [
       "skills/goal-contract/references/indicator-handoff.md",
     ],
     schema_blocks: ["目标契约:", "指标转译:"],
-    route_terms: ["control-loop", "system-model", "evidence-verify", "block"],
+    route_terms: ["control-loop", "system-model", "evidence-verify", "阻塞"],
   },
   {
     name: "multi-controller system maps hierarchy before mutation",
@@ -1498,7 +1501,7 @@ function validateSchemaSidecarContract(root: string, errors: string[]): void {
   const text = fs.readFileSync(file, "utf8");
   const match = text.match(/```json\s*([\s\S]*?)```/);
   if (!match) {
-    errors.push(`${rel}: missing JSON Schema sidecar example block`);
+    errors.push(`${rel}: 缺少 JSON Schema 结构化索引示例块`);
     return;
   }
 
@@ -1506,7 +1509,7 @@ function validateSchemaSidecarContract(root: string, errors: string[]): void {
   try {
     schema = JSON.parse(match[1]);
   } catch (error) {
-    errors.push(`${rel}: invalid JSON Schema sidecar block: ${errorMessage(error)}`);
+    errors.push(`${rel}: JSON Schema 结构化索引块无效: ${errorMessage(error)}`);
     return;
   }
 
@@ -1554,22 +1557,22 @@ function validateSchemaSidecarContract(root: string, errors: string[]): void {
   validateSchemaEnum(rel, properties, "authorization_status", SIDECAR_AUTHORIZATION_STATUSES, errors);
 
   const responsibilityBoundaryTerms = [
-    "base JSON Schema",
-    "compact summary and index",
-    "does not replace the full Markdown stage artifact",
-    "persisted full 控制律",
-    "TypeScript validator additionally enforces",
-    "runtime trace continuity",
+    "基础 JSON Schema",
+    "紧凑摘要",
+    "不替代完整 Markdown 阶段产物",
+    "不替代持久化的完整控制律",
+    "TypeScript 校验器还会额外检查",
+    "运行态追踪连续性",
   ];
   for (const term of responsibilityBoundaryTerms) {
     if (!text.includes(term)) {
-      errors.push(`${rel}: schema sidecar responsibility boundary must mention ${JSON.stringify(term)}`);
+      errors.push(`${rel}: 结构化索引责任边界必须提到 ${JSON.stringify(term)}`);
     }
   }
 
   for (const kind of SIDECAR_ARTIFACT_KINDS) {
     if (!text.includes(`- \`${kind}\``)) {
-      errors.push(`${rel}: stage-specific required keys omit ${kind}`);
+      errors.push(`${rel}: 阶段专用必填键遗漏 ${kind}`);
     }
   }
 }
@@ -1612,7 +1615,7 @@ function validateSchemaSidecarFixtures(root: string, errors: string[]): void {
       }
       fixture = parsed as Record<string, unknown>;
     } catch (error) {
-      errors.push(`${rel}: invalid JSON schema sidecar fixture: ${errorMessage(error)}`);
+      errors.push(`${rel}: JSON schema 结构化索引样例无效: ${errorMessage(error)}`);
       continue;
     }
 
@@ -1757,7 +1760,7 @@ function validateConcreteSidecarFixture(
 ): void {
   for (const key of SIDECAR_REQUIRED_KEYS) {
     if (!Object.hasOwn(fixture, key)) {
-      errors.push(`${rel}: schema sidecar missing required key ${JSON.stringify(key)}`);
+      errors.push(`${rel}: 结构化索引缺少必填键 ${JSON.stringify(key)}`);
     }
   }
   for (const key of Object.keys(fixture)) {
@@ -1859,24 +1862,24 @@ function validateConcreteSidecarFixture(
     routeState !== "control-loop" &&
     authorizationStatus !== "approved"
   ) {
-    errors.push(`${rel}: routing into control-loop requires authorization_status=approved`);
+    errors.push(`${rel}: 路由进入 control-loop 要求 authorization_status=approved`);
   }
   if (routeState === "control-loop" && authorizationStatus !== "approved") {
-    errors.push(`${rel}: control-loop sidecar requires authorization_status=approved`);
+    errors.push(`${rel}: control-loop 结构化索引要求 authorization_status=approved`);
   }
   if (
     expectedKind === "decision-synthesis" &&
     nextRoute === "control-loop" &&
     !isMeaningfulSidecarValue(fixture.reference_id)
   ) {
-    errors.push(`${rel}: decision-synthesis -> control-loop requires an existing reference_id`);
+    errors.push(`${rel}: decision-synthesis -> control-loop 要求已有 reference_id`);
   }
   if (
     expectedKind === "system-model" &&
     nextRoute === "control-loop" &&
     !isMeaningfulSidecarValue(fixture.reference_id)
   ) {
-    errors.push(`${rel}: system-model -> control-loop requires an existing reference_id`);
+    errors.push(`${rel}: system-model -> control-loop 要求已有 reference_id`);
   }
 
   const generatedAt = stringValue(fixture.generated_at);
@@ -1888,18 +1891,18 @@ function validateConcreteSidecarFixture(
 
   if (expectedKind === "decision-synthesis") {
     if (!isMeaningfulSidecarValue(fixture.next_route)) {
-      errors.push(`${rel}: decision-synthesis sidecar requires next_route`);
+      errors.push(`${rel}: decision-synthesis 结构化索引要求 next_route`);
     }
     if (
       !isMeaningfulSidecarValue(fixture.reference_id) &&
       !isMeaningfulSidecarValue(fixture.claim_boundary)
     ) {
-      errors.push(`${rel}: decision-synthesis sidecar requires reference_id or claim_boundary`);
+      errors.push(`${rel}: decision-synthesis 结构化索引要求 reference_id 或 claim_boundary`);
     }
   } else {
     for (const key of STAGE_REQUIRED_SIDECAR_KEYS[expectedKind] ?? []) {
       if (!isMeaningfulSidecarValue(fixture[key])) {
-        errors.push(`${rel}: ${expectedKind} sidecar requires meaningful ${key}`);
+        errors.push(`${rel}: ${expectedKind} 结构化索引要求有意义的 ${key}`);
       }
     }
   }
@@ -1993,18 +1996,18 @@ function validateRuntimeSidecarTraceGroups(
       const missingReference = sidecars.some((sidecar) => !stringValue(sidecar.reference_id));
       if (missingReference) {
         errors.push(
-          `${relPrefix}: runtime sidecars that reach action or final routes must share one meaningful reference_id`,
+          `${relPrefix}: 到达行动或最终路由的运行态结构化索引必须共享一个有意义的 reference_id`,
         );
       }
     }
     if (referenceIds.size > 1) {
-      errors.push(`${relPrefix}: runtime sidecars must share one reference_id`);
+      errors.push(`${relPrefix}: 运行态结构化索引必须共享同一个 reference_id`);
     }
 
     const hasControlLoop = sidecars.some((sidecar) => sidecar.route_state === "control-loop");
     const approvedContracts = sidecars.filter(isApprovedControlContractSidecar);
     if (hasControlLoop && approvedContracts.length === 0) {
-      errors.push(`${relPrefix}: control-loop runtime sidecar requires an approved goal-contract sidecar`);
+      errors.push(`${relPrefix}: control-loop 运行态结构化索引需要已批准的 goal-contract 结构化索引`);
     }
 
     const finalVerifiers = sidecars.filter(isFinalVerificationVerdictSidecar);
@@ -2025,18 +2028,18 @@ function validateRuntimeSidecarTraceGroups(
       ) {
         const support = approvedContractSupport(sidecar, approvedContracts);
         if (support === "missing") {
-          errors.push(`${relPrefix}: routing to control-loop requires a prior approved goal-contract sidecar`);
+          errors.push(`${relPrefix}: 路由到 control-loop 需要先前已批准的 goal-contract 结构化索引`);
         } else if (support === "late") {
-          errors.push(`${relPrefix}: approved goal-contract sidecar must not be later than control-loop route`);
+          errors.push(`${relPrefix}: 已批准的 goal-contract 结构化索引不得晚于 control-loop 路由`);
         }
       }
 
       if (routeState === "control-loop") {
         const support = approvedContractSupport(sidecar, approvedContracts);
         if (support === "missing") {
-          errors.push(`${relPrefix}: control-loop runtime sidecar requires an approved goal-contract sidecar`);
+          errors.push(`${relPrefix}: control-loop 运行态结构化索引需要已批准的 goal-contract 结构化索引`);
         } else if (support === "late") {
-          errors.push(`${relPrefix}: approved goal-contract sidecar must not be later than control-loop route`);
+          errors.push(`${relPrefix}: 已批准的 goal-contract 结构化索引不得晚于 control-loop 路由`);
         }
       }
 
@@ -2044,10 +2047,10 @@ function validateRuntimeSidecarTraceGroups(
         const support = finalVerifierSupport(sidecar, finalVerifiers);
         if (support === "missing") {
           errors.push(
-            `${relPrefix}: final route requires a verification-verdict sidecar with PASS_TO_FINAL or NARROW_CLAIM_AND_FINAL`,
+            `${relPrefix}: 最终路由需要带 PASS_TO_FINAL 或 NARROW_CLAIM_AND_FINAL 的 verification-verdict 结构化索引`,
           );
         } else if (support === "late") {
-          errors.push(`${relPrefix}: final verification-verdict sidecar must not be later than final route`);
+          errors.push(`${relPrefix}: 最终 verification-verdict 结构化索引不得晚于最终路由`);
         }
       }
 
@@ -2059,7 +2062,7 @@ function validateRuntimeSidecarTraceGroups(
         (candidate) => candidate.route_state === priorRoute && candidate.next_route === routeState,
       );
       if (incomingSources.length === 0) {
-        errors.push(`${relPrefix}: no prior sidecar connects ${priorRoute} -> ${routeState}`);
+        errors.push(`${relPrefix}: 没有先前结构化索引连接 ${priorRoute} -> ${routeState}`);
         continue;
       }
 
@@ -2067,9 +2070,9 @@ function validateRuntimeSidecarTraceGroups(
         traceAnchorsCompatible(sidecar, candidate),
       );
       if (compatibleIncomingSources.length === 0) {
-        errors.push(`${relPrefix}: prior sidecar edge must share reference_id or claim_boundary`);
+        errors.push(`${relPrefix}: 先前结构化索引边必须共享 reference_id 或 claim_boundary`);
       } else if (!hasPriorOrSameGeneratedAt(sidecar, compatibleIncomingSources)) {
-        errors.push(`${relPrefix}: prior sidecar edge must not be later than current route`);
+        errors.push(`${relPrefix}: 先前结构化索引边不得晚于当前路由`);
       }
     }
   }
@@ -2109,7 +2112,7 @@ function validateSchemaSidecarFixtureTrace(
       const expected = step[key];
       const actual = nullableStringValue(fixture[key]);
       if (actual !== expected) {
-        errors.push(`${rel}: fixture trace requires ${key}=${expected}, got ${String(actual)}`);
+        errors.push(`${rel}: 样例轨迹要求 ${key}=${expected}，实际为 ${String(actual)}`);
       }
     }
   }
@@ -2141,13 +2144,13 @@ function validateCyberneticRouteConsistency(root: string, errors: string[]): voi
     }
 
     const requiredGuards = [
-      "`decision-synthesis -> control-loop` is valid only when an approved 目标契约 already exists",
-      "`decision-synthesis -> evidence-verify` is valid only when synthesis did not authorize mutation",
-      "`system-model -> control-loop` is valid only when an approved 目标契约 exists",
+      "`decision-synthesis -> control-loop` 仅在已存在批准后的目标契约",
+      "`decision-synthesis -> evidence-verify` 仅在综合研判未授权改动",
+      "`system-model -> control-loop` 仅在已存在批准后的目标契约",
     ];
     for (const guard of requiredGuards) {
       if (!conformance.includes(guard)) {
-        errors.push(`${conformanceRel}: missing conditional transition guard ${guard}`);
+        errors.push(`${conformanceRel}: 缺少条件迁移 guard ${guard}`);
       }
     }
   }
@@ -2179,7 +2182,7 @@ function validateSemanticSmokeTests(root: string, errors: string[]): void {
   for (const [scenario, relPath, requiredTerms] of SEMANTIC_SMOKE_TESTS) {
     const file = path.join(root, relPath);
     if (!isFile(file)) {
-      errors.push(`semantic smoke test ${JSON.stringify(scenario)}: missing ${relPath}`);
+      errors.push(`语义冒烟测试「${scenario}」失败：缺少文件 ${relPath}`);
       continue;
     }
 
@@ -2187,7 +2190,7 @@ function validateSemanticSmokeTests(root: string, errors: string[]): void {
     const missing = requiredTerms.filter((term) => !text.includes(term.toLowerCase()));
     if (missing.length > 0) {
       errors.push(
-        `semantic smoke test ${JSON.stringify(scenario)} failed in ${relPath}: missing ${missing.join(", ")}`,
+        `语义冒烟测试「${scenario}」失败：${relPath} 缺少 ${missing.join(", ")}`,
       );
     }
   }
@@ -2197,7 +2200,7 @@ function validateStructuredBlockTests(root: string, errors: string[]): void {
   for (const fixture of STRUCTURED_BLOCK_TESTS) {
     const file = path.join(root, fixture.path);
     if (!isFile(file)) {
-      errors.push(`structured block test ${JSON.stringify(fixture.name)}: missing ${fixture.path}`);
+      errors.push(`结构化块测试「${fixture.name}」失败：缺少文件 ${fixture.path}`);
       continue;
     }
 
@@ -2208,7 +2211,7 @@ function validateStructuredBlockTests(root: string, errors: string[]): void {
         : textBlockAfterAnchor(text, fixture.anchor);
     if (!block) {
       errors.push(
-        `structured block test ${JSON.stringify(fixture.name)} failed in ${fixture.path}: missing anchor ${fixture.anchor}`,
+        `结构化块测试「${fixture.name}」失败：${fixture.path} 缺少锚点 ${fixture.anchor}`,
       );
       continue;
     }
@@ -2216,14 +2219,14 @@ function validateStructuredBlockTests(root: string, errors: string[]): void {
     const missing = fixture.required_terms.filter((term) => !block.includes(term));
     if (missing.length > 0) {
       errors.push(
-        `structured block test ${JSON.stringify(fixture.name)} failed in ${fixture.path}: missing ${missing.join(", ")}`,
+        `结构化块测试「${fixture.name}」失败：${fixture.path} 缺少 ${missing.join(", ")}`,
       );
     }
 
     const forbidden = (fixture.forbidden_terms ?? []).filter((term) => block.includes(term));
     if (forbidden.length > 0) {
       errors.push(
-        `structured block test ${JSON.stringify(fixture.name)} failed in ${fixture.path}: forbidden ${forbidden.join(", ")}`,
+        `结构化块测试「${fixture.name}」失败：${fixture.path} 包含禁止词 ${forbidden.join(", ")}`,
       );
     }
   }
@@ -2233,7 +2236,7 @@ function validateDefaultTuiProjectionGuards(root: string, errors: string[]): voi
   for (const guard of DEFAULT_TUI_PROJECTION_GUARDS) {
     const file = path.join(root, guard.path);
     if (!isFile(file)) {
-      errors.push(`default TUI projection guard ${JSON.stringify(guard.name)}: missing ${guard.path}`);
+      errors.push(`默认 TUI 投影 guard「${guard.name}」失败：缺少文件 ${guard.path}`);
       continue;
     }
 
@@ -2241,7 +2244,7 @@ function validateDefaultTuiProjectionGuards(root: string, errors: string[]): voi
     const section = textBetweenAnchors(text, guard.anchor, guard.end_anchor);
     if (!section) {
       errors.push(
-        `default TUI projection guard ${JSON.stringify(guard.name)} failed in ${guard.path}: missing anchor boundary ${guard.anchor}${guard.end_anchor ? ` -> ${guard.end_anchor}` : ""}`,
+        `默认 TUI 投影 guard「${guard.name}」失败：${guard.path} 缺少锚点边界 ${guard.anchor}${guard.end_anchor ? ` -> ${guard.end_anchor}` : ""}`,
       );
       continue;
     }
@@ -2249,7 +2252,7 @@ function validateDefaultTuiProjectionGuards(root: string, errors: string[]): voi
     const codeFences = codeFenceBlocks(section);
     if (codeFences.length !== 1) {
       errors.push(
-        `default TUI projection guard ${JSON.stringify(guard.name)} failed in ${guard.path}: default TUI section must contain exactly one template code fence, got ${codeFences.length}`,
+        `默认 TUI 投影 guard「${guard.name}」失败：${guard.path} 默认 TUI 区块必须只包含一个模板代码块，实际 ${codeFences.length}`,
       );
     } else {
       const missingTemplateTerms = DEFAULT_TUI_TEMPLATE_TERMS.filter(
@@ -2257,7 +2260,7 @@ function validateDefaultTuiProjectionGuards(root: string, errors: string[]): voi
       );
       if (missingTemplateTerms.length > 0) {
         errors.push(
-          `default TUI projection guard ${JSON.stringify(guard.name)} failed in ${guard.path}: default TUI template is missing ${missingTemplateTerms.join(", ")}`,
+          `默认 TUI 投影 guard「${guard.name}」失败：${guard.path} 默认 TUI 模板缺少 ${missingTemplateTerms.join(", ")}`,
         );
       }
     }
@@ -2265,14 +2268,14 @@ function validateDefaultTuiProjectionGuards(root: string, errors: string[]): voi
     const rawControlLaw = rawControlLawFieldLeak(section);
     if (rawControlLaw) {
       errors.push(
-        `default TUI projection guard ${JSON.stringify(guard.name)} failed in ${guard.path}: default TUI section contains raw 控制律 field ${JSON.stringify(rawControlLaw)}`,
+        `默认 TUI 投影 guard「${guard.name}」失败：${guard.path} 默认 TUI 区块包含原始控制律字段 ${JSON.stringify(rawControlLaw)}`,
       );
     }
 
     const multilingualExample = section.match(MULTILINGUAL_TUI_EXAMPLE_RE);
     if (multilingualExample) {
       errors.push(
-        `default TUI projection guard ${JSON.stringify(guard.name)} failed in ${guard.path}: default TUI section contains a separate non-Chinese example term ${JSON.stringify(multilingualExample[0].trim())}`,
+        `默认 TUI 投影 guard「${guard.name}」失败：${guard.path} 默认 TUI 区块包含单独的非中文示例词 ${JSON.stringify(multilingualExample[0].trim())}`,
       );
     }
   }
@@ -2290,12 +2293,12 @@ function validateChineseOutputTitles(root: string, errors: string[]): void {
     const text = fs.readFileSync(file, "utf8");
     for (const title of LEGACY_OUTPUT_TITLE_TERMS) {
       if (text.includes(title)) {
-        errors.push(`${rel}: legacy English output title remains: ${title}`);
+        errors.push(`${rel}: 残留旧英文输出标题: ${title}`);
       }
     }
     for (const [label, pattern] of LEGACY_OUTPUT_TITLE_LINE_PATTERNS) {
       if (pattern.test(text)) {
-        errors.push(`${rel}: legacy English output title line remains: ${label}`);
+        errors.push(`${rel}: 残留旧英文输出标题行: ${label}`);
       }
     }
   }
@@ -2306,23 +2309,23 @@ function validateFixtureContractTests(root: string, errors: string[]): void {
     const name = fixture.name;
     const prompt = fixture.prompt;
     if (!prompt.trim()) {
-      errors.push(`fixture contract ${JSON.stringify(name)}: empty prompt`);
+      errors.push(`契约样例「${name}」: prompt 为空`);
       continue;
     }
     const missingPromptTerms = fixture.prompt_terms.filter((term) => !prompt.includes(term));
     if (missingPromptTerms.length > 0) {
       errors.push(
-        `fixture contract ${JSON.stringify(name)}: prompt is missing expected terms ${missingPromptTerms.join(", ")}`,
+        `契约样例「${name}」: prompt 缺少预期词 ${missingPromptTerms.join(", ")}`,
       );
     }
     if (!isRouteToken(fixture.expected_route)) {
       errors.push(
-        `fixture contract ${JSON.stringify(name)}: expected_route is not a known route ${fixture.expected_route}`,
+        `契约样例「${name}」: expected_route 不是已知路由 ${fixture.expected_route}`,
       );
     }
     if (!SIDECAR_STAGE_DECISIONS.includes(fixture.expected_stage_decision)) {
       errors.push(
-        `fixture contract ${JSON.stringify(name)}: expected_stage_decision is unsupported ${fixture.expected_stage_decision}`,
+        `契约样例「${name}」: expected_stage_decision 不受支持 ${fixture.expected_stage_decision}`,
       );
     }
     if (
@@ -2331,7 +2334,7 @@ function validateFixtureContractTests(root: string, errors: string[]): void {
       !stageDecisionMatchesRoute(fixture.expected_stage_decision, fixture.expected_route)
     ) {
       errors.push(
-        `fixture contract ${JSON.stringify(name)}: expected_stage_decision ${fixture.expected_stage_decision} does not match expected_route ${fixture.expected_route}`,
+        `契约样例「${name}」: expected_stage_decision ${fixture.expected_stage_decision} 不匹配 expected_route ${fixture.expected_route}`,
       );
     }
 
@@ -2348,7 +2351,7 @@ function validateFixtureContractTests(root: string, errors: string[]): void {
 
     if (missingPaths.length > 0) {
       errors.push(
-        `fixture contract ${JSON.stringify(name)}: missing paths ${missingPaths.join(", ")}`,
+        `契约样例「${name}」: 缺少路径 ${missingPaths.join(", ")}`,
       );
       continue;
     }
@@ -2357,7 +2360,7 @@ function validateFixtureContractTests(root: string, errors: string[]): void {
     const missingBlocks = fixture.schema_blocks.filter((block) => !hasSchemaBlock(combined, block));
     if (missingBlocks.length > 0) {
       errors.push(
-        `fixture contract ${JSON.stringify(name)}: missing schema blocks ${missingBlocks.join(", ")}`,
+        `契约样例「${name}」: 缺少结构块 ${missingBlocks.join(", ")}`,
       );
     }
 
@@ -2368,7 +2371,7 @@ function validateFixtureContractTests(root: string, errors: string[]): void {
     }
     if (missingRoutes.length > 0) {
       errors.push(
-        `fixture contract ${JSON.stringify(name)}: missing route terms ${missingRoutes.join(", ")}`,
+        `契约样例「${name}」: 缺少路由词 ${missingRoutes.join(", ")}`,
       );
     }
   }

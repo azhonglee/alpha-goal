@@ -1,8 +1,8 @@
-# 目标契约 Schema
+# 目标契约结构定义
 
-Use this reference when a durable or handoff-ready contract is needed.
+需要形成可持久化或可交接的目标契约时，使用本参考。
 
-Persist the full contract at `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md` by default. When machine validation or resume safety matters, write a schema sidecar at `.alpha-goal/YYYYMMDD-<slug>/schema/goal-contract.json`. The TUI should show a Markdown-table `契约摘要` with reference, scope boundary, evidence, artifact path, and next action unless full chat output is required.
+默认把完整契约持久化到 `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/goal-contract.json` 写入结构化索引。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `契约摘要`，包含参考状态、范围边界、证据、产物路径和下一步动作。
 
 ```text
 目标契约:
@@ -61,4 +61,4 @@ Persist the full contract at `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md` by d
   - 下一路由:
 ```
 
-A contract can be compact when risk is low, but it must preserve reference state, scope, non-goals, decision boundary, acceptance evidence, and claim boundary.
+低风险任务的契约可以保持紧凑，但必须保留参考状态、范围、非目标、决策边界、验收证据和声明边界。

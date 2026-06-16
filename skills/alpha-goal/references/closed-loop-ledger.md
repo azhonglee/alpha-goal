@@ -149,7 +149,7 @@
 - `alpha-goal`: 发现或初始化台账，分类活跃控制状态，写入完整 `最新控制路由`，把产物登记保持在 `.alpha-goal/YYYYMMDD-<slug>/` 内，并在 TUI 默认只显示 Markdown 表格 `路由摘要`。
 - `decision-synthesis`: 综合前读取最新路由；把完整 决策综合记录 写到 `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md`，更新产物登记和路由相关综合状态，并在 TUI 默认显示 Markdown 表格 `综合摘要`。
 - `system-model`: 建模前读取最新路由；把完整 控制模型 写到 `.alpha-goal/YYYYMMDD-<slug>/system-model.md`，更新产物登记和模型相关状态，并在 TUI 默认显示 Markdown 表格 `模型摘要`。
-- `goal-contract`: 修改参考输入前读取最新路由；把完整 目标契约 写到 `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md`，更新产物登记和参考状态，并在 TUI 默认显示 Markdown 表格 `契约摘要`。
+- `goal-contract`: 修改参考输入前读取最新路由；把完整目标契约写到 `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md`，更新产物登记和参考状态，并在 TUI 默认显示 Markdown 表格 `契约摘要`。
 - `control-loop`: 变更 / 探测前读取最新路由；把完整 控制律 持久化到 迭代记录 或台账，变更前显示 Markdown 表格 `执行检查`，把完整 迭代记录 写到 `.alpha-goal/YYYYMMDD-<slug>/iterations/`，必要时把持久日志写到 `.alpha-goal/YYYYMMDD-<slug>/evidence/`，更新产物登记和控制状态，并在反馈后默认显示 Markdown 表格 `迭代摘要`。
 - `evidence-verify`: 下结论前读取最新路由；把完整 验证结论 写到 `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md`，更新产物登记和最终比较器状态，并在 TUI 默认显示 Markdown 表格 `验证摘要`。
 
@@ -173,7 +173,7 @@
 ```
 
 - 阶段摘要和 control-loop 的 `执行检查` 默认使用带中文标题的紧凑双列表格。如果用户明确要求其他语言，只翻译同一标题语义，不展示多语言模板。值应保持简短；长细节指向产物路径。如果运行环境不能渲染 Markdown 表格，使用紧凑双列纯文本表，而不是项目符号列表。只有在用户要求、持久化受阻，或决策 / 风险需要用户明确复核时，才在聊天中打印完整产物或原始内部 控制律 块。
-- Do not duplicate full command output; link or summarize evidence and point to `.alpha-goal/YYYYMMDD-<slug>/evidence/` when durable logs are needed.
-- Do not store secrets, tokens, credentials, private user data, or production-only sensitive records.
-- Label stale or superseded state instead of silently overwriting it.
-- If the ledger conflicts with the current 目标契约, system model, diff, or fresh evidence, route to `goal-contract`, `system-model`, or `evidence-verify` before further mutation.
+- 不重复完整命令输出；需要持久日志时，链接或摘要证据，并指向 `.alpha-goal/YYYYMMDD-<slug>/evidence/`。
+- 不存储密钥、token、凭证、私有用户数据或仅生产环境敏感记录。
+- 标注过期或被取代的状态，而不是静默覆盖。
+- 如果台账与当前目标契约、系统模型、diff 或新鲜证据冲突，在进一步改动前路由到 `goal-contract`、`system-model` 或 `evidence-verify`。

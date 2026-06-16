@@ -2,27 +2,27 @@
 
 ## 分类
 
-- `simple`: clear goal, clear path, direct feedback.
-- `complicated`: many parts, but objective and decomposition are stable.
-- `complex`: feedback loops, adaptation, ambiguous objective, or conflicting priorities.
-- `complex-giant-like`: many interacting human/technical subsystems, weak observability, high stakes, and no single complete model.
+- `simple`: 目标清楚、路径清楚、反馈直接。
+- `complicated`: 部件很多，但目标和拆解方式稳定。
+- `complex`: 存在反馈环、自适应、目标含糊或优先级冲突。
+- `complex-giant-like`: 多个人类 / 技术子系统相互作用，可观测性弱，风险高，且不存在单一完整模型。
 
 ## 需要综合的信号
 
-- optimizing one subsystem harms another;
-- stakeholders disagree on success;
-- quantitative metrics conflict with qualitative experience;
-- evidence is sparse, stale, or boundary-mismatched;
-- model uncertainty is high but action pressure is also high;
-- irreversible decisions depend on assumptions.
+- 优化一个子系统会损害另一个子系统；
+- 利益相关方对成功标准意见不一；
+- 定量指标与定性体验冲突；
+- 证据稀疏、过期或边界不匹配；
+- 模型不确定性高，但行动压力也高；
+- 不可逆决策依赖假设。
 
 ## 退出标准
 
-Synthesis is sufficient when it identifies:
+当综合能识别以下内容时，视为充分：
 
-- recommended direction or options;
-- user-owned decisions;
+- 推荐方向或选项；
+- 用户自有决策；
 - non-goals;
-- evidence needed;
-- risks requiring acceptance;
-- the smallest viable route to `goal-contract` or `system-model`.
+- 所需证据；
+- 需要接受的风险；
+- 通往 `goal-contract` 或 `system-model` 的最小可行路由。

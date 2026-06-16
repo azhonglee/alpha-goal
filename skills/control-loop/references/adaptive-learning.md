@@ -1,8 +1,8 @@
 # 自适应学习记录
 
-Use an 自适应学习记录 when observed feedback shows that a 控制律, threshold, disturbance assumption, route choice, or evidence floor was wrong enough to affect later cycles.
+当已观察反馈表明控制律、阈值、扰动假设、路由选择或证据下限错误到会影响后续循环时，使用自适应学习记录。
 
-This is not a retrospective essay. Record only learning that changes a future control action, sensor threshold, routing rule, or reuse boundary.
+这不是复盘文章。只记录会改变后续控制动作、传感器阈值、路由规则或复用边界的学习。
 
 ```text
 自适应学习记录:
@@ -23,8 +23,8 @@ This is not a retrospective essay. Record only learning that changes a future co
 
 ## 规则
 
-- Learn from residual error, threshold miss, repeated fallback, failed probe, contradicted model, or user/reviewer feedback.
-- Do not convert a local observation into a broad rule unless the evidence boundary supports it.
-- Name the condition under which the adjustment should be reused and the condition that invalidates it.
-- If learning changes reference, scope, authority, risk acceptance, or final claim, route to `goal-contract` or user instead of silently adapting.
-- If learning shows plant, sensor, actuator, disturbance, or coupling assumptions were wrong, route to `system-model`.
+- 从残余误差、阈值未命中、重复失败处理、失败探针、被反驳模型或用户 / 评审反馈中学习。
+- 除非证据边界支持，否则不要把局部观察转成宽泛规则。
+- 命名调整应复用的条件，以及会使其失效的条件。
+- 如果学习改变参考状态、范围、权限、风险接受或最终声明，路由到 `goal-contract` 或用户，而不是静默自适应。
+- 如果学习表明被控对象、传感器、执行器、扰动或耦合假设错误，路由到 `system-model`。

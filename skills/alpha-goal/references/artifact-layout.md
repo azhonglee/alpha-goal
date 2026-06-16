@@ -1,6 +1,6 @@
 # 任务级产物布局
 
-Use one task run directory for every durable runtime artifact:
+每个可持久化运行态产物都使用同一个任务运行目录：
 
 ```text
 .alpha-goal/YYYYMMDD-<slug>/
@@ -21,16 +21,16 @@ Use one task run directory for every durable runtime artifact:
 
 ## 规则
 
-- Create `.alpha-goal/YYYYMMDD-<slug>/` once per goal, task batch, or resumable workstream.
-- Keep `control-state.md` as the cross-skill source of truth for route, reference, current state, residual error, latest control action, latest sensor feedback, artifact registry, and next route.
-- Store large command output, logs, screenshots, traces, and raw evidence under `evidence/`; link them from stage records instead of pasting them into chat.
-- Store optional machine-readable schema sidecars under `schema/`, using the same artifact stem when practical, for example `schema/goal-contract.json`.
-- Do not use legacy category directories directly under `.alpha-goal/`, such as `context/`, `models/`, `control-state/`, `iterations/`, `evidence/`, or `verification/`.
-- If file persistence is blocked, print the artifact in chat and state the no-write reason where the artifact path would normally appear.
+- 每个目标、任务批次或可恢复工作流只创建一次 `.alpha-goal/YYYYMMDD-<slug>/`。
+- 把 `control-state.md` 作为跨技能事实来源，记录路由、参考状态、当前状态、残余误差、最新控制动作、最新传感器反馈、产物登记和下一路由。
+- 大体量命令输出、日志、截图、轨迹和原始证据存放到 `evidence/`；从阶段记录链接它们，而不是粘贴进聊天。
+- 可选机器可读结构化索引存放到 `schema/`，可行时使用与产物相同的文件主干，例如 `schema/goal-contract.json`。
+- 不要直接在 `.alpha-goal/` 下使用旧分类目录，例如 `context/`、`models/`、`control-state/`、`iterations/`、`evidence/` 或 `verification/`。
+- 如果文件持久化受阻，在聊天中打印产物，并在通常应出现产物路径的位置说明无法写入原因。
 
 ## 产物登记字段
 
-Record paths relative to the repository root:
+以仓库根目录为基准记录路径：
 
 ```text
 产物登记:

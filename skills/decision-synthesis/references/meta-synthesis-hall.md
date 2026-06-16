@@ -1,6 +1,6 @@
 # 综合研判工作台
 
-Use the metasynthetic workspace (`综合研判工作台`) when a complex or complex-giant-like task needs human-machine synthesis before the next 目标契约, system model, or user decision. It corresponds to the “综合集成研讨厅” idea in the metasynthetic systems approach, but uses a more direct product-facing label for skill outputs.
+当复杂或复杂巨系统式任务需要在下一目标契约、系统模型或用户决策前进行人机综合时，使用综合研判工作台。它对应综合集成方法中的“综合集成研讨厅”思想，但技能输出采用更直接、面向产品使用的命名。
 
 ## 角色
 
@@ -37,9 +37,9 @@ Use the metasynthetic workspace (`综合研判工作台`) when a complex or comp
 
 ## 规则
 
-- Move from qualitative to quantitative only where a metric or proxy can observe a material objective without false precision.
-- Preserve dissent when stakeholders, models, or evidence disagree; do not average away conflicts.
+- 只有当指标或代理能在不制造虚假精确度的前提下观测实质目标时，才从定性转向定量。
+- 当利益相关方、模型或证据不一致时，保留异议；不要用平均值抹平冲突。
 - 保留假设库，用于未解决解释；当缺失事实属于被控对象、传感器、执行器、扰动或耦合时，路由到 `system-model`。
 - 保留模型登记，用于竞争性心智模型、经验模型、仿真或利益相关方视角。
-- 离开综合前先命名收敛条件：稳定的 目标契约 候选、system-model 问题、用户自有决策、有界验证假设或 blocker。
-- Route to user when priority, budget, schedule, risk acceptance, production impact, or final claim ownership is the active uncertainty.
+- 离开综合前先命名收敛条件：稳定的目标契约候选、system-model 问题、用户自有决策、有界验证假设或 blocker。
+- 当活跃不确定性是优先级、预算、排期、风险接受、生产影响或最终声明归属时，路由到用户。

@@ -1,15 +1,15 @@
 # 利益相关方决策边界
 
-The agent may recommend but must not silently decide:
+agent 可以提出建议，但不得静默决定：
 
-- budget, timeline, or staffing tradeoffs;
-- risk acceptance for security, compliance, legal, safety, production, or data loss;
-- stakeholder priority when objectives conflict;
-- irreversible migration or data repair;
-- scope cuts that change the user's intended outcome;
-- external side effects such as deployment, communication, account changes, or PR/MR creation.
+- 预算、时间线或人力取舍；
+- 安全、合规、法律、安全性、生产或数据丢失风险接受；
+- 目标冲突时的利益相关方优先级；
+- 不可逆迁移或数据修复；
+- 会改变用户预期结果的范围裁剪；
+- 部署、沟通、账号变更或创建 PR/MR 等外部副作用。
 
-Decision request format:
+决策请求格式：
 
 ```text
 需要决策:

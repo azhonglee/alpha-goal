@@ -1,99 +1,99 @@
 ---
 name: alpha-goal
-description: "Route engineering, debugging, design, and verification work through the closed-loop control skill suite: goal-contract, system-model, control-loop, evidence-verify, and decision-synthesis. Use when the next skill or control boundary is unclear. Use for any engineering, debugging, design, or verification request."
+description: "把工程、调试、设计和验证工作路由到闭环控制技能套件：goal-contract、system-model、control-loop、evidence-verify 和 decision-synthesis。下一技能或控制边界不清楚时使用；工程、调试、设计或验证请求默认可用。"
 ---
 
 # Alpha Goal
 
-Use this skill to select and stabilize the next action in the skill suite. It is a router and control governor, not an implementation skill.
+使用本技能选择并稳定技能套件的下一步。它是路由与控制守门阶段，不负责实现。
 
 ## 控制论框架
 
-Treat the user request as a control problem:
+把用户请求视为一个控制问题：
 
-- `reference`: desired outcome, acceptance criteria, and final claim boundary;
-- `plant`: repository, product, data flow, document system, workflow, or organization being changed;
-- `state`: what is currently known about goal, scope, implementation, evidence, risk, and blockers;
-- `observer`: tests, logs, diffs, runtime probes, user feedback, reviewer feedback, and read-only repository facts;
-- `actuator`: bounded changes made by `control-loop` under an approved 目标契约;
-- `comparator`: `evidence-verify`, which compares fresh evidence against the reference and claim boundary;
-- `memory`: a 闭环台账 that carries reference, current state, error, control action, feedback, and route history across skills;
-- `adaptation`: 自适应学习记录 that correct reusable control assumptions without silently changing scope or authority;
-- `disturbance`: changing requirements, dirty working tree, missing tools, flaky tests, conflicting specs, hidden ownership, broad claims, or external side effects; material items are tracked through 扰动记录.
+- `reference`: 期望结果、验收标准和最终声明边界；
+- `plant`: 被变更的仓库、产品、数据流、文档系统、工作流或组织流程；
+- `state`: 目前已知的目标、范围、实现、证据、风险和阻塞项；
+- `observer`: 测试、日志、diff、运行探针、用户反馈、评审反馈和只读仓库事实；
+- `actuator`: `control-loop` 在已批准目标契约下执行的有界变更；
+- `comparator`: `evidence-verify`，用于把新鲜证据与参考状态、声明边界进行比较；
+- `memory`: 跨技能承载参考状态、当前状态、误差、控制动作、反馈和路由历史的闭环台账；
+- `adaptation`: 修正可复用控制假设的自适应学习记录，不得静默改变范围或权限；
+- `disturbance`: 需求变化、脏工作区、缺失工具、不稳定测试、冲突规范、隐藏归属、过宽声明或外部副作用；实质项通过扰动记录追踪。
 
 ## 边界
 
-- Do not mutate implementation files, deploy, push, open PRs/MRs, repair data, or claim completion.
-- Do not bypass `goal-contract` when the desired reference state is ambiguous.
-- Do not bypass `system-model` when observability, controllability, ownership, or coupling is unclear enough to affect safe action.
-- Do not bypass `evidence-verify` when making a completion, correctness, readiness, merge, ship, or safety claim.
-- Keep routing proportional: choose the smallest next skill that reduces material uncertainty.
-- Default to durable process memory under `.alpha-goal/`. Before the first write in a repository, ensure `.alpha-goal/` is ignored; if it is missing from the repo root `.gitignore`, add `.alpha-goal/` there before writing ledger artifacts.
-- Use chat-only ledger state only when the user explicitly forbids file writes, no repository path exists, or `.gitignore` cannot be updated safely.
+- 不改实现文件，不部署，不 push，不开 PR/MR，不修复数据，也不宣称完成。
+- 期望参考状态含糊时，不绕过 `goal-contract`。
+- 可观测性、可控性、归属或耦合不清楚且会影响安全行动时，不绕过 `system-model`。
+- 需要作出完成、正确、就绪、可合并、可发布或安全性声明时，不绕过 `evidence-verify`。
+- 路由保持成比例：选择能降低实质不确定性的最小下一技能。
+- 默认把流程记忆持久化到 `.alpha-goal/`。在仓库内首次写入前，确认 `.alpha-goal/` 已被忽略；如果仓库根目录 `.gitignore` 缺少该条目，先加入 `.alpha-goal/`，再写台账产物。
+- 只有当用户明确禁止写文件、没有仓库路径，或无法安全更新 `.gitignore` 时，才使用仅聊天态台账。
 
 ## 按需加载资源
 
-- `references/cybernetic-routing.md`: route selection and stability failure patterns.
-- `references/closed-loop-ledger.md`: cross-stage state memory schema and update rules.
-- `references/artifact-layout.md`: task-scoped `.alpha-goal/YYYYMMDD-<slug>/xxx` runtime artifact layout.
-- `references/cybernetic-conformance.md`: state transition, schema sidecar, and closed-loop invariant checks.
+- `references/cybernetic-routing.md`: 路由选择和稳定性失效模式。
+- `references/closed-loop-ledger.md`: 跨阶段状态记忆结构和更新规则。
+- `references/artifact-layout.md`: 任务级 `.alpha-goal/YYYYMMDD-<slug>/xxx` 运行态产物布局。
+- `references/cybernetic-conformance.md`: 状态迁移、结构化索引和闭环不变量检查。
 
 ## 流程
 
 ```text
-Classify state -> Select next skill -> Check stability gates -> Persist route card -> Show route summary
+分类状态 -> 选择下一技能 -> 检查稳定性闸门 -> 持久化路由卡 -> 展示路由摘要
 ```
 
-### 1. Classify state
+### 1. 分类状态
 
-Identify the current dominant uncertainty. If a 闭环台账 exists, read its latest reference, current state, residual error, and route decision before classifying:
+识别当前主导不确定性。如果已有闭环台账，分类前先读取其中的最新参考状态、当前状态、残余误差和路由决策：
 
-- unclear target, intent, scope, non-goals, acceptance, or authorization -> goal ambiguity;
-- unclear plant boundary, state variables, observability, controllability, disturbances, or coupling -> model ambiguity;
-- unclear controller hierarchy, local/global objective conflict, or coupling arbitration -> coordination ambiguity;
-- approved goal exists and a bounded action can improve evidence or implementation -> execution need;
-- repeated residual error, failed threshold, or contradicted control assumption -> adaptation need;
-- work appears done but claim/evidence boundary is unresolved -> verification need;
-- many stakeholders, weak quantification, conflicting values, or complex giant-system behavior -> synthesis need;
-- missing tool, permission, data, environment, or user-owned decision -> blocker.
+- 目标、意图、范围、非目标、验收或授权不清楚 -> 目标模糊；
+- 被控对象边界、状态变量、可观测性、可控性、扰动或耦合不清楚 -> 模型模糊；
+- 控制器层级、局部 / 全局目标冲突或耦合仲裁不清楚 -> 协同模糊；
+- 已有批准目标，且有界动作能改善证据或实现 -> 执行需求；
+- 残余误差反复出现、阈值失败或控制假设被证伪 -> 自适应需求；
+- 工作看似完成，但声明 / 证据边界未解决 -> 验证需求；
+- 利益相关方多、弱量化、价值冲突或呈现复杂巨系统特征 -> 综合需求；
+- 缺少工具、权限、数据、环境或用户自有决策 -> 阻塞。
 
-If no ledger exists and the task is likely to span multiple skills, initialize `.alpha-goal/YYYYMMDD-<slug>/control-state.md` after ensuring `.alpha-goal/` is ignored. Add `.alpha-goal/` to the repo root `.gitignore` first when needed.
+如果没有台账且任务可能跨多个技能，先确认 `.alpha-goal/` 已被忽略，再初始化 `.alpha-goal/YYYYMMDD-<slug>/control-state.md`。必要时先把 `.alpha-goal/` 加入仓库根目录 `.gitignore`。
 
-### 2. Select next skill
+### 2. 选择下一技能
 
-Use this routing table:
+使用下列路由表：
 
 | 当前状态 | 下一技能 | 原因 |
 | --- | --- | --- |
-| User asks for implementation but goal boundary is unclear | `goal-contract` | define reference/setpoint before control action |
-| Goal is broad and system structure is unclear | `system-model` then `goal-contract` | model the plant before writing the contract |
-| Multiple local controllers can affect one global objective | `system-model` or `decision-synthesis` | map hierarchy, coupling, arbitration, and user-owned priorities |
-| Active approved 目标契约 exists and mutation/probe is needed | `control-loop` | execute one bounded control action and collect feedback |
-| Evidence bundle exists and a final claim is proposed | `evidence-verify` | compare output state to reference and claim boundary |
-| Problem is socio-technical, strategic, multi-agent, or complex giant-system-like | `decision-synthesis` | synthesize qualitative and quantitative views before contract |
-| Required user-owned decision or external permission is missing | user clarification / blocker | do not invent authority |
+| 用户要求实现，但目标边界不清楚 | `goal-contract` | 控制动作前先定义参考状态 / 设定点 |
+| 目标很宽，且系统结构不清楚 | `system-model` 后接 `goal-contract` | 写契约前先建模被控对象 |
+| 多个局部控制器会影响同一个全局目标 | `system-model` 或 `decision-synthesis` | 映射层级、耦合、仲裁和用户自有优先级 |
+| 已有活跃且批准的目标契约，需要变更或探测 | `control-loop` | 执行一个有界控制动作并采集反馈 |
+| 已有证据包且提出最终声明 | `evidence-verify` | 比较输出状态、参考状态和声明边界 |
+| 问题属于社会技术、战略、多智能体或复杂巨系统式任务 | `decision-synthesis` | 形成契约前先综合定性和定量视角 |
+| 缺少必需的用户自有决策或外部权限 | 用户澄清 / blocker | 不虚构权限 |
 
-### 3. Check stability gates
+### 3. 检查稳定性闸门
 
-Before routing to an execution-capable path, ensure:
+路由到可执行路径前，确认：
 
-- the reference state is explicit enough to detect error;
-- an execution route has a candidate 控制律: target error, control variable, expected effect, sensor threshold, fallback, and dynamics/stability guards when material;
-- the actuator boundary says what may change and what must not change;
-- observer signals are available or a missing-observer blocker is stated;
-- qualitative objectives have accepted indicators or explicitly missing sensors before execution claims depend on them;
+- 参考状态足够明确，能够检测误差；
+- 执行路由已有候选控制律：目标误差、控制变量、预期效果、传感器阈值、失败处理，以及必要的动态 / 稳定性保护；
+- 执行器边界说明哪些可以改、哪些不能改；
+- 观测信号可用，或已声明缺失观测器阻塞；
+- 执行声明依赖定性目标前，已有被接受的指标，或已明确缺失传感器；
 - 实质扰动必须记录可能性、影响、传感器、控制措施和路由触发条件；否则路由到建模、综合、用户或 blocker；
-- prior 自适应学习记录 are applied only when reuse conditions hold and invalidation conditions do not hold;
-- the ledger records the last error signal and why the selected next skill reduces it, or chat-only state is explicitly justified by a no-write constraint;
-- final claims will be checked by `evidence-verify` rather than stated by the executor.
-- runtime artifacts use the task-scoped layout from `references/artifact-layout.md`; legacy category paths are treated as validation failures.
-- complex, high-risk, resumed, or final handoffs must either produce a conformance report using `references/cybernetic-conformance.md` or state why the report is unnecessary for the narrowed claim.
+- 既有自适应学习记录只在复用条件成立且失效条件不成立时应用；
+- 台账记录上一误差信号，以及为什么选定的下一技能会降低该误差；若使用仅聊天态，必须有明确的禁止写入理由；
+- 最终声明由 `evidence-verify` 检查，而不是由执行阶段直接给出。
+- 运行态产物使用 `references/artifact-layout.md` 定义的任务级布局；旧分类路径视为校验失败。
+- 复杂、高风险、恢复后继续或最终交接的任务，要么使用 `references/cybernetic-conformance.md` 生成一致性报告，要么说明为什么窄化声明不需要该报告。
 
-### 4. Persist route card and show summary
+### 4. 持久化路由卡并展示摘要
 
-Persist the full route card to the 闭环台账 by default. Do not print the full card in the TUI unless the user explicitly asks for it, persistence is blocked, or the route is high-risk enough that the user must review every field before continuing.
+默认把完整路由卡持久化到闭环台账。除非用户明确要求、持久化受阻，或路由风险高到继续前必须让用户逐字段复核，否则不要在 TUI 中打印完整路由卡。
 
-Write or update this section in `.alpha-goal/YYYYMMDD-<slug>/control-state.md`:
+在 `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 中写入或更新此节：
 
 ```text
 最新控制路由:
@@ -114,7 +114,7 @@ Write or update this section in `.alpha-goal/YYYYMMDD-<slug>/control-state.md`:
 - 下一步:
 ```
 
-Then show only a TUI-friendly summary as a Markdown table:
+随后只展示适合 TUI 阅读的 Markdown 表格摘要：
 
 ```markdown
 路由摘要
@@ -128,6 +128,6 @@ Then show only a TUI-friendly summary as a Markdown table:
 | 下一步 | |
 ```
 
-The summary must be enough for the user to understand the selected route without reading a long field list. Keep each table value concise; put long reasoning in the ledger artifact. Other skills must recover the full route from `.alpha-goal/YYYYMMDD-<slug>/control-state.md` instead of relying on the TUI transcript. If writing is explicitly forbidden or impossible, include the full `控制路由` in chat and state the no-write reason in `台账路径`.
+摘要应足以让用户不阅读长字段列表也能理解选定路由。每个表格值保持简洁；长推理放入台账产物。其他技能必须从 `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 恢复完整路由，而不是依赖 TUI 转录。如果用户明确禁止写入或写入不可能，在聊天中包含完整 `控制路由`，并在 `台账路径` 中说明无法写入原因。
 
-If the user explicitly named a skill and the route is safe, respect that selection and state any residual gates.
+如果用户明确指定了某个技能且路由安全，尊重该选择，并说明剩余闸门。

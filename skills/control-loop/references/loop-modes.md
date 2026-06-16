@@ -1,31 +1,31 @@
 # 循环模式
 
-A mode names the dominant uncertainty in the current iteration; it is not an extra ceremony layer.
+模式用于命名当前迭代中的主导不确定性，不是额外仪式层。
 
 ## 按主导不确定性选择
 
-- `discovery`: unknown target, owner, behavior, rules, logs, or existing work.
-- `debug`: unknown cause or first divergence point.
-- `tdd`: known desired behavior, missing regression guard.
-- `implementation`: known change, uncertain implementation path.
-- `refactor`: behavior should stay the same while structure changes.
-- `spike`: feasibility unknown and output will not itself prove completion.
-- `hardening`: core behavior appears done but evidence, edge cases, compatibility, cleanup, docs, or observability remain weak.
-- `evidence-audit`: implementation may already exist, but evidence quality and claim boundary are uncertain.
+- `discovery`: 目标、负责人、行为、规则、日志或既有工作未知。
+- `debug`: 原因或首个分歧点未知。
+- `tdd`: 期望行为已知，但缺少回归保护。
+- `implementation`: 变更已知，但实现路径不确定。
+- `refactor`: 行为应保持不变，只改变结构。
+- `spike`: 可行性未知，输出本身不证明完成。
+- `hardening`: 核心行为看似完成，但证据、边界情况、兼容性、清理、文档或可观测性仍弱。
+- `evidence-audit`: 实现可能已存在，但证据质量和声明边界不确定。
 
 ## 证据形态
 
-Evidence is useful only if it can change the next decision.
+证据只有能改变下一决策时才有用。
 
-- Gate evidence can satisfy approved context, acceptance, or completion gates.
-- Advisory audit identifies risks but does not prove completion.
-- Exploration-only evidence maps sources or possibilities without authorizing mutation or final claims.
-- Delta review is a narrow follow-up when prior gate evidence remains fresh.
-- Blocker evidence shows a missing input, permission, tool, data, environment, or safe-state condition.
+- 闸门证据可以满足已批准上下文、验收或完成闸门。
+- 建议性审计识别风险，但不证明完成。
+- 仅探索证据只映射来源或可能性，不授权改动或最终声明。
+- 增量复核是在既有闸门证据仍新鲜时的窄范围跟进。
+- 阻塞证据表明缺少输入、权限、工具、数据、环境或安全状态条件。
 
 ## 调试回执
 
-Debug must identify root cause before repair actions. Keep the receipt compact but falsifiable.
+调试必须在修复动作前识别根因。回执保持紧凑，但必须可证伪。
 
 ```text
 调试回执:
@@ -44,12 +44,12 @@ Debug must identify root cause before repair actions. Keep the receipt compact b
 - 决策:
 ```
 
-Status rules:
+状态规则：
 
-- `ROOT_CAUSE_CONFIRMED`: evidence identifies the first divergence point, links entity/state to the interface boundary, and bounds material alternatives enough to support the fix surface.
-- `HYPOTHESIS_TESTED`: a falsifiable hypothesis was tested with a bounded probe, instrumentation, or reversible change that does not alter the intended fix surface.
+- `ROOT_CAUSE_CONFIRMED`: 证据识别首个分歧点，把实体 / 状态链接到接口边界，并充分限定实质备选项以支持修复面。
+- `HYPOTHESIS_TESTED`: 已用有界探针、instrumentation 或可逆变更测试可证伪假设，且没有改变目标修复面。
 - `MITIGATION_APPLIED`: 已应用授权控制措施或风险降低措施，但不声明根因已修复。
-- `NOT_REPRODUCED`: reproduction was attempted but not observed; do not claim fixed.
-- `BLOCKED`: missing logs, commands, files, environment, data, or scope prevents diagnosis.
+- `NOT_REPRODUCED`: 已尝试复现但未观察到；不要声明已修复。
+- `BLOCKED`: 缺少日志、命令、文件、环境、数据或范围，导致无法诊断。
 
-Only `ROOT_CAUSE_CONFIRMED` authorizes repair-complete claims, and those claims still require `evidence-verify`.
+只有 `ROOT_CAUSE_CONFIRMED` 授权修复完成声明，且该声明仍需要 `evidence-verify`。

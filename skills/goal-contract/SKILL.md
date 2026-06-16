@@ -1,140 +1,140 @@
 ---
 name: goal-contract
-description: "Convert ambiguous engineering, debugging, design, or artifact requests into a safe 目标契约: reference state, scope, non-goals, decision boundaries, acceptance evidence, and implementation authorization."
+description: "把含糊的工程、调试、设计或产物请求转成安全的目标契约：参考状态、范围、非目标、决策边界、验收证据和实现授权。"
 ---
 
 # 目标契约
 
-Use this skill to form the reference state for a controlled engineering effort. It turns intent into a 目标契约 before any mutation-capable iteration begins.
+使用本技能为受控工程任务形成参考状态。在任何可变更迭代开始前，先把意图转成目标契约。
 
 ## 控制论解释
 
-In engineering-cybernetics terms, this skill defines the setpoint and safe control boundary:
+从工程控制论角度看，本技能用于定义设定点和安全控制边界：
 
-- `reference`: desired outcome and acceptance criteria;
-- `error signal`: what would count as mismatch between desired and current state;
-- `actuator boundary`: what `control-loop` may change, probe, or delegate;
-- `sensor plan`: what evidence can observe success, failure, or root cause;
-- `control memory`: the ledger state that preserves reference/current/error/route history across stages;
-- `stability conditions`: non-goals, stop conditions, claim boundary, and reframe triggers.
+- `reference`: 期望结果和验收标准；
+- `error signal`: 期望状态与当前状态之间的误差判定；
+- `actuator boundary`: `control-loop` 可以变更、探测或委托的范围；
+- `sensor plan`: 能观测成功、失败或根因的证据；
+- `control memory`: 跨阶段保留参考状态、当前状态、误差和路由历史的台账状态；
+- `stability conditions`: 非目标、停止条件、声明边界和重新界定触发条件。
 
 ## 边界
 
-- Do not edit implementation files, push, open PRs/MRs, deploy, repair data, request credentials, or claim implementation completion.
-- Default to writing process artifacts under `.alpha-goal/`. Before the first write in a repository, ensure `.alpha-goal/` is ignored; if it is missing from the repo root `.gitignore`, add `.alpha-goal/` there before writing ledger artifacts.
-- Keep ledger state in chat only when the user explicitly forbids file writes, no repository path exists, or `.gitignore` cannot be updated safely.
-- Ask only for user-owned decisions. Discover codebase or document facts yourself when safe and available.
-- 目标契约 acceptance authorizes only handoff to `control-loop`; it does not authorize push, deployment, data repair, production actions, or external side effects.
-- For diagnostics, do not assume repair authorization merely because a plausible cause exists. Define what evidence authorizes repair.
-- Keep proportionality: gather only what materially changes scope, risk, authority, evidence, or next safe action.
+- 不编辑实现文件，不 push，不开 PR/MR，不部署，不修复数据，不索要凭证，也不声称实现完成。
+- 默认把流程产物写到 `.alpha-goal/`。在仓库内首次写入前，确认 `.alpha-goal/` 已被忽略；如果仓库根目录 `.gitignore` 缺少该条目，先加入 `.alpha-goal/`，再写台账产物。
+- 只有当用户明确禁止写文件、没有仓库路径，或无法安全更新 `.gitignore` 时，才把台账状态保留在聊天中。
+- 只询问用户自有决策。代码库或文档事实如果可以安全发现，应自行检查。
+- 目标契约被接受只授权交接给 `control-loop`；不授权 push、部署、数据修复、生产动作或外部副作用。
+- 对诊断任务，不要因为存在一个貌似合理的原因就假定已授权修复。必须定义什么证据会授权修复。
+- 保持成比例：只收集会实质改变范围、风险、权限、证据或下一安全动作的信息。
 
 ## 按需加载资源
 
-- `references/ambiguity-scoring.md`: score uncertainty only when it changes clarification effort or handoff safety.
-- `references/indicator-handoff.md`: convert qualitative objectives or synthesis indicators into measurable evidence.
-- `references/goal-contract-schema.md`: produce a durable or handoff-ready 目标契约.
+- `references/ambiguity-scoring.md`: 只有当评分会改变澄清力度或交接安全性时，才评估不确定性。
+- `references/indicator-handoff.md`: 把定性目标或综合指标转成可测证据。
+- `references/goal-contract-schema.md`: 生成可持久化或可交接的目标契约。
 
 ## 流程
 
 ```text
-Observe request -> Model uncertainty -> Clarify -> Pressure-test -> Crystallize -> Review -> Handoff
+观察请求 -> 建模不确定性 -> 澄清 -> 压力测试 -> 固化产物 -> 复核 -> 交接
 ```
 
-### 1. Observe request
+### 1. 观察请求
 
-Collect enough context to classify the problem:
+收集足够上下文来分类问题：
 
-- user intent, desired outcome, proposed solution, deadline, constraints, and non-goals;
-- target repo/path/service/module/document/data/workflow and likely touchpoints;
-- existing work, durable specs, incidents, logs, tickets, or prior decisions;
-- 综合轮次 indicators, qualitative objectives, or metrics that must become observable evidence;
-- unknowns that affect authority, scope, risk, acceptance, decision boundaries, or claim wording;
-- for brownfield work, facts observed directly versus inferences.
+- 用户意图、期望结果、拟议方案、截止时间、约束和非目标；
+- 目标仓库 / 路径 / 服务 / 模块 / 文档 / 数据 / 工作流及可能触点；
+- 既有工作、持久化规范、事故、日志、工单或既有决策；
+- 综合轮次中必须变成可观测证据的指标、定性目标或度量；
+- 会影响权限、范围、风险、验收、决策边界或声明措辞的未知项；
+- 对存量系统，区分直接观察到的事实和推断。
 
-If a 闭环台账 exists, read its `最新控制路由` and current control state before changing the 目标契约. Recover route fields from `.alpha-goal/YYYYMMDD-<slug>/control-state.md`, not from the TUI summary. If it conflicts with current user intent or fresh facts, label the superseded state and reframe instead of silently continuing.
+如果已有闭环台账，在改变目标契约前先读取 `最新控制路由` 和当前控制状态。路由字段从 `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 恢复，不要从 TUI 摘要重建。如果台账与当前用户意图或新鲜事实冲突，标注被取代状态并重新界定，不要静默继续。
 
-If the system boundary or feedback signals are too unclear to write a reliable contract, route to `system-model` first and return with a model summary.
+如果系统边界或反馈信号太不清楚，无法写出可靠契约，先路由到 `system-model`，并带着模型摘要返回。
 
-### 2. Model uncertainty
+### 2. 建模不确定性
 
-Score ambiguity only to guide effort, not to create ceremony. Use `low / medium / high` unless numeric scoring helps.
+模糊度评分只用于指导投入，不制造形式主义。除非数值评分确实有帮助，否则使用 `low / medium / high`。
 
-Clarity dimensions:
+清晰度维度：
 
-- Intent clarity: why this matters.
-- Outcome clarity: what end state is wanted.
-- Scope clarity: what is included and excluded.
-- Constraint clarity: technical, business, safety, legal, or timing limits.
-- Success clarity: how completion will be judged.
-- Context clarity: brownfield facts, existing work, ownership, and environment.
-- Control clarity: observability, controllability, disturbances, and claim boundary.
+- 意图清晰度：为什么这件事重要。
+- 结果清晰度：期望的最终状态是什么。
+- 范围清晰度：包含什么、排除什么。
+- 约束清晰度：技术、业务、安全、法律或时间限制。
+- 成功清晰度：如何判断完成。
+- 上下文清晰度：存量系统事实、既有工作、归属和环境。
+- 控制清晰度：可观测性、可控性、扰动和声明边界。
 
-Numeric option:
+可选数值模型：
 
 ```text
-Greenfield ambiguity = 1 - (intent*0.25 + outcome*0.25 + scope*0.20 + constraints*0.15 + success*0.15)
-Brownfield ambiguity = 1 - (intent*0.20 + outcome*0.20 + scope*0.18 + constraints*0.14 + success*0.14 + context*0.14)
-Control ambiguity = 1 - (reference*0.25 + actuator_boundary*0.20 + sensor_plan*0.20 + disturbance_bounds*0.15 + claim_boundary*0.20)
+绿地模糊度 = 1 - (intent*0.25 + outcome*0.25 + scope*0.20 + constraints*0.15 + success*0.15)
+存量系统模糊度 = 1 - (intent*0.20 + outcome*0.20 + scope*0.18 + constraints*0.14 + success*0.14 + context*0.14)
+控制模糊度 = 1 - (reference*0.25 + actuator_boundary*0.20 + sensor_plan*0.20 + disturbance_bounds*0.15 + claim_boundary*0.20)
 ```
 
-Default thresholds:
+默认阈值：
 
-- `quick`: ambiguity <= 0.30 for low-risk framing.
-- `standard`: ambiguity <= 0.20 for ordinary implementation handoff.
-- `deep`: ambiguity <= 0.15 for broad, high-risk, multi-repo, data, security, or production-affecting work.
+- `quick`: 模糊度 <= 0.30，用于低风险框定。
+- `standard`: 模糊度 <= 0.20，用于普通实现交接。
+- `deep`: 模糊度 <= 0.15，用于宽范围、高风险、多仓库、数据、安全或影响生产的工作。
 
-### 3. Clarify
+### 3. 澄清
 
-Ask only when material user-owned uncertainty remains. Prefer one high-leverage question per round.
+只有存在实质性的用户自有不确定性时才询问。每轮优先问一个高价值问题。
 
-Priority order:
+优先级：
 
-1. intent, outcome, scope, non-goals, and authority;
-2. acceptance evidence, claim boundary, and stop conditions;
-3. constraints, tradeoffs, and user-owned decisions;
-4. brownfield context only when it cannot be discovered safely.
+1. 意图、结果、范围、非目标和权限；
+2. 验收证据、声明边界和停止条件；
+3. 约束、取舍和用户自有决策；
+4. 只有在无法安全发现时，才询问存量系统上下文。
 
-Readiness gates before handoff:
+交接前就绪闸门：
 
-- target and desired outcome are explicit enough to detect error;
-- included scope and excluded non-goals are clear;
-- decision boundaries state what the agent may decide without confirmation;
-- acceptance criteria and evidence expectations are testable enough for the next action;
+- 目标和期望结果足够明确，能够检测误差；
+- 范围内事项和排除的非目标清楚；
+- 决策边界说明 agent 可以无需确认自行决定什么；
+- 验收标准和证据预期足够可测试，能够支持下一动作；
 - 实质性定性目标应有 指标转译，并包含传感器、阈值或容差、证据边界；否则明确缺失传感器缺口；
-- diagnostic contracts define symptoms, observations, hypotheses, and root-cause evidence needed before repair;
-- claim boundary states what final wording may and may not say;
-- at least one pressure pass has checked an assumption, example, counterexample, or tradeoff for non-trivial work.
+- 诊断契约定义修复前所需的症状、观察、假设和根因证据；
+- 声明边界说明最终措辞可以说什么、不能说什么；
+- 对非平凡任务，至少做过一次假设、示例、反例或取舍的压力检查。
 
-If the user stops early, either narrow the artifact, ask for explicit risk acceptance, or return a bounded unresolved-gap contract.
+如果用户提前停止，要么收窄产物，要么请求明确风险接受，要么返回带边界的未解决缺口契约。
 
-### 4. Pressure-test
+### 4. 压力测试
 
-Use lenses only when they reduce real uncertainty:
+只有在能降低真实不确定性时，才使用下列视角：
 
-- `contrarian`: what assumption would make this goal wrong?
-- `simplifier`: what is the smallest useful scope?
-- `ontologist`: what entity, state, or cause is really changing?
-- `evidence-checker`: how would we know the result is wrong?
-- `disturbance-checker`: what external change or hidden coupling can destabilize the plan?
+- `contrarian`: 哪个假设一旦为假，目标就会错？
+- `simplifier`: 最小有用范围是什么？
+- `ontologist`: 真正变化的实体、状态或原因是什么？
+- `evidence-checker`: 我们如何知道结果是错的？
+- `disturbance-checker`: 哪些外部变化或隐藏耦合会让计划失稳？
 
-Follow-up ladder:
+追问阶梯：
 
-1. Ask for a concrete example, counterexample, or evidence signal.
-2. Probe the dependency that makes the answer true.
-3. Force a tradeoff: exclude, defer, or reject something.
-4. If the answer stays symptom-level, reframe toward state, boundary, or root cause.
+1. 要求一个具体示例、反例或证据信号。
+2. 探测让答案成立的依赖条件。
+3. 迫使做出取舍：排除、延后或拒绝某项内容。
+4. 如果答案停留在症状层，转向状态、边界或根因重新界定。
 
-### 5. Crystallize
+### 5. 固化产物
 
-Produce the lightest safe artifact:
+产出最轻量但安全的产物：
 
-- `Clarifying question`: name the user-owned decision.
-- `Bounded exploration answer`: summarize findings, evidence, residual uncertainty, and whether a 目标契约 is needed before mutation.
-- `Design/spec`: resolve a decision boundary without authorizing implementation.
-- `目标契约`: authorize a bounded `control-loop` handoff after user acceptance.
-- `Diagnostic Contract`: authorize diagnosis first, and repair only after recorded root-cause evidence.
+- `澄清问题`: 命名用户自有决策。
+- `有界探索结论`: 总结发现、证据、残余不确定性，以及改动前是否需要目标契约。
+- `设计 / 规范`: 解决决策边界，但不授权实现。
+- `目标契约`: 用户接受后授权有界交接给 `control-loop`。
+- `诊断契约`: 先授权诊断；只有记录根因证据后才授权修复。
 
-Persist full artifacts under `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md` by default and update the 闭环台账 artifact registry. Show a compact Markdown-table `契约摘要` in the TUI by default. Print the full contract in chat only when the user asks, file persistence is blocked, or explicit user acceptance requires reviewing all contract fields in the conversation.
+默认把完整产物持久化到 `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md`，并更新闭环台账的产物登记。TUI 默认展示紧凑 Markdown 表格 `契约摘要`。只有当用户要求、文件持久化受阻，或显式用户接受需要在对话中复核全部契约字段时，才在聊天中打印完整契约。
 
 目标契约结构:
 
@@ -177,27 +177,27 @@ TUI 摘要:
 .alpha-goal/YYYYMMDD-<slug>/interviews.md
 ```
 
-Write a committed design document outside `.alpha-goal/` only when the user or repository explicitly requests one.
+只有当用户或仓库明确要求时，才在 `.alpha-goal/` 之外写入需要提交的设计文档。
 
-### 6. Review
+### 6. 复核
 
-Self-review the artifact:
+自检产物：
 
-- Does it answer the actual request rather than fill a template?
-- Are non-goals, actuator boundary, sensor plan, and claim boundary explicit?
-- Are qualitative objectives connected to indicators, sensors, thresholds/tolerances, and evidence boundaries where needed?
-- Are observed facts labeled separately from inference?
-- Would `control-loop` know what not to do?
-- Would `evidence-verify` know what evidence is required?
-- Would a later skill recover reference, current state, latest control route, last error, and next route from `.alpha-goal/YYYYMMDD-<slug>/control-state.md` or an explicitly justified no-write chat state?
-- Does any next step require user permission, risk acceptance, credentials, external side effects, data repair, push, PR/MR, deployment, or production access?
+- 它是否回答了真实请求，而不是填模板？
+- 非目标、执行器边界、传感器计划和声明边界是否明确？
+- 必要时，定性目标是否已连接到指标、传感器、阈值 / 容差和证据边界？
+- 已观察事实是否与推断分开标注？
+- `control-loop` 是否知道什么不能做？
+- `evidence-verify` 是否知道需要什么证据？
+- 后续技能是否能从 `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 或有明确理由的仅聊天态中恢复参考状态、当前状态、最新控制路由、上一误差和下一路由？
+- 下一步是否需要用户权限、风险接受、凭证、外部副作用、数据修复、push、PR/MR、部署或生产访问？
 
-If review fails, return to the earliest phase that can fix it.
+如果复核失败，返回能修复问题的最早阶段。
 
-### 7. Handoff
+### 7. 交接
 
-Handoff means passing a user-accepted 目标契约 to `control-loop`. Non-contract artifacts inform later work but do not authorize implementation.
+交接是指把用户已接受的目标契约传给 `control-loop`。非契约产物只能为后续工作提供信息，不授权实现。
 
-When a contract is ready, ask the user to accept, reject, or change it unless the runtime already contains explicit acceptance.
-- If accepted, update `.alpha-goal/YYYYMMDD-<slug>/control-state.md` with reference, current state, actuator boundary, evidence floor, artifact path, and next route before handoff. If `.alpha-goal/` is not ignored, add it to the repo root `.gitignore` first. If writing is explicitly forbidden or impossible, include the ledger state and full contract in chat and state the no-write reason.
-- If rejected or changed, return to clarification.
+契约准备好后，除非运行上下文已包含明确接受，否则请用户接受、拒绝或修改。
+- 如果接受，交接前把参考状态、当前状态、执行器边界、证据下限、产物路径和下一路由更新到 `.alpha-goal/YYYYMMDD-<slug>/control-state.md`。如果 `.alpha-goal/` 未被忽略，先把它加入仓库根目录 `.gitignore`。如果用户明确禁止写入或写入不可能，在聊天中包含台账状态和完整契约，并说明无法写入原因。
+- 如果拒绝或修改，回到澄清阶段。

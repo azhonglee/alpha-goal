@@ -1,84 +1,84 @@
 ---
 name: system-model
-description: "Build a control-system model before engineering action: controlled object, state variables, observability, controllability, actuators, disturbances, coupling, controller hierarchy, and evidence sensors. Use for architecture, debugging, brownfield, or complex-system uncertainty."
+description: "在工程行动前建立控制系统模型：被控对象、状态变量、可观测性、可控性、执行器、扰动、耦合、控制器层级和证据传感器。适用于架构、调试、存量系统或复杂系统不确定性。"
 ---
 
 # 系统建模
 
-Use this skill when safe execution depends on understanding the system boundary and feedback signals. It is read-only unless the user explicitly asks for a modeling artifact and artifact creation is safe.
+当安全执行依赖于理解系统边界和反馈信号时，使用本技能。除非用户明确要求建模产物且创建产物是安全的，否则本技能保持只读。
 
 ## 使用时机
 
-Use `system-model` when any of these are true:
+以下任一条件成立时，使用 `system-model`：
 
-- the target repo/module/service/document/data flow is unclear;
-- symptoms are reported but the failing entity, interface, or state transition is uncertain;
-- multiple modules, repos, submodules, generated outputs, teams, or agents could be coupled;
-- observability is weak: logs, tests, probes, or feedback signals are missing or stale;
-- controllability is weak: it is unclear what variables may be changed safely;
-- the work is architectural, migratory, integration-heavy, production-facing, or high blast-radius;
-- `goal-contract` cannot produce a reliable 目标契约 without a plant model.
+- 目标仓库 / 模块 / 服务 / 文档 / 数据流不清楚；
+- 已报告症状，但失败实体、接口或状态迁移不确定；
+- 多个模块、仓库、子模块、生成输出、团队或智能体可能存在耦合；
+- 可观测性弱：日志、测试、探针或反馈信号缺失或过期；
+- 可控性弱：哪些变量可以安全改变尚不清楚；
+- 工作属于架构、迁移、重集成、面向生产或高影响面变更；
+- 没有被控对象模型时，`goal-contract` 无法生成可靠目标契约。
 
 ## 边界
 
-- Do not mutate implementation files, repair data, push, deploy, or claim completion.
-- Do not decide user-owned goals, risk acceptance, or business tradeoffs.
-- Do not over-model simple low-risk work where target, scope, evidence, and ownership are already clear.
-- Label observed facts, inferred structure, assumptions, and missing sensors separately.
-- If a 闭环台账 exists, read its `最新控制路由` from `.alpha-goal/YYYYMMDD-<slug>/control-state.md` before modeling and update only model-relevant state: plant boundary, state variables, sensors, actuators, disturbances, coupling, and model adequacy.
-- Independently review and update the model if needed before routing back to `goal-contract`, `alpha-goal`, or `control-loop`.
+- 不改实现文件，不修复数据，不 push，不部署，也不宣称完成。
+- 不替用户决定目标、风险接受或业务取舍。
+- 对目标、范围、证据和归属都已清楚的简单低风险工作，不做过度建模。
+- 分开标注已观察事实、推断结构、假设和缺失传感器。
+- 如果已有闭环台账，建模前从 `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 读取 `最新控制路由`，并且只更新模型相关状态：被控对象边界、状态变量、传感器、执行器、扰动、耦合和模型充分性。
+- 路由回 `goal-contract`、`alpha-goal` 或 `control-loop` 前，必要时独立复核并更新模型。
 
 ## 按需加载资源
 
-- `references/control-model-schema.md`: produce a durable or handoff-ready 控制模型.
-- `references/observability-controllability-check.md`: rate sensor and actuator adequacy.
+- `references/control-model-schema.md`: 生成可持久化或可交接的控制模型。
+- `references/observability-controllability-check.md`: 评估传感器和执行器充分性。
 - `references/disturbance-register.md`: 记录扰动的可能性、影响、传感器、控制措施和路由触发条件。
-- `references/controller-hierarchy.md`: map global/local controllers, coupling variables, arbitration, and escalation.
+- `references/controller-hierarchy.md`: 映射全局 / 局部控制器、耦合变量、仲裁和升级。
 
 ## 流程
 
 ```text
-Set boundary -> Identify state and signals -> Check observability/controllability -> Map coupling/disturbance -> Judge model adequacy -> Route
+界定边界 -> 识别状态与信号 -> 检查可观测性 / 可控性 -> 映射耦合 / 扰动 -> 判断模型充分性 -> 路由
 ```
 
-### 1. Set boundary
+### 1. 界定边界
 
-Define the system of interest:
+定义关注系统：
 
-- controlled object;
-- external actors and environment;
-- interfaces crossing the boundary;
-- ownership boundary: repo, worktree, submodule, team, data owner, or product surface;
-- controller hierarchy: global controller, local controllers, coordination boundary, or 无实质项;
-- time boundary: current behavior, migration phase, release window, incident window, or historical state.
+- 被控对象；
+- 外部参与方和环境；
+- 跨越边界的接口；
+- 归属边界：仓库、worktree、子模块、团队、数据负责人或产品表面；
+- 控制器层级：全局控制器、局部控制器、协同边界，或无实质项；
+- 时间边界：当前行为、迁移阶段、发布窗口、事故窗口或历史状态。
 
-If a ledger exists, compare its latest route, plant/current-state assumptions, and next action to observed facts. Mark stale assumptions before routing back to `goal-contract`, `alpha-goal`, or `control-loop`.
+如果已有台账，把其中的最新路由、被控对象 / 当前状态假设、下一动作与已观察事实比较。路由回 `goal-contract`、`alpha-goal` 或 `control-loop` 前，标记过期假设。
 
-If a repository is available and read-only inspection is safe, use `npx --yes tsx scripts/repo-sensor-snapshot.ts` or equivalent manual checks to gather structure, status, and local rules.
+如果仓库可用且只读检查安全，使用 `npx --yes tsx scripts/repo-sensor-snapshot.ts` 或等价手工检查收集结构、状态和本地规则。
 
-### 2. Identify state and signals
+### 2. 识别状态与信号
 
-Map:
+映射：
 
-- state variables: data shape, configuration, branch, version, lifecycle phase, runtime status, user-visible behavior, evidence coverage;
-- inputs: user actions, API calls, jobs, events, prompts, configuration, dependencies, data feeds;
-- outputs: UI behavior, responses, files, metrics, logs, tests, artifacts, reports;
-- sensors: tests, logs, static analysis, diffs, runtime probes, examples, screenshots, user feedback, review comments;
-- actuators: code edits, config changes, migrations, prompts, scripts, documentation, process changes, test changes;
-- indicator handoff: metrics/proxies, operational definitions, thresholds/tolerances, and evidence boundaries from `goal-contract` or `decision-synthesis`;
-- disturbances: flaky dependencies, dirty working tree, clock/time zone, environment drift, missing credentials, concurrent edits, ambiguous specs.
+- 状态变量：数据形态、配置、分支、版本、生命周期阶段、运行状态、用户可见行为、证据覆盖；
+- 输入：用户动作、API 调用、任务、事件、提示词、配置、依赖、数据流；
+- 输出：UI 行为、响应、文件、指标、日志、测试、产物、报告；
+- 传感器：测试、日志、静态分析、diff、运行探针、示例、截图、用户反馈、评审意见；
+- 执行器：代码编辑、配置变更、迁移、提示词、脚本、文档、流程变更、测试变更；
+- 指标转译结果：来自 `goal-contract` 或 `decision-synthesis` 的指标 / 代理、操作化定义、阈值 / 容差和证据边界；
+- 扰动：不稳定依赖、脏工作区、时钟 / 时区、环境漂移、缺失凭证、并发编辑、含糊规范。
 
-### 3. Check observability
+### 3. 检查可观测性
 
-Ask:
+询问：
 
-- What evidence can distinguish success from failure?
-- What evidence can distinguish competing root-cause hypotheses?
-- Which signals are fresh final-state evidence versus advisory or stale evidence?
-- What boundary does each signal actually cross: helper, module, service, user-visible, production?
-- Which missing signal blocks a claim or requires a narrowed claim?
+- 哪些证据能区分成功和失败？
+- 哪些证据能区分竞争性根因假设？
+- 哪些信号是新鲜的最终状态证据，哪些只是建议性或过期证据？
+- 每个信号实际跨越了什么边界：辅助函数、模块、服务、用户可见、生产？
+- 哪个缺失信号会阻塞声明，或要求收窄声明？
 
-Classify sensor quality:
+传感器质量分类：
 
 ```text
 传感器质量: 强 | 足够 | 弱 | 阻塞
@@ -88,18 +88,18 @@ Classify sensor quality:
 支持的声明:
 ```
 
-### 4. Check controllability
+### 4. 检查可控性
 
-Ask:
+询问：
 
-- Which variables may the agent control without further permission?
-- Which variables require user approval, credentials, external tools, deployment, data repair, or production access?
-- Can the desired state be reached through small reversible control actions?
-- Are there coupled outputs where changing one variable destabilizes another?
-- Is a diagnostic probe safer than a repair action?
-- What sensor threshold would show that a candidate control action reduced the target error?
+- 哪些变量 agent 无需进一步授权即可控制？
+- 哪些变量需要用户批准、凭证、外部工具、部署、数据修复或生产访问？
+- 期望状态是否能通过小而可逆的控制动作达到？
+- 是否存在改变一个变量会让另一个输出失稳的耦合输出？
+- 诊断探测是否比修复动作更安全？
+- 哪个传感器阈值能表明候选控制动作降低了目标误差？
 
-Classify control quality:
+可控性质量分类：
 
 ```text
 可控性质量: 强 | 足够 | 弱 | 阻塞
@@ -108,9 +108,9 @@ Classify control quality:
 用户自有决策:
 ```
 
-### 5. Map coupling and disturbances
+### 5. 映射耦合与扰动
 
-Create a clearly labeled 控制器层级（协同图）when multiple local controllers can affect the same global objective. Load `references/controller-hierarchy.md` when controller ownership, arbitration, or escalation is unclear.
+当多个局部控制器会影响同一个全局目标时，创建清晰标记的控制器层级（协同图）。如果控制器归属、仲裁或升级不清楚，加载 `references/controller-hierarchy.md`。
 
 ```text
 控制器层级:
@@ -122,9 +122,9 @@ Create a clearly labeled 控制器层级（协同图）when multiple local contr
 - 推荐协同路由:
 ```
 
-Do not collapse material multi-controller relationships into a prose coordination section. A 控制模型 is incomplete if it names multiple local controllers that can affect one global objective but does not either emit a `控制器层级:` block or explicitly state `控制器层级: 无实质项`.
+不要把实质性的多控制器关系压缩成散文式协同说明。如果控制模型提到多个局部控制器会影响同一个全局目标，却既没有输出 `控制器层级:` 块，也没有明确写明 `控制器层级: 无实质项`，该模型就是不完整的。
 
-Create a compact coupling map. Use a matrix only when it clarifies risk.
+创建紧凑耦合图。只有当矩阵能澄清风险时才使用矩阵。
 
 ```text
 耦合图:
@@ -154,19 +154,19 @@ Create a compact coupling map. Use a matrix only when it clarifies risk.
 
 高影响或影响未知的扰动必须先具备传感器、控制措施和路由触发条件，才能路由到 `control-loop`。
 
-Stabilization strategies:
+稳定策略：
 
-- isolate worktree or ownership surface;
-- reduce slice size;
-- add or reuse a sensor before changing behavior;
-- sequence changes so one control variable moves at a time;
-- monitor registered disturbance sensors and route when a trigger fires;
-- return to `goal-contract` if coupling changes scope or claim boundary;
-- route to `decision-synthesis` if objectives or stakeholders conflict.
+- 隔离 worktree 或归属表面；
+- 缩小切片；
+- 改变行为前先添加或复用传感器；
+- 排列变更顺序，确保一次只移动一个控制变量；
+- 监控已登记扰动的传感器，触发条件命中时按规则路由；
+- 如果耦合改变范围或声明边界，返回 `goal-contract`；
+- 如果目标或利益相关方冲突，路由到 `decision-synthesis`。
 
-### 6. Judge model adequacy
+### 6. 判断模型充分性
 
-Persist the full 控制模型 under `.alpha-goal/YYYYMMDD-<slug>/system-model.md` by default and update the 闭环台账 artifact registry. Show a compact Markdown-table `模型摘要` in the TUI by default. Print the full model in chat only when the user asks, file persistence is blocked, or a modeling gap requires explicit user review.
+默认把完整控制模型持久化到 `.alpha-goal/YYYYMMDD-<slug>/system-model.md`，并更新闭环台账的产物登记。TUI 默认展示紧凑 Markdown 表格 `模型摘要`。只有当用户要求、文件持久化受阻，或建模缺口需要用户显式复核时，才在聊天中打印完整模型。
 
 紧凑模型:
 
@@ -214,7 +214,7 @@ TUI 摘要:
 - 输出:
 - 传感器与证据边界:
 - 执行器与授权边界:
-- 指标到传感器的交接:
+- 指标与传感器映射:
 - 候选控制律:
   - 目标误差:
   - 控制变量:
@@ -240,9 +240,9 @@ TUI 摘要:
   - 仲裁 / 升级:
 - 稳定性条件:
 - 缺失信息:
-- 模型充分性: sufficient | sufficient with narrowed claim | insufficient | blocked
+- 模型充分性: 充分 | 窄化声明下充分 | 不充分 | 阻塞
 - 台账更新: `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 路径、产物路径、可选结构化索引路径、模型变更、残余模型不确定性、下一路由，或明确的无法写入原因
 - 推荐路由: goal-contract | control-loop | evidence-verify | decision-synthesis | blocker
 ```
 
-Route to `goal-contract` when the model is sufficient to write or revise a 目标契约. Route to `control-loop` only when an approved 目标契约 already exists and this model merely informs the next bounded slice. Route to `evidence-verify` only when comparing evidence to a claim is the next action.
+当模型足以写入或修订目标契约时，路由到 `goal-contract`。只有在已存在批准后的目标契约，且本模型只是为下一有界切片提供信息时，才路由到 `control-loop`。只有当下一动作是把证据与声明进行比较时，才路由到 `evidence-verify`。

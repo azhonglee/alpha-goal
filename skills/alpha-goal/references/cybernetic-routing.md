@@ -1,35 +1,35 @@
 # 控制论路由参考
 
-Use this reference when a request could activate multiple skills.
+当一个请求可能激活多个技能时，使用本参考。
 
 ## 闭环顺序
 
-A stable route usually follows:
+稳定路由通常遵循：
 
 ```text
-decision-synthesis? -> system-model? -> goal-contract -> control-loop -> evidence-verify -> final claim
+decision-synthesis? -> system-model? -> goal-contract -> control-loop -> evidence-verify -> 最终声明
 ```
 
-The optional steps are not ceremony:
+可选步骤不是仪式：
 
-- Use `decision-synthesis` when the problem's values, stakeholders, or objective function are unstable.
-- Use `system-model` when the plant boundary or feedback signals are unstable.
-- Use `goal-contract` when the reference/setpoint is unstable.
-- Use `control-loop` only after the reference and actuator boundary are stable enough.
-- Use `evidence-verify` whenever a completion/readiness/correctness claim is at stake.
-- Carry the 闭环台账 across stages when a task spans skills or turns. The full `控制路由` is persisted under `.alpha-goal/YYYYMMDD-<slug>/control-state.md`; the TUI should show only a compact Markdown-table `路由摘要` by default.
+- 当问题的价值取向、利益相关方或目标函数不稳定时，使用 `decision-synthesis`。
+- 当被控对象边界或反馈信号不稳定时，使用 `system-model`。
+- 当参考状态 / 设定点不稳定时，使用 `goal-contract`。
+- 只有在参考状态和执行器边界足够稳定后，才使用 `control-loop`。
+- 任何涉及完成 / 就绪 / 正确性声明的场景，都使用 `evidence-verify`。
+- 当任务跨技能或跨轮次时，跨阶段携带闭环台账。完整 `控制路由` 持久化到 `.alpha-goal/YYYYMMDD-<slug>/control-state.md`；TUI 默认只展示紧凑 Markdown 表格 `路由摘要`。
 
 ## 稳定性失败模式
 
-- Implementation before setpoint: code changes start while acceptance is vague.
-- Sensor failure: final claim relies on old, low-boundary, or missing evidence.
-- Actuator overreach: executor mutates outside approved scope or ownership.
-- Coupled control: parallel changes hit shared generated outputs or submodules.
-- Disturbance denial: dirty state, tool gaps, or changing specs are treated as irrelevant.
-- Dynamic instability: delayed or noisy feedback causes repeated over-correction, route flapping, or broad rewrites without damping.
-- Memory drift: artifacts are written outside `.alpha-goal/YYYYMMDD-<slug>/`, making later recovery or validation ambiguous.
-- Comparator bypass: `control-loop` claims final completion without `evidence-verify`.
+- 设定点前置失败：验收仍含糊时就开始改代码。
+- 传感器失败：最终声明依赖旧证据、低边界证据或缺失证据。
+- 执行器越界：执行阶段改动超出已批准范围或归属。
+- 耦合控制：并行变更触达共享生成输出或子模块。
+- 扰动否认：脏状态、工具缺口或变化中的规范被视为无关。
+- 动态不稳定：延迟或噪声反馈导致反复过度修正、路由摆动或缺少阻尼的大范围改写。
+- 记忆漂移：产物写到 `.alpha-goal/YYYYMMDD-<slug>/` 之外，使后续恢复或验证变得含糊。
+- 比较器绕过：`control-loop` 未经 `evidence-verify` 就声明最终完成。
 
 ## 最小干预规则
 
-Route to the smallest skill that can reduce the current error. Do not run a full modeling or synthesis phase for a localized low-risk task with clear acceptance and direct evidence.
+路由到能降低当前误差的最小技能。对验收清楚、证据直接的局部低风险任务，不运行完整建模或综合阶段。

@@ -1,6 +1,6 @@
-# 迭代记录 Schema
+# 迭代记录结构定义
 
-Use this reference when a loop result needs a durable or handoff-ready record. Keep it proportional: include fields only when they affect judgment, handoff, recovery, or accountability. Persist the full record at `.alpha-goal/YYYYMMDD-<slug>/iterations/NN-<slice>.md` by default, with bulky evidence under `.alpha-goal/YYYYMMDD-<slug>/evidence/`. When machine validation or resume safety matters, write a schema sidecar under `.alpha-goal/YYYYMMDD-<slug>/schema/iteration-NN.json`. The TUI should show a Markdown-table `迭代摘要` with action, feedback, residual error, artifact path, and next action unless full chat output is required.
+当循环结果需要可持久化或可交接的记录时，使用本参考。记录应与风险成比例：只有影响判断、交接、恢复或归责的字段才需要写入。默认把完整记录持久化到 `.alpha-goal/YYYYMMDD-<slug>/iterations/NN-<slice>.md`，大体量证据放在 `.alpha-goal/YYYYMMDD-<slug>/evidence/` 下。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/iteration-NN.json` 写入结构化索引。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `迭代摘要`，包含动作、反馈、残余误差、产物路径和下一步动作。
 
 ## 紧凑记录
 
@@ -25,26 +25,26 @@ Use this reference when a loop result needs a durable or handoff-ready record. K
 
 ## 条件字段
 
-Add when relevant:
+相关时再添加：
 
-- `动态计划`: multi-slice, multi-repo/module, contested ownership, recovery, rollback, compatibility, or handoff sequencing.
-- `预检`: mutation path, dirty state, worktree, submodule, local rules, or user-change evidence.
-- `已变更文件`: intentional touched paths when there is a diff.
-- `生成产物`: generated files, reports, binaries, or documents.
-- `验收变化`: criteria covered, partially covered, or uncovered.
+- `动态计划`: 多切片、多仓库 / 模块、有争议的归属、恢复、回滚、兼容性或交接顺序。
+- `预检`: 改动路径、脏工作区、worktree、子模块、本地规则或用户改动证据。
+- `已变更文件`: 存在 diff 时，记录有意触达的路径。
+- `生成产物`: 生成的文件、报告、二进制或文档。
+- `验收变化`: 验收标准已覆盖、部分覆盖或未覆盖。
 - `控制律结果`: 对变更或诊断探测切片，记录目标误差、预期效果、已观察反馈、阈值状态、反馈延迟、信号噪声、置信度、阻尼 / 防振荡、影响范围上限、失败处理和残余误差。
-- `自适应学习记录`: trigger, observed mismatch, adjustment, reuse condition, and invalidation condition when feedback changes future control behavior.
-- `反馈处理`: user, reviewer, test, runtime, or advisory feedback that changed the route.
-- `风险 / 归属`: cross-boundary, generated-output, migration, compatibility, concurrency, data, security, or observability risk.
-- `台账更新`: input state, error signal, control action, sensor feedback, residual error, route decision, and next state when the task spans skills or turns.
-- `调试回执`: required for bug/root-cause claims.
-- `委托回执`: required when subagents own an independent surface.
+- `自适应学习记录`: 当反馈改变后续控制行为时，记录触发条件、已观察不匹配、调整、复用条件和失效条件。
+- `反馈处理`: 改变路由的用户、评审、测试、运行态或咨询反馈。
+- `风险 / 归属`: 跨边界、生成产物、迁移、兼容性、并发、数据、安全或可观测性风险。
+- `台账更新`: 当任务跨技能或跨轮次时，记录输入状态、误差信号、控制动作、传感器反馈、残余误差、路由决策和下一状态。
+- `调试回执`: bug 或根因声明必填。
+- `委托回执`: 子代理拥有独立工作面时必填。
 
 ## 结论词汇
 
-- `ITERATION_CONTINUES`: another bounded slice should proceed or be recommended.
-- `ITERATION_HARDEN`: direction is valid but evidence, edge cases, compatibility, or cleanup are insufficient.
-- `ITERATION_READY_FOR_VERIFY`: acceptance appears covered; final judgment belongs to `evidence-verify`.
-- `RETURN_TO_ALPHA_GOAL`: target, scope, acceptance, non-goals, constraints, decision boundary, authorization, or claim boundary needs reframing.
-- `RETURN_TO_SYSTEM_MODEL`: plant boundary, observability, controllability, disturbance, or coupling needs modeling.
-- `BLOCKED`: smallest missing input, permission, tool, data, environment, or safe-state condition is named.
+- `ITERATION_CONTINUES`: 应继续或建议继续另一个有界切片。
+- `ITERATION_HARDEN`: 方向有效，但证据、边界情况、兼容性或清理还不足。
+- `ITERATION_READY_FOR_VERIFY`: 验收看起来已覆盖；最终判断交给 `evidence-verify`。
+- `RETURN_TO_ALPHA_GOAL`: 目标、范围、验收、非目标、约束、决策边界、授权或声明边界需要重新界定。
+- `RETURN_TO_SYSTEM_MODEL`: 被控对象边界、可观测性、可控性、扰动或耦合需要建模。
+- `BLOCKED`: 已点明最小缺失输入、权限、工具、数据、环境或安全状态条件。

@@ -1,72 +1,72 @@
 ---
 name: decision-synthesis
-description: "Apply decision-synthesis to complex engineering or socio-technical systems: integrate qualitative judgment, quantitative evidence, stakeholder constraints, models, contradictions, and user-owned decisions before forming a 目标契约."
+description: "把决策综合用于复杂工程或社会技术系统：在形成目标契约前，整合定性判断、定量证据、利益相关方约束、模型、矛盾和用户自有决策。"
 ---
 
 # 决策综合
 
-Use this skill when the problem behaves like a complex system rather than a simple implementation task. It helps synthesize goals and decision boundaries before `goal-contract`, `system-model`, or `control-loop` proceeds.
+当问题表现为复杂系统，而不是简单实现任务时，使用本技能。它在 `goal-contract`、`system-model` 或 `control-loop` 继续前，帮助综合目标和决策边界。
 
 ## 使用时机
 
-Use when the request includes:
+请求包含以下情况时使用：
 
-- multiple stakeholders with conflicting objectives;
-- weakly quantified success, qualitative preferences, or strategic tradeoffs;
-- high uncertainty, incomplete data, or changing environment;
-- broad architecture, migration, organizational workflow, safety, compliance, research, or product strategy;
-- many interacting subsystems where optimizing one part can destabilize another;
-- need to combine expert judgment, empirical evidence, models, and scenario analysis.
+- 多个利益相关方且目标冲突；
+- 成功标准弱量化、偏好偏定性，或存在战略取舍；
+- 高不确定性、数据不完整或环境变化；
+- 涉及宽范围架构、迁移、组织工作流、安全、合规、研究或产品策略；
+- 多个子系统相互作用，优化一部分可能让另一部分失稳；
+- 需要结合专家判断、经验性证据、模型和场景分析。
 
-Do not use for localized low-risk tasks with clear acceptance and direct evidence.
+对验收清楚且证据直接的局部低风险任务，不使用本技能。
 
 ## 边界
 
-- Do not mutate implementation files, deploy, push, repair data, or claim final completion.
-- Do not invent stakeholder preferences or user-owned risk decisions.
-- Do not treat a synthesis as implementation authorization. Convert the selected direction into a 目标契约 via `goal-contract` before mutation.
-- Separate facts, expert judgments, assumptions, hypotheses, scenarios, and decisions.
-- When a 闭环台账 exists, read its `最新控制路由` from `.alpha-goal/YYYYMMDD-<slug>/control-state.md` before synthesis and update only synthesis-relevant state: objective conflicts, user-owned decisions, scenario assumptions, and the recommended route.
+- 不改实现文件，不部署，不 push，不修复数据，也不宣称最终完成。
+- 不虚构利益相关方偏好或用户自有风险决策。
+- 不把综合结果当成实现授权。变更前，必须通过 `goal-contract` 把选定方向转成目标契约。
+- 区分事实、专家判断、假设、待证假设、场景和决策。
+- 如果已有闭环台账，综合前从 `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 读取 `最新控制路由`，并且只更新综合相关状态：目标冲突、用户自有决策、场景假设和推荐路由。
 
 ## 按需加载资源
 
-- `references/complexity-triage.md`: classify simple, complicated, complex, or complex-giant-like requests.
-- `references/stakeholder-decision-boundaries.md`: distinguish recommendation from user-owned decisions.
-- `references/synthesis-round.md`: run human-machine qualitative/quantitative convergence rounds.
-- `references/synthesis-record-schema.md`: produce a durable or handoff-ready 决策综合记录.
-- `references/meta-synthesis-hall.md`: use a metasynthetic workspace (`综合研判工作台`) to preserve roles, hypothesis bank, model registry, dissent, and convergence conditions.
+- `references/complexity-triage.md`: 区分简单、繁杂、复杂或复杂巨系统式请求。
+- `references/stakeholder-decision-boundaries.md`: 区分建议和用户自有决策。
+- `references/synthesis-round.md`: 运行人机定性 / 定量收敛轮次。
+- `references/synthesis-record-schema.md`: 生成可持久化或可交接的决策综合记录。
+- `references/meta-synthesis-hall.md`: 使用综合研判工作台保存角色、假设库、模型登记、异议和收敛条件。
 
 ## 流程
 
 ```text
-Triage complexity -> Collect perspectives -> Build synthesis map -> Run synthesis rounds -> Resolve decisions -> Produce synthesis record -> Route
+判定复杂度 -> 收集视角 -> 构建综合图 -> 运行综合轮次 -> 解决决策 -> 产出综合记录 -> 路由
 ```
 
-### 1. Triage complexity
+### 1. 判定复杂度
 
-Classify the problem:
+分类问题：
 
-- `simple`: known goal, known path, direct evidence; route out.
-- `complicated`: many parts but decomposable with stable objective; use `system-model` or `goal-contract`.
-- `complex`: feedback, adaptation, ambiguity, or conflicting goals; continue synthesis.
-- `complex-giant-like`: many subsystems, human decisions, weak observability, high stakes, and no single complete model; use full synthesis and explicit human decision gates.
+- `simple`: 目标已知、路径已知、证据直接；路由出去。
+- `complicated`: 部件很多，但目标稳定且可分解；使用 `system-model` 或 `goal-contract`。
+- `complex`: 存在反馈、自适应、模糊性或目标冲突；继续综合。
+- `complex-giant-like`: 子系统多、含人类决策、可观测性弱、风险高，且不存在单一完整模型；使用完整综合和显式人工决策闸门。
 
-### 2. Collect perspectives
+### 2. 收集视角
 
-For each relevant perspective, record:
+对每个相关视角记录：
 
-- objective or concern;
-- evidence, model, or expertise basis;
-- uncertainty and assumptions;
-- conflict with other perspectives;
-- decision owner;
-- evidence that could change the decision.
+- 目标或关切；
+- 证据、模型或专业判断依据；
+- 不确定性和假设；
+- 与其他视角的冲突；
+- 决策负责人；
+- 可能改变决策的证据。
 
-Perspectives may include user, customer, operations, security, legal/compliance, engineering, data, UX, research, maintainability, cost, delivery, and long-term strategy.
+视角可包括用户、客户、运营、安全、法务 / 合规、工程、数据、UX、研究、可维护性、成本、交付和长期策略。
 
-### 3. Build synthesis map
+### 3. 构建综合图
 
-Create a qualitative-quantitative map:
+创建定性 / 定量综合图：
 
 ```text
 综合图:
@@ -84,40 +84,40 @@ Create a qualitative-quantitative map:
 - 候选控制策略:
 ```
 
-Use quantitative evidence when available, but do not force false precision. Qualitative judgments must be labeled and tied to the owner or source.
+有定量证据时使用定量证据，但不要制造虚假精确度。定性判断必须标注，并关联到负责人或来源。
 
-### 4. Run synthesis rounds
+### 4. 运行综合轮次
 
-For `complex` and `complex-giant-like` cases, or whenever perspectives conflict, run one or more `综合轮次` records before resolving decisions. Load `references/synthesis-round.md` for the schema. For complex-giant-like work, use the metasynthetic workspace defined in `references/meta-synthesis-hall.md` (`综合研判工作台`) to preserve roles, hypotheses, models, dissent, and convergence conditions.
+对 `complex` 和 `complex-giant-like` 场景，或任何视角冲突场景，在解决决策前运行一轮或多轮 `综合轮次` 记录。结构见 `references/synthesis-round.md`。对复杂巨系统式工作，使用 `references/meta-synthesis-hall.md` 定义的综合研判工作台来保存角色、假设、模型、异议和收敛条件。
 
-Each round must connect:
+每轮必须连接：
 
-- human or expert judgment and its decision owner;
-- machine evidence, model output, tests, logs, metrics, or probes;
+- 人类或专家判断及其决策负责人；
+- 机器证据、模型输出、测试、日志、指标或探针；
 - 综合研判工作台状态：多种假设、模型或利益相关方视角仍然活跃时的工作区状态;
-- the conflict, contradiction, or missing sensor;
+- 冲突、矛盾或缺失传感器；
 - 任何能把定性判断转成有界证据的指标或代理；
-- 应成为验收证据或传感器证据的 指标转译 候选；
-- the user-owned decision or next hypothesis that would reduce uncertainty.
+- 应成为验收证据或传感器证据的指标转译候选；
+- 能降低不确定性的用户自有决策或下一待证假设。
 
-Stop when the smallest next action is clear: a 目标契约 candidate, a system-model question, a user decision, a blocker, or a bounded validation hypothesis.
+当最小下一动作清楚时停止：目标契约候选、系统建模问题、用户决策、阻塞项或有界验证假设。
 
-### 5. Resolve decisions
+### 5. 解决决策
 
-Identify:
+识别：
 
-- decisions the agent can recommend;
-- decisions the user must make;
-- risks requiring explicit acceptance;
-- non-goals that stabilize the effort;
-- minimum viable next contract;
-- evidence needed before irreversible action.
+- agent 可以建议的决策；
+- 用户必须作出的决策；
+- 需要显式接受的风险；
+- 能稳定工作的非目标；
+- 最小可行下一契约；
+- 不可逆行动前所需证据。
 
-If a stakeholder conflict cannot be resolved, return a decision request rather than choosing silently.
+如果利益相关方冲突无法解决，返回决策请求，而不是静默选择。
 
-### 6. Produce synthesis record
+### 6. 产出综合记录
 
-Persist the full 决策综合记录 under `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md` by default and update the 闭环台账 artifact registry. Show a compact Markdown-table `综合摘要` in the TUI by default. Print the full synthesis in chat only when the user asks, file persistence is blocked, or a user-owned decision requires reviewing the full tradeoff in the conversation.
+默认把完整决策综合记录持久化到 `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md`，并更新闭环台账的产物登记。TUI 默认展示紧凑 Markdown 表格 `综合摘要`。只有当用户要求、文件持久化受阻，或用户自有决策需要在对话中复核完整取舍时，才在聊天中打印完整综合记录。
 
 紧凑记录字段:
 
@@ -174,9 +174,9 @@ TUI 摘要:
 - 路由:
 ```
 
-### 7. Route
+### 7. 路由
 
-- 当稳定推荐方向和 指标转译 可以形成 目标契约 时，路由到 `goal-contract`。
+- 当稳定推荐方向和指标转译可以形成目标契约时，路由到 `goal-contract`。
 - 当子系统边界或反馈信号仍不清楚时，路由到 `system-model`。
 - 当需要用户自有决策、风险接受、预算 / 时间取舍或利益相关方优先级时，路由到用户。
 - 只有当综合未授权变更，且下一动作是把既有证据包与拟声明比较时，才路由到 `evidence-verify`。

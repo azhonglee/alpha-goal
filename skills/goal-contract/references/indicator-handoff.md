@@ -19,8 +19,8 @@
 
 ## 规则
 
-- Convert only material objectives into indicators; avoid false precision for preferences that should remain qualitative.
-- Every indicator must name a sensor or explicitly name the missing sensor.
-- Thresholds may be qualitative, but must be clear enough to decide continue, harden, verify, reframe, or block.
-- If a metric changes scope, priority, budget, timeline, risk acceptance, or final claim, route to user before handoff.
-- Pass accepted indicators into the 目标契约, system model sensors, 控制律 thresholds, and verification evidence boundary.
+- 只把实质目标转成指标；对应该保持定性的偏好，避免虚假精确度。
+- 每个指标必须命名传感器，或明确命名缺失传感器。
+- 阈值可以是定性的，但必须足够清楚，能够决定继续、加固、验证、重新界定或阻塞。
+- 如果指标改变范围、优先级、预算、时间线、风险接受或最终声明，交接前先路由到用户。
+- 把已接受指标传递到目标契约、系统模型传感器、控制律阈值和验证证据边界。

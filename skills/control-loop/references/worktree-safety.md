@@ -1,48 +1,48 @@
 # 工作树安全
 
-Use this reference when mutation could pollute a primary checkout or cross an ownership boundary.
+当改动可能污染主检出区或跨越归属边界时，使用本参考。
 
 ## 隔离规则
 
-Isolation is valid when the edit path is:
+编辑路径满足以下条件时，隔离有效：
 
-- not the primary checkout;
-- inside the approved repository or owner boundary;
-- ignored by the primary checkout or outside tracked paths;
-- recorded before mutation;
-- compatible with project rules and unrelated user changes.
+- 不是主检出区；
+- 位于已批准仓库或归属边界内；
+- 被主检出区忽略，或位于已跟踪路径之外；
+- 改动前已记录；
+- 与项目规则和无关用户变更兼容。
 
-Default candidate path:
+默认候选路径：
 
 ```text
 .worktrees/codex/<task-slug>/
 ```
 
-Project rules or an already approved external worktree path may override it.
+项目规则或已批准的外部 worktree 路径可以覆盖该默认值。
 
 ## 主检出目录警示信号
 
-Treat the current checkout as primary when:
+以下情况把当前检出目录视为主检出区：
 
-- it is on `main`, `master`, `trunk`, or the repo default branch;
-- `git worktree list` shows it as the base checkout;
-- project rules say not to edit the main checkout;
-- branch/worktree state is unknown.
+- 当前分支是 `main`、`master`、`trunk` 或仓库默认分支；
+- `git worktree list` 显示它是基础检出区；
+- 项目规则说明不要编辑主检出区；
+- 分支 / worktree 状态未知。
 
 ## 只读预检
 
 ```bash
 git worktree list
 git status --short
-git check-ignore -q .worktrees/codex/<task-slug> || printf 'CHECK: default worktree path is not ignored here\n'
-git check-ignore -q .alpha-goal/preflight-check || printf 'CHECK: add .alpha-goal/ to the repo root .gitignore before writing process artifacts\n'
+git check-ignore -q .worktrees/codex/<task-slug> || printf '检查：默认 worktree 路径在这里未被忽略\n'
+git check-ignore -q .alpha-goal/preflight-check || printf '检查：写流程产物前先把 .alpha-goal/ 加入仓库根目录 .gitignore\n'
 ```
 
-These checks evaluate default candidates only. If `.alpha-goal/` is not ignored, add `.alpha-goal/` to the repo root `.gitignore` before writing ledger, evidence, review, or scratch artifacts. If the approved path differs, check that path instead.
+这些检查只评估默认候选路径。如果 `.alpha-goal/` 未被忽略，在写台账、证据、评审或 scratch 产物前，把 `.alpha-goal/` 加入仓库根目录 `.gitignore`。如果已批准路径不同，改查该路径。
 
 ## 安全模式
 
-If `.worktrees/` is ignored and matches project rules:
+如果 `.worktrees/` 已被忽略且符合项目规则：
 
 ```bash
 mkdir -p .worktrees/codex
@@ -50,25 +50,25 @@ git worktree add .worktrees/codex/<task-slug> -b <branch-name> <base-branch>
 cd .worktrees/codex/<task-slug>
 ```
 
-Only after entering the isolated worktree should mutation begin.
+只有进入隔离 worktree 后，才开始改动。
 
 ## 不安全模式
 
-Avoid direct mutation in the primary checkout, including:
+避免在主检出区直接改动，包括：
 
 ```bash
 git checkout -b <branch-name>
 git switch -c <branch-name>
 ```
 
-Also avoid direct edits or deletes in that checkout unless explicitly approved and risk is recorded.
+除非明确批准并记录风险，否则也避免在该检出区直接编辑或删除。
 
 ## 既有变更
 
-If unrelated user changes exist:
+如果存在无关用户变更：
 
-- do not overwrite them;
-- avoid broad formatting commands;
-- use targeted edits;
+- 不覆盖它们；
+- 避免大范围格式化命令；
+- 使用定向编辑；
 - mention them in the 迭代记录;
-- ask before stashing, reverting, or moving them.
+- stash、revert 或移动前先询问。

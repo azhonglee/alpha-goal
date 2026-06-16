@@ -19,18 +19,18 @@
 
 ## 评级指引
 
-- `low`: unlikely or low blast radius; record only if it affects sequencing.
-- `medium`: plausible and could change evidence, slice size, or fallback.
+- `low`: 不太可能发生或影响范围小；只有影响顺序时才记录。
+- `medium`: 可能发生，且可能改变证据、切片大小或失败处理。
 - `high`: 可能发生或影响范围大；变更前需要控制措施。
-- `unknown`: treat as material when impact could be medium or high.
+- `unknown`: 如果影响可能为 medium 或 high，则视为实质扰动。
 
 ## 控制措施模式
 
-- isolate worktree, environment, data copy, or ownership surface;
-- reduce slice size and change one control variable at a time;
-- add a sensor before changing behavior;
-- freeze or record assumptions before acting;
-- route to `decision-synthesis` for stakeholder conflict;
-- route to user/blocker for authority, credentials, external side effects, or risk acceptance.
+- 隔离 worktree、环境、数据副本或归属表面；
+- 缩小切片，一次只改变一个控制变量；
+- 改变行为前先添加传感器；
+- 行动前冻结或记录假设；
+- 利益相关方冲突路由到 `decision-synthesis`；
+- 权限、凭证、外部副作用或风险接受问题路由到用户 / blocker。
 
 当高影响或影响未知的扰动缺少传感器、控制措施和路由触发条件时，不要路由到 `control-loop`。

@@ -7,9 +7,9 @@
 | `skills/alpha-goal/` | 闭环总入口、稳定性检查和技能路由。 |
 | `skills/goal-contract/` | 目标发现、模糊度评估、指标转译、目标契约和目标参考输入形成。 |
 | `skills/system-model/` | 被控对象、状态、观测器、执行器、控制器层级、扰动记录和耦合建模。 |
-| `skills/control-loop/` | 在 目标契约 下执行有界控制迭代，并记录 自适应学习记录。 |
-| `skills/evidence-verify/` | 检查验收、证据边界、指标 / 学习边界，并给出 验证结论。 |
-| `skills/decision-synthesis/` | 面向复杂巨系统、多主体和弱结构化问题的 综合轮次 与 指标转译 综合研判。 |
+| `skills/control-loop/` | 在目标契约下执行有界控制迭代，并记录自适应学习记录。 |
+| `skills/evidence-verify/` | 检查验收、证据边界、指标 / 学习边界，并给出验证结论。 |
+| `skills/decision-synthesis/` | 面向复杂巨系统、多主体和弱结构化问题的综合轮次与指标转译综合研判。 |
 
 ## 支持目录
 
@@ -37,7 +37,7 @@
 | 路径 | 用途 |
 |---|---|
 | `.alpha-goal/YYYYMMDD-<slug>/control-state.md` | 可选 闭环台账，记录跨阶段控制状态和产物登记：完整 最新控制路由、参考输入、当前状态、产物路径、反馈、残余误差和下一路由。 |
-| `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md` | 可选完整 目标契约 产物。 |
+| `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md` | 可选完整目标契约产物。 |
 | `.alpha-goal/YYYYMMDD-<slug>/system-model.md` | 可选完整 控制模型 产物。 |
 | `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md` | 可选完整 决策综合记录 产物。 |
 | `.alpha-goal/YYYYMMDD-<slug>/plan.md` | 可选持久化动态计划。 |

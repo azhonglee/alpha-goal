@@ -1,27 +1,27 @@
 # 模糊度评分
 
-Scoring is a steering aid. It should reduce unnecessary clarification while preventing unsafe handoff.
+评分是转向辅助工具。它应减少不必要澄清，同时防止不安全交接。
 
 ## 定性评分
 
-- `low`: remaining uncertainty will not change scope, authority, evidence, or final claim.
-- `medium`: uncertainty might change a slice plan or evidence floor; clarify or narrow before mutation.
-- `high`: uncertainty can change goal, owner, target, non-goals, safety, or authorization; do not hand off to `control-loop`.
+- `low`: 剩余不确定性不会改变范围、权限、证据或最终声明。
+- `medium`: 不确定性可能改变切片计划或证据下限；改动前先澄清或收窄。
+- `high`: 不确定性会改变目标、负责人、对象、非目标、安全性或授权；不要交接给 `control-loop`。
 
 ## 数值评分
 
-Use 0.0 to 1.0 clarity scores, then compute ambiguity.
+使用 0.0 到 1.0 的清晰度评分，再计算模糊度。
 
 ```text
-Greenfield ambiguity = 1 - (intent*0.25 + outcome*0.25 + scope*0.20 + constraints*0.15 + success*0.15)
-Brownfield ambiguity = 1 - (intent*0.20 + outcome*0.20 + scope*0.18 + constraints*0.14 + success*0.14 + context*0.14)
-Control ambiguity = 1 - (reference*0.25 + actuator_boundary*0.20 + sensor_plan*0.20 + disturbance_bounds*0.15 + claim_boundary*0.20)
+绿地模糊度 = 1 - (intent*0.25 + outcome*0.25 + scope*0.20 + constraints*0.15 + success*0.15)
+存量系统模糊度 = 1 - (intent*0.20 + outcome*0.20 + scope*0.18 + constraints*0.14 + success*0.14 + context*0.14)
+控制模糊度 = 1 - (reference*0.25 + actuator_boundary*0.20 + sensor_plan*0.20 + disturbance_bounds*0.15 + claim_boundary*0.20)
 ```
 
-Thresholds are defaults, not proofs:
+阈值只是默认值，不是证明：
 
 - quick: <= 0.30
 - standard: <= 0.20
 - deep: <= 0.15
 
-Never let a low numeric ambiguity override a missing user-owned decision or unsafe actuator boundary.
+不要让低数值模糊度覆盖缺失的用户自有决策或不安全的执行器边界。

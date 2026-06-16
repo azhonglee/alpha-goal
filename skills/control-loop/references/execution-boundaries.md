@@ -1,59 +1,59 @@
 # 执行边界
 
-Use this reference for subagents, unclear ownership, multi-path work, generated outputs, cross-repo/worktree/submodule work, or unrelated user changes.
+当涉及子代理、归属不清、多路径工作、生成输出、跨仓库 / worktree / 子模块工作或无关用户变更时，使用本参考。
 
 ## 子代理委托
 
-Delegate only bounded, independent work.
+只委托有边界且独立的工作。
 
-Provide:
+提供：
 
-- task id;
-- scope and working directory;
-- ownership surface;
-- approved contract/plan evidence;
-- constraints and non-goals;
-- expected evidence;
-- return receipt schema.
+- 任务 ID；
+- 范围和工作目录；
+- 归属表面；
+- 已批准契约 / 计划证据；
+- 约束和非目标；
+- 预期证据；
+- 回执结构。
 
-Receipt labels:
+回执标签：
 
 - `DONE`
 - `DONE_WITH_CONCERNS`
 - `NEEDS_CONTEXT`
 - `BLOCKED`
 
-Accept delegated output only after checking files, ownership, evidence, and concerns. Delegation never bypasses 目标契约, 迭代记录, 验证结论, strongest-risk evidence, or final checks.
+只有检查文件、归属、证据和关注点后，才接受委托输出。委托永远不能绕过目标契约、迭代记录、验证结论、最强风险证据或最终检查。
 
 ## 所有权边界
 
-Before editing, identify:
+编辑前识别：
 
-- repository root and current branch;
-- whether current directory is a linked worktree;
-- dirty state and unrelated user changes;
-- owning git root for every touched path;
-- nested `.git` directories and submodules;
-- local rule files such as `AGENTS.md`, `AGENTS.override.md`, `CLAUDE.md`, or `code_review.md`.
+- 仓库根目录和当前分支；
+- 当前目录是否为关联 worktree；
+- 脏状态和无关用户变更；
+- 每个被触达路径所属的 git 根目录；
+- 嵌套 `.git` 目录和子模块；
+- 本地规则文件，例如 `AGENTS.md`、`AGENTS.override.md`、`CLAUDE.md` 或 `code_review.md`。
 
-Do not modify a repo, worktree, submodule, generated-output owner, or process boundary unless approved by the 目标契约 or user.
+除非目标契约或用户批准，否则不要修改仓库、worktree、子模块、生成输出负责人或流程边界。
 
 ## 生成产物
 
-When generated files are involved:
+涉及生成文件时：
 
-- identify generator source and generated target;
-- change the source when possible rather than only the generated output;
-- run or record the generator command if required;
-- avoid partial regeneration that rewrites unrelated surfaces;
-- record generated artifacts in the 迭代记录.
+- 识别生成器源和生成目标；
+- 可行时修改源，而不是只修改生成输出；
+- 必要时运行或记录生成命令；
+- 避免会重写无关表面的局部重新生成；
+- 在迭代记录中记录生成产物。
 
 ## 用户变更与无关变更
 
-If unrelated user changes exist:
+如果存在无关用户变更：
 
-- do not overwrite them;
-- avoid broad formatting;
-- use targeted edits;
-- state how they were preserved;
-- ask before stash, revert, move, or cleanup.
+- 不覆盖它们；
+- 避免大范围格式化；
+- 使用定向编辑；
+- 说明如何保留它们；
+- stash、revert、移动或清理前先询问。

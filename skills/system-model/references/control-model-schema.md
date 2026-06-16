@@ -1,6 +1,6 @@
-# 控制模型 Schema
+# 控制模型结构定义
 
-Persist the full model at `.alpha-goal/YYYYMMDD-<slug>/system-model.md` by default. When machine validation or resume safety matters, write a schema sidecar at `.alpha-goal/YYYYMMDD-<slug>/schema/system-model.json`. The TUI should show a Markdown-table `模型摘要` with boundary, observability, controllability, artifact path, and recommended route unless full chat output is required.
+默认把完整模型持久化到 `.alpha-goal/YYYYMMDD-<slug>/system-model.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/system-model.json` 写入结构化索引。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `模型摘要`，包含边界、可观测性、可控性、产物路径和推荐路由。
 
 ```text
 控制模型:
@@ -79,4 +79,4 @@ Persist the full model at `.alpha-goal/YYYYMMDD-<slug>/system-model.md` by defau
 - 推荐路由:
 ```
 
-Use this only when the compact model is insufficient for handoff or recovery.
+仅在紧凑模型不足以支撑交接或恢复时使用完整模型。

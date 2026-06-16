@@ -1,6 +1,6 @@
-# 决策综合记录 Schema
+# 决策综合记录结构定义
 
-Persist the full record at `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md` by default. When machine validation or resume safety matters, write a schema sidecar at `.alpha-goal/YYYYMMDD-<slug>/schema/decision-synthesis.json`. The TUI should show a Markdown-table `综合摘要` with core tension, recommended direction, user decision, artifact path, and next action unless full chat output is required.
+默认把完整记录持久化到 `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/decision-synthesis.json` 写入结构化索引。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `综合摘要`，包含核心张力、推荐方向、用户裁决、产物路径和下一步动作。
 
 ```text
 决策综合记录:
@@ -62,4 +62,4 @@ Persist the full record at `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md` b
 - 路由:
 ```
 
-Keep the record compact unless broad handoff or recovery is needed.
+除非需要广泛交接或恢复，否则记录应保持紧凑。

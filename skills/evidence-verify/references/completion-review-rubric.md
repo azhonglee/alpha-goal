@@ -1,49 +1,49 @@
 # 完成复核准则
 
-Use for readiness-to-merge, readiness-to-ship, final delivery, safety/correctness claims, or other formal completion judgments.
+用于可合并、可发布、最终交付、安全 / 正确性声明或其他正式完成判断。
 
 ## 正向结论下限
 
-Return `PASS_TO_FINAL` only when:
+只有以下条件都满足时，才返回 `PASS_TO_FINAL`：
 
-- approved context covers acceptance, included/excluded scope, decision boundaries, and claim boundary;
-- changed files and artifacts match target and non-goals;
-- implementation/evidence history is consistent with current diff/artifacts;
-- fresh checks ran after the last material change, or substitute evidence is explicitly sufficient for a narrowed claim;
-- feedback is handled, out of scope, or routed elsewhere;
-- strongest material risk has matching evidence;
-- 实质性定性目标有 指标转译 证据，或最终声明已明确窄化；
-- material control actions have sensor feedback that meets the stated 控制律 threshold, or residual error/fallback is reflected in the verdict;
+- 已批准上下文覆盖验收、范围内 / 排除范围、决策边界和声明边界；
+- 已变更文件和产物匹配目标与非目标；
+- 实现 / 证据历史与当前 diff / 产物一致；
+- 新鲜检查已在最后一次实质变更后运行，或替代证据对窄化声明明确足够；
+- 反馈已处理、属于范围外，或已路由到其他位置；
+- 最强实质风险有匹配证据；
+- 实质性定性目标有指标转译证据，或最终声明已明确窄化；
+- 实质控制动作已有满足控制律阈值的传感器反馈，或残余误差 / 失败处理已反映到结论中；
 - 实质性的延迟 / 噪声反馈在声明稳定完成前，已把延迟、噪声、置信度、阻尼和影响范围约束反映到验证结论中;
-- material 自适应学习记录 are supported by evidence and do not broaden the final claim beyond the observed boundary;
-- bug/root-cause claims have valid root-cause evidence;
-- final claim does not exceed tested or observed boundary.
+- 实质自适应学习记录有证据支持，且不会把最终声明扩大到已观察边界之外；
+- bug / 根因声明有有效根因证据；
+- 最终声明不超过已测试或已观察边界。
 
 ## 按风险确定证据下限
 
-Choose evidence by strongest material risk:
+按最强实质风险选择证据：
 
 - 局部 / 只读 / 低影响范围: 变更差异复核加聚焦检查或直接证据通常足够;
-- behavior, API, data, or user-visible change: relevant automated test, runtime probe, integration evidence, or explicit substitute is needed;
-- migration, security, compliance, production, tenant, data repair, or irreversible claim: environment-specific or independently reviewable final-state evidence is needed;
-- missing environment/tool/data: narrow the claim, return `NEXT_ITERATION`, or return `BLOCKED`.
+- 行为、API、数据或用户可见变更：需要相关自动化测试、运行探针、集成证据或明确替代证据；
+- 迁移、安全、合规、生产、租户、数据修复或不可逆声明：需要特定环境证据或可独立复核的最终状态证据；
+- 缺少环境 / 工具 / 数据：窄化声明、返回 `NEXT_ITERATION`，或返回 `BLOCKED`。
 
 ## 返回 NEXT_ITERATION
 
-Use when acceptance is partially covered, checks/probes/cleanup/edge cases/feedback action remain, implementation direction is valid but evidence is not final-state, or a narrowed claim would not satisfy the user.
+当验收只被部分覆盖、仍需检查 / 探针 / 清理 / 边界情况 / 反馈动作、实现方向有效但证据不是最终状态证据，或窄化声明不能满足用户时使用。
 
 ## 返回 REFRAME
 
-Use when target/scope, acceptance, non-goals, existing-work relationship, user intent, system model, or claim boundary is wrong or incomplete; or when evidence points to a different entity, interface, submodule, repo, or user-owned decision.
+当目标 / 范围、验收、非目标、既有工作关系、用户意图、系统模型或声明边界错误或不完整时使用；当证据指向不同实体、接口、子模块、仓库或用户自有决策时也使用。
 
 ## 返回 BLOCKED
 
-Use when credential, permission, service, data, tooling, environment, or required user risk/scope decision is missing and no meaningful loop progress can be made.
+当缺少凭证、权限、服务、数据、工具、环境或必需的用户风险 / 范围决策，且无法取得有意义的循环进展时使用。
 
 ## 窄化声明
 
-When local target is satisfied but user wording is broader, return `NARROW_CLAIM_AND_FINAL` and state:
+当局部目标已满足但用户措辞更宽时，返回 `NARROW_CLAIM_AND_FINAL` 并说明：
 
-- widest verified boundary;
-- higher boundary not verified;
-- final wording the user may receive.
+- 已验证的最宽边界；
+- 尚未验证的更高边界；
+- 可给用户的最终措辞。

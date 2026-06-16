@@ -1,20 +1,20 @@
 # 声明边界检查
 
-Use this to prevent final claims from exceeding evidence.
+用本参考防止最终声明超出证据。
 
 ## 边界阶梯
 
-A claim can move from local artifact toward broader behavior only when fresh evidence crosses the relevant interface boundary:
+只有当新鲜证据跨越相关接口边界时，声明才能从局部产物扩展到更宽行为：
 
-- local helper/function;
-- module/class/reducer;
-- package/service boundary;
+- 局部 helper / function；
+- module / class / reducer；
+- package / service 边界；
 - API/RPC endpoint;
-- data/state lifecycle;
-- user-visible product behavior;
-- production/tenant/compliance/safety boundary.
+- 数据 / 状态生命周期；
+- 用户可见产品行为；
+- 生产 / 租户 / 合规 / 安全边界。
 
-State the actual boundary if these examples do not fit. Never use lower-boundary evidence to claim higher-boundary success.
+如果这些示例不适用，说明实际边界。绝不要用低边界证据声明高边界成功。
 
 ## 必要比较
 
@@ -30,17 +30,17 @@ State the actual boundary if these examples do not fit. Never use lower-boundary
 
 ## 常见过度声明
 
-- testing a helper but claiming product flow fixed;
-- reading a diff but claiming runtime behavior verified;
-- fixing a mock path but claiming API integration fixed;
-- proving correlation but claiming root cause;
-- completing implementation but claiming production observability works;
-- using old test results after the last material change.
+- 只测试了 helper，却声明产品流程已修复；
+- 只阅读了 diff，却声明运行态行为已验证；
+- 只修复了 mock 路径，却声明 API 集成已修复；
+- 只证明相关性，却声明根因；
+- 只完成实现，却声明生产可观测性可用；
+- 最后一次实质变更后仍使用旧测试结果。
 
 ## 决策
 
-- Evidence covers user wording: `PASS_TO_FINAL`.
-- Local goal is satisfied but wording is broader: `NARROW_CLAIM_AND_FINAL`.
-- User needs broader evidence: `NEXT_ITERATION`.
-- Contract/model boundary is wrong: `REFRAME`.
-- Environment, permission, tool, or data is missing: `BLOCKED`.
+- 证据覆盖用户措辞：`PASS_TO_FINAL`。
+- 局部目标已满足但措辞更宽：`NARROW_CLAIM_AND_FINAL`。
+- 用户需要更宽证据：`NEXT_ITERATION`。
+- 契约 / 模型边界错误：`REFRAME`。
+- 缺少环境、权限、工具或数据：`BLOCKED`。

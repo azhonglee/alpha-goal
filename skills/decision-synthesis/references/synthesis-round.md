@@ -1,8 +1,8 @@
 # 综合轮次
 
-Use a 综合轮次 when qualitative judgment, quantitative evidence, stakeholder priorities, or model assumptions conflict enough to affect the 目标契约 or route.
+当定性判断、定量证据、利益相关方优先级或模型假设的冲突足以影响目标契约或路由时，使用综合轮次。
 
-The round is a human-machine convergence mechanism, not a meeting transcript. Keep only claims, evidence, conflicts, decisions, and next hypotheses that change routing or scope.
+综合轮次是人机收敛机制，不是会议纪要。只保留会改变路由或范围的声明、证据、冲突、决策和下一待证假设。
 
 ```text
 综合轮次:
@@ -49,9 +49,9 @@ The round is a human-machine convergence mechanism, not a meeting transcript. Ke
 
 ## 规则
 
-- Use qualitative judgment to select objectives, scenarios, and tradeoffs; use quantitative evidence to constrain claims and detect error.
-- Do not average away conflicts. Name the owner, evidence basis, and decision boundary.
-- If a metric is unavailable, name a proxy or missing sensor instead of inventing precision.
-- 把已接受指标作为 指标转译 传递给 `goal-contract`，并包含操作化定义、传感器、阈值 / 容差和证据边界。
-- If user priority, risk acceptance, budget, timeline, or scope changes are required, route to user instead of deciding silently.
-- Stop rounds when a stable 目标契约 candidate, system-model question, user decision, or blocker is the smallest next action.
+- 使用定性判断选择目标、场景和取舍；使用定量证据约束声明并检测误差。
+- 不要用平均值抹平冲突。命名负责人、证据基础和决策边界。
+- 如果指标不可用，命名代理指标或缺失传感器，不要制造精确度。
+- 把已接受指标作为指标转译传递给 `goal-contract`，并包含操作化定义、传感器、阈值 / 容差和证据边界。
+- 如果需要用户优先级、风险接受、预算、时间线或范围变更，路由到用户，而不是静默决定。
+- 当稳定目标契约候选、system-model 问题、用户决策或 blocker 成为最小下一动作时，停止轮次。
