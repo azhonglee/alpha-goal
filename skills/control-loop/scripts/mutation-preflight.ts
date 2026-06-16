@@ -90,7 +90,7 @@ if (root && commonDir) {
   const commonAbs = path.resolve(root, commonDir);
   console.log(`git 公共目录: ${fs.existsSync(commonAbs) ? fs.realpathSync(commonAbs) : commonDir}`);
 }
-console.log("已声明隔离编辑路径: 从已批准上下文手工记录");
+console.log("已声明隔离编辑路径: 从已确认上下文手工记录");
 console.log("主检出区风险: 根据分支、关联 worktree、worktree 列表和项目规则推断");
 if (/(^|\/)\.worktrees(\/|$)|(^|\/)worktrees(\/|$)/.test(root)) {
   console.log("worktree 路径提示: 当前根路径包含 worktrees 片段");
@@ -152,8 +152,8 @@ console.log(submodules || "<无或不可用>");
 
 section("需手工判断的预检缺口");
 console.log("主检出区: 根据 worktree 列表、分支 / 默认分支提示和项目规则推断");
-console.log("隔离编辑路径: 非主检出区、位于已批准归属边界内、被忽略或外部路径，且改动前已记录时有效");
-console.log("变更是否允许: 根据目标契约、系统模型、项目规则、脏状态、归属和证据需求判断");
+console.log("隔离编辑路径: 非主检出区、位于已确认归属边界内、被忽略或外部路径，且改动前已记录时有效");
+console.log("变更是否允许: 根据目标语义、系统模型、项目规则、脏状态、归属和证据需求判断");
 
 section("提醒");
 console.log("本脚本只读。它报告事实和候选路径检查，不能替代对改动安全性的判断。");

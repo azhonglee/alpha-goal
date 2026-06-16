@@ -1,0 +1,19 @@
+{
+  "artifact_kind": "alpha-goal",
+  "task_slug": "20260616-neg-contract-fields",
+  "artifact_path": ".alpha-goal/20260616-neg-contract-fields/alpha-goal.md",
+  "reference_id": "ref-neg-contract-fields",
+  "route_state": "alpha-goal",
+  "prior_route": "alpha-goal",
+  "next_route": "control-loop",
+  "target_error": "目标契约缺少必要语义字段却被确认",
+  "control_variable": "alpha-goal 目标契约字段校验",
+  "sensor": "runtime fixture 具体 sidecar 校验",
+  "threshold_or_tolerance": "真实意图、预期结果、范围、非目标、边界、约束、验收信号、决策边界、关键假设、风险取舍、未决问题和 pressure pass 均存在",
+  "evidence_boundary": "artifact",
+  "residual_error": "目标契约 sidecar 缺少明确意图或边界",
+  "claim_boundary": "negative fixture 必须暴露缺失的 alpha-goal 目标契约字段",
+  "stage_decision": "CONTRACT_CONFIRMED",
+  "confirmation_status": "confirmed",
+  "generated_at": "2026-06-16T00:00:00Z"
+}

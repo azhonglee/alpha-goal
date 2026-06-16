@@ -14,6 +14,6 @@
   "residual_error": "verifier requested next iteration",
   "claim_boundary": "negative fixture must expose non-passing final verifier",
   "stage_decision": "CONFORMANCE_PASS",
-  "authorization_status": "not-required",
+  "confirmation_status": "not-required",
   "generated_at": "2026-06-16T00:04:00Z"
 }

@@ -1,4 +1,4 @@
 interface:
-  display_name: "System Model"
-  short_description: "Model plant and hierarchy"
-  default_prompt: "Use $system-model to map system boundary, sensors, actuators, Controller Hierarchy, disturbances, and coupling before execution."
+  display_name: "系统建模"
+  short_description: "建模边界和反馈"
+  default_prompt: "使用 $system-model 在执行前梳理系统边界、传感器、执行器、控制器层级、扰动和耦合，并回到 alpha-goal 形成目标契约。"

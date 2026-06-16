@@ -14,6 +14,6 @@
   "residual_error": "verification verdict timestamp is later than conformance final route",
   "claim_boundary": "negative fixture must expose late final verifier",
   "stage_decision": "CONFORMANCE_PASS",
-  "authorization_status": "not-required",
+  "confirmation_status": "not-required",
   "generated_at": "2026-06-16T00:03:00Z"
 }

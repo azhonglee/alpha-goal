@@ -11,9 +11,9 @@
   "sensor": "observability and controllability review",
   "threshold_or_tolerance": "boundary, state variables, observers, actuators, disturbances, and coupling are explicit",
   "evidence_boundary": "artifact",
-  "residual_error": "remaining contract drafting",
+  "residual_error": "仍需确认目标契约",
   "claim_boundary": "runtime fixture documents a bounded system model sidecar",
   "stage_decision": "ROUTE_TO_ALPHA_GOAL",
-  "authorization_status": "not-required",
+  "confirmation_status": "not-required",
   "generated_at": "2026-06-16T00:00:00Z"
 }

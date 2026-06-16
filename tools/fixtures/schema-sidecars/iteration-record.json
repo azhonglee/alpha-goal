@@ -14,6 +14,6 @@
   "residual_error": "runtime sidecars are not scanned unless supplied to the repository validator",
   "claim_boundary": "fixture documents a bounded iteration record sidecar",
   "stage_decision": "ITERATION_READY_FOR_VERIFY",
-  "authorization_status": "approved",
+  "confirmation_status": "confirmed",
   "generated_at": "2026-06-16T00:00:00Z"
 }

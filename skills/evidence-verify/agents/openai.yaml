@@ -1,4 +1,4 @@
 interface:
-  display_name: "Evidence Verify"
-  short_description: "Judge evidence and claim boundary"
-  default_prompt: "Use $evidence-verify to compare fresh evidence, Indicator Handoff, Control Law, Adaptive Learning, and claim boundary."
+  display_name: "证据验证"
+  short_description: "验证证据和声明边界"
+  default_prompt: "使用 $evidence-verify 对照已确认 alpha-goal 目标契约、控制律、自适应学习和声明边界检查新鲜证据。"

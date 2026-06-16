@@ -13,7 +13,20 @@
   "evidence_boundary": "artifact",
   "residual_error": "iteration reference_id is null",
   "claim_boundary": "negative fixture must expose missing runtime reference",
-  "stage_decision": "CONTRACT_APPROVED",
-  "authorization_status": "approved",
-  "generated_at": "2026-06-16T00:01:00Z"
+  "stage_decision": "CONTRACT_CONFIRMED",
+  "confirmation_status": "confirmed",
+  "generated_at": "2026-06-16T00:01:00Z",
+  "intent": "明确用户为什么要做这件事，避免把现有实现能力误当真实诉求",
+  "outcome": "明确用户希望看到的最终状态和完成口径",
+  "in_scope": "只包含本轮明确要覆盖的范围",
+  "out_of_scope_non_goals": "明确本轮不做、延后或拒绝的内容",
+  "boundaries": "明确数据、接口、仓库、权限、外部副作用和声明边界",
+  "pressure_pass": "已回看早先答案，并用证据、假设或取舍问题完成一次追问",
+  "context_facts": "已记录可发现事实，并区分事实与推断。",
+  "constraints": "约束已明确，暂无会改变目标的隐藏约束。",
+  "acceptance_signals": "验收信号已明确，可用于后续证据比较。",
+  "decision_boundaries": "用户自有决策与代理可安全决定的边界已明确。",
+  "assumptions": "关键假设已列明，不影响当前目标契约确认。",
+  "risks_tradeoffs": "主要风险和取舍已记录。",
+  "open_questions": "无会改变后续行动方向的未决问题。"
 }

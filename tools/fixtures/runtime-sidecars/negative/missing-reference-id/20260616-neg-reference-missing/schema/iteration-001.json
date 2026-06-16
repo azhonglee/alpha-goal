@@ -14,6 +14,6 @@
   "residual_error": "iteration reference_id is null",
   "claim_boundary": "negative fixture must expose missing runtime reference",
   "stage_decision": "ITERATION_READY_FOR_VERIFY",
-  "authorization_status": "approved",
+  "confirmation_status": "confirmed",
   "generated_at": "2026-06-16T00:02:00Z"
 }

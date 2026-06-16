@@ -1,4 +1,4 @@
 interface:
-  display_name: "Alpha Goal"
-  short_description: "形成可执行目标契约"
-  default_prompt: "Use $alpha-goal to form a bounded goal contract with reference state, scope, non-goals, evidence, and handoff boundary."
+  display_name: "目标契约"
+  short_description: "形成目标契约"
+  default_prompt: "使用 $alpha-goal 在执行前形成已确认目标契约，覆盖真实意图、预期结果、范围、非目标、边界、约束、验收信号和决策边界。"

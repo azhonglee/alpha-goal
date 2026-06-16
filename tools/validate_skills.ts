@@ -20,6 +20,7 @@ const REMOVED_SKILL_TERMS = [
   "decision-synthesis.md",
   "skills/goal-contract",
   "skills/decision-synthesis",
+  "bounded goal contract",
 ];
 const SKILL_DOC_SIZE_LIMIT_BYTES = 30_000;
 const SIDECAR_TASK_SLUG_RE = /^\d{8}-[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -39,10 +40,25 @@ const SIDECAR_REQUIRED_KEYS = [
   "residual_error",
   "claim_boundary",
   "stage_decision",
-  "authorization_status",
+  "confirmation_status",
   "generated_at",
 ];
-const SIDECAR_REQUIRED_KEY_SET = new Set(SIDECAR_REQUIRED_KEYS);
+const ALPHA_GOAL_CONTRACT_KEYS = [
+  "intent",
+  "outcome",
+  "in_scope",
+  "out_of_scope_non_goals",
+  "boundaries",
+  "context_facts",
+  "constraints",
+  "acceptance_signals",
+  "decision_boundaries",
+  "assumptions",
+  "risks_tradeoffs",
+  "open_questions",
+  "pressure_pass",
+];
+const SIDECAR_ALLOWED_KEY_SET = new Set([...SIDECAR_REQUIRED_KEYS, ...ALPHA_GOAL_CONTRACT_KEYS]);
 const SIDECAR_ARTIFACT_KINDS = [
   "alpha-goal",
   "system-model",
@@ -61,7 +77,7 @@ const SIDECAR_ROUTE_STATES = [
 ];
 const ROUTE_TRANSITIONS: Record<string, string[]> = {
   START: ["alpha-goal", "system-model", "evidence-verify"],
-  "alpha-goal": ["control-loop", "system-model", "evidence-verify", "user", "blocker"],
+  "alpha-goal": ["control-loop", "user", "blocker"],
   "system-model": ["alpha-goal", "blocker"],
   "control-loop": ["control-loop", "evidence-verify", "alpha-goal", "system-model", "blocker"],
   "evidence-verify": ["final", "control-loop", "alpha-goal", "system-model", "blocker"],
@@ -69,7 +85,7 @@ const ROUTE_TRANSITIONS: Record<string, string[]> = {
 const STAGE_POLICIES: Record<string, { routeState: string; stageDecisions: string[] }> = {
   "alpha-goal": {
     routeState: "alpha-goal",
-    stageDecisions: ["ROUTE_TO_USER", "CONTRACT_APPROVED", "CONTRACT_REFRAME", "BLOCKED"],
+    stageDecisions: ["ROUTE_TO_USER", "CONTRACT_CONFIRMED", "BLOCKED"],
   },
   "system-model": {
     routeState: "system-model",
@@ -111,7 +127,7 @@ const EVIDENCE_BOUNDARIES = [
   "safety",
   "custom",
 ];
-const AUTHORIZATION_STATUSES = ["approved", "not-required", "pending", "blocked", "unknown"];
+const CONFIRMATION_STATUSES = ["confirmed", "not-required", "pending", "blocked", "unknown"];
 const LEGACY_ARTIFACT_PATHS = [
   ".alpha-goal/control-state",
   ".alpha-goal/context",
@@ -228,22 +244,29 @@ function validateDocSize(root: string, errors: string[]): void {
 function validateSemanticSmoke(root: string, errors: string[]): void {
   const checks: Array<[string, string, string[]]> = [
     [
-      "alpha-goal 形成目标契约",
+      "alpha-goal 澄清真实需求",
       "skills/alpha-goal/SKILL.md",
       [
         "目标契约",
-        "参考状态",
-        "验收证据",
-        "声明边界",
+        "真实意图",
+        "预期结果",
+        "范围内",
+        "范围外 / 非目标",
+        "边界",
+        "上下文事实",
+        "约束",
+        "验收信号",
         "决策边界",
-        "量化模糊度闸门",
+        "关键假设",
+        "风险取舍",
+        "苏格拉底式",
+        "每轮只问一个最高杠杆问题",
+        "pressure pass",
         "模糊度必须 `<= 0.15`",
-        "唯一的产品 / 工程语义",
+        "不得输出已确认目标契约",
         "误当成用户真正诉求",
-        "CONTRACT_APPROVED",
-        "authorization_status: approved",
         ".alpha-goal/YYYYMMDD-<slug>/alpha-goal.md",
-        "契约摘要",
+        "目标契约摘要",
       ],
     ],
     [
@@ -259,14 +282,20 @@ function validateSemanticSmoke(root: string, errors: string[]): void {
         "执行前先到 `alpha-goal`",
         "不能直接进入 `control-loop`",
         "最终必须回到 `alpha-goal`",
+        "形成目标契约",
       ],
     ],
     [
-      "control-loop 必须有批准契约",
+      "control-loop 必须有已确认目标契约",
       "skills/control-loop/SKILL.md",
       [
-        "只在已批准目标契约下",
-        "`alpha-goal`、`system-model` 不能推断授权",
+        "只在已确认的 `alpha-goal` 目标契约下",
+        "真实意图",
+        "预期结果",
+        "范围外 / 非目标",
+        "边界",
+        "验收信号",
+        "决策边界",
         "返回 `alpha-goal`",
         "执行检查",
         "默认不要在 TUI 打印原始 `控制律:` 块",
@@ -304,11 +333,24 @@ function validateSemanticSmoke(root: string, errors: string[]): void {
 function validateTuiTemplates(root: string, errors: string[]): void {
   const checks = [
     {
-      name: "契约摘要",
+      name: "目标契约摘要",
       path: "skills/alpha-goal/SKILL.md",
       anchor: "TUI 摘要:",
       end: "持久化路径:",
-      terms: ["契约摘要", "| 字段 | 内容 |", "| 参考 |", "| 语义状态 |", "| 模糊度 |", "| 下一步 |"],
+      terms: [
+        "目标契约摘要",
+        "| 字段 | 内容 |",
+        "| 真实意图 |",
+        "| 预期结果 |",
+        "| 范围 |",
+        "| 非目标 |",
+        "| 边界 |",
+        "| 约束 |",
+        "| 验收信号 |",
+        "| 决策边界 |",
+        "| 模糊度 |",
+        "| 下一步 |",
+      ],
     },
     {
       name: "模型摘要",
@@ -451,7 +493,7 @@ function validateSidecarFile(root: string, file: string, errors: string[]): void
     }
   }
   for (const key of Object.keys(sidecar)) {
-    if (!SIDECAR_REQUIRED_KEY_SET.has(key)) {
+    if (!SIDECAR_ALLOWED_KEY_SET.has(key)) {
       errors.push(`${rel}: 包含不支持的键 ${key}`);
     }
   }
@@ -510,14 +552,15 @@ function validateSidecarFile(root: string, file: string, errors: string[]): void
   if (!EVIDENCE_BOUNDARIES.includes(stringValue(sidecar.evidence_boundary))) {
     errors.push(`${rel}: evidence_boundary 不受支持`);
   }
-  if (!AUTHORIZATION_STATUSES.includes(stringValue(sidecar.authorization_status))) {
-    errors.push(`${rel}: authorization_status 不受支持`);
+  if (!CONFIRMATION_STATUSES.includes(stringValue(sidecar.confirmation_status))) {
+    errors.push(`${rel}: confirmation_status 不受支持`);
   }
-  if (nextRoute === "control-loop" && stringValue(sidecar.authorization_status) !== "approved") {
-    errors.push(`${rel}: 路由进入 control-loop 要求 authorization_status=approved`);
+  validateAlphaGoalContractFields(rel, sidecar, errors);
+  if (nextRoute === "control-loop" && stringValue(sidecar.confirmation_status) !== "confirmed") {
+    errors.push(`${rel}: 路由进入 control-loop 要求 confirmation_status=confirmed`);
   }
-  if (routeState === "control-loop" && stringValue(sidecar.authorization_status) !== "approved") {
-    errors.push(`${rel}: control-loop 要求 authorization_status=approved`);
+  if (routeState === "control-loop" && stringValue(sidecar.confirmation_status) !== "confirmed") {
+    errors.push(`${rel}: control-loop 要求 confirmation_status=confirmed`);
   }
   const generatedAt = stringValue(sidecar.generated_at);
   if (!generatedAt || Number.isNaN(Date.parse(generatedAt)) || !generatedAt.includes("T")) {
@@ -531,7 +574,7 @@ function validateSidecarTraceGroups(
 ): void {
   for (const [taskSlug, sidecars] of sidecarsByTask) {
     const prefix = `.alpha-goal/${taskSlug}/schema`;
-    const approvedAlpha = sidecars.filter(isApprovedAlphaGoalSidecar);
+    const confirmedAlpha = sidecars.filter(isConfirmedAlphaGoalSidecar);
     const finalVerdicts = sidecars.filter(isFinalVerificationSidecar);
     const reachesMutation = sidecars.some(
       (sidecar) => sidecar.route_state === "control-loop" || sidecar.next_route === "control-loop",
@@ -553,10 +596,10 @@ function validateSidecarTraceGroups(
 
       if (
         (routeState === "control-loop" || nextRoute === "control-loop") &&
-        !isApprovedAlphaGoalSidecar(sidecar) &&
-        support(sidecar, approvedAlpha, ["reference_id"]) !== "ok"
+        !isConfirmedAlphaGoalSidecar(sidecar) &&
+        support(sidecar, confirmedAlpha, ["reference_id"]) !== "ok"
       ) {
-        errors.push(`${prefix}: control-loop 需要先前已批准的 alpha-goal schema sidecar`);
+        errors.push(`${prefix}: control-loop 需要先前已确认的 alpha-goal schema sidecar`);
       }
 
       if (
@@ -599,14 +642,33 @@ function readJsonObject(file: string): Record<string, unknown> | undefined {
   return undefined;
 }
 
-function isApprovedAlphaGoalSidecar(sidecar: Record<string, unknown>): boolean {
+function validateAlphaGoalContractFields(
+  rel: string,
+  sidecar: Record<string, unknown>,
+  errors: string[],
+): void {
+  if (sidecar.artifact_kind !== "alpha-goal") {
+    return;
+  }
+  const missing = ALPHA_GOAL_CONTRACT_KEYS.filter((key) => !stringValue(sidecar[key]));
+  if (missing.length > 0) {
+    errors.push(`${rel}: alpha-goal 缺少目标契约字段 ${missing.join(", ")}`);
+  }
+}
+
+function hasAlphaGoalContractFields(sidecar: Record<string, unknown>): boolean {
+  return ALPHA_GOAL_CONTRACT_KEYS.every((key) => Boolean(stringValue(sidecar[key])));
+}
+
+function isConfirmedAlphaGoalSidecar(sidecar: Record<string, unknown>): boolean {
   return (
     sidecar.artifact_kind === "alpha-goal" &&
     sidecar.route_state === "alpha-goal" &&
     sidecar.next_route === "control-loop" &&
-    sidecar.stage_decision === "CONTRACT_APPROVED" &&
-    sidecar.authorization_status === "approved" &&
-    Boolean(stringValue(sidecar.reference_id))
+    sidecar.stage_decision === "CONTRACT_CONFIRMED" &&
+    sidecar.confirmation_status === "confirmed" &&
+    Boolean(stringValue(sidecar.reference_id)) &&
+    hasAlphaGoalContractFields(sidecar)
   );
 }
 
@@ -762,7 +824,6 @@ function stageDecisionMatchesRoute(stageDecision: string, nextRoute: string): bo
     case "ROUTE_TO_ALPHA_GOAL":
     case "RETURN_TO_ALPHA_GOAL":
     case "REFRAME":
-    case "CONTRACT_REFRAME":
       return ["alpha-goal", "system-model", "user"].includes(nextRoute);
     case "ROUTE_TO_SYSTEM_MODEL":
     case "RETURN_TO_SYSTEM_MODEL":
@@ -772,7 +833,7 @@ function stageDecisionMatchesRoute(stageDecision: string, nextRoute: string): bo
       return nextRoute === "evidence-verify";
     case "ROUTE_TO_USER":
       return nextRoute === "user";
-    case "CONTRACT_APPROVED":
+    case "CONTRACT_CONFIRMED":
     case "ITERATION_CONTINUES":
     case "ITERATION_HARDEN":
     case "NEXT_ITERATION":

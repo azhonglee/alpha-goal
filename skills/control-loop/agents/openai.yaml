@@ -1,4 +1,4 @@
 interface:
-  display_name: "Control Loop"
-  short_description: "Execute bounded control cycles"
-  default_prompt: "Use $control-loop to run one bounded control iteration under the current Goal Contract, then record evidence, Adaptive Learning, and route."
+  display_name: "控制循环"
+  short_description: "运行有界控制迭代"
+  default_prompt: "使用 $control-loop 在已确认 alpha-goal 目标契约下运行一轮有界控制迭代，并记录证据、自适应学习和下一路由。"

@@ -9,11 +9,11 @@
   "target_error": "validator must catch runtime trace drift",
   "control_variable": "runtime sidecar fixtures",
   "sensor": "npx --yes tsx tools/validate_skillset.ts .",
-  "threshold_or_tolerance": "validation passes only when trace continuity and authorization gates hold",
+  "threshold_or_tolerance": "validation passes only when trace continuity and 目标契约闸门s hold",
   "evidence_boundary": "module",
   "residual_error": "none known for fixture",
   "claim_boundary": "runtime fixture documents a bounded iteration sidecar",
   "stage_decision": "ITERATION_READY_FOR_VERIFY",
-  "authorization_status": "approved",
+  "confirmation_status": "confirmed",
   "generated_at": "2026-06-16T00:00:00Z"
 }
