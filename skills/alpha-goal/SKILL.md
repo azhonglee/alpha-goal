@@ -36,7 +36,7 @@ description: "把工程、调试、设计和验证工作路由到闭环控制技
 - `references/cybernetic-routing.md`: 路由选择和稳定性失效模式。
 - `references/closed-loop-ledger.md`: 跨阶段状态记忆结构和更新规则。
 - `references/artifact-layout.md`: 任务级 `.alpha-goal/YYYYMMDD-<slug>/xxx` 运行态产物布局。
-- `references/cybernetic-conformance.md`: 状态转移、结构化伴随文件和闭环不变量检查。
+- `references/cybernetic-conformance.md`: 状态转移、schema sidecar 和闭环不变量检查。
 
 ## 流程
 

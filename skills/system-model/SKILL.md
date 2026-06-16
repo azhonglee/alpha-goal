@@ -224,7 +224,7 @@ TUI 摘要:
   - 信号噪声:
   - 置信度:
   - 阻尼 / 防振荡:
-  - 饱和 / 约束边界:
+  - 饱和条件 / 约束边界:
   - 风险 / 失败处理:
 - 扰动记录:
   - 扰动:
@@ -241,7 +241,7 @@ TUI 摘要:
 - 稳定性条件:
 - 缺失信息:
 - 模型充分性: 充分 | 窄化声明下充分 | 不充分 | 阻塞
-- 台账更新: `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 路径、产物路径、可选结构化伴随文件路径、模型变更、残余模型不确定性、下一路由，或明确的无法写入原因
+- 台账更新: `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 路径、产物路径、可选 schema sidecar 路径、模型变更、残余模型不确定性、下一路由，或明确的无法写入原因
 - 推荐路由: goal-contract | control-loop | evidence-verify | decision-synthesis | blocker
 ```
 

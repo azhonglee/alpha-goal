@@ -1,6 +1,6 @@
 # 验证结论结构定义
 
-正式验收记录、可合并 / 可发布判断、高风险声明、证据存在争议或需要交接时，使用完整结构定义。低风险检查只要语义完整，可以使用紧凑结论。默认把完整结论持久化到 `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/verification-verdict.json` 写入结构化伴随文件。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `验证摘要`，包含结论、声明边界、证据、产物路径和下一步动作。
+正式验收记录、可合并 / 可发布判断、高风险声明、证据存在争议或需要交接时，使用完整结构定义。低风险检查只要语义完整，可以使用紧凑结论。默认把完整结论持久化到 `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/verification-verdict.json` 写入 schema sidecar。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `验证摘要`，包含结论、声明边界、证据、产物路径和下一步动作。
 
 ## 紧凑结论
 
@@ -39,7 +39,7 @@
 - 台账更新:
   - 控制状态路径:
   - 产物路径:
-  - 结构化伴随文件路径:
+  - schema sidecar 路径:
   - 结论:
   - 下一路由:
 ```
@@ -77,7 +77,7 @@
 - 信号噪声;
 - 置信度;
 - 阻尼 / 防振荡;
-- 饱和 / 约束边界;
+- 饱和条件 / 约束边界;
 - 阈值状态: `met`、`partially met`、`not met`、`blocked` 或 `not applicable`;
 - 失败处理或残余误差.
 

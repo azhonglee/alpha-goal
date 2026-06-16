@@ -170,7 +170,7 @@ TUI 摘要:
 - 决策边界:
 - 风险与显式接受:
 - 最小可行目标契约候选:
-- 台账更新: `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 路径、产物路径、可选结构化伴随文件路径、综合状态变更、下一路由，或明确的无法写入原因
+- 台账更新: `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 路径、产物路径、可选 schema sidecar 路径、综合状态变更、下一路由，或明确的无法写入原因
 - 路由:
 ```
 

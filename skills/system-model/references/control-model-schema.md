@@ -1,6 +1,6 @@
 # 控制模型结构定义
 
-默认把完整模型持久化到 `.alpha-goal/YYYYMMDD-<slug>/system-model.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/system-model.json` 写入结构化伴随文件。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `模型摘要`，包含边界、可观测性、可控性、产物路径和推荐路由。
+默认把完整模型持久化到 `.alpha-goal/YYYYMMDD-<slug>/system-model.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/system-model.json` 写入 schema sidecar。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `模型摘要`，包含边界、可观测性、可控性、产物路径和推荐路由。
 
 ```text
 控制模型:
@@ -45,7 +45,7 @@
   - 信号噪声:
   - 置信度:
   - 阻尼 / 防振荡:
-  - 饱和 / 约束边界:
+  - 饱和条件 / 约束边界:
   - 风险 / 失败处理:
 - 扰动记录:
   - 扰动:
@@ -72,7 +72,7 @@
 - 台账更新:
   - 控制状态路径:
   - 产物路径:
-  - 结构化伴随文件路径:
+  - schema sidecar 路径:
   - 模型变更:
   - 残余模型不确定性:
   - 下一路由:

@@ -38,9 +38,9 @@ evidence-verify -> final | control-loop | goal-contract | system-model | blocker
 - `decision-synthesis -> evidence-verify` 仅在综合研判未授权改动，且下一步只是把既有证据包与拟声明内容进行比较时有效。
 - `system-model -> control-loop` 仅在已存在批准后的目标契约，并且模型只在该契约内更新被控对象、传感器、执行器、扰动或耦合事实时有效。
 
-## 结构化伴随文件
+## schema sidecar
 
-任务耗时较长、风险较高或可能需要恢复时，要在 `.alpha-goal/YYYYMMDD-<slug>/schema/` 下为阶段产物生成机器可读的结构化伴随文件。该文件用于路由、追踪和机器检查，是紧凑摘要；它不替代完整 Markdown 阶段产物，也不替代持久化的完整控制律。伴随文件使用 JSON，必须满足下列基础 JSON Schema。TypeScript 校验器还会额外检查：产物类型与路径匹配、阶段专用必填字段、迁移闸门、授权规则、样例追踪、运行态追踪连续性、证据边界、阶段决策和声明边界。
+任务耗时较长、风险较高或可能需要恢复时，要在 `.alpha-goal/YYYYMMDD-<slug>/schema/` 下为阶段产物生成机器可读的 schema sidecar。该文件用于路由、追踪和机器检查，是紧凑摘要；它不替代完整 Markdown 阶段产物，也不替代持久化的完整控制律。sidecar 使用 JSON，必须满足下列基础 JSON Schema。TypeScript 校验器还会额外检查：产物类型与路径匹配、阶段专用必填字段、迁移闸门、授权规则、样例追踪、运行态追踪连续性、证据边界、阶段决策和声明边界。
 
 ```json
 {
