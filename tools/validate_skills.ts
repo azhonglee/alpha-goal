@@ -422,9 +422,9 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "execution feedback requires control law and ledger state",
     "skills/control-loop/SKILL.md",
     [
-      "Execution Check",
-      "Use the user's language",
       "执行检查",
+      "Chinese heading and field labels by default",
+      "explicitly asks for another language",
       "问题",
       "本轮动作",
       "验收证据",
@@ -532,9 +532,8 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "Route decision",
       "Next state",
       "Adaptive learning",
-      "Execution Check",
       "执行检查",
-      "Localize headings and field labels",
+      "Chinese heading and field labels by default",
       "raw internal Control Law blocks",
     ],
   ],
@@ -641,7 +640,6 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     [
       "Internal Schema",
       "TUI Projection",
-      "Execution Check",
       "执行检查",
       "internal artifact syntax only",
       "Schema sidecars are machine-readable summaries and indexes",
@@ -672,9 +670,9 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "control loop preserves dynamic control law fields",
     "skills/control-loop/SKILL.md",
     [
-      "Execution Check",
-      "Use the user's language",
       "执行检查",
+      "Chinese heading and field labels by default",
+      "explicitly asks for another language",
       "问题",
       "本轮动作",
       "主要风险",
@@ -772,13 +770,8 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
       "| 验收证据 |",
       "| 主要风险 |",
       "| 失败处理 |",
-      "Execution Check",
-      "| Problem |",
-      "| Action |",
-      "| Held constant |",
-      "| Evidence |",
-      "| Main risk |",
-      "| Fallback |",
+      "Chinese heading and field labels by default",
+      "without showing multiple language templates",
     ],
   },
   {
@@ -794,17 +787,10 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
       "| 验收证据 |",
       "| 主要风险 |",
       "| 失败处理 |",
-      "Execution Check",
-      "| Problem |",
-      "| Action |",
-      "| Held constant |",
-      "| Evidence |",
-      "| Main risk |",
-      "| Fallback |",
-      "Problem / 问题",
-      "Action / 本轮动作",
-      "Main risk / 主要风险",
-      "Fallback / 失败处理",
+      "| 问题 | Target error |",
+      "| 本轮动作 | Control variable plus control action or probe |",
+      "| 主要风险 | Signal noise, damping / anti-oscillation, saturation / containment, or strongest material risk |",
+      "| 失败处理 | Fallback action plus stop / reframe trigger |",
     ],
   },
   {
@@ -873,6 +859,9 @@ const DEFAULT_TUI_PROJECTION_GUARDS = [
 const RAW_CONTROL_LAW_LINE_RE =
   /(?:^|\n)\s*(?:Control Law:|- Target error:|- Control variable:|- Control action or probe:|- Variables held constant:|- Expected effect:|- Sensor:|- Threshold \/ tolerance:|- Feedback latency:|- Signal noise:|- Confidence:|- Damping \/ anti-oscillation:|- Saturation \/ containment:|- Feedback timing:|- Fallback action:|- Stop \/ reframe trigger:)/;
 
+const MULTILINGUAL_TUI_EXAMPLE_RE =
+  /(?:For English conversations|English Check|Execution Check|\| Problem \||\| Action \||\| Held constant \||\| Main risk \||\| Fallback \|)/;
+
 const FIXTURE_CONTRACT_TESTS = [
   {
     name: "complex migration conflict uses synthesis and indicator handoff",
@@ -924,7 +913,7 @@ const FIXTURE_CONTRACT_TESTS = [
       "skills/control-loop/references/control-law.md",
       "skills/control-loop/references/adaptive-learning.md",
     ],
-    schema_blocks: ["执行检查", "Execution Check", "Adaptive Learning Record:"],
+    schema_blocks: ["执行检查", "Adaptive Learning Record:"],
     route_terms: [
       "ITERATION_CONTINUES",
       "ITERATION_HARDEN",
@@ -2128,6 +2117,13 @@ function validateDefaultTuiProjectionGuards(root: string, errors: string[]): voi
     if (match) {
       errors.push(
         `default TUI projection guard ${JSON.stringify(guard.name)} failed in ${guard.path}: default TUI section contains raw Control Law field ${JSON.stringify(match[0].trim())}`,
+      );
+    }
+
+    const multilingualExample = section.match(MULTILINGUAL_TUI_EXAMPLE_RE);
+    if (multilingualExample) {
+      errors.push(
+        `default TUI projection guard ${JSON.stringify(guard.name)} failed in ${guard.path}: default TUI section contains a separate non-Chinese example term ${JSON.stringify(multilingualExample[0].trim())}`,
       );
     }
   }

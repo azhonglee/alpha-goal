@@ -65,13 +65,13 @@ Dynamic planning answers only the current iteration:
 - success, failure, feedback, and reframe routes;
 - whether a durable plan is necessary.
 
-Before executing a mutation or diagnostic-probe slice, prepare the full Control Law and persist it in the Iteration Record or Closed-loop Ledger. Do not print the raw `Control Law:` block in the TUI by default. Show a user-facing `Execution Check` table instead, then execute only if the target error, approved control variable, observable sensor threshold, and fallback action are present in the persisted Control Law. For repeated, noisy, broad, or high-risk loops, the persisted Control Law must also include feedback latency, signal noise, confidence, damping / anti-oscillation, and saturation / containment before acting again.
+Before executing a mutation or diagnostic-probe slice, prepare the full Control Law and persist it in the Iteration Record or Closed-loop Ledger. Do not print the raw `Control Law:` block in the TUI by default. Show a user-facing `执行检查` table instead, then execute only if the target error, approved control variable, observable sensor threshold, and fallback action are present in the persisted Control Law. For repeated, noisy, broad, or high-risk loops, the persisted Control Law must also include feedback latency, signal noise, confidence, damping / anti-oscillation, and saturation / containment before acting again.
 
 Print the raw `Control Law:` block in chat only when the user asks for it, file persistence is blocked, or the slice is high-risk enough that the user must review every control field before mutation.
 
 TUI pre-action check:
 
-Use the user's language for the heading and field labels. For Chinese conversations, use:
+Use Chinese heading and field labels by default. If the user explicitly asks for another language, translate the same field semantics without showing multiple language templates.
 
 ```markdown
 执行检查
@@ -86,22 +86,7 @@ Use the user's language for the heading and field labels. For Chinese conversati
 | 失败处理 | |
 ```
 
-For English conversations, use:
-
-```markdown
-Execution Check
-
-| Field | Value |
-| --- | --- |
-| Problem | |
-| Action | |
-| Held constant | |
-| Evidence | |
-| Main risk | |
-| Fallback | |
-```
-
-Map `Problem` / `问题` from target error, `Action` / `本轮动作` from control variable plus control action, `Held constant` / `保持不变` from variables held constant and containment, `Evidence` / `验收证据` from sensor plus threshold, `Main risk` / `主要风险` from signal noise, damping, saturation, or strongest material risk, and `Fallback` / `失败处理` from fallback action or stop/reframe trigger. Keep values concise and point to the persisted artifact for the full Control Law.
+Map `问题` from target error, `本轮动作` from control variable plus control action, `保持不变` from variables held constant and containment, `验收证据` from sensor plus threshold, `主要风险` from signal noise, damping, saturation, or strongest material risk, and `失败处理` from fallback action or stop/reframe trigger. Keep values concise and point to the persisted artifact for the full Control Law.
 
 Create or update a durable plan only for multiple independent loops, modules, repos, handoff/recovery needs, external side effects, irreversible/high-risk changes, rollback/compatibility decisions, contested ownership, or user request.
 

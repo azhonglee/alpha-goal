@@ -4,7 +4,7 @@ Use this reference when planning or reviewing a `control-loop` slice that change
 
 ## TUI Projection
 
-Show a concise `Execution Check` table in the TUI by default. Use the user's language for the heading and field labels. For Chinese conversations, use:
+Show a concise `执行检查` table in the TUI by default. Use Chinese heading and field labels unless the user explicitly asks for another language:
 
 ```markdown
 执行检查
@@ -19,33 +19,18 @@ Show a concise `Execution Check` table in the TUI by default. Use the user's lan
 | 失败处理 | |
 ```
 
-For English conversations, use:
-
-```markdown
-Execution Check
-
-| Field | Value |
-| --- | --- |
-| Problem | |
-| Action | |
-| Held constant | |
-| Evidence | |
-| Main risk | |
-| Fallback | |
-```
-
 Use the table as a human-readable projection of the internal Control Law. Keep the TUI values short enough to scan. Put long reasoning, exact thresholds, and stability guards in the persisted Control Law. Print the raw `Control Law:` block in chat only when the user asks, persistence is blocked, or a high-risk slice requires explicit review of every field before mutation.
 
 Map fields as follows:
 
 | TUI field | Internal source |
 | --- | --- |
-| Problem / 问题 | Target error |
-| Action / 本轮动作 | Control variable plus control action or probe |
-| Held constant / 保持不变 | Variables held constant plus saturation / containment |
-| Evidence / 验收证据 | Sensor plus threshold / tolerance |
-| Main risk / 主要风险 | Signal noise, damping / anti-oscillation, saturation / containment, or strongest material risk |
-| Fallback / 失败处理 | Fallback action plus stop / reframe trigger |
+| 问题 | Target error |
+| 本轮动作 | Control variable plus control action or probe |
+| 保持不变 | Variables held constant plus saturation / containment |
+| 验收证据 | Sensor plus threshold / tolerance |
+| 主要风险 | Signal noise, damping / anti-oscillation, saturation / containment, or strongest material risk |
+| 失败处理 | Fallback action plus stop / reframe trigger |
 
 ## Internal Schema
 

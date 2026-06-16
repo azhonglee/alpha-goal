@@ -133,7 +133,7 @@ Expected behavior:
 
 - It should run or manually record mutation preflight.
 - It should refuse mutation if target is not closed or edit path is unsafe.
-- Its full Control Law should be persisted to an iteration artifact or ledger, while the TUI shows a compact `Execution Check` table instead of the raw `Control Law:` block by default.
+- Its full Control Law should be persisted to an iteration artifact or ledger, while the TUI shows a compact Chinese `执行检查` table instead of the raw `Control Law:` block by default.
 - The persisted Control Law should include feedback latency, signal noise, confidence, damping / anti-oscillation, and saturation / containment when feedback is repeated, noisy, broad, or high-risk.
 - It should produce an Iteration Record with dynamic plan, execution, feedback, and Adaptive Learning Record when feedback contradicts a reusable control assumption.
 
