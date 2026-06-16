@@ -1,6 +1,6 @@
 ---
 name: alpha-goal
-description: "Route engineering, debugging, design, and verification work through the closed-loop control skill suite: goal-contract, system-model, control-loop, evidence-verify, and decision-synthesis. Use when the next skill or control boundary is unclear."
+description: "Route engineering, debugging, design, and verification work through the closed-loop control skill suite: goal-contract, system-model, control-loop, evidence-verify, and decision-synthesis. Use when the next skill or control boundary is unclear. Use for any rengineering, debugging, design, or verification request."
 ---
 
 # Alpha Goal
