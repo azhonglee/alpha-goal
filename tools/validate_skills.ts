@@ -849,10 +849,100 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
 
 const DEFAULT_TUI_PROJECTION_GUARDS = [
   {
+    name: "路由摘要 TUI",
+    path: "skills/alpha-goal/SKILL.md",
+    anchor: "随后只展示适合 TUI 阅读的 Markdown 表格摘要：",
+    end_anchor: "摘要应让用户",
+    required_template_terms: [
+      "路由摘要",
+      "| 字段 | 内容 |",
+      "| 路由 |",
+      "| 原因 |",
+      "| 边界 |",
+      "| 台账 |",
+      "| 下一步 |",
+    ],
+  },
+  {
+    name: "目标契约摘要 TUI",
+    path: "skills/goal-contract/SKILL.md",
+    anchor: "TUI 摘要:",
+    end_anchor: "默认持久化路径:",
+    required_template_terms: [
+      "契约摘要",
+      "| 字段 | 内容 |",
+      "| 参考 |",
+      "| 范围边界 |",
+      "| 证据 |",
+      "| 产物 |",
+      "| 下一步 |",
+    ],
+  },
+  {
+    name: "系统模型摘要 TUI",
+    path: "skills/system-model/SKILL.md",
+    anchor: "TUI 摘要:",
+    end_anchor: "完整模型:",
+    required_template_terms: [
+      "模型摘要",
+      "| 字段 | 内容 |",
+      "| 边界 |",
+      "| 可观测性 |",
+      "| 可控性 |",
+      "| 产物 |",
+      "| 推荐路由 |",
+    ],
+  },
+  {
     name: "控制循环行动前 TUI",
     path: "skills/control-loop/SKILL.md",
     anchor: "TUI 执行前检查:",
     end_anchor: "只有存在多个独立循环",
+  },
+  {
+    name: "控制循环迭代摘要 TUI",
+    path: "skills/control-loop/SKILL.md",
+    anchor: "TUI 摘要:",
+    end_anchor: "不要在迭代记录中作出最终完成声明",
+    required_template_terms: [
+      "迭代摘要",
+      "| 字段 | 内容 |",
+      "| 动作 |",
+      "| 反馈 |",
+      "| 剩余误差 |",
+      "| 产物 |",
+      "| 下一步 |",
+    ],
+  },
+  {
+    name: "决策综合摘要 TUI",
+    path: "skills/decision-synthesis/SKILL.md",
+    anchor: "TUI 摘要:",
+    end_anchor: "完整产物字段:",
+    required_template_terms: [
+      "综合摘要",
+      "| 字段 | 内容 |",
+      "| 核心张力 |",
+      "| 推荐方向 |",
+      "| 用户决策 |",
+      "| 产物 |",
+      "| 下一步 |",
+    ],
+  },
+  {
+    name: "验证摘要 TUI",
+    path: "skills/evidence-verify/SKILL.md",
+    anchor: "TUI 摘要:",
+    end_anchor: "完整版:",
+    required_template_terms: [
+      "验证摘要",
+      "| 字段 | 内容 |",
+      "| 结论 |",
+      "| 声明边界 |",
+      "| 证据 |",
+      "| 产物 |",
+      "| 下一步 |",
+    ],
   },
   {
     name: "控制律 TUI 展示",
@@ -879,6 +969,38 @@ const RAW_CONTROL_LAW_FIELD_PATTERNS = [
   "feedback timing",
   "fallback action",
   "stop / reframe trigger",
+  "目标误差",
+  "控制变量",
+  "控制动作或探测",
+  "保持不变的变量",
+  "预期效果",
+  "传感器",
+  "阈值 / 容差",
+  "反馈延迟",
+  "信号噪声",
+  "置信度",
+  "阻尼 / 防振荡",
+  "影响范围上限",
+  "反馈时机",
+  "停止 / 重新界定触发条件",
+];
+
+const USER_VISIBLE_SCRIPT_OUTPUT_TERMS = [
+  "Usage:",
+  "Options:",
+  "Missing value",
+  "Unknown option",
+  "Alpha Goal skillset",
+  "Codex home:",
+  "Validation: passed",
+  "User templates:",
+  "Unsupported TOML value type",
+  "Skipped user template sync",
+  "section(\"status --short\")",
+  "section(\"diff check",
+  "console.log(\"status --short:",
+  "Refusing to ",
+  "Re-run with --force",
 ];
 
 const MULTILINGUAL_TUI_EXAMPLE_RE =
@@ -925,6 +1047,7 @@ const LEGACY_OUTPUT_TITLE_TERMS = [
   "Cybernetic Conformance Report:",
   "Meta-Synthesis Hall",
   "综合集成厅",
+  "综合集成研讨厅",
   "指标交接",
   "扰动登记",
   "饱和 / 影响范围约束",
@@ -1240,6 +1363,7 @@ export function main(args = process.argv.slice(2)): number {
   validateSemanticSmokeTests(root, errors);
   validateStructuredBlockTests(root, errors);
   validateChineseOutputTitles(root, errors);
+  validateUserVisibleScriptOutput(root, errors);
   validateDefaultTuiProjectionGuards(root, errors);
   validateFixtureContractTests(root, errors);
 
@@ -1964,11 +2088,13 @@ function validateRuntimeSchemaSidecars(root: string, errors: string[]): void {
 function validateRuntimeArtifactTree(root: string, runtimeRoot: string, errors: string[]): void {
   const entries = fs.readdirSync(runtimeRoot, { withFileTypes: true });
   for (const entry of entries) {
+    const rel = `.alpha-goal/${entry.name}`;
     if (!entry.isDirectory()) {
+      errors.push(`${rel}: 运行期产物必须放在 .alpha-goal/YYYYMMDD-<slug>/ 任务目录下`);
       continue;
     }
     if (!SIDECAR_TASK_SLUG_RE.test(entry.name)) {
-      errors.push(`.alpha-goal/${entry.name}: 运行期产物目录必须限定到任务目录`);
+      errors.push(`${rel}: 运行期产物目录必须限定到任务目录`);
     }
   }
 }
@@ -2255,7 +2381,11 @@ function validateDefaultTuiProjectionGuards(root: string, errors: string[]): voi
         `默认 TUI 展示检查「${guard.name}」失败：${guard.path} 默认 TUI 区块必须只包含一个模板代码块，实际 ${codeFences.length}`,
       );
     } else {
-      const missingTemplateTerms = DEFAULT_TUI_TEMPLATE_TERMS.filter(
+      const requiredTemplateTerms =
+        "required_template_terms" in guard
+          ? guard.required_template_terms
+          : DEFAULT_TUI_TEMPLATE_TERMS;
+      const missingTemplateTerms = requiredTemplateTerms.filter(
         (term) => !codeFences[0].content.includes(term),
       );
       if (missingTemplateTerms.length > 0) {
@@ -2300,6 +2430,26 @@ function validateChineseOutputTitles(root: string, errors: string[]): void {
       if (pattern.test(text)) {
         errors.push(`${rel}: 残留旧英文输出标题行: ${label}`);
       }
+    }
+  }
+}
+
+function validateUserVisibleScriptOutput(root: string, errors: string[]): void {
+  const scriptFiles = [
+    "scripts/install.sh",
+    "skills/control-loop/scripts/mutation-preflight.ts",
+    "skills/evidence-verify/scripts/evidence-summary.ts",
+    "skills/system-model/scripts/repo-sensor-snapshot.ts",
+  ];
+  for (const rel of scriptFiles) {
+    const file = path.join(root, rel);
+    if (!isFile(file)) {
+      continue;
+    }
+    const text = fs.readFileSync(file, "utf8");
+    const forbidden = USER_VISIBLE_SCRIPT_OUTPUT_TERMS.filter((term) => text.includes(term));
+    if (forbidden.length > 0) {
+      errors.push(`${rel}: 用户可见脚本输出残留旧英文标题或提示: ${forbidden.join(", ")}`);
     }
   }
 }

@@ -220,14 +220,14 @@ evidence-verify -> final | control-loop | goal-contract | system-model | blocker
 
 ```text
 控制论一致性报告:
-- 产物布局: pass | fail
-- 状态转移: pass | fail
-- 行动前参考状态: pass | fail
-- 控制律完整性: pass | fail
-- 扰动处理: pass | fail | not applicable
-- 指标转译: pass | fail | not applicable
-- 声明前传感器: pass | fail
-- 最终结论前比较器: pass | fail
-- 旧产物路径扫描: pass | fail
+- 产物布局: 通过 | 失败
+- 状态转移: 通过 | 失败
+- 行动前参考状态: 通过 | 失败
+- 控制律完整性: 通过 | 失败
+- 扰动处理: 通过 | 失败 | 不适用
+- 指标转译: 通过 | 失败 | 不适用
+- 声明前传感器: 通过 | 失败
+- 最终结论前比较器: 通过 | 失败
+- 旧产物路径扫描: 通过 | 失败
 - 必需下一路由:
 ```

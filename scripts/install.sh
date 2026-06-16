@@ -3,25 +3,24 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: scripts/install.sh [--codex-home PATH] [--force] [--no-sync-user-templates] [--verbose]
+用法: scripts/install.sh [--codex-home PATH] [--force] [--no-sync-user-templates] [--verbose]
 
-Install this repository's skills/ tree by creating a single alpha-goal
-symlink under ${CODEX_HOME:-$HOME/.codex}/skills.
+安装本仓库的 skills/ 目录：在 ${CODEX_HOME:-$HOME/.codex}/skills 下
+创建一个 alpha-goal 软链接。
 
-By default, this script merges templates/AGENTS.md into user-level AGENTS.md
-and fills missing config.toml settings from templates/config.toml.
-Use --no-sync-user-templates to skip user-level template updates.
+默认会把 templates/AGENTS.md 合并到用户级 AGENTS.md，
+并用 templates/config.toml 补齐 config.toml 中缺失的设置。
+使用 --no-sync-user-templates 可跳过用户级模板同步。
 
-Options:
+选项:
   --codex-home PATH
-            Install into PATH instead of ${CODEX_HOME:-$HOME/.codex}.
-  --force   Replace existing symlinks that point elsewhere. Real files or
-            directories are never removed.
+            安装到 PATH，而不是 ${CODEX_HOME:-$HOME/.codex}。
+  --force   替换指向其他位置的既有软链接。不会删除真实文件或目录。
   --no-sync-user-templates
-            Skip updating Codex home AGENTS.md and config.toml from templates/.
+            不用 templates/ 更新 Codex 主目录下的 AGENTS.md 和 config.toml。
   --sync-user-templates
-            Compatibility no-op; user templates are synced by default.
-  --verbose Print detailed install and validation output.
+            兼容选项；用户模板默认已经同步。
+  --verbose 打印详细安装和校验输出。
 EOF
 }
 
@@ -40,7 +39,7 @@ while [[ $# -gt 0 ]]; do
     --codex-home)
       shift
       if [[ $# -eq 0 ]]; then
-        die "Missing value for --codex-home"
+        die "缺少 --codex-home 的取值"
       fi
       codex_home_arg="$1"
       shift
@@ -48,7 +47,7 @@ while [[ $# -gt 0 ]]; do
     --codex-home=*)
       codex_home_arg="${1#*=}"
       if [[ -z "$codex_home_arg" ]]; then
-        die "Missing value for --codex-home"
+        die "缺少 --codex-home 的取值"
       fi
       shift
       ;;
@@ -73,7 +72,7 @@ while [[ $# -gt 0 ]]; do
       exit 0
       ;;
     *)
-      echo "Unknown option: $1" >&2
+      echo "未知选项: $1" >&2
       usage >&2
       exit 2
       ;;
@@ -101,7 +100,7 @@ from pathlib import Path
 
 raw_path = sys.argv[1]
 if not raw_path:
-    print("empty path is not valid", file=sys.stderr)
+    print("空路径无效", file=sys.stderr)
     raise SystemExit(1)
 
 print(Path(raw_path).expanduser().resolve(strict=False))
@@ -115,7 +114,7 @@ import sys
 
 raw_path = sys.argv[1]
 if not raw_path:
-    print("empty path is not valid", file=sys.stderr)
+    print("空路径无效", file=sys.stderr)
     raise SystemExit(1)
 
 print(os.path.abspath(os.path.expanduser(raw_path)))
@@ -134,7 +133,7 @@ default_codex_home() {
   fi
 
   if [[ -z "${HOME:-}" ]]; then
-    die "CODEX_HOME is not set and HOME is unavailable; pass --codex-home PATH"
+    die "未设置 CODEX_HOME，且 HOME 不可用；请传入 --codex-home PATH"
   fi
 
   printf '%s\n' "$HOME/.codex"
@@ -179,7 +178,7 @@ link_path() {
     current_target="$(resolve_link_target "$target")"
     if [[ "$current_target" == "$source" ]]; then
       already_count=$((already_count + 1))
-      log "Already installed: $label -> $source"
+      log "已安装，无需变更: $label -> $source"
       return
     fi
 
@@ -192,22 +191,22 @@ link_path() {
       rm "$target"
       replaced=true
     else
-      echo "Refusing to replace existing symlink: $target -> $raw_current_target" >&2
-      echo "Re-run with --force to replace symlinks." >&2
+      echo "拒绝替换既有软链接: $target -> $raw_current_target" >&2
+      echo "如需替换软链接，请重新运行并加上 --force。" >&2
       exit 1
     fi
   elif [[ -e "$target" ]]; then
-    echo "Refusing to replace existing non-symlink path: $target" >&2
+    echo "拒绝替换既有非软链接路径: $target" >&2
     exit 1
   fi
 
   ln -s "$source" "$target"
   if [[ "$replaced" == true ]]; then
     replaced_count=$((replaced_count + 1))
-    log "Replaced: $label -> $source"
+    log "已替换: $label -> $source"
   else
     linked_count=$((linked_count + 1))
-    log "Installed: $label -> $source"
+    log "已安装: $label -> $source"
   fi
 }
 
@@ -225,7 +224,7 @@ remove_legacy_support_link() {
   if [[ "$current_target" == "$legacy_source" ]]; then
     rm "$target"
     legacy_removed_count=$((legacy_removed_count + 1))
-    log "Removed legacy support link: $target"
+    log "已清理旧支持链接: $target"
   fi
 }
 
@@ -242,7 +241,7 @@ remove_obsolete_skill_link() {
   if [[ "$current_target" == "$source_skill_root/$skill_name" || "$current_target" == "$repo_root/$skill_name" ]]; then
     rm "$target"
     legacy_removed_count=$((legacy_removed_count + 1))
-    log "Removed obsolete skill link: $target"
+    log "已清理旧技能链接: $target"
   fi
 }
 
@@ -257,11 +256,11 @@ preflight_install_targets() {
     if [[ "$current_target" == "$install_source" || "$current_target" == "$legacy_top_level_source" || "$current_target" == "$legacy_skill_dir_source" || "$force" == true ]]; then
       return
     fi
-    echo "Refusing to replace existing symlink: $target -> $(readlink "$target")" >&2
-    echo "Re-run with --force to replace symlinks." >&2
+    echo "拒绝替换既有软链接: $target -> $(readlink "$target")" >&2
+    echo "如需替换软链接，请重新运行并加上 --force。" >&2
     exit 1
   elif [[ -e "$target" ]]; then
-    echo "Refusing to replace existing non-symlink path: $target" >&2
+    echo "拒绝替换既有非软链接路径: $target" >&2
     exit 1
   fi
 }
@@ -271,13 +270,13 @@ validate_installed_links() {
   local target="$target_root/$install_link_name"
 
   if [[ ! -L "$target" ]]; then
-    echo "Installed skillset is not a symlink: $target" >&2
+    echo "已安装技能套件不是软链接: $target" >&2
     failed=true
   else
     local current_target
     current_target="$(resolve_link_target "$target")"
     if [[ "$current_target" != "$install_source" ]]; then
-      echo "Installed skillset points elsewhere: $target -> $current_target" >&2
+      echo "已安装技能套件指向了其他位置: $target -> $current_target" >&2
       failed=true
     fi
   fi
@@ -289,7 +288,7 @@ validate_installed_links() {
     skill_name="$(basename "$skill_dir")"
 
     if [[ ! -f "$target/$skill_name/SKILL.md" ]]; then
-      echo "Installed skillset is missing $skill_name/SKILL.md through symlink: $target" >&2
+      echo "已安装技能套件通过软链接访问不到 $skill_name/SKILL.md: $target" >&2
       failed=true
       continue
     fi
@@ -302,7 +301,7 @@ validate_installed_links() {
     local direct_current_target
     direct_current_target="$(resolve_link_target "$direct_target")"
     if [[ "$direct_current_target" == "$skill_dir" || "$direct_current_target" == "$repo_root/$skill_name" ]]; then
-      echo "Required skill should be installed through $install_link_name, not as a direct same-repo link: $direct_target" >&2
+      echo "必需技能应通过 $install_link_name 安装，不应作为同仓库直接链接安装: $direct_target" >&2
       failed=true
     fi
   done
@@ -312,7 +311,7 @@ validate_installed_links() {
     local legacy_source="$repo_root/$support_name"
 
     if [[ -L "$target" && "$(resolve_link_target "$target")" == "$legacy_source" ]]; then
-      echo "Support directory should not be installed as a skill: $target" >&2
+      echo "支持目录不应作为技能安装: $target" >&2
       failed=true
     fi
   done
@@ -321,7 +320,7 @@ validate_installed_links() {
     exit 1
   fi
 
-  log "Validated installed skillset link in $target_root"
+  log "已校验安装后的技能套件链接: $target_root"
 }
 
 inject_agents_template() {
@@ -329,19 +328,19 @@ inject_agents_template() {
   template_content="$(<"$agents_template")"
 
   if [[ -e "$agents_target" && ! -f "$agents_target" ]]; then
-    echo "Refusing to write AGENTS template into non-file path: $agents_target" >&2
+    echo "拒绝把 AGENTS 模板写入非文件路径: $agents_target" >&2
     exit 1
   fi
 
   if [[ "$template_content" != *"$agents_template_marker"* ]]; then
-    echo "AGENTS template is missing required marker: $agents_template_marker" >&2
+    echo "AGENTS 模板缺少必需标记: $agents_template_marker" >&2
     exit 1
   fi
 
   if [[ ! -f "$agents_target" ]]; then
     cp "$agents_template" "$agents_target"
     agents_action="created"
-    log "Created AGENTS.md from template: $agents_target"
+    log "已从模板创建 AGENTS.md: $agents_target"
     return
   fi
 
@@ -356,7 +355,7 @@ inject_agents_template() {
       cat "$agents_template"
     } >>"$agents_target"
     agents_action="updated"
-    log "Injected AGENTS template into $agents_target"
+    log "已注入 AGENTS 模板: $agents_target"
     return
   fi
 
@@ -374,7 +373,7 @@ target = target_path.read_text()
 template_lines = template.splitlines()
 
 if not template_lines or marker not in template_lines:
-    print(f"Invalid AGENTS template: {template_path}", file=sys.stderr)
+    print(f"AGENTS 模板无效: {template_path}", file=sys.stderr)
     raise SystemExit(1)
 
 block_start = template_lines[0]
@@ -404,7 +403,7 @@ while index < len(target_lines):
 
 if not blocks:
     print(
-        f"Refusing to update {target_path}: marker exists but managed block was not found",
+        f"拒绝更新 {target_path}: 找到标记，但未找到受管理模板块",
         file=sys.stderr,
     )
     raise SystemExit(1)
@@ -432,28 +431,28 @@ PY
   case "$result" in
     current)
       agents_action="current"
-      log "AGENTS.md already has current managed template content: $agents_target"
+      log "AGENTS.md 受管理模板已是最新: $agents_target"
       ;;
     updated)
       agents_action="updated"
-      log "Updated managed AGENTS template content in $agents_target"
+      log "已更新 AGENTS.md 受管理模板: $agents_target"
       ;;
     *)
-      die "Unexpected AGENTS template merge result: $result"
+      die "AGENTS 模板合并结果异常: $result"
       ;;
   esac
 }
 
 sync_config_template() {
   if [[ -e "$config_target" && ! -f "$config_target" ]]; then
-    echo "Refusing to write config template into non-file path: $config_target" >&2
+    echo "拒绝把 config 模板写入非文件路径: $config_target" >&2
     exit 1
   fi
 
   if [[ ! -f "$config_target" ]]; then
     cp "$config_template" "$config_target"
     config_action="created"
-    log "Created config.toml from template: $config_target"
+    log "已从模板创建 config.toml: $config_target"
     return
   fi
 
@@ -529,7 +528,7 @@ def toml_value(value) -> str:
         return repr(value)
     if isinstance(value, list):
         return "[" + ", ".join(toml_value(item) for item in value) + "]"
-    print(f"Unsupported TOML value type in template: {type(value).__name__}", file=sys.stderr)
+    print(f"模板中存在不支持的 TOML 值类型: {type(value).__name__}", file=sys.stderr)
     raise SystemExit(1)
 
 
@@ -561,7 +560,7 @@ for path, value in flatten(template_data):
     conflict = parent_conflict(target_data, path)
     if conflict:
         print(
-            f"Cannot add {'.'.join(path)}: non-table value exists at {'.'.join(conflict)}",
+            f"无法添加 {'.'.join(path)}: {'.'.join(conflict)} 已存在且不是表",
             file=sys.stderr,
         )
         raise SystemExit(1)
@@ -610,7 +609,7 @@ new_text = "".join(lines)
 try:
     tomllib.loads(new_text) if new_text.strip() else {}
 except tomllib.TOMLDecodeError as exc:
-    print(f"Refusing to write invalid merged TOML for {target_path}: {exc}", file=sys.stderr)
+    print(f"拒绝写入合并后无效的 TOML {target_path}: {exc}", file=sys.stderr)
     raise SystemExit(1)
 
 target_path.write_text(new_text)
@@ -621,21 +620,21 @@ PY
   case "$result" in
     current)
       config_action="current"
-      log "config.toml already contains template settings: $config_target"
+      log "config.toml 已包含模板设置: $config_target"
       ;;
     updated:*)
       config_action="updated"
-      log "Added ${result#updated:} config setting(s) into $config_target"
+      log "已向 $config_target 补齐 ${result#updated:} 个配置项"
       ;;
     *)
-      die "Unexpected config template merge result: $result"
+      die "配置模板合并结果异常: $result"
       ;;
   esac
 }
 
 run_skillset_validation() {
   if [[ ! -f "$validation_tool" ]]; then
-    echo "Missing validation tool: $validation_tool" >&2
+    echo "缺少校验工具: $validation_tool" >&2
     exit 1
   fi
 
@@ -646,39 +645,59 @@ run_skillset_validation() {
 
   local output
   if ! output="$(npx --yes tsx "$validation_tool" "$repo_root" 2>&1)"; then
-    echo "Validation failed ($validation_tool_label). Re-run with --verbose for full output." >&2
+    echo "校验失败 ($validation_tool_label)。如需完整输出，请加 --verbose 重新运行。" >&2
     printf '%s\n' "$output" | grep -E '^(ERRORS:|- |FAIL )' >&2 || true
     exit 1
   fi
 }
 
+action_label() {
+  case "$1" in
+    created)
+      printf '已创建'
+      ;;
+    updated)
+      printf '已更新'
+      ;;
+    current)
+      printf '已是最新'
+      ;;
+    skipped)
+      printf '已跳过'
+      ;;
+    *)
+      printf '%s' "$1"
+      ;;
+  esac
+}
+
 print_summary() {
-  local status="ready"
+  local status="已就绪"
   if [[ "$linked_count" -gt 0 || "$replaced_count" -gt 0 || "$legacy_removed_count" -gt 0 ]]; then
-    status="installed"
+    status="已安装"
   fi
   if [[ "$sync_user_templates" == true && ( "$agents_action" != "current" || "$config_action" != "current" ) ]]; then
-    status="installed"
+    status="已安装"
   fi
 
-  echo "Alpha Goal skillset $status: $installed -> $target_root"
-  echo "Codex home: $codex_home"
-  echo "Validation: passed ($validation_tool_label)"
+  echo "Alpha Goal 技能套件$status: $installed -> $target_root"
+  echo "Codex 主目录: $codex_home"
+  echo "校验: 通过 ($validation_tool_label)"
   if [[ "$sync_user_templates" == true ]]; then
-    echo "User templates: AGENTS.md $agents_action, config.toml $config_action"
+    echo "用户模板: AGENTS.md $(action_label "$agents_action")，config.toml $(action_label "$config_action")"
   else
-    echo "User templates: skipped (--no-sync-user-templates)"
+    echo "用户模板: 已跳过 (--no-sync-user-templates)"
   fi
 }
 
 if [[ "$sync_user_templates" == true ]]; then
   if [[ ! -f "$agents_template" ]]; then
-    echo "No AGENTS template found at $agents_template" >&2
+    echo "未找到 AGENTS 模板: $agents_template" >&2
     exit 1
   fi
 
   if [[ ! -f "$config_template" ]]; then
-    echo "No config template found at $config_template" >&2
+    echo "未找到 config 模板: $config_template" >&2
     exit 1
   fi
 fi
@@ -690,7 +709,7 @@ skill_files=()
 for skill_name in "${required_skills[@]}"; do
   skill_file="$source_skill_root/$skill_name/SKILL.md"
   if [[ ! -f "$skill_file" ]]; then
-    echo "Missing required skill: $skill_file" >&2
+    echo "缺少必需技能: $skill_file" >&2
     exit 1
   fi
   skill_files+=("$skill_file")
@@ -700,7 +719,7 @@ shopt -s nullglob
 discovered_skill_files=("$source_skill_root"/*/SKILL.md)
 shopt -u nullglob
 if [[ "${#discovered_skill_files[@]}" -ne "${#required_skills[@]}" ]]; then
-  echo "Unexpected skill set under $source_skill_root; run $validation_tool_label for details." >&2
+  echo "$source_skill_root 下的技能集合不符合预期；请运行 $validation_tool_label 查看详情。" >&2
   exit 1
 fi
 
@@ -711,7 +730,7 @@ if [[ "$sync_user_templates" == true ]]; then
   inject_agents_template
   sync_config_template
 else
-  log "Skipped user template sync due to --no-sync-user-templates"
+  log "已按 --no-sync-user-templates 跳过用户模板同步"
 fi
 
 installed=0

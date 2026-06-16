@@ -9,7 +9,7 @@
 - 标题:
 - 负责人 / 请求方:
 - 日期 / slug:
-- 配置档: quick | standard | deep
+- 配置名称: quick | standard | deep
 - 参考状态:
   - 期望结果:
   - 最终声明边界:

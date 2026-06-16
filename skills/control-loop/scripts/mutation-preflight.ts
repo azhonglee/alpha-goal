@@ -73,7 +73,7 @@ if (["main", "master", "trunk"].includes(branch)) {
   console.log("主分支名风险: 否");
 }
 
-section("status --short");
+section("工作区状态（git status --short）");
 printCommand("git", ["status", "--short"]);
 
 section("worktree 列表");

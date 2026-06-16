@@ -11,7 +11,7 @@ if (commandSucceeds("git", ["--version"]) && commandSucceeds("git", ["rev-parse"
   console.log("git 工作树: 是");
   console.log(`根目录: ${commandOutput("git", ["rev-parse", "--show-toplevel"]).trim()}`);
   console.log(`分支: ${commandOutput("git", ["branch", "--show-current"]).trim()}`);
-  console.log("status --short:");
+  console.log("工作区状态（git status --short）:");
   printCommand("git", ["status", "--short"]);
   console.log("worktree 列表:");
   printWorktreeList();

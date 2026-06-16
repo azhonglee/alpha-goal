@@ -22,7 +22,7 @@ printCommand("git", ["rev-parse", "--show-toplevel"]);
 section("分支");
 printCommand("git", ["branch", "--show-current"]);
 
-section("status --short");
+section("工作区状态（git status --short）");
 printCommand("git", ["status", "--short"]);
 
 section("已变更文件：未暂存");
@@ -37,14 +37,14 @@ printCommand("git", ["diff", "--stat"]);
 section("diff 统计：已暂存");
 printCommand("git", ["diff", "--cached", "--stat"]);
 
-section("diff check：未暂存");
+section("差异空白检查（未暂存）");
 if (printCommand("git", ["diff", "--check"]) === 0) {
   console.log("git diff --check: 通过");
 } else {
   console.log("git diff --check: 失败");
 }
 
-section("diff check：已暂存");
+section("差异空白检查（已暂存）");
 if (printCommand("git", ["diff", "--cached", "--check"]) === 0) {
   console.log("git diff --cached --check: 通过");
 } else {
