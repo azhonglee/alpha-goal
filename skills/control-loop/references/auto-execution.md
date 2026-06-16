@@ -1,6 +1,6 @@
 # Auto-Execution Boundary
 
-Use this reference when an Iteration Record has a `Next` action, especially when the wording might become a passive “recommended next step”. The loop controller should continue acting when it is safe to do so; recommendation-only output is a stop decision that needs a reason.
+Use this reference when an 迭代记录 has a `Next` action, especially when the wording might become a passive “recommended next step”. The loop controller should continue acting when it is safe to do so; recommendation-only output is a stop decision that needs a reason.
 
 ## Default posture
 
@@ -8,8 +8,8 @@ Execute the next bounded pass immediately when all are true:
 
 - the current route is `ITERATION_CONTINUES` or `ITERATION_HARDEN`;
 - the next action is concrete enough to run now, with known target paths, commands, probes, or evidence sensors;
-- it remains inside the approved Goal Contract, scope, non-goals, constraints, authorization, and claim boundary;
-- the next pass has a Control Law with target error, approved control variable, expected effect, sensor threshold, and fallback action;
+- it remains inside the approved 目标契约, scope, non-goals, constraints, authorization, and claim boundary;
+- the next pass has a 控制律 with target error, approved control variable, expected effect, sensor threshold, and fallback action;
 - repeated, noisy, or broad loops have explicit feedback latency, signal noise, confidence, damping / anti-oscillation, and saturation / containment;
 - it does not require a user-owned decision, credential, secret, unavailable environment, external approval, deployment, push, PR/MR, or other external side effect;
 - it will not overwrite unrelated user changes, cross unclear ownership boundaries, or mutate a primary checkout unsafely;

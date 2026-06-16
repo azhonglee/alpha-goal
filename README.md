@@ -64,11 +64,11 @@ For simple work, `alpha-goal` chooses the smallest viable path. When target, sys
 | Skill | Responsibility | Trigger |
 | --- | --- | --- |
 | `alpha-goal` | Closed-loop entry point, skill routing, stability checks, and cross-stage state memory | The next step may be framing, modeling, execution, verification, or synthesis |
-| `goal-contract` | Produces an executable, verifiable, handoff-ready Goal Contract and Indicator Handoff | Goal, scope, acceptance, non-goals, or authorization boundaries are unclear |
-| `system-model` | Models plant, state, observer, actuator, Controller Hierarchy, Disturbance Register, and coupling | System boundary, observability, controllability, disturbances, or coupling affect safe action |
-| `control-loop` | Runs bounded iterations under an approved Goal Contract, collects feedback, and records Adaptive Learning Records | The goal is clear and the next step is execution, diagnosis, repair, or hardening |
+| `goal-contract` | Produces an executable, verifiable, handoff-ready 目标契约 and 指标交接 | Goal, scope, acceptance, non-goals, or authorization boundaries are unclear |
+| `system-model` | Models plant, state, observer, actuator, 控制器层级, 扰动登记, and coupling | System boundary, observability, controllability, disturbances, or coupling affect safe action |
+| `control-loop` | Runs bounded iterations under an approved 目标契约, collects feedback, and records 自适应学习记录 | The goal is clear and the next step is execution, diagnosis, repair, or hardening |
 | `evidence-verify` | Judges whether evidence supports completion, merge-readiness, ship-readiness, or a narrowed claim | Work appears done and needs independent evidence and claim-boundary review |
-| `decision-synthesis` | Uses Synthesis Rounds to combine qualitative judgment, machine evidence, metrics, conflicts, and user decisions | The problem has multiple teams, multiple goals, high uncertainty, or complex-system dynamics |
+| `decision-synthesis` | Uses 综合轮次 to combine qualitative judgment, machine evidence, metrics, conflicts, and user decisions | The problem has multiple teams, multiple goals, high uncertainty, or complex-system dynamics |
 
 ## Core Concepts
 
@@ -81,12 +81,12 @@ For simple work, `alpha-goal` chooses the smallest viable path. When target, sys
 | Actuator | Bounded changes, diagnostics, repairs, hardening, or read-only probes run by `control-loop` |
 | Control law | Target error, control variable, expected effect, sensor threshold, feedback latency/noise, confidence, damping/containment, and fallback action |
 | Comparator | `evidence-verify`, which checks error between the goal, evidence, and final claim |
-| Memory | The Closed-loop Ledger under `.alpha-goal/YYYYMMDD-<slug>/control-state.md`, recording reference, state, error, action, feedback, and next route |
+| Memory | The 闭环台账 under `.alpha-goal/YYYYMMDD-<slug>/control-state.md`, recording reference, state, error, action, feedback, and next route |
 | Indicator handoff | Mapping qualitative goals to metrics/proxies, sensors, thresholds, and evidence boundaries |
 | Adaptive learning | Bounded reusable corrections when feedback invalidates a threshold, strategy, route, or assumption |
-| Disturbance handling | Disturbance Register entries with likelihood, impact, sensor, containment, and route trigger |
-| Hierarchical control | Controller Hierarchy for global/local controllers, coupling variables, arbitration, and escalation |
-| Complex-system synthesis | `decision-synthesis` Synthesis Rounds for conflicts, evidence, indicators, and user decisions |
+| Disturbance handling | 扰动登记 entries with likelihood, impact, sensor, containment, and route trigger |
+| Hierarchical control | 控制器层级 for global/local controllers, coupling variables, arbitration, and escalation |
+| Complex-system synthesis | `decision-synthesis` 综合轮次 for conflicts, evidence, indicators, and user decisions |
 | Artifact layout | Task-scoped runtime artifacts under `.alpha-goal/YYYYMMDD-<slug>/xxx` |
 | Cybernetic conformance | State-transition, schema sidecar, and legacy-path checks that verify the loop was followed |
 
@@ -119,7 +119,7 @@ $alpha-goal your_task_description
 
 ## State Memory
 
-For cross-stage recovery, Alpha Goal uses `.alpha-goal/YYYYMMDD-<slug>/control-state.md` as the default Closed-loop Ledger.
+For cross-stage recovery, Alpha Goal uses `.alpha-goal/YYYYMMDD-<slug>/control-state.md` as the default 闭环台账.
 Related artifacts for the same task stay under that task directory, such as `goal-contract.md`, `system-model.md`, `iterations/`, `evidence/`, and `verification-verdict.md`.
 
 ## Validation
@@ -137,7 +137,7 @@ For installation behavior, use a temporary `CODEX_HOME` smoke test as described 
 ```text
 skills/
   alpha-goal/          # closed-loop entry point and routing
-  goal-contract/       # goal clarification and Goal Contract
+  goal-contract/       # goal clarification and 目标契约
   system-model/        # system state, observability, and controllability modeling
   control-loop/        # bounded iteration execution and feedback
   evidence-verify/     # evidence boundaries and completion judgment
@@ -153,5 +153,5 @@ tools/                 # local validators
 - Observation before claims: no sensor and evidence boundary, no completion claim.
 - Bounded action first: each loop changes the smallest coherent slice that can reduce the current error.
 - Evidence over assertion: final judgment belongs to `evidence-verify`.
-- Recoverable state: long-running work depends on the Closed-loop Ledger, not just chat history.
+- Recoverable state: long-running work depends on the 闭环台账, not just chat history.
 - Complex problems need synthesis: use `decision-synthesis` for multi-goal, multi-party, weakly quantified work.

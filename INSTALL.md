@@ -98,8 +98,8 @@ Expected behavior:
 
 - It should frame a read-only discovery/audit boundary.
 - It should read the requested `SKILL.md` and relevant `references/` files as the audit target.
-- It should return findings, evidence, recommendations, and residual uncertainty, not only a Goal Contract.
-- It should create an Indicator Handoff when qualitative objectives need measurable acceptance evidence.
+- It should return findings, evidence, recommendations, and residual uncertainty, not only a 目标契约.
+- It should create an 指标交接 when qualitative objectives need measurable acceptance evidence.
 - It should not run `control-loop` or `evidence-verify` because no mutation or completion claim is requested.
 
 ```text
@@ -110,8 +110,8 @@ Expected behavior:
 
 - It should identify the install script, validators, docs, templates, symlink target, and temporary `CODEX_HOME` smoke test as relevant system parts.
 - It should distinguish observed evidence from inferred risks.
-- It should produce a Controller Hierarchy when multiple repos, agents, teams, or modules can change a shared objective.
-- It should produce a Disturbance Register with likelihood, impact, sensor, containment, and route trigger when install drift or environment issues can affect the claim.
+- It should produce a 控制器层级 when multiple repos, agents, teams, or modules can change a shared objective.
+- It should produce a 扰动登记 with likelihood, impact, sensor, containment, and route trigger when install drift or environment issues can affect the claim.
 - It should not mutate files.
 
 ```text
@@ -120,22 +120,22 @@ $decision-synthesis 多团队对迁移方案目标、风险和成功指标有冲
 
 Expected behavior:
 
-- It should run at least one Synthesis Round that combines human/expert judgment, machine evidence or available metrics, conflicts, user-owned decisions, and next hypotheses.
-- For complex-giant-like work, it should use a Meta-Synthesis Hall with roles, a Hypothesis bank, a Model registry, dissent, and a convergence condition.
-- It should emit an Indicator Handoff candidate for success metrics that should become Goal Contract evidence.
+- It should run at least one 综合轮次 that combines human/expert judgment, machine evidence or available metrics, conflicts, user-owned decisions, and next hypotheses.
+- For complex-giant-like work, it should use a 综合集成厅 with roles, a Hypothesis bank, a Model registry, dissent, and a convergence condition.
+- It should emit an 指标交接 candidate for success metrics that should become 目标契约 evidence.
 - It should route to `goal-contract`, `system-model`, user, or blocker instead of treating a list of opinions as a final plan.
 
 ```text
-$control-loop 根据上面的 Goal Contract 做一轮最小变更。
+$control-loop 根据上面的 目标契约 做一轮最小变更。
 ```
 
 Expected behavior:
 
 - It should run or manually record mutation preflight.
 - It should refuse mutation if target is not closed or edit path is unsafe.
-- Its full Control Law should be persisted to an iteration artifact or ledger, while the TUI shows a compact Chinese `执行检查` table instead of the raw `Control Law:` block by default.
-- The persisted Control Law should include feedback latency, signal noise, confidence, damping / anti-oscillation, and saturation / containment when feedback is repeated, noisy, broad, or high-risk.
-- It should produce an Iteration Record with dynamic plan, execution, feedback, and Adaptive Learning Record when feedback contradicts a reusable control assumption.
+- Its full 控制律 should be persisted to an iteration artifact or ledger, while the TUI shows a compact Chinese `执行检查` table instead of the raw `控制律:` block by default.
+- The persisted 控制律 should include feedback latency, signal noise, confidence, damping / anti-oscillation, and saturation / containment when feedback is repeated, noisy, broad, or high-risk.
+- It should produce an 迭代记录 with dynamic plan, execution, feedback, and 自适应学习记录 when feedback contradicts a reusable control assumption.
 
 ```text
 $evidence-verify 检查当前 diff、测试和声明边界，判断是否可以最终交付。
@@ -145,7 +145,7 @@ Expected behavior:
 
 - It should map acceptance items to fresh evidence.
 - It should review contract acceptance and claim boundary.
-- It should check Control Law dynamics and cybernetic conformance when the evidence bundle includes those artifacts.
-- It should review Indicator Handoff and Adaptive Learning Record boundaries when present.
-- It should produce a Verification Verdict with judgment.
+- It should check 控制律 dynamics and cybernetic conformance when the evidence bundle includes those artifacts.
+- It should review 指标交接 and 自适应学习记录 boundaries when present.
+- It should produce a 验证结论 with judgment.
 - It should route to final, next iteration, reframe, or blocked.

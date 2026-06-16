@@ -1,50 +1,50 @@
-# Verification Verdict Schema
+# 验证结论 Schema
 
-Use this full schema for formal acceptance records, merge-ready or ship-ready judgments, high-risk claims, contested evidence, or handoff. For low-risk checks, a compact verdict is enough if it preserves the semantics. Persist the full verdict at `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md` by default. When machine validation or resume safety matters, write a schema sidecar at `.alpha-goal/YYYYMMDD-<slug>/schema/verification-verdict.json`. The TUI should show a Markdown-table `Verification Summary` with verdict, claim boundary, evidence, artifact path, and next action unless full chat output is required.
+Use this full schema for formal acceptance records, merge-ready or ship-ready judgments, high-risk claims, contested evidence, or handoff. For low-risk checks, a compact verdict is enough if it preserves the semantics. Persist the full verdict at `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md` by default. When machine validation or resume safety matters, write a schema sidecar at `.alpha-goal/YYYYMMDD-<slug>/schema/verification-verdict.json`. The TUI should show a Markdown-table `验证摘要` with verdict, claim boundary, evidence, artifact path, and next action unless full chat output is required.
 
-## Compact verdict
-
-```text
-Verification Verdict:
-- Verdict:
-- Evidence coverage:
-- Claim allowed:
-- Gaps:
-- Artifact:
-- Next step:
-```
-
-## Full verdict
+## 紧凑结论
 
 ```text
-Verification Verdict:
-- Verdict:
-- Acceptance evidence matrix:
-- Contract review:
-- System model review:
-- Artifact review:
-- Control law review:
-  - Dynamics and stability review:
-- Indicator handoff review:
-- Adaptive learning review:
-- Claim boundary:
-- Risk/evidence review:
-- Fresh checks run:
-- Diff/scope review:
-- Feedback review:
-- Judgment:
-- Unresolved gaps:
-- Required next step:
-- Final claim allowed:
-- Ledger update:
-  - Control-state path:
-  - Artifact path:
-  - Schema sidecar path:
-  - Verdict:
-  - Next route:
+验证结论:
+- 结论:
+- 证据覆盖:
+- 允许声明:
+- 缺口:
+- 产物:
+- 下一步:
 ```
 
-## Verdict
+## 完整结论
+
+```text
+验证结论:
+- 结论:
+- 验收证据矩阵:
+- 契约复核:
+- 控制模型复核:
+- 产物复核:
+- 控制律复核:
+  - 动态与稳定性复核:
+- 指标交接复核:
+- 自适应学习复核:
+- 声明边界:
+- 风险 / 证据复核:
+- 已运行新鲜检查:
+- Diff / 范围复核:
+- 反馈复核:
+- 判断:
+- 未解决缺口:
+- 必需下一步:
+- 允许的最终声明:
+- 台账更新:
+  - 控制状态路径:
+  - 产物路径:
+  - Schema 辅助索引路径:
+  - 结论:
+  - 下一路由:
+```
+
+## 结论
 
 Exactly one:
 
@@ -54,7 +54,7 @@ Exactly one:
 - `REFRAME`
 - `BLOCKED`
 
-## Acceptance evidence matrix
+## 验收证据矩阵
 
 For each acceptance expectation:
 
@@ -65,7 +65,7 @@ For each acceptance expectation:
 
 Root-cause claims should record symptom, first divergence point, narrowed component, excluded alternatives, and remaining uncertainty.
 
-## Control law review
+## 控制律复核
 
 For each material control action or diagnostic probe:
 
@@ -81,7 +81,7 @@ For each material control action or diagnostic probe:
 - threshold status: `met`, `partially met`, `not met`, `blocked`, or `not applicable`;
 - fallback or residual error.
 
-## Indicator handoff review
+## 指标交接复核
 
 For each material qualitative objective or synthesis metric:
 
@@ -92,7 +92,7 @@ For each material qualitative objective or synthesis metric:
 - evidence boundary;
 - status: `covered`, `partially covered`, `not covered`, `blocked`, or `not applicable`.
 
-## Adaptive learning review
+## 自适应学习复核
 
 For each material learning record:
 
@@ -104,6 +104,6 @@ For each material learning record:
 - invalidation condition;
 - whether the final claim stays inside the evidence boundary.
 
-## Final claim allowed
+## 允许的最终声明
 
 Write the widest final statement that fresh evidence supports. It must not imply broader product, integration, production, tenant, security, or safety validation than evidence shows.

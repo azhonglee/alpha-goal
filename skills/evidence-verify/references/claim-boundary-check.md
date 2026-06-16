@@ -19,13 +19,13 @@ State the actual boundary if these examples do not fit. Never use lower-boundary
 ## Required comparison
 
 ```text
-Claim boundary:
-- User wording:
-- Implemented boundary:
-- Tested/observed boundary:
-- Highest practical evidence-supported boundary:
-- Gap:
-- Final claim allowed:
+声明边界:
+- 用户表述:
+- 已实现边界:
+- 已测试 / 已观察边界:
+- 证据支持的最高实用边界:
+- 缺口:
+- 允许的最终声明:
 ```
 
 ## Common overclaims
@@ -37,7 +37,7 @@ Claim boundary:
 - completing implementation but claiming production observability works;
 - using old test results after the last material change.
 
-## Decisions
+## 决策
 
 - Evidence covers user wording: `PASS_TO_FINAL`.
 - Local goal is satisfied but wording is broader: `NARROW_CLAIM_AND_FINAL`.

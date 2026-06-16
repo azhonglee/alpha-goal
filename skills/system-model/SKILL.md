@@ -17,7 +17,7 @@ Use `system-model` when any of these are true:
 - observability is weak: logs, tests, probes, or feedback signals are missing or stale;
 - controllability is weak: it is unclear what variables may be changed safely;
 - the work is architectural, migratory, integration-heavy, production-facing, or high blast-radius;
-- `goal-contract` cannot produce a reliable Goal Contract without a plant model.
+- `goal-contract` cannot produce a reliable 目标契约 without a plant model.
 
 ## Boundaries
 
@@ -25,12 +25,12 @@ Use `system-model` when any of these are true:
 - Do not decide user-owned goals, risk acceptance, or business tradeoffs.
 - Do not over-model simple low-risk work where target, scope, evidence, and ownership are already clear.
 - Label observed facts, inferred structure, assumptions, and missing sensors separately.
-- If a Closed-loop Ledger exists, read its `Latest Control Route` from `.alpha-goal/YYYYMMDD-<slug>/control-state.md` before modeling and update only model-relevant state: plant boundary, state variables, sensors, actuators, disturbances, coupling, and model adequacy.
+- If a 闭环台账 exists, read its `最新控制路由` from `.alpha-goal/YYYYMMDD-<slug>/control-state.md` before modeling and update only model-relevant state: plant boundary, state variables, sensors, actuators, disturbances, coupling, and model adequacy.
 - Independently review and update the model if needed before routing back to `goal-contract`, `alpha-goal`, or `control-loop`.
 
 ## Load resources when needed
 
-- `references/control-model-schema.md`: produce a durable or handoff-ready Control Model.
+- `references/control-model-schema.md`: produce a durable or handoff-ready 控制模型.
 - `references/observability-controllability-check.md`: rate sensor and actuator adequacy.
 - `references/disturbance-register.md`: record disturbance likelihood, impact, sensor, containment, and route trigger.
 - `references/controller-hierarchy.md`: map global/local controllers, coupling variables, arbitration, and escalation.
@@ -110,47 +110,47 @@ User-owned decisions:
 
 ### 5. Map coupling and disturbances
 
-Create a clearly labeled Controller Hierarchy / Coordination Map when multiple local controllers can affect the same global objective. Load `references/controller-hierarchy.md` when controller ownership, arbitration, or escalation is unclear.
+Create a clearly labeled 控制器层级 / Coordination Map when multiple local controllers can affect the same global objective. Load `references/controller-hierarchy.md` when controller ownership, arbitration, or escalation is unclear.
 
 ```text
-Controller Hierarchy:
-- Global controller:
-- Local controller:
-- Coupling variables:
-- Arbitration rule:
-- Escalation trigger:
-- Recommended coordination route:
+控制器层级:
+- 全局控制器:
+- 局部控制器:
+- 耦合变量:
+- 仲裁规则:
+- 升级触发条件:
+- 推荐协同路由:
 ```
 
-Do not collapse material multi-controller relationships into a prose coordination section. A Control Model is incomplete if it names multiple local controllers that can affect one global objective but does not either emit a `Controller Hierarchy:` block or explicitly state `Controller hierarchy: none material`.
+Do not collapse material multi-controller relationships into a prose coordination section. A 控制模型 is incomplete if it names multiple local controllers that can affect one global objective but does not either emit a `控制器层级:` block or explicitly state `控制器层级: none material`.
 
 Create a compact coupling map. Use a matrix only when it clarifies risk.
 
 ```text
-Coupling Map:
-- Surface A -> Surface B:
-  - Shared state/artifact:
-  - Disturbance:
-  - Risk:
-  - Isolation strategy:
+耦合图:
+- 表面 A -> 表面 B:
+  - 共享状态 / 产物:
+  - 扰动:
+  - 风险:
+  - 隔离策略:
 ```
 
-Create a clearly labeled Disturbance Register for material disturbances. Load `references/disturbance-register.md` when disturbance likelihood, impact, sensor, containment, or route trigger is not obvious.
+Create a clearly labeled 扰动登记 for material disturbances. Load `references/disturbance-register.md` when disturbance likelihood, impact, sensor, containment, or route trigger is not obvious.
 
 ```text
-Disturbance Register:
-- Disturbance:
-  - Source:
-  - Likelihood:
-  - Impact:
-  - Affected state/control variable:
-  - Sensor:
-  - Containment:
-  - Route trigger:
-  - Owner or decision boundary:
+扰动登记:
+- 扰动:
+  - 来源:
+  - 可能性:
+  - 影响:
+  - 受影响状态 / 控制变量:
+  - 传感器:
+  - 约束措施:
+  - 路由触发条件:
+  - 负责人或决策边界:
 ```
 
-Do not collapse material disturbances into a prose risk list. A Control Model is incomplete if it names material disturbances but does not either emit a Disturbance Register or explicitly state `Disturbance register: none material`.
+Do not collapse material disturbances into a prose risk list. A 控制模型 is incomplete if it names material disturbances but does not either emit a 扰动登记 or explicitly state `扰动登记: none material`.
 
 High-impact or unknown-impact disturbances must have a sensor, containment, and route trigger before routing to `control-loop`.
 
@@ -166,83 +166,83 @@ Stabilization strategies:
 
 ### 6. Judge model adequacy
 
-Persist the full Control Model under `.alpha-goal/YYYYMMDD-<slug>/system-model.md` by default and update the Closed-loop Ledger artifact registry. Show a compact Markdown-table `Model Summary` in the TUI by default. Print the full model in chat only when the user asks, file persistence is blocked, or a modeling gap requires explicit user review.
+Persist the full 控制模型 under `.alpha-goal/YYYYMMDD-<slug>/system-model.md` by default and update the 闭环台账 artifact registry. Show a compact Markdown-table `模型摘要` in the TUI by default. Print the full model in chat only when the user asks, file persistence is blocked, or a modeling gap requires explicit user review.
 
-Compact model:
+紧凑模型:
 
 ```text
-Control Model:
-- Boundary:
-- State variables:
-- Sensors:
-- Actuators:
-- Candidate control laws:
-- Controller hierarchy:
-- Disturbance register:
-- Coupling map:
-- Observability:
-- Controllability:
-- Model adequacy:
-- Ledger update:
-- Recommended route:
+控制模型:
+- 边界:
+- 状态变量:
+- 传感器:
+- 执行器:
+- 候选控制律:
+- 控制器层级:
+- 扰动登记:
+- 耦合图:
+- 可观测性:
+- 可控性:
+- 模型充分性:
+- 台账更新:
+- 推荐路由:
 ```
 
-TUI summary:
+TUI 摘要:
 
 ```markdown
-Model Summary
+模型摘要
 
-| Field | Value |
+| 字段 | 内容 |
 | --- | --- |
-| Boundary | |
-| Observability | |
-| Controllability | |
-| Artifact | |
-| Recommended route | |
+| 边界 | |
+| 可观测性 | |
+| 可控性 | |
+| 产物 | |
+| 推荐路由 | |
 ```
 
-Full model:
+完整模型:
 
 ```text
-Control Model:
-- System boundary:
-- Controlled object / plant:
-- Environment and external actors:
-- Interfaces:
-- State variables:
-- Inputs:
-- Outputs:
-- Sensors and evidence boundary:
-- Actuators and authority boundary:
-- Indicator handoff to sensors:
-- Candidate control laws:
-  - Target error:
-  - Control variable:
-  - Candidate action or probe:
-  - Sensor and threshold:
-  - Feedback latency:
-  - Signal noise:
-  - Confidence:
-  - Damping / anti-oscillation:
-  - Saturation / containment:
-  - Risk/fallback:
-- Disturbance register:
-  - Disturbance:
-  - Likelihood/impact:
-  - Sensor:
-  - Containment:
-  - Route trigger:
-- Coupling map:
-- Controller hierarchy:
-  - Global objective:
-  - Local controllers:
-  - Coupling variables:
-  - Arbitration/escalation:
-- Stability conditions:
-- Missing information:
-- Model adequacy: sufficient | sufficient with narrowed claim | insufficient | blocked
-- Ledger update: `.alpha-goal/YYYYMMDD-<slug>/control-state.md` path, artifact path, optional schema sidecar path, model changes, residual model uncertainty, next route, or explicit no-write reason
-- Recommended route: goal-contract | control-loop | evidence-verify | decision-synthesis | blocker
+控制模型:
+- 系统边界:
+- 被控对象 / plant:
+- 环境与外部参与方:
+- 接口:
+- 状态变量:
+- 输入:
+- 输出:
+- 传感器与证据边界:
+- 执行器与授权边界:
+- 指标到传感器的交接:
+- 候选控制律:
+  - 目标误差:
+  - 控制变量:
+  - 候选动作或探测:
+  - 传感器与阈值:
+  - 反馈延迟:
+  - 信号噪声:
+  - 置信度:
+  - 阻尼 / 防振荡:
+  - 饱和 / 影响范围约束:
+  - 风险 / 失败处理:
+- 扰动登记:
+  - 扰动:
+  - 可能性 / 影响:
+  - 传感器:
+  - 约束措施:
+  - 路由触发条件:
+- 耦合图:
+- 控制器层级:
+  - 全局目标:
+  - 局部控制器:
+  - 耦合变量:
+  - 仲裁 / 升级:
+- 稳定性条件:
+- 缺失信息:
+- 模型充分性: sufficient | sufficient with narrowed claim | insufficient | blocked
+- 台账更新: `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 路径、产物路径、可选 Schema 辅助索引路径、模型变更、残余模型不确定性、下一路由，或明确的无法写入原因
+- 推荐路由: goal-contract | control-loop | evidence-verify | decision-synthesis | blocker
 ```
 
-Route to `goal-contract` when the model is sufficient to write or revise a Goal Contract. Route to `control-loop` only when an approved Goal Contract already exists and this model merely informs the next bounded slice. Route to `evidence-verify` only when comparing evidence to a claim is the next action.
+Route to `goal-contract` when the model is sufficient to write or revise a 目标契约. Route to `control-loop` only when an approved 目标契约 already exists and this model merely informs the next bounded slice. Route to `evidence-verify` only when comparing evidence to a claim is the next action.

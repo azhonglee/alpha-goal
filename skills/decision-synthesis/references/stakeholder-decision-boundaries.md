@@ -12,12 +12,12 @@ The agent may recommend but must not silently decide:
 Decision request format:
 
 ```text
-Decision needed:
-- Decision owner:
-- Options:
-- Recommendation:
-- Evidence:
-- Tradeoff:
-- Consequence of no decision:
-- Smallest safe next action while waiting:
+需要决策:
+- 决策负责人:
+- 选项:
+- 建议:
+- 证据:
+- 取舍:
+- 未决后果:
+- 等待期间最小安全下一步:
 ```

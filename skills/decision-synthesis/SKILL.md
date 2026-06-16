@@ -1,9 +1,9 @@
 ---
 name: decision-synthesis
-description: "Apply decision-synthesis to complex engineering or socio-technical systems: integrate qualitative judgment, quantitative evidence, stakeholder constraints, models, contradictions, and user-owned decisions before forming a Goal Contract."
+description: "Apply decision-synthesis to complex engineering or socio-technical systems: integrate qualitative judgment, quantitative evidence, stakeholder constraints, models, contradictions, and user-owned decisions before forming a 目标契约."
 ---
 
-# Decision Synthesis
+# 决策综合
 
 Use this skill when the problem behaves like a complex system rather than a simple implementation task. It helps synthesize goals and decision boundaries before `goal-contract`, `system-model`, or `control-loop` proceeds.
 
@@ -24,17 +24,17 @@ Do not use for localized low-risk tasks with clear acceptance and direct evidenc
 
 - Do not mutate implementation files, deploy, push, repair data, or claim final completion.
 - Do not invent stakeholder preferences or user-owned risk decisions.
-- Do not treat a synthesis as implementation authorization. Convert the selected direction into a Goal Contract via `goal-contract` before mutation.
+- Do not treat a synthesis as implementation authorization. Convert the selected direction into a 目标契约 via `goal-contract` before mutation.
 - Separate facts, expert judgments, assumptions, hypotheses, scenarios, and decisions.
-- When a Closed-loop Ledger exists, read its `Latest Control Route` from `.alpha-goal/YYYYMMDD-<slug>/control-state.md` before synthesis and update only synthesis-relevant state: objective conflicts, user-owned decisions, scenario assumptions, and the recommended route.
+- When a 闭环台账 exists, read its `最新控制路由` from `.alpha-goal/YYYYMMDD-<slug>/control-state.md` before synthesis and update only synthesis-relevant state: objective conflicts, user-owned decisions, scenario assumptions, and the recommended route.
 
 ## Load resources when needed
 
 - `references/complexity-triage.md`: classify simple, complicated, complex, or complex-giant-like requests.
 - `references/stakeholder-decision-boundaries.md`: distinguish recommendation from user-owned decisions.
 - `references/synthesis-round.md`: run human-machine qualitative/quantitative convergence rounds.
-- `references/synthesis-record-schema.md`: produce a durable or handoff-ready Decision Synthesis Record.
-- `references/meta-synthesis-hall.md`: run a Meta-Synthesis Hall with roles, hypothesis bank, model registry, dissent, and convergence conditions.
+- `references/synthesis-record-schema.md`: produce a durable or handoff-ready 决策综合记录.
+- `references/meta-synthesis-hall.md`: run a 综合集成厅 with roles, hypothesis bank, model registry, dissent, and convergence conditions.
 
 ## Process
 
@@ -69,38 +69,38 @@ Perspectives may include user, customer, operations, security, legal/compliance,
 Create a qualitative-quantitative map:
 
 ```text
-Synthesis Map:
-- System purpose:
-- Candidate objectives:
-- Constraints:
-- Stakeholders and decision owners:
-- Subsystems and interactions:
-- Key state variables:
-- Available evidence and confidence:
-- Missing evidence:
-- Conflicts/tradeoffs:
-- Scenarios:
-- Stability risks:
-- Candidate control strategies:
+综合图:
+- 系统目的:
+- 候选目标:
+- 约束:
+- 利益相关方与决策负责人:
+- 子系统与交互:
+- 关键状态变量:
+- 可用证据与置信度:
+- 缺失证据:
+- 冲突 / 取舍:
+- 场景:
+- 稳定性风险:
+- 候选控制策略:
 ```
 
 Use quantitative evidence when available, but do not force false precision. Qualitative judgments must be labeled and tied to the owner or source.
 
 ### 4. Run synthesis rounds
 
-For `complex` and `complex-giant-like` cases, or whenever perspectives conflict, run one or more `Synthesis Round` records before resolving decisions. Load `references/synthesis-round.md` for the schema. For complex-giant-like work, use the Meta-Synthesis Hall from `references/meta-synthesis-hall.md` to preserve roles, hypotheses, models, dissent, and convergence conditions.
+For `complex` and `complex-giant-like` cases, or whenever perspectives conflict, run one or more `综合轮次` records before resolving decisions. Load `references/synthesis-round.md` for the schema. For complex-giant-like work, use the 综合集成厅 from `references/meta-synthesis-hall.md` to preserve roles, hypotheses, models, dissent, and convergence conditions.
 
 Each round must connect:
 
 - human or expert judgment and its decision owner;
 - machine evidence, model output, tests, logs, metrics, or probes;
-- Meta-Synthesis Hall state when many hypotheses, models, or stakeholder perspectives remain active;
+- 综合集成厅 state when many hypotheses, models, or stakeholder perspectives remain active;
 - the conflict, contradiction, or missing sensor;
 - any metric/proxy that could turn qualitative judgment into bounded evidence;
-- the Indicator Handoff candidate that should become acceptance or sensor evidence;
+- the 指标交接 candidate that should become acceptance or sensor evidence;
 - the user-owned decision or next hypothesis that would reduce uncertainty.
 
-Stop when the smallest next action is clear: a Goal Contract candidate, a system-model question, a user decision, a blocker, or a bounded validation hypothesis.
+Stop when the smallest next action is clear: a 目标契约 candidate, a system-model question, a user decision, a blocker, or a bounded validation hypothesis.
 
 ### 5. Resolve decisions
 
@@ -117,67 +117,67 @@ If a stakeholder conflict cannot be resolved, return a decision request rather t
 
 ### 6. Produce synthesis record
 
-Persist the full Decision Synthesis Record under `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md` by default and update the Closed-loop Ledger artifact registry. Show a compact Markdown-table `Synthesis Summary` in the TUI by default. Print the full synthesis in chat only when the user asks, file persistence is blocked, or a user-owned decision requires reviewing the full tradeoff in the conversation.
+Persist the full 决策综合记录 under `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md` by default and update the 闭环台账 artifact registry. Show a compact Markdown-table `综合摘要` in the TUI by default. Print the full synthesis in chat only when the user asks, file persistence is blocked, or a user-owned decision requires reviewing the full tradeoff in the conversation.
 
-Compact record fields:
+紧凑记录字段:
 
 ```text
-Decision Synthesis Record:
-- Complexity class:
-- Core tension:
-- Meta-Synthesis Hall:
-- Latest synthesis round:
-- Integrated view:
-- Recommended direction:
-- User-owned decisions:
-- Non-goals:
-- Evidence needed:
-- Indicator handoff:
-- Route:
+决策综合记录:
+- 复杂度类型:
+- 核心张力:
+- 综合集成厅:
+- 最新综合轮次:
+- 综合视图:
+- 推荐方向:
+- 用户自有决策:
+- 非目标:
+- 所需证据:
+- 指标交接:
+- 路由:
 ```
 
-TUI summary:
+TUI 摘要:
 
 ```markdown
-Synthesis Summary
+综合摘要
 
-| Field | Value |
+| 字段 | 内容 |
 | --- | --- |
-| Core tension | |
-| Recommended direction | |
-| User decision | |
-| Artifact | |
-| Next | |
+| 核心张力 | |
+| 推荐方向 | |
+| 用户决策 | |
+| 产物 | |
+| 下一步 | |
 ```
 
-Full artifact fields:
+完整产物字段:
 
 ```text
-Decision Synthesis Record:
-- Complexity class:
-- System purpose:
-- Stakeholders / perspectives:
-- Evidence and models:
-- Qualitative judgments:
-- Quantitative signals:
-- Meta-Synthesis Hall:
-- Synthesis rounds:
-- Indicator handoff:
-- Contradictions and tradeoffs:
-- Scenarios:
-- Candidate strategies:
-- Recommended direction:
-- Decision boundaries:
-- Risks and explicit acceptances:
-- Minimum viable Goal Contract candidate:
-- Ledger update: `.alpha-goal/YYYYMMDD-<slug>/control-state.md` path, artifact path, optional schema sidecar path, synthesis state changes, next route, or explicit no-write reason
-- Route:
+决策综合记录:
+- 复杂度类型:
+- 系统目的:
+- 利益相关方 / 视角:
+- 证据与模型:
+- 定性判断:
+- 定量信号:
+- 综合集成厅:
+- 综合轮次:
+- 指标交接:
+- 矛盾与取舍:
+- 场景:
+- 候选策略:
+- 推荐方向:
+- 决策边界:
+- 风险与显式接受:
+- 最小可行目标契约候选:
+- 台账更新: `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 路径、产物路径、可选 Schema 辅助索引路径、综合状态变更、下一路由，或明确的无法写入原因
+- 路由:
 ```
 
 ### 7. Route
 
-- Route to `goal-contract` when a stable recommended direction and Indicator Handoff can become a Goal Contract.
+- Route to `goal-contract` when a stable recommended direction and 指标交接 can become a 目标契约.
 - Route to `system-model` when subsystem boundary or feedback signals remain unclear.
 - Route to user when a user-owned decision, risk acceptance, budget/timeline tradeoff, or stakeholder priority is required.
 - Route to `evidence-verify` only when synthesis did not authorize mutation and the next action is comparing an existing evidence bundle to a proposed claim.
-- Route to `control-loop` only if a valid Goal Contract already exists and synthesis merely narrowed the next slice without changing authorization.
+- Route to `control-loop` only if a valid 目标契约 already exists and synthesis merely narrowed the next slice without changing authorization.

@@ -1,24 +1,24 @@
-# Closed-loop Ledger
+# 闭环台账
 
 Use this reference when a task spans multiple skills, may resume across turns, or needs durable state to prevent the loop from losing reference, error, action, route decision, or feedback history.
 
 ## Purpose
 
-The ledger is a control-state memory and artifact index, not a work diary. Keep only information that changes routing, safety, evidence, or final claim judgment. The full `Control Route` belongs here by default; other full stage artifacts belong under the same task run directory, `.alpha-goal/YYYYMMDD-<slug>/`. The TUI should show compact summaries unless the user asks for full details, file persistence is blocked, or a user-owned decision needs review.
+The ledger is a control-state memory and artifact index, not a work diary. Keep only information that changes routing, safety, evidence, or final claim judgment. The full `控制路由` belongs here by default; other full stage artifacts belong under the same task run directory, `.alpha-goal/YYYYMMDD-<slug>/`. The TUI should show compact summaries unless the user asks for full details, file persistence is blocked, or a user-owned decision needs review.
 
-Default durable path:
+默认持久化路径:
 
 ```text
 .alpha-goal/YYYYMMDD-<slug>/control-state.md
 ```
 
-Optional append-only machine log:
+可选追加式机器日志:
 
 ```text
 .alpha-goal/YYYYMMDD-<slug>/iterations/cycles.jsonl
 ```
 
-Default full artifact paths:
+默认完整产物路径:
 
 ```text
 .alpha-goal/YYYYMMDD-<slug>/goal-contract.md
@@ -39,141 +39,141 @@ Default behavior is to write the ledger under `.alpha-goal/`. Before the first w
 .alpha-goal/
 ```
 
-Treat adding `.alpha-goal/` to `.gitignore` as a process-artifact setup mutation, not an implementation mutation. Use chat-only ledger state only when the user explicitly forbids file writes, no repository path exists, or `.gitignore` cannot be updated safely; state that reason in the `Ledger path` field.
+Treat adding `.alpha-goal/` to `.gitignore` as a process-artifact setup mutation, not an implementation mutation. Use chat-only ledger state only when the user explicitly forbids file writes, no repository path exists, or `.gitignore` cannot be updated safely; state that reason in the `台账路径` field.
 
-## Ledger schema
+## 台账结构
 
 ```text
-Closed-loop Ledger:
-- Task slug:
-- Last updated:
-- Ledger path:
-- Artifact registry:
-  - Goal Contract:
-  - System Model:
-  - Decision Synthesis:
-  - Plan:
-  - Iteration Records:
-  - Evidence:
-  - Schema sidecars:
-  - Verification Verdict:
-  - Conformance Report:
-  - Interviews:
-- Latest Control Route:
-  Control Route:
-  - Ledger path:
-  - Active state:
-  - Dominant uncertainty:
-  - Error signal:
-  - Control law:
-  - Indicator handoff:
-  - Adaptive learning:
-  - Controller hierarchy:
-  - Disturbance register:
-  - Selected skill:
-  - Why this skill:
-  - Required context to load or ask for:
-  - Safety boundary:
-  - Next action:
-- Reference:
-  - Desired outcome:
-  - Acceptance evidence:
-  - Claim boundary:
-  - Indicator handoff:
-    - Qualitative objective:
-    - Metric/proxy:
-    - Sensor:
-    - Threshold/tolerance:
-    - Evidence boundary:
-- Current state:
-  - Observed facts:
-  - Inferences:
-  - Unknowns:
-  - Active risks/disturbances:
-  - Disturbance register:
-    - Disturbance:
-    - Likelihood/impact:
-    - Sensor:
-    - Containment:
-    - Route trigger:
-  - Controller hierarchy:
-    - Global controller:
-    - Local controllers:
-    - Coupling variables:
-    - Arbitration/escalation:
-- Control state:
-  - Active route:
-  - Dominant uncertainty:
-  - Last error signal:
-  - Last control law:
-  - Last control action:
-  - Last sensor feedback:
-  - Residual error:
-  - Adaptive learning:
-    - Learning trigger:
-    - Observed mismatch:
-    - Adjustment:
-    - Reuse condition:
-    - Invalidation condition:
-  - Next route:
-- Cycle log:
-  - Cycle:
-    - Input state:
-    - Selected skill:
-    - Error signal:
-    - Control law:
-      - Target error:
-      - Control variable:
-      - Expected effect:
-      - Sensor threshold:
-      - Feedback latency:
-      - Signal noise:
-      - Confidence:
-      - Damping / anti-oscillation:
-      - Saturation / containment:
-      - Fallback action:
-    - Control action or probe:
-    - Variables changed:
-    - Variables held constant:
-    - Disturbance register update:
-    - Adaptive learning record:
-    - Sensor feedback:
-    - Evidence boundary:
-    - Residual error:
-    - Route decision:
-    - Next state:
+闭环台账:
+- 任务 slug:
+- 最后更新:
+- 台账路径:
+- 产物登记:
+  - 目标契约:
+  - 控制模型:
+  - 决策综合:
+  - 计划:
+  - 迭代记录:
+  - 证据:
+  - Schema 辅助索引:
+  - 验证结论:
+  - 一致性报告:
+  - 访谈记录:
+- 最新控制路由:
+  控制路由:
+  - 台账路径:
+  - 活跃状态:
+  - 主导不确定性:
+  - 误差信号:
+  - 控制律:
+  - 指标交接:
+  - 自适应学习:
+  - 控制器层级:
+  - 扰动登记:
+  - 选定技能:
+  - 选择理由:
+  - 需加载或询问的上下文:
+  - 安全边界:
+  - 下一步:
+- 参考状态:
+  - 期望结果:
+  - 验收证据:
+  - 声明边界:
+  - 指标交接:
+    - 定性目标:
+    - 指标 / 代理:
+    - 传感器:
+    - 阈值 / 容差:
+    - 证据边界:
+- 当前状态:
+  - 已观察事实:
+  - 推断:
+  - 未知项:
+  - 活跃风险 / 扰动:
+  - 扰动登记:
+    - 扰动:
+    - 可能性 / 影响:
+    - 传感器:
+    - 约束措施:
+    - 路由触发条件:
+  - 控制器层级:
+    - 全局控制器:
+    - 局部控制器:
+    - 耦合变量:
+    - 仲裁 / 升级:
+- 控制状态:
+  - 活跃路由:
+  - 主导不确定性:
+  - 最近误差信号:
+  - 最近控制律:
+  - 最近控制动作:
+  - 最近传感器反馈:
+  - 残余误差:
+  - 自适应学习:
+    - 学习触发条件:
+    - 已观察偏差:
+    - 调整:
+    - 复用条件:
+    - 失效条件:
+  - 下一路由:
+- 循环日志:
+  - 循环:
+    - 输入状态:
+    - 选定技能:
+    - 误差信号:
+    - 控制律:
+      - 目标误差:
+      - 控制变量:
+      - 预期效果:
+      - 传感器阈值:
+      - 反馈延迟:
+      - 信号噪声:
+      - 置信度:
+      - 阻尼 / 防振荡:
+      - 饱和 / 影响范围约束:
+      - 失败处理:
+    - 控制动作或探测:
+    - 已改变变量:
+    - 保持不变的变量:
+    - 扰动登记更新:
+    - 自适应学习记录:
+    - 传感器反馈:
+    - 证据边界:
+    - 残余误差:
+    - 路由决策:
+    - 下一状态:
 ```
 
-## Stage responsibilities
+## 阶段职责
 
-- `alpha-goal`: discover or initialize the ledger, classify active control state, write the full `Latest Control Route`, keep the artifact registry inside `.alpha-goal/YYYYMMDD-<slug>/`, and show only a Markdown-table `Route Summary` in the TUI by default.
-- `decision-synthesis`: read the latest route before synthesis; write the full Decision Synthesis Record under `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md`, update the artifact registry and route-relevant synthesis state, and show a Markdown-table `Synthesis Summary` in the TUI by default.
-- `system-model`: read the latest route before modeling; write the full Control Model under `.alpha-goal/YYYYMMDD-<slug>/system-model.md`, update the artifact registry and model-relevant state, and show a Markdown-table `Model Summary` in the TUI by default.
-- `goal-contract`: read the latest route before changing the reference; write the full Goal Contract under `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md`, update the artifact registry and reference state, and show a Markdown-table `Contract Summary` in the TUI by default.
-- `control-loop`: read the latest route before mutation/probe; persist the full Control Law in the Iteration Record or ledger, show a Markdown-table `执行检查` before mutation, write full Iteration Records under `.alpha-goal/YYYYMMDD-<slug>/iterations/`, durable logs under `.alpha-goal/YYYYMMDD-<slug>/evidence/` when needed, update the artifact registry and control state, and show a Markdown-table `Iteration Summary` after feedback by default.
-- `evidence-verify`: read the latest route before verdict; write the full Verification Verdict under `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md`, update the artifact registry and final comparator state, and show a Markdown-table `Verification Summary` in the TUI by default.
+- `alpha-goal`: discover or initialize the ledger, classify active control state, write the full `最新控制路由`, keep the artifact registry inside `.alpha-goal/YYYYMMDD-<slug>/`, and show only a Markdown-table `路由摘要` in the TUI by default.
+- `decision-synthesis`: read the latest route before synthesis; write the full 决策综合记录 under `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md`, update the artifact registry and route-relevant synthesis state, and show a Markdown-table `综合摘要` in the TUI by default.
+- `system-model`: read the latest route before modeling; write the full 控制模型 under `.alpha-goal/YYYYMMDD-<slug>/system-model.md`, update the artifact registry and model-relevant state, and show a Markdown-table `模型摘要` in the TUI by default.
+- `goal-contract`: read the latest route before changing the reference; write the full 目标契约 under `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md`, update the artifact registry and reference state, and show a Markdown-table `契约摘要` in the TUI by default.
+- `control-loop`: read the latest route before mutation/probe; persist the full 控制律 in the 迭代记录 or ledger, show a Markdown-table `执行检查` before mutation, write full 迭代记录 under `.alpha-goal/YYYYMMDD-<slug>/iterations/`, durable logs under `.alpha-goal/YYYYMMDD-<slug>/evidence/` when needed, update the artifact registry and control state, and show a Markdown-table `迭代摘要` after feedback by default.
+- `evidence-verify`: read the latest route before verdict; write the full 验证结论 under `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md`, update the artifact registry and final comparator state, and show a Markdown-table `验证摘要` in the TUI by default.
 
-## Update rules
+## 更新规则
 
-- Update the ledger when reference, Indicator Handoff, plant model, Controller Hierarchy, Disturbance Register, Adaptive Learning Record, Control Law, actuator boundary, evidence floor, schema sidecar, conformance report, artifact path, route, selected skill, next action, or residual error changes materially.
-- Treat `.alpha-goal/YYYYMMDD-<slug>/control-state.md` as the source of truth for cross-skill route fields. Do not require later skills to reconstruct `Control Route` from the visible TUI summary.
-- Treat the artifact registry as the source of truth for locating full stage outputs. Do not duplicate full Goal Contracts, Control Models, Decision Synthesis Records, Iteration Records, schema sidecars, Conformance Reports, or Verification Verdicts inside the ledger unless file persistence is blocked.
+- Update the ledger when reference, 指标交接, plant model, 控制器层级, 扰动登记, 自适应学习记录, 控制律, actuator boundary, evidence floor, schema sidecar, conformance report, artifact path, route, selected skill, next action, or residual error changes materially.
+- Treat `.alpha-goal/YYYYMMDD-<slug>/control-state.md` as the source of truth for cross-skill route fields. Do not require later skills to reconstruct `控制路由` from the visible TUI summary.
+- Treat the artifact registry as the source of truth for locating full stage outputs. Do not duplicate full 目标契约, 控制模型, 决策综合记录, 迭代记录, schema sidecars, 一致性报告, or 验证结论 inside the ledger unless file persistence is blocked.
 - TUI output should default to compact Markdown table summaries:
 
 ```markdown
-Route Summary
+路由摘要
 
-| Field | Value |
+| 字段 | 内容 |
 | --- | --- |
-| Route | |
-| Why | |
-| Boundary | |
-| Ledger | |
-| Next | |
+| 路由 | |
+| 原因 | |
+| 边界 | |
+| 台账 | |
+| 下一步 | |
 ```
 
-- Stage summaries and the control-loop `执行检查` should use compact two-column Markdown table shapes. The control-loop `执行检查` uses Chinese heading and field labels by default; if the user explicitly asks for another language, translate the same field semantics without showing multiple language templates. Other stage summaries keep their established labels unless separately localized. Values should be concise and point to artifact paths for long details. If a runtime cannot render Markdown tables, use a compact two-column plain-text table instead of bullet lists. Print full artifacts or raw internal Control Law blocks in chat only when the user asks, persistence is blocked, or a decision/risk requires explicit user review.
+- Stage summaries and the control-loop `执行检查` should use compact two-column Markdown table shapes with Chinese titles by default. If the user explicitly asks for another language, translate the same title semantics without showing multiple language templates. Values should be concise and point to artifact paths for long details. If a runtime cannot render Markdown tables, use a compact two-column plain-text table instead of bullet lists. Print full artifacts or raw internal 控制律 blocks in chat only when the user asks, persistence is blocked, or a decision/risk requires explicit user review.
 - Do not duplicate full command output; link or summarize evidence and point to `.alpha-goal/YYYYMMDD-<slug>/evidence/` when durable logs are needed.
 - Do not store secrets, tokens, credentials, private user data, or production-only sensitive records.
 - Label stale or superseded state instead of silently overwriting it.
-- If the ledger conflicts with the current Goal Contract, system model, diff, or fresh evidence, route to `goal-contract`, `system-model`, or `evidence-verify` before further mutation.
+- If the ledger conflicts with the current 目标契约, system model, diff, or fresh evidence, route to `goal-contract`, `system-model`, or `evidence-verify` before further mutation.

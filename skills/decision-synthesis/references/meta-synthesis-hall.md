@@ -1,6 +1,6 @@
-# Meta-Synthesis Hall
+# 综合集成厅
 
-Use the Meta-Synthesis Hall when a complex or complex-giant-like task needs human-machine synthesis before the next Goal Contract, system model, or user decision.
+Use the 综合集成厅 when a complex or complex-giant-like task needs human-machine synthesis before the next 目标契约, system model, or user decision.
 
 ## Roles
 
@@ -12,27 +12,27 @@ Use the Meta-Synthesis Hall when a complex or complex-giant-like task needs huma
 ## Working memory
 
 ```text
-Meta-Synthesis Hall:
-- Core question:
-- Human role:
-- Machine role:
-- Expert inputs:
-- Hypothesis bank:
-  - Hypothesis:
-  - Evidence for:
-  - Evidence against:
-  - Missing sensor:
-- Model registry:
-  - Model or perspective:
-  - Boundary:
-  - Confidence:
-  - Failure mode:
-- Scenario set:
-- Dissent:
-- Candidate indicators:
-- Convergence condition:
-- Decision boundary:
-- Route:
+综合集成厅:
+- 核心问题:
+- 人类角色:
+- 机器角色:
+- 专家输入:
+- 假设库:
+  - 假设:
+  - 支持证据:
+  - 反对证据:
+  - 缺失传感器:
+- 模型登记:
+  - 模型或视角:
+  - 边界:
+  - 置信度:
+  - 失效模式:
+- 场景集:
+- 异议:
+- 候选指标:
+- 收敛条件:
+- 决策边界:
+- 路由:
 ```
 
 ## Rules
@@ -41,5 +41,5 @@ Meta-Synthesis Hall:
 - Preserve dissent when stakeholders, models, or evidence disagree; do not average away conflicts.
 - Keep a Hypothesis bank for unresolved explanations and route to `system-model` when the missing fact is plant, sensor, actuator, disturbance, or coupling.
 - Keep a Model registry for competing mental models, empirical models, simulations, or stakeholder perspectives.
-- Name a Convergence condition before leaving synthesis: stable Goal Contract candidate, system-model question, user-owned decision, bounded validation hypothesis, or blocker.
+- Name a Convergence condition before leaving synthesis: stable 目标契约 candidate, system-model question, user-owned decision, bounded validation hypothesis, or blocker.
 - Route to user when priority, budget, schedule, risk acceptance, production impact, or final claim ownership is the active uncertainty.

@@ -1,8 +1,8 @@
-# Plan Template
+# 计划模板
 
-Use only when `control-loop` needs a durable dynamic plan. A plan is the current execution view and incremental history; it is not an approval gate and must not rewrite the Goal Contract.
+Use only when `control-loop` needs a durable dynamic plan. A plan is the current execution view and incremental history; it is not an approval gate and must not rewrite the 目标契约.
 
-Default path:
+默认路径:
 
 ```text
 .alpha-goal/YYYYMMDD-<slug>/plan.md
@@ -17,75 +17,75 @@ Create or update a plan when:
 - user requests a plan, execution artifact, handoff route, or status artifact.
 
 ```text
-# Plan
+# 计划
 
-## Metadata
-- Title:
-- Status: draft | reviewed | approved | superseded
-- Related Goal Contract:
-- Related system model:
-- Owner:
-- Strongest material risk:
-- Approval basis:
-- Supersedes:
-- Last updated:
+## 元数据
+- 标题:
+- 状态: draft | reviewed | approved | superseded
+- 关联目标契约:
+- 关联控制模型:
+- 负责人:
+- 最强实质风险:
+- 批准依据:
+- 取代:
+- 最后更新:
 
-## Current Strategy
+## 当前策略
 
 2-5 sentences explaining the current route, key tradeoff, and why this is the smallest viable route.
 
-## Active Boundary
+## 活跃边界
 
-- Included:
-- Excluded:
-- Claim boundary supported:
-- Control law:
-- Control variables:
-- Variables held constant:
-- Adaptive learning records applied:
+- 范围内:
+- 范围外:
+- 已支持声明边界:
+- 控制律:
+- 控制变量:
+- 保持不变的变量:
+- 已应用自适应学习记录:
 
-## Triggering Evidence
+## 触发证据
 
-- Loop or event:
-- Evidence:
-- Decision:
+- 循环或事件:
+- 证据:
+- 决策:
 
-## Execution Slices
+## 执行切片
 
-| ID | Goal | Control law | Learning applied | Status | Dependencies | Evidence gate | Feedback route |
+| ID | 目标 | 控制律 | 已应用学习 | 状态 | 依赖 | 证据闸门 | 反馈路由 |
 | --- | --- | --- | --- | --- | --- | --- |
 | S1 |  |  | none | pending | none |  |  |
 
 Status values: pending, in_progress, done, blocked, superseded.
 
-## Decisions
+## 决策
 
-- Decision:
-  - Reason:
-  - Evidence:
+- 决策:
+  - 原因:
+  - 证据:
 
-## Risks and Watchpoints
+## 风险与关注点
 
-- Strongest material risk:
-  - Mitigation:
-  - Evidence needed:
+- 最强实质风险:
+  - 缓解措施:
+  - 所需证据:
 
-## Verification Route
+## 验证路由
 
-- Target-final-state checks:
-- Commands or manual probes:
-- Evidence fresh after final material change:
-- Checks intentionally out of scope:
+- 目标最终状态检查:
+- 命令或手动探测:
+- 最后实质变更后的新鲜证据:
+- 明确排除的检查:
 
-## Change Log
+## 变更日志
 
-- Time/version:
-  - Changed:
-  - Reason:
-  - Evidence:
-  - Learning:
+- 时间 / 版本:
+  - 变更:
+  - 原因:
+  - 证据:
+  - 学习:
 
-## Open Questions
+## 开放问题
 
 -
 ```

@@ -12,10 +12,10 @@ Return `PASS_TO_FINAL` only when:
 - fresh checks ran after the last material change, or substitute evidence is explicitly sufficient for a narrowed claim;
 - feedback is handled, out of scope, or routed elsewhere;
 - strongest material risk has matching evidence;
-- material qualitative objectives have Indicator Handoff evidence or an explicit narrowed claim;
-- material control actions have sensor feedback that meets the stated Control Law threshold, or residual error/fallback is reflected in the verdict;
+- material qualitative objectives have 指标交接 evidence or an explicit narrowed claim;
+- material control actions have sensor feedback that meets the stated 控制律 threshold, or residual error/fallback is reflected in the verdict;
 - material delayed/noisy feedback has latency, noise, confidence, damping, and containment reflected in the verdict before stable completion is claimed;
-- material Adaptive Learning Records are supported by evidence and do not broaden the final claim beyond the observed boundary;
+- material 自适应学习记录 are supported by evidence and do not broaden the final claim beyond the observed boundary;
 - bug/root-cause claims have valid root-cause evidence;
 - final claim does not exceed tested or observed boundary.
 

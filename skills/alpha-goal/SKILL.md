@@ -15,11 +15,11 @@ Treat the user request as a control problem:
 - `plant`: repository, product, data flow, document system, workflow, or organization being changed;
 - `state`: what is currently known about goal, scope, implementation, evidence, risk, and blockers;
 - `observer`: tests, logs, diffs, runtime probes, user feedback, reviewer feedback, and read-only repository facts;
-- `actuator`: bounded changes made by `control-loop` under an approved Goal Contract;
+- `actuator`: bounded changes made by `control-loop` under an approved 目标契约;
 - `comparator`: `evidence-verify`, which compares fresh evidence against the reference and claim boundary;
-- `memory`: a Closed-loop Ledger that carries reference, current state, error, control action, feedback, and route history across skills;
-- `adaptation`: Adaptive Learning Records that correct reusable control assumptions without silently changing scope or authority;
-- `disturbance`: changing requirements, dirty working tree, missing tools, flaky tests, conflicting specs, hidden ownership, broad claims, or external side effects, tracked through a Disturbance Register when material.
+- `memory`: a 闭环台账 that carries reference, current state, error, control action, feedback, and route history across skills;
+- `adaptation`: 自适应学习记录 that correct reusable control assumptions without silently changing scope or authority;
+- `disturbance`: changing requirements, dirty working tree, missing tools, flaky tests, conflicting specs, hidden ownership, broad claims, or external side effects, tracked through a 扰动登记 when material.
 
 ## Boundaries
 
@@ -46,7 +46,7 @@ Classify state -> Select next skill -> Check stability gates -> Persist route ca
 
 ### 1. Classify state
 
-Identify the current dominant uncertainty. If a Closed-loop Ledger exists, read its latest reference, current state, residual error, and route decision before classifying:
+Identify the current dominant uncertainty. If a 闭环台账 exists, read its latest reference, current state, residual error, and route decision before classifying:
 
 - unclear target, intent, scope, non-goals, acceptance, or authorization -> goal ambiguity;
 - unclear plant boundary, state variables, observability, controllability, disturbances, or coupling -> model ambiguity;
@@ -63,12 +63,12 @@ If no ledger exists and the task is likely to span multiple skills, initialize `
 
 Use this routing table:
 
-| Current state | Next skill | Reason |
+| 当前状态 | 下一技能 | 原因 |
 | --- | --- | --- |
 | User asks for implementation but goal boundary is unclear | `goal-contract` | define reference/setpoint before control action |
 | Goal is broad and system structure is unclear | `system-model` then `goal-contract` | model the plant before writing the contract |
 | Multiple local controllers can affect one global objective | `system-model` or `decision-synthesis` | map hierarchy, coupling, arbitration, and user-owned priorities |
-| Active approved Goal Contract exists and mutation/probe is needed | `control-loop` | execute one bounded control action and collect feedback |
+| Active approved 目标契约 exists and mutation/probe is needed | `control-loop` | execute one bounded control action and collect feedback |
 | Evidence bundle exists and a final claim is proposed | `evidence-verify` | compare output state to reference and claim boundary |
 | Problem is socio-technical, strategic, multi-agent, or complex giant-system-like | `decision-synthesis` | synthesize qualitative and quantitative views before contract |
 | Required user-owned decision or external permission is missing | user clarification / blocker | do not invent authority |
@@ -78,12 +78,12 @@ Use this routing table:
 Before routing to an execution-capable path, ensure:
 
 - the reference state is explicit enough to detect error;
-- an execution route has a candidate Control Law: target error, control variable, expected effect, sensor threshold, fallback, and dynamics/stability guards when material;
+- an execution route has a candidate 控制律: target error, control variable, expected effect, sensor threshold, fallback, and dynamics/stability guards when material;
 - the actuator boundary says what may change and what must not change;
 - observer signals are available or a missing-observer blocker is stated;
 - qualitative objectives have accepted indicators or explicitly missing sensors before execution claims depend on them;
 - material disturbances are registered with likelihood, impact, sensor, containment, and route trigger, or routed to modeling/synthesis/user/blocker;
-- prior Adaptive Learning Records are applied only when reuse conditions hold and invalidation conditions do not hold;
+- prior 自适应学习记录 are applied only when reuse conditions hold and invalidation conditions do not hold;
 - the ledger records the last error signal and why the selected next skill reduces it, or chat-only state is explicitly justified by a no-write constraint;
 - final claims will be checked by `evidence-verify` rather than stated by the executor.
 - runtime artifacts use the task-scoped layout from `references/artifact-layout.md`; legacy category paths are treated as validation failures.
@@ -91,43 +91,43 @@ Before routing to an execution-capable path, ensure:
 
 ### 4. Persist route card and show summary
 
-Persist the full route card to the Closed-loop Ledger by default. Do not print the full card in the TUI unless the user explicitly asks for it, persistence is blocked, or the route is high-risk enough that the user must review every field before continuing.
+Persist the full route card to the 闭环台账 by default. Do not print the full card in the TUI unless the user explicitly asks for it, persistence is blocked, or the route is high-risk enough that the user must review every field before continuing.
 
 Write or update this section in `.alpha-goal/YYYYMMDD-<slug>/control-state.md`:
 
 ```text
-Latest Control Route:
-Control Route:
-- Ledger path:
-- Active state:
-- Dominant uncertainty:
-- Error signal:
-- Control law:
-- Indicator handoff:
-- Adaptive learning:
-- Controller hierarchy:
-- Disturbance register:
-- Selected skill:
-- Why this skill:
-- Required context to load or ask for:
-- Safety boundary:
-- Next action:
+最新控制路由:
+控制路由:
+- 台账路径:
+- 活跃状态:
+- 主导不确定性:
+- 误差信号:
+- 控制律:
+- 指标交接:
+- 自适应学习:
+- 控制器层级:
+- 扰动登记:
+- 选定技能:
+- 选择理由:
+- 需加载或询问的上下文:
+- 安全边界:
+- 下一步:
 ```
 
 Then show only a TUI-friendly summary as a Markdown table:
 
 ```markdown
-Route Summary
+路由摘要
 
-| Field | Value |
+| 字段 | 内容 |
 | --- | --- |
-| Route | |
-| Why | |
-| Boundary | |
-| Ledger | |
-| Next | |
+| 路由 | |
+| 原因 | |
+| 边界 | |
+| 台账 | |
+| 下一步 | |
 ```
 
-The summary must be enough for the user to understand the selected route without reading a long field list. Keep each table value concise; put long reasoning in the ledger artifact. Other skills must recover the full route from `.alpha-goal/YYYYMMDD-<slug>/control-state.md` instead of relying on the TUI transcript. If writing is explicitly forbidden or impossible, include the full `Control Route` in chat and state the no-write reason in `Ledger`.
+The summary must be enough for the user to understand the selected route without reading a long field list. Keep each table value concise; put long reasoning in the ledger artifact. Other skills must recover the full route from `.alpha-goal/YYYYMMDD-<slug>/control-state.md` instead of relying on the TUI transcript. If writing is explicitly forbidden or impossible, include the full `控制路由` in chat and state the no-write reason in `台账路径`.
 
 If the user explicitly named a skill and the route is safe, respect that selection and state any residual gates.

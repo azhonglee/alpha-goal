@@ -1,46 +1,46 @@
-# Iteration Record Schema
+# 迭代记录 Schema
 
-Use this reference when a loop result needs a durable or handoff-ready record. Keep it proportional: include fields only when they affect judgment, handoff, recovery, or accountability. Persist the full record at `.alpha-goal/YYYYMMDD-<slug>/iterations/NN-<slice>.md` by default, with bulky evidence under `.alpha-goal/YYYYMMDD-<slug>/evidence/`. When machine validation or resume safety matters, write a schema sidecar under `.alpha-goal/YYYYMMDD-<slug>/schema/iteration-NN.json`. The TUI should show a Markdown-table `Iteration Summary` with action, feedback, residual error, artifact path, and next action unless full chat output is required.
+Use this reference when a loop result needs a durable or handoff-ready record. Keep it proportional: include fields only when they affect judgment, handoff, recovery, or accountability. Persist the full record at `.alpha-goal/YYYYMMDD-<slug>/iterations/NN-<slice>.md` by default, with bulky evidence under `.alpha-goal/YYYYMMDD-<slug>/evidence/`. When machine validation or resume safety matters, write a schema sidecar under `.alpha-goal/YYYYMMDD-<slug>/schema/iteration-NN.json`. The TUI should show a Markdown-table `迭代摘要` with action, feedback, residual error, artifact path, and next action unless full chat output is required.
 
-## Compact record
+## 紧凑记录
 
 ```text
-Iteration Record:
-- Boundary:
-- Control slice:
-- Action:
-- Evidence:
-- Error/acceptance delta:
-- Control law result:
-- Ledger update:
-  - Control-state path:
-  - Artifact path:
-  - Schema sidecar path:
-  - Evidence paths:
-  - Residual error:
-  - Route decision:
-- Decision:
-- Next:
+迭代记录:
+- 边界:
+- 控制切片:
+- 动作:
+- 证据:
+- 误差 / 验收变化:
+- 控制律结果:
+- 台账更新:
+  - 控制状态路径:
+  - 产物路径:
+  - Schema 辅助索引路径:
+  - 证据路径:
+  - 残余误差:
+  - 路由决策:
+- 决策:
+- 下一步:
 ```
 
-## Conditional fields
+## 条件字段
 
 Add when relevant:
 
-- `Dynamic plan`: multi-slice, multi-repo/module, contested ownership, recovery, rollback, compatibility, or handoff sequencing.
-- `Preflight`: mutation path, dirty state, worktree, submodule, local rules, or user-change evidence.
-- `Changed files`: intentional touched paths when there is a diff.
-- `Generated artifacts`: generated files, reports, binaries, or documents.
-- `Acceptance delta`: criteria covered, partially covered, or uncovered.
-- `Control law result`: target error, expected effect, observed feedback, threshold status, feedback latency, signal noise, confidence, damping / anti-oscillation, saturation / containment, fallback, and residual error for mutation or diagnostic-probe slices.
-- `Adaptive Learning Record`: trigger, observed mismatch, adjustment, reuse condition, and invalidation condition when feedback changes future control behavior.
-- `Feedback handling`: user, reviewer, test, runtime, or advisory feedback that changed the route.
-- `Risk/ownership`: cross-boundary, generated-output, migration, compatibility, concurrency, data, security, or observability risk.
-- `Ledger update`: input state, error signal, control action, sensor feedback, residual error, route decision, and next state when the task spans skills or turns.
-- `Debug Receipt`: required for bug/root-cause claims.
-- `Delegation receipt`: required when subagents own an independent surface.
+- `动态计划`: multi-slice, multi-repo/module, contested ownership, recovery, rollback, compatibility, or handoff sequencing.
+- `预检`: mutation path, dirty state, worktree, submodule, local rules, or user-change evidence.
+- `已变更文件`: intentional touched paths when there is a diff.
+- `生成产物`: generated files, reports, binaries, or documents.
+- `验收变化`: criteria covered, partially covered, or uncovered.
+- `控制律结果`: target error, expected effect, observed feedback, threshold status, feedback latency, signal noise, confidence, damping / anti-oscillation, saturation / containment, fallback, and residual error for mutation or diagnostic-probe slices.
+- `自适应学习记录`: trigger, observed mismatch, adjustment, reuse condition, and invalidation condition when feedback changes future control behavior.
+- `反馈处理`: user, reviewer, test, runtime, or advisory feedback that changed the route.
+- `风险 / 归属`: cross-boundary, generated-output, migration, compatibility, concurrency, data, security, or observability risk.
+- `台账更新`: input state, error signal, control action, sensor feedback, residual error, route decision, and next state when the task spans skills or turns.
+- `调试回执`: required for bug/root-cause claims.
+- `委托回执`: required when subagents own an independent surface.
 
-## Verdict vocabulary
+## 结论词汇
 
 - `ITERATION_CONTINUES`: another bounded slice should proceed or be recommended.
 - `ITERATION_HARDEN`: direction is valid but evidence, edge cases, compatibility, or cleanup are insufficient.

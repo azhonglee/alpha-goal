@@ -384,38 +384,38 @@ type StructuredBlockTest = {
 
 const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
   [
-    "ambiguous requirement can become a bounded Goal Contract",
+    "ambiguous requirement can become a bounded 目标契约",
     "skills/goal-contract/SKILL.md",
     [
-      "Goal Contract",
+      "目标契约",
       "reference state",
       "acceptance evidence",
       "claim boundary",
       "decision boundaries",
-      "Indicator Handoff",
+      "指标交接",
       ".alpha-goal/YYYYMMDD-<slug>/goal-contract.md",
       ".alpha-goal/YYYYMMDD-<slug>/control-state.md",
-      "Contract Summary",
-      "| Field | Value |",
-      "artifact path",
+      "契约摘要",
+      "| 字段 | 内容 |",
+      "产物路径",
     ],
   ],
   [
     "unclear system boundary routes through control modeling",
     "skills/system-model/SKILL.md",
     [
-      "System boundary",
-      "Observability",
-      "Controllability",
-      "Candidate control laws",
-      "Controller Hierarchy",
+      "系统边界",
+      "可观测性",
+      "可控性",
+      "候选控制律",
+      "控制器层级",
       "none material",
-      "Disturbance Register",
+      "扰动登记",
       "none material",
       ".alpha-goal/YYYYMMDD-<slug>/system-model.md",
       ".alpha-goal/YYYYMMDD-<slug>/control-state.md",
-      "Model Summary",
-      "| Field | Value |",
+      "模型摘要",
+      "| 字段 | 内容 |",
     ],
   ],
   [
@@ -423,85 +423,85 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "skills/control-loop/SKILL.md",
     [
       "执行检查",
-      "Chinese heading and field labels by default",
+      "Chinese titles by default",
       "explicitly asks for another language",
       "问题",
       "本轮动作",
       "验收证据",
-      "persisted Control Law",
-      "Do not print the raw `Control Law:` block in the TUI by default",
+      "persisted 控制律",
+      "Do not print the raw `控制律:` block in the TUI by default",
       "user asks",
       "persistence is blocked",
       "high-risk",
-      "target error",
-      "control variable",
-      "sensor threshold",
+      "目标误差",
+      "控制变量",
+      "传感器阈值",
       "fallback",
-      "Latest Control Route",
-      "Adaptive Learning Record",
+      "最新控制路由",
+      "自适应学习记录",
       ".alpha-goal/YYYYMMDD-<slug>/iterations",
       ".alpha-goal/YYYYMMDD-<slug>/evidence",
-      "Iteration Summary",
-      "| Field | Value |",
-      "ledger update",
+      "迭代摘要",
+      "| 字段 | 内容 |",
+      "台账更新",
     ],
   ],
   [
     "insufficient evidence routes to next iteration instead of final",
     "skills/evidence-verify/SKILL.md",
     [
-      "Evidence coverage",
+      "证据覆盖",
       "NEXT_ITERATION",
       "NARROW_CLAIM_AND_FINAL",
       ".alpha-goal/YYYYMMDD-<slug>/verification-verdict.md",
-      "Verification Summary",
-      "| Field | Value |",
-      "Final claim allowed",
+      "验证摘要",
+      "| 字段 | 内容 |",
+      "允许的最终声明",
     ],
   ],
   [
     "complex multi-party conflict uses human-machine synthesis rounds",
     "skills/decision-synthesis/SKILL.md",
     [
-      "Synthesis Round",
-      "Indicator Handoff",
-      "Qualitative judgments",
-      "Quantitative signals",
-      "Meta-Synthesis Hall",
-      "User-owned decisions",
+      "综合轮次",
+      "指标交接",
+      "定性判断",
+      "定量信号",
+      "综合集成厅",
+      "用户自有决策",
       ".alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md",
-      "Synthesis Summary",
-      "| Field | Value |",
-      "Route",
+      "综合摘要",
+      "| 字段 | 内容 |",
+      "路由",
     ],
   ],
   [
     "router preserves closed-loop state and disturbance handling",
     "skills/alpha-goal/SKILL.md",
     [
-      "Closed-loop Ledger",
+      "闭环台账",
       ".alpha-goal/YYYYMMDD-<slug>/control-state.md",
-      "Latest Control Route",
-      "Route Summary",
-      "| Field | Value |",
+      "最新控制路由",
+      "路由摘要",
+      "| 字段 | 内容 |",
       "TUI",
-      "Control Law",
-      "Indicator Handoff",
-      "Adaptive Learning",
-      "Controller Hierarchy",
-      "Disturbance Register",
-      "Error signal",
-      "Selected skill",
+      "控制律",
+      "指标交接",
+      "自适应学习",
+      "控制器层级",
+      "扰动登记",
+      "误差信号",
+      "选定技能",
     ],
   ],
   [
     "claim boundary prevents overbroad final claims",
     "skills/evidence-verify/SKILL.md",
     [
-      "Claim boundary",
-      "Highest practical evidence-supported boundary",
-      "Gap",
-      "Final claim allowed",
+      "声明边界",
+      "证据支持的最高实用边界",
+      "缺口",
+      "允许的最终声明",
     ],
   ],
   [
@@ -513,10 +513,10 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       ".gitignore",
       "process-artifact setup mutation",
       ".alpha-goal/YYYYMMDD-<slug>/",
-      "Latest Control Route",
+      "最新控制路由",
       "Artifact registry",
-      "Route Summary",
-      "| Field | Value |",
+      "路由摘要",
+      "| 字段 | 内容 |",
       "source of truth",
       ".alpha-goal/YYYYMMDD-<slug>/goal-contract.md",
       ".alpha-goal/YYYYMMDD-<slug>/system-model.md",
@@ -524,18 +524,18 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       ".alpha-goal/YYYYMMDD-<slug>/iterations",
       ".alpha-goal/YYYYMMDD-<slug>/evidence",
       ".alpha-goal/YYYYMMDD-<slug>/verification-verdict.md",
-      "Reference",
-      "Current state",
-      "Last error signal",
-      "Control law",
-      "Sensor feedback",
-      "Route decision",
-      "Next state",
-      "Adaptive learning",
+      "参考状态",
+      "当前状态",
+      "最近误差信号",
+      "控制律",
+      "传感器反馈",
+      "路由决策",
+      "下一状态",
+      "自适应学习",
       "执行检查",
-      "Chinese heading and field labels by default",
-      "Other stage summaries keep their established labels unless separately localized",
-      "raw internal Control Law blocks",
+      "Chinese titles by default",
+      "Chinese titles by default",
+      "raw internal 控制律 blocks",
     ],
   ],
   [
@@ -560,8 +560,8 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "cybernetic conformance is machine-checkable",
     "skills/alpha-goal/references/cybernetic-conformance.md",
     [
-      "State transition",
-      "Schema sidecar",
+      "状态迁移",
+      "Schema 辅助索引",
       "legacy artifact path",
       "reference before action",
       "sensor before claim",
@@ -570,18 +570,18 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "\"artifact_kind\"",
       "\"stage_decision\"",
       "\"authorization_status\"",
-      "Stage-specific required keys",
+      "阶段专用必填键",
     ],
   ],
   [
     "disturbance register has robust monitoring and containment fields",
     "skills/system-model/references/disturbance-register.md",
     [
-      "Likelihood",
-      "Impact",
-      "Sensor",
-      "Containment",
-      "Route trigger",
+      "可能性",
+      "影响",
+      "传感器",
+      "约束措施",
+      "路由触发条件",
       "none material",
     ],
   ],
@@ -589,37 +589,37 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "synthesis round combines judgment, evidence, metrics, and decisions",
     "skills/decision-synthesis/references/synthesis-round.md",
     [
-      "Human/expert judgments",
-      "Machine evidence and models",
-      "Quantitative indicators",
-      "Conflict or contradiction",
-      "User-owned decision",
-      "Next hypothesis to verify",
-      "Indicator handoff candidate",
+      "人类 / 专家判断",
+      "机器证据与模型",
+      "定量指标",
+      "冲突或矛盾",
+      "用户自有决策",
+      "下一个待验证假设",
+      "指标交接候选",
     ],
   ],
   [
     "indicator handoff turns qualitative goals into evidence signals",
     "skills/goal-contract/references/indicator-handoff.md",
     [
-      "Operational definition",
-      "Sensor / evidence source",
-      "Measurement timing or frequency",
-      "Threshold / tolerance",
-      "Evidence boundary",
-      "Route trigger",
+      "操作化定义",
+      "传感器 / 证据来源",
+      "测量时机或频率",
+      "阈值 / 容差",
+      "证据边界",
+      "路由触发条件",
     ],
   ],
   [
     "controller hierarchy maps local controllers to global objective",
     "skills/system-model/references/controller-hierarchy.md",
     [
-      "Global controller",
-      "Local controller",
-      "Coupling variables",
-      "Arbitration rule",
-      "Escalation trigger",
-      "Recommended coordination route",
+      "全局控制器",
+      "局部控制器",
+      "耦合变量",
+      "仲裁规则",
+      "升级触发条件",
+      "推荐协同路由",
       "none material",
     ],
   ],
@@ -627,44 +627,44 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "adaptive learning records reusable control corrections",
     "skills/control-loop/references/adaptive-learning.md",
     [
-      "Learning trigger",
-      "Observed mismatch",
-      "Adjustment",
-      "Reuse condition",
-      "Invalidation condition",
-      "Ledger update",
+      "学习触发条件",
+      "已观察偏差",
+      "调整",
+      "复用条件",
+      "失效条件",
+      "台账更新",
     ],
   ],
   [
     "control law captures dynamics and stability guards",
     "skills/control-loop/references/control-law.md",
     [
-      "Internal Schema",
-      "TUI Projection",
+      "内部结构",
+      "界面投影",
       "执行检查",
       "internal artifact syntax only",
-      "Schema sidecars are machine-readable summaries and indexes",
-      "Internal Artifact Example",
+      "Schema 辅助索引是机器可读的摘要与索引",
+      "内部产物示例",
       "not the default TUI projection",
-      "Print the raw `Control Law:` block in chat only when the user asks",
+      "Print the raw `控制律:` block in chat only when the user asks",
       "persistence is blocked",
       "high-risk",
-      "Feedback latency",
-      "Signal noise",
-      "Confidence",
-      "Damping / anti-oscillation",
-      "Saturation / containment",
+      "反馈延迟",
+      "信号噪声",
+      "置信度",
+      "阻尼 / 防振荡",
+      "饱和 / 影响范围约束",
     ],
   ],
   [
     "system model propagates dynamic control law fields",
     "skills/system-model/references/control-model-schema.md",
     [
-      "Feedback latency",
-      "Signal noise",
-      "Confidence",
-      "Damping / anti-oscillation",
-      "Saturation / containment",
+      "反馈延迟",
+      "信号噪声",
+      "置信度",
+      "阻尼 / 防振荡",
+      "饱和 / 影响范围约束",
     ],
   ],
   [
@@ -672,21 +672,21 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "skills/control-loop/SKILL.md",
     [
       "执行检查",
-      "Chinese heading and field labels by default",
+      "Chinese titles by default",
       "explicitly asks for another language",
       "问题",
       "本轮动作",
       "主要风险",
-      "persisted Control Law",
-      "Do not print the raw `Control Law:` block in the TUI by default",
+      "persisted 控制律",
+      "Do not print the raw `控制律:` block in the TUI by default",
       "user asks",
       "persistence is blocked",
       "high-risk",
-      "feedback latency",
-      "signal noise",
-      "confidence",
-      "damping / anti-oscillation",
-      "saturation / containment",
+      "反馈延迟",
+      "信号噪声",
+      "置信度",
+      "阻尼 / 防振荡",
+      "饱和 / 影响范围约束",
     ],
   ],
   [
@@ -704,7 +704,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "meta-synthesis hall operationalizes qualitative to quantitative convergence",
     "skills/decision-synthesis/references/meta-synthesis-hall.md",
     [
-      "Meta-Synthesis Hall",
+      "综合集成厅",
       "Human role",
       "Machine role",
       "Hypothesis bank",
@@ -719,36 +719,36 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
   {
     name: "goal contract schema keeps executable handoff fields",
     path: "skills/goal-contract/SKILL.md",
-    anchor: "Goal Contract schema:",
+    anchor: "目标契约结构:",
     required_terms: [
-      "- Reference state:",
-      "- Scope:",
-      "- Control model:",
-      "- Indicator handoff:",
-      "- Acceptance criteria:",
-      "- Handoff:",
-      "- Ledger update:",
+      "- 参考状态:",
+      "- 范围:",
+      "- 控制模型:",
+      "- 指标交接:",
+      "- 验收标准:",
+      "- 交接:",
+      "- 台账更新:",
     ],
   },
   {
     name: "system model full schema keeps plant sensors and control boundaries",
     path: "skills/system-model/SKILL.md",
-    anchor: "Full model:",
+    anchor: "完整模型:",
     required_terms: [
-      "- System boundary:",
-      "- Controlled object / plant:",
-      "- Sensors and evidence boundary:",
-      "- Actuators and authority boundary:",
-      "- Candidate control laws:",
-      "- Disturbance register:",
-      "- Controller hierarchy:",
-      "- Recommended route:",
+      "- 系统边界:",
+      "- 被控对象 / plant:",
+      "- 传感器与证据边界:",
+      "- 执行器与授权边界:",
+      "- 候选控制律:",
+      "- 扰动登记:",
+      "- 控制器层级:",
+      "- 推荐路由:",
     ],
   },
   {
     name: "iteration record preserves route vocabulary",
     path: "skills/control-loop/references/iteration-record-schema.md",
-    anchor: "## Verdict vocabulary",
+    anchor: "## 结论词汇",
     required_terms: [
       "`ITERATION_CONTINUES`",
       "`ITERATION_HARDEN`",
@@ -771,14 +771,14 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
       "| 验收证据 |",
       "| 主要风险 |",
       "| 失败处理 |",
-      "Chinese heading and field labels by default",
+      "Chinese titles by default",
       "without showing multiple language templates",
     ],
   },
   {
     name: "control law TUI projection keeps localized table fields",
     path: "skills/control-loop/references/control-law.md",
-    anchor: "## TUI Projection",
+    anchor: "## 界面投影",
     block_scope: "section",
     required_terms: [
       "执行检查",
@@ -788,40 +788,40 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
       "| 验收证据 |",
       "| 主要风险 |",
       "| 失败处理 |",
-      "| 问题 | Target error |",
-      "| 本轮动作 | Control variable plus control action or probe |",
-      "| 主要风险 | Signal noise, damping / anti-oscillation, saturation / containment, or strongest material risk |",
-      "| 失败处理 | Fallback action plus stop / reframe trigger |",
+      "| 问题 | 目标误差 |",
+      "| 本轮动作 | 控制变量加控制动作或探测 |",
+      "| 主要风险 | 信号噪声、阻尼 / 防振荡、饱和 / 影响范围约束，或最强实质风险 |",
+      "| 失败处理 | 失败处理加停止 / 重构触发条件 |",
     ],
   },
   {
     name: "control law internal schema separates sidecar and chat display",
     path: "skills/control-loop/references/control-law.md",
-    anchor: "## Internal Schema",
+    anchor: "## 内部结构",
     block_scope: "section",
     required_terms: [
       "internal artifact syntax only",
       "not the default TUI shape",
-      "Schema sidecars are machine-readable summaries and indexes",
-      "do not treat a sidecar as the full Control Law",
+      "Schema 辅助索引是机器可读的摘要与索引",
+      "do not treat a sidecar as the full 控制律",
     ],
   },
   {
     name: "control law internal example is not default TUI",
     path: "skills/control-loop/references/control-law.md",
-    anchor: "## Internal Artifact Example",
+    anchor: "## 内部产物示例",
     block_scope: "section",
     required_terms: [
       "persisted artifact",
       "not the default TUI projection",
       "Do not paste it into chat",
-      "Control Law:",
+      "控制律:",
     ],
   },
   {
     name: "verification verdict preserves final comparator vocabulary",
     path: "skills/evidence-verify/references/verification-verdict-schema.md",
-    anchor: "## Verdict",
+    anchor: "## 结论",
     required_terms: [
       "`PASS_TO_FINAL`",
       "`NARROW_CLAIM_AND_FINAL`",
@@ -839,7 +839,7 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
       "Route to `system-model`",
       "Route to user",
       "Route to `evidence-verify` only when synthesis did not authorize mutation",
-      "Route to `control-loop` only if a valid Goal Contract already exists",
+      "Route to `control-loop` only if a valid 目标契约 already exists",
     ],
   },
 ];
@@ -854,8 +854,8 @@ const DEFAULT_TUI_PROJECTION_GUARDS = [
   {
     name: "control law TUI projection",
     path: "skills/control-loop/references/control-law.md",
-    anchor: "## TUI Projection",
-    end_anchor: "## Internal Schema",
+    anchor: "## 界面投影",
+    end_anchor: "## 内部结构",
   },
 ];
 
@@ -892,6 +892,37 @@ const DEFAULT_TUI_TEMPLATE_TERMS = [
   "| 失败处理 |",
 ];
 
+const LEGACY_OUTPUT_TITLE_TERMS = [
+  "Route Summary",
+  "Control Route",
+  "Latest Control Route",
+  "Goal Contract:",
+  "Goal Contract schema:",
+  "Contract Summary",
+  "Control Model:",
+  "Model Summary",
+  "Decision Synthesis Record:",
+  "Synthesis Summary",
+  "Iteration Summary",
+  "Verification Verdict:",
+  "Verification Summary",
+  "Control Law:",
+  "Internal Schema",
+  "TUI Projection",
+  "Internal Artifact Example",
+  "Closed-loop Ledger:",
+  "Adaptive Learning Record:",
+  "Disturbance Register:",
+  "Indicator Handoff:",
+  "Controller Hierarchy:",
+  "Synthesis Round:",
+  "Debug Receipt:",
+  "Coupling Map:",
+  "Synthesis Map:",
+  "Cybernetic Conformance Report:",
+  "| Field | Value |",
+];
+
 const FIXTURE_CONTRACT_TESTS = [
   {
     name: "complex migration conflict uses synthesis and indicator handoff",
@@ -903,20 +934,20 @@ const FIXTURE_CONTRACT_TESTS = [
       "skills/decision-synthesis/SKILL.md",
       "skills/decision-synthesis/references/synthesis-round.md",
     ],
-    schema_blocks: ["Decision Synthesis Record:", "Synthesis Round:", "Indicator Handoff:"],
+    schema_blocks: ["决策综合记录:", "综合轮次:", "指标交接:"],
     route_terms: ["user", "goal-contract", "system-model", "blocker"],
   },
   {
     name: "qualitative objective becomes measurable contract evidence",
-    prompt: "把用户体验更稳定转成可验证 Goal Contract。",
-    prompt_terms: ["用户体验", "稳定", "可验证", "Goal Contract"],
+    prompt: "把用户体验更稳定转成可验证 目标契约。",
+    prompt_terms: ["用户体验", "稳定", "可验证", "目标契约"],
     expected_route: "control-loop",
     expected_stage_decision: "CONTRACT_APPROVED",
     paths: [
       "skills/goal-contract/SKILL.md",
       "skills/goal-contract/references/indicator-handoff.md",
     ],
-    schema_blocks: ["Goal Contract:", "Indicator Handoff:"],
+    schema_blocks: ["目标契约:", "指标交接:"],
     route_terms: ["control-loop", "system-model", "evidence-verify", "block"],
   },
   {
@@ -929,7 +960,7 @@ const FIXTURE_CONTRACT_TESTS = [
       "skills/system-model/SKILL.md",
       "skills/system-model/references/controller-hierarchy.md",
     ],
-    schema_blocks: ["Control Model:", "Controller Hierarchy:"],
+    schema_blocks: ["控制模型:", "控制器层级:"],
     route_terms: ["goal-contract", "control-loop", "decision-synthesis", "blocker"],
   },
   {
@@ -943,7 +974,7 @@ const FIXTURE_CONTRACT_TESTS = [
       "skills/control-loop/references/control-law.md",
       "skills/control-loop/references/adaptive-learning.md",
     ],
-    schema_blocks: ["执行检查", "Adaptive Learning Record:"],
+    schema_blocks: ["执行检查", "自适应学习记录:"],
     route_terms: [
       "ITERATION_CONTINUES",
       "ITERATION_HARDEN",
@@ -961,9 +992,9 @@ const FIXTURE_CONTRACT_TESTS = [
       "skills/evidence-verify/references/verification-verdict-schema.md",
     ],
     schema_blocks: [
-      "Verification Verdict:",
-      "Indicator handoff review",
-      "Adaptive learning review",
+      "验证结论:",
+      "指标交接复核",
+      "自适应学习复核",
     ],
     route_terms: ["PASS_TO_FINAL", "NEXT_ITERATION", "REFRAME", "BLOCKED"],
   },
@@ -1134,6 +1165,7 @@ export function main(args = process.argv.slice(2)): number {
   validateCyberneticRouteConsistency(root, errors);
   validateSemanticSmokeTests(root, errors);
   validateStructuredBlockTests(root, errors);
+  validateChineseOutputTitles(root, errors);
   validateDefaultTuiProjectionGuards(root, errors);
   validateFixtureContractTests(root, errors);
 
@@ -1454,7 +1486,7 @@ function validateSchemaSidecarContract(root: string, errors: string[]): void {
     "base JSON Schema",
     "compact summary and index",
     "does not replace the full Markdown stage artifact",
-    "persisted full Control Law",
+    "persisted full 控制律",
     "TypeScript validator additionally enforces",
     "runtime trace continuity",
   ];
@@ -2038,9 +2070,9 @@ function validateCyberneticRouteConsistency(root: string, errors: string[]): voi
     }
 
     const requiredGuards = [
-      "`decision-synthesis -> control-loop` is valid only when an approved Goal Contract already exists",
+      "`decision-synthesis -> control-loop` is valid only when an approved 目标契约 already exists",
       "`decision-synthesis -> evidence-verify` is valid only when synthesis did not authorize mutation",
-      "`system-model -> control-loop` is valid only when an approved Goal Contract exists",
+      "`system-model -> control-loop` is valid only when an approved 目标契约 exists",
     ];
     for (const guard of requiredGuards) {
       if (!conformance.includes(guard)) {
@@ -2052,7 +2084,7 @@ function validateCyberneticRouteConsistency(root: string, errors: string[]): voi
   if (synthesis) {
     const requiredRoutes = [
       "Route to `evidence-verify` only when synthesis did not authorize mutation",
-      "Route to `control-loop` only if a valid Goal Contract already exists",
+      "Route to `control-loop` only if a valid 目标契约 already exists",
       "Route to `goal-contract` when a stable recommended direction",
       "Route to `system-model` when subsystem boundary or feedback signals remain unclear",
     ];
@@ -2065,7 +2097,7 @@ function validateCyberneticRouteConsistency(root: string, errors: string[]): voi
 
   if (synthesisRound) {
     const routeTrigger =
-      "Route trigger: goal-contract | system-model | control-loop | evidence-verify | user | blocker";
+      "路由触发条件: goal-contract | system-model | control-loop | evidence-verify | user | blocker";
     if (!synthesisRound.includes(routeTrigger)) {
       errors.push(`${synthesisRoundRel}: missing complete route trigger list`);
     }
@@ -2162,7 +2194,7 @@ function validateDefaultTuiProjectionGuards(root: string, errors: string[]): voi
     const rawControlLaw = rawControlLawFieldLeak(section);
     if (rawControlLaw) {
       errors.push(
-        `default TUI projection guard ${JSON.stringify(guard.name)} failed in ${guard.path}: default TUI section contains raw Control Law field ${JSON.stringify(rawControlLaw)}`,
+        `default TUI projection guard ${JSON.stringify(guard.name)} failed in ${guard.path}: default TUI section contains raw 控制律 field ${JSON.stringify(rawControlLaw)}`,
       );
     }
 
@@ -2171,6 +2203,24 @@ function validateDefaultTuiProjectionGuards(root: string, errors: string[]): voi
       errors.push(
         `default TUI projection guard ${JSON.stringify(guard.name)} failed in ${guard.path}: default TUI section contains a separate non-Chinese example term ${JSON.stringify(multilingualExample[0].trim())}`,
       );
+    }
+  }
+}
+
+function validateChineseOutputTitles(root: string, errors: string[]): void {
+  for (const rel of documentationFiles(root)) {
+    if (!rel.startsWith("skills/") || !rel.endsWith(".md")) {
+      continue;
+    }
+    const file = path.join(root, rel);
+    if (!isFile(file)) {
+      continue;
+    }
+    const text = fs.readFileSync(file, "utf8");
+    for (const title of LEGACY_OUTPUT_TITLE_TERMS) {
+      if (text.includes(title)) {
+        errors.push(`${rel}: legacy English output title remains: ${title}`);
+      }
     }
   }
 }

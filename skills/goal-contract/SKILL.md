@@ -1,11 +1,11 @@
 ---
 name: goal-contract
-description: "Convert ambiguous engineering, debugging, design, or artifact requests into a safe Goal Contract: reference state, scope, non-goals, decision boundaries, acceptance evidence, and implementation authorization."
+description: "Convert ambiguous engineering, debugging, design, or artifact requests into a safe 目标契约: reference state, scope, non-goals, decision boundaries, acceptance evidence, and implementation authorization."
 ---
 
-# Goal Contract
+# 目标契约
 
-Use this skill to form the reference state for a controlled engineering effort. It turns intent into a Goal Contract before any mutation-capable iteration begins.
+Use this skill to form the reference state for a controlled engineering effort. It turns intent into a 目标契约 before any mutation-capable iteration begins.
 
 ## Control interpretation
 
@@ -24,7 +24,7 @@ In engineering-cybernetics terms, this skill defines the setpoint and safe contr
 - Default to writing process artifacts under `.alpha-goal/`. Before the first write in a repository, ensure `.alpha-goal/` is ignored; if it is missing from the repo root `.gitignore`, add `.alpha-goal/` there before writing ledger artifacts.
 - Keep ledger state in chat only when the user explicitly forbids file writes, no repository path exists, or `.gitignore` cannot be updated safely.
 - Ask only for user-owned decisions. Discover codebase or document facts yourself when safe and available.
-- Goal Contract acceptance authorizes only handoff to `control-loop`; it does not authorize push, deployment, data repair, production actions, or external side effects.
+- 目标契约 acceptance authorizes only handoff to `control-loop`; it does not authorize push, deployment, data repair, production actions, or external side effects.
 - For diagnostics, do not assume repair authorization merely because a plausible cause exists. Define what evidence authorizes repair.
 - Keep proportionality: gather only what materially changes scope, risk, authority, evidence, or next safe action.
 
@@ -32,7 +32,7 @@ In engineering-cybernetics terms, this skill defines the setpoint and safe contr
 
 - `references/ambiguity-scoring.md`: score uncertainty only when it changes clarification effort or handoff safety.
 - `references/indicator-handoff.md`: convert qualitative objectives or synthesis indicators into measurable evidence.
-- `references/goal-contract-schema.md`: produce a durable or handoff-ready Goal Contract.
+- `references/goal-contract-schema.md`: produce a durable or handoff-ready 目标契约.
 
 ## Process
 
@@ -47,11 +47,11 @@ Collect enough context to classify the problem:
 - user intent, desired outcome, proposed solution, deadline, constraints, and non-goals;
 - target repo/path/service/module/document/data/workflow and likely touchpoints;
 - existing work, durable specs, incidents, logs, tickets, or prior decisions;
-- Synthesis Round indicators, qualitative objectives, or metrics that must become observable evidence;
+- 综合轮次 indicators, qualitative objectives, or metrics that must become observable evidence;
 - unknowns that affect authority, scope, risk, acceptance, decision boundaries, or claim wording;
 - for brownfield work, facts observed directly versus inferences.
 
-If a Closed-loop Ledger exists, read its `Latest Control Route` and current control state before changing the Goal Contract. Recover route fields from `.alpha-goal/YYYYMMDD-<slug>/control-state.md`, not from the TUI summary. If it conflicts with current user intent or fresh facts, label the superseded state and reframe instead of silently continuing.
+If a 闭环台账 exists, read its `最新控制路由` and current control state before changing the 目标契约. Recover route fields from `.alpha-goal/YYYYMMDD-<slug>/control-state.md`, not from the TUI summary. If it conflicts with current user intent or fresh facts, label the superseded state and reframe instead of silently continuing.
 
 If the system boundary or feedback signals are too unclear to write a reliable contract, route to `system-model` first and return with a model summary.
 
@@ -100,7 +100,7 @@ Readiness gates before handoff:
 - included scope and excluded non-goals are clear;
 - decision boundaries state what the agent may decide without confirmation;
 - acceptance criteria and evidence expectations are testable enough for the next action;
-- material qualitative goals have an Indicator Handoff with sensor, threshold or tolerance, and evidence boundary, or an explicit missing-sensor gap;
+- material qualitative goals have an 指标交接 with sensor, threshold or tolerance, and evidence boundary, or an explicit missing-sensor gap;
 - diagnostic contracts define symptoms, observations, hypotheses, and root-cause evidence needed before repair;
 - claim boundary states what final wording may and may not say;
 - at least one pressure pass has checked an assumption, example, counterexample, or tradeoff for non-trivial work.
@@ -129,47 +129,47 @@ Follow-up ladder:
 Produce the lightest safe artifact:
 
 - `Clarifying question`: name the user-owned decision.
-- `Bounded exploration answer`: summarize findings, evidence, residual uncertainty, and whether a Goal Contract is needed before mutation.
+- `Bounded exploration answer`: summarize findings, evidence, residual uncertainty, and whether a 目标契约 is needed before mutation.
 - `Design/spec`: resolve a decision boundary without authorizing implementation.
-- `Goal Contract`: authorize a bounded `control-loop` handoff after user acceptance.
+- `目标契约`: authorize a bounded `control-loop` handoff after user acceptance.
 - `Diagnostic Contract`: authorize diagnosis first, and repair only after recorded root-cause evidence.
 
-Persist full artifacts under `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md` by default and update the Closed-loop Ledger artifact registry. Show a compact Markdown-table `Contract Summary` in the TUI by default. Print the full contract in chat only when the user asks, file persistence is blocked, or explicit user acceptance requires reviewing all contract fields in the conversation.
+Persist full artifacts under `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md` by default and update the 闭环台账 artifact registry. Show a compact Markdown-table `契约摘要` in the TUI by default. Print the full contract in chat only when the user asks, file persistence is blocked, or explicit user acceptance requires reviewing all contract fields in the conversation.
 
-Goal Contract schema:
+目标契约结构:
 
 ```text
-Goal Contract:
-- Metadata: profile, rounds, final ambiguity, context type, date/slug
-- Reference state: desired outcome and final claim boundary
-- Current state: observed facts, inferences, and unresolved uncertainty
-- Scope: in-scope, out-of-scope, non-goals
-- Control model: controlled object, allowed control variables, observability signals, disturbances, coupling risks
-- Indicator handoff: qualitative objective, metric/proxy, operational definition, sensor, timing, threshold/tolerance, evidence boundary, owner, route trigger
-- Decision boundaries: agent-owned versus user-owned decisions
-- Constraints and assumptions: resolved assumptions and conditions
-- Acceptance criteria: testable evidence expectations
-- Diagnostic gate: symptom, hypotheses, cause-evidence needed, repair authorization gate, if applicable
-- Pressure-test findings: assumption/tradeoff/evidence probes
-- Handoff: accepted indicators, allowed first loop mode, evidence floor, stop/reframe triggers
-- Ledger update: `.alpha-goal/YYYYMMDD-<slug>/control-state.md` path, artifact path, optional schema sidecar path, latest error signal, next route, or explicit no-write reason
+目标契约:
+- 元数据: 配置档、轮次、最终模糊度、上下文类型、日期 / slug
+- 参考状态: 期望结果与最终声明边界
+- 当前状态: 已观察事实、推断、未解决不确定性
+- 范围: 范围内、范围外、非目标
+- 控制模型: 被控对象、允许的控制变量、可观测信号、扰动、耦合风险
+- 指标交接: 定性目标、指标 / 代理、操作化定义、传感器、测量时机、阈值 / 容差、证据边界、负责人、路由触发条件
+- 决策边界: agent 可决策事项与用户自有决策
+- 约束与假设: 已解决假设与条件
+- 验收标准: 可验证的证据预期
+- 诊断闸门: 症状、假设、所需原因证据、修复授权闸门（如适用）
+- 压力测试发现: 假设 / 取舍 / 证据探测
+- 交接: 已接受指标、允许的首轮循环模式、证据下限、停止 / 重构触发条件
+- 台账更新: `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 路径、产物路径、可选 Schema 辅助索引路径、最新误差信号、下一路由，或明确的无法写入原因
 ```
 
-TUI summary:
+TUI 摘要:
 
 ```markdown
-Contract Summary
+契约摘要
 
-| Field | Value |
+| 字段 | 内容 |
 | --- | --- |
-| Reference | |
-| Scope boundary | |
-| Evidence | |
-| Artifact | |
-| Next | |
+| 参考 | |
+| 范围边界 | |
+| 证据 | |
+| 产物 | |
+| 下一步 | |
 ```
 
-Default durable paths:
+默认持久化路径:
 
 ```text
 .alpha-goal/YYYYMMDD-<slug>/goal-contract.md
@@ -196,7 +196,7 @@ If review fails, return to the earliest phase that can fix it.
 
 ### 7. Handoff
 
-Handoff means passing a user-accepted Goal Contract to `control-loop`. Non-contract artifacts inform later work but do not authorize implementation.
+Handoff means passing a user-accepted 目标契约 to `control-loop`. Non-contract artifacts inform later work but do not authorize implementation.
 
 When a contract is ready, ask the user to accept, reject, or change it unless the runtime already contains explicit acceptance.
 - If accepted, update `.alpha-goal/YYYYMMDD-<slug>/control-state.md` with reference, current state, actuator boundary, evidence floor, artifact path, and next route before handoff. If `.alpha-goal/` is not ignored, add it to the repo root `.gitignore` first. If writing is explicitly forbidden or impossible, include the ledger state and full contract in chat and state the no-write reason.

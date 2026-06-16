@@ -70,5 +70,5 @@ If unrelated user changes exist:
 - do not overwrite them;
 - avoid broad formatting commands;
 - use targeted edits;
-- mention them in the Iteration Record;
+- mention them in the 迭代记录;
 - ask before stashing, reverting, or moving them.

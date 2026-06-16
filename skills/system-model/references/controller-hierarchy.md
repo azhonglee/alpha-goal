@@ -1,27 +1,27 @@
-# Controller Hierarchy
+# 控制器层级
 
-Use a Controller Hierarchy / Coordination Map when a task has multiple subsystems, teams, repos, agents, modules, services, or objectives that can act as local controllers under a shared goal.
+Use a 控制器层级 / Coordination Map when a task has multiple subsystems, teams, repos, agents, modules, services, or objectives that can act as local controllers under a shared goal.
 
-If material multi-controller relationships exist, output a clearly labeled `Controller Hierarchy:` block. If none exist, state `Controller hierarchy: none material`. Do not replace the hierarchy with an unlabeled prose coordination section.
+If material multi-controller relationships exist, output a clearly labeled `控制器层级:` block. If none exist, state `控制器层级: none material`. Do not replace the hierarchy with an unlabeled prose coordination section.
 
 ```text
-Controller Hierarchy:
-- Global controller:
-  - Objective:
-  - Authority boundary:
-  - Global sensors:
-  - Arbitration rule:
-- Local controller:
-  - Owner:
-  - Controlled object / plant:
-  - Local objective:
-  - Control variables:
-  - Local sensors:
-  - Constraints:
-  - Coupling variables:
-  - Escalation trigger:
-- Coordination risks:
-- Recommended coordination route:
+控制器层级:
+- 全局控制器:
+  - 目标:
+  - 权限边界:
+  - 全局传感器:
+  - 仲裁规则:
+- 局部控制器:
+  - 负责人:
+  - 被控对象 / plant:
+  - 局部目标:
+  - 控制变量:
+  - 局部传感器:
+  - 约束:
+  - 耦合变量:
+  - 升级触发条件:
+- 协同风险:
+- 推荐协同路由:
 ```
 
 ## Rules

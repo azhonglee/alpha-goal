@@ -23,25 +23,25 @@ Evidence is useful only if it can change the next decision.
 - Delta review is a narrow follow-up when prior gate evidence remains fresh.
 - Blocker evidence shows a missing input, permission, tool, data, environment, or safe-state condition.
 
-## Debug Receipt
+## 调试回执
 
 Debug must identify root cause before repair actions. Keep the receipt compact but falsifiable.
 
 ```text
-Debug Receipt:
-- Symptom:
-- Reproduction:
-- Problem-space decomposition:
-- Competing hypotheses:
-- Probe:
-- Evidence:
-- Entity/interface/log alignment:
-- First divergence point:
-- Root cause statement:
-- Root cause validation:
-- Fix surface:
-- Status: ROOT_CAUSE_CONFIRMED | HYPOTHESIS_TESTED | MITIGATION_APPLIED | NOT_REPRODUCED | BLOCKED
-- Decision:
+调试回执:
+- 症状:
+- 复现:
+- 问题空间拆解:
+- 竞争假设:
+- 探测:
+- 证据:
+- 实体 / 接口 / 日志对齐:
+- 首个分歧点:
+- 根因陈述:
+- 根因验证:
+- 修复面:
+- 状态: ROOT_CAUSE_CONFIRMED | HYPOTHESIS_TESTED | MITIGATION_APPLIED | NOT_REPRODUCED | BLOCKED
+- 决策:
 ```
 
 Status rules:

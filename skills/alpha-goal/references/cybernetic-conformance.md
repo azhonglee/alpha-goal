@@ -25,7 +25,7 @@ Reject or reframe these transitions. A no-write chat state may replace persisted
 
 ## Invariants
 
-- reference before action: a Goal Contract or equivalent context identifies target, scope, non-goals, authority, acceptance evidence, and claim boundary before mutation.
+- reference before action: a 目标契约 or equivalent context identifies target, scope, non-goals, authority, acceptance evidence, and claim boundary before mutation.
 - plant before broad control: system boundary, sensors, actuators, disturbances, and coupling are modeled before high-blast-radius action.
 - sensor before claim: the sensor must be fresh enough and cross the same boundary as the proposed claim.
 - comparator before final: `evidence-verify` must compare evidence, residual error, and final claim boundary before completion wording.
@@ -34,13 +34,13 @@ Reject or reframe these transitions. A no-write chat state may replace persisted
 
 Conditional transition rules:
 
-- `decision-synthesis -> control-loop` is valid only when an approved Goal Contract already exists and synthesis narrows the next slice without changing reference, scope, authority, risk acceptance, or claim boundary.
+- `decision-synthesis -> control-loop` is valid only when an approved 目标契约 already exists and synthesis narrows the next slice without changing reference, scope, authority, risk acceptance, or claim boundary.
 - `decision-synthesis -> evidence-verify` is valid only when synthesis did not authorize mutation and the next action is comparing an existing evidence bundle to a proposed claim.
-- `system-model -> control-loop` is valid only when an approved Goal Contract exists and the model only updates plant, sensor, actuator, disturbance, or coupling facts within that contract.
+- `system-model -> control-loop` is valid only when an approved 目标契约 exists and the model only updates plant, sensor, actuator, disturbance, or coupling facts within that contract.
 
-## Schema sidecar
+## Schema 辅助索引
 
-When a task is long-running, high-risk, or likely to resume, emit a machine-readable Schema sidecar in `.alpha-goal/YYYYMMDD-<slug>/schema/` for the stage artifact. The sidecar is a compact summary and index for routing, traceability, and machine checks; it does not replace the full Markdown stage artifact or the persisted full Control Law. The sidecar is JSON and must satisfy this base JSON Schema. The TypeScript validator additionally enforces artifact-kind path matching, stage-specific required fields, transition guards, authorization rules, fixture trace, runtime trace continuity, evidence boundaries, stage decisions, and claim boundaries:
+When a task is long-running, high-risk, or likely to resume, emit a machine-readable Schema 辅助索引 in `.alpha-goal/YYYYMMDD-<slug>/schema/` for the stage artifact. The sidecar is a compact summary and index for routing, traceability, and machine checks; it does not replace the full Markdown stage artifact or the persisted full 控制律. The sidecar is JSON and must satisfy this base JSON Schema. The TypeScript validator additionally enforces artifact-kind path matching, stage-specific required fields, transition guards, authorization rules, fixture trace, runtime trace continuity, evidence boundaries, stage decisions, and claim boundaries:
 
 ```json
 {
@@ -205,7 +205,7 @@ When a task is long-running, high-risk, or likely to resume, emit a machine-read
 }
 ```
 
-Stage-specific required keys:
+阶段专用必填键:
 
 - `goal-contract`: `reference_id`, `claim_boundary`, `evidence_boundary`, `next_route`, `stage_decision`, `authorization_status`; routing to `control-loop` requires `authorization_status: approved`.
 - `system-model`: `sensor`, `evidence_boundary`, `next_route`, `stage_decision`; routing to `control-loop` requires an existing `reference_id` and `authorization_status: approved`.
@@ -214,20 +214,20 @@ Stage-specific required keys:
 - `verification-verdict`: `sensor`, `evidence_boundary`, `claim_boundary`, `residual_error`, `next_route`, `stage_decision`.
 - `conformance-report`: `artifact_path`, `route_state`, `prior_route`, `next_route`, `residual_error`, `claim_boundary`, `stage_decision`.
 
-## Conformance report
+## 一致性报告
 
 Use `.alpha-goal/YYYYMMDD-<slug>/conformance-report.md` when a final or handoff claim needs an audit trail:
 
 ```text
-Cybernetic Conformance Report:
-- Artifact layout: pass | fail
-- State transition: pass | fail
-- Reference before action: pass | fail
-- Control Law completeness: pass | fail
-- Disturbance handling: pass | fail | not applicable
-- Indicator handoff: pass | fail | not applicable
-- Sensor before claim: pass | fail
-- Comparator before final: pass | fail
-- Legacy artifact path scan: pass | fail
-- Required next route:
+控制论一致性报告:
+- 产物布局: pass | fail
+- 状态迁移: pass | fail
+- 行动前参考状态: pass | fail
+- 控制律完整性: pass | fail
+- 扰动处理: pass | fail | not applicable
+- 指标交接: pass | fail | not applicable
+- 声明前传感器: pass | fail
+- 最终结论前比较器: pass | fail
+- 旧产物路径扫描: pass | fail
+- 必需下一路由:
 ```

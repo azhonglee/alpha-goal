@@ -1,20 +1,20 @@
-# Disturbance Register
+# 扰动登记
 
-Use a Disturbance Register when external change, hidden coupling, unreliable tooling, unclear ownership, or environmental drift can change the route, evidence floor, or safety boundary.
+Use a 扰动登记 when external change, hidden coupling, unreliable tooling, unclear ownership, or environmental drift can change the route, evidence floor, or safety boundary.
 
-If material disturbances exist, output a clearly labeled `Disturbance Register:` block. If none exist, state `Disturbance register: none material`. Do not replace the register with an unlabeled prose risk list.
+If material disturbances exist, output a clearly labeled `扰动登记:` block. If none exist, state `扰动登记: none material`. Do not replace the register with an unlabeled prose risk list.
 
 ```text
-Disturbance Register:
-- Disturbance:
-  - Source:
-  - Likelihood: low | medium | high | unknown
-  - Impact: low | medium | high | unknown
-  - Affected state/control variable:
-  - Sensor:
-  - Containment:
-  - Route trigger:
-  - Owner or decision boundary:
+扰动登记:
+- 扰动:
+  - 来源:
+  - 可能性: low | medium | high | unknown
+  - 影响: low | medium | high | unknown
+  - 受影响状态 / 控制变量:
+  - 传感器:
+  - 约束措施:
+  - 路由触发条件:
+  - 负责人或决策边界:
 ```
 
 ## Rating guidance

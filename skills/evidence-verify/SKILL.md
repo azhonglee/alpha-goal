@@ -1,6 +1,6 @@
 ---
 name: evidence-verify
-description: "Judge whether fresh evidence satisfies an active Goal Contract and supports completion, correctness, safety, merge readiness, ship readiness, or a narrowed final claim. Use for final comparator/error-boundary decisions, not implementation."
+description: "Judge whether fresh evidence satisfies an active 目标契约 and supports completion, correctness, safety, merge readiness, ship readiness, or a narrowed final claim. Use for final comparator/error-boundary decisions, not implementation."
 ---
 
 # Evidence Verify
@@ -17,13 +17,13 @@ A positive verdict needs proportional semantic evidence for:
 
 - reference state, desired outcome, included scope, excluded scope/non-goals, decision boundaries, constraints, and claim boundary;
 - current durable spec/plan/model if referenced;
-- Iteration Record or equivalent diff/evidence bundle;
-- Control Law result for each material `control-loop` slice, including latency/noise/confidence and stability guards when a mutation or diagnostic probe was used;
-- Indicator Handoff handling when qualitative objectives or synthesis metrics affect acceptance evidence;
-- Closed-loop Ledger from `.alpha-goal/YYYYMMDD-<slug>/control-state.md`, including `Latest Control Route`, when the work crossed skills or turns, or explicit no-write chat state when file writing was forbidden or impossible;
-- Disturbance Register handling when material disturbances affected route, evidence, or risk;
-- Adaptive Learning Record handling when feedback changed thresholds, strategy, route, or reusable assumptions;
-- Debug Receipt when the claim is a bug or root-cause fix;
+- 迭代记录 or equivalent diff/evidence bundle;
+- 控制律 result for each material `control-loop` slice, including latency/noise/confidence and stability guards when a mutation or diagnostic probe was used;
+- 指标交接 handling when qualitative objectives or synthesis metrics affect acceptance evidence;
+- 闭环台账 from `.alpha-goal/YYYYMMDD-<slug>/control-state.md`, including `最新控制路由`, when the work crossed skills or turns, or explicit no-write chat state when file writing was forbidden or impossible;
+- 扰动登记 handling when material disturbances affected route, evidence, or risk;
+- 自适应学习记录 handling when feedback changed thresholds, strategy, route, or reusable assumptions;
+- 调试回执 when the claim is a bug or root-cause fix;
 - strongest material risk and matching evidence floor;
 - fresh final-target repo/artifact status and applicable project rules;
 - exact commands/probes/checks and outcomes, or explicit blocker/substitute evidence;
@@ -59,13 +59,13 @@ Evidence must match the claim boundary. A lower-boundary test cannot prove a hig
 Confirm:
 
 - approved context is current or explicitly superseded;
-- Goal Contract, system model, durable spec, and plan are semantically aligned or contradictions are routed;
+- 目标契约, system model, durable spec, and plan are semantically aligned or contradictions are routed;
 - ledger reference, current state, latest control route, residual error, and latest route decision are aligned with fresh evidence or explicitly superseded;
-- each material Control Law identifies a target error, approved control variable, expected effect, sensor threshold, observed feedback, feedback latency, signal noise when material, confidence, damping / anti-oscillation, saturation / containment, and fallback handling;
-- each material Indicator Handoff maps qualitative objective to operational definition, sensor, threshold/tolerance, timing, and evidence boundary;
-- each material Disturbance Register entry has sensor evidence, containment, route-trigger handling, or an explicit residual gap;
-- each material Adaptive Learning Record has evidence, adjustment, reuse condition, invalidation condition, and no unsupported broad generalization;
-- Iteration Record goal type, control slice, execution, feedback, learning, and evidence match the final diff/artifact;
+- each material 控制律 identifies a target error, approved control variable, expected effect, sensor threshold, observed feedback, feedback latency, signal noise when material, confidence, damping / anti-oscillation, saturation / containment, and fallback handling;
+- each material 指标交接 maps qualitative objective to operational definition, sensor, threshold/tolerance, timing, and evidence boundary;
+- each material 扰动登记 entry has sensor evidence, containment, route-trigger handling, or an explicit residual gap;
+- each material 自适应学习记录 has evidence, adjustment, reuse condition, invalidation condition, and no unsupported broad generalization;
+- 迭代记录 goal type, control slice, execution, feedback, learning, and evidence match the final diff/artifact;
 - changed files match target and avoid non-goals;
 - mutation evidence comes from an isolated or approved edit path;
 - `.worktrees/` is ignored or otherwise safe, and `.alpha-goal/` is ignored before ledger/evidence artifacts are written; if `.alpha-goal/` was missing from the repo root `.gitignore`, the setup mutation is included in the evidence;
@@ -81,13 +81,13 @@ Bug/root-cause fixes need `ROOT_CAUSE_CONFIRMED` before repair-complete claims. 
 Compare:
 
 ```text
-Claim boundary:
-- User wording:
-- Implemented boundary:
-- Tested/observed boundary:
-- Highest practical evidence-supported boundary:
-- Gap:
-- Final claim allowed:
+声明边界:
+- 用户表述:
+- 已实现边界:
+- 已测试 / 已观察边界:
+- 证据支持的最高实用边界:
+- 缺口:
+- 允许的最终声明:
 ```
 
 If user wording is product-level but evidence is helper-level, choose either `NEXT_ITERATION` for broader evidence or `NARROW_CLAIM_AND_FINAL` with explicit narrowed wording.
@@ -99,67 +99,67 @@ Return exactly one verdict:
 - `PASS_TO_FINAL`: evidence covers acceptance and claim boundary.
 - `NARROW_CLAIM_AND_FINAL`: local target is satisfied, but final wording must be narrower than the user request.
 - `NEXT_ITERATION`: direction is valid, but implementation, evidence, hardening, or cleanup is still needed.
-- `REFRAME`: Goal Contract, system model, target/scope, non-goals, acceptance, existing-work relationship, or claim boundary is wrong or incomplete.
+- `REFRAME`: 目标契约, system model, target/scope, non-goals, acceptance, existing-work relationship, or claim boundary is wrong or incomplete.
 - `BLOCKED`: environment, data, permission, credential, tool, or user-owned risk/scope decision is missing.
 
 ### 5. Output
 
-Persist the full Verification Verdict under `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md` by default and update the Closed-loop Ledger artifact registry. Show a compact Markdown-table `Verification Summary` in the TUI by default. Print the full verdict in chat only when the user asks, file persistence is blocked, or the final claim requires explicit user review.
+Persist the full 验证结论 under `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md` by default and update the 闭环台账 artifact registry. Show a compact Markdown-table `验证摘要` in the TUI by default. Print the full verdict in chat only when the user asks, file persistence is blocked, or the final claim requires explicit user review.
 
-Compact:
+紧凑版:
 
 ```text
-Verification Verdict:
-- Verdict:
-- Evidence coverage:
-- Claim boundary:
-- Judgment:
-- Gaps:
-- Required next step:
-- Final claim allowed:
-- Artifact:
+验证结论:
+- 结论:
+- 证据覆盖:
+- 声明边界:
+- 判断:
+- 缺口:
+- 必需下一步:
+- 允许的最终声明:
+- 产物:
 ```
 
-TUI summary:
+TUI 摘要:
 
 ```markdown
-Verification Summary
+验证摘要
 
-| Field | Value |
+| 字段 | 内容 |
 | --- | --- |
-| Verdict | |
-| Claim boundary | |
-| Evidence | |
-| Artifact | |
-| Next | |
+| 结论 | |
+| 声明边界 | |
+| 证据 | |
+| 产物 | |
+| 下一步 | |
 ```
 
-Full:
+完整版:
 
 ```text
-Verification Verdict:
-- Verdict:
-- Acceptance evidence matrix:
-- Contract/model/artifact review:
-- Claim boundary:
-- Risk/evidence review:
-- Control law review:
-- Indicator handoff review:
-- Adaptive learning review:
-- Ledger review:
-- Disturbance review:
-- Fresh checks run:
-- Diff/scope review:
-- Feedback review:
-- Judgment:
-- Unresolved gaps:
-- Required next step:
-- Final claim allowed:
-- Ledger update:
-  - Schema sidecar path:
+验证结论:
+- 结论:
+- 验收证据矩阵:
+- 契约 / 模型 / 产物复核:
+- 声明边界:
+- 风险 / 证据复核:
+- 控制律复核:
+- 指标交接复核:
+- 自适应学习复核:
+- 台账复核:
+- 扰动复核:
+- 已运行新鲜检查:
+- Diff / 范围复核:
+- 反馈复核:
+- 判断:
+- 未解决缺口:
+- 必需下一步:
+- 允许的最终声明:
+- 台账更新:
+  - Schema 辅助索引路径:
 ```
 
-Routing:
+路由:
 
 - `PASS_TO_FINAL`: final answer may claim completion inside the verified boundary.
 - `NARROW_CLAIM_AND_FINAL`: final answer must state the narrowed claim and remaining higher-boundary gap.

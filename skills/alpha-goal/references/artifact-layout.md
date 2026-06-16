@@ -33,15 +33,15 @@ Use one task run directory for every durable runtime artifact:
 Record paths relative to the repository root:
 
 ```text
-Artifact registry:
-- Control state: .alpha-goal/YYYYMMDD-<slug>/control-state.md
-- Goal Contract: .alpha-goal/YYYYMMDD-<slug>/goal-contract.md
-- System Model: .alpha-goal/YYYYMMDD-<slug>/system-model.md
-- Decision Synthesis: .alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md
-- Plan: .alpha-goal/YYYYMMDD-<slug>/plan.md
-- Iteration Records: .alpha-goal/YYYYMMDD-<slug>/iterations/
-- Evidence: .alpha-goal/YYYYMMDD-<slug>/evidence/
-- Schema sidecars: .alpha-goal/YYYYMMDD-<slug>/schema/
-- Verification Verdict: .alpha-goal/YYYYMMDD-<slug>/verification-verdict.md
-- Conformance Report: .alpha-goal/YYYYMMDD-<slug>/conformance-report.md
+产物登记:
+- 控制状态: .alpha-goal/YYYYMMDD-<slug>/control-state.md
+- 目标契约: .alpha-goal/YYYYMMDD-<slug>/goal-contract.md
+- 控制模型: .alpha-goal/YYYYMMDD-<slug>/system-model.md
+- 决策综合: .alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md
+- 计划: .alpha-goal/YYYYMMDD-<slug>/plan.md
+- 迭代记录: .alpha-goal/YYYYMMDD-<slug>/iterations/
+- 证据: .alpha-goal/YYYYMMDD-<slug>/evidence/
+- Schema 辅助索引: .alpha-goal/YYYYMMDD-<slug>/schema/
+- 验证结论: .alpha-goal/YYYYMMDD-<slug>/verification-verdict.md
+- 一致性报告: .alpha-goal/YYYYMMDD-<slug>/conformance-report.md
 ```
