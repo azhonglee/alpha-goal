@@ -1,6 +1,6 @@
 # 控制论一致性
 
-检查任务是否真正遵循闭环控制模型时使用本参考；判断依据是状态转移、证据和边界是否成立，而不是文档里是否出现了控制论术语。
+检查任务是否真正遵循闭环控制模型时使用本参考。判断依据是状态转移、证据和边界是否成立，而不是文档里是否出现了控制论术语。
 
 ## 状态转移检查
 
@@ -16,7 +16,7 @@ control-loop -> control-loop | evidence-verify | alpha-goal | system-model | blo
 evidence-verify -> final | control-loop | goal-contract | system-model | blocker
 ```
 
-遇到以下迁移时必须拒绝或重新界定。只有在文件持久化受阻时，不能写文件的聊天状态才可以替代持久化台账或产物文件；这不会免除下列安全闸门：
+遇到以下迁移时必须拒绝或重新界定。只有文件持久化受阻时，聊天态记录才可替代持久化台账或产物文件；但仍必须满足下列安全闸门：
 
 - 在参考状态和执行器边界存在之前进入 `control-loop`。
 - 在新鲜证据存在之前进入 `evidence-verify`。
@@ -40,7 +40,7 @@ evidence-verify -> final | control-loop | goal-contract | system-model | blocker
 
 ## 结构化索引
 
-当任务耗时较长、风险较高或可能需要恢复时，要为阶段产物在 `.alpha-goal/YYYYMMDD-<slug>/schema/` 下生成机器可读的结构化索引。该索引是用于路由、追踪和机器检查的紧凑摘要，不替代完整 Markdown 阶段产物，也不替代持久化的完整控制律。索引文件使用 JSON，必须满足下列基础 JSON Schema。TypeScript 校验器还会额外检查产物类型与路径匹配、阶段专用必填字段、迁移闸门、授权规则、样例追踪、运行态追踪连续性、证据边界、阶段决策和声明边界：
+任务耗时较长、风险较高或可能需要恢复时，要在 `.alpha-goal/YYYYMMDD-<slug>/schema/` 下为阶段产物生成机器可读的结构化索引。该索引用于路由、追踪和机器检查，是紧凑摘要；它不替代完整 Markdown 阶段产物，也不替代持久化的完整控制律。索引文件使用 JSON，必须满足下列基础 JSON Schema。TypeScript 校验器还会额外检查：产物类型与路径匹配、阶段专用必填字段、迁移闸门、授权规则、样例追踪、运行态追踪连续性、证据边界、阶段决策和声明边界。
 
 ```json
 {

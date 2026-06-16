@@ -6,7 +6,7 @@
 scripts/install.sh
 ```
 
-默认 Codex 主目录是 `$HOME/.codex`，脚本会创建 `$HOME/.codex/skills/alpha-goal` 软链接，目标是本仓库的 `skills/`。该 `skills/` 树内包含六个必需技能：
+默认 Codex 主目录是 `$HOME/.codex`。脚本会创建 `$HOME/.codex/skills/alpha-goal` 软链接，指向本仓库的 `skills/`。该目录包含六个必需技能：
 
 安装脚本会通过 `npx --yes tsx` 运行 TypeScript 校验器，因此本机需要可用的 Node.js/npm。
 
@@ -30,12 +30,12 @@ CODEX_HOME=/path/to/codex-home scripts/install.sh
 
 脚本会：
 
-- 安装前运行源码中的 `tools/validate_skills.ts` 校验六技能套件的结构、引用可发现性、安装脚本语法、配置模板解析、临时 `CODEX_HOME` 安装烟测、闭环语义烟测、结构化索引样本、运行期样本和样本契约检查。
+- 安装前运行源码中的 `tools/validate_skills.ts`。它会校验六技能结构、引用可发现性、安装脚本、配置模板、临时安装烟测、闭环语义、结构化索引样本、运行期样本和样本契约。
 - 创建 `${CODEX_HOME:-$HOME/.codex}/skills/alpha-goal` 软链接，目标是本仓库的 `skills/` 目录。
-- 默认更新 Codex 主目录 `AGENTS.md` 中带 `generate-with-template:agents-md` 标记的受管理模板块，并只补齐 `config.toml` 中缺失的模板设置；模板只补齐多智能体、子目录 AGENTS.md 和结构化 `request_user_input` 相关开关，不设置 `sandbox_mode`、休眠行为或不稳定特性警告抑制项。
+- 默认同步用户级模板：更新受管理的 `AGENTS.md` 模板块，并补齐 `config.toml` 中缺失的模板设置。模板只涉及多智能体、子目录 AGENTS.md 和结构化 `request_user_input`，不改 sandbox、休眠行为或警告设置。
 - 自动替换指向本仓库旧顶层布局或旧 `skills/alpha-goal` 目录的 `alpha-goal` 软链接。
 - 清理旧版本可能留在目标 `skills/` 下、且直接指向本仓库单个技能目录的旧软链接。
-- 校验目标 `skills/alpha-goal` 软链接指向源码 `skills/` 目录，所有必需技能都能通过该链接访问，且旧支持目录没有作为本仓库技能安装。
+- 校验目标 `skills/alpha-goal` 软链接指向源码 `skills/`，六个必需技能都可访问，且旧支持目录没有作为本仓库技能安装。
 
 如果目标位置已有其他软链接：
 
@@ -60,7 +60,7 @@ scripts/install.sh --verbose
 源码中的 `templates/` 目录包含：
 
 - `AGENTS.md`：推荐的自主智能体行为、人类参与决策（HIL）和交互约束。
-- `config.toml`：启用多智能体、子目录 AGENTS.md 和结构化 `request_user_input` 的可选 Codex 配置，不改变 sandbox 权限、休眠行为，也不抑制不稳定特性警告。启用多智能体后，复杂任务可能启动多个子智能体；模板默认最多 6 个线程、深度 1，可能增加本地资源和模型用量。
+- `config.toml`：可选 Codex 配置，启用多智能体、子目录 AGENTS.md 和结构化 `request_user_input`。它不改变 sandbox 权限、休眠行为，也不抑制不稳定特性警告。启用多智能体后，复杂任务可能启动多个子智能体；模板默认最多 6 个线程、深度 1，可能增加本地资源和模型用量。
 
 默认安装会同步用户级模板。做冒烟测试或文档验证时，应使用临时 `CODEX_HOME`：
 
@@ -120,7 +120,7 @@ $decision-synthesis 多团队对迁移方案目标、风险和成功指标有冲
 
 预期行为：
 
-- 应至少运行一个综合轮次，整合人类 / 专家判断、机器证据或可用指标、冲突、用户自有决策和下一个假设。
+- 应至少运行一轮综合，整合人类 / 专家判断、机器证据或可用指标、冲突、用户自有决策和下一个假设。
 - 开放复杂巨系统任务应使用综合研判工作台，记录角色、假设库、模型登记、异议和收敛条件。
 - 对需要纳入目标契约证据的成功指标，应输出指标转译候选。
 - 应路由到 `goal-contract`、`system-model`、用户或阻塞项，而不是把意见列表当成最终计划。

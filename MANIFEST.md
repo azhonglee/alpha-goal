@@ -6,7 +6,7 @@
 |---|---|
 | `skills/alpha-goal/` | 闭环总入口、稳定性检查和技能路由。 |
 | `skills/goal-contract/` | 发现目标、评估模糊度、转译指标，并形成目标契约和参考输入。 |
-| `skills/system-model/` | 被控对象、状态、观测器、执行器、控制器层级、扰动记录和耦合建模。 |
+| `skills/system-model/` | 建模被控对象、状态、观测器、执行器、控制器层级、扰动和耦合。 |
 | `skills/control-loop/` | 在目标契约下执行有界控制迭代，并记录自适应学习记录。 |
 | `skills/evidence-verify/` | 检查验收、证据边界、指标 / 学习边界，并给出验证结论。 |
 | `skills/decision-synthesis/` | 用于开放复杂巨系统、多主体和弱结构化问题的综合轮次、综合研判和指标转译。 |
@@ -25,7 +25,7 @@
 
 | 路径 | 是否改变状态 | 用途 |
 |---|---:|---|
-| `scripts/install.sh` | 是 | 创建 `${CODEX_HOME:-$HOME/.codex}/skills/alpha-goal` 软链接到本仓库 `skills/` 树，替换同仓库旧技能链接，默认合并用户配置模板，清理旧支持链接，校验六技能套件和目标软链接。 |
+| `scripts/install.sh` | 是 | 创建指向本仓库 `skills/` 的 `alpha-goal` 软链接；替换旧链接；默认合并用户配置模板；清理旧支持链接；校验六技能套件和目标软链接。 |
 | `skills/system-model/scripts/repo-sensor-snapshot.ts` | 否 | 输出仓库传感器快照，用于系统建模和可观测性检查。 |
 | `skills/control-loop/scripts/mutation-preflight.ts` | 否 | 输出 Git 根目录、分支、状态、worktree、本地规则文件、已忽略的 worktree / evidence 路径和子模块。 |
 | `skills/evidence-verify/scripts/evidence-summary.ts` | 否 | 输出已变更文件、diff 统计、diff 检查状态和最近提交。 |
@@ -36,7 +36,7 @@
 
 | 路径 | 用途 |
 |---|---|
-| `.alpha-goal/YYYYMMDD-<slug>/control-state.md` | 可选。闭环台账，记录跨阶段控制状态和产物登记：完整的最新控制路由、参考输入、当前状态、产物路径、反馈、残余误差和下一路由。 |
+| `.alpha-goal/YYYYMMDD-<slug>/control-state.md` | 可选。闭环台账，记录跨阶段控制状态和产物登记：最新控制路由、参考输入、当前状态、产物路径、反馈、残余误差和下一路由。 |
 | `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md` | 可选。完整目标契约产物。 |
 | `.alpha-goal/YYYYMMDD-<slug>/system-model.md` | 可选。完整控制模型产物。 |
 | `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md` | 可选。完整决策综合记录产物。 |

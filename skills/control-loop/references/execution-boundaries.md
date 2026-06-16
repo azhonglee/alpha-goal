@@ -36,7 +36,7 @@
 - 嵌套 `.git` 目录和子模块；
 - 本地规则文件，例如 `AGENTS.md`、`AGENTS.override.md`、`CLAUDE.md` 或 `code_review.md`。
 
-除非目标契约或用户批准，否则不要修改仓库、worktree、子模块、生成输出负责人或流程边界。
+除非目标契约或用户批准，否则不要跨越仓库、worktree、子模块、生成输出归属或流程边界。
 
 ## 生成产物
 
