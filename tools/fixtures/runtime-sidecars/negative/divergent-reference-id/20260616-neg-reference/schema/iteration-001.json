@@ -1,0 +1,19 @@
+{
+  "artifact_kind": "iteration-record",
+  "task_slug": "20260616-neg-reference",
+  "artifact_path": ".alpha-goal/20260616-neg-reference/iterations/001-reference-split.md",
+  "reference_id": "ref-neg-reference-b",
+  "route_state": "control-loop",
+  "prior_route": "goal-contract",
+  "next_route": "evidence-verify",
+  "target_error": "runtime trace has split references",
+  "control_variable": "reference_id continuity",
+  "sensor": "runtime sidecar trace group",
+  "threshold_or_tolerance": "all runtime sidecars in one task share one reference_id",
+  "evidence_boundary": "module",
+  "residual_error": "reference split remains",
+  "claim_boundary": "negative fixture must expose divergent reference_id",
+  "stage_decision": "ITERATION_READY_FOR_VERIFY",
+  "authorization_status": "approved",
+  "generated_at": "2026-06-16T00:00:00Z"
+}

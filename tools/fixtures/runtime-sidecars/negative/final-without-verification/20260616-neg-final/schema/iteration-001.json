@@ -1,0 +1,19 @@
+{
+  "artifact_kind": "iteration-record",
+  "task_slug": "20260616-neg-final",
+  "artifact_path": ".alpha-goal/20260616-neg-final/iterations/001-final-gap.md",
+  "reference_id": "ref-neg-final",
+  "route_state": "control-loop",
+  "prior_route": "goal-contract",
+  "next_route": "evidence-verify",
+  "target_error": "final route is missing verification",
+  "control_variable": "final claim gate",
+  "sensor": "runtime sidecar trace group",
+  "threshold_or_tolerance": "final route requires a verification-verdict sidecar",
+  "evidence_boundary": "module",
+  "residual_error": "verification sidecar absent",
+  "claim_boundary": "negative fixture must not pass final without verification",
+  "stage_decision": "ITERATION_READY_FOR_VERIFY",
+  "authorization_status": "approved",
+  "generated_at": "2026-06-16T00:00:00Z"
+}

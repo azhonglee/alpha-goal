@@ -1,0 +1,19 @@
+{
+  "artifact_kind": "iteration-record",
+  "task_slug": "20260616-neg-late-contract",
+  "artifact_path": ".alpha-goal/20260616-neg-late-contract/iterations/001-late-contract.md",
+  "reference_id": "ref-neg-late-contract",
+  "route_state": "control-loop",
+  "prior_route": "goal-contract",
+  "next_route": "evidence-verify",
+  "target_error": "approved contract was recorded after mutation",
+  "control_variable": "authorization order",
+  "sensor": "runtime sidecar generated_at order",
+  "threshold_or_tolerance": "approved contract time is not later than control-loop route time",
+  "evidence_boundary": "module",
+  "residual_error": "contract timestamp is later than iteration",
+  "claim_boundary": "negative fixture must expose late authorization",
+  "stage_decision": "ITERATION_READY_FOR_VERIFY",
+  "authorization_status": "approved",
+  "generated_at": "2026-06-16T00:01:00Z"
+}

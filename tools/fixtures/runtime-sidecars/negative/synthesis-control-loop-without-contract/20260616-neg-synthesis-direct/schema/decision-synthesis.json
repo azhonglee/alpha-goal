@@ -1,0 +1,19 @@
+{
+  "artifact_kind": "decision-synthesis",
+  "task_slug": "20260616-neg-synthesis-direct",
+  "artifact_path": ".alpha-goal/20260616-neg-synthesis-direct/decision-synthesis.md",
+  "reference_id": "ref-neg-synthesis-direct",
+  "route_state": "decision-synthesis",
+  "prior_route": "alpha-goal",
+  "next_route": "control-loop",
+  "target_error": "synthesis routes directly to control-loop without approved contract",
+  "control_variable": "mutation authorization",
+  "sensor": "runtime sidecar trace group",
+  "threshold_or_tolerance": "decision-synthesis to control-loop is backed by a prior approved goal-contract",
+  "evidence_boundary": "artifact",
+  "residual_error": "approved goal-contract sidecar absent",
+  "claim_boundary": "negative fixture must expose unauthorized synthesis mutation route",
+  "stage_decision": "ROUTE_TO_CONTROL_LOOP",
+  "authorization_status": "approved",
+  "generated_at": "2026-06-16T00:00:00Z"
+}

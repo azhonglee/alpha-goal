@@ -1,0 +1,19 @@
+{
+  "artifact_kind": "goal-contract",
+  "task_slug": "20260616-runtime-fixture",
+  "artifact_path": ".alpha-goal/20260616-runtime-fixture/goal-contract.md",
+  "reference_id": "ref-runtime-fixture",
+  "route_state": "goal-contract",
+  "prior_route": "system-model",
+  "next_route": "control-loop",
+  "target_error": "unclear reference and acceptance evidence",
+  "control_variable": "goal contract fields",
+  "sensor": "contract coverage review",
+  "threshold_or_tolerance": "target, scope, non-goals, authority, evidence, and claim boundary are present",
+  "evidence_boundary": "artifact",
+  "residual_error": "none known for fixture",
+  "claim_boundary": "runtime fixture documents a bounded goal contract sidecar",
+  "stage_decision": "CONTRACT_APPROVED",
+  "authorization_status": "approved",
+  "generated_at": "2026-06-16T00:00:00Z"
+}

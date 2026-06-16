@@ -1,0 +1,19 @@
+{
+  "artifact_kind": "conformance-report",
+  "task_slug": "20260616-neg-late-final",
+  "artifact_path": ".alpha-goal/20260616-neg-late-final/conformance-report.md",
+  "reference_id": "ref-neg-late-final",
+  "route_state": "evidence-verify",
+  "prior_route": "control-loop",
+  "next_route": "final",
+  "target_error": "final claim is earlier than supporting verifier",
+  "control_variable": "final verifier order",
+  "sensor": "runtime sidecar generated_at order",
+  "threshold_or_tolerance": "final verifier time is not later than final route time",
+  "evidence_boundary": "artifact",
+  "residual_error": "verification verdict timestamp is later than conformance final route",
+  "claim_boundary": "negative fixture must expose late final verifier",
+  "stage_decision": "CONFORMANCE_PASS",
+  "authorization_status": "not-required",
+  "generated_at": "2026-06-16T00:03:00Z"
+}

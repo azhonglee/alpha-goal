@@ -1,0 +1,19 @@
+{
+  "artifact_kind": "decision-synthesis",
+  "task_slug": "20260616-no-mutation-verify",
+  "artifact_path": ".alpha-goal/20260616-no-mutation-verify/decision-synthesis.md",
+  "reference_id": null,
+  "route_state": "decision-synthesis",
+  "prior_route": "alpha-goal",
+  "next_route": "evidence-verify",
+  "target_error": "existing evidence may or may not support the proposed claim",
+  "control_variable": "claim boundary and evidence bundle",
+  "sensor": "read-only synthesis of existing evidence",
+  "threshold_or_tolerance": "no mutation is authorized; verifier may compare evidence to claim boundary",
+  "evidence_boundary": "artifact",
+  "residual_error": "none known for fixture",
+  "claim_boundary": "read-only claim can be compared without a mutation contract",
+  "stage_decision": "ROUTE_TO_EVIDENCE_VERIFY",
+  "authorization_status": "not-required",
+  "generated_at": "2026-06-16T00:00:00Z"
+}

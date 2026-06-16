@@ -1,0 +1,18 @@
+{
+  "artifact_kind": "goal-contract",
+  "task_slug": "20260616-neg-artifact-path",
+  "reference_id": "ref-neg-artifact-path",
+  "route_state": "goal-contract",
+  "prior_route": "system-model",
+  "next_route": "control-loop",
+  "target_error": "sidecar omits artifact path",
+  "control_variable": "schema sidecar required keys",
+  "sensor": "runtime fixture concrete sidecar validation",
+  "threshold_or_tolerance": "artifact_path is always present and task-scoped",
+  "evidence_boundary": "artifact",
+  "residual_error": "artifact_path missing",
+  "claim_boundary": "negative fixture must expose missing artifact_path",
+  "stage_decision": "CONTRACT_APPROVED",
+  "authorization_status": "approved",
+  "generated_at": "2026-06-16T00:00:00Z"
+}

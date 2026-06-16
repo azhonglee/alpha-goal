@@ -1,0 +1,19 @@
+{
+  "artifact_kind": "decision-synthesis",
+  "task_slug": "20260616-neg-late-edge",
+  "artifact_path": ".alpha-goal/20260616-neg-late-edge/decision-synthesis.md",
+  "reference_id": "ref-neg-late-edge",
+  "route_state": "decision-synthesis",
+  "prior_route": "alpha-goal",
+  "next_route": "system-model",
+  "target_error": "incoming edge source is later than target state",
+  "control_variable": "trace ordering",
+  "sensor": "runtime sidecar generated_at order",
+  "threshold_or_tolerance": "incoming sidecar edge is not later than current route",
+  "evidence_boundary": "artifact",
+  "residual_error": "source timestamp is later than target timestamp",
+  "claim_boundary": "negative fixture must expose late incoming edge",
+  "stage_decision": "ROUTE_TO_SYSTEM_MODEL",
+  "authorization_status": "not-required",
+  "generated_at": "2026-06-16T00:02:00Z"
+}

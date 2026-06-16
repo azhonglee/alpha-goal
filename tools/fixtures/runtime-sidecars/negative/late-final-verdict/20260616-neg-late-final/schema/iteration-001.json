@@ -1,0 +1,19 @@
+{
+  "artifact_kind": "iteration-record",
+  "task_slug": "20260616-neg-late-final",
+  "artifact_path": ".alpha-goal/20260616-neg-late-final/iterations/001-late-final.md",
+  "reference_id": "ref-neg-late-final",
+  "route_state": "control-loop",
+  "prior_route": "goal-contract",
+  "next_route": "evidence-verify",
+  "target_error": "final claim is earlier than supporting verifier",
+  "control_variable": "final verifier order",
+  "sensor": "runtime sidecar generated_at order",
+  "threshold_or_tolerance": "final verifier time is not later than final route time",
+  "evidence_boundary": "module",
+  "residual_error": "verification verdict timestamp is later than conformance final route",
+  "claim_boundary": "negative fixture must expose late final verifier",
+  "stage_decision": "ITERATION_READY_FOR_VERIFY",
+  "authorization_status": "approved",
+  "generated_at": "2026-06-16T00:02:00Z"
+}

@@ -1,0 +1,19 @@
+{
+  "artifact_kind": "iteration-record",
+  "task_slug": "20260616-runtime-fixture",
+  "artifact_path": ".alpha-goal/20260616-runtime-fixture/iterations/001-tighten-validator.md",
+  "reference_id": "ref-runtime-fixture",
+  "route_state": "control-loop",
+  "prior_route": "goal-contract",
+  "next_route": "evidence-verify",
+  "target_error": "validator must catch runtime trace drift",
+  "control_variable": "runtime sidecar fixtures",
+  "sensor": "npx --yes tsx tools/validate_skillset.ts .",
+  "threshold_or_tolerance": "validation passes only when trace continuity and authorization gates hold",
+  "evidence_boundary": "module",
+  "residual_error": "none known for fixture",
+  "claim_boundary": "runtime fixture documents a bounded iteration sidecar",
+  "stage_decision": "ITERATION_READY_FOR_VERIFY",
+  "authorization_status": "approved",
+  "generated_at": "2026-06-16T00:00:00Z"
+}

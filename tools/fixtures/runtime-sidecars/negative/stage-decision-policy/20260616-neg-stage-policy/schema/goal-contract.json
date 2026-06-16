@@ -1,0 +1,19 @@
+{
+  "artifact_kind": "goal-contract",
+  "task_slug": "20260616-neg-stage-policy",
+  "artifact_path": ".alpha-goal/20260616-neg-stage-policy/goal-contract.md",
+  "reference_id": "ref-neg-stage-policy",
+  "route_state": "goal-contract",
+  "prior_route": "alpha-goal",
+  "next_route": "control-loop",
+  "target_error": "goal contract uses an iteration stage decision",
+  "control_variable": "stage decision source policy",
+  "sensor": "runtime fixture concrete sidecar validation",
+  "threshold_or_tolerance": "stage_decision belongs to the artifact_kind route_state matrix",
+  "evidence_boundary": "artifact",
+  "residual_error": "wrong stage decision still points at control-loop",
+  "claim_boundary": "negative fixture must expose stage decision forgery",
+  "stage_decision": "ITERATION_HARDEN",
+  "authorization_status": "approved",
+  "generated_at": "2026-06-16T00:00:00Z"
+}

@@ -1,0 +1,19 @@
+{
+  "artifact_kind": "iteration-record",
+  "task_slug": "20260616-neg-reference-missing",
+  "artifact_path": ".alpha-goal/20260616-neg-reference-missing/iterations/001-missing-reference.md",
+  "reference_id": null,
+  "route_state": "control-loop",
+  "prior_route": "goal-contract",
+  "next_route": "evidence-verify",
+  "target_error": "action sidecar has no reference",
+  "control_variable": "reference_id continuity",
+  "sensor": "runtime sidecar trace group",
+  "threshold_or_tolerance": "runtime sidecars reaching action routes share one meaningful reference_id",
+  "evidence_boundary": "module",
+  "residual_error": "iteration reference_id is null",
+  "claim_boundary": "negative fixture must expose missing runtime reference",
+  "stage_decision": "ITERATION_READY_FOR_VERIFY",
+  "authorization_status": "approved",
+  "generated_at": "2026-06-16T00:02:00Z"
+}

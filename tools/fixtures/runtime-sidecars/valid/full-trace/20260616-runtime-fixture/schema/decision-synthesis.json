@@ -1,0 +1,19 @@
+{
+  "artifact_kind": "decision-synthesis",
+  "task_slug": "20260616-runtime-fixture",
+  "artifact_path": ".alpha-goal/20260616-runtime-fixture/decision-synthesis.md",
+  "reference_id": "ref-runtime-fixture",
+  "route_state": "decision-synthesis",
+  "prior_route": "alpha-goal",
+  "next_route": "system-model",
+  "target_error": "conflicting qualitative and quantitative priorities",
+  "control_variable": "recommended direction and indicator handoff",
+  "sensor": "synthesis round convergence",
+  "threshold_or_tolerance": "user-owned decisions and accepted indicators are explicit",
+  "evidence_boundary": "artifact",
+  "residual_error": "none known for fixture",
+  "claim_boundary": "runtime fixture documents a bounded decision synthesis sidecar",
+  "stage_decision": "ROUTE_TO_SYSTEM_MODEL",
+  "authorization_status": "not-required",
+  "generated_at": "2026-06-16T00:00:00Z"
+}

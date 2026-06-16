@@ -1,0 +1,19 @@
+{
+  "artifact_kind": "goal-contract",
+  "task_slug": "20260616-neg-reference-missing",
+  "artifact_path": ".alpha-goal/20260616-neg-reference-missing/goal-contract.md",
+  "reference_id": "ref-neg-reference-missing",
+  "route_state": "goal-contract",
+  "prior_route": "alpha-goal",
+  "next_route": "control-loop",
+  "target_error": "action sidecar has no reference",
+  "control_variable": "reference_id continuity",
+  "sensor": "runtime sidecar trace group",
+  "threshold_or_tolerance": "runtime sidecars reaching action routes share one meaningful reference_id",
+  "evidence_boundary": "artifact",
+  "residual_error": "iteration reference_id is null",
+  "claim_boundary": "negative fixture must expose missing runtime reference",
+  "stage_decision": "CONTRACT_APPROVED",
+  "authorization_status": "approved",
+  "generated_at": "2026-06-16T00:01:00Z"
+}

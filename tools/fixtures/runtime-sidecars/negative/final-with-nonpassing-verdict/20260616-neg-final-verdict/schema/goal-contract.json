@@ -1,0 +1,19 @@
+{
+  "artifact_kind": "goal-contract",
+  "task_slug": "20260616-neg-final-verdict",
+  "artifact_path": ".alpha-goal/20260616-neg-final-verdict/goal-contract.md",
+  "reference_id": "ref-neg-final-verdict",
+  "route_state": "goal-contract",
+  "prior_route": "alpha-goal",
+  "next_route": "control-loop",
+  "target_error": "final route is backed only by a non-passing verifier",
+  "control_variable": "final verifier gate",
+  "sensor": "runtime sidecar trace group",
+  "threshold_or_tolerance": "final requires PASS_TO_FINAL or NARROW_CLAIM_AND_FINAL",
+  "evidence_boundary": "artifact",
+  "residual_error": "verifier requested next iteration",
+  "claim_boundary": "negative fixture must expose non-passing final verifier",
+  "stage_decision": "CONTRACT_APPROVED",
+  "authorization_status": "approved",
+  "generated_at": "2026-06-16T00:01:00Z"
+}

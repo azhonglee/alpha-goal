@@ -2,6 +2,7 @@
 // Lightweight validation for a local Agent Skills suite.
 
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -74,6 +75,7 @@ const SIDECAR_REQUIRED_KEYS = [
   "authorization_status",
   "generated_at",
 ];
+const SIDECAR_REQUIRED_KEY_SET = new Set(SIDECAR_REQUIRED_KEYS);
 
 const SIDECAR_ARTIFACT_KINDS = [
   "goal-contract",
@@ -97,6 +99,7 @@ const SIDECAR_ROUTE_STATES = [
 ];
 
 const SIDECAR_FIXTURE_DIR = "tools/fixtures/schema-sidecars";
+const RUNTIME_SIDECAR_FIXTURE_DIR = "tools/fixtures/runtime-sidecars";
 const SIDECAR_TASK_SLUG_RE = /^\d{8}-[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const ALLOWED_ALPHA_GOAL_NON_ARTIFACT_PATHS = new Set(["preflight-check"]);
 
@@ -180,6 +183,62 @@ const STAGE_REQUIRED_SIDECAR_KEYS: Record<string, string[]> = {
   ],
 };
 
+const SIDECAR_STAGE_POLICIES: Record<
+  string,
+  { routeState: string; stageDecisions: string[] }
+> = {
+  "decision-synthesis": {
+    routeState: "decision-synthesis",
+    stageDecisions: [
+      "ROUTE_TO_GOAL_CONTRACT",
+      "ROUTE_TO_SYSTEM_MODEL",
+      "ROUTE_TO_CONTROL_LOOP",
+      "ROUTE_TO_EVIDENCE_VERIFY",
+      "ROUTE_TO_USER",
+      "BLOCKED",
+    ],
+  },
+  "system-model": {
+    routeState: "system-model",
+    stageDecisions: [
+      "ROUTE_TO_GOAL_CONTRACT",
+      "ROUTE_TO_CONTROL_LOOP",
+      "ROUTE_TO_EVIDENCE_VERIFY",
+      "REFRAME",
+      "BLOCKED",
+    ],
+  },
+  "goal-contract": {
+    routeState: "goal-contract",
+    stageDecisions: ["CONTRACT_APPROVED", "CONTRACT_REFRAME", "BLOCKED"],
+  },
+  "iteration-record": {
+    routeState: "control-loop",
+    stageDecisions: [
+      "ITERATION_CONTINUES",
+      "ITERATION_HARDEN",
+      "ITERATION_READY_FOR_VERIFY",
+      "RETURN_TO_ALPHA_GOAL",
+      "RETURN_TO_SYSTEM_MODEL",
+      "BLOCKED",
+    ],
+  },
+  "verification-verdict": {
+    routeState: "evidence-verify",
+    stageDecisions: [
+      "PASS_TO_FINAL",
+      "NARROW_CLAIM_AND_FINAL",
+      "NEXT_ITERATION",
+      "REFRAME",
+      "BLOCKED",
+    ],
+  },
+  "conformance-report": {
+    routeState: "evidence-verify",
+    stageDecisions: ["CONFORMANCE_PASS", "CONFORMANCE_FAIL"],
+  },
+};
+
 const SIDECAR_FIXTURE_TRACE = [
   {
     kind: "decision-synthesis",
@@ -229,6 +288,52 @@ const SIDECAR_FIXTURE_TRACE = [
     stage_decision: "CONFORMANCE_PASS",
     authorization_status: "not-required",
   },
+];
+
+const RUNTIME_SIDECAR_NEGATIVE_CASES: Array<[string, string]> = [
+  [
+    "control-loop-without-approved-contract",
+    "control-loop runtime sidecar requires an approved goal-contract sidecar",
+  ],
+  ["final-without-verification", "final route requires a verification-verdict sidecar"],
+  ["broken-incoming-edge", "no prior sidecar connects decision-synthesis -> system-model"],
+  ["divergent-reference-id", "runtime sidecars must share one reference_id"],
+  ["missing-artifact-path", "schema sidecar missing required key \"artifact_path\""],
+  ["missing-reference-id", "runtime sidecars that reach action or final routes must share one meaningful reference_id"],
+  ["stage-decision-policy", "goal-contract sidecar stage_decision must be one of"],
+  [
+    "synthesis-control-loop-without-contract",
+    "routing to control-loop requires a prior approved goal-contract sidecar",
+  ],
+  [
+    "final-with-nonpassing-verdict",
+    "final route requires a verification-verdict sidecar with PASS_TO_FINAL or NARROW_CLAIM_AND_FINAL",
+  ],
+  [
+    "late-approved-contract",
+    "approved goal-contract sidecar must not be later than control-loop route",
+  ],
+  [
+    "system-model-control-loop-without-contract",
+    "routing to control-loop requires a prior approved goal-contract sidecar",
+  ],
+  [
+    "late-final-verdict",
+    "final verification-verdict sidecar must not be later than final route",
+  ],
+  [
+    "late-incoming-edge",
+    "prior sidecar edge must not be later than current route",
+  ],
+  [
+    "claim-boundary-mismatch",
+    "prior sidecar edge must share reference_id or claim_boundary",
+  ],
+];
+
+const RUNTIME_SIDECAR_VALID_CASES = [
+  "full-trace",
+  "no-mutation-evidence-verify",
 ];
 
 const ROUTE_TRANSITIONS: Record<string, string[]> = {
@@ -566,10 +671,82 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
   ],
 ];
 
+const STRUCTURED_BLOCK_TESTS = [
+  {
+    name: "goal contract schema keeps executable handoff fields",
+    path: "skills/goal-contract/SKILL.md",
+    anchor: "Goal Contract schema:",
+    required_terms: [
+      "- Reference state:",
+      "- Scope:",
+      "- Control model:",
+      "- Indicator handoff:",
+      "- Acceptance criteria:",
+      "- Handoff:",
+      "- Ledger update:",
+    ],
+  },
+  {
+    name: "system model full schema keeps plant sensors and control boundaries",
+    path: "skills/system-model/SKILL.md",
+    anchor: "Full model:",
+    required_terms: [
+      "- System boundary:",
+      "- Controlled object / plant:",
+      "- Sensors and evidence boundary:",
+      "- Actuators and authority boundary:",
+      "- Candidate control laws:",
+      "- Disturbance register:",
+      "- Controller hierarchy:",
+      "- Recommended route:",
+    ],
+  },
+  {
+    name: "iteration record preserves route vocabulary",
+    path: "skills/control-loop/references/iteration-record-schema.md",
+    anchor: "## Verdict vocabulary",
+    required_terms: [
+      "`ITERATION_CONTINUES`",
+      "`ITERATION_HARDEN`",
+      "`ITERATION_READY_FOR_VERIFY`",
+      "`RETURN_TO_ALPHA_GOAL`",
+      "`RETURN_TO_SYSTEM_MODEL`",
+      "`BLOCKED`",
+    ],
+  },
+  {
+    name: "verification verdict preserves final comparator vocabulary",
+    path: "skills/evidence-verify/references/verification-verdict-schema.md",
+    anchor: "## Verdict",
+    required_terms: [
+      "`PASS_TO_FINAL`",
+      "`NARROW_CLAIM_AND_FINAL`",
+      "`NEXT_ITERATION`",
+      "`REFRAME`",
+      "`BLOCKED`",
+    ],
+  },
+  {
+    name: "decision synthesis route rules preserve mutation guard",
+    path: "skills/decision-synthesis/SKILL.md",
+    anchor: "### 7. Route",
+    required_terms: [
+      "Route to `goal-contract`",
+      "Route to `system-model`",
+      "Route to user",
+      "Route to `evidence-verify` only when synthesis did not authorize mutation",
+      "Route to `control-loop` only if a valid Goal Contract already exists",
+    ],
+  },
+];
+
 const FIXTURE_CONTRACT_TESTS = [
   {
     name: "complex migration conflict uses synthesis and indicator handoff",
     prompt: "多团队迁移目标、风险、窗口、成功指标冲突，先综合研判。",
+    prompt_terms: ["多团队", "目标", "风险", "成功指标", "冲突", "综合研判"],
+    expected_route: "goal-contract",
+    expected_stage_decision: "ROUTE_TO_GOAL_CONTRACT",
     paths: [
       "skills/decision-synthesis/SKILL.md",
       "skills/decision-synthesis/references/synthesis-round.md",
@@ -580,6 +757,9 @@ const FIXTURE_CONTRACT_TESTS = [
   {
     name: "qualitative objective becomes measurable contract evidence",
     prompt: "把用户体验更稳定转成可验证 Goal Contract。",
+    prompt_terms: ["用户体验", "稳定", "可验证", "Goal Contract"],
+    expected_route: "control-loop",
+    expected_stage_decision: "CONTRACT_APPROVED",
     paths: [
       "skills/goal-contract/SKILL.md",
       "skills/goal-contract/references/indicator-handoff.md",
@@ -590,6 +770,9 @@ const FIXTURE_CONTRACT_TESTS = [
   {
     name: "multi-controller system maps hierarchy before mutation",
     prompt: "多个团队和模块都能改变同一上线目标，先建模。",
+    prompt_terms: ["多个团队", "模块", "上线目标", "建模"],
+    expected_route: "goal-contract",
+    expected_stage_decision: "ROUTE_TO_GOAL_CONTRACT",
     paths: [
       "skills/system-model/SKILL.md",
       "skills/system-model/references/controller-hierarchy.md",
@@ -600,6 +783,9 @@ const FIXTURE_CONTRACT_TESTS = [
   {
     name: "feedback mismatch creates adaptive learning before next loop",
     prompt: "上轮控制律阈值没命中，但方向有效，继续下一轮。",
+    prompt_terms: ["控制律", "阈值", "没命中", "方向有效", "下一轮"],
+    expected_route: "control-loop",
+    expected_stage_decision: "ITERATION_HARDEN",
     paths: [
       "skills/control-loop/SKILL.md",
       "skills/control-loop/references/adaptive-learning.md",
@@ -614,6 +800,9 @@ const FIXTURE_CONTRACT_TESTS = [
   {
     name: "verification checks learned thresholds and indicator evidence",
     prompt: "检查当前声明是否可以最终交付。",
+    prompt_terms: ["检查", "声明", "最终交付"],
+    expected_route: "final",
+    expected_stage_decision: "PASS_TO_FINAL",
     paths: [
       "skills/evidence-verify/SKILL.md",
       "skills/evidence-verify/references/verification-verdict-schema.md",
@@ -787,9 +976,11 @@ export function main(args = process.argv.slice(2)): number {
   validateTaskScopedArtifactPathShape(root, errors);
   validateSchemaSidecarContract(root, errors);
   validateSchemaSidecarFixtures(root, errors);
+  validateRuntimeSidecarFixtureSets(root, errors);
   validateRuntimeSchemaSidecars(root, errors);
   validateCyberneticRouteConsistency(root, errors);
   validateSemanticSmokeTests(root, errors);
+  validateStructuredBlockTests(root, errors);
   validateFixtureContractTests(root, errors);
 
   printReport(root, errors, warnings);
@@ -846,6 +1037,63 @@ function validateInstallSurface(root: string, errors: string[]): void {
       "-c",
       "import pathlib,tomllib; tomllib.loads(pathlib.Path('templates/config.toml').read_text())",
     ]);
+  }
+
+  validateInstallSmoke(root, errors);
+}
+
+function validateInstallSmoke(root: string, errors: string[]): void {
+  if (process.env.ALPHA_GOAL_SKIP_INSTALL_SMOKE === "1") {
+    return;
+  }
+
+  const tmpCodexHome = fs.mkdtempSync(path.join(os.tmpdir(), "alpha-goal-install-"));
+  try {
+    const result = spawnSync("bash", ["scripts/install.sh", "--codex-home", tmpCodexHome], {
+      cwd: root,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        ALPHA_GOAL_SKIP_INSTALL_SMOKE: "1",
+      },
+      timeout: 120_000,
+    });
+
+    if (result.error) {
+      errors.push(`install smoke test: failed to run scripts/install.sh: ${result.error.message}`);
+      return;
+    }
+    if (result.status !== 0) {
+      const output = [result.stderr, result.stdout].filter(Boolean).join("\n").trim();
+      errors.push(`install smoke test: command failed${output ? `: ${output}` : ""}`);
+      return;
+    }
+
+    const installed = path.join(tmpCodexHome, "skills", "alpha-goal");
+    if (!isSymlink(installed)) {
+      errors.push(`install smoke test: installed alpha-goal is not a symlink: ${installed}`);
+      return;
+    }
+
+    const target = fs.realpathSync(installed);
+    const expectedTarget = fs.realpathSync(path.join(root, "skills"));
+    if (target !== expectedTarget) {
+      errors.push(`install smoke test: alpha-goal symlink points to ${target}, expected ${expectedTarget}`);
+    }
+
+    for (const skillName of [...REQUIRED_SKILL_NAMES].sort()) {
+      if (!isFile(path.join(installed, skillName, "SKILL.md"))) {
+        errors.push(`install smoke test: missing installed ${skillName}/SKILL.md through alpha-goal link`);
+      }
+    }
+    if (!isFile(path.join(tmpCodexHome, "AGENTS.md"))) {
+      errors.push("install smoke test: default install did not create AGENTS.md from template");
+    }
+    if (!isFile(path.join(tmpCodexHome, "config.toml"))) {
+      errors.push("install smoke test: default install did not create config.toml from template");
+    }
+  } finally {
+    fs.rmSync(tmpCodexHome, { recursive: true, force: true });
   }
 }
 
@@ -1015,12 +1263,13 @@ function validateSchemaSidecarContract(root: string, errors: string[]): void {
     errors.push(`${rel}: schema sidecar must set additionalProperties to false`);
   }
 
-  const required = stringArray(schema.required);
-  for (const key of SIDECAR_REQUIRED_KEYS) {
-    if (!required.includes(key)) {
-      errors.push(`${rel}: schema sidecar required list omits ${JSON.stringify(key)}`);
-    }
-  }
+  validateExactStringSet(
+    rel,
+    "schema sidecar required list",
+    schema.required,
+    SIDECAR_REQUIRED_KEYS,
+    errors,
+  );
 
   const properties = objectValue(schema.properties);
   if (!properties) {
@@ -1033,12 +1282,30 @@ function validateSchemaSidecarContract(root: string, errors: string[]): void {
       errors.push(`${rel}: schema sidecar properties omit ${JSON.stringify(key)}`);
     }
   }
+  for (const key of Object.keys(properties)) {
+    if (!SIDECAR_REQUIRED_KEY_SET.has(key)) {
+      errors.push(`${rel}: schema sidecar properties has unexpected key ${JSON.stringify(key)}`);
+    }
+  }
 
   validateSchemaEnum(rel, properties, "artifact_kind", SIDECAR_ARTIFACT_KINDS, errors);
   validateSchemaEnum(rel, properties, "route_state", SIDECAR_ROUTE_STATES, errors);
+  validateSchemaEnum(rel, properties, "next_route", SIDECAR_ROUTE_STATES, errors);
+  validateNullableRouteSchemaEnum(rel, properties, "prior_route", SIDECAR_ROUTE_STATES, errors);
   validateSchemaEnum(rel, properties, "evidence_boundary", SIDECAR_EVIDENCE_BOUNDARIES, errors);
   validateSchemaEnum(rel, properties, "stage_decision", SIDECAR_STAGE_DECISIONS, errors);
   validateSchemaEnum(rel, properties, "authorization_status", SIDECAR_AUTHORIZATION_STATUSES, errors);
+
+  const responsibilityBoundaryTerms = [
+    "base JSON Schema",
+    "TypeScript validator additionally enforces",
+    "runtime trace continuity",
+  ];
+  for (const term of responsibilityBoundaryTerms) {
+    if (!text.includes(term)) {
+      errors.push(`${rel}: schema sidecar responsibility boundary must mention ${JSON.stringify(term)}`);
+    }
+  }
 
   for (const kind of SIDECAR_ARTIFACT_KINDS) {
     if (!text.includes(`- \`${kind}\``)) {
@@ -1096,6 +1363,131 @@ function validateSchemaSidecarFixtures(root: string, errors: string[]): void {
   validateSchemaSidecarFixtureTrace(fixturesByKind, errors);
 }
 
+function validateRuntimeSidecarFixtureSets(root: string, errors: string[]): void {
+  const dir = path.join(root, RUNTIME_SIDECAR_FIXTURE_DIR);
+  if (!isDirectory(dir)) {
+    errors.push(`runtime sidecar fixtures: missing ${RUNTIME_SIDECAR_FIXTURE_DIR}`);
+    return;
+  }
+
+  const validRoot = path.join(dir, "valid");
+  if (!isDirectory(validRoot)) {
+    errors.push(`runtime sidecar fixtures: missing ${RUNTIME_SIDECAR_FIXTURE_DIR}/valid`);
+  } else {
+    const validCases = fixtureCaseDirs(validRoot);
+    const expectedValidNames = new Set(RUNTIME_SIDECAR_VALID_CASES);
+    for (const caseDir of validCases) {
+      const name = path.basename(caseDir);
+      if (!expectedValidNames.has(name)) {
+        errors.push(`${relative(root, caseDir)}: unexpected valid runtime sidecar fixture`);
+      }
+    }
+    for (const caseName of RUNTIME_SIDECAR_VALID_CASES) {
+      const caseDir = path.join(validRoot, caseName);
+      if (!isDirectory(caseDir)) {
+        errors.push(`runtime sidecar fixtures: missing valid case ${caseName}`);
+        continue;
+      }
+      const localErrors = validateRuntimeSidecarFixtureCase(root, caseDir);
+      if (localErrors.length > 0) {
+        errors.push(
+          `${relative(root, caseDir)}: valid runtime sidecar fixture failed: ${localErrors.join("; ")}`,
+        );
+      }
+    }
+  }
+
+  const negativeRoot = path.join(dir, "negative");
+  if (!isDirectory(negativeRoot)) {
+    errors.push(`runtime sidecar fixtures: missing ${RUNTIME_SIDECAR_FIXTURE_DIR}/negative`);
+    return;
+  }
+
+  const expectedNegativeNames = new Set(RUNTIME_SIDECAR_NEGATIVE_CASES.map(([name]) => name));
+  for (const caseDir of fixtureCaseDirs(negativeRoot)) {
+    const name = path.basename(caseDir);
+    if (!expectedNegativeNames.has(name)) {
+      errors.push(`${relative(root, caseDir)}: unexpected negative runtime sidecar fixture`);
+    }
+  }
+
+  for (const [caseName, expectedError] of RUNTIME_SIDECAR_NEGATIVE_CASES) {
+    const caseDir = path.join(negativeRoot, caseName);
+    if (!isDirectory(caseDir)) {
+      errors.push(`runtime sidecar fixtures: missing negative case ${caseName}`);
+      continue;
+    }
+
+    const localErrors = validateRuntimeSidecarFixtureCase(root, caseDir);
+    if (!localErrors.some((error) => error.includes(expectedError))) {
+      const actual = localErrors.length > 0 ? localErrors.join("; ") : "no errors";
+      errors.push(
+        `${relative(root, caseDir)}: expected negative runtime sidecar error containing ${JSON.stringify(expectedError)}, got ${actual}`,
+      );
+    }
+  }
+}
+
+function validateRuntimeSidecarFixtureCase(root: string, caseDir: string): string[] {
+  const localErrors: string[] = [];
+  const sidecarsByTask = new Map<string, Record<string, unknown>[]>();
+  const files = walk(caseDir)
+    .filter((file) => isFile(file) && file.endsWith(".json"))
+    .sort();
+
+  if (files.length === 0) {
+    localErrors.push(`${relative(root, caseDir)}: runtime fixture case has no JSON sidecars`);
+    return localErrors;
+  }
+
+  for (const file of files) {
+    const rel = relative(root, file);
+    const fixtureRel = relative(caseDir, file);
+    const match = fixtureRel.match(/^([^/]+)\/schema\/([^/]+\.json)$/);
+    if (!match) {
+      localErrors.push(`${rel}: runtime fixture sidecar must be under <task_slug>/schema/`);
+      continue;
+    }
+
+    const taskSlug = match[1];
+    if (!SIDECAR_TASK_SLUG_RE.test(taskSlug)) {
+      localErrors.push(`${rel}: runtime fixture task directory must match YYYYMMDD-<slug>`);
+    }
+
+    let sidecar: Record<string, unknown>;
+    try {
+      const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        localErrors.push(`${rel}: runtime fixture sidecar must be a JSON object`);
+        continue;
+      }
+      sidecar = parsed as Record<string, unknown>;
+    } catch (error) {
+      localErrors.push(`${rel}: invalid runtime fixture sidecar JSON: ${errorMessage(error)}`);
+      continue;
+    }
+
+    const artifactKind = stringValue(sidecar.artifact_kind);
+    if (!artifactKind || !SIDECAR_ARTIFACT_KINDS.includes(artifactKind)) {
+      localErrors.push(`${rel}: runtime fixture sidecar has unknown artifact_kind`);
+      continue;
+    }
+    if (!sidecarFilenameMatchesKind(artifactKind, path.basename(file))) {
+      localErrors.push(`${rel}: runtime fixture filename does not match artifact_kind ${artifactKind}`);
+    }
+
+    validateConcreteSidecarFixture(rel, sidecar, artifactKind, localErrors, taskSlug);
+    const group = sidecarsByTask.get(taskSlug) ?? [];
+    group.push(sidecar);
+    sidecarsByTask.set(taskSlug, group);
+  }
+
+  validateRuntimeSidecarTraceGroups(root, sidecarsByTask, localErrors, {
+    checkArtifactFiles: false,
+  });
+  return localErrors;
+}
+
 function validateConcreteSidecarFixture(
   rel: string,
   fixture: Record<string, unknown>,
@@ -1106,6 +1498,11 @@ function validateConcreteSidecarFixture(
   for (const key of SIDECAR_REQUIRED_KEYS) {
     if (!Object.hasOwn(fixture, key)) {
       errors.push(`${rel}: schema sidecar missing required key ${JSON.stringify(key)}`);
+    }
+  }
+  for (const key of Object.keys(fixture)) {
+    if (!SIDECAR_REQUIRED_KEY_SET.has(key)) {
+      errors.push(`${rel}: schema sidecar has unsupported key ${JSON.stringify(key)}`);
     }
   }
 
@@ -1183,6 +1580,18 @@ function validateConcreteSidecarFixture(
     errors.push(`${rel}: authorization_status must be a non-empty string`);
   } else if (!SIDECAR_AUTHORIZATION_STATUSES.includes(authorizationStatus)) {
     errors.push(`${rel}: authorization_status has unsupported value ${JSON.stringify(authorizationStatus)}`);
+  }
+
+  const stagePolicy = SIDECAR_STAGE_POLICIES[expectedKind];
+  if (stagePolicy) {
+    if (routeState && routeState !== stagePolicy.routeState) {
+      errors.push(`${rel}: ${expectedKind} sidecar route_state must be ${stagePolicy.routeState}`);
+    }
+    if (stageDecision && !stagePolicy.stageDecisions.includes(stageDecision)) {
+      errors.push(
+        `${rel}: ${expectedKind} sidecar stage_decision must be one of ${stagePolicy.stageDecisions.join(", ")}`,
+      );
+    }
   }
 
   if (
@@ -1305,52 +1714,102 @@ function validateRuntimeSidecarTraceGroups(
   root: string,
   sidecarsByTask: Map<string, Record<string, unknown>[]>,
   errors: string[],
+  options: { checkArtifactFiles?: boolean } = {},
 ): void {
+  const checkArtifactFiles = options.checkArtifactFiles ?? true;
   for (const [taskSlug, sidecars] of sidecarsByTask) {
     const relPrefix = `.alpha-goal/${taskSlug}/schema`;
+    const reachesMutation = sidecars.some((sidecar) => {
+      const routeState = stringValue(sidecar.route_state);
+      const nextRoute = stringValue(sidecar.next_route);
+      return routeState === "control-loop" || nextRoute === "control-loop";
+    });
     const referenceIds = new Set(
       sidecars
         .map((sidecar) => stringValue(sidecar.reference_id))
         .filter((value): value is string => Boolean(value)),
     );
+    if (reachesMutation) {
+      const missingReference = sidecars.some((sidecar) => !stringValue(sidecar.reference_id));
+      if (missingReference) {
+        errors.push(
+          `${relPrefix}: runtime sidecars that reach action or final routes must share one meaningful reference_id`,
+        );
+      }
+    }
     if (referenceIds.size > 1) {
       errors.push(`${relPrefix}: runtime sidecars must share one reference_id`);
     }
 
     const hasControlLoop = sidecars.some((sidecar) => sidecar.route_state === "control-loop");
-    const hasApprovedContract = sidecars.some(
-      (sidecar) =>
-        sidecar.artifact_kind === "goal-contract" &&
-        sidecar.next_route === "control-loop" &&
-        sidecar.authorization_status === "approved",
-    );
-    if (hasControlLoop && !hasApprovedContract) {
+    const approvedContracts = sidecars.filter(isApprovedControlContractSidecar);
+    if (hasControlLoop && approvedContracts.length === 0) {
       errors.push(`${relPrefix}: control-loop runtime sidecar requires an approved goal-contract sidecar`);
     }
 
-    const hasFinalRoute = sidecars.some((sidecar) => sidecar.next_route === "final");
-    const hasVerification = sidecars.some((sidecar) => sidecar.artifact_kind === "verification-verdict");
-    if (hasFinalRoute && !hasVerification) {
-      errors.push(`${relPrefix}: final route requires a verification-verdict sidecar`);
-    }
+    const finalVerifiers = sidecars.filter(isFinalVerificationVerdictSidecar);
 
     for (const sidecar of sidecars) {
       const artifactPath = stringValue(sidecar.artifact_path);
-      if (artifactPath && !isFile(path.join(root, artifactPath))) {
+      if (checkArtifactFiles && artifactPath && !isFile(path.join(root, artifactPath))) {
         errors.push(`${relPrefix}: sidecar artifact_path does not exist: ${artifactPath}`);
       }
 
       const priorRoute = nullableStringValue(sidecar.prior_route);
       const routeState = stringValue(sidecar.route_state);
+      const nextRoute = stringValue(sidecar.next_route);
+
+      if (
+        nextRoute === "control-loop" &&
+        !isApprovedControlContractSidecar(sidecar)
+      ) {
+        const support = approvedContractSupport(sidecar, approvedContracts);
+        if (support === "missing") {
+          errors.push(`${relPrefix}: routing to control-loop requires a prior approved goal-contract sidecar`);
+        } else if (support === "late") {
+          errors.push(`${relPrefix}: approved goal-contract sidecar must not be later than control-loop route`);
+        }
+      }
+
+      if (routeState === "control-loop") {
+        const support = approvedContractSupport(sidecar, approvedContracts);
+        if (support === "missing") {
+          errors.push(`${relPrefix}: control-loop runtime sidecar requires an approved goal-contract sidecar`);
+        } else if (support === "late") {
+          errors.push(`${relPrefix}: approved goal-contract sidecar must not be later than control-loop route`);
+        }
+      }
+
+      if (nextRoute === "final") {
+        const support = finalVerifierSupport(sidecar, finalVerifiers);
+        if (support === "missing") {
+          errors.push(
+            `${relPrefix}: final route requires a verification-verdict sidecar with PASS_TO_FINAL or NARROW_CLAIM_AND_FINAL`,
+          );
+        } else if (support === "late") {
+          errors.push(`${relPrefix}: final verification-verdict sidecar must not be later than final route`);
+        }
+      }
+
       if (!priorRoute || priorRoute === "alpha-goal" || !routeState) {
         continue;
       }
 
-      const hasIncomingSource = sidecars.some(
+      const incomingSources = sidecars.filter(
         (candidate) => candidate.route_state === priorRoute && candidate.next_route === routeState,
       );
-      if (!hasIncomingSource) {
+      if (incomingSources.length === 0) {
         errors.push(`${relPrefix}: no prior sidecar connects ${priorRoute} -> ${routeState}`);
+        continue;
+      }
+
+      const compatibleIncomingSources = incomingSources.filter((candidate) =>
+        traceAnchorsCompatible(sidecar, candidate),
+      );
+      if (compatibleIncomingSources.length === 0) {
+        errors.push(`${relPrefix}: prior sidecar edge must share reference_id or claim_boundary`);
+      } else if (!hasPriorOrSameGeneratedAt(sidecar, compatibleIncomingSources)) {
+        errors.push(`${relPrefix}: prior sidecar edge must not be later than current route`);
       }
     }
   }
@@ -1380,9 +1839,15 @@ function validateSchemaSidecarFixtureTrace(
       referenceIds.add(referenceId);
     }
 
-    for (const key of ["route_state", "prior_route", "next_route"] as const) {
+    for (const key of [
+      "route_state",
+      "prior_route",
+      "next_route",
+      "stage_decision",
+      "authorization_status",
+    ] as const) {
       const expected = step[key];
-      const actual = stringValue(fixture[key]);
+      const actual = nullableStringValue(fixture[key]);
       if (actual !== expected) {
         errors.push(`${rel}: fixture trace requires ${key}=${expected}, got ${String(actual)}`);
       }
@@ -1468,6 +1933,32 @@ function validateSemanticSmokeTests(root: string, errors: string[]): void {
   }
 }
 
+function validateStructuredBlockTests(root: string, errors: string[]): void {
+  for (const fixture of STRUCTURED_BLOCK_TESTS) {
+    const file = path.join(root, fixture.path);
+    if (!isFile(file)) {
+      errors.push(`structured block test ${JSON.stringify(fixture.name)}: missing ${fixture.path}`);
+      continue;
+    }
+
+    const text = fs.readFileSync(file, "utf8");
+    const block = textBlockAfterAnchor(text, fixture.anchor);
+    if (!block) {
+      errors.push(
+        `structured block test ${JSON.stringify(fixture.name)} failed in ${fixture.path}: missing anchor ${fixture.anchor}`,
+      );
+      continue;
+    }
+
+    const missing = fixture.required_terms.filter((term) => !block.includes(term));
+    if (missing.length > 0) {
+      errors.push(
+        `structured block test ${JSON.stringify(fixture.name)} failed in ${fixture.path}: missing ${missing.join(", ")}`,
+      );
+    }
+  }
+}
+
 function validateFixtureContractTests(root: string, errors: string[]): void {
   for (const fixture of FIXTURE_CONTRACT_TESTS) {
     const name = fixture.name;
@@ -1475,6 +1966,31 @@ function validateFixtureContractTests(root: string, errors: string[]): void {
     if (!prompt.trim()) {
       errors.push(`fixture contract ${JSON.stringify(name)}: empty prompt`);
       continue;
+    }
+    const missingPromptTerms = fixture.prompt_terms.filter((term) => !prompt.includes(term));
+    if (missingPromptTerms.length > 0) {
+      errors.push(
+        `fixture contract ${JSON.stringify(name)}: prompt is missing expected terms ${missingPromptTerms.join(", ")}`,
+      );
+    }
+    if (!isRouteToken(fixture.expected_route)) {
+      errors.push(
+        `fixture contract ${JSON.stringify(name)}: expected_route is not a known route ${fixture.expected_route}`,
+      );
+    }
+    if (!SIDECAR_STAGE_DECISIONS.includes(fixture.expected_stage_decision)) {
+      errors.push(
+        `fixture contract ${JSON.stringify(name)}: expected_stage_decision is unsupported ${fixture.expected_stage_decision}`,
+      );
+    }
+    if (
+      isRouteToken(fixture.expected_route) &&
+      SIDECAR_STAGE_DECISIONS.includes(fixture.expected_stage_decision) &&
+      !stageDecisionMatchesRoute(fixture.expected_stage_decision, fixture.expected_route)
+    ) {
+      errors.push(
+        `fixture contract ${JSON.stringify(name)}: expected_stage_decision ${fixture.expected_stage_decision} does not match expected_route ${fixture.expected_route}`,
+      );
     }
 
     const combinedParts: string[] = [];
@@ -1505,6 +2021,9 @@ function validateFixtureContractTests(root: string, errors: string[]): void {
 
     const lower = combined.toLowerCase();
     const missingRoutes = fixture.route_terms.filter((term) => !lower.includes(term.toLowerCase()));
+    if (!lower.includes(fixture.expected_route.toLowerCase())) {
+      missingRoutes.push(fixture.expected_route);
+    }
     if (missingRoutes.length > 0) {
       errors.push(
         `fixture contract ${JSON.stringify(name)}: missing route terms ${missingRoutes.join(", ")}`,
@@ -1521,6 +2040,29 @@ function hasSchemaBlock(text: string, label: string): boolean {
   return blockPattern.test(text) || headingPattern.test(text);
 }
 
+function textBlockAfterAnchor(text: string, anchor: string): string | undefined {
+  const start = text.indexOf(anchor);
+  if (start < 0) {
+    return undefined;
+  }
+
+  const after = text.slice(start);
+  const codeFence = after.indexOf("```");
+  if (codeFence >= 0 && codeFence < 300) {
+    const blockStart = codeFence + 3;
+    const blockEnd = after.indexOf("```", blockStart);
+    if (blockEnd > blockStart) {
+      return after.slice(blockStart, blockEnd);
+    }
+  }
+
+  const nextHeading = after.slice(1).search(/\n#{1,3}\s+/);
+  if (nextHeading >= 0) {
+    return after.slice(0, nextHeading + 1);
+  }
+  return after;
+}
+
 function validateSchemaEnum(
   rel: string,
   properties: Record<string, unknown>,
@@ -1533,12 +2075,36 @@ function validateSchemaEnum(
     errors.push(`${rel}: schema sidecar property ${propertyName} must be an object`);
     return;
   }
-  const actualValues = stringArray(property.enum);
-  for (const expected of expectedValues) {
-    if (!actualValues.includes(expected)) {
-      errors.push(`${rel}: schema sidecar ${propertyName} enum omits ${expected}`);
-    }
+  validateExactStringSet(
+    rel,
+    `schema sidecar ${propertyName} enum`,
+    property.enum,
+    expectedValues,
+    errors,
+  );
+}
+
+function validateNullableRouteSchemaEnum(
+  rel: string,
+  properties: Record<string, unknown>,
+  propertyName: string,
+  expectedValues: string[],
+  errors: string[],
+): void {
+  const property = objectValue(properties[propertyName]);
+  if (!property) {
+    errors.push(`${rel}: schema sidecar property ${propertyName} must be an object`);
+    return;
   }
+
+  validateExactStringOrNullSet(
+    rel,
+    `schema sidecar ${propertyName} enum`,
+    property.enum,
+    expectedValues,
+    true,
+    errors,
+  );
 }
 
 function readRequiredText(root: string, rel: string, errors: string[]): string | undefined {
@@ -1550,6 +2116,17 @@ function readRequiredText(root: string, rel: string, errors: string[]): string |
   return fs.readFileSync(file, "utf8");
 }
 
+function fixtureCaseDirs(root: string): string[] {
+  if (!isDirectory(root)) {
+    return [];
+  }
+  return fs
+    .readdirSync(root, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => path.join(root, entry.name))
+    .sort();
+}
+
 function objectValue(value: unknown): Record<string, unknown> | undefined {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return undefined;
@@ -1557,11 +2134,69 @@ function objectValue(value: unknown): Record<string, unknown> | undefined {
   return value as Record<string, unknown>;
 }
 
-function stringArray(value: unknown): string[] {
+function validateExactStringSet(
+  rel: string,
+  label: string,
+  value: unknown,
+  expectedValues: string[],
+  errors: string[],
+): string[] {
+  return validateExactStringOrNullSet(rel, label, value, expectedValues, false, errors).strings;
+}
+
+function validateExactStringOrNullSet(
+  rel: string,
+  label: string,
+  value: unknown,
+  expectedValues: string[],
+  expectNull: boolean,
+  errors: string[],
+): { strings: string[]; hasNull: boolean } {
   if (!Array.isArray(value)) {
-    return [];
+    errors.push(`${rel}: ${label} must be an array`);
+    return { strings: [], hasNull: false };
   }
-  return value.filter((item): item is string => typeof item === "string");
+
+  const actualValues: string[] = [];
+  const seen = new Set<string>();
+  let hasNull = false;
+  for (const [index, item] of value.entries()) {
+    if (item === null) {
+      if (!expectNull) {
+        errors.push(`${rel}: ${label} item ${index} must be a string`);
+      }
+      if (hasNull) {
+        errors.push(`${rel}: ${label} has duplicate value null`);
+      }
+      hasNull = true;
+      continue;
+    }
+    if (typeof item !== "string") {
+      errors.push(`${rel}: ${label} item ${index} must be a string`);
+      continue;
+    }
+    actualValues.push(item);
+    if (seen.has(item)) {
+      errors.push(`${rel}: ${label} has duplicate value ${item}`);
+    }
+    seen.add(item);
+  }
+
+  const expectedSet = new Set(expectedValues);
+  for (const expected of expectedValues) {
+    if (!seen.has(expected)) {
+      errors.push(`${rel}: ${label} omits ${expected}`);
+    }
+  }
+  for (const actual of actualValues) {
+    if (!expectedSet.has(actual)) {
+      errors.push(`${rel}: ${label} has unexpected value ${actual}`);
+    }
+  }
+  if (expectNull && !hasNull) {
+    errors.push(`${rel}: ${label} omits null`);
+  }
+  return { strings: actualValues, hasNull };
 }
 
 function stringValue(value: unknown): string | undefined {
@@ -1585,6 +2220,104 @@ function isRouteToken(value: string): boolean {
 
 function canTransition(from: string, to: string): boolean {
   return (ROUTE_TRANSITIONS[from] ?? []).includes(to);
+}
+
+type SupportStatus = "ok" | "missing" | "late";
+
+function isApprovedControlContractSidecar(sidecar: Record<string, unknown>): boolean {
+  return (
+    sidecar.artifact_kind === "goal-contract" &&
+    sidecar.route_state === "goal-contract" &&
+    sidecar.next_route === "control-loop" &&
+    sidecar.stage_decision === "CONTRACT_APPROVED" &&
+    sidecar.authorization_status === "approved" &&
+    isMeaningfulSidecarValue(sidecar.reference_id)
+  );
+}
+
+function isFinalVerificationVerdictSidecar(sidecar: Record<string, unknown>): boolean {
+  return (
+    sidecar.artifact_kind === "verification-verdict" &&
+    sidecar.route_state === "evidence-verify" &&
+    sidecar.next_route === "final" &&
+    (sidecar.stage_decision === "PASS_TO_FINAL" ||
+      sidecar.stage_decision === "NARROW_CLAIM_AND_FINAL") &&
+    (isMeaningfulSidecarValue(sidecar.reference_id) ||
+      isMeaningfulSidecarValue(sidecar.claim_boundary))
+  );
+}
+
+function approvedContractSupport(
+  sidecar: Record<string, unknown>,
+  approvedContracts: Record<string, unknown>[],
+): SupportStatus {
+  return timeOrderedSupport(sidecar, approvedContracts, ["reference_id"]);
+}
+
+function finalVerifierSupport(
+  sidecar: Record<string, unknown>,
+  finalVerifiers: Record<string, unknown>[],
+): SupportStatus {
+  return timeOrderedSupport(sidecar, finalVerifiers, ["reference_id", "claim_boundary"]);
+}
+
+function timeOrderedSupport(
+  sidecar: Record<string, unknown>,
+  candidates: Record<string, unknown>[],
+  anchorKeys: string[],
+): SupportStatus {
+  const anchorKey = anchorKeys.find((key) => stringValue(sidecar[key]));
+  if (!anchorKey) {
+    return "missing";
+  }
+  const anchorValue = stringValue(sidecar[anchorKey]);
+
+  const sameAnchorCandidates = candidates.filter(
+    (candidate) => stringValue(candidate[anchorKey]) === anchorValue,
+  );
+  if (sameAnchorCandidates.length === 0) {
+    return "missing";
+  }
+
+  const sidecarTime = sidecarGeneratedAtMillis(sidecar);
+  const hasPriorOrSameCandidate = sameAnchorCandidates.some((candidate) => {
+    const candidateTime = sidecarGeneratedAtMillis(candidate);
+    return sidecarTime === undefined || candidateTime === undefined || candidateTime <= sidecarTime;
+  });
+  return hasPriorOrSameCandidate ? "ok" : "late";
+}
+
+function hasPriorOrSameGeneratedAt(
+  sidecar: Record<string, unknown>,
+  candidates: Record<string, unknown>[],
+): boolean {
+  const sidecarTime = sidecarGeneratedAtMillis(sidecar);
+  return candidates.some((candidate) => {
+    const candidateTime = sidecarGeneratedAtMillis(candidate);
+    return sidecarTime === undefined || candidateTime === undefined || candidateTime <= sidecarTime;
+  });
+}
+
+function traceAnchorsCompatible(
+  sidecar: Record<string, unknown>,
+  candidate: Record<string, unknown>,
+): boolean {
+  const referenceId = stringValue(sidecar.reference_id);
+  if (referenceId) {
+    return stringValue(candidate.reference_id) === referenceId;
+  }
+
+  const claimBoundary = stringValue(sidecar.claim_boundary);
+  return Boolean(claimBoundary && stringValue(candidate.claim_boundary) === claimBoundary);
+}
+
+function sidecarGeneratedAtMillis(sidecar: Record<string, unknown>): number | undefined {
+  const generatedAt = stringValue(sidecar.generated_at);
+  if (!generatedAt) {
+    return undefined;
+  }
+  const millis = Date.parse(generatedAt);
+  return Number.isNaN(millis) ? undefined : millis;
 }
 
 function stageDecisionMatchesRoute(stageDecision: string, nextRoute: string): boolean {
@@ -1613,7 +2346,7 @@ function stageDecisionMatchesRoute(stageDecision: string, nextRoute: string): bo
       return nextRoute === "final";
     case "REFRAME":
     case "CONTRACT_REFRAME":
-      return ["goal-contract", "system-model", "alpha-goal", "user"].includes(nextRoute);
+      return ["goal-contract", "system-model", "decision-synthesis", "alpha-goal", "user"].includes(nextRoute);
     case "CONFORMANCE_FAIL":
       return ["control-loop", "goal-contract", "system-model", "blocker"].includes(nextRoute);
     case "BLOCKED":
@@ -1732,6 +2465,14 @@ function isDirectory(file: string): boolean {
 function isFile(file: string): boolean {
   try {
     return fs.statSync(file).isFile();
+  } catch {
+    return false;
+  }
+}
+
+function isSymlink(file: string): boolean {
+  try {
+    return fs.lstatSync(file).isSymbolicLink();
   } catch {
     return false;
   }

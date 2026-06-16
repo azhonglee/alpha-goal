@@ -1,0 +1,19 @@
+{
+  "artifact_kind": "iteration-record",
+  "task_slug": "20260616-neg-control-loop",
+  "artifact_path": ".alpha-goal/20260616-neg-control-loop/iterations/001-unapproved.md",
+  "reference_id": "ref-neg-control-loop",
+  "route_state": "control-loop",
+  "prior_route": "goal-contract",
+  "next_route": "evidence-verify",
+  "target_error": "control-loop mutation started without approved contract",
+  "control_variable": "mutation authority",
+  "sensor": "runtime sidecar trace group",
+  "threshold_or_tolerance": "control-loop requires a goal-contract sidecar with authorization_status approved",
+  "evidence_boundary": "module",
+  "residual_error": "missing approved contract",
+  "claim_boundary": "negative fixture must not authorize mutation",
+  "stage_decision": "ITERATION_READY_FOR_VERIFY",
+  "authorization_status": "approved",
+  "generated_at": "2026-06-16T00:00:00Z"
+}
