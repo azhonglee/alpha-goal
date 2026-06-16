@@ -1,6 +1,6 @@
-# 综合集成厅
+# 综合研判工作台
 
-Use the 综合集成厅 when a complex or complex-giant-like task needs human-machine synthesis before the next 目标契约, system model, or user decision.
+Use the metasynthetic workspace (`综合研判工作台`) when a complex or complex-giant-like task needs human-machine synthesis before the next 目标契约, system model, or user decision. It corresponds to the “综合集成研讨厅” idea in the metasynthetic systems approach, but uses a more direct product-facing label for skill outputs.
 
 ## Roles
 
@@ -12,7 +12,7 @@ Use the 综合集成厅 when a complex or complex-giant-like task needs human-ma
 ## Working memory
 
 ```text
-综合集成厅:
+综合研判工作台:
 - 核心问题:
 - 人类角色:
 - 机器角色:

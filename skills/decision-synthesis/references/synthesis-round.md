@@ -18,7 +18,7 @@ The round is a human-machine convergence mechanism, not a meeting transcript. Ke
   - 已跨越边界:
   - 置信度:
   - 失效模式:
-- 综合集成厅状态:
+- 综合研判工作台状态:
   - 假设库:
   - 模型登记:
   - 异议:

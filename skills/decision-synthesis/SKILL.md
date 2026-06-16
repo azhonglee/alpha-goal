@@ -34,7 +34,7 @@ Do not use for localized low-risk tasks with clear acceptance and direct evidenc
 - `references/stakeholder-decision-boundaries.md`: distinguish recommendation from user-owned decisions.
 - `references/synthesis-round.md`: run human-machine qualitative/quantitative convergence rounds.
 - `references/synthesis-record-schema.md`: produce a durable or handoff-ready 决策综合记录.
-- `references/meta-synthesis-hall.md`: run a 综合集成厅 with roles, hypothesis bank, model registry, dissent, and convergence conditions.
+- `references/meta-synthesis-hall.md`: use a metasynthetic workspace (`综合研判工作台`) to preserve roles, hypothesis bank, model registry, dissent, and convergence conditions.
 
 ## Process
 
@@ -88,13 +88,13 @@ Use quantitative evidence when available, but do not force false precision. Qual
 
 ### 4. Run synthesis rounds
 
-For `complex` and `complex-giant-like` cases, or whenever perspectives conflict, run one or more `综合轮次` records before resolving decisions. Load `references/synthesis-round.md` for the schema. For complex-giant-like work, use the 综合集成厅 from `references/meta-synthesis-hall.md` to preserve roles, hypotheses, models, dissent, and convergence conditions.
+For `complex` and `complex-giant-like` cases, or whenever perspectives conflict, run one or more `综合轮次` records before resolving decisions. Load `references/synthesis-round.md` for the schema. For complex-giant-like work, use the metasynthetic workspace defined in `references/meta-synthesis-hall.md` (`综合研判工作台`) to preserve roles, hypotheses, models, dissent, and convergence conditions.
 
 Each round must connect:
 
 - human or expert judgment and its decision owner;
 - machine evidence, model output, tests, logs, metrics, or probes;
-- 综合集成厅 state when many hypotheses, models, or stakeholder perspectives remain active;
+- 综合研判工作台状态：多种假设、模型或利益相关方视角仍然活跃时的工作区状态;
 - the conflict, contradiction, or missing sensor;
 - any metric/proxy that could turn qualitative judgment into bounded evidence;
 - the 指标交接 candidate that should become acceptance or sensor evidence;
@@ -125,7 +125,7 @@ Persist the full 决策综合记录 under `.alpha-goal/YYYYMMDD-<slug>/decision-
 决策综合记录:
 - 复杂度类型:
 - 核心张力:
-- 综合集成厅:
+- 综合研判工作台:
 - 最新综合轮次:
 - 综合视图:
 - 推荐方向:
@@ -160,7 +160,7 @@ TUI 摘要:
 - 证据与模型:
 - 定性判断:
 - 定量信号:
-- 综合集成厅:
+- 综合研判工作台:
 - 综合轮次:
 - 指标交接:
 - 矛盾与取舍:

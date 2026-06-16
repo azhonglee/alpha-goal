@@ -121,7 +121,7 @@ $decision-synthesis 多团队对迁移方案目标、风险和成功指标有冲
 Expected behavior:
 
 - It should run at least one 综合轮次 that combines human/expert judgment, machine evidence or available metrics, conflicts, user-owned decisions, and next hypotheses.
-- For complex-giant-like work, it should use a 综合集成厅 with roles, a Hypothesis bank, a Model registry, dissent, and a convergence condition.
+- 复杂巨系统式任务应使用 综合研判工作台，记录角色、假设库、模型登记、异议和收敛条件。
 - It should emit an 指标交接 candidate for success metrics that should become 目标契约 evidence.
 - It should route to `goal-contract`, `system-model`, user, or blocker instead of treating a list of opinions as a final plan.
 

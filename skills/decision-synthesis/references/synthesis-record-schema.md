@@ -17,7 +17,7 @@ Persist the full record at `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md` b
   - 决策负责人:
 - 定性判断:
 - 定量信号:
-- 综合集成厅:
+- 综合研判工作台:
   - 假设库:
   - 模型登记:
   - 异议:
@@ -27,7 +27,7 @@ Persist the full record at `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md` b
   - 核心问题或假设:
   - 人类 / 专家判断:
   - 机器证据与模型:
-  - 综合集成厅状态:
+  - 综合研判工作台状态:
   - 定量指标:
   - 冲突或矛盾:
   - 综合更新:

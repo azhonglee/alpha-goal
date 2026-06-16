@@ -467,7 +467,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "指标交接",
       "定性判断",
       "定量信号",
-      "综合集成厅",
+      "综合研判工作台",
       "用户自有决策",
       ".alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md",
       "综合摘要",
@@ -704,7 +704,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "meta-synthesis hall operationalizes qualitative to quantitative convergence",
     "skills/decision-synthesis/references/meta-synthesis-hall.md",
     [
-      "综合集成厅",
+      "综合研判工作台",
       "Human role",
       "Machine role",
       "Hypothesis bank",
@@ -920,6 +920,8 @@ const LEGACY_OUTPUT_TITLE_TERMS = [
   "Coupling Map:",
   "Synthesis Map:",
   "Cybernetic Conformance Report:",
+  "Meta-Synthesis Hall",
+  "综合集成厅",
   "| Field | Value |",
 ];
 
