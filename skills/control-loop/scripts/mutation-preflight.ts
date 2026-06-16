@@ -156,7 +156,7 @@ console.log("隔离编辑路径: 非主检出区、位于已批准归属边界�
 console.log("变更是否允许: 根据目标契约、系统模型、项目规则、脏状态、归属和证据需求判断");
 
 section("提醒");
-console.log("本脚本只读。它报告事实和候选路径检查，不代替安全改动决策。");
+console.log("本脚本只读。它报告事实和候选路径检查，不能替代对改动安全性的判断。");
 
 function section(name: string): void {
   console.log(`\n== ${name} ==`);

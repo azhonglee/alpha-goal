@@ -5,11 +5,11 @@
 | 目录 | 用途 |
 |---|---|
 | `skills/alpha-goal/` | 闭环总入口、稳定性检查和技能路由。 |
-| `skills/goal-contract/` | 目标发现、模糊度评估、指标转译、目标契约和目标参考输入形成。 |
+| `skills/goal-contract/` | 发现目标、评估模糊度、转译指标，并形成目标契约和参考输入。 |
 | `skills/system-model/` | 被控对象、状态、观测器、执行器、控制器层级、扰动记录和耦合建模。 |
 | `skills/control-loop/` | 在目标契约下执行有界控制迭代，并记录自适应学习记录。 |
 | `skills/evidence-verify/` | 检查验收、证据边界、指标 / 学习边界，并给出验证结论。 |
-| `skills/decision-synthesis/` | 面向开放复杂巨系统、多主体和弱结构化问题的综合轮次与指标转译综合研判。 |
+| `skills/decision-synthesis/` | 用于开放复杂巨系统、多主体和弱结构化问题的综合轮次、综合研判和指标转译。 |
 
 ## 支持目录
 
@@ -23,29 +23,29 @@
 
 ## 脚本
 
-| 路径 | 是否改状态 | 用途 |
+| 路径 | 是否改变状态 | 用途 |
 |---|---:|---|
 | `scripts/install.sh` | 是 | 创建 `${CODEX_HOME:-$HOME/.codex}/skills/alpha-goal` 软链接到本仓库 `skills/` 树，替换同仓库旧技能链接，默认合并用户配置模板，清理旧支持链接，校验六技能套件和目标软链接。 |
 | `skills/system-model/scripts/repo-sensor-snapshot.ts` | 否 | 输出仓库传感器快照，用于系统建模和可观测性检查。 |
-| `skills/control-loop/scripts/mutation-preflight.ts` | 否 | 输出 git 根目录、分支、状态、worktree、本地规则文件、已忽略的 worktree / evidence 路径和子模块。 |
+| `skills/control-loop/scripts/mutation-preflight.ts` | 否 | 输出 Git 根目录、分支、状态、worktree、本地规则文件、已忽略的 worktree / evidence 路径和子模块。 |
 | `skills/evidence-verify/scripts/evidence-summary.ts` | 否 | 输出已变更文件、diff 统计、diff 检查状态和最近提交。 |
-| `tools/validate_skills.ts` | 否 | 六技能闭环套件的轻量规范校验器，覆盖引用可发现性、任务级产物布局、临时 `CODEX_HOME` 安装烟测、结构化索引样本 / 运行期样本、路由一致性、语义烟测、旧路径防护和样本契约检查。 |
+| `tools/validate_skills.ts` | 否 | 六技能闭环套件的轻量级规范校验器，覆盖引用可发现性、任务级产物布局、临时 `CODEX_HOME` 安装烟测、结构化索引样本 / 运行期样本、路由一致性、语义烟测、旧路径防护和样本契约检查。 |
 | `tools/validate_skillset.ts` | 否 | 兼容旧校验命令的包装入口，委托给 `tools/validate_skills.ts`。 |
 
 ## 运行产物
 
 | 路径 | 用途 |
 |---|---|
-| `.alpha-goal/YYYYMMDD-<slug>/control-state.md` | 可选闭环台账，记录跨阶段控制状态和产物登记：完整最新控制路由、参考输入、当前状态、产物路径、反馈、残余误差和下一路由。 |
-| `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md` | 可选完整目标契约产物。 |
-| `.alpha-goal/YYYYMMDD-<slug>/system-model.md` | 可选完整控制模型产物。 |
-| `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md` | 可选完整决策综合记录产物。 |
-| `.alpha-goal/YYYYMMDD-<slug>/plan.md` | 可选持久化动态计划。 |
-| `.alpha-goal/YYYYMMDD-<slug>/iterations/NN-<slice>.md` | 可选完整迭代记录产物。 |
+| `.alpha-goal/YYYYMMDD-<slug>/control-state.md` | 可选。闭环台账，记录跨阶段控制状态和产物登记：完整的最新控制路由、参考输入、当前状态、产物路径、反馈、残余误差和下一路由。 |
+| `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md` | 可选。完整目标契约产物。 |
+| `.alpha-goal/YYYYMMDD-<slug>/system-model.md` | 可选。完整控制模型产物。 |
+| `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md` | 可选。完整决策综合记录产物。 |
+| `.alpha-goal/YYYYMMDD-<slug>/plan.md` | 可选。持久化动态计划。 |
+| `.alpha-goal/YYYYMMDD-<slug>/iterations/NN-<slice>.md` | 可选。完整迭代记录产物。 |
 | `.alpha-goal/YYYYMMDD-<slug>/iterations/cycles.jsonl` | 可选追加式循环日志，用于机器可读的循环历史。 |
-| `.alpha-goal/YYYYMMDD-<slug>/evidence/` | 可选持久化证据、日志、截图、轨迹或记录引用的检查输出。 |
+| `.alpha-goal/YYYYMMDD-<slug>/evidence/` | 可选。持久化证据、日志、截图、轨迹或记录引用的检查输出。 |
 | `.alpha-goal/YYYYMMDD-<slug>/schema/` | 可选机器可读结构化索引。 |
-| `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md` | 可选完整验证结论产物。 |
+| `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md` | 可选。完整验证结论产物。 |
 | `.alpha-goal/YYYYMMDD-<slug>/conformance-report.md` | 可选控制论一致性报告，用于状态转移、证据边界和旧路径检查。 |
 | `.alpha-goal/YYYYMMDD-<slug>/interviews.md` | 可选发现 / 访谈记录，用于形成目标契约。 |
 

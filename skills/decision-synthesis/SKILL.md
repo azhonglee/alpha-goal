@@ -5,7 +5,7 @@ description: "把决策综合用于复杂工程或社会技术系统：在形成
 
 # 决策综合
 
-当问题表现为复杂系统，而不是简单实现任务时，使用本技能。它在 `goal-contract`、`system-model` 或 `control-loop` 继续前，帮助综合目标和决策边界。
+当问题是复杂系统问题，而不是单纯实现任务时，使用本技能。它在 `goal-contract`、`system-model` 或 `control-loop` 继续前，帮助综合目标和决策边界。
 
 ## 使用时机
 
@@ -30,7 +30,7 @@ description: "把决策综合用于复杂工程或社会技术系统：在形成
 
 ## 按需加载资源
 
-- `references/complexity-triage.md`: 区分简单、繁杂、复杂或开放复杂巨系统类请求。
+- `references/complexity-triage.md`: 区分简单、繁杂、复杂和开放复杂巨系统请求。
 - `references/stakeholder-decision-boundaries.md`: 区分建议和用户自有决策。
 - `references/synthesis-round.md`: 运行人机定性 / 定量收敛轮次。
 - `references/synthesis-record-schema.md`: 生成可持久化或可交接的决策综合记录。
@@ -88,13 +88,13 @@ description: "把决策综合用于复杂工程或社会技术系统：在形成
 
 ### 4. 运行综合轮次
 
-对 `complex` 和 `complex-giant-like` 场景，或任何视角冲突场景，在解决决策前运行一轮或多轮 `综合轮次` 记录。结构见 `references/synthesis-round.md`。对开放复杂巨系统类工作，使用 `references/meta-synthesis-hall.md` 定义的综合研判工作台来保存角色、假设、模型、异议和收敛条件。
+对 `complex` 和 `complex-giant-like` 场景，或任何视角冲突场景，在解决决策前运行一轮或多轮 `综合轮次` 记录。结构见 `references/synthesis-round.md`。对开放复杂巨系统工作，使用 `references/meta-synthesis-hall.md` 定义的综合研判工作台保存角色、假设、模型、异议和收敛条件。
 
 每轮必须连接：
 
 - 人类或专家判断及其决策负责人；
 - 机器证据、模型输出、测试、日志、指标或探针；
-- 综合研判工作台状态：多种假设、模型或利益相关方视角仍然活跃时的工作区状态;
+- 综合研判工作台状态：多种假设、模型或利益相关方视角仍未收敛时的状态；
 - 冲突、矛盾或缺失传感器；
 - 任何能把定性判断转成有界证据的指标或代理；
 - 应成为验收证据或传感器证据的指标转译候选；
@@ -180,4 +180,4 @@ TUI 摘要:
 - 当子系统边界或反馈信号仍不清楚时，路由到 `system-model`。
 - 当需要用户自有决策、风险接受、预算 / 时间取舍或利益相关方优先级时，路由到用户。
 - 只有当综合未授权变更，且下一动作是把既有证据包与拟声明比较时，才路由到 `evidence-verify`。
-- 只有当已有有效 目标契约，且综合只是收窄下一切片、没有改变授权时，才路由到 `control-loop`。
+- 只有当已有有效的目标契约，且综合只是收窄下一切片、没有改变授权时，才路由到 `control-loop`。

@@ -1,8 +1,8 @@
 # 控制论一致性
 
-检查任务是否真正遵循闭环控制模型时使用本参考；判断依据是状态迁移、证据和边界是否成立，而不是文档里是否出现了控制论术语。
+检查任务是否真正遵循闭环控制模型时使用本参考；判断依据是状态转移、证据和边界是否成立，而不是文档里是否出现了控制论术语。
 
-## 状态迁移检查
+## 状态转移检查
 
 允许的高层路由迁移：
 
@@ -221,7 +221,7 @@ evidence-verify -> final | control-loop | goal-contract | system-model | blocker
 ```text
 控制论一致性报告:
 - 产物布局: pass | fail
-- 状态迁移: pass | fail
+- 状态转移: pass | fail
 - 行动前参考状态: pass | fail
 - 控制律完整性: pass | fail
 - 扰动处理: pass | fail | not applicable

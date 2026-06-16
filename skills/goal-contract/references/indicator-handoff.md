@@ -1,6 +1,6 @@
 # 指标转译
 
-当定性目标、综合轮次指标或验收预期需要转成 `system-model`、`control-loop` 或 `evidence-verify` 可观察的证据时，使用 指标转译。
+当定性目标、综合轮次指标或验收预期需要转成 `system-model`、`control-loop` 或 `evidence-verify` 可观察的证据时，使用 `指标转译`。
 
 ```text
 指标转译:

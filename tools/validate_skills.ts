@@ -326,11 +326,11 @@ const RUNTIME_SIDECAR_NEGATIVE_CASES: Array<[string, string]> = [
   ],
   [
     "late-incoming-edge",
-    "先前结构化索引边不得晚于当前路由",
+    "前置结构化索引记录不得晚于当前路由",
   ],
   [
     "claim-boundary-mismatch",
-    "先前结构化索引边必须共享 reference_id 或 claim_boundary",
+    "前置结构化索引记录必须共享 reference_id 或 claim_boundary",
   ],
 ];
 
@@ -502,7 +502,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "skills/evidence-verify/SKILL.md",
     [
       "声明边界",
-      "证据支持的最高实用边界",
+      "证据能支持的最高边界",
       "缺口",
       "允许的最终声明",
     ],
@@ -563,7 +563,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "控制论一致性可由机器检查",
     "skills/alpha-goal/references/cybernetic-conformance.md",
     [
-      "状态迁移",
+      "状态转移",
       "结构化索引",
       "旧产物路径",
       "行动前必须有参考状态",
@@ -643,12 +643,12 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     "skills/control-loop/references/control-law.md",
     [
       "内部结构",
-      "界面投影",
+      "界面展示",
       "执行检查",
       "内部产物语法",
       "结构化索引是机器可读的摘要与索引",
       "内部产物示例",
-      "不是默认 TUI 投影",
+      "不是默认 TUI 展示",
       "只有在用户要求",
       "持久化受阻",
       "高风险",
@@ -779,9 +779,9 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
     ],
   },
   {
-    name: "控制律 TUI 投影保留本地化表格字段",
+    name: "控制律 TUI 展示保留本地化表格字段",
     path: "skills/control-loop/references/control-law.md",
-    anchor: "## 界面投影",
+    anchor: "## 界面展示",
     block_scope: "section",
     required_terms: [
       "执行检查",
@@ -816,7 +816,7 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
     block_scope: "section",
     required_terms: [
       "持久化产物",
-      "不是默认 TUI 投影",
+      "不是默认 TUI 展示",
       "不要把它作为默认执行前展示",
       "控制律:",
     ],
@@ -855,9 +855,9 @@ const DEFAULT_TUI_PROJECTION_GUARDS = [
     end_anchor: "只有存在多个独立循环",
   },
   {
-    name: "控制律 TUI 投影",
+    name: "控制律 TUI 展示",
     path: "skills/control-loop/references/control-law.md",
-    anchor: "## 界面投影",
+    anchor: "## 界面展示",
     end_anchor: "## 内部结构",
   },
 ];
@@ -2070,9 +2070,9 @@ function validateRuntimeSidecarTraceGroups(
         traceAnchorsCompatible(sidecar, candidate),
       );
       if (compatibleIncomingSources.length === 0) {
-        errors.push(`${relPrefix}: 先前结构化索引边必须共享 reference_id 或 claim_boundary`);
+        errors.push(`${relPrefix}: 前置结构化索引记录必须共享 reference_id 或 claim_boundary`);
       } else if (!hasPriorOrSameGeneratedAt(sidecar, compatibleIncomingSources)) {
-        errors.push(`${relPrefix}: 先前结构化索引边不得晚于当前路由`);
+        errors.push(`${relPrefix}: 前置结构化索引记录不得晚于当前路由`);
       }
     }
   }
@@ -2236,7 +2236,7 @@ function validateDefaultTuiProjectionGuards(root: string, errors: string[]): voi
   for (const guard of DEFAULT_TUI_PROJECTION_GUARDS) {
     const file = path.join(root, guard.path);
     if (!isFile(file)) {
-      errors.push(`默认 TUI 投影守卫「${guard.name}」失败：缺少文件 ${guard.path}`);
+      errors.push(`默认 TUI 展示检查「${guard.name}」失败：缺少文件 ${guard.path}`);
       continue;
     }
 
@@ -2244,7 +2244,7 @@ function validateDefaultTuiProjectionGuards(root: string, errors: string[]): voi
     const section = textBetweenAnchors(text, guard.anchor, guard.end_anchor);
     if (!section) {
       errors.push(
-        `默认 TUI 投影守卫「${guard.name}」失败：${guard.path} 缺少锚点边界 ${guard.anchor}${guard.end_anchor ? ` -> ${guard.end_anchor}` : ""}`,
+        `默认 TUI 展示检查「${guard.name}」失败：${guard.path} 缺少锚点边界 ${guard.anchor}${guard.end_anchor ? ` -> ${guard.end_anchor}` : ""}`,
       );
       continue;
     }
@@ -2252,7 +2252,7 @@ function validateDefaultTuiProjectionGuards(root: string, errors: string[]): voi
     const codeFences = codeFenceBlocks(section);
     if (codeFences.length !== 1) {
       errors.push(
-        `默认 TUI 投影守卫「${guard.name}」失败：${guard.path} 默认 TUI 区块必须只包含一个模板代码块，实际 ${codeFences.length}`,
+        `默认 TUI 展示检查「${guard.name}」失败：${guard.path} 默认 TUI 区块必须只包含一个模板代码块，实际 ${codeFences.length}`,
       );
     } else {
       const missingTemplateTerms = DEFAULT_TUI_TEMPLATE_TERMS.filter(
@@ -2260,7 +2260,7 @@ function validateDefaultTuiProjectionGuards(root: string, errors: string[]): voi
       );
       if (missingTemplateTerms.length > 0) {
         errors.push(
-          `默认 TUI 投影守卫「${guard.name}」失败：${guard.path} 默认 TUI 模板缺少 ${missingTemplateTerms.join(", ")}`,
+          `默认 TUI 展示检查「${guard.name}」失败：${guard.path} 默认 TUI 模板缺少 ${missingTemplateTerms.join(", ")}`,
         );
       }
     }
@@ -2268,14 +2268,14 @@ function validateDefaultTuiProjectionGuards(root: string, errors: string[]): voi
     const rawControlLaw = rawControlLawFieldLeak(section);
     if (rawControlLaw) {
       errors.push(
-        `默认 TUI 投影守卫「${guard.name}」失败：${guard.path} 默认 TUI 区块包含原始控制律字段 ${JSON.stringify(rawControlLaw)}`,
+        `默认 TUI 展示检查「${guard.name}」失败：${guard.path} 默认 TUI 区块包含原始控制律字段 ${JSON.stringify(rawControlLaw)}`,
       );
     }
 
     const multilingualExample = section.match(MULTILINGUAL_TUI_EXAMPLE_RE);
     if (multilingualExample) {
       errors.push(
-        `默认 TUI 投影守卫「${guard.name}」失败：${guard.path} 默认 TUI 区块包含单独的非中文示例词 ${JSON.stringify(multilingualExample[0].trim())}`,
+        `默认 TUI 展示检查「${guard.name}」失败：${guard.path} 默认 TUI 区块包含单独的非中文示例词 ${JSON.stringify(multilingualExample[0].trim())}`,
       );
     }
   }

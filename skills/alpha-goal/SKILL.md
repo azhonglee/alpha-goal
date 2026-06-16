@@ -1,6 +1,6 @@
 ---
 name: alpha-goal
-description: "把工程、调试、设计和验证工作路由到闭环控制技能套件：goal-contract、system-model、control-loop、evidence-verify 和 decision-synthesis。下一技能或控制边界不清楚时使用；工程、调试、设计或验证请求默认可用。"
+description: "把工程、调试、设计和验证工作路由到闭环控制技能套件：goal-contract、system-model、control-loop、evidence-verify 和 decision-synthesis。当下一技能或控制边界不清楚，或请求涉及工程、调试、设计、验证时使用。"
 ---
 
 # Alpha Goal
@@ -28,7 +28,7 @@ description: "把工程、调试、设计和验证工作路由到闭环控制技
 - 可观测性、可控性、归属或耦合不清楚且会影响安全行动时，不绕过 `system-model`。
 - 需要作出完成、正确、就绪、可合并、可发布或安全性声明时，不绕过 `evidence-verify`。
 - 路由保持成比例：选择能降低实质不确定性的最小下一技能。
-- 默认把流程记忆持久化到 `.alpha-goal/`。在仓库内首次写入前，确认 `.alpha-goal/` 已被忽略；如果仓库根目录 `.gitignore` 缺少该条目，先加入 `.alpha-goal/`，再写台账产物。
+- 默认把流程状态持久化到 `.alpha-goal/`。在仓库内首次写入前，确认 `.alpha-goal/` 已被忽略；如果仓库根目录 `.gitignore` 缺少该条目，先加入 `.alpha-goal/`，再写台账产物。
 - 只有当用户明确禁止写文件、没有仓库路径，或无法安全更新 `.gitignore` 时，才使用仅聊天态台账。
 
 ## 按需加载资源
@@ -36,7 +36,7 @@ description: "把工程、调试、设计和验证工作路由到闭环控制技
 - `references/cybernetic-routing.md`: 路由选择和稳定性失效模式。
 - `references/closed-loop-ledger.md`: 跨阶段状态记忆结构和更新规则。
 - `references/artifact-layout.md`: 任务级 `.alpha-goal/YYYYMMDD-<slug>/xxx` 运行态产物布局。
-- `references/cybernetic-conformance.md`: 状态迁移、结构化索引和闭环不变量检查。
+- `references/cybernetic-conformance.md`: 状态转移、结构化索引和闭环不变量检查。
 
 ## 流程
 
@@ -54,7 +54,7 @@ description: "把工程、调试、设计和验证工作路由到闭环控制技
 - 已有批准目标，且有界动作能改善证据或实现 -> 执行需求；
 - 残余误差反复出现、阈值失败或控制假设被证伪 -> 自适应需求；
 - 工作看似完成，但声明 / 证据边界未解决 -> 验证需求；
-- 利益相关方多、弱量化、价值冲突或呈现开放复杂巨系统特征 -> 综合需求；
+- 利益相关方多、弱量化、价值冲突或属于开放复杂巨系统场景 -> 综合需求；
 - 缺少工具、权限、数据、环境或用户自有决策 -> 阻塞。
 
 如果没有台账且任务可能跨多个技能，先确认 `.alpha-goal/` 已被忽略，再初始化 `.alpha-goal/YYYYMMDD-<slug>/control-state.md`。必要时先把 `.alpha-goal/` 加入仓库根目录 `.gitignore`。
@@ -70,7 +70,7 @@ description: "把工程、调试、设计和验证工作路由到闭环控制技
 | 多个局部控制器会影响同一个全局目标 | `system-model` 或 `decision-synthesis` | 映射层级、耦合、仲裁和用户自有优先级 |
 | 已有活跃且批准的目标契约，需要变更或探测 | `control-loop` | 执行一个有界控制动作并采集反馈 |
 | 已有证据包且提出最终声明 | `evidence-verify` | 比较输出状态、参考状态和声明边界 |
-| 问题属于社会技术、战略、多智能体或开放复杂巨系统类任务 | `decision-synthesis` | 形成契约前先综合定性和定量视角 |
+| 问题属于社会技术、战略、多智能体或开放复杂巨系统场景 | `decision-synthesis` | 形成契约前先综合定性和定量视角 |
 | 缺少必需的用户自有决策或外部权限 | 用户澄清 / 阻塞项 | 不虚构权限 |
 
 ### 3. 检查稳定性闸门
