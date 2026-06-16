@@ -5,7 +5,7 @@ usage() {
   cat <<'EOF'
 Usage: scripts/install.sh [--codex-home PATH] [--force] [--no-sync-user-templates] [--verbose]
 
-Install this repository's six skill directories as direct symlinks
+Install this repository's public skill directories as direct symlinks
 under ${CODEX_HOME:-$HOME/.codex}/skills.
 
 By default, this script merges templates/AGENTS.md into user-level AGENTS.md
@@ -632,7 +632,7 @@ fi
 
 run_skillset_validation
 
-required_skills=(alpha-goal goal-contract system-model control-loop evidence-verify decision-synthesis)
+required_skills=(alpha-goal control-loop evidence-verify)
 skill_files=()
 for skill_name in "${required_skills[@]}"; do
   skill_file="$source_skill_root/$skill_name/SKILL.md"
@@ -672,7 +672,7 @@ for support_name in adapters tools templates scripts; do
   remove_legacy_support_link "$support_name"
 done
 
-for obsolete_skill in control-kernel loop verify meta-synthesis goal-frame goal-loop goal-iterate goal-review goal-verify; do
+for obsolete_skill in goal-contract system-model decision-synthesis control-kernel loop verify meta-synthesis goal-frame goal-loop goal-iterate goal-review goal-verify; do
   remove_obsolete_skill_link "$obsolete_skill"
 done
 

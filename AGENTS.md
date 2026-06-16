@@ -2,11 +2,11 @@
 
 ## Project Structure & Module Organization
 
-本仓库维护 `alpha-goal` Codex 技能包。技能源码统一位于 `skills/`：核心入口是 `skills/alpha-goal/SKILL.md`；目标契约技能位于 `skills/goal-contract/`，执行与验证阶段技能位于 `skills/control-loop/`、`skills/evidence-verify/`。各技能的详细规则放在本技能 `references/` 下，脚本放在本技能 `scripts/` 下。`templates/` 是可选用户配置模板，`scripts/install.sh` 负责软链接安装，`tools/validate_skillset.ts` 用于本地布局校验。`README.md`、`INSTALL.md`、`MANIFEST.md` 应与这些路径和命令保持一致。
+本仓库维护 `alpha-goal` Codex 技能包。公开技能位于 `skills/alpha-goal/`、`skills/control-loop/`、`skills/evidence-verify/`；目标成帧、系统建模和综合研判是 `alpha-goal` 的内部 references。`templates/` 是可选用户配置模板，`scripts/install.sh` 负责软链接安装，`tools/validate_skills.ts` 用于本地布局校验。`README.md`、`INSTALL.md`、`MANIFEST.md` 应与这些路径和命令保持一致。
 
 ## Build, Test, and Development Commands
 
-- `npx --yes tsx tools/validate_skills.ts .`：验证六技能结构、front matter、引用可发现性、闭环语义烟测、fixture checks、安装口径和 30K skills 字节预算。
+- `npx --yes tsx tools/validate_skills.ts .`：验证三公开技能结构、front matter、引用可发现性、闭环语义烟测、安装口径和 30K skills 字节预算。
 - `npx --yes tsx tools/validate_skillset.ts .`：兼容入口，委托给 `tools/validate_skills.ts`。
 - `bash -n scripts/install.sh`：检查安装脚本语法。
 - `npx --yes tsx skills/control-loop/scripts/mutation-preflight.ts`：检查迭代阶段脚本可运行。

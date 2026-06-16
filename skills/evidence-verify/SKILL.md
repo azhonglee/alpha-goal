@@ -9,7 +9,7 @@ Act as comparator. Completion is unproven until evidence covers every explicit r
 
 ## Resources
 
-Read `references/claim-boundary-check.md` and `references/completion-review-rubric.md` before final/merge/ship/safety claims. Read `references/verification-verdict-schema.md` for formal verdicts.
+Read `references/claim-boundary.md` before final/merge/ship/safety claims. Read `references/verification-verdict-schema.md` for formal verdicts.
 
 ## Inputs
 

@@ -9,7 +9,7 @@ Advance the reference state by the smallest observable action. Do not claim comp
 
 ## Resources
 
-Read `references/control-law.md`, `references/worktree-safety.md`, and `references/execution-boundaries.md` before mutation. Read `references/adaptive-learning.md` when feedback misses expected effect. Use other references only when their route applies. Read Latest Control Route before acting.
+Read `references/control-law.md`, `references/safety-boundaries.md` before mutation. Read `references/adaptive-learning.md` when feedback misses expected effect. Use other references only when their route applies. Read Latest Control Route before acting.
 
 ## Gates before mutation
 
@@ -23,7 +23,7 @@ All must be true:
 - `.alpha-goal/` is ignored before writing process artifacts.
 - A Control Law is present: target error, control variable, expected effect, sensor threshold, fallback.
 
-If any gate is missing, route to `goal-contract`, `system-model`, or blocker instead of editing.
+If any gate is missing, route to `alpha-goal` or blocker instead of editing.
 
 ## Iteration
 
@@ -93,7 +93,7 @@ Routes:
 - `ITERATION_HARDEN`: direction is valid but evidence/edge/compatibility/cleanup is weak.
 - `ITERATION_READY_FOR_VERIFY`: evidence plausibly covers acceptance and claim boundary.
 - `RETURN_TO_ALPHA_GOAL`: target/scope/authority/claim changed.
-- `RETURN_TO_SYSTEM_MODEL`: plant/sensor/actuator/coupling became unclear.
+- `RETURN_TO_ALPHA_GOAL`: target/plant/sensor/actuator/coupling became unclear.
 - `BLOCKED`: missing permission, tool, data, environment, credential, or user-owned decision.
 
 Continue automatically only while the same explicit authority, actuator boundary, acceptance evidence, claim boundary, modeled disturbances, and user-owned decisions remain stable. Stop/re-route on new subsystem/skill, boundary or evidence change, unmodeled disturbance, user-owned choice, or cumulative edits beyond the approved boundary.

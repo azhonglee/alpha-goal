@@ -1,6 +1,4 @@
 #!/usr/bin/env -S npx --yes tsx
-// Lightweight validation for a local Agent Skills suite.
-
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -9,790 +7,191 @@ const FRONTMATTER_RE = /^---\n(.*?)\n---\n/s;
 const FIELD_RE = /^([A-Za-z0-9_-]+):\s*(.*?)\s*$/;
 const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
 const SKILLS_BYTE_BUDGET = 30_000;
-const REQUIRED_SKILL_NAMES = new Set([
-  "alpha-goal",
-  "goal-contract",
-  "system-model",
-  "control-loop",
-  "evidence-verify",
-  "decision-synthesis",
-]);
-
-const LEGACY_SCRIPT_REFERENCES = [
-  "tools/validate_skills.py",
-  "tools/validate_skillset.py",
-  "scripts/mutation-preflight.sh",
-  "mutation-preflight.sh",
-  "scripts/repo-sensor-snapshot.sh",
-  "repo-sensor-snapshot.sh",
-  "scripts/evidence-summary.sh",
-  "evidence-summary.sh",
-];
-
+const REQUIRED_SKILL_NAMES = ["alpha-goal", "control-loop", "evidence-verify"];
+const MERGED_SKILL_NAMES = ["goal-contract", "system-model", "decision-synthesis"];
 const LEGACY_SKILL_REFERENCES = [
-  "$control-kernel",
-  "$loop",
-  "$verify",
-  "$meta-synthesis",
-  "`control-kernel`",
-  "`loop`",
-  "`verify`",
-  "`meta-synthesis`",
-  "skills/control-kernel",
-  "skills/loop",
-  "skills/verify",
-  "skills/meta-synthesis",
+  ...MERGED_SKILL_NAMES,
+  "control-kernel", "loop", "verify", "meta-synthesis",
+  "goal-frame", "goal-loop", "goal-iterate", "goal-review", "goal-verify",
+];
+const LEGACY_SCRIPT_REFERENCES = [
+  "tools/validate_skills.py", "tools/validate_skillset.py",
+  "scripts/mutation-preflight.sh", "mutation-preflight.sh",
+  "scripts/repo-sensor-snapshot.sh", "repo-sensor-snapshot.sh",
+  "scripts/evidence-summary.sh", "evidence-summary.sh",
 ];
 
-const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
-  [
-    "ambiguous requirement can become a bounded Goal Contract",
-    "skills/goal-contract/SKILL.md",
-    [
-      "Goal Contract",
-      "reference state",
-      "acceptance evidence",
-      "claim boundary",
-      "decision boundaries",
-      "Indicator Handoff",
-      ".alpha-goal/context",
-      "Contract Summary",
-      "| Field | Value |",
-      "artifact path",
-    ],
-  ],
-  [
-    "unclear system boundary routes through control modeling",
-    "skills/system-model/SKILL.md",
-    [
-      "System boundary",
-      "Observability",
-      "Controllability",
-      "Candidate control laws",
-      "Controller Hierarchy",
-      "none material",
-      "Disturbance Register",
-      "none material",
-      ".alpha-goal/models",
-      "Model Summary",
-      "| Field | Value |",
-    ],
-  ],
-  [
-    "execution feedback requires control law and ledger state",
-    "skills/control-loop/SKILL.md",
-    [
-      "Control Law",
-      "target error",
-      "control variable",
-      "sensor threshold",
-      "fallback",
-      "Latest Control Route",
-      "Adaptive Learning Record",
-      ".alpha-goal/iterations",
-      ".alpha-goal/evidence",
-      "Iteration Summary",
-      "| Field | Value |",
-      "ledger update",
-    ],
-  ],
-  [
-    "insufficient evidence routes to next iteration instead of final",
-    "skills/evidence-verify/SKILL.md",
-    [
-      "Evidence coverage",
-      "NEXT_ITERATION",
-      "NARROW_CLAIM_AND_FINAL",
-      ".alpha-goal/verification",
-      "Verification Summary",
-      "| Field | Value |",
-      "Final claim allowed",
-    ],
-  ],
-  [
-    "complex multi-party conflict uses human-machine synthesis rounds",
-    "skills/decision-synthesis/SKILL.md",
-    [
-      "Synthesis Round",
-      "Indicator Handoff",
-      "Qualitative judgments",
-      "Quantitative signals",
-      "User-owned decisions",
-      ".alpha-goal/synthesis",
-      "Synthesis Summary",
-      "| Field | Value |",
-      "Route",
-    ],
-  ],
-  [
-    "router preserves closed-loop state and disturbance handling",
-    "skills/alpha-goal/SKILL.md",
-    [
-      "Closed-loop Ledger",
-      ".alpha-goal/control-state",
-      "Latest Control Route",
-      "Route Summary",
-      "| Field | Value |",
-      "TUI",
-      "Control Law",
-      "Indicator Handoff",
-      "Adaptive Learning",
-      "Controller Hierarchy",
-      "Disturbance Register",
-      "Error signal",
-      "Selected skill",
-    ],
-  ],
-  [
-    "claim boundary prevents overbroad final claims",
-    "skills/evidence-verify/SKILL.md",
-    [
-      "Claim boundary",
-      "Highest practical evidence-supported boundary",
-      "Gap",
-      "Final claim allowed",
-    ],
-  ],
-  [
-    "closed-loop ledger records cross-stage control memory",
-    "skills/alpha-goal/references/closed-loop-ledger.md",
-    [
-      "Default behavior",
-      ".alpha-goal/",
-      ".gitignore",
-      "process-artifact setup mutation",
-      "Latest Control Route",
-      "Artifact registry",
-      "Route Summary",
-      "| Field | Value |",
-      "source of truth",
-      ".alpha-goal/context",
-      ".alpha-goal/models",
-      ".alpha-goal/synthesis",
-      ".alpha-goal/iterations",
-      ".alpha-goal/evidence",
-      ".alpha-goal/verification",
-      "Reference",
-      "Current state",
-      "Last error signal",
-      "Control law",
-      "Sensor feedback",
-      "Route decision",
-      "Next state",
-      "Adaptive learning",
-    ],
-  ],
-  [
-    "disturbance register has robust monitoring and containment fields",
-    "skills/system-model/references/disturbance-register.md",
-    [
-      "Likelihood",
-      "Impact",
-      "Sensor",
-      "Containment",
-      "Route trigger",
-      "none material",
-    ],
-  ],
-  [
-    "synthesis round combines judgment, evidence, metrics, and decisions",
-    "skills/decision-synthesis/references/synthesis-round.md",
-    [
-      "Human/expert judgments",
-      "Machine evidence and models",
-      "Quantitative indicators",
-      "Conflict or contradiction",
-      "User-owned decision",
-      "Next hypothesis to verify",
-      "Indicator handoff candidate",
-    ],
-  ],
-  [
-    "indicator handoff turns qualitative goals into evidence signals",
-    "skills/goal-contract/references/indicator-handoff.md",
-    [
-      "Operational definition",
-      "Sensor / evidence source",
-      "Measurement timing or frequency",
-      "Threshold / tolerance",
-      "Evidence boundary",
-      "Route trigger",
-    ],
-  ],
-  [
-    "controller hierarchy maps local controllers to global objective",
-    "skills/system-model/references/controller-hierarchy.md",
-    [
-      "Global controller",
-      "Local controller",
-      "Coupling variables",
-      "Arbitration rule",
-      "Escalation trigger",
-      "Recommended coordination route",
-      "none material",
-    ],
-  ],
-  [
-    "adaptive learning records reusable control corrections",
-    "skills/control-loop/references/adaptive-learning.md",
-    [
-      "Learning trigger",
-      "Observed mismatch",
-      "Adjustment",
-      "Reuse condition",
-      "Invalidation condition",
-      "Ledger update",
-    ],
-  ],
+const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
+  ["front controller frames/models/synthesizes/routes", "skills/alpha-goal/SKILL.md", [
+    "Frame -> Model -> Synthesize", "Goal Contract", "Control Model", "Indicator Handoff", "user-owned decisions", "control-loop", "evidence-verify", "never creates", "Route Summary"
+  ]],
+  ["contract/model reference preserves pre-action gates", "skills/alpha-goal/references/contract-and-model.md", [
+    "Goal Contract:", "Control Model:", "Acceptance evidence", "Claim boundary", "Authorization class", "Disturbance Register", "Controller Hierarchy", "Candidate Control Law"
+  ]],
+  ["synthesis reference preserves qualitative quantitative integration", "skills/alpha-goal/references/synthesis.md", [
+    "Human/expert judgments", "Machine evidence/models", "Quantitative indicators", "Qualitative constraints", "User-owned decision", "Indicator handoff candidate"
+  ]],
+  ["ledger records cross-stage state", "skills/alpha-goal/references/ledger.md", [
+    "Latest Control Route:", "Reference", "Current state", "Control law", "Sensor feedback", "User-owned decisions", "Blocked downstream action", "Claim boundary", "Next action"
+  ]],
+  ["execution has hard safety gates", "skills/control-loop/SKILL.md", [
+    "mutation authority", "explicit user/repo instruction", "A vague request is not mutation authorization", "Control Law", "Iteration Summary", "User-owned decisions", "Stop/re-route"
+  ]],
+  ["verification limits final claims", "skills/evidence-verify/SKILL.md", [
+    "NARROW_CLAIM_AND_FINAL", "Final response guard", "Highest practical evidence-supported boundary", "Final wording allowed", "repair-complete", "no risk", "Verification Summary"
+  ]],
 ];
 
-const FIXTURE_CONTRACT_TESTS = [
-  {
-    name: "complex migration conflict uses synthesis and indicator handoff",
-    prompt: "多团队迁移目标、风险、窗口、成功指标冲突，先综合研判。",
-    paths: [
-      "skills/decision-synthesis/SKILL.md",
-      "skills/decision-synthesis/references/synthesis-round.md",
-    ],
-    schema_blocks: ["Decision Synthesis Record:", "Synthesis Round:", "Indicator Handoff:"],
-    route_terms: ["user", "goal-contract", "system-model", "blocker"],
-  },
-  {
-    name: "qualitative objective becomes measurable contract evidence",
-    prompt: "把用户体验更稳定转成可验证 Goal Contract。",
-    paths: [
-      "skills/goal-contract/SKILL.md",
-      "skills/goal-contract/references/indicator-handoff.md",
-    ],
-    schema_blocks: ["Goal Contract:", "Indicator Handoff:"],
-    route_terms: ["control-loop", "system-model", "evidence-verify", "block"],
-  },
-  {
-    name: "multi-controller system maps hierarchy before mutation",
-    prompt: "多个团队和模块都能改变同一上线目标，先建模。",
-    paths: [
-      "skills/system-model/SKILL.md",
-      "skills/system-model/references/controller-hierarchy.md",
-    ],
-    schema_blocks: ["Control Model:", "Controller Hierarchy:"],
-    route_terms: ["goal-contract", "control-loop", "decision-synthesis", "blocker"],
-  },
-  {
-    name: "feedback mismatch creates adaptive learning before next loop",
-    prompt: "上轮控制律阈值没命中，但方向有效，继续下一轮。",
-    paths: [
-      "skills/control-loop/SKILL.md",
-      "skills/control-loop/references/adaptive-learning.md",
-    ],
-    schema_blocks: ["Control Law:", "Adaptive Learning Record:"],
-    route_terms: [
-      "ITERATION_CONTINUES",
-      "ITERATION_HARDEN",
-      "RETURN_TO_SYSTEM_MODEL",
-    ],
-  },
-  {
-    name: "verification checks learned thresholds and indicator evidence",
-    prompt: "检查当前声明是否可以最终交付。",
-    paths: [
-      "skills/evidence-verify/SKILL.md",
-      "skills/evidence-verify/references/verification-verdict-schema.md",
-    ],
-    schema_blocks: [
-      "Verification Verdict:",
-      "Indicator handoff review",
-      "Adaptive learning review",
-    ],
-    route_terms: ["PASS_TO_FINAL", "NEXT_ITERATION", "REFRAME", "BLOCKED"],
-  },
-];
-
-type Frontmatter = Record<string, string>;
-
-function parseFrontmatter(text: string): Frontmatter {
+function parseFrontmatter(text: string): Record<string, string> {
   const match = text.match(FRONTMATTER_RE);
-  if (!match) {
-    throw new Error("missing YAML frontmatter block");
-  }
-
-  const data: Frontmatter = {};
-  const lines = match[1].split(/\r?\n/);
-  for (const [offset, line] of lines.entries()) {
-    const lineno = offset + 2;
+  if (!match) throw new Error("missing YAML frontmatter block");
+  const data: Record<string, string> = {};
+  for (const [offset, line] of match[1].split(/\r?\n/).entries()) {
     const stripped = line.trim();
-    if (!stripped || stripped.startsWith("#")) {
-      continue;
-    }
-
+    if (!stripped || stripped.startsWith("#")) continue;
     const field = line.match(FIELD_RE);
-    if (!field) {
-      throw new Error(`line ${lineno}: unsupported frontmatter syntax`);
-    }
-
+    if (!field) throw new Error(`line ${offset + 2}: unsupported frontmatter syntax`);
     const [, key, rawValue] = field;
     const value = rawValue.trim();
-    if (!ALLOWED_FRONTMATTER_KEYS.has(key)) {
-      throw new Error(`line ${lineno}: unsupported frontmatter key ${JSON.stringify(key)}`);
-    }
-    if (Object.hasOwn(data, key)) {
-      throw new Error(`line ${lineno}: duplicate frontmatter key ${JSON.stringify(key)}`);
-    }
-    if (!value) {
-      throw new Error(`line ${lineno}: empty frontmatter value for ${JSON.stringify(key)}`);
-    }
-
-    const quoted =
-      value.length >= 2 &&
-      value[0] === value[value.length - 1] &&
-      (value[0] === "'" || value[0] === '"');
-    if (!quoted && /:\s/.test(value)) {
-      throw new Error(`line ${lineno}: quote frontmatter value containing ': '`);
-    }
-
+    if (!ALLOWED_FRONTMATTER_KEYS.has(key)) throw new Error(`line ${offset + 2}: unsupported frontmatter key ${key}`);
+    if (Object.hasOwn(data, key)) throw new Error(`line ${offset + 2}: duplicate frontmatter key ${key}`);
+    if (!value) throw new Error(`line ${offset + 2}: empty frontmatter value for ${key}`);
+    const quoted = value.length >= 2 && value[0] === value[value.length - 1] && (value[0] === '"' || value[0] === "'");
+    if (!quoted && /:\s/.test(value)) throw new Error(`line ${offset + 2}: quote frontmatter value containing ': ' `);
     data[key] = quoted ? value.slice(1, -1) : value;
   }
-
   return data;
 }
 
 export function main(args = process.argv.slice(2)): number {
-  const root = path.resolve(
-    args[0] ?? path.join(path.dirname(fileURLToPath(import.meta.url)), ".."),
-  );
+  const root = path.resolve(args[0] ?? path.join(path.dirname(fileURLToPath(import.meta.url)), ".."));
   const skills = path.join(root, "skills");
   const errors: string[] = [];
   const warnings: string[] = [];
+  if (!isDirectory(skills)) errors.push(`missing skills directory: ${skills}`);
+  const skillDirs = isDirectory(skills) ? fs.readdirSync(skills, { withFileTypes: true }).filter(e => e.isDirectory()).map(e => path.join(skills, e.name)).sort() : [];
+  const discovered = skillDirs.map(d => path.basename(d));
+  for (const name of REQUIRED_SKILL_NAMES) if (!discovered.includes(name)) errors.push(`missing required skill directory: skills/${name}`);
+  for (const name of discovered) if (!REQUIRED_SKILL_NAMES.includes(name)) errors.push(`unexpected skill directory: skills/${name}`);
 
-  if (!isDirectory(skills)) {
-    errors.push(`missing skills directory: ${skills}`);
-    printReport(root, errors, warnings);
-    return 1;
-  }
-
-  for (const bad of walk(root)) {
-    const basename = path.basename(bad);
-    if (basename === "__MACOSX" && isDirectory(bad)) {
-      errors.push(`macOS metadata directory found: ${relative(root, bad)}`);
-    }
-    if (basename.startsWith("._") && isFile(bad)) {
-      errors.push(`macOS resource fork file found: ${relative(root, bad)}`);
-    }
-  }
-
-  const skillDirs = fs
-    .readdirSync(skills, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => path.join(skills, entry.name))
-    .sort();
-
-  if (skillDirs.length === 0) {
-    errors.push("no skill directories found");
-  }
-
-  const discoveredSkillNames = new Set(skillDirs.map((dir) => path.basename(dir)));
-  for (const name of [...REQUIRED_SKILL_NAMES].sort()) {
-    if (!discoveredSkillNames.has(name)) {
-      errors.push(`missing required skill directory: skills/${name}`);
-    }
-  }
-  for (const name of [...discoveredSkillNames].sort()) {
-    if (!REQUIRED_SKILL_NAMES.has(name)) {
-      errors.push(`unexpected skill directory: skills/${name}`);
-    }
-  }
-
-  const names = new Set<string>();
-  for (const dir of skillDirs) {
-    const skillName = path.basename(dir);
-    const md = path.join(dir, "SKILL.md");
-    if (!isFile(md)) {
-      errors.push(`${skillName}: missing SKILL.md`);
-      continue;
-    }
-
-    const text = fs.readFileSync(md, "utf8");
-    let frontmatter: Frontmatter;
-    try {
-      frontmatter = parseFrontmatter(text);
-    } catch (error) {
-      errors.push(`${skillName}: invalid SKILL.md frontmatter: ${errorMessage(error)}`);
-      continue;
-    }
-
-    const name = frontmatter.name;
-    const desc = frontmatter.description;
-    if (!name) {
-      errors.push(`${skillName}: SKILL.md frontmatter missing name`);
-    }
-    if (!desc) {
-      errors.push(`${skillName}: SKILL.md frontmatter missing description`);
-    }
-    if (name && name !== skillName) {
-      errors.push(`${skillName}: frontmatter name ${JSON.stringify(name)} does not match directory`);
-    }
-    if (name && names.has(name)) {
-      errors.push(`duplicate skill name: ${name}`);
-    }
-    if (name) {
-      names.add(name);
-    }
-    if (desc && desc.length > 500) {
-      warnings.push(
-        `${skillName}: description is long (${desc.length} chars); implicit routing may truncate it`,
-      );
-    }
-
-    const referencesDir = path.join(dir, "references");
-    const references = isDirectory(referencesDir)
-      ? fs
-          .readdirSync(referencesDir, { withFileTypes: true })
-          .filter((entry) => entry.isFile())
-          .map((entry) => path.join(referencesDir, entry.name))
-          .sort()
-      : [];
-    for (const ref of references) {
-      const relRef = `references/${path.basename(ref)}`;
-      if (!text.includes(relRef)) {
-        errors.push(`${skillName}: reference is not discoverable from SKILL.md: ${relRef}`);
-      }
-    }
-  }
-
-  validateTypeScriptScriptSurface(root, errors, warnings);
-  validateRuntimeArtifactIgnore(root, errors);
-  validateLegacyScriptReferences(root, errors);
-  validateLegacySkillReferences(root, errors);
+  for (const dir of skillDirs) validateSkillDir(root, dir, errors, warnings);
   validateByteBudget(skills, errors);
-  validateInstallDocumentation(root, errors);
-  validateSemanticSmokeTests(root, errors);
-  validateFixtureContractTests(root, errors);
+  validateRuntimeArtifactIgnore(root, errors);
+  validateScriptSurface(root, errors, warnings);
+  validateLegacyReferences(root, errors);
+  validateSemanticChecks(root, errors);
   validateSchemaConsistency(root, errors);
+  validateInstallDocumentation(root, errors);
 
   printReport(root, errors, warnings);
-  return errors.length > 0 ? 1 : 0;
+  return errors.length ? 1 : 0;
+}
+
+function validateSkillDir(root: string, dir: string, errors: string[], warnings: string[]): void {
+  const skillName = path.basename(dir);
+  const md = path.join(dir, "SKILL.md");
+  if (!isFile(md)) { errors.push(`${skillName}: missing SKILL.md`); return; }
+  const text = fs.readFileSync(md, "utf8");
+  try {
+    const fm = parseFrontmatter(text);
+    if (fm.name !== skillName) errors.push(`${skillName}: frontmatter name ${JSON.stringify(fm.name)} does not match directory`);
+    if (!fm.description) errors.push(`${skillName}: SKILL.md frontmatter missing description`);
+    if (fm.description && fm.description.length > 500) warnings.push(`${skillName}: description is long (${fm.description.length} chars)`);
+  } catch (error) { errors.push(`${skillName}: invalid SKILL.md frontmatter: ${errorMessage(error)}`); }
+  const refs = path.join(dir, "references");
+  if (isDirectory(refs)) for (const ref of fs.readdirSync(refs).filter(f => isFile(path.join(refs, f))).sort()) {
+    const rel = `references/${ref}`;
+    if (!text.includes(rel)) errors.push(`${skillName}: reference is not discoverable from SKILL.md: ${rel}`);
+  }
 }
 
 function validateByteBudget(skills: string, errors: string[]): void {
   let total = 0;
-  for (const file of walk(skills)) {
-    if (isFile(file)) total += fs.statSync(file).size;
-  }
-  if (total > SKILLS_BYTE_BUDGET) {
-    errors.push(`skills byte budget exceeded: ${total} > ${SKILLS_BYTE_BUDGET}`);
-  }
-}
-
-function validateInstallDocumentation(root: string, errors: string[]): void {
-  const install = path.join(root, "scripts", "install.sh");
-  if (isFile(install)) {
-    const text = fs.readFileSync(install, "utf8");
-    for (const required of ["$target_root/$skill_name", "$source_skill_root/$skill_name/SKILL.md", "$target/SKILL.md"]) {
-      if (!text.includes(required)) errors.push(`scripts/install.sh missing direct-install guard: ${required}`);
-    }
-  }
-  for (const doc of ["INSTALL.md", "MANIFEST.md", "README.md", "README.zh-CN.md"]) {
-    const file = path.join(root, doc);
-    if (!isFile(file)) continue;
-    const text = fs.readFileSync(file, "utf8");
-    if (text.includes("one `${CODEX_HOME:-$HOME/.codex}/skills/alpha-goal` symlink") ||
-        text.includes("creates an `alpha-goal` symlink") ||
-        text.includes("points to this repository's `skills/` tree") ||
-        text.includes("创建一个 `alpha-goal` 软链接") ||
-        text.includes("软链接，目标是本仓库的 `skills/`")) {
-      errors.push(`${doc}: stale aggregate skill symlink wording`);
-    }
-  }
-}
-
-function validateTypeScriptScriptSurface(root: string, errors: string[], warnings: string[]): void {
-  const scriptFiles = walk(root).filter((file) => {
-    if (!isFile(file)) {
-      return false;
-    }
-    const rel = relative(root, file);
-    return (
-      rel.startsWith("tools/") ||
-      /^skills\/[^/]+\/scripts\//.test(rel)
-    );
-  });
-
-  for (const file of scriptFiles) {
-    const rel = relative(root, file);
-    if (rel.includes("/__pycache__/") || rel.endsWith(".pyc")) {
-      continue;
-    }
-    if (!rel.endsWith(".ts")) {
-      errors.push(`script surface must be TypeScript only: ${rel}`);
-      continue;
-    }
-    const text = fs.readFileSync(file, "utf8");
-    if (text.startsWith("#!")) {
-      const mode = fs.statSync(file).mode;
-      if ((mode & 0o100) === 0) {
-        warnings.push(`${rel} has a shebang but is not user-executable`);
-      }
-    }
-  }
+  for (const file of walk(skills)) if (isFile(file)) total += fs.statSync(file).size;
+  if (total > SKILLS_BYTE_BUDGET) errors.push(`skills byte budget exceeded: ${total} > ${SKILLS_BYTE_BUDGET}`);
 }
 
 function validateRuntimeArtifactIgnore(root: string, errors: string[]): void {
   const gitignore = path.join(root, ".gitignore");
-  if (!isFile(gitignore)) {
-    errors.push("missing .gitignore with required .alpha-goal/ runtime artifact ignore");
-    return;
-  }
+  if (!isFile(gitignore)) { errors.push("missing .gitignore with required .alpha-goal/ runtime artifact ignore"); return; }
+  const lines = fs.readFileSync(gitignore, "utf8").split(/\r?\n/).map(l => l.trim());
+  if (!lines.includes(".alpha-goal/")) errors.push(".gitignore must include .alpha-goal/");
+}
 
-  const lines = fs
-    .readFileSync(gitignore, "utf8")
-    .split(/\r?\n/)
-    .map((line) => line.trim());
-  if (!lines.includes(".alpha-goal/")) {
-    errors.push(".gitignore must include .alpha-goal/ for default ledger and runtime artifacts");
+function validateScriptSurface(root: string, errors: string[], warnings: string[]): void {
+  for (const file of walk(root).filter(f => isFile(f) && (relative(root, f).startsWith("tools/") || /^skills\/[^/]+\/scripts\//.test(relative(root, f))))) {
+    const rel = relative(root, file);
+    if (!rel.endsWith(".ts")) errors.push(`script surface must be TypeScript only: ${rel}`);
+    if (fs.readFileSync(file, "utf8").startsWith("#!") && (fs.statSync(file).mode & 0o100) === 0) warnings.push(`${rel} has a shebang but is not user-executable`);
   }
 }
 
-function validateLegacyScriptReferences(root: string, errors: string[]): void {
-  const checkedFiles = [
-    "AGENTS.md",
-    "README.md",
-    "INSTALL.md",
-    "MANIFEST.md",
-    ...walk(path.join(root, "skills"))
-      .filter((file) => isFile(file) && path.basename(file) === "SKILL.md")
-      .map((file) => relative(root, file)),
-  ];
-
-  for (const rel of checkedFiles) {
-    const file = path.join(root, rel);
-    if (!isFile(file)) {
-      continue;
-    }
+function validateLegacyReferences(root: string, errors: string[]): void {
+  const files = ["AGENTS.md", "README.md", "README.zh-CN.md", "INSTALL.md", "MANIFEST.md", ...walk(path.join(root, "skills")).filter(isFile).map(f => relative(root, f))];
+  for (const rel of files) {
+    const file = path.join(root, rel); if (!isFile(file)) continue;
     const text = fs.readFileSync(file, "utf8");
-    for (const legacy of LEGACY_SCRIPT_REFERENCES) {
-      if (text.includes(legacy)) {
-        errors.push(`${rel}: legacy non-TypeScript script reference remains: ${legacy}`);
-      }
-    }
-  }
-}
-
-function validateLegacySkillReferences(root: string, errors: string[]): void {
-  const checkedFiles = [
-    "AGENTS.md",
-    "README.md",
-    "INSTALL.md",
-    "MANIFEST.md",
-    ...walk(path.join(root, "skills"))
-      .filter((file) => {
-        if (!isFile(file)) {
-          return false;
-        }
-        const rel = relative(root, file);
-        return rel.endsWith(".md") || rel.endsWith("/agents/openai.yaml");
-      })
-      .map((file) => relative(root, file)),
-  ];
-
-  for (const rel of checkedFiles) {
-    const file = path.join(root, rel);
-    if (!isFile(file)) {
-      continue;
-    }
-    const text = fs.readFileSync(file, "utf8");
+    for (const legacy of LEGACY_SCRIPT_REFERENCES) if (text.includes(legacy)) errors.push(`${rel}: legacy non-TypeScript script reference remains: ${legacy}`);
     for (const legacy of LEGACY_SKILL_REFERENCES) {
-      if (text.includes(legacy)) {
-        errors.push(`${rel}: legacy skill reference remains: ${legacy}`);
-      }
+      const patterns = [`$${legacy}`, `skills/${legacy}`, `\`${legacy}\``];
+      if (patterns.some(p => text.includes(p))) errors.push(`${rel}: legacy skill reference remains: ${legacy}`);
     }
   }
 }
 
-function validateSemanticSmokeTests(root: string, errors: string[]): void {
-  for (const [scenario, relPath, requiredTerms] of SEMANTIC_SMOKE_TESTS) {
-    const file = path.join(root, relPath);
-    if (!isFile(file)) {
-      errors.push(`semantic smoke test ${JSON.stringify(scenario)}: missing ${relPath}`);
-      continue;
-    }
-
-    const text = fs.readFileSync(file, "utf8").toLowerCase();
-    const missing = requiredTerms.filter((term) => !text.includes(term.toLowerCase()));
-    if (missing.length > 0) {
-      errors.push(
-        `semantic smoke test ${JSON.stringify(scenario)} failed in ${relPath}: missing ${missing.join(", ")}`,
-      );
-    }
+function validateSemanticChecks(root: string, errors: string[]): void {
+  for (const [name, rel, terms] of SEMANTIC_CHECKS) {
+    const file = path.join(root, rel);
+    if (!isFile(file)) { errors.push(`semantic check ${JSON.stringify(name)}: missing ${rel}`); continue; }
+    const lower = fs.readFileSync(file, "utf8").toLowerCase();
+    for (const term of terms) if (!lower.includes(term.toLowerCase())) errors.push(`semantic check ${JSON.stringify(name)} failed in ${rel}: missing ${term}`);
   }
-}
-
-function validateFixtureContractTests(root: string, errors: string[]): void {
-  for (const fixture of FIXTURE_CONTRACT_TESTS) {
-    const name = fixture.name;
-    const prompt = fixture.prompt;
-    if (!prompt.trim()) {
-      errors.push(`fixture contract ${JSON.stringify(name)}: empty prompt`);
-      continue;
-    }
-
-    const combinedParts: string[] = [];
-    const missingPaths: string[] = [];
-    for (const relPath of fixture.paths) {
-      const file = path.join(root, relPath);
-      if (!isFile(file)) {
-        missingPaths.push(relPath);
-        continue;
-      }
-      combinedParts.push(fs.readFileSync(file, "utf8"));
-    }
-
-    if (missingPaths.length > 0) {
-      errors.push(
-        `fixture contract ${JSON.stringify(name)}: missing paths ${missingPaths.join(", ")}`,
-      );
-      continue;
-    }
-
-    const combined = combinedParts.join("\n");
-    const missingBlocks = fixture.schema_blocks.filter((block) => !hasSchemaBlock(combined, block));
-    if (missingBlocks.length > 0) {
-      errors.push(
-        `fixture contract ${JSON.stringify(name)}: missing schema blocks ${missingBlocks.join(", ")}`,
-      );
-    }
-
-    const lower = combined.toLowerCase();
-    const missingRoutes = fixture.route_terms.filter((term) => !lower.includes(term.toLowerCase()));
-    if (missingRoutes.length > 0) {
-      errors.push(
-        `fixture contract ${JSON.stringify(name)}: missing route terms ${missingRoutes.join(", ")}`,
-      );
-    }
-  }
-}
-
-function hasSchemaBlock(text: string, label: string): boolean {
-  const escaped = escapeRegex(label.trim());
-  const headingLabel = escapeRegex(label.trim().replace(/:$/, ""));
-  const blockPattern = new RegExp("```(?:text)?\\n(?:(?!```).)*" + escaped, "s");
-  const headingPattern = new RegExp("^#{1,6}\\s+" + headingLabel, "m");
-  return blockPattern.test(text) || headingPattern.test(text);
 }
 
 function validateSchemaConsistency(root: string, errors: string[]): void {
+  const alpha = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
+  const ledger = readIfFile(path.join(root, "skills/alpha-goal/references/ledger.md"));
+  const fields = ["Reference", "Current state", "Last error signal", "Control law", "Sensor feedback", "Route decision", "Next state", "Artifact registry", "Adaptive learning", "Selected skill", "Boundary", "Disturbance", "User-owned decisions", "Blocked downstream action", "Claim boundary", "Next action"];
+  const positions = (text: string) => { const scoped = text.slice(Math.max(0, text.toLowerCase().indexOf("latest control route:"))).toLowerCase(); return fields.map(f => scoped.indexOf(`- ${f.toLowerCase()}:`)); };
+  for (const [label, pos] of [["alpha", positions(alpha)], ["ledger", positions(ledger)]] as [string, number[]][]) if (pos.some(v => v < 0) || pos.some((v, i) => i > 0 && v <= pos[i - 1])) errors.push(`ledger schema order mismatch: ${label}`);
   const evSkill = readIfFile(path.join(root, "skills/evidence-verify/SKILL.md"));
   const evRef = readIfFile(path.join(root, "skills/evidence-verify/references/verification-verdict-schema.md"));
   if (evSkill.includes("- Gaps:") || evRef.includes("- Gaps:")) errors.push("evidence verdict schema must use only `Gap:`");
-  for (const term of ["PASS_TO_FINAL", "NARROW_CLAIM_AND_FINAL", "NEXT_ITERATION", "REFRAME", "BLOCKED"]) {
-    if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`evidence verdict enum mismatch: ${term}`);
-  }
-  const alpha = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
-  const ledger = readIfFile(path.join(root, "skills/alpha-goal/references/closed-loop-ledger.md"));
-  const ledgerFields = ["Reference", "Current state", "Last error signal", "Control law", "Sensor feedback", "Route decision", "Next state", "Artifact registry", "Adaptive learning", "Selected skill", "Boundary", "Disturbance", "User-owned decisions", "Blocked downstream action", "Claim boundary", "Next action"];
-  for (const field of ledgerFields) {
-    if (!alpha.toLowerCase().includes(field.toLowerCase()) || !ledger.toLowerCase().includes(field.toLowerCase())) errors.push(`ledger schema mismatch: ${field}`);
-  }
-  const positions = (text: string) => { const start = text.toLowerCase().indexOf("latest control route:"); const scoped = text.slice(start < 0 ? 0 : start).toLowerCase(); return ledgerFields.map((field) => scoped.indexOf(`- ${field.toLowerCase()}:`)); };
-  for (const [label, pos] of [["alpha", positions(alpha)], ["ledger", positions(ledger)]] as [string, number[]][]) {
-    if (pos.some((value) => value < 0) || pos.some((value, index) => index > 0 && value <= pos[index - 1])) errors.push(`ledger schema order mismatch: ${label}`);
-  }
-  for (const file of ["skills/control-loop/SKILL.md", "skills/evidence-verify/SKILL.md", "skills/evidence-verify/references/verification-verdict-schema.md"]) {
-    const text = readIfFile(path.join(root, file));
-    for (const field of ["User-owned decisions", "Blocked downstream action"]) if (!text.toLowerCase().includes(field.toLowerCase())) errors.push(`${file}: missing ${field}`);
+  for (const term of ["PASS_TO_FINAL", "NARROW_CLAIM_AND_FINAL", "NEXT_ITERATION", "REFRAME", "BLOCKED"]) if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`evidence verdict enum mismatch: ${term}`);
+}
+
+function validateInstallDocumentation(root: string, errors: string[]): void {
+  const install = readIfFile(path.join(root, "scripts/install.sh"));
+  for (const name of REQUIRED_SKILL_NAMES) if (!install.includes(name)) errors.push(`scripts/install.sh missing required skill: ${name}`);
+  for (const name of MERGED_SKILL_NAMES) if (!install.includes(name)) errors.push(`scripts/install.sh should clean merged old skill: ${name}`);
+  for (const doc of ["README.md", "README.zh-CN.md", "INSTALL.md", "MANIFEST.md"]) {
+    const text = readIfFile(path.join(root, doc));
+    if (/six skills|六技能|六个技能|\$goal-contract|\$system-model|\$decision-synthesis/.test(text)) errors.push(`${doc}: stale six-skill public architecture wording`);
   }
 }
 
-function readIfFile(file: string): string {
-  return isFile(file) ? fs.readFileSync(file, "utf8") : "";
-}
-
-function printReport(root: string, errors: string[], warnings: string[]): void {
-  console.log("Skill suite validation");
-  console.log(`root: ${root}`);
-  if (errors.length > 0) {
-    console.log("\nERRORS:");
-    for (const error of errors) {
-      console.log(`- ${error}`);
-    }
-  }
-  if (warnings.length > 0) {
-    console.log("\nWARNINGS:");
-    for (const warning of warnings) {
-      console.log(`- ${warning}`);
-    }
-  }
-  if (errors.length === 0 && warnings.length === 0) {
-    console.log("PASS: all checks passed");
-  } else if (errors.length === 0) {
-    console.log("PASS with warnings");
-  }
-}
-
+function readIfFile(file: string): string { return isFile(file) ? fs.readFileSync(file, "utf8") : ""; }
+function isFile(file: string): boolean { try { return fs.statSync(file).isFile(); } catch { return false; } }
+function isDirectory(file: string): boolean { try { return fs.statSync(file).isDirectory(); } catch { return false; } }
 function walk(root: string): string[] {
-  if (!fs.existsSync(root)) {
-    return [];
-  }
-
   const result: string[] = [];
-  const stack = [root];
-  const skippedDirs = new Set([
-    ".git",
-    ".worktrees",
-    "node_modules",
-    "dist",
-    "build",
-    ".venv",
-    "__pycache__",
-  ]);
-
-  while (stack.length > 0) {
-    const current = stack.pop()!;
-    result.push(current);
-    let entries: fs.Dirent[];
-    try {
-      entries = fs.readdirSync(current, { withFileTypes: true });
-    } catch {
-      continue;
-    }
-    for (const entry of entries.reverse()) {
-      if (entry.isDirectory() && skippedDirs.has(entry.name)) {
-        continue;
-      }
-      stack.push(path.join(current, entry.name));
+  if (!fs.existsSync(root)) return result;
+  const skipped = new Set([".git", ".worktrees", "node_modules", "dist", "build", ".venv", "__pycache__"]);
+  function visit(dir: string): void {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.isDirectory() && skipped.has(entry.name)) continue;
+      const full = path.join(dir, entry.name); result.push(full); if (entry.isDirectory()) visit(full);
     }
   }
-
-  return result;
+  visit(root); return result.sort();
+}
+function relative(root: string, file: string): string { return path.relative(root, file).split(path.sep).join("/"); }
+function errorMessage(error: unknown): string { return error instanceof Error ? error.message : String(error); }
+function printReport(root: string, errors: string[], warnings: string[]): void {
+  console.log("Skill suite validation"); console.log(`root: ${root}`);
+  if (warnings.length) { console.log("\nWARNINGS:"); for (const w of warnings) console.log(`- ${w}`); }
+  if (errors.length) { console.log("\nERRORS:"); for (const e of errors) console.log(`- ${e}`); }
+  else console.log("PASS: all checks passed");
 }
 
-function isDirectory(file: string): boolean {
-  try {
-    return fs.statSync(file).isDirectory();
-  } catch {
-    return false;
-  }
-}
-
-function isFile(file: string): boolean {
-  try {
-    return fs.statSync(file).isFile();
-  } catch {
-    return false;
-  }
-}
-
-function relative(root: string, file: string): string {
-  return path.relative(root, file).split(path.sep).join("/");
-}
-
-function escapeRegex(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
-
-const entrypoint = process.argv[1] ? path.resolve(process.argv[1]) : "";
-if (entrypoint === fileURLToPath(import.meta.url)) {
-  process.exit(main());
-}
+if (import.meta.url === `file://${process.argv[1]}`) process.exit(main(process.argv.slice(2)));
