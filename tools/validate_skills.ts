@@ -141,7 +141,6 @@ const SIDECAR_AUTHORIZATION_STATUSES = [
 const SIDECAR_STAGE_DECISIONS = [
   "ROUTE_TO_GOAL_CONTRACT",
   "ROUTE_TO_SYSTEM_MODEL",
-  "ROUTE_TO_CONTROL_LOOP",
   "ROUTE_TO_EVIDENCE_VERIFY",
   "ROUTE_TO_USER",
   "CONTRACT_APPROVED",
@@ -208,7 +207,6 @@ const SIDECAR_STAGE_POLICIES: Record<
     stageDecisions: [
       "ROUTE_TO_GOAL_CONTRACT",
       "ROUTE_TO_SYSTEM_MODEL",
-      "ROUTE_TO_CONTROL_LOOP",
       "ROUTE_TO_EVIDENCE_VERIFY",
       "ROUTE_TO_USER",
       "BLOCKED",
@@ -218,7 +216,6 @@ const SIDECAR_STAGE_POLICIES: Record<
     routeState: "system-model",
     stageDecisions: [
       "ROUTE_TO_GOAL_CONTRACT",
-      "ROUTE_TO_CONTROL_LOOP",
       "ROUTE_TO_EVIDENCE_VERIFY",
       "REFRAME",
       "BLOCKED",
@@ -322,7 +319,7 @@ const RUNTIME_SIDECAR_NEGATIVE_CASES: Array<[string, string]> = [
   ["stage-decision-policy", "goal-contract schema sidecar stage_decision 必须是下列值之一"],
   [
     "synthesis-control-loop-without-contract",
-    "路由到 control-loop 需要先前已批准的 goal-contract schema sidecar",
+    "next transition 无效 decision-synthesis -> control-loop",
   ],
   [
     "final-with-nonpassing-verdict",
@@ -334,7 +331,7 @@ const RUNTIME_SIDECAR_NEGATIVE_CASES: Array<[string, string]> = [
   ],
   [
     "system-model-control-loop-without-contract",
-    "路由到 control-loop 需要先前已批准的 goal-contract schema sidecar",
+    "next transition 无效 system-model -> control-loop",
   ],
   [
     "late-final-verdict",
@@ -361,7 +358,6 @@ const ROUTE_TRANSITIONS: Record<string, string[]> = {
     "decision-synthesis",
     "system-model",
     "goal-contract",
-    "control-loop",
     "evidence-verify",
     "user",
     "blocker",
@@ -369,14 +365,12 @@ const ROUTE_TRANSITIONS: Record<string, string[]> = {
   "decision-synthesis": [
     "goal-contract",
     "system-model",
-    "control-loop",
     "evidence-verify",
     "user",
     "blocker",
   ],
   "system-model": [
     "goal-contract",
-    "control-loop",
     "evidence-verify",
     "decision-synthesis",
     "blocker",
@@ -622,7 +616,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "行动前必须有参考状态",
       "声明前必须有传感器",
       "最终结论前必须有比较器",
-      "decision-synthesis -> control-loop",
+      "decision-synthesis -> goal-contract",
       "\"artifact_kind\"",
       "\"stage_decision\"",
       "\"authorization_status\"",
@@ -900,7 +894,7 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
       "路由到 `system-model`",
       "路由到用户",
       "路由到 `evidence-verify`",
-      "路由到 `control-loop`",
+      "不能直接路由到 `control-loop`",
     ],
   },
 ];
@@ -1225,7 +1219,7 @@ const FIXTURE_CONTRACT_TESTS = [
       "skills/system-model/references/controller-hierarchy.md",
     ],
     schema_blocks: ["控制模型:", "控制器层级:"],
-    route_terms: ["goal-contract", "control-loop", "decision-synthesis", "blocker"],
+    route_terms: ["goal-contract", "decision-synthesis", "blocker"],
   },
   {
     name: "反馈不匹配会在下一轮前生成自适应学习",
@@ -2096,21 +2090,6 @@ function validateConcreteSidecarFixture(
   if (routeState === "control-loop" && authorizationStatus !== "approved") {
     errors.push(`${rel}: control-loop schema sidecar 要求 authorization_status=approved`);
   }
-  if (
-    expectedKind === "decision-synthesis" &&
-    nextRoute === "control-loop" &&
-    !isMeaningfulSidecarValue(fixture.reference_id)
-  ) {
-    errors.push(`${rel}: decision-synthesis -> control-loop 要求已有 reference_id`);
-  }
-  if (
-    expectedKind === "system-model" &&
-    nextRoute === "control-loop" &&
-    !isMeaningfulSidecarValue(fixture.reference_id)
-  ) {
-    errors.push(`${rel}: system-model -> control-loop 要求已有 reference_id`);
-  }
-
   const generatedAt = stringValue(fixture.generated_at);
   if (!generatedAt) {
     errors.push(`${rel}: generated_at 必须是非空 ISO-8601 字符串`);
@@ -2375,9 +2354,9 @@ function validateCyberneticRouteConsistency(root: string, errors: string[]): voi
     }
 
     const requiredGuards = [
-      "`decision-synthesis -> control-loop` 仅在已存在批准后的目标契约",
+      "`decision-synthesis -> goal-contract` 用于把综合研判和指标转译固化为目标契约",
       "`decision-synthesis -> evidence-verify` 仅在综合研判未授权改动",
-      "`system-model -> control-loop` 仅在已存在批准后的目标契约",
+      "`system-model -> goal-contract` 用于把被控对象、传感器、执行器、扰动或耦合事实固化为目标契约",
     ];
     for (const guard of requiredGuards) {
       if (!conformance.includes(guard)) {
@@ -2389,7 +2368,6 @@ function validateCyberneticRouteConsistency(root: string, errors: string[]): voi
   if (synthesis) {
     const requiredRoutes = [
       "路由到 `evidence-verify`",
-      "路由到 `control-loop`",
       "路由到 `goal-contract`",
       "路由到 `system-model`",
     ];
@@ -2402,7 +2380,7 @@ function validateCyberneticRouteConsistency(root: string, errors: string[]): voi
 
   if (synthesisRound) {
     const routeTrigger =
-      "路由触发条件: goal-contract | system-model | control-loop | evidence-verify | user | blocker";
+      "路由触发条件: goal-contract | system-model | evidence-verify | user | blocker";
     if (!synthesisRound.includes(routeTrigger)) {
       errors.push(`${synthesisRoundRel}: 缺少完整路由触发条件列表`);
     }
@@ -3000,7 +2978,6 @@ function stageDecisionMatchesRoute(stageDecision: string, nextRoute: string): bo
     case "ROUTE_TO_SYSTEM_MODEL":
     case "RETURN_TO_SYSTEM_MODEL":
       return nextRoute === "system-model";
-    case "ROUTE_TO_CONTROL_LOOP":
     case "CONTRACT_APPROVED":
     case "ITERATION_CONTINUES":
     case "ITERATION_HARDEN":

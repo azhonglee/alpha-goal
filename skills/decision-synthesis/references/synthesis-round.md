@@ -33,7 +33,7 @@
 - 综合更新:
 - 用户自有决策:
 - 下一个待验证假设:
-- 路由触发条件: goal-contract | system-model | control-loop | evidence-verify | user | blocker
+- 路由触发条件: goal-contract | system-model | evidence-verify | user | blocker
 ```
 
 ```text

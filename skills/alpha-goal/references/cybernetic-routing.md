@@ -15,7 +15,7 @@ decision-synthesis? -> system-model? -> goal-contract -> control-loop -> evidenc
 - 当问题的价值取向、利益相关方或目标函数不稳定时，使用 `decision-synthesis`。
 - 当被控对象边界或反馈信号不稳定时，使用 `system-model`。
 - 当参考状态 / 设定点不稳定时，使用 `goal-contract`。
-- 只有在参考状态和执行器边界足够稳定后，才使用 `control-loop`。
+- 只有经 `goal-contract` 形成并确认目标契约后，才使用 `control-loop`。
 - 任何涉及完成 / 就绪 / 正确性声明的场景，都使用 `evidence-verify`。
 - 当任务跨技能或跨轮次时，跨阶段携带闭环台账。完整 `控制路由` 持久化到 `.alpha-goal/YYYYMMDD-<slug>/control-state.md`；TUI 默认只展示紧凑 Markdown 表格 `路由摘要`。
 
