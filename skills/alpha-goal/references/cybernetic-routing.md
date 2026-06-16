@@ -1,35 +1,5 @@
-# 控制论路由参考
+# 控制路由
 
-当一个请求可能激活多个技能时，使用本参考。
+默认链路：`decision-synthesis? -> system-model? -> goal-contract -> control-loop -> evidence-verify -> final`。
 
-## 闭环顺序
-
-稳定路由通常遵循：
-
-```text
-decision-synthesis? -> system-model? -> goal-contract -> control-loop -> evidence-verify -> 最终声明
-```
-
-可选步骤不是仪式：
-
-- 当问题的价值取向、利益相关方或目标函数不稳定时，使用 `decision-synthesis`。
-- 当被控对象边界或反馈信号不稳定时，使用 `system-model`。
-- 当参考状态 / 设定点不稳定时，使用 `goal-contract`。
-- 只有经 `goal-contract` 形成并确认目标契约后，才使用 `control-loop`。
-- 任何涉及完成 / 就绪 / 正确性声明的场景，都使用 `evidence-verify`。
-- 当任务跨技能或跨轮次时，跨阶段携带闭环台账。完整 `控制路由` 持久化到 `.alpha-goal/YYYYMMDD-<slug>/control-state.md`；TUI 默认只展示紧凑 Markdown 表格 `路由摘要`。
-
-## 稳定性失败模式
-
-- 设定点前置失败：验收仍含糊时就开始改代码。
-- 传感器失败：最终声明依赖旧证据、低边界证据或缺失证据。
-- 执行器越界：执行阶段改动超出已批准范围或归属。
-- 耦合控制：并行变更触达共享生成输出或子模块。
-- 扰动否认：脏状态、工具缺口或变化中的规范被视为无关。
-- 动态不稳定：延迟或噪声反馈导致反复过度修正、路由摆动或缺少阻尼的大范围改写。
-- 记忆漂移：产物写到 `.alpha-goal/YYYYMMDD-<slug>/` 之外，使后续恢复或验证变得含糊。
-- 比较器绕过：`control-loop` 未经 `evidence-verify` 就声明最终完成。
-
-## 最小干预规则
-
-路由到能降低当前误差的最小技能。对验收清楚、证据直接的局部低风险任务，不运行完整建模或综合阶段；这只减少阶段数量，不降低目标契约、控制律、证据或最终声明闸门。
+禁止：未经 `goal-contract` 到 `control-loop`；未经 `evidence-verify` 作最终声明；把最小执行范围当目标语义。路由到能降低误差的最小技能；局部低风险任务可不运行完整建模或综合，但不降低目标契约、控制律、证据或声明闸门。

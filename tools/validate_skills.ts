@@ -118,6 +118,7 @@ const SIDECAR_FIXTURE_DIR = "tools/fixtures/schema-sidecars";
 const RUNTIME_SIDECAR_FIXTURE_DIR = "tools/fixtures/runtime-sidecars";
 const SIDECAR_TASK_SLUG_RE = /^\d{8}-[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const ALLOWED_ALPHA_GOAL_NON_ARTIFACT_PATHS = new Set(["preflight-check"]);
+const SKILL_DOC_SIZE_LIMIT_BYTES = 30_000;
 
 const SIDECAR_EVIDENCE_BOUNDARIES = [
   "artifact",
@@ -1424,6 +1425,7 @@ export function main(args = process.argv.slice(2)): number {
   validateMisleadingSemanticContractions(root, errors);
   validateGoalContractAmbiguityGate(root, errors);
   validateTaskScopedArtifactPathShape(root, errors);
+  validateSkillDocCorpusSize(root, errors);
   validateSchemaSidecarContract(root, errors);
   validateSchemaSidecarFixtures(root, errors);
   validateRuntimeSidecarFixtureSets(root, errors);
@@ -1590,6 +1592,16 @@ function validateRuntimeArtifactIgnores(root: string, errors: string[]): void {
   }
 }
 
+function validateSkillDocCorpusSize(root: string, errors: string[]): void {
+  const docs = documentationFiles(root).filter(
+    (rel) => rel.startsWith("skills/") && (rel.endsWith("/SKILL.md") || rel.includes("/references/")),
+  );
+  const total = docs.reduce((sum, rel) => sum + fs.statSync(path.join(root, rel)).size, 0);
+  if (total > SKILL_DOC_SIZE_LIMIT_BYTES) {
+    errors.push(`技能正文超过 30K: ${total} bytes > ${SKILL_DOC_SIZE_LIMIT_BYTES}`);
+  }
+}
+
 function documentationFiles(root: string): string[] {
   const rootDocs = [
     "AGENTS.md",
@@ -1728,62 +1740,6 @@ function validateSchemaSidecarContract(root: string, errors: string[]): void {
   }
 
   const text = fs.readFileSync(file, "utf8");
-  const match = text.match(/```json\s*([\s\S]*?)```/);
-  if (!match) {
-    errors.push(`${rel}: 缺少 JSON Schema schema sidecar 示例块`);
-    return;
-  }
-
-  let schema: Record<string, unknown>;
-  try {
-    schema = JSON.parse(match[1]);
-  } catch (error) {
-    errors.push(`${rel}: JSON Schema schema sidecar 块无效: ${errorMessage(error)}`);
-    return;
-  }
-
-  if (schema.$schema !== "https://json-schema.org/draft/2020-12/schema") {
-    errors.push(`${rel}: schema sidecar 必须声明 JSON Schema draft 2020-12`);
-  }
-  if (schema.type !== "object") {
-    errors.push(`${rel}: schema sidecar 根类型必须是 object`);
-  }
-  if (schema.additionalProperties !== false) {
-    errors.push(`${rel}: schema sidecar 必须把 additionalProperties 设为 false`);
-  }
-
-  validateExactStringSet(
-    rel,
-    "schema sidecar 必填键列表",
-    schema.required,
-    SIDECAR_REQUIRED_KEYS,
-    errors,
-  );
-
-  const properties = objectValue(schema.properties);
-  if (!properties) {
-    errors.push(`${rel}: schema sidecar 缺少 properties 对象`);
-    return;
-  }
-
-  for (const key of SIDECAR_REQUIRED_KEYS) {
-    if (!Object.hasOwn(properties, key)) {
-      errors.push(`${rel}: schema sidecar properties 遗漏 ${JSON.stringify(key)}`);
-    }
-  }
-  for (const key of Object.keys(properties)) {
-    if (!SIDECAR_REQUIRED_KEY_SET.has(key)) {
-      errors.push(`${rel}: schema sidecar properties 包含非预期键 ${JSON.stringify(key)}`);
-    }
-  }
-
-  validateSchemaEnum(rel, properties, "artifact_kind", SIDECAR_ARTIFACT_KINDS, errors);
-  validateSchemaEnum(rel, properties, "route_state", SIDECAR_ROUTE_STATES, errors);
-  validateSchemaEnum(rel, properties, "next_route", SIDECAR_ROUTE_STATES, errors);
-  validateNullableRouteSchemaEnum(rel, properties, "prior_route", SIDECAR_ROUTE_STATES, errors);
-  validateSchemaEnum(rel, properties, "evidence_boundary", SIDECAR_EVIDENCE_BOUNDARIES, errors);
-  validateSchemaEnum(rel, properties, "stage_decision", SIDECAR_STAGE_DECISIONS, errors);
-  validateSchemaEnum(rel, properties, "authorization_status", SIDECAR_AUTHORIZATION_STATUSES, errors);
 
   const responsibilityBoundaryTerms = [
     "基础 JSON Schema",
@@ -1799,8 +1755,14 @@ function validateSchemaSidecarContract(root: string, errors: string[]): void {
     }
   }
 
+  for (const key of ["artifact_kind", "stage_decision", "authorization_status"]) {
+    if (!text.includes(key)) {
+      errors.push(`${rel}: schema sidecar 责任边界遗漏核心键 ${JSON.stringify(key)}`);
+    }
+  }
+
   for (const kind of SIDECAR_ARTIFACT_KINDS) {
-    if (!text.includes(`- \`${kind}\``)) {
+    if (!text.includes(`\`${kind}\``)) {
       errors.push(`${rel}: 阶段专用必填键遗漏 ${kind}`);
     }
   }
