@@ -1,6 +1,6 @@
 # Auto-Execution Boundary
 
-Use this reference when an 迭代记录 has a `Next` action, especially when the wording might become a passive “recommended next step”. The loop controller should continue acting when it is safe to do so; recommendation-only output is a stop decision that needs a reason.
+Use this reference when an 迭代记录 has a `下一步` action, especially when the wording might become a passive “recommended next step”. The loop controller should continue acting when it is safe to do so; recommendation-only output is a stop decision that needs a reason.
 
 ## Default posture
 
@@ -36,11 +36,11 @@ When pausing, name the stop reason and the smallest concrete next action. Avoid 
 
 ## Output rule
 
-For every `Next` field, use one of these forms:
+For every `下一步` field, use one of these forms:
 
 ```text
-Next: auto-executing <bounded pass> because <why safe/actionable>.
-Next: pausing; <STOP_REASON>; recommended <bounded pass>.
+下一步: 自动执行 <有界轮次>，因为 <安全 / 可执行原因>。
+下一步: 暂停；<STOP_REASON>；建议 <有界轮次>。
 ```
 
 If a next action is read-only and already authorized, the expected form is `auto-executing`, followed by actually performing the pass before responding.

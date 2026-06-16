@@ -152,7 +152,7 @@ Persist full artifacts under `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md` by d
 - 诊断闸门: 症状、假设、所需原因证据、修复授权闸门（如适用）
 - 压力测试发现: 假设 / 取舍 / 证据探测
 - 交接: 已接受指标、允许的首轮循环模式、证据下限、停止 / 重构触发条件
-- 台账更新: `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 路径、产物路径、可选 Schema 辅助索引路径、最新误差信号、下一路由，或明确的无法写入原因
+- 台账更新: `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 路径、产物路径、可选结构化索引路径、最新误差信号、下一路由，或明确的无法写入原因
 ```
 
 TUI 摘要:

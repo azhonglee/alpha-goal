@@ -86,7 +86,7 @@ Use Chinese titles by default, with Chinese field labels. If the user explicitly
 | 失败处理 | |
 ```
 
-Map `问题` from 目标误差, `本轮动作` from 控制变量 plus control action, `保持不变` from 保持不变的变量 and containment, `验收证据` from 传感器 plus 阈值, `主要风险` from 信号噪声, damping, saturation, or strongest material risk, and `失败处理` from 失败处理 or stop/reframe trigger. Keep values concise and point to the persisted artifact for the full 控制律.
+字段映射：`问题` 取自目标误差；`本轮动作` 取自控制变量和控制动作；`保持不变` 取自保持不变的变量和影响范围约束；`验收证据` 取自传感器和阈值；`主要风险` 取自信号噪声、阻尼 / 防振荡、饱和 / 影响范围约束或最强实质风险；`失败处理` 取自失败处理或停止 / 重构触发条件。表格内容保持简短，完整控制律指向持久化产物。
 
 Create or update a durable plan only for multiple independent loops, modules, repos, handoff/recovery needs, external side effects, irreversible/high-risk changes, rollback/compatibility decisions, contested ownership, or user request.
 
@@ -168,14 +168,14 @@ Persist a full 迭代记录 under `.alpha-goal/YYYYMMDD-<slug>/iterations/NN-<sl
 
 Print the full 迭代记录 in chat only when the user asks, file persistence is blocked, or a blocker/risk requires explicit user review. Compact records are still acceptable for low-risk passes, but preserve:
 
-- approved context and boundary;
-- dynamic plan and preflight;
-- action or probe;
-- fresh evidence and evidence class;
-- acceptance delta and error remaining;
+- 已批准上下文与边界;
+- 动态计划与预检;
+- 动作或探测;
+- 最新证据与证据类别;
+- 验收变化与剩余误差;
 - 控制律结果: 预期效果、已观察反馈、阈值状态、反馈延迟、信号噪声、置信度、阻尼 / 防振荡、饱和 / 影响范围约束、失败处理或调整;
 - 自适应学习更新: 触发条件、已观察偏差、调整、复用条件、失效条件;
-- feedback and disturbances;
+- 反馈与扰动;
 - 台账更新: 输入状态、误差信号、扰动更新、控制动作、传感器反馈、残余误差和下一状态;
 - 路由决策;
 - 下一步.

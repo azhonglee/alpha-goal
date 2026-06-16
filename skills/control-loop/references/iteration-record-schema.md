@@ -15,7 +15,7 @@ Use this reference when a loop result needs a durable or handoff-ready record. K
 - 台账更新:
   - 控制状态路径:
   - 产物路径:
-  - Schema 辅助索引路径:
+  - 结构化索引路径:
   - 证据路径:
   - 残余误差:
   - 路由决策:

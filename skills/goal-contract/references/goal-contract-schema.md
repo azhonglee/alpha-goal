@@ -22,7 +22,7 @@ Persist the full contract at `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md` by d
   - 范围内:
   - 范围外 / 非目标:
 - 控制模型:
-  - 被控对象 / plant:
+  - 被控对象:
   - 允许的控制变量:
   - 可观测信号:
   - 扰动:
@@ -38,7 +38,7 @@ Persist the full contract at `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md` by d
   - 证据边界:
   - 负责人或决策边界:
 - 决策边界:
-  - Agent 可决策:
+  - 代理可决策:
   - 用户自有:
 - 约束:
 - 已解决假设:
@@ -56,7 +56,7 @@ Persist the full contract at `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md` by d
 - 台账更新:
   - 控制状态路径:
   - 产物路径:
-  - Schema 辅助索引路径:
+  - 结构化索引路径:
   - 最新误差信号:
   - 下一路由:
 ```

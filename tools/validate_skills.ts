@@ -409,9 +409,9 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "可控性",
       "候选控制律",
       "控制器层级",
-      "none material",
+      "无实质项",
       "扰动登记",
-      "none material",
+      "无实质项",
       ".alpha-goal/YYYYMMDD-<slug>/system-model.md",
       ".alpha-goal/YYYYMMDD-<slug>/control-state.md",
       "模型摘要",
@@ -582,7 +582,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "传感器",
       "约束措施",
       "路由触发条件",
-      "none material",
+      "无实质项",
     ],
   ],
   [
@@ -620,7 +620,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "仲裁规则",
       "升级触发条件",
       "推荐协同路由",
-      "none material",
+      "无实质项",
     ],
   ],
   [
@@ -736,7 +736,7 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
     anchor: "完整模型:",
     required_terms: [
       "- 系统边界:",
-      "- 被控对象 / plant:",
+      "- 被控对象:",
       "- 传感器与证据边界:",
       "- 执行器与授权边界:",
       "- 候选控制律:",
@@ -921,6 +921,67 @@ const LEGACY_OUTPUT_TITLE_TERMS = [
   "Synthesis Map:",
   "Cybernetic Conformance Report:",
   "| Field | Value |",
+];
+
+const LEGACY_OUTPUT_TITLE_LINE_PATTERNS: Array<[string, RegExp]> = [
+  ["Plan Template", /^# Plan Template$/m],
+  ["Plan", /^# Plan$/m],
+  ["Default path", /^Default path:$/m],
+  ["Compact", /^Compact:$/m],
+  ["Full", /^Full:$/m],
+  ["Routing", /^Routing:$/m],
+  ["Stage-specific required keys", /^Stage-specific required keys:$/m],
+  ["Compact verdict", /^## Compact verdict$/m],
+  ["Full verdict", /^## Full verdict$/m],
+  ["Verdict", /^## Verdict$/m],
+  ["Acceptance evidence matrix", /^## Acceptance evidence matrix$/m],
+  ["Control law review", /^## Control law review$/m],
+  ["Indicator handoff review", /^## Indicator handoff review$/m],
+  ["Adaptive learning review", /^## Adaptive learning review$/m],
+  ["Final claim allowed", /^## Final claim allowed$/m],
+  ["Ledger schema", /^## Ledger schema$/m],
+  ["Stage responsibilities", /^## Stage responsibilities$/m],
+  ["Update rules", /^## Update rules$/m],
+  ["Conformance report", /^## Conformance report$/m],
+  ["Schema sidecar", /^## Schema sidecar$/m],
+  ["Metadata", /^## Metadata$/m],
+  ["Current Strategy", /^## Current Strategy$/m],
+  ["Active Boundary", /^## Active Boundary$/m],
+  ["Triggering Evidence", /^## Triggering Evidence$/m],
+  ["Execution Slices", /^## Execution Slices$/m],
+  ["Risks and Watchpoints", /^## Risks and Watchpoints$/m],
+  ["Verification Route", /^## Verification Route$/m],
+  ["Change Log", /^## Change Log$/m],
+  ["Open Questions", /^## Open Questions$/m],
+  ["Sensor quality", /^Sensor quality:/m],
+  ["Control quality", /^Control quality:/m],
+  ["Reason", /^Reason:$/m],
+  ["Freshness", /^Freshness:$/m],
+  ["Boundary crossed", /^Boundary crossed:$/m],
+  ["Claim supported", /^Claim supported:$/m],
+  ["Allowed actuators", /^\s*-\s*Allowed actuators:|^Allowed actuators:$/m],
+  ["Forbidden actuators", /^\s*-\s*Forbidden actuators:|^Forbidden actuators:$/m],
+  ["Target error", /^\s*-\s*Target error:/m],
+  ["Control variable", /^\s*-\s*Control variable:/m],
+  ["Control action or probe", /^\s*-\s*Control action or probe:/m],
+  ["Variables held constant", /^\s*-\s*Variables held constant:/m],
+  ["Expected effect", /^\s*-\s*Expected effect:/m],
+  ["Sensor threshold", /^\s*-\s*Sensor threshold:/m],
+  ["Feedback latency", /^\s*-\s*Feedback latency:/m],
+  ["Signal noise", /^\s*-\s*Signal noise:/m],
+  ["Confidence", /^\s*-\s*Confidence:/m],
+  ["Fallback action", /^\s*-\s*Fallback action:/m],
+  ["Stop / reframe trigger", /^\s*-\s*Stop \/ reframe trigger:/m],
+  ["Next", /^Next:/m],
+  ["Diff / scope review", /^\s*-\s*Diff \/ 范围复核:/m],
+  ["approved context and boundary", /^\s*-\s*approved context and boundary;/m],
+  ["dynamic plan and preflight", /^\s*-\s*dynamic plan and preflight;/m],
+  ["fresh evidence and evidence class", /^\s*-\s*fresh evidence and evidence class;/m],
+  ["feedback and disturbances", /^\s*-\s*feedback and disturbances;/m],
+  ["none material", /none material/],
+  ["被控对象 / plant", /被控对象 \/ plant/],
+  ["Agent 可决策", /Agent 可决策/],
+  ["Schema 辅助索引路径", /Schema 辅助索引路径/],
 ];
 
 const FIXTURE_CONTRACT_TESTS = [
@@ -2209,7 +2270,7 @@ function validateDefaultTuiProjectionGuards(root: string, errors: string[]): voi
 
 function validateChineseOutputTitles(root: string, errors: string[]): void {
   for (const rel of documentationFiles(root)) {
-    if (!rel.startsWith("skills/") || !rel.endsWith(".md")) {
+    if (!rel.endsWith(".md")) {
       continue;
     }
     const file = path.join(root, rel);
@@ -2220,6 +2281,11 @@ function validateChineseOutputTitles(root: string, errors: string[]): void {
     for (const title of LEGACY_OUTPUT_TITLE_TERMS) {
       if (text.includes(title)) {
         errors.push(`${rel}: legacy English output title remains: ${title}`);
+      }
+    }
+    for (const [label, pattern] of LEGACY_OUTPUT_TITLE_LINE_PATTERNS) {
+      if (pattern.test(text)) {
+        errors.push(`${rel}: legacy English output title line remains: ${label}`);
       }
     }
   }

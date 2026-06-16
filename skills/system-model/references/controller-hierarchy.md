@@ -1,8 +1,8 @@
 # 控制器层级
 
-Use a 控制器层级 / Coordination Map when a task has multiple subsystems, teams, repos, agents, modules, services, or objectives that can act as local controllers under a shared goal.
+Use a 控制器层级（协同图）when a task has multiple subsystems, teams, repos, agents, modules, services, or objectives that can act as local controllers under a shared goal.
 
-If material multi-controller relationships exist, output a clearly labeled `控制器层级:` block. If none exist, state `控制器层级: none material`. Do not replace the hierarchy with an unlabeled prose coordination section.
+If material multi-controller relationships exist, output a clearly labeled `控制器层级:` block. If none exist, state `控制器层级: 无实质项`. Do not replace the hierarchy with an unlabeled prose coordination section.
 
 ```text
 控制器层级:
@@ -13,7 +13,7 @@ If material multi-controller relationships exist, output a clearly labeled `控�
   - 仲裁规则:
 - 局部控制器:
   - 负责人:
-  - 被控对象 / plant:
+  - 被控对象:
   - 局部目标:
   - 控制变量:
   - 局部传感器:

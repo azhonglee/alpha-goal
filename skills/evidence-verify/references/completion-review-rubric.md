@@ -14,7 +14,7 @@ Return `PASS_TO_FINAL` only when:
 - strongest material risk has matching evidence;
 - material qualitative objectives have 指标交接 evidence or an explicit narrowed claim;
 - material control actions have sensor feedback that meets the stated 控制律 threshold, or residual error/fallback is reflected in the verdict;
-- material delayed/noisy feedback has latency, noise, confidence, damping, and containment reflected in the verdict before stable completion is claimed;
+- 实质性的延迟 / 噪声反馈在声明稳定完成前，已把延迟、噪声、置信度、阻尼和影响范围约束反映到验证结论中;
 - material 自适应学习记录 are supported by evidence and do not broaden the final claim beyond the observed boundary;
 - bug/root-cause claims have valid root-cause evidence;
 - final claim does not exceed tested or observed boundary.
@@ -23,7 +23,7 @@ Return `PASS_TO_FINAL` only when:
 
 Choose evidence by strongest material risk:
 
-- localized/read-only/low blast radius: diff review plus focused check or direct evidence may be enough;
+- 局部 / 只读 / 低影响范围: 变更差异复核加聚焦检查或直接证据通常足够;
 - behavior, API, data, or user-visible change: relevant automated test, runtime probe, integration evidence, or explicit substitute is needed;
 - migration, security, compliance, production, tenant, data repair, or irreversible claim: environment-specific or independently reviewable final-state evidence is needed;
 - missing environment/tool/data: narrow the claim, return `NEXT_ITERATION`, or return `BLOCKED`.

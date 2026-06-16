@@ -7,7 +7,7 @@ Persist the full model at `.alpha-goal/YYYYMMDD-<slug>/system-model.md` by defau
 - 标题:
 - 日期 / slug:
 - 系统边界:
-  - 被控对象 / plant:
+  - 被控对象:
   - 环境:
   - 外部参与方:
   - 所有权边界:
@@ -72,7 +72,7 @@ Persist the full model at `.alpha-goal/YYYYMMDD-<slug>/system-model.md` by defau
 - 台账更新:
   - 控制状态路径:
   - 产物路径:
-  - Schema 辅助索引路径:
+  - 结构化索引路径:
   - 模型变更:
   - 残余模型不确定性:
   - 下一路由:

@@ -56,7 +56,7 @@ Persist the full record at `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md` b
 - 台账更新:
   - 控制状态路径:
   - 产物路径:
-  - Schema 辅助索引路径:
+  - 结构化索引路径:
   - 综合状态变更:
   - 下一路由:
 - 路由:

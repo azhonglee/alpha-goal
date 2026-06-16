@@ -30,7 +30,7 @@ Use this full schema for formal acceptance records, merge-ready or ship-ready ju
 - 声明边界:
 - 风险 / 证据复核:
 - 已运行新鲜检查:
-- Diff / 范围复核:
+- 变更差异 / 范围复核:
 - 反馈复核:
 - 判断:
 - 未解决缺口:
@@ -39,7 +39,7 @@ Use this full schema for formal acceptance records, merge-ready or ship-ready ju
 - 台账更新:
   - 控制状态路径:
   - 产物路径:
-  - Schema 辅助索引路径:
+  - 结构化索引路径:
   - 结论:
   - 下一路由:
 ```

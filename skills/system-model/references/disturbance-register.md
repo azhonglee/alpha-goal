@@ -2,7 +2,7 @@
 
 Use a 扰动登记 when external change, hidden coupling, unreliable tooling, unclear ownership, or environmental drift can change the route, evidence floor, or safety boundary.
 
-If material disturbances exist, output a clearly labeled `扰动登记:` block. If none exist, state `扰动登记: none material`. Do not replace the register with an unlabeled prose risk list.
+If material disturbances exist, output a clearly labeled `扰动登记:` block. If none exist, state `扰动登记: 无实质项`. Do not replace the register with an unlabeled prose risk list.
 
 ```text
 扰动登记:

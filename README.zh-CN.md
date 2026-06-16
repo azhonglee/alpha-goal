@@ -75,11 +75,11 @@ Alpha Goal 把每个请求当作一个控制系统来处理：
 | 控制论概念 | 在 Alpha Goal 中的含义 |
 | --- | --- |
 | 参考输入 / reference | `goal-contract` 生成的目标、验收标准和最终声明边界 |
-| 被控对象 / plant | 代码库、产品、文档、数据流、运行环境或组织流程 |
+| 被控对象 | 代码库、产品、文档、数据流、运行环境或组织流程 |
 | 状态变量 / state | 需求清晰度、实现状态、测试状态、风险、证据覆盖率和 blocker |
 | 观测器 / observer | repo 快照、diff、测试、日志、运行探针、截图、人工反馈和 review 意见 |
 | 控制器 / actuator | `control-loop` 执行的有界改动、诊断、修复、加固或只读探针 |
-| 控制律 / control law | target error、control variable、expected effect、sensor threshold、feedback latency/noise、confidence、damping/containment 和 fallback action |
+| 控制律 | 目标误差、控制变量、预期效果、传感器阈值、反馈延迟 / 噪声、置信度、阻尼 / 影响范围约束和失败处理 |
 | 比较器 / comparator | `evidence-verify` 对目标、证据和最终声明的误差判定 |
 | 状态记忆 / memory | `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 中的 闭环台账，记录 reference、state、error、action、feedback 和 next route |
 | 指标交接 / indicator handoff | 把定性目标转成 metric/proxy、sensor、threshold 和 evidence boundary |

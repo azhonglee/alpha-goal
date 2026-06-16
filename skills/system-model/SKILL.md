@@ -45,11 +45,11 @@ Set boundary -> Identify state and signals -> Check observability/controllabilit
 
 Define the system of interest:
 
-- controlled object / plant;
+- controlled object;
 - external actors and environment;
 - interfaces crossing the boundary;
 - ownership boundary: repo, worktree, submodule, team, data owner, or product surface;
-- controller hierarchy: global controller, local controllers, coordination boundary, or none material;
+- controller hierarchy: global controller, local controllers, coordination boundary, or 无实质项;
 - time boundary: current behavior, migration phase, release window, incident window, or historical state.
 
 If a ledger exists, compare its latest route, plant/current-state assumptions, and next action to observed facts. Mark stale assumptions before routing back to `goal-contract`, `alpha-goal`, or `control-loop`.
@@ -81,11 +81,11 @@ Ask:
 Classify sensor quality:
 
 ```text
-Sensor quality: strong | adequate | weak | blocked
-Reason:
-Freshness:
-Boundary crossed:
-Claim supported:
+传感器质量: 强 | 足够 | 弱 | 阻塞
+理由:
+新鲜度:
+已跨越边界:
+支持的声明:
 ```
 
 ### 4. Check controllability
@@ -102,15 +102,15 @@ Ask:
 Classify control quality:
 
 ```text
-Control quality: strong | adequate | weak | blocked
-Allowed actuators:
-Forbidden actuators:
-User-owned decisions:
+可控性质量: 强 | 足够 | 弱 | 阻塞
+允许的执行器:
+禁止的执行器:
+用户自有决策:
 ```
 
 ### 5. Map coupling and disturbances
 
-Create a clearly labeled 控制器层级 / Coordination Map when multiple local controllers can affect the same global objective. Load `references/controller-hierarchy.md` when controller ownership, arbitration, or escalation is unclear.
+Create a clearly labeled 控制器层级（协同图）when multiple local controllers can affect the same global objective. Load `references/controller-hierarchy.md` when controller ownership, arbitration, or escalation is unclear.
 
 ```text
 控制器层级:
@@ -122,7 +122,7 @@ Create a clearly labeled 控制器层级 / Coordination Map when multiple local 
 - 推荐协同路由:
 ```
 
-Do not collapse material multi-controller relationships into a prose coordination section. A 控制模型 is incomplete if it names multiple local controllers that can affect one global objective but does not either emit a `控制器层级:` block or explicitly state `控制器层级: none material`.
+Do not collapse material multi-controller relationships into a prose coordination section. A 控制模型 is incomplete if it names multiple local controllers that can affect one global objective but does not either emit a `控制器层级:` block or explicitly state `控制器层级: 无实质项`.
 
 Create a compact coupling map. Use a matrix only when it clarifies risk.
 
@@ -150,7 +150,7 @@ Create a clearly labeled 扰动登记 for material disturbances. Load `reference
   - 负责人或决策边界:
 ```
 
-Do not collapse material disturbances into a prose risk list. A 控制模型 is incomplete if it names material disturbances but does not either emit a 扰动登记 or explicitly state `扰动登记: none material`.
+Do not collapse material disturbances into a prose risk list. A 控制模型 is incomplete if it names material disturbances but does not either emit a 扰动登记 or explicitly state `扰动登记: 无实质项`.
 
 High-impact or unknown-impact disturbances must have a sensor, containment, and route trigger before routing to `control-loop`.
 
@@ -206,7 +206,7 @@ TUI 摘要:
 ```text
 控制模型:
 - 系统边界:
-- 被控对象 / plant:
+- 被控对象:
 - 环境与外部参与方:
 - 接口:
 - 状态变量:
@@ -241,7 +241,7 @@ TUI 摘要:
 - 稳定性条件:
 - 缺失信息:
 - 模型充分性: sufficient | sufficient with narrowed claim | insufficient | blocked
-- 台账更新: `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 路径、产物路径、可选 Schema 辅助索引路径、模型变更、残余模型不确定性、下一路由，或明确的无法写入原因
+- 台账更新: `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 路径、产物路径、可选结构化索引路径、模型变更、残余模型不确定性、下一路由，或明确的无法写入原因
 - 推荐路由: goal-contract | control-loop | evidence-verify | decision-synthesis | blocker
 ```
 
