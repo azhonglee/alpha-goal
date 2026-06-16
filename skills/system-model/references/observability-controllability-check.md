@@ -21,7 +21,7 @@
 - 哪些扰动可能让模型、路由、证据下限或最终声明失效？
 - 哪个传感器能在行动前或行动后立即检测该扰动？
 - 哪些控制措施能阻止扰动扩大影响范围？
-- 哪些路由触发条件会把工作送到 `goal-contract`、`system-model`、`decision-synthesis`、用户或 blocker？
+- 哪些路由触发条件会把工作送到 `goal-contract`、`system-model`、`decision-synthesis`、用户或阻塞项？
 
 ## 评级
 

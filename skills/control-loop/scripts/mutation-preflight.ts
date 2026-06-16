@@ -42,14 +42,14 @@ section("当前目录");
 console.log(currentDir);
 
 if (!commandSucceeds("git", ["--version"])) {
-  section("git");
+  section("Git 状态");
   console.log("git: 未找到");
   process.exit(0);
 }
 
 if (!commandSucceeds("git", ["rev-parse", "--is-inside-work-tree"])) {
-  section("git");
-  console.log("inside_work_tree: no");
+  section("Git 状态");
+  console.log("git 工作树: 否");
   process.exit(0);
 }
 
@@ -57,45 +57,45 @@ const root = commandOutput("git", ["rev-parse", "--show-toplevel"]).trim();
 const branch = commandOutput("git", ["branch", "--show-current"]).trim();
 
 section("git 根目录");
-console.log(root || "<unknown>");
+console.log(root || "<未知>");
 
 section("分支");
-console.log(branch || "<detached-or-unknown>");
+console.log(branch || "<游离 HEAD 或未知>");
 
 section("默认分支提示");
 const remoteHead = commandOutput("git", ["symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD"]).trim();
-console.log(`origin_head: ${remoteHead || "<unknown>"}`);
+console.log(`远端默认分支: ${remoteHead || "<未知>"}`);
 if (["main", "master", "trunk"].includes(branch)) {
-  console.log("primary_branch_name_risk: yes");
+  console.log("主分支名风险: 是");
 } else if (!branch) {
-  console.log("primary_branch_name_risk: unknown-detached");
+  console.log("主分支名风险: 未知，当前可能是游离 HEAD");
 } else {
-  console.log("primary_branch_name_risk: no");
+  console.log("主分支名风险: 否");
 }
 
 section("status --short");
 printCommand("git", ["status", "--short"]);
 
 section("worktree 列表");
-printCommand("git", ["worktree", "list"]);
+printWorktreeList();
 
 section("检出目录分类");
 const commonDir = commandOutput("git", ["rev-parse", "--git-common-dir"]).trim();
 if (root && fs.existsSync(path.join(root, ".git")) && fs.statSync(path.join(root, ".git")).isFile()) {
-  console.log("linked_worktree: yes");
+  console.log("关联 worktree: 是");
 } else {
-  console.log("linked_worktree: no");
+  console.log("关联 worktree: 否");
 }
 if (root && commonDir) {
   const commonAbs = path.resolve(root, commonDir);
-  console.log(`git_common_dir: ${fs.existsSync(commonAbs) ? fs.realpathSync(commonAbs) : commonDir}`);
+  console.log(`git 公共目录: ${fs.existsSync(commonAbs) ? fs.realpathSync(commonAbs) : commonDir}`);
 }
-console.log("declared_isolated_edit_path: 从已批准上下文手工记录");
-console.log("primary_checkout_risk: 根据分支、linked_worktree、worktree 列表和项目规则推断");
+console.log("已声明隔离编辑路径: 从已批准上下文手工记录");
+console.log("主检出区风险: 根据分支、关联 worktree、worktree 列表和项目规则推断");
 if (/(^|\/)\.worktrees(\/|$)|(^|\/)worktrees(\/|$)/.test(root)) {
-  console.log("worktree_path_hint: 当前根路径包含 worktrees 片段");
+  console.log("worktree 路径提示: 当前根路径包含 worktrees 片段");
 } else {
-  console.log("worktree_path_hint: 未检测到默认 worktrees 片段");
+  console.log("worktree 路径提示: 未检测到默认 worktrees 片段");
 }
 
 section("忽略规则检查");
@@ -103,7 +103,7 @@ if (root && isDirectory(root)) {
   for (const candidate of [worktreeCheckPath, scratchCheckPath]) {
     const ignored = commandSucceeds("git", ["check-ignore", "-q", candidate], { cwd: root });
     if (ignored) {
-      console.log(`${candidate}: ignored`);
+      console.log(`${candidate}: 已忽略`);
     } else if (candidate.startsWith(".alpha-goal/")) {
       console.log(`${candidate}: 未被忽略；写流程产物前先把 .alpha-goal/ 加入仓库根目录 .gitignore`);
     } else {
@@ -111,7 +111,7 @@ if (root && isDirectory(root)) {
     }
   }
 } else {
-  console.log("<unknown root>");
+  console.log("<未知根目录>");
 }
 
 section("祖先规则文件");
@@ -120,7 +120,7 @@ if (root && isDirectory(root)) {
     console.log(file);
   }
 } else {
-  console.log("<unknown root>");
+  console.log("<未知根目录>");
 }
 
 if (fullScan) {
@@ -130,7 +130,7 @@ if (fullScan) {
       console.log(file);
     }
   } else {
-    console.log("<unknown root>");
+    console.log("<未知根目录>");
   }
 } else {
   section("本地规则文件：已跳过完整扫描");
@@ -143,7 +143,7 @@ if (root && isDirectory(root)) {
     console.log(file);
   }
 } else {
-  console.log("<unknown root>");
+  console.log("<未知根目录>");
 }
 
 section("子模块");
@@ -151,9 +151,9 @@ const submodules = commandOutput("git", ["submodule", "status"]).trimEnd();
 console.log(submodules || "<无或不可用>");
 
 section("需手工判断的预检缺口");
-console.log("primary_checkout: 根据 worktree 列表、分支 / 默认分支提示和项目规则推断");
-console.log("isolated_edit_path: 非主检出区、位于已批准归属边界内、被忽略或外部路径，且改动前已记录时有效");
-console.log("mutation_allowed: 根据目标契约、系统模型、项目规则、脏状态、归属和证据需求判断");
+console.log("主检出区: 根据 worktree 列表、分支 / 默认分支提示和项目规则推断");
+console.log("隔离编辑路径: 非主检出区、位于已批准归属边界内、被忽略或外部路径，且改动前已记录时有效");
+console.log("变更是否允许: 根据目标契约、系统模型、项目规则、脏状态、归属和证据需求判断");
 
 section("提醒");
 console.log("本脚本只读。它报告事实和候选路径检查，不代替安全改动决策。");
@@ -173,6 +173,18 @@ function printCommand(command: string, args: string[], options: { cwd?: string }
   if (result.stderr) {
     process.stderr.write(result.stderr);
   }
+}
+
+function printWorktreeList(): void {
+  const output = commandOutput("git", ["worktree", "list"]);
+  process.stdout.write(localizeGitWorktreeList(output));
+}
+
+function localizeGitWorktreeList(output: string): string {
+  return output
+    .replace(/ prunable/g, " 可清理")
+    .replace(/\(detached HEAD\)/g, "(游离 HEAD)")
+    .replace(/\(bare\)/g, "(裸仓库)");
 }
 
 function commandOutput(command: string, args: string[], options: { cwd?: string } = {}): string {

@@ -1,5 +1,5 @@
 #!/usr/bin/env -S npx --yes tsx
-// Lightweight validation for a local Agent Skills suite.
+// 本地 Agent Skills 套件的轻量校验。
 
 import fs from "node:fs";
 import os from "node:os";
@@ -303,7 +303,7 @@ const RUNTIME_SIDECAR_NEGATIVE_CASES: Array<[string, string]> = [
   ["divergent-reference-id", "运行态结构化索引必须共享同一个 reference_id"],
   ["missing-artifact-path", "结构化索引缺少必填键 \"artifact_path\""],
   ["missing-reference-id", "到达行动或最终路由的运行态结构化索引必须共享一个有意义的 reference_id"],
-  ["stage-decision-policy", "goal-contract sidecar stage_decision must be one of"],
+  ["stage-decision-policy", "goal-contract 结构化索引 stage_decision 必须是下列值之一"],
   [
     "synthesis-control-loop-without-contract",
     "路由到 control-loop 需要先前已批准的 goal-contract 结构化索引",
@@ -387,7 +387,7 @@ type StructuredBlockTest = {
 
 const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
   [
-    "ambiguous requirement can become a bounded 目标契约",
+    "模糊需求可以形成有边界的目标契约",
     "skills/goal-contract/SKILL.md",
     [
       "目标契约",
@@ -404,7 +404,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     ],
   ],
   [
-    "unclear system boundary routes through control modeling",
+    "不清晰的系统边界会先进入控制建模",
     "skills/system-model/SKILL.md",
     [
       "系统边界",
@@ -450,7 +450,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     ],
   ],
   [
-    "insufficient evidence routes to next iteration instead of final",
+    "证据不足时路由到下一轮而不是最终声明",
     "skills/evidence-verify/SKILL.md",
     [
       "证据覆盖",
@@ -463,7 +463,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     ],
   ],
   [
-    "complex multi-party conflict uses human-machine synthesis rounds",
+    "多方复杂冲突使用人机综合轮次",
     "skills/decision-synthesis/SKILL.md",
     [
       "综合轮次",
@@ -479,7 +479,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     ],
   ],
   [
-    "router preserves closed-loop state and disturbance handling",
+    "路由器保留闭环状态和扰动处理",
     "skills/alpha-goal/SKILL.md",
     [
       "闭环台账",
@@ -498,7 +498,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     ],
   ],
   [
-    "claim boundary prevents overbroad final claims",
+    "声明边界防止最终声明过宽",
     "skills/evidence-verify/SKILL.md",
     [
       "声明边界",
@@ -508,7 +508,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     ],
   ],
   [
-    "closed-loop ledger records cross-stage control memory",
+    "闭环台账记录跨阶段控制记忆",
     "skills/alpha-goal/references/closed-loop-ledger.md",
     [
       "默认行为",
@@ -538,11 +538,11 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "执行检查",
       "默认使用带中文标题",
       "不展示多语言模板",
-      "原始内部 控制律 块",
+      "原始内部控制律块",
     ],
   ],
   [
-    "task-scoped artifact layout is explicit and complete",
+    "任务级产物布局明确且完整",
     "skills/alpha-goal/references/artifact-layout.md",
     [
       ".alpha-goal/YYYYMMDD-<slug>/",
@@ -560,7 +560,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     ],
   ],
   [
-    "cybernetic conformance is machine-checkable",
+    "控制论一致性可由机器检查",
     "skills/alpha-goal/references/cybernetic-conformance.md",
     [
       "状态迁移",
@@ -577,19 +577,19 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     ],
   ],
   [
-    "disturbance register has robust monitoring and containment fields",
+    "扰动记录包含稳健的监控与约束字段",
     "skills/system-model/references/disturbance-register.md",
     [
       "可能性",
       "影响",
       "传感器",
-      "约束措施",
+      "控制措施",
       "路由触发条件",
       "无实质项",
     ],
   ],
   [
-    "synthesis round combines judgment, evidence, metrics, and decisions",
+    "综合轮次整合判断、证据、指标和决策",
     "skills/decision-synthesis/references/synthesis-round.md",
     [
       "人类 / 专家判断",
@@ -602,7 +602,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     ],
   ],
   [
-    "indicator handoff turns qualitative goals into evidence signals",
+    "指标转译把定性目标变成证据信号",
     "skills/goal-contract/references/indicator-handoff.md",
     [
       "操作化定义",
@@ -614,7 +614,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     ],
   ],
   [
-    "controller hierarchy maps local controllers to global objective",
+    "控制器层级把局部控制器映射到全局目标",
     "skills/system-model/references/controller-hierarchy.md",
     [
       "全局控制器",
@@ -627,7 +627,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     ],
   ],
   [
-    "adaptive learning records reusable control corrections",
+    "自适应学习记录可复用的控制修正",
     "skills/control-loop/references/adaptive-learning.md",
     [
       "学习触发条件",
@@ -639,7 +639,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     ],
   ],
   [
-    "control law captures dynamics and stability guards",
+    "控制律捕获动态与稳定性保护",
     "skills/control-loop/references/control-law.md",
     [
       "内部结构",
@@ -660,7 +660,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     ],
   ],
   [
-    "system model propagates dynamic control law fields",
+    "系统模型传递动态控制律字段",
     "skills/system-model/references/control-model-schema.md",
     [
       "反馈延迟",
@@ -671,7 +671,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     ],
   ],
   [
-    "control loop preserves dynamic control law fields",
+    "控制循环保留动态控制律字段",
     "skills/control-loop/SKILL.md",
     [
       "执行检查",
@@ -693,7 +693,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     ],
   ],
   [
-    "evidence verify checks dynamic control law fields",
+    "证据验证检查动态控制律字段",
     "skills/evidence-verify/SKILL.md",
     [
       "反馈延迟",
@@ -704,7 +704,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
     ],
   ],
   [
-    "meta-synthesis hall operationalizes qualitative to quantitative convergence",
+    "综合研判工作台把定性判断操作化为量化收敛",
     "skills/decision-synthesis/references/meta-synthesis-hall.md",
     [
       "综合研判工作台",
@@ -720,7 +720,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
 
 const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
   {
-    name: "goal contract schema keeps executable handoff fields",
+    name: "目标契约结构保留可执行交接字段",
     path: "skills/goal-contract/SKILL.md",
     anchor: "目标契约结构:",
     required_terms: [
@@ -734,7 +734,7 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
     ],
   },
   {
-    name: "system model full schema keeps plant sensors and control boundaries",
+    name: "系统模型完整结构保留被控对象、传感器和控制边界",
     path: "skills/system-model/SKILL.md",
     anchor: "完整模型:",
     required_terms: [
@@ -749,7 +749,7 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
     ],
   },
   {
-    name: "iteration record preserves route vocabulary",
+    name: "迭代记录保留路由词汇",
     path: "skills/control-loop/references/iteration-record-schema.md",
     anchor: "## 结论词汇",
     required_terms: [
@@ -762,7 +762,7 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
     ],
   },
   {
-    name: "control loop execution check keeps user-facing table fields",
+    name: "控制循环执行检查保留面向用户的表格字段",
     path: "skills/control-loop/SKILL.md",
     anchor: "TUI 执行前检查:",
     block_scope: "section",
@@ -779,7 +779,7 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
     ],
   },
   {
-    name: "control law TUI projection keeps localized table fields",
+    name: "控制律 TUI 投影保留本地化表格字段",
     path: "skills/control-loop/references/control-law.md",
     anchor: "## 界面投影",
     block_scope: "section",
@@ -798,7 +798,7 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
     ],
   },
   {
-    name: "control law internal schema separates sidecar and chat display",
+    name: "控制律内部结构区分结构化索引和聊天展示",
     path: "skills/control-loop/references/control-law.md",
     anchor: "## 内部结构",
     block_scope: "section",
@@ -806,11 +806,11 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
       "内部产物语法",
       "不是默认 TUI 形态",
       "结构化索引是机器可读的摘要与索引",
-      "不要把结构化索引文件当成完整 控制律",
+      "不要把结构化索引文件当成完整控制律",
     ],
   },
   {
-    name: "control law internal example is not default TUI",
+    name: "控制律内部示例不是默认 TUI",
     path: "skills/control-loop/references/control-law.md",
     anchor: "## 内部产物示例",
     block_scope: "section",
@@ -822,7 +822,7 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
     ],
   },
   {
-    name: "verification verdict preserves final comparator vocabulary",
+    name: "验证结论保留最终比较器词汇",
     path: "skills/evidence-verify/references/verification-verdict-schema.md",
     anchor: "## 结论",
     required_terms: [
@@ -834,7 +834,7 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
     ],
   },
   {
-    name: "decision synthesis route rules preserve mutation guard",
+    name: "决策综合路由规则保留变更闸门",
     path: "skills/decision-synthesis/SKILL.md",
     anchor: "### 7. 路由",
     required_terms: [
@@ -849,13 +849,13 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
 
 const DEFAULT_TUI_PROJECTION_GUARDS = [
   {
-    name: "control loop pre-action TUI",
+    name: "控制循环行动前 TUI",
     path: "skills/control-loop/SKILL.md",
     anchor: "TUI 执行前检查:",
     end_anchor: "只有存在多个独立循环",
   },
   {
-    name: "control law TUI projection",
+    name: "控制律 TUI 投影",
     path: "skills/control-loop/references/control-law.md",
     anchor: "## 界面投影",
     end_anchor: "## 内部结构",
@@ -999,7 +999,7 @@ const LEGACY_OUTPUT_TITLE_LINE_PATTERNS: Array<[string, RegExp]> = [
 
 const FIXTURE_CONTRACT_TESTS = [
   {
-    name: "complex migration conflict uses synthesis and indicator handoff",
+    name: "复杂迁移冲突使用综合研判和指标转译",
     prompt: "多团队迁移目标、风险、窗口、成功指标冲突，先综合研判。",
     prompt_terms: ["多团队", "目标", "风险", "成功指标", "冲突", "综合研判"],
     expected_route: "goal-contract",
@@ -1012,7 +1012,7 @@ const FIXTURE_CONTRACT_TESTS = [
     route_terms: ["user", "goal-contract", "system-model", "blocker"],
   },
   {
-    name: "qualitative objective becomes measurable contract evidence",
+    name: "定性目标转成可测契约证据",
     prompt: "把用户体验更稳定转成可验证 目标契约。",
     prompt_terms: ["用户体验", "稳定", "可验证", "目标契约"],
     expected_route: "control-loop",
@@ -1025,7 +1025,7 @@ const FIXTURE_CONTRACT_TESTS = [
     route_terms: ["control-loop", "system-model", "evidence-verify", "阻塞"],
   },
   {
-    name: "multi-controller system maps hierarchy before mutation",
+    name: "多控制器系统在变更前映射层级",
     prompt: "多个团队和模块都能改变同一上线目标，先建模。",
     prompt_terms: ["多个团队", "模块", "上线目标", "建模"],
     expected_route: "goal-contract",
@@ -1038,7 +1038,7 @@ const FIXTURE_CONTRACT_TESTS = [
     route_terms: ["goal-contract", "control-loop", "decision-synthesis", "blocker"],
   },
   {
-    name: "feedback mismatch creates adaptive learning before next loop",
+    name: "反馈不匹配会在下一轮前生成自适应学习",
     prompt: "上轮控制律阈值没命中，但方向有效，继续下一轮。",
     prompt_terms: ["控制律", "阈值", "没命中", "方向有效", "下一轮"],
     expected_route: "control-loop",
@@ -1056,7 +1056,7 @@ const FIXTURE_CONTRACT_TESTS = [
     ],
   },
   {
-    name: "verification checks learned thresholds and indicator evidence",
+    name: "验证检查已学习阈值和指标证据",
     prompt: "检查当前声明是否可以最终交付。",
     prompt_terms: ["检查", "声明", "最终交付"],
     expected_route: "final",
@@ -1079,7 +1079,7 @@ type Frontmatter = Record<string, string>;
 function parseFrontmatter(text: string): Frontmatter {
   const match = text.match(FRONTMATTER_RE);
   if (!match) {
-    throw new Error("missing YAML frontmatter block");
+    throw new Error("缺少 YAML frontmatter 块");
   }
 
   const data: Frontmatter = {};
@@ -1093,19 +1093,19 @@ function parseFrontmatter(text: string): Frontmatter {
 
     const field = line.match(FIELD_RE);
     if (!field) {
-      throw new Error(`line ${lineno}: unsupported frontmatter syntax`);
+      throw new Error(`第 ${lineno} 行：不支持的 frontmatter 语法`);
     }
 
     const [, key, rawValue] = field;
     const value = rawValue.trim();
     if (!ALLOWED_FRONTMATTER_KEYS.has(key)) {
-      throw new Error(`line ${lineno}: unsupported frontmatter key ${JSON.stringify(key)}`);
+      throw new Error(`第 ${lineno} 行：不支持的 frontmatter key ${JSON.stringify(key)}`);
     }
     if (Object.hasOwn(data, key)) {
-      throw new Error(`line ${lineno}: duplicate frontmatter key ${JSON.stringify(key)}`);
+      throw new Error(`第 ${lineno} 行：重复的 frontmatter key ${JSON.stringify(key)}`);
     }
     if (!value) {
-      throw new Error(`line ${lineno}: empty frontmatter value for ${JSON.stringify(key)}`);
+      throw new Error(`第 ${lineno} 行：frontmatter 值为空 ${JSON.stringify(key)}`);
     }
 
     const quoted =
@@ -1113,7 +1113,7 @@ function parseFrontmatter(text: string): Frontmatter {
       value[0] === value[value.length - 1] &&
       (value[0] === "'" || value[0] === '"');
     if (!quoted && /:\s/.test(value)) {
-      throw new Error(`line ${lineno}: quote frontmatter value containing ': '`);
+      throw new Error(`第 ${lineno} 行：包含 ': ' 的 frontmatter 值必须加引号`);
     }
 
     data[key] = quoted ? value.slice(1, -1) : value;
@@ -1131,7 +1131,7 @@ export function main(args = process.argv.slice(2)): number {
   const warnings: string[] = [];
 
   if (!isDirectory(skills)) {
-    errors.push(`missing skills directory: ${skills}`);
+    errors.push(`缺少 skills 目录: ${skills}`);
     printReport(root, errors, warnings);
     return 1;
   }
@@ -1139,10 +1139,10 @@ export function main(args = process.argv.slice(2)): number {
   for (const bad of walk(root)) {
     const basename = path.basename(bad);
     if (basename === "__MACOSX" && isDirectory(bad)) {
-      errors.push(`macOS metadata directory found: ${relative(root, bad)}`);
+      errors.push(`发现 macOS 元数据目录: ${relative(root, bad)}`);
     }
     if (basename.startsWith("._") && isFile(bad)) {
-      errors.push(`macOS resource fork file found: ${relative(root, bad)}`);
+      errors.push(`发现 macOS 资源分叉文件: ${relative(root, bad)}`);
     }
   }
 
@@ -1153,18 +1153,18 @@ export function main(args = process.argv.slice(2)): number {
     .sort();
 
   if (skillDirs.length === 0) {
-    errors.push("no skill directories found");
+    errors.push("未发现技能目录");
   }
 
   const discoveredSkillNames = new Set(skillDirs.map((dir) => path.basename(dir)));
   for (const name of [...REQUIRED_SKILL_NAMES].sort()) {
     if (!discoveredSkillNames.has(name)) {
-      errors.push(`missing required skill directory: skills/${name}`);
+      errors.push(`缺少必需技能目录: skills/${name}`);
     }
   }
   for (const name of [...discoveredSkillNames].sort()) {
     if (!REQUIRED_SKILL_NAMES.has(name)) {
-      errors.push(`unexpected skill directory: skills/${name}`);
+      errors.push(`发现非预期技能目录: skills/${name}`);
     }
   }
 
@@ -1173,7 +1173,7 @@ export function main(args = process.argv.slice(2)): number {
     const skillName = path.basename(dir);
     const md = path.join(dir, "SKILL.md");
     if (!isFile(md)) {
-      errors.push(`${skillName}: missing SKILL.md`);
+      errors.push(`${skillName}: 缺少 SKILL.md`);
       continue;
     }
 
@@ -1182,30 +1182,30 @@ export function main(args = process.argv.slice(2)): number {
     try {
       frontmatter = parseFrontmatter(text);
     } catch (error) {
-      errors.push(`${skillName}: invalid SKILL.md frontmatter: ${errorMessage(error)}`);
+      errors.push(`${skillName}: SKILL.md frontmatter 无效: ${errorMessage(error)}`);
       continue;
     }
 
     const name = frontmatter.name;
     const desc = frontmatter.description;
     if (!name) {
-      errors.push(`${skillName}: SKILL.md frontmatter missing name`);
+      errors.push(`${skillName}: SKILL.md frontmatter 缺少 name`);
     }
     if (!desc) {
-      errors.push(`${skillName}: SKILL.md frontmatter missing description`);
+      errors.push(`${skillName}: SKILL.md frontmatter 缺少 description`);
     }
     if (name && name !== skillName) {
-      errors.push(`${skillName}: frontmatter name ${JSON.stringify(name)} does not match directory`);
+      errors.push(`${skillName}: frontmatter name ${JSON.stringify(name)} 与目录名不匹配`);
     }
     if (name && names.has(name)) {
-      errors.push(`duplicate skill name: ${name}`);
+      errors.push(`技能名重复: ${name}`);
     }
     if (name) {
       names.add(name);
     }
     if (desc && desc.length > 500) {
       warnings.push(
-        `${skillName}: description is long (${desc.length} chars); implicit routing may truncate it`,
+        `${skillName}: description 较长（${desc.length} 字符）；隐式路由可能截断`,
       );
     }
 
@@ -1220,7 +1220,7 @@ export function main(args = process.argv.slice(2)): number {
     for (const ref of references) {
       const relRef = `references/${path.basename(ref)}`;
       if (!text.includes(relRef)) {
-        errors.push(`${skillName}: reference is not discoverable from SKILL.md: ${relRef}`);
+        errors.push(`${skillName}: reference 未能从 SKILL.md 发现: ${relRef}`);
       }
     }
   }
@@ -1268,14 +1268,14 @@ function validateTypeScriptScriptSurface(root: string, errors: string[], warning
       continue;
     }
     if (!rel.endsWith(".ts")) {
-      errors.push(`script surface must be TypeScript only: ${rel}`);
+      errors.push(`脚本入口必须只使用 TypeScript: ${rel}`);
       continue;
     }
     const text = fs.readFileSync(file, "utf8");
     if (text.startsWith("#!")) {
       const mode = fs.statSync(file).mode;
       if ((mode & 0o100) === 0) {
-        warnings.push(`${rel} has a shebang but is not user-executable`);
+        warnings.push(`${rel} 带有 shebang 但不可由用户直接执行`);
       }
     }
   }
@@ -1284,16 +1284,16 @@ function validateTypeScriptScriptSurface(root: string, errors: string[], warning
 function validateInstallSurface(root: string, errors: string[]): void {
   const installScript = path.join(root, "scripts/install.sh");
   if (!isFile(installScript)) {
-    errors.push("missing install script: scripts/install.sh");
+    errors.push("缺少安装脚本: scripts/install.sh");
   } else {
-    runReadOnlyCheck(root, errors, "install script syntax", "bash", ["-n", "scripts/install.sh"]);
+    runReadOnlyCheck(root, errors, "安装脚本语法", "bash", ["-n", "scripts/install.sh"]);
   }
 
   const configTemplate = path.join(root, "templates/config.toml");
   if (!isFile(configTemplate)) {
-    errors.push("missing config template: templates/config.toml");
+    errors.push("缺少配置模板: templates/config.toml");
   } else {
-    runReadOnlyCheck(root, errors, "config template TOML parse", "python3", [
+    runReadOnlyCheck(root, errors, "配置模板 TOML 解析", "python3", [
       "-c",
       "import pathlib,tomllib; tomllib.loads(pathlib.Path('templates/config.toml').read_text())",
     ]);
@@ -1320,37 +1320,37 @@ function validateInstallSmoke(root: string, errors: string[]): void {
     });
 
     if (result.error) {
-      errors.push(`install smoke test: failed to run scripts/install.sh: ${result.error.message}`);
+      errors.push(`安装冒烟测试: 执行 scripts/install.sh 失败: ${result.error.message}`);
       return;
     }
     if (result.status !== 0) {
       const output = [result.stderr, result.stdout].filter(Boolean).join("\n").trim();
-      errors.push(`install smoke test: command failed${output ? `: ${output}` : ""}`);
+      errors.push(`安装冒烟测试: 命令失败${output ? `: ${output}` : ""}`);
       return;
     }
 
     const installed = path.join(tmpCodexHome, "skills", "alpha-goal");
     if (!isSymlink(installed)) {
-      errors.push(`install smoke test: installed alpha-goal is not a symlink: ${installed}`);
+      errors.push(`安装冒烟测试: 已安装的 alpha-goal 不是软链接: ${installed}`);
       return;
     }
 
     const target = fs.realpathSync(installed);
     const expectedTarget = fs.realpathSync(path.join(root, "skills"));
     if (target !== expectedTarget) {
-      errors.push(`install smoke test: alpha-goal symlink points to ${target}, expected ${expectedTarget}`);
+      errors.push(`安装冒烟测试: alpha-goal 软链接指向 ${target}，预期 ${expectedTarget}`);
     }
 
     for (const skillName of [...REQUIRED_SKILL_NAMES].sort()) {
       if (!isFile(path.join(installed, skillName, "SKILL.md"))) {
-        errors.push(`install smoke test: missing installed ${skillName}/SKILL.md through alpha-goal link`);
+        errors.push(`安装冒烟测试: alpha-goal 链接下缺少已安装的 ${skillName}/SKILL.md`);
       }
     }
     if (!isFile(path.join(tmpCodexHome, "AGENTS.md"))) {
-      errors.push("install smoke test: default install did not create AGENTS.md from template");
+      errors.push("安装冒烟测试: 默认安装未从模板创建 AGENTS.md");
     }
     if (!isFile(path.join(tmpCodexHome, "config.toml"))) {
-      errors.push("install smoke test: default install did not create config.toml from template");
+      errors.push("安装冒烟测试: 默认安装未从模板创建 config.toml");
     }
   } finally {
     fs.rmSync(tmpCodexHome, { recursive: true, force: true });
@@ -1369,19 +1369,19 @@ function runReadOnlyCheck(
     encoding: "utf8",
   });
   if (result.error) {
-    errors.push(`${label}: failed to run ${command}: ${result.error.message}`);
+    errors.push(`${label}: 执行 ${command} 失败: ${result.error.message}`);
     return;
   }
   if (result.status !== 0) {
     const output = [result.stderr, result.stdout].filter(Boolean).join("\n").trim();
-    errors.push(`${label}: command failed${output ? `: ${output}` : ""}`);
+    errors.push(`${label}: 命令失败${output ? `: ${output}` : ""}`);
   }
 }
 
 function validateRuntimeArtifactIgnores(root: string, errors: string[]): void {
   const gitignore = path.join(root, ".gitignore");
   if (!isFile(gitignore)) {
-    errors.push("missing .gitignore with required .alpha-goal/ and .worktrees/ ignores");
+    errors.push("缺少 .gitignore，必须包含 .alpha-goal/ 和 .worktrees/ 忽略规则");
     return;
   }
 
@@ -1390,10 +1390,10 @@ function validateRuntimeArtifactIgnores(root: string, errors: string[]): void {
     .split(/\r?\n/)
     .map((line) => line.trim());
   if (!lines.includes(".alpha-goal/")) {
-    errors.push(".gitignore must include .alpha-goal/ for default ledger and runtime artifacts");
+    errors.push(".gitignore 必须包含 .alpha-goal/，用于默认台账和运行期产物");
   }
   if (!lines.includes(".worktrees/")) {
-    errors.push(".gitignore must include .worktrees/ before repository-local worktrees are used");
+    errors.push(".gitignore 必须包含 .worktrees/，才能使用仓库内 worktree");
   }
 }
 
@@ -1427,7 +1427,7 @@ function validateLegacyScriptReferences(root: string, errors: string[]): void {
     const text = fs.readFileSync(file, "utf8");
     for (const legacy of LEGACY_SCRIPT_REFERENCES) {
       if (text.includes(legacy)) {
-        errors.push(`${rel}: legacy non-TypeScript script reference remains: ${legacy}`);
+        errors.push(`${rel}: 仍残留旧的非 TypeScript 脚本引用: ${legacy}`);
       }
     }
   }
@@ -1442,7 +1442,7 @@ function validateLegacySkillReferences(root: string, errors: string[]): void {
     const text = fs.readFileSync(file, "utf8");
     for (const legacy of LEGACY_SKILL_REFERENCES) {
       if (text.includes(legacy)) {
-        errors.push(`${rel}: legacy skill reference remains: ${legacy}`);
+        errors.push(`${rel}: 仍残留旧技能引用: ${legacy}`);
       }
     }
   }
@@ -1457,7 +1457,7 @@ function validateLegacyArtifactPathReferences(root: string, errors: string[]): v
     const text = fs.readFileSync(file, "utf8");
     for (const legacy of LEGACY_ARTIFACT_PATH_REFERENCES) {
       if (text.includes(legacy)) {
-        errors.push(`${rel}: legacy artifact path remains: ${legacy}`);
+        errors.push(`${rel}: 仍残留旧产物路径: ${legacy}`);
       }
     }
   }
@@ -1484,7 +1484,7 @@ function validateTaskScopedArtifactPathShape(root: string, errors: string[]): vo
         continue;
       }
       errors.push(
-        `${rel}: .alpha-goal runtime artifact path must be task-scoped, found .alpha-goal/${segment}`,
+        `${rel}: .alpha-goal 运行期产物路径必须限定到任务目录，发现 .alpha-goal/${segment}`,
       );
     }
   }
@@ -1494,7 +1494,7 @@ function validateSchemaSidecarContract(root: string, errors: string[]): void {
   const rel = "skills/alpha-goal/references/cybernetic-conformance.md";
   const file = path.join(root, rel);
   if (!isFile(file)) {
-    errors.push(`schema sidecar contract: missing ${rel}`);
+    errors.push(`结构化索引契约缺少 ${rel}`);
     return;
   }
 
@@ -1514,18 +1514,18 @@ function validateSchemaSidecarContract(root: string, errors: string[]): void {
   }
 
   if (schema.$schema !== "https://json-schema.org/draft/2020-12/schema") {
-    errors.push(`${rel}: schema sidecar must declare JSON Schema draft 2020-12`);
+    errors.push(`${rel}: 结构化索引必须声明 JSON Schema draft 2020-12`);
   }
   if (schema.type !== "object") {
-    errors.push(`${rel}: schema sidecar root type must be object`);
+    errors.push(`${rel}: 结构化索引根类型必须是 object`);
   }
   if (schema.additionalProperties !== false) {
-    errors.push(`${rel}: schema sidecar must set additionalProperties to false`);
+    errors.push(`${rel}: 结构化索引必须把 additionalProperties 设为 false`);
   }
 
   validateExactStringSet(
     rel,
-    "schema sidecar required list",
+    "结构化索引必填键列表",
     schema.required,
     SIDECAR_REQUIRED_KEYS,
     errors,
@@ -1533,18 +1533,18 @@ function validateSchemaSidecarContract(root: string, errors: string[]): void {
 
   const properties = objectValue(schema.properties);
   if (!properties) {
-    errors.push(`${rel}: schema sidecar missing properties object`);
+    errors.push(`${rel}: 结构化索引缺少 properties 对象`);
     return;
   }
 
   for (const key of SIDECAR_REQUIRED_KEYS) {
     if (!Object.hasOwn(properties, key)) {
-      errors.push(`${rel}: schema sidecar properties omit ${JSON.stringify(key)}`);
+      errors.push(`${rel}: 结构化索引 properties 遗漏 ${JSON.stringify(key)}`);
     }
   }
   for (const key of Object.keys(properties)) {
     if (!SIDECAR_REQUIRED_KEY_SET.has(key)) {
-      errors.push(`${rel}: schema sidecar properties has unexpected key ${JSON.stringify(key)}`);
+      errors.push(`${rel}: 结构化索引 properties 包含非预期键 ${JSON.stringify(key)}`);
     }
   }
 
@@ -1580,7 +1580,7 @@ function validateSchemaSidecarContract(root: string, errors: string[]): void {
 function validateSchemaSidecarFixtures(root: string, errors: string[]): void {
   const dir = path.join(root, SIDECAR_FIXTURE_DIR);
   if (!isDirectory(dir)) {
-    errors.push(`schema sidecar fixtures: missing ${SIDECAR_FIXTURE_DIR}`);
+    errors.push(`结构化索引样例目录缺失: ${SIDECAR_FIXTURE_DIR}`);
     return;
   }
 
@@ -1594,7 +1594,7 @@ function validateSchemaSidecarFixtures(root: string, errors: string[]): void {
 
   for (const name of actualFiles) {
     if (!expectedFiles.has(name)) {
-      errors.push(`${SIDECAR_FIXTURE_DIR}/${name}: unexpected schema sidecar fixture`);
+      errors.push(`${SIDECAR_FIXTURE_DIR}/${name}: 非预期的结构化索引样例`);
     }
   }
 
@@ -1602,7 +1602,7 @@ function validateSchemaSidecarFixtures(root: string, errors: string[]): void {
     const rel = `${SIDECAR_FIXTURE_DIR}/${kind}.json`;
     const file = path.join(root, rel);
     if (!isFile(file)) {
-      errors.push(`schema sidecar fixtures: missing ${rel}`);
+      errors.push(`结构化索引样例缺失: ${rel}`);
       continue;
     }
 
@@ -1610,7 +1610,7 @@ function validateSchemaSidecarFixtures(root: string, errors: string[]): void {
     try {
       const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-        errors.push(`${rel}: schema sidecar fixture must be a JSON object`);
+        errors.push(`${rel}: 结构化索引样例必须是 JSON object`);
         continue;
       }
       fixture = parsed as Record<string, unknown>;
@@ -1629,32 +1629,32 @@ function validateSchemaSidecarFixtures(root: string, errors: string[]): void {
 function validateRuntimeSidecarFixtureSets(root: string, errors: string[]): void {
   const dir = path.join(root, RUNTIME_SIDECAR_FIXTURE_DIR);
   if (!isDirectory(dir)) {
-    errors.push(`runtime sidecar fixtures: missing ${RUNTIME_SIDECAR_FIXTURE_DIR}`);
+    errors.push(`运行期结构化索引样例目录缺失: ${RUNTIME_SIDECAR_FIXTURE_DIR}`);
     return;
   }
 
   const validRoot = path.join(dir, "valid");
   if (!isDirectory(validRoot)) {
-    errors.push(`runtime sidecar fixtures: missing ${RUNTIME_SIDECAR_FIXTURE_DIR}/valid`);
+    errors.push(`运行期结构化索引样例缺少 valid 目录: ${RUNTIME_SIDECAR_FIXTURE_DIR}/valid`);
   } else {
     const validCases = fixtureCaseDirs(validRoot);
     const expectedValidNames = new Set(RUNTIME_SIDECAR_VALID_CASES);
     for (const caseDir of validCases) {
       const name = path.basename(caseDir);
       if (!expectedValidNames.has(name)) {
-        errors.push(`${relative(root, caseDir)}: unexpected valid runtime sidecar fixture`);
+      errors.push(`${relative(root, caseDir)}: 非预期的 valid 运行期结构化索引样例`);
       }
     }
     for (const caseName of RUNTIME_SIDECAR_VALID_CASES) {
       const caseDir = path.join(validRoot, caseName);
       if (!isDirectory(caseDir)) {
-        errors.push(`runtime sidecar fixtures: missing valid case ${caseName}`);
+      errors.push(`运行期结构化索引样例缺少 valid case ${caseName}`);
         continue;
       }
       const localErrors = validateRuntimeSidecarFixtureCase(root, caseDir);
       if (localErrors.length > 0) {
         errors.push(
-          `${relative(root, caseDir)}: valid runtime sidecar fixture failed: ${localErrors.join("; ")}`,
+          `${relative(root, caseDir)}: valid 运行期结构化索引样例失败: ${localErrors.join("; ")}`,
         );
       }
     }
@@ -1662,7 +1662,7 @@ function validateRuntimeSidecarFixtureSets(root: string, errors: string[]): void
 
   const negativeRoot = path.join(dir, "negative");
   if (!isDirectory(negativeRoot)) {
-    errors.push(`runtime sidecar fixtures: missing ${RUNTIME_SIDECAR_FIXTURE_DIR}/negative`);
+    errors.push(`运行期结构化索引样例缺少 negative 目录: ${RUNTIME_SIDECAR_FIXTURE_DIR}/negative`);
     return;
   }
 
@@ -1670,22 +1670,22 @@ function validateRuntimeSidecarFixtureSets(root: string, errors: string[]): void
   for (const caseDir of fixtureCaseDirs(negativeRoot)) {
     const name = path.basename(caseDir);
     if (!expectedNegativeNames.has(name)) {
-      errors.push(`${relative(root, caseDir)}: unexpected negative runtime sidecar fixture`);
+      errors.push(`${relative(root, caseDir)}: 非预期的 negative 运行期结构化索引样例`);
     }
   }
 
   for (const [caseName, expectedError] of RUNTIME_SIDECAR_NEGATIVE_CASES) {
     const caseDir = path.join(negativeRoot, caseName);
     if (!isDirectory(caseDir)) {
-      errors.push(`runtime sidecar fixtures: missing negative case ${caseName}`);
+      errors.push(`运行期结构化索引样例缺少 negative case ${caseName}`);
       continue;
     }
 
     const localErrors = validateRuntimeSidecarFixtureCase(root, caseDir);
     if (!localErrors.some((error) => error.includes(expectedError))) {
-      const actual = localErrors.length > 0 ? localErrors.join("; ") : "no errors";
+      const actual = localErrors.length > 0 ? localErrors.join("; ") : "无错误";
       errors.push(
-        `${relative(root, caseDir)}: expected negative runtime sidecar error containing ${JSON.stringify(expectedError)}, got ${actual}`,
+        `${relative(root, caseDir)}: negative 运行期结构化索引样例应包含错误 ${JSON.stringify(expectedError)}，实际为 ${actual}`,
       );
     }
   }
@@ -1699,7 +1699,7 @@ function validateRuntimeSidecarFixtureCase(root: string, caseDir: string): strin
     .sort();
 
   if (files.length === 0) {
-    localErrors.push(`${relative(root, caseDir)}: runtime fixture case has no JSON sidecars`);
+    localErrors.push(`${relative(root, caseDir)}: 运行期样例 case 没有 JSON 结构化索引`);
     return localErrors;
   }
 
@@ -1708,35 +1708,35 @@ function validateRuntimeSidecarFixtureCase(root: string, caseDir: string): strin
     const fixtureRel = relative(caseDir, file);
     const match = fixtureRel.match(/^([^/]+)\/schema\/([^/]+\.json)$/);
     if (!match) {
-      localErrors.push(`${rel}: runtime fixture sidecar must be under <task_slug>/schema/`);
+      localErrors.push(`${rel}: 运行期样例结构化索引必须位于 <task_slug>/schema/ 下`);
       continue;
     }
 
     const taskSlug = match[1];
     if (!SIDECAR_TASK_SLUG_RE.test(taskSlug)) {
-      localErrors.push(`${rel}: runtime fixture task directory must match YYYYMMDD-<slug>`);
+      localErrors.push(`${rel}: 运行期样例任务目录必须匹配 YYYYMMDD-<slug>`);
     }
 
     let sidecar: Record<string, unknown>;
     try {
       const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-        localErrors.push(`${rel}: runtime fixture sidecar must be a JSON object`);
+        localErrors.push(`${rel}: 运行期样例结构化索引必须是 JSON object`);
         continue;
       }
       sidecar = parsed as Record<string, unknown>;
     } catch (error) {
-      localErrors.push(`${rel}: invalid runtime fixture sidecar JSON: ${errorMessage(error)}`);
+      localErrors.push(`${rel}: 运行期样例结构化索引 JSON 无效: ${errorMessage(error)}`);
       continue;
     }
 
     const artifactKind = stringValue(sidecar.artifact_kind);
     if (!artifactKind || !SIDECAR_ARTIFACT_KINDS.includes(artifactKind)) {
-      localErrors.push(`${rel}: runtime fixture sidecar has unknown artifact_kind`);
+      localErrors.push(`${rel}: 运行期样例结构化索引的 artifact_kind 未知`);
       continue;
     }
     if (!sidecarFilenameMatchesKind(artifactKind, path.basename(file))) {
-      localErrors.push(`${rel}: runtime fixture filename does not match artifact_kind ${artifactKind}`);
+      localErrors.push(`${rel}: 运行期样例文件名与 artifact_kind ${artifactKind} 不匹配`);
     }
 
     validateConcreteSidecarFixture(rel, sidecar, artifactKind, localErrors, taskSlug);
@@ -1765,94 +1765,94 @@ function validateConcreteSidecarFixture(
   }
   for (const key of Object.keys(fixture)) {
     if (!SIDECAR_REQUIRED_KEY_SET.has(key)) {
-      errors.push(`${rel}: schema sidecar has unsupported key ${JSON.stringify(key)}`);
+      errors.push(`${rel}: 结构化索引包含不支持的键 ${JSON.stringify(key)}`);
     }
   }
 
   const artifactKind = stringValue(fixture.artifact_kind);
   if (!artifactKind) {
-    errors.push(`${rel}: artifact_kind must be a non-empty string`);
+    errors.push(`${rel}: artifact_kind 必须是非空字符串`);
   } else if (artifactKind !== expectedKind) {
-    errors.push(`${rel}: artifact_kind ${JSON.stringify(artifactKind)} must equal ${expectedKind}`);
+    errors.push(`${rel}: artifact_kind ${JSON.stringify(artifactKind)} 必须等于 ${expectedKind}`);
   }
 
   const taskSlug = stringValue(fixture.task_slug);
   if (!taskSlug) {
-    errors.push(`${rel}: task_slug must be a non-empty string`);
+    errors.push(`${rel}: task_slug 必须是非空字符串`);
   } else if (expectedTaskSlug && taskSlug !== expectedTaskSlug) {
-    errors.push(`${rel}: task_slug ${JSON.stringify(taskSlug)} must match sidecar directory ${expectedTaskSlug}`);
+    errors.push(`${rel}: task_slug ${JSON.stringify(taskSlug)} 必须匹配结构化索引目录 ${expectedTaskSlug}`);
   } else if (!SIDECAR_TASK_SLUG_RE.test(taskSlug)) {
-    errors.push(`${rel}: task_slug must match YYYYMMDD-<slug>, got ${JSON.stringify(taskSlug)}`);
+    errors.push(`${rel}: task_slug 必须匹配 YYYYMMDD-<slug>，实际为 ${JSON.stringify(taskSlug)}`);
   }
 
   const artifactPath = stringValue(fixture.artifact_path);
   if (!artifactPath) {
-    errors.push(`${rel}: artifact_path must be a non-empty string`);
+    errors.push(`${rel}: artifact_path 必须是非空字符串`);
   } else if (taskSlug && !artifactPath.startsWith(`.alpha-goal/${taskSlug}/`)) {
-    errors.push(`${rel}: artifact_path must stay under .alpha-goal/${taskSlug}/`);
+    errors.push(`${rel}: artifact_path 必须位于 .alpha-goal/${taskSlug}/ 下`);
   } else if (!artifactPath.endsWith(".md")) {
-    errors.push(`${rel}: artifact_path must point to the Markdown stage artifact`);
+    errors.push(`${rel}: artifact_path 必须指向 Markdown 阶段产物`);
   } else if (taskSlug && artifactKind && !artifactPathMatchesKind(artifactKind, taskSlug, artifactPath)) {
-    errors.push(`${rel}: artifact_path does not match artifact_kind ${artifactKind}`);
+    errors.push(`${rel}: artifact_path 与 artifact_kind ${artifactKind} 不匹配`);
   }
 
   const routeState = stringValue(fixture.route_state);
   if (!routeState || !SIDECAR_ROUTE_STATES.includes(routeState)) {
-    errors.push(`${rel}: route_state must be one of ${SIDECAR_ROUTE_STATES.join(", ")}`);
+    errors.push(`${rel}: route_state 必须是下列值之一: ${SIDECAR_ROUTE_STATES.join(", ")}`);
   }
 
   const priorRoute = nullableStringValue(fixture.prior_route);
   if (priorRoute === undefined) {
-    errors.push(`${rel}: prior_route must be a route string or null`);
+    errors.push(`${rel}: prior_route 必须是路由字符串或 null`);
   } else if (priorRoute !== null && !isRouteToken(priorRoute)) {
-    errors.push(`${rel}: prior_route has unknown route token ${JSON.stringify(priorRoute)}`);
+    errors.push(`${rel}: prior_route 包含未知路由 token ${JSON.stringify(priorRoute)}`);
   }
 
   const nextRoute = nullableStringValue(fixture.next_route);
   if (!nextRoute) {
-    errors.push(`${rel}: next_route must be a non-empty route string`);
+    errors.push(`${rel}: next_route 必须是非空路由字符串`);
   } else if (!isRouteToken(nextRoute)) {
-    errors.push(`${rel}: next_route has unknown route token ${JSON.stringify(nextRoute)}`);
+    errors.push(`${rel}: next_route 包含未知路由 token ${JSON.stringify(nextRoute)}`);
   }
 
   if (priorRoute && routeState && isRouteToken(priorRoute) && !canTransition(priorRoute, routeState)) {
-    errors.push(`${rel}: invalid prior transition ${priorRoute} -> ${routeState}`);
+    errors.push(`${rel}: prior transition 无效 ${priorRoute} -> ${routeState}`);
   }
   if (routeState && nextRoute && isRouteToken(nextRoute) && !canTransition(routeState, nextRoute)) {
-    errors.push(`${rel}: invalid next transition ${routeState} -> ${nextRoute}`);
+    errors.push(`${rel}: next transition 无效 ${routeState} -> ${nextRoute}`);
   }
 
   const evidenceBoundary = stringValue(fixture.evidence_boundary);
   if (!evidenceBoundary) {
-    errors.push(`${rel}: evidence_boundary must be a non-empty string`);
+    errors.push(`${rel}: evidence_boundary 必须是非空字符串`);
   } else if (!SIDECAR_EVIDENCE_BOUNDARIES.includes(evidenceBoundary)) {
-    errors.push(`${rel}: evidence_boundary has unsupported value ${JSON.stringify(evidenceBoundary)}`);
+    errors.push(`${rel}: evidence_boundary 包含不支持的值 ${JSON.stringify(evidenceBoundary)}`);
   }
 
   const stageDecision = stringValue(fixture.stage_decision);
   if (!stageDecision) {
-    errors.push(`${rel}: stage_decision must be a non-empty string`);
+    errors.push(`${rel}: stage_decision 必须是非空字符串`);
   } else if (!SIDECAR_STAGE_DECISIONS.includes(stageDecision)) {
-    errors.push(`${rel}: stage_decision has unsupported value ${JSON.stringify(stageDecision)}`);
+    errors.push(`${rel}: stage_decision 包含不支持的值 ${JSON.stringify(stageDecision)}`);
   } else if (nextRoute && !stageDecisionMatchesRoute(stageDecision, nextRoute)) {
-    errors.push(`${rel}: stage_decision ${stageDecision} does not support next_route ${nextRoute}`);
+    errors.push(`${rel}: stage_decision ${stageDecision} 不支持 next_route ${nextRoute}`);
   }
 
   const authorizationStatus = stringValue(fixture.authorization_status);
   if (!authorizationStatus) {
-    errors.push(`${rel}: authorization_status must be a non-empty string`);
+    errors.push(`${rel}: authorization_status 必须是非空字符串`);
   } else if (!SIDECAR_AUTHORIZATION_STATUSES.includes(authorizationStatus)) {
-    errors.push(`${rel}: authorization_status has unsupported value ${JSON.stringify(authorizationStatus)}`);
+    errors.push(`${rel}: authorization_status 包含不支持的值 ${JSON.stringify(authorizationStatus)}`);
   }
 
   const stagePolicy = SIDECAR_STAGE_POLICIES[expectedKind];
   if (stagePolicy) {
     if (routeState && routeState !== stagePolicy.routeState) {
-      errors.push(`${rel}: ${expectedKind} sidecar route_state must be ${stagePolicy.routeState}`);
+      errors.push(`${rel}: ${expectedKind} 结构化索引 route_state 必须是 ${stagePolicy.routeState}`);
     }
     if (stageDecision && !stagePolicy.stageDecisions.includes(stageDecision)) {
       errors.push(
-        `${rel}: ${expectedKind} sidecar stage_decision must be one of ${stagePolicy.stageDecisions.join(", ")}`,
+        `${rel}: ${expectedKind} 结构化索引 stage_decision 必须是下列值之一: ${stagePolicy.stageDecisions.join(", ")}`,
       );
     }
   }
@@ -1884,9 +1884,9 @@ function validateConcreteSidecarFixture(
 
   const generatedAt = stringValue(fixture.generated_at);
   if (!generatedAt) {
-    errors.push(`${rel}: generated_at must be a non-empty ISO-8601 string`);
+    errors.push(`${rel}: generated_at 必须是非空 ISO-8601 字符串`);
   } else if (Number.isNaN(Date.parse(generatedAt)) || !generatedAt.includes("T")) {
-    errors.push(`${rel}: generated_at must parse as ISO-8601, got ${JSON.stringify(generatedAt)}`);
+    errors.push(`${rel}: generated_at 必须可解析为 ISO-8601，实际为 ${JSON.stringify(generatedAt)}`);
   }
 
   if (expectedKind === "decision-synthesis") {
@@ -1930,23 +1930,23 @@ function validateRuntimeSchemaSidecars(root: string, errors: string[]): void {
     try {
       const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-        errors.push(`${rel}: runtime schema sidecar must be a JSON object`);
+        errors.push(`${rel}: 运行态结构化索引必须是 JSON object`);
         continue;
       }
       sidecar = parsed as Record<string, unknown>;
     } catch (error) {
-      errors.push(`${rel}: invalid runtime schema sidecar JSON: ${errorMessage(error)}`);
+      errors.push(`${rel}: 运行态结构化索引 JSON 无效: ${errorMessage(error)}`);
       continue;
     }
 
     const artifactKind = stringValue(sidecar.artifact_kind);
     if (!artifactKind || !SIDECAR_ARTIFACT_KINDS.includes(artifactKind)) {
-      errors.push(`${rel}: runtime schema sidecar has unknown artifact_kind`);
+      errors.push(`${rel}: 运行态结构化索引的 artifact_kind 未知`);
       continue;
     }
 
     if (!sidecarFilenameMatchesKind(artifactKind, path.basename(file))) {
-      errors.push(`${rel}: runtime schema sidecar filename does not match artifact_kind ${artifactKind}`);
+      errors.push(`${rel}: 运行态结构化索引文件名与 artifact_kind ${artifactKind} 不匹配`);
     }
 
     const taskSlug = rel.match(/^\.alpha-goal\/([^/]+)\//)?.[1];
@@ -1968,7 +1968,7 @@ function validateRuntimeArtifactTree(root: string, runtimeRoot: string, errors: 
       continue;
     }
     if (!SIDECAR_TASK_SLUG_RE.test(entry.name)) {
-      errors.push(`.alpha-goal/${entry.name}: runtime artifact directory must be task-scoped`);
+      errors.push(`.alpha-goal/${entry.name}: 运行期产物目录必须限定到任务目录`);
     }
   }
 }
@@ -2015,7 +2015,7 @@ function validateRuntimeSidecarTraceGroups(
     for (const sidecar of sidecars) {
       const artifactPath = stringValue(sidecar.artifact_path);
       if (checkArtifactFiles && artifactPath && !isFile(path.join(root, artifactPath))) {
-        errors.push(`${relPrefix}: sidecar artifact_path does not exist: ${artifactPath}`);
+        errors.push(`${relPrefix}: 结构化索引 artifact_path 不存在: ${artifactPath}`);
       }
 
       const priorRoute = nullableStringValue(sidecar.prior_route);
@@ -2118,11 +2118,11 @@ function validateSchemaSidecarFixtureTrace(
   }
 
   if (taskSlugs.size !== 1) {
-    errors.push(`schema sidecar fixture trace must use exactly one task_slug, got ${[...taskSlugs].join(", ")}`);
+    errors.push(`结构化索引样例轨迹必须只使用一个 task_slug，实际为 ${[...taskSlugs].join(", ")}`);
   }
   if (referenceIds.size !== 1) {
     errors.push(
-      `schema sidecar fixture trace must use exactly one reference_id, got ${[...referenceIds].join(", ")}`,
+      `结构化索引样例轨迹必须只使用一个 reference_id，实际为 ${[...referenceIds].join(", ")}`,
     );
   }
 }
@@ -2139,7 +2139,7 @@ function validateCyberneticRouteConsistency(root: string, errors: string[]): voi
     for (const [from, targets] of Object.entries(ROUTE_TRANSITIONS)) {
       const transition = `${from} -> ${targets.join(" | ")}`;
       if (!conformance.includes(transition)) {
-        errors.push(`${conformanceRel}: missing route transition ${transition}`);
+        errors.push(`${conformanceRel}: 缺少路由迁移 ${transition}`);
       }
     }
 
@@ -2150,7 +2150,7 @@ function validateCyberneticRouteConsistency(root: string, errors: string[]): voi
     ];
     for (const guard of requiredGuards) {
       if (!conformance.includes(guard)) {
-        errors.push(`${conformanceRel}: 缺少条件迁移 guard ${guard}`);
+        errors.push(`${conformanceRel}: 缺少条件迁移守卫 ${guard}`);
       }
     }
   }
@@ -2164,7 +2164,7 @@ function validateCyberneticRouteConsistency(root: string, errors: string[]): voi
     ];
     for (const route of requiredRoutes) {
       if (!synthesis.includes(route)) {
-        errors.push(`${synthesisRel}: missing decision-synthesis route rule ${route}`);
+        errors.push(`${synthesisRel}: 缺少 decision-synthesis 路由规则 ${route}`);
       }
     }
   }
@@ -2173,7 +2173,7 @@ function validateCyberneticRouteConsistency(root: string, errors: string[]): voi
     const routeTrigger =
       "路由触发条件: goal-contract | system-model | control-loop | evidence-verify | user | blocker";
     if (!synthesisRound.includes(routeTrigger)) {
-      errors.push(`${synthesisRoundRel}: missing complete route trigger list`);
+      errors.push(`${synthesisRoundRel}: 缺少完整路由触发条件列表`);
     }
   }
 }
@@ -2236,7 +2236,7 @@ function validateDefaultTuiProjectionGuards(root: string, errors: string[]): voi
   for (const guard of DEFAULT_TUI_PROJECTION_GUARDS) {
     const file = path.join(root, guard.path);
     if (!isFile(file)) {
-      errors.push(`默认 TUI 投影 guard「${guard.name}」失败：缺少文件 ${guard.path}`);
+      errors.push(`默认 TUI 投影守卫「${guard.name}」失败：缺少文件 ${guard.path}`);
       continue;
     }
 
@@ -2244,7 +2244,7 @@ function validateDefaultTuiProjectionGuards(root: string, errors: string[]): voi
     const section = textBetweenAnchors(text, guard.anchor, guard.end_anchor);
     if (!section) {
       errors.push(
-        `默认 TUI 投影 guard「${guard.name}」失败：${guard.path} 缺少锚点边界 ${guard.anchor}${guard.end_anchor ? ` -> ${guard.end_anchor}` : ""}`,
+        `默认 TUI 投影守卫「${guard.name}」失败：${guard.path} 缺少锚点边界 ${guard.anchor}${guard.end_anchor ? ` -> ${guard.end_anchor}` : ""}`,
       );
       continue;
     }
@@ -2252,7 +2252,7 @@ function validateDefaultTuiProjectionGuards(root: string, errors: string[]): voi
     const codeFences = codeFenceBlocks(section);
     if (codeFences.length !== 1) {
       errors.push(
-        `默认 TUI 投影 guard「${guard.name}」失败：${guard.path} 默认 TUI 区块必须只包含一个模板代码块，实际 ${codeFences.length}`,
+        `默认 TUI 投影守卫「${guard.name}」失败：${guard.path} 默认 TUI 区块必须只包含一个模板代码块，实际 ${codeFences.length}`,
       );
     } else {
       const missingTemplateTerms = DEFAULT_TUI_TEMPLATE_TERMS.filter(
@@ -2260,7 +2260,7 @@ function validateDefaultTuiProjectionGuards(root: string, errors: string[]): voi
       );
       if (missingTemplateTerms.length > 0) {
         errors.push(
-          `默认 TUI 投影 guard「${guard.name}」失败：${guard.path} 默认 TUI 模板缺少 ${missingTemplateTerms.join(", ")}`,
+          `默认 TUI 投影守卫「${guard.name}」失败：${guard.path} 默认 TUI 模板缺少 ${missingTemplateTerms.join(", ")}`,
         );
       }
     }
@@ -2268,14 +2268,14 @@ function validateDefaultTuiProjectionGuards(root: string, errors: string[]): voi
     const rawControlLaw = rawControlLawFieldLeak(section);
     if (rawControlLaw) {
       errors.push(
-        `默认 TUI 投影 guard「${guard.name}」失败：${guard.path} 默认 TUI 区块包含原始控制律字段 ${JSON.stringify(rawControlLaw)}`,
+        `默认 TUI 投影守卫「${guard.name}」失败：${guard.path} 默认 TUI 区块包含原始控制律字段 ${JSON.stringify(rawControlLaw)}`,
       );
     }
 
     const multilingualExample = section.match(MULTILINGUAL_TUI_EXAMPLE_RE);
     if (multilingualExample) {
       errors.push(
-        `默认 TUI 投影 guard「${guard.name}」失败：${guard.path} 默认 TUI 区块包含单独的非中文示例词 ${JSON.stringify(multilingualExample[0].trim())}`,
+        `默认 TUI 投影守卫「${guard.name}」失败：${guard.path} 默认 TUI 区块包含单独的非中文示例词 ${JSON.stringify(multilingualExample[0].trim())}`,
       );
     }
   }
@@ -2490,12 +2490,12 @@ function validateSchemaEnum(
 ): void {
   const property = objectValue(properties[propertyName]);
   if (!property) {
-    errors.push(`${rel}: schema sidecar property ${propertyName} must be an object`);
+    errors.push(`${rel}: 结构化索引属性 ${propertyName} 必须是 object`);
     return;
   }
   validateExactStringSet(
     rel,
-    `schema sidecar ${propertyName} enum`,
+    `结构化索引 ${propertyName} enum`,
     property.enum,
     expectedValues,
     errors,
@@ -2511,13 +2511,13 @@ function validateNullableRouteSchemaEnum(
 ): void {
   const property = objectValue(properties[propertyName]);
   if (!property) {
-    errors.push(`${rel}: schema sidecar property ${propertyName} must be an object`);
+    errors.push(`${rel}: 结构化索引属性 ${propertyName} 必须是 object`);
     return;
   }
 
   validateExactStringOrNullSet(
     rel,
-    `schema sidecar ${propertyName} enum`,
+    `结构化索引 ${propertyName} enum`,
     property.enum,
     expectedValues,
     true,
@@ -2528,7 +2528,7 @@ function validateNullableRouteSchemaEnum(
 function readRequiredText(root: string, rel: string, errors: string[]): string | undefined {
   const file = path.join(root, rel);
   if (!isFile(file)) {
-    errors.push(`missing required text file: ${rel}`);
+    errors.push(`缺少必需文本文件: ${rel}`);
     return undefined;
   }
   return fs.readFileSync(file, "utf8");
@@ -2571,7 +2571,7 @@ function validateExactStringOrNullSet(
   errors: string[],
 ): { strings: string[]; hasNull: boolean } {
   if (!Array.isArray(value)) {
-    errors.push(`${rel}: ${label} must be an array`);
+    errors.push(`${rel}: ${label} 必须是数组`);
     return { strings: [], hasNull: false };
   }
 
@@ -2581,21 +2581,21 @@ function validateExactStringOrNullSet(
   for (const [index, item] of value.entries()) {
     if (item === null) {
       if (!expectNull) {
-        errors.push(`${rel}: ${label} item ${index} must be a string`);
+        errors.push(`${rel}: ${label} 第 ${index} 项必须是字符串`);
       }
       if (hasNull) {
-        errors.push(`${rel}: ${label} has duplicate value null`);
+        errors.push(`${rel}: ${label} 包含重复值 null`);
       }
       hasNull = true;
       continue;
     }
     if (typeof item !== "string") {
-      errors.push(`${rel}: ${label} item ${index} must be a string`);
+      errors.push(`${rel}: ${label} 第 ${index} 项必须是字符串`);
       continue;
     }
     actualValues.push(item);
     if (seen.has(item)) {
-      errors.push(`${rel}: ${label} has duplicate value ${item}`);
+      errors.push(`${rel}: ${label} 包含重复值 ${item}`);
     }
     seen.add(item);
   }
@@ -2603,16 +2603,16 @@ function validateExactStringOrNullSet(
   const expectedSet = new Set(expectedValues);
   for (const expected of expectedValues) {
     if (!seen.has(expected)) {
-      errors.push(`${rel}: ${label} omits ${expected}`);
+      errors.push(`${rel}: ${label} 遗漏 ${expected}`);
     }
   }
   for (const actual of actualValues) {
     if (!expectedSet.has(actual)) {
-      errors.push(`${rel}: ${label} has unexpected value ${actual}`);
+      errors.push(`${rel}: ${label} 包含非预期值 ${actual}`);
     }
   }
   if (expectNull && !hasNull) {
-    errors.push(`${rel}: ${label} omits null`);
+    errors.push(`${rel}: ${label} 遗漏 null`);
   }
   return { strings: actualValues, hasNull };
 }

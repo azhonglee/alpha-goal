@@ -94,7 +94,7 @@
     - 扰动:
     - 可能性 / 影响:
     - 传感器:
-    - 约束措施:
+    - 控制措施:
     - 路由触发条件:
   - 控制器层级:
     - 全局控制器:
@@ -147,17 +147,17 @@
 ## 阶段职责
 
 - `alpha-goal`: 发现或初始化台账，分类活跃控制状态，写入完整 `最新控制路由`，把产物登记保持在 `.alpha-goal/YYYYMMDD-<slug>/` 内，并在 TUI 默认只显示 Markdown 表格 `路由摘要`。
-- `decision-synthesis`: 综合前读取最新路由；把完整 决策综合记录 写到 `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md`，更新产物登记和路由相关综合状态，并在 TUI 默认显示 Markdown 表格 `综合摘要`。
-- `system-model`: 建模前读取最新路由；把完整 控制模型 写到 `.alpha-goal/YYYYMMDD-<slug>/system-model.md`，更新产物登记和模型相关状态，并在 TUI 默认显示 Markdown 表格 `模型摘要`。
+- `decision-synthesis`: 综合前读取最新路由；把完整决策综合记录写到 `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md`，更新产物登记和路由相关综合状态，并在 TUI 默认显示 Markdown 表格 `综合摘要`。
+- `system-model`: 建模前读取最新路由；把完整控制模型写到 `.alpha-goal/YYYYMMDD-<slug>/system-model.md`，更新产物登记和模型相关状态，并在 TUI 默认显示 Markdown 表格 `模型摘要`。
 - `goal-contract`: 修改参考输入前读取最新路由；把完整目标契约写到 `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md`，更新产物登记和参考状态，并在 TUI 默认显示 Markdown 表格 `契约摘要`。
-- `control-loop`: 变更 / 探测前读取最新路由；把完整 控制律 持久化到 迭代记录 或台账，变更前显示 Markdown 表格 `执行检查`，把完整 迭代记录 写到 `.alpha-goal/YYYYMMDD-<slug>/iterations/`，必要时把持久日志写到 `.alpha-goal/YYYYMMDD-<slug>/evidence/`，更新产物登记和控制状态，并在反馈后默认显示 Markdown 表格 `迭代摘要`。
-- `evidence-verify`: 下结论前读取最新路由；把完整 验证结论 写到 `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md`，更新产物登记和最终比较器状态，并在 TUI 默认显示 Markdown 表格 `验证摘要`。
+- `control-loop`: 变更 / 探测前读取最新路由；把完整控制律持久化到迭代记录或台账，变更前显示 Markdown 表格 `执行检查`，把完整迭代记录写到 `.alpha-goal/YYYYMMDD-<slug>/iterations/`，必要时把持久日志写到 `.alpha-goal/YYYYMMDD-<slug>/evidence/`，更新产物登记和控制状态，并在反馈后默认显示 Markdown 表格 `迭代摘要`。
+- `evidence-verify`: 下结论前读取最新路由；把完整验证结论写到 `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md`，更新产物登记和最终比较器状态，并在 TUI 默认显示 Markdown 表格 `验证摘要`。
 
 ## 更新规则
 
 - 当参考输入、指标转译、被控对象模型、控制器层级、扰动记录、自适应学习记录、控制律、执行器边界、证据下限、结构化索引、一致性报告、产物路径、路由、选定技能、下一动作或残余误差发生实质变化时，更新台账。
 - 把 `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 视为跨技能路由字段的事实来源。不要要求后续技能从可见 TUI 摘要重建 `控制路由`。
-- 把产物登记视为定位完整阶段输出的事实来源。除非文件持久化受阻，不要在台账内重复完整 目标契约、控制模型、决策综合记录、迭代记录、结构化索引、一致性报告或 验证结论。
+- 把产物登记视为定位完整阶段输出的事实来源。除非文件持久化受阻，不要在台账内重复完整目标契约、控制模型、决策综合记录、迭代记录、结构化索引、一致性报告或验证结论。
 - TUI 输出默认使用紧凑 Markdown 表格摘要：
 
 ```markdown
@@ -172,7 +172,7 @@
 | 下一步 | |
 ```
 
-- 阶段摘要和 control-loop 的 `执行检查` 默认使用带中文标题的紧凑双列表格。如果用户明确要求其他语言，只翻译同一标题语义，不展示多语言模板。值应保持简短；长细节指向产物路径。如果运行环境不能渲染 Markdown 表格，使用紧凑双列纯文本表，而不是项目符号列表。只有在用户要求、持久化受阻，或决策 / 风险需要用户明确复核时，才在聊天中打印完整产物或原始内部 控制律 块。
+- 阶段摘要和 control-loop 的 `执行检查` 默认使用带中文标题的紧凑双列表格。如果用户明确要求其他语言，只翻译同一标题语义，不展示多语言模板。值应保持简短；长细节指向产物路径。如果运行环境不能渲染 Markdown 表格，使用紧凑双列纯文本表，而不是项目符号列表。只有在用户要求、持久化受阻，或决策 / 风险需要用户明确复核时，才在聊天中打印完整产物或原始内部控制律块。
 - 不重复完整命令输出；需要持久日志时，链接或摘要证据，并指向 `.alpha-goal/YYYYMMDD-<slug>/evidence/`。
 - 不存储密钥、token、凭证、私有用户数据或仅生产环境敏感记录。
 - 标注过期或被取代的状态，而不是静默覆盖。

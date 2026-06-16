@@ -39,15 +39,15 @@
 - 首个分歧点:
 - 根因陈述:
 - 根因验证:
-- 修复面:
+- 修复范围:
 - 状态: ROOT_CAUSE_CONFIRMED | HYPOTHESIS_TESTED | MITIGATION_APPLIED | NOT_REPRODUCED | BLOCKED
 - 决策:
 ```
 
 状态规则：
 
-- `ROOT_CAUSE_CONFIRMED`: 证据识别首个分歧点，把实体 / 状态链接到接口边界，并充分限定实质备选项以支持修复面。
-- `HYPOTHESIS_TESTED`: 已用有界探针、instrumentation 或可逆变更测试可证伪假设，且没有改变目标修复面。
+- `ROOT_CAUSE_CONFIRMED`: 证据识别首个分歧点，把实体 / 状态链接到接口边界，并充分限定实质备选项以支持修复范围。
+- `HYPOTHESIS_TESTED`: 已用有界探针、诊断插桩或可逆变更测试可证伪假设，且没有改变目标修复范围。
 - `MITIGATION_APPLIED`: 已应用授权控制措施或风险降低措施，但不声明根因已修复。
 - `NOT_REPRODUCED`: 已尝试复现但未观察到；不要声明已修复。
 - `BLOCKED`: 缺少日志、命令、文件、环境、数据或范围，导致无法诊断。

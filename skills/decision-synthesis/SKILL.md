@@ -30,7 +30,7 @@ description: "把决策综合用于复杂工程或社会技术系统：在形成
 
 ## 按需加载资源
 
-- `references/complexity-triage.md`: 区分简单、繁杂、复杂或复杂巨系统式请求。
+- `references/complexity-triage.md`: 区分简单、繁杂、复杂或开放复杂巨系统类请求。
 - `references/stakeholder-decision-boundaries.md`: 区分建议和用户自有决策。
 - `references/synthesis-round.md`: 运行人机定性 / 定量收敛轮次。
 - `references/synthesis-record-schema.md`: 生成可持久化或可交接的决策综合记录。
@@ -88,7 +88,7 @@ description: "把决策综合用于复杂工程或社会技术系统：在形成
 
 ### 4. 运行综合轮次
 
-对 `complex` 和 `complex-giant-like` 场景，或任何视角冲突场景，在解决决策前运行一轮或多轮 `综合轮次` 记录。结构见 `references/synthesis-round.md`。对复杂巨系统式工作，使用 `references/meta-synthesis-hall.md` 定义的综合研判工作台来保存角色、假设、模型、异议和收敛条件。
+对 `complex` 和 `complex-giant-like` 场景，或任何视角冲突场景，在解决决策前运行一轮或多轮 `综合轮次` 记录。结构见 `references/synthesis-round.md`。对开放复杂巨系统类工作，使用 `references/meta-synthesis-hall.md` 定义的综合研判工作台来保存角色、假设、模型、异议和收敛条件。
 
 每轮必须连接：
 
@@ -106,7 +106,7 @@ description: "把决策综合用于复杂工程或社会技术系统：在形成
 
 识别：
 
-- agent 可以建议的决策；
+- 智能体可以建议的决策；
 - 用户必须作出的决策；
 - 需要显式接受的风险；
 - 能稳定工作的非目标；

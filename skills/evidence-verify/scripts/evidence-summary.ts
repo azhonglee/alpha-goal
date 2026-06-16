@@ -5,14 +5,14 @@ section("当前目录");
 console.log(process.cwd());
 
 if (!commandSucceeds("git", ["--version"])) {
-  section("git");
+  section("Git 状态");
   console.log("git: 未找到");
   process.exit(0);
 }
 
 if (!commandSucceeds("git", ["rev-parse", "--is-inside-work-tree"])) {
-  section("git");
-  console.log("inside_work_tree: no");
+  section("Git 状态");
+  console.log("git 工作树: 否");
   process.exit(0);
 }
 
@@ -52,13 +52,13 @@ if (printCommand("git", ["diff", "--cached", "--check"]) === 0) {
 }
 
 section("worktree 与忽略规则提示");
-printCommand("git", ["worktree", "list"]);
+printWorktreeList();
 const root = commandOutput("git", ["rev-parse", "--show-toplevel"]).trim();
 if (root) {
   for (const candidate of [".worktrees/codex/preflight-check", ".alpha-goal/preflight-check"]) {
     const ignored = commandSucceeds("git", ["check-ignore", "-q", candidate], { cwd: root });
     if (ignored) {
-      console.log(`${candidate}: ignored`);
+      console.log(`${candidate}: 已忽略`);
     } else if (candidate.startsWith(".alpha-goal/")) {
       console.log(`${candidate}: 未被忽略；写流程产物前先把 .alpha-goal/ 加入仓库根目录 .gitignore`);
     } else {
@@ -97,6 +97,18 @@ function commandOutput(command: string, args: string[], options: { cwd?: string 
     encoding: "utf8",
   });
   return result.status === 0 ? result.stdout : "";
+}
+
+function printWorktreeList(): void {
+  const output = commandOutput("git", ["worktree", "list"]);
+  process.stdout.write(localizeGitWorktreeList(output));
+}
+
+function localizeGitWorktreeList(output: string): string {
+  return output
+    .replace(/ prunable/g, " 可清理")
+    .replace(/\(detached HEAD\)/g, "(游离 HEAD)")
+    .replace(/\(bare\)/g, "(裸仓库)");
 }
 
 function commandSucceeds(command: string, args: string[], options: { cwd?: string } = {}): boolean {

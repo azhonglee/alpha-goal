@@ -3,31 +3,31 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 
-section("cwd");
+section("当前目录");
 console.log(process.cwd());
 
-section("git");
+section("Git 状态");
 if (commandSucceeds("git", ["--version"]) && commandSucceeds("git", ["rev-parse", "--is-inside-work-tree"])) {
-  console.log("inside_work_tree: yes");
-  console.log(`root: ${commandOutput("git", ["rev-parse", "--show-toplevel"]).trim()}`);
-  console.log(`branch: ${commandOutput("git", ["branch", "--show-current"]).trim()}`);
-  console.log("status_short:");
+  console.log("git 工作树: 是");
+  console.log(`根目录: ${commandOutput("git", ["rev-parse", "--show-toplevel"]).trim()}`);
+  console.log(`分支: ${commandOutput("git", ["branch", "--show-current"]).trim()}`);
+  console.log("status --short:");
   printCommand("git", ["status", "--short"]);
-  console.log("worktrees:");
-  printCommand("git", ["worktree", "list"]);
-  console.log("submodules:");
+  console.log("worktree 列表:");
+  printWorktreeList();
+  console.log("子模块:");
   const submodules = commandOutput("git", ["submodule", "status"]).trimEnd();
-  console.log(submodules || "<none or unavailable>");
+  console.log(submodules || "<无或不可用>");
 } else {
-  console.log("inside_work_tree: no or git unavailable");
+  console.log("git 工作树: 否或 git 不可用");
 }
 
-section("top-level structure");
+section("顶层结构");
 for (const entry of find(".", 2, () => true).slice(0, 200)) {
   console.log(entry);
 }
 
-section("rule and instruction files");
+section("规则与说明文件");
 for (const entry of find(".", 4, (candidate) => {
   const name = path.basename(candidate);
   return [
@@ -41,7 +41,7 @@ for (const entry of find(".", 4, (candidate) => {
   console.log(entry);
 }
 
-section("project manifest hints");
+section("项目清单线索");
 for (const entry of find(".", 3, (candidate) => [
   "package.json",
   "pyproject.toml",
@@ -56,8 +56,8 @@ for (const entry of find(".", 3, (candidate) => [
   console.log(entry);
 }
 
-section("reminder");
-console.log("This script is read-only. Interpret output manually before any mutation.");
+section("提醒");
+console.log("本脚本只读。任何变更前都要先人工解读这些输出。");
 
 function section(name: string): void {
   console.log(`\n== ${name} ==`);
@@ -80,6 +80,18 @@ function commandOutput(command: string, args: string[]): string {
     encoding: "utf8",
   });
   return result.status === 0 ? result.stdout : "";
+}
+
+function printWorktreeList(): void {
+  const output = commandOutput("git", ["worktree", "list"]);
+  process.stdout.write(localizeGitWorktreeList(output));
+}
+
+function localizeGitWorktreeList(output: string): string {
+  return output
+    .replace(/ prunable/g, " 可清理")
+    .replace(/\(detached HEAD\)/g, "(游离 HEAD)")
+    .replace(/\(bare\)/g, "(裸仓库)");
 }
 
 function commandSucceeds(command: string, args: string[]): boolean {

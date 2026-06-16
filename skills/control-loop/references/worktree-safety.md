@@ -70,5 +70,5 @@ git switch -c <branch-name>
 - 不覆盖它们；
 - 避免大范围格式化命令；
 - 使用定向编辑；
-- mention them in the 迭代记录;
+- 在迭代记录中说明这些变更；
 - stash、revert 或移动前先询问。
