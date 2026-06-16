@@ -128,6 +128,21 @@ const EVIDENCE_BOUNDARIES = [
   "custom",
 ];
 const CONFIRMATION_STATUSES = ["confirmed", "not-required", "pending", "blocked", "unknown"];
+const NEGATIVE_FIXTURE_EXPECTATIONS: Record<string, string[]> = {
+  "contract-missing-fields": ["alpha-goal 缺少目标契约字段"],
+  "control-loop-without-confirmed-contract": ["control-loop 需要先前已确认的 alpha-goal schema sidecar"],
+  "divergent-reference-id": ["运行态 schema sidecar 必须共享同一个 reference_id"],
+  "final-with-nonpassing-verdict": ["最终路由需要带 PASS_TO_FINAL 或 NARROW_CLAIM_AND_FINAL"],
+  "final-self-verdict": ["最终路由需要明确 prior_route"],
+  "final-without-contract": ["最终路由需要先前已确认的 alpha-goal schema sidecar"],
+  "final-without-verification": ["最终路由需要带 PASS_TO_FINAL 或 NARROW_CLAIM_AND_FINAL"],
+  "late-confirmed-contract": ["已确认 alpha-goal schema sidecar 不得晚于 control-loop 路由"],
+  "late-final-verdict": ["verification-verdict schema sidecar 不得晚于最终路由"],
+  "missing-artifact-path": ["缺少必填键 artifact_path"],
+  "missing-reference-id": ["必须共享一个有意义的 reference_id"],
+  "stage-decision-policy": ["alpha-goal stage_decision 不受支持 ITERATION_HARDEN"],
+  "system-model-control-loop-without-confirmed-contract": ["next transition 无效 system-model -> control-loop"],
+};
 const LEGACY_ARTIFACT_PATHS = [
   ".alpha-goal/control-state",
   ".alpha-goal/context",
@@ -266,6 +281,7 @@ function validateSemanticSmoke(root: string, errors: string[]): void {
         "不得输出已确认目标契约",
         "误当成用户真正诉求",
         ".alpha-goal/YYYYMMDD-<slug>/alpha-goal.md",
+        ".alpha-goal/YYYYMMDD-<slug>/schema/alpha-goal.json",
         "目标契约摘要",
       ],
     ],
@@ -283,6 +299,7 @@ function validateSemanticSmoke(root: string, errors: string[]): void {
         "不能直接进入 `control-loop`",
         "最终必须回到 `alpha-goal`",
         "形成目标契约",
+        ".alpha-goal/YYYYMMDD-<slug>/schema/system-model.json",
       ],
     ],
     [
@@ -297,8 +314,10 @@ function validateSemanticSmoke(root: string, errors: string[]): void {
         "验收信号",
         "决策边界",
         "返回 `alpha-goal`",
+        "只读突变预检快照",
         "执行检查",
         "默认不要在 TUI 打印原始 `控制律:` 块",
+        ".alpha-goal/YYYYMMDD-<slug>/schema/iteration-NN.json",
         "自适应学习记录",
       ],
     ],
@@ -312,6 +331,7 @@ function validateSemanticSmoke(root: string, errors: string[]): void {
         "NARROW_CLAIM_AND_FINAL",
         "NEXT_ITERATION",
         "返回 `alpha-goal`",
+        ".alpha-goal/YYYYMMDD-<slug>/schema/verification-verdict.json",
       ],
     ],
   ];
@@ -409,6 +429,7 @@ function validateTuiTemplates(root: string, errors: string[]): void {
 function validateSidecarFixtures(root: string, errors: string[]): void {
   validateFixtureDir(root, "tools/fixtures/schema-sidecars", errors, false);
   validateRuntimeFixtureSets(root, errors);
+  validateActualRuntimeSidecars(root, errors);
 }
 
 function validateFixtureDir(
@@ -467,7 +488,39 @@ function validateRuntimeFixtureSets(root: string, errors: string[]): void {
       const localErrors = validateFixtureDir(root, relative(root, caseDir), [], true);
       if (localErrors.length === 0) {
         errors.push(`${relative(root, caseDir)}: negative fixture 必须触发至少一个错误`);
+        continue;
       }
+      const caseName = path.basename(caseDir);
+      const expectedErrors = NEGATIVE_FIXTURE_EXPECTATIONS[caseName];
+      if (!expectedErrors) {
+        errors.push(`${relative(root, caseDir)}: negative fixture 缺少期望错误登记`);
+        continue;
+      }
+      const missingExpected = expectedErrors.filter(
+        (expected) => !localErrors.some((error) => error.includes(expected)),
+      );
+      if (missingExpected.length > 0) {
+        errors.push(
+          `${relative(root, caseDir)}: negative fixture 未命中期望错误 ${missingExpected.join(", ")}；实际错误: ${localErrors.join("; ")}`,
+        );
+      }
+    }
+  }
+}
+
+function validateActualRuntimeSidecars(root: string, errors: string[]): void {
+  const alphaRoot = path.join(root, ".alpha-goal");
+  if (!isDirectory(alphaRoot)) {
+    return;
+  }
+  for (const taskDir of childDirectories(alphaRoot)) {
+    const schemaDir = path.join(taskDir, "schema");
+    if (!isDirectory(schemaDir)) {
+      continue;
+    }
+    const localErrors = validateFixtureDir(root, relative(root, schemaDir), [], true);
+    if (localErrors.length > 0) {
+      errors.push(`${relative(root, schemaDir)}: 运行态 sidecar 失败: ${localErrors.join("; ")}`);
     }
   }
 }
@@ -596,18 +649,34 @@ function validateSidecarTraceGroups(
 
       if (
         (routeState === "control-loop" || nextRoute === "control-loop") &&
-        !isConfirmedAlphaGoalSidecar(sidecar) &&
-        support(sidecar, confirmedAlpha, ["reference_id"]) !== "ok"
+        !isConfirmedAlphaGoalSidecar(sidecar)
       ) {
-        errors.push(`${prefix}: control-loop 需要先前已确认的 alpha-goal schema sidecar`);
+        const contractSupport = support(sidecar, confirmedAlpha, ["reference_id"]);
+        if (contractSupport === "late") {
+          errors.push(`${prefix}: 已确认 alpha-goal schema sidecar 不得晚于 control-loop 路由`);
+        } else if (contractSupport !== "ok") {
+          errors.push(`${prefix}: control-loop 需要先前已确认的 alpha-goal schema sidecar`);
+        }
       }
 
-      if (
-        nextRoute === "final" &&
-        !isFinalVerificationSidecar(sidecar) &&
-        support(sidecar, finalVerdicts, ["reference_id", "claim_boundary"]) !== "ok"
-      ) {
-        errors.push(`${prefix}: 最终路由需要带 PASS_TO_FINAL 或 NARROW_CLAIM_AND_FINAL 的 verification-verdict schema sidecar`);
+      if (nextRoute === "final") {
+        if (!priorRoute) {
+          errors.push(`${prefix}: 最终路由需要明确 prior_route，不能由单个 verification-verdict 自行闭合`);
+        }
+        const contractSupport = support(sidecar, confirmedAlpha, ["reference_id"]);
+        if (contractSupport === "late") {
+          errors.push(`${prefix}: 已确认 alpha-goal schema sidecar 不得晚于最终路由`);
+        } else if (contractSupport !== "ok") {
+          errors.push(`${prefix}: 最终路由需要先前已确认的 alpha-goal schema sidecar`);
+        }
+        if (!isFinalVerificationSidecar(sidecar)) {
+          const verifierSupport = support(sidecar, finalVerdicts, ["reference_id", "claim_boundary"]);
+          if (verifierSupport === "late") {
+            errors.push(`${prefix}: verification-verdict schema sidecar 不得晚于最终路由`);
+          } else if (verifierSupport !== "ok") {
+            errors.push(`${prefix}: 最终路由需要带 PASS_TO_FINAL 或 NARROW_CLAIM_AND_FINAL 的 verification-verdict schema sidecar`);
+          }
+        }
       }
 
       if (!priorRoute || priorRoute === "alpha-goal" || !routeState) {
@@ -733,13 +802,17 @@ function generatedAtMillis(sidecar: Record<string, unknown>): number | undefined
 }
 
 function validateInstallSurface(root: string, errors: string[], warnings: string[]): void {
+  const errorCountBeforeInstallChecks = errors.length;
   runReadOnlyCheck(root, errors, "安装脚本语法", "bash", ["-n", "scripts/install.sh"]);
   runReadOnlyCheck(root, errors, "配置模板 TOML 解析", "python3", [
     "-c",
     "import pathlib,tomllib; tomllib.loads(pathlib.Path('templates/config.toml').read_text())",
   ]);
 
-  if (process.env.ALPHA_GOAL_SKIP_INSTALL_SMOKE === "1") {
+  if (process.env.ALPHA_GOAL_SKIP_INSTALL_SMOKE === "1" || errors.length > errorCountBeforeInstallChecks) {
+    return;
+  }
+  if (errorCountBeforeInstallChecks > 0) {
     return;
   }
   const tmpCodexHome = fs.mkdtempSync(path.join(os.tmpdir(), "alpha-goal-install-"));
@@ -765,8 +838,51 @@ function validateInstallSurface(root: string, errors: string[], warnings: string
         errors.push(`安装冒烟测试: 缺少 ${skillName}/SKILL.md`);
       }
     }
+    if (!isFile(path.join(tmpCodexHome, "AGENTS.md"))) {
+      errors.push("安装冒烟测试: 默认安装必须创建 AGENTS.md");
+    }
+    if (!isFile(path.join(tmpCodexHome, "config.toml"))) {
+      errors.push("安装冒烟测试: 默认安装必须创建 config.toml");
+    }
+    const forceResult = spawnSync("bash", ["scripts/install.sh", "--codex-home", tmpCodexHome, "--force"], {
+      cwd: root,
+      encoding: "utf8",
+      env: { ...process.env, ALPHA_GOAL_SKIP_INSTALL_SMOKE: "1" },
+      timeout: 120_000,
+    });
+    if (forceResult.error) {
+      errors.push(`安装 --force 冒烟测试: ${forceResult.error.message}`);
+    } else if (forceResult.status !== 0) {
+      const output = [forceResult.stderr, forceResult.stdout].filter(Boolean).join("\n").trim();
+      errors.push(`安装 --force 冒烟测试失败${output ? `: ${output}` : ""}`);
+    }
   } finally {
     fs.rmSync(tmpCodexHome, { recursive: true, force: true });
+  }
+
+  const tmpNoSyncCodexHome = fs.mkdtempSync(path.join(os.tmpdir(), "alpha-goal-install-nosync-"));
+  try {
+    const result = spawnSync(
+      "bash",
+      ["scripts/install.sh", "--codex-home", tmpNoSyncCodexHome, "--no-sync-user-templates"],
+      {
+        cwd: root,
+        encoding: "utf8",
+        env: { ...process.env, ALPHA_GOAL_SKIP_INSTALL_SMOKE: "1" },
+        timeout: 120_000,
+      },
+    );
+    if (result.error) {
+      errors.push(`安装 --no-sync-user-templates 冒烟测试: ${result.error.message}`);
+    } else if (result.status !== 0) {
+      const output = [result.stderr, result.stdout].filter(Boolean).join("\n").trim();
+      errors.push(`安装 --no-sync-user-templates 冒烟测试失败${output ? `: ${output}` : ""}`);
+    }
+    if (isFile(path.join(tmpNoSyncCodexHome, "AGENTS.md")) || isFile(path.join(tmpNoSyncCodexHome, "config.toml"))) {
+      errors.push("安装 --no-sync-user-templates 冒烟测试: 不应创建用户模板文件");
+    }
+  } finally {
+    fs.rmSync(tmpNoSyncCodexHome, { recursive: true, force: true });
   }
 
   if (warnings.length > 0) {
@@ -904,7 +1020,7 @@ function textFiles(root: string): string[] {
       if (rel.startsWith(".git/") || rel.startsWith(".worktrees/") || rel.startsWith("node_modules/")) {
         return false;
       }
-      return /\.(md|yaml|yml|json|ts|sh)$/.test(rel);
+      return /\.(md|yaml|yml|json|toml|ts|sh)$/.test(rel);
     })
     .map((file) => relative(root, file))
     .sort();

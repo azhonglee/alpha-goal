@@ -1,0 +1,19 @@
+{
+  "artifact_kind": "verification-verdict",
+  "task_slug": "20260616-neg-final-no-contract",
+  "artifact_path": ".alpha-goal/20260616-neg-final-no-contract/verification-verdict.md",
+  "reference_id": "ref-neg-final-no-contract",
+  "route_state": "evidence-verify",
+  "prior_route": null,
+  "next_route": "final",
+  "target_error": "最终声明缺少已确认目标契约",
+  "control_variable": "最终声明闸门",
+  "sensor": "runtime fixture 具体 sidecar 校验",
+  "threshold_or_tolerance": "final 路由前必须存在同 reference_id 的已确认 alpha-goal sidecar",
+  "evidence_boundary": "artifact",
+  "residual_error": "缺少已确认目标契约",
+  "claim_boundary": "negative fixture 必须暴露无契约最终声明",
+  "stage_decision": "PASS_TO_FINAL",
+  "confirmation_status": "not-required",
+  "generated_at": "2026-06-16T00:00:00Z"
+}

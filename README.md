@@ -28,7 +28,7 @@
 | 执行器 | `control-loop` 执行的有界改动、诊断、修复、加固或只读探针 |
 | 控制律 | 目标误差、控制变量、预期效果、传感器阈值、反馈延迟 / 噪声、置信度、阻尼 / 防振荡、饱和条件 / 约束边界和失败处理 |
 | 比较器 | `evidence-verify` 对目标、证据和最终声明的误差判定 |
-| 状态记忆 | `.alpha-goal/YYYYMMDD-<slug>/control-state.md` 中的闭环台账 |
+| 状态记忆 | 需要恢复 / 交接时，记录在 `.alpha-goal/YYYYMMDD-<slug>/` 下的任务级产物和 schema sidecar |
 | 产物布局 | 任务级运行产物统一放在 `.alpha-goal/YYYYMMDD-<slug>/xxx` 下 |
 
 ## 安装
@@ -53,7 +53,7 @@ $alpha-goal your_task_description
 
 ## 运行产物
 
-跨阶段恢复状态时，使用 `.alpha-goal/YYYYMMDD-<slug>/control-state.md`。同一任务的相关产物也放在该任务目录下，例如 `alpha-goal.md`、`system-model.md`、`iterations/`、`evidence/` 和 `verification-verdict.md`。
+普通内联任务默认不写文件。需要恢复、交接、审计或高风险复核时，同一任务的相关产物放在 `.alpha-goal/YYYYMMDD-<slug>/` 下，例如 `alpha-goal.md`、`system-model.md`、`iterations/`、`evidence/`、`verification-verdict.md` 和 `schema/`。写入前确认 `.alpha-goal/` 已被忽略。
 
 ## 校验
 

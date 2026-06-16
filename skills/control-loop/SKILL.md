@@ -7,7 +7,7 @@ description: "在已确认的 alpha-goal 目标契约下运行有界控制迭代
 
 只在已确认的 `alpha-goal` 目标契约下执行或探测；`alpha-goal`、`system-model` 不能推断外部副作用授权。已确认目标契约必须保留用户真实意图、预期结果、范围内、范围外 / 非目标、边界、约束、验收信号和决策边界；不能裁剪语义。
 
-脚本：`scripts/mutation-preflight.ts` 用于执行前突变安全检查。
+脚本：`scripts/mutation-preflight.ts` 只提供执行前只读突变预检快照；它不是授权或安全通过证明。硬阻断来自目标契约、用户授权、项目规则、分支 / worktree 归属、外部副作用和不可逆风险判断。
 
 ## 入口
 
@@ -40,11 +40,11 @@ TUI 执行前检查:
 
 ## 反馈
 
-动作后采集新鲜反馈，标记 `gate evidence`、`advisory evidence`、`exploration evidence` 或 `blocked evidence`。反馈反驳控制律、阈值、模型或路由假设时，创建自适应学习记录。主路由只能选 `ITERATION_CONTINUES`、`ITERATION_HARDEN`、`ITERATION_READY_FOR_VERIFY`、`RETURN_TO_ALPHA_GOAL`、`RETURN_TO_SYSTEM_MODEL`、`BLOCKED`。
+动作后采集新鲜反馈，标记 `gate evidence`、`advisory evidence`、`exploration evidence` 或 `blocked evidence`。反馈反驳控制律、阈值、模型或路由假设时，创建自适应学习记录。TUI 的下一路由只使用 `control-loop`、`evidence-verify`、`alpha-goal`、`system-model` 或 `blocker`；schema sidecar 再写对应 `stage_decision`。
 
 ## 记录
 
-`persisted` / `audited` 写 `.alpha-goal/YYYYMMDD-<slug>/iterations/NN-<slice>.md`，大证据进 `.alpha-goal/YYYYMMDD-<slug>/evidence/`。记录动作、反馈、剩余误差、控制律结果、台账更新和下一路由。
+`persisted` / `audited` 写 `.alpha-goal/YYYYMMDD-<slug>/iterations/NN-<slice>.md` 和 `.alpha-goal/YYYYMMDD-<slug>/schema/iteration-NN.json`，大证据进 `.alpha-goal/YYYYMMDD-<slug>/evidence/`。记录动作、反馈、剩余误差、控制律结果、台账更新和下一路由。普通单轮小改可只输出 TUI 摘要。
 
 TUI 摘要:
 

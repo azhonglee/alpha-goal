@@ -32,14 +32,13 @@
 
 | 路径 | 用途 |
 |---|---|
-| `.alpha-goal/YYYYMMDD-<slug>/control-state.md` | 可选。闭环台账，记录跨阶段控制状态和产物登记。 |
-| `.alpha-goal/YYYYMMDD-<slug>/alpha-goal.md` | 可选。完整目标契约产物。 |
-| `.alpha-goal/YYYYMMDD-<slug>/system-model.md` | 可选。完整控制模型产物。 |
+| `.alpha-goal/YYYYMMDD-<slug>/alpha-goal.md` | `persisted` / `audited` 时写。完整目标契约产物。 |
+| `.alpha-goal/YYYYMMDD-<slug>/system-model.md` | `persisted` / `audited` 时写。完整控制模型产物。 |
 | `.alpha-goal/YYYYMMDD-<slug>/plan.md` | 可选。持久化动态计划。 |
-| `.alpha-goal/YYYYMMDD-<slug>/iterations/NN-<slice>.md` | 可选。完整迭代记录产物。 |
+| `.alpha-goal/YYYYMMDD-<slug>/iterations/NN-<slice>.md` | `persisted` / `audited` 时写。完整迭代记录产物。 |
 | `.alpha-goal/YYYYMMDD-<slug>/evidence/` | 可选。持久化证据、日志、截图、轨迹或记录引用的检查输出。 |
-| `.alpha-goal/YYYYMMDD-<slug>/schema/` | 可选。机器可读 schema sidecar。 |
-| `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md` | 可选。完整验证结论产物。 |
+| `.alpha-goal/YYYYMMDD-<slug>/schema/` | `persisted` / `audited` 时同步写。机器可读 schema sidecar。 |
+| `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md` | `persisted` / `audited` 时写。完整验证结论产物。 |
 | `.alpha-goal/YYYYMMDD-<slug>/conformance-report.md` | 可选。控制论一致性报告。 |
 
 默认主路径：

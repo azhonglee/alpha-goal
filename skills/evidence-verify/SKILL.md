@@ -11,7 +11,7 @@ description: "判断新鲜证据是否满足已确认的 alpha-goal 目标契约
 
 ## 检查
 
-正向结论必须有风险相称的新鲜证据，覆盖已确认目标契约中的真实意图、预期结果、范围内、范围外 / 非目标、边界、约束、验收信号、决策边界、长期规范 / 计划 / 模型、迭代记录或 diff、控制律结果、闭环台账的 `最新控制路由`、扰动记录、自适应学习记录、调试回执、最强风险、证据下限、产物状态、命令 / 探针 / 检查结果和反馈处理。
+正向结论必须有风险相称的新鲜证据，至少覆盖：已确认目标契约的验收信号和边界、当前 diff 或产物状态、实际运行的命令 / 探针 / 检查结果、最强风险及其处理结论。长期规范 / 计划 / 模型、闭环台账、扰动记录、自适应学习记录、调试回执只在目标契约、改动风险或已存在产物涉及它们时检查，否则标记 `not applicable`。
 
 对每条验收标记 `covered`、`partially covered`、`not covered`、`blocked` 或 `not applicable`。低边界测试不能支撑高边界声明。bug / 根因修复必须先有 `ROOT_CAUSE_CONFIRMED`；`NOT_REPRODUCED` 或 `BLOCKED` 不支持该声明。
 
@@ -37,7 +37,7 @@ description: "判断新鲜证据是否满足已确认的 alpha-goal 目标契约
 - `REFRAME`: 目标契约、模型、范围、非目标、验收或声明边界错误。
 - `BLOCKED`: 缺环境、数据、权限、工具或用户决策。
 
-默认展示 `验证摘要`。高风险、发布、证据争议、恢复 / 交接或用户要求时，写 `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md`。
+默认展示 `验证摘要`。高风险、发布、证据争议、恢复 / 交接或用户要求时，写 `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md` 和 `.alpha-goal/YYYYMMDD-<slug>/schema/verification-verdict.json`。
 
 TUI 摘要:
 
@@ -67,4 +67,4 @@ TUI 摘要:
 - 下一路由:
 ```
 
-路由：`PASS_TO_FINAL` 可最终答复；`NARROW_CLAIM_AND_FINAL` 必须说明窄化；`NEXT_ITERATION` 返回 `control-loop`；`REFRAME` 返回 `alpha-goal` 或 `system-model`；`BLOCKED` 报告最小缺失条件。
+TUI 的下一路由只使用 `final`、`control-loop`、`alpha-goal`、`system-model` 或 `blocker`；schema sidecar 再写 `PASS_TO_FINAL`、`NARROW_CLAIM_AND_FINAL`、`NEXT_ITERATION`、`REFRAME` 或 `BLOCKED`。契约语义错误时返回 `alpha-goal`，系统模型错误时返回 `system-model`；`NARROW_CLAIM_AND_FINAL` 必须说明窄化；`BLOCKED` 报告最小缺失条件。

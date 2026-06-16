@@ -1,0 +1,19 @@
+{
+  "artifact_kind": "verification-verdict",
+  "task_slug": "20260616-neg-final-self",
+  "artifact_path": ".alpha-goal/20260616-neg-final-self/verification-verdict.md",
+  "reference_id": "ref-neg-final-self",
+  "route_state": "evidence-verify",
+  "prior_route": null,
+  "next_route": "final",
+  "target_error": "verification-verdict 自行闭合 final 路由",
+  "control_variable": "final 路由 prior_route",
+  "sensor": "runtime fixture 具体 sidecar 校验",
+  "threshold_or_tolerance": "final 路由必须有可追溯前置路由",
+  "evidence_boundary": "artifact",
+  "residual_error": "缺少前置路由",
+  "claim_boundary": "negative fixture 必须暴露 final 自路由",
+  "stage_decision": "PASS_TO_FINAL",
+  "confirmation_status": "not-required",
+  "generated_at": "2026-06-16T00:01:00Z"
+}

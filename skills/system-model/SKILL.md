@@ -5,7 +5,7 @@ description: "在工程行动前建立控制系统模型：被控对象、状态
 
 # 系统建模
 
-行动前系统边界、状态或反馈不清时使用。默认只读；不改实现、不授权执行、不声明完成。模型只把事实交给 `alpha-goal`，不能直接进入 `control-loop`；最终必须回到 `alpha-goal` 形成目标契约。
+行动前系统边界、状态或反馈不清时使用。默认只读、只输出摘要；不改实现、不默认写文件、不授权执行、不声明完成。模型只把事实交给 `alpha-goal`，不能直接进入 `control-loop`；最终必须回到 `alpha-goal` 形成目标契约。
 
 ## 流程
 
@@ -13,7 +13,7 @@ description: "在工程行动前建立控制系统模型：被控对象、状态
 
 可观测性要说明哪些证据能区分成功 / 失败、竞争根因和声明边界。可控性要说明哪些执行器可用、哪些需要授权、哪些用户自有决策不能代替用户决定。控制器层级无实质耦合时写 `控制器层级: 无实质项`；扰动无实质项时写 `扰动记录: 无实质项`。
 
-高风险、跨模块、多仓、恢复 / 交接、用户要求或紧凑模型不足时，写 `.alpha-goal/YYYYMMDD-<slug>/system-model.md` 并更新 `.alpha-goal/YYYYMMDD-<slug>/control-state.md`。
+只有用户要求 `persisted` / `audited`、任务恢复 / 交接已在维护 `.alpha-goal/`，或紧凑摘要会丢失关键边界时，才写 `.alpha-goal/YYYYMMDD-<slug>/system-model.md` 和 `.alpha-goal/YYYYMMDD-<slug>/schema/system-model.json`。写入前确认 `.alpha-goal/` 已被忽略。
 
 紧凑模型:
 
@@ -61,4 +61,4 @@ TUI 摘要:
 - 推荐路由:
 ```
 
-推荐路由不得把目标语义压缩成最小版本。执行前先到 `alpha-goal`。推荐路由: `alpha-goal` | `blocker`。
+推荐路由不得把目标语义压缩成最小版本。执行前先到 `alpha-goal`。下一路由只使用 `alpha-goal` 或 `blocker`。
