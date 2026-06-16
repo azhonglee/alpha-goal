@@ -19,10 +19,10 @@ Act as the front-end controller. Do not mutate files or make final claims. Reduc
 
 ## Resources
 
-- Read `references/routing.md` when route is unclear.
-- Read `references/contract-and-model.md` when target, evidence, authority, plant, sensors, actuators, ownership, disturbances, or coupling are unclear.
-- Read `references/synthesis.md` for stakeholder/value/indicator conflicts, high coupling, high consequence, or complex-giant-like work.
-- Read `references/ledger.md` before cross-skill, multi-turn, mutation, subagent, risk, or final-claim work.
+Do not load references by default. Use them only when the compact rules below are insufficient:
+
+- `references/contract-and-model.md`: target/evidence/authority or plant/sensor/actuator/ownership/coupling remains unclear after fact discovery.
+- `references/synthesis.md`: stakeholder/value/indicator conflict, high coupling, high consequence, or complex-giant-like work.
 
 ## Process
 
@@ -32,12 +32,12 @@ Discover facts -> Frame -> Model -> Synthesize if needed -> Route -> Ledger hand
 
 1. For vague or overloaded requests, run Discovery Interview before planning: read local rules/docs/code/contracts that are safe and relevant; record facts, conflicts, unknowns, and assumptions.
 2. Classify each gap as discoverable fact, fact needing confirmation, or user-owned decision. Do not ask for discoverable facts until inspected.
-3. Ask at most one high-leverage question per round, only when it changes target, scope, non-goals, acceptance evidence, decision boundaries, authority, risk acceptance, or final claim.
+3. Ask at most one high-leverage question per round, only when it changes target, scope, non-goals, acceptance evidence, decision boundaries, authority, risk acceptance, or final claim. Use `request_user_input` when available; otherwise ask plainly.
 4. If target/scope/evidence/claim/authority is unclear, frame it with a Goal Contract.
 5. If plant/sensor/actuator/ownership/coupling is unclear, produce a Control Model before execution.
 6. If qualitative, value-laden, multi-party, or weakly quantified objectives exist, synthesize and create Indicator Handoff before action/claims.
 7. If user-owned decisions, credentials, permissions, external side effects, public claims, or irreversible commitments are unresolved, ask/block.
-8. If explicit bounded action authority exists, route to `control-loop`; `alpha-goal` may record authority but never creates it.
+8. If explicit bounded action authority exists and material ambiguity is resolved, route to `control-loop`; `alpha-goal` may record authority but never creates it.
 9. If work appears done or any final/ready/safe/complete/repair claim is needed, route to `evidence-verify`.
 
 ## Stability gates
@@ -56,7 +56,7 @@ Before execution-capable routing, verify:
 
 ## Ledger
 
-Use `.alpha-goal/control-state/latest.md` when durable handoff is required. Before writing `.alpha-goal/`, ensure it is ignored; add `.alpha-goal/` to repo root `.gitignore` only as a process-artifact setup mutation. Minimal fields are in `references/ledger.md`.
+Use `.alpha-goal/control-state/latest.md` when durable handoff is required. Before writing `.alpha-goal/`, ensure it is ignored; add `.alpha-goal/` to repo root `.gitignore` only as a process-artifact setup mutation.
 
 TUI summary:
 

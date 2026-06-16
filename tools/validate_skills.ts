@@ -31,7 +31,7 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
   ["synthesis reference preserves qualitative quantitative integration", "skills/alpha-goal/references/synthesis.md", [
     "Human/expert judgments", "Machine evidence/models", "Quantitative indicators", "Qualitative constraints", "User-owned decision", "Indicator handoff candidate"
   ]],
-  ["ledger records cross-stage state", "skills/alpha-goal/references/ledger.md", [
+  ["alpha records cross-stage state", "skills/alpha-goal/SKILL.md", [
     "Latest Control Route:", "Reference", "Current state", "Control law", "Sensor feedback", "User-owned decisions", "Blocked downstream action", "Claim boundary", "Next action"
   ]],
   ["execution has hard safety gates", "skills/control-loop/SKILL.md", [
@@ -150,10 +150,10 @@ function validateSemanticChecks(root: string, errors: string[]): void {
 
 function validateSchemaConsistency(root: string, errors: string[]): void {
   const alpha = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
-  const ledger = readIfFile(path.join(root, "skills/alpha-goal/references/ledger.md"));
   const fields = ["Reference", "Current state", "Last error signal", "Control law", "Sensor feedback", "Route decision", "Next state", "Artifact registry", "Adaptive learning", "Selected skill", "Boundary", "Disturbance", "User-owned decisions", "Blocked downstream action", "Claim boundary", "Next action"];
   const positions = (text: string) => { const scoped = text.slice(Math.max(0, text.toLowerCase().indexOf("latest control route:"))).toLowerCase(); return fields.map(f => scoped.indexOf(`- ${f.toLowerCase()}:`)); };
-  for (const [label, pos] of [["alpha", positions(alpha)], ["ledger", positions(ledger)]] as [string, number[]][]) if (pos.some(v => v < 0) || pos.some((v, i) => i > 0 && v <= pos[i - 1])) errors.push(`ledger schema order mismatch: ${label}`);
+  const alphaPos = positions(alpha);
+  if (alphaPos.some(v => v < 0) || alphaPos.some((v, i) => i > 0 && v <= alphaPos[i - 1])) errors.push("ledger schema order mismatch: alpha");
   const evSkill = readIfFile(path.join(root, "skills/evidence-verify/SKILL.md"));
   const evRef = readIfFile(path.join(root, "skills/evidence-verify/references/verification-verdict-schema.md"));
   if (evSkill.includes("- Gaps:") || evRef.includes("- Gaps:")) errors.push("evidence verdict schema must use only `Gap:`");
