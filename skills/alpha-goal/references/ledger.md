@@ -20,4 +20,4 @@ Latest Control Route:
 - Claim boundary:
 - Next action:
 
-Artifact registry may point to `.alpha-goal/context`, `.alpha-goal/models`, `.alpha-goal/synthesis`, `.alpha-goal/iterations`, `.alpha-goal/evidence`, and `.alpha-goal/verification`.
+Artifact registry may point to `.alpha-goal/context`, `.alpha-goal/models`, `.alpha-goal/synthesis`, `.alpha-goal/iterations`, `.alpha-goal/evidence`, and `.alpha-goal/verification`. Put Discovery Interview notes there when facts, conflicts, confirmations, or user-owned decisions must survive handoff.

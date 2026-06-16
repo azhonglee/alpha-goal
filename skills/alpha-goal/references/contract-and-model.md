@@ -2,6 +2,12 @@
 
 Use before action when reference, evidence, or system boundary is uncertain.
 
+Discovery Record:
+- Inspected facts/sources:
+- Fact conflicts or overloaded terms:
+- Unknowns classified: discoverable fact / fact needing confirmation / user-owned decision
+- Human question: none / one high-leverage question
+
 Goal Contract:
 - Reference state:
 - In scope:

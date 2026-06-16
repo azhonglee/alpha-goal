@@ -6,7 +6,7 @@
 
 | Skill | 职责 |
 | --- | --- |
-| `alpha-goal` | 默认入口：目标成帧、系统建模、复杂决策综合、路由下一控制器、维护 ledger。 |
+| `alpha-goal` | 默认入口：模糊请求先挖掘事实，再目标成帧、系统建模、复杂决策综合、路由下一控制器、维护 ledger。 |
 | `control-loop` | 有界执行/探针：变更安全门、反馈采样、残余误差路由。 |
 | `evidence-verify` | 独立比较器：检查 final/ready/safe/complete/repair 声明与证据边界。 |
 
@@ -15,7 +15,7 @@
 ## 流程
 
 ```text
-INTENT -> alpha-goal(frame/model/synthesize/route) -> control-loop(action+feedback) -> evidence-verify(claim check) -> FINAL or NEXT LOOP
+INTENT -> alpha-goal(discover/frame/model/synthesize/route) -> control-loop(action+feedback) -> evidence-verify(claim check) -> FINAL or NEXT LOOP
 ```
 
 ## 安装
@@ -47,9 +47,10 @@ tools/
 
 ## 原则
 
+- 澄清问题前先做事实挖掘。
 - 目标先于行动。
 - 只建模影响安全控制的内容。
-- 用户拥有的决策会阻断执行。
+- 用户拥有的决策会阻断执行；每轮只问一个高杠杆问题。
 - 有界行动优先于宽泛重构。
 - 最终声明受证据边界约束。
 - 执行与验证保持隔离。

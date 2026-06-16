@@ -4,7 +4,7 @@
 
 | Directory | Purpose |
 |---|---|
-| `skills/alpha-goal/` | Front-end controller: frame, model, synthesize, route, ledger. |
+| `skills/alpha-goal/` | Front-end controller: fact discovery, frame, model, synthesize, route, ledger. |
 | `skills/control-loop/` | Bounded actuator/controller for safe execution and feedback. |
 | `skills/evidence-verify/` | Independent comparator for evidence and claim boundaries. |
 
