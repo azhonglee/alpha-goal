@@ -89,7 +89,7 @@ For simple work, `alpha-goal` chooses the smallest viable path. When target, sys
 
 ## Quick Start
 
-The default install creates an `alpha-goal` symlink under `$HOME/.codex/skills/` that points to this repository's `skills/` tree:
+The default install creates direct symlinks for all six skills under `$HOME/.codex/skills/`:
 
 ```bash
 scripts/install.sh
@@ -125,6 +125,8 @@ After changing skills, scripts, templates, or documentation, run at least:
 ```bash
 npx --yes tsx tools/validate_skills.ts .
 ```
+
+The enforced control-byte budget is the whole `skills/` tree, including `SKILL.md`, `references/`, `agents/`, and skill `scripts/`, capped at 30,000 bytes.
 
 For installation behavior, use a temporary `CODEX_HOME` smoke test as described in [INSTALL.md](INSTALL.md), so real user configuration is not polluted.
 

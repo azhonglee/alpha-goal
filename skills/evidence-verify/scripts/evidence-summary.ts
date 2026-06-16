@@ -1,12 +1,6 @@
 #!/usr/bin/env -S npx --yes tsx
-import {spawnSync} from "node:child_process";
-function out(c:string,a:string[]){const r=spawnSync(c,a,{encoding:"utf8"}); return r.status===0?(r.stdout.trim()||"<empty>"):`<failed:${r.status}>`}
-function ok(c:string,a:string[]){return spawnSync(c,a,{stdio:"ignore"}).status===0}
-function s(n:string,v:string){console.log(`\n== ${n} ==\n${v}`)}
-s("cwd",process.cwd());
-if(!ok("git",["rev-parse","--is-inside-work-tree"])) {s("git","not inside work tree"); process.exit(0)}
-s("git root",out("git",["rev-parse","--show-toplevel"])); s("branch",out("git",["branch","--show-current"]));
-s("status",out("git",["status","--short"])); s("unstaged files",out("git",["diff","--name-only"])); s("staged files",out("git",["diff","--cached","--name-only"]));
-s("diff stat",out("git",["diff","--stat"])); s("cached diff stat",out("git",["diff","--cached","--stat"]));
-s("diff check",ok("git",["diff","--check"])?"pass":"fail"); s("recent commits",out("git",["log","--oneline","-5"]));
-s("reminder","Read-only evidence summary. Map every requirement to authoritative evidence manually.");
+import{spawnSync as x}from"node:child_process";
+const o=(a:string[])=>{const r=x("git",a,{encoding:"utf8"});return r.status===0?(r.stdout.trim()||"<empty>"):`<failed:${r.status}>`}, ok=(a:string[])=>x("git",a,{stdio:"ignore"}).status===0, s=(n:string,v:string)=>console.log(`\n== ${n} ==\n${v}`);
+s("cwd",process.cwd()); if(!ok(["rev-parse","--is-inside-work-tree"])){s("git","not inside work tree");process.exit(0)}
+for(const [n,a] of [["git root",["rev-parse","--show-toplevel"]],["branch",["branch","--show-current"]],["status",["status","--short"]],["unstaged",["diff","--name-only"]],["staged",["diff","--cached","--name-only"]],["diff stat",["diff","--stat"]],["cached stat",["diff","--cached","--stat"]],["recent commits",["log","--oneline","-5"]]] as [string,string[]][])s(n,o(a));
+s("diff check",ok(["diff","--check"])?"pass":"fail"); s("reminder","Git evidence only; map requirements to semantic/test evidence manually.");

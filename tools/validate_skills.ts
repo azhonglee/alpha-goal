@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 const FRONTMATTER_RE = /^---\n(.*?)\n---\n/s;
 const FIELD_RE = /^([A-Za-z0-9_-]+):\s*(.*?)\s*$/;
 const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
+const SKILLS_BYTE_BUDGET = 30_000;
 const REQUIRED_SKILL_NAMES = new Set([
   "alpha-goal",
   "goal-contract",
@@ -461,11 +462,46 @@ export function main(args = process.argv.slice(2)): number {
   validateRuntimeArtifactIgnore(root, errors);
   validateLegacyScriptReferences(root, errors);
   validateLegacySkillReferences(root, errors);
+  validateByteBudget(skills, errors);
+  validateInstallDocumentation(root, errors);
   validateSemanticSmokeTests(root, errors);
   validateFixtureContractTests(root, errors);
+  validateSchemaConsistency(root, errors);
 
   printReport(root, errors, warnings);
   return errors.length > 0 ? 1 : 0;
+}
+
+function validateByteBudget(skills: string, errors: string[]): void {
+  let total = 0;
+  for (const file of walk(skills)) {
+    if (isFile(file)) total += fs.statSync(file).size;
+  }
+  if (total > SKILLS_BYTE_BUDGET) {
+    errors.push(`skills byte budget exceeded: ${total} > ${SKILLS_BYTE_BUDGET}`);
+  }
+}
+
+function validateInstallDocumentation(root: string, errors: string[]): void {
+  const install = path.join(root, "scripts", "install.sh");
+  if (isFile(install)) {
+    const text = fs.readFileSync(install, "utf8");
+    for (const required of ["$target_root/$skill_name", "$source_skill_root/$skill_name/SKILL.md", "$target/SKILL.md"]) {
+      if (!text.includes(required)) errors.push(`scripts/install.sh missing direct-install guard: ${required}`);
+    }
+  }
+  for (const doc of ["INSTALL.md", "MANIFEST.md", "README.md", "README.zh-CN.md"]) {
+    const file = path.join(root, doc);
+    if (!isFile(file)) continue;
+    const text = fs.readFileSync(file, "utf8");
+    if (text.includes("one `${CODEX_HOME:-$HOME/.codex}/skills/alpha-goal` symlink") ||
+        text.includes("creates an `alpha-goal` symlink") ||
+        text.includes("points to this repository's `skills/` tree") ||
+        text.includes("创建一个 `alpha-goal` 软链接") ||
+        text.includes("软链接，目标是本仓库的 `skills/`")) {
+      errors.push(`${doc}: stale aggregate skill symlink wording`);
+    }
+  }
 }
 
 function validateTypeScriptScriptSurface(root: string, errors: string[], warnings: string[]): void {
@@ -640,6 +676,33 @@ function hasSchemaBlock(text: string, label: string): boolean {
   const blockPattern = new RegExp("```(?:text)?\\n(?:(?!```).)*" + escaped, "s");
   const headingPattern = new RegExp("^#{1,6}\\s+" + headingLabel, "m");
   return blockPattern.test(text) || headingPattern.test(text);
+}
+
+function validateSchemaConsistency(root: string, errors: string[]): void {
+  const evSkill = readIfFile(path.join(root, "skills/evidence-verify/SKILL.md"));
+  const evRef = readIfFile(path.join(root, "skills/evidence-verify/references/verification-verdict-schema.md"));
+  if (evSkill.includes("- Gaps:") || evRef.includes("- Gaps:")) errors.push("evidence verdict schema must use only `Gap:`");
+  for (const term of ["PASS_TO_FINAL", "NARROW_CLAIM_AND_FINAL", "NEXT_ITERATION", "REFRAME", "BLOCKED"]) {
+    if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`evidence verdict enum mismatch: ${term}`);
+  }
+  const alpha = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
+  const ledger = readIfFile(path.join(root, "skills/alpha-goal/references/closed-loop-ledger.md"));
+  const ledgerFields = ["Reference", "Current state", "Last error signal", "Control law", "Sensor feedback", "Route decision", "Next state", "Artifact registry", "Adaptive learning", "Selected skill", "Boundary", "Disturbance", "User-owned decisions", "Blocked downstream action", "Claim boundary", "Next action"];
+  for (const field of ledgerFields) {
+    if (!alpha.toLowerCase().includes(field.toLowerCase()) || !ledger.toLowerCase().includes(field.toLowerCase())) errors.push(`ledger schema mismatch: ${field}`);
+  }
+  const positions = (text: string) => { const start = text.toLowerCase().indexOf("latest control route:"); const scoped = text.slice(start < 0 ? 0 : start).toLowerCase(); return ledgerFields.map((field) => scoped.indexOf(`- ${field.toLowerCase()}:`)); };
+  for (const [label, pos] of [["alpha", positions(alpha)], ["ledger", positions(ledger)]] as [string, number[]][]) {
+    if (pos.some((value) => value < 0) || pos.some((value, index) => index > 0 && value <= pos[index - 1])) errors.push(`ledger schema order mismatch: ${label}`);
+  }
+  for (const file of ["skills/control-loop/SKILL.md", "skills/evidence-verify/SKILL.md", "skills/evidence-verify/references/verification-verdict-schema.md"]) {
+    const text = readIfFile(path.join(root, file));
+    for (const field of ["User-owned decisions", "Blocked downstream action"]) if (!text.toLowerCase().includes(field.toLowerCase())) errors.push(`${file}: missing ${field}`);
+  }
+}
+
+function readIfFile(file: string): string {
+  return isFile(file) ? fs.readFileSync(file, "utf8") : "";
 }
 
 function printReport(root: string, errors: string[], warnings: string[]): void {

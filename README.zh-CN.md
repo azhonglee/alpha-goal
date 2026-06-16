@@ -89,7 +89,7 @@ Alpha Goal 把每个请求当作一个控制系统来处理：
 
 ## 快速开始
 
-默认安装到真实 Codex home，并在 `$HOME/.codex/skills/` 下创建一个 `alpha-goal` 软链接，指向本仓库的 `skills/`：
+默认安装到真实 Codex home，并在 `$HOME/.codex/skills/` 下为六个技能创建直接软链接：
 
 ```bash
 scripts/install.sh
@@ -125,6 +125,8 @@ $alpha-goal your_task_description
 ```bash
 npx --yes tsx tools/validate_skills.ts .
 ```
+
+强制控制字节口径为整个 `skills/` 树，包括 `SKILL.md`、`references/`、`agents/` 和技能 `scripts/`，上限 30,000 bytes。
 
 涉及安装行为时，按 [INSTALL.md](INSTALL.md) 使用临时 `CODEX_HOME` 做 smoke test，避免污染真实用户配置。
 

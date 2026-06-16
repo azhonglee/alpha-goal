@@ -1,15 +1,5 @@
 #!/usr/bin/env -S npx --yes tsx
-import {spawnSync} from "node:child_process";
-import fs from "node:fs";
-function run(c:string,a:string[]){const r=spawnSync(c,a,{encoding:"utf8"}); return r.status===0?(r.stdout.trim()||"<empty>"):`<failed:${r.status}>`;}
-function section(n:string,v:string){console.log(`\n== ${n} ==\n${v}`)}
-section("cwd",process.cwd());
-section("git root",run("git",["rev-parse","--show-toplevel"]));
-section("branch",run("git",["branch","--show-current"]));
-section("status",run("git",["status","--short"]));
-section("worktrees",run("git",["worktree","list"]));
-section("submodules",run("git",["submodule","status"]));
-const names=["AGENTS.md","AGENTS.override.md","CLAUDE.md","code_review.md","README.md","package.json","pyproject.toml","go.mod","Cargo.toml","Makefile"];
-const hits:string[]=[]; for(const n of names){if(fs.existsSync(n)) hits.push(n)}
-section("top-level hints",hits.join("\n")||"<none>");
-section("reminder","Read-only snapshot; interpret before mutation.");
+import{spawnSync as x}from"node:child_process";import fs from"node:fs";
+const r=(a:string[])=>x("git",a,{encoding:"utf8"}).stdout?.trim()||"<empty>", ok=(a:string[])=>x("git",a,{stdio:"ignore"}).status===0, s=(n:string,v:string)=>console.log(`\n== ${n} ==\n${v}`);
+s("cwd",process.cwd()); if(ok(["rev-parse","--is-inside-work-tree"])){for(const [n,a] of [["git root",["rev-parse","--show-toplevel"]],["branch",["branch","--show-current"]],["status",["status","--short"]],["worktrees",["worktree","list"]],["submodules",["submodule","status"]]] as [string,string[]][])s(n,r(a));}
+const names=["AGENTS.md","AGENTS.override.md","CLAUDE.md","code_review.md","README.md","package.json","pyproject.toml","go.mod","Cargo.toml","Makefile"];s("top-level hints",names.filter(n=>fs.existsSync(n)).join("\n")||"<none>");s("reminder","Snapshot only; not semantic validation.");

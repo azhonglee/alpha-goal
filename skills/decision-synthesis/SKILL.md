@@ -35,7 +35,7 @@ Synthesis Round:
 - Indicator handoff candidate:
 ```
 
-Distinguish recommendation from decision. The agent may analyze options and propose indicators; the user owns priority/value/risk-acceptance choices, external commitments, credentials, deployment, and irreversible side effects.
+Distinguish recommendation from decision. The agent may analyze options and propose indicators; the user owns priority/value/risk-acceptance choices, external commitments, credentials, deployment, public claims, and irreversible side effects. If a user-owned decision affects target, acceptance, risk tolerance, external side effects, public claim, or irreversible commitment, do not route to `goal-contract`/`control-loop` until resolved; record the unresolved decision and blocked downstream action.
 
 ## Output
 
@@ -63,6 +63,7 @@ Synthesis Summary
 | Tension | |
 | Indicators | |
 | Decision | |
+| User-owned blocker | |
 | Route | |
 ```
 

@@ -5,7 +5,7 @@ description: "Route engineering, debugging, design, and verification through the
 
 # Alpha Goal
 
-Route the task as a cybernetic loop. Keep only the information needed to reduce error.
+Route the task as a cybernetic loop. Keep only the information needed to reduce error. Output follows conversation/repo language; keep schema labels stable.
 
 ## Kernel
 
@@ -15,12 +15,12 @@ Route the task as a cybernetic loop. Keep only the information needed to reduce 
 - Sensor: tests, diffs, logs, probes, review, user evidence.
 - Actuator: bounded edits/probes by `control-loop`.
 - Comparator: `evidence-verify` judges claims against evidence.
-- Memory: lightweight ledger in chat or `.alpha-goal/` when durable handoff is useful.
+- Memory: chat for one-turn low-risk read-only work; durable `.alpha-goal/` ledger for handoff, mutation, risk, or final claims.
 - Disturbance: changed requirements, dirty tree, missing tools, hidden owners, flaky sensors.
 
 ## Resources
 
-Load only when needed: `references/cybernetic-routing.md`, `references/closed-loop-ledger.md`. The durable memory is the Closed-loop Ledger under `.alpha-goal/control-state`; route fields include Control Law, Indicator Handoff, Adaptive Learning, Controller Hierarchy, Disturbance Register, Error signal, and Selected skill.
+Read `references/cybernetic-routing.md` for unclear routes. Read `references/closed-loop-ledger.md` before cross-skill, multi-turn, mutation, subagent, risk, or final-claim work. The Closed-loop Ledger stable latest entry is `.alpha-goal/control-state/latest.md`; stage artifacts attach via registry.
 
 ## Routing
 
@@ -40,12 +40,13 @@ Before execution-capable routing, verify:
 - reference state is explicit enough to observe error;
 - actuator boundary says what may and may not change;
 - sensor evidence exists or the missing observer is named;
+- qualitative or value-laden goals have Indicator Handoff or `decision-synthesis` before execution/claims;
 - strongest disturbance has sensor, containment, and route trigger;
 - final claims will be compared by `evidence-verify`, not asserted by the executor.
 
 ## Ledger
 
-Use the smallest durable record that helps continuity. Before writing `.alpha-goal/`, ensure it is ignored; add `.alpha-goal/` to repo root `.gitignore` only as a process-artifact setup mutation. For simple one-turn work, chat state plus git/test evidence is enough.
+Use the smallest record that preserves control state. Durable ledger is required when work crosses skills or turns, uses subagents, mutates files, has material risk, contains Indicator Handoff/Disturbance Register/Adaptive Learning/Controller Hierarchy, or supports final/ready/safe/complete/repair claims; update `.alpha-goal/control-state/latest.md` unless writes are forbidden/unavailable, then state chat-only limits. Chat-only state is acceptable only for one-turn, low-risk, read-only work with no handoff or readiness claim. Before writing `.alpha-goal/`, ensure it is ignored; add `.alpha-goal/` to repo root `.gitignore` only as a process-artifact setup mutation.
 
 Minimal ledger fields:
 
@@ -53,10 +54,19 @@ Minimal ledger fields:
 Latest Control Route:
 - Reference:
 - Current state:
-- Error signal:
+- Last error signal:
+- Control law:
+- Sensor feedback:
+- Route decision:
+- Next state:
+- Artifact registry:
+- Adaptive learning:
 - Selected skill:
 - Boundary:
 - Disturbance:
+- User-owned decisions:
+- Blocked downstream action:
+- Claim boundary:
 - Next action:
 ```
 

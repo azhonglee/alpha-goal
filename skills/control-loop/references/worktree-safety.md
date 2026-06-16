@@ -1,3 +1,3 @@
 # Worktree Safety
 
-Avoid mutating primary main/master/trunk. Prefer repo-local `.worktrees/codex/<slug>/` when project rules require isolation. Preserve unrelated user changes.
+Do not mutate primary `main/master/trunk`. Use repo-local `.worktrees/codex/<slug>/` when available unless repo policy defines a safer equivalent. Preserve unrelated user changes; never stash/revert/delete them without approval.

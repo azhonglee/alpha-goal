@@ -9,7 +9,7 @@ Act as comparator. Completion is unproven until evidence covers every explicit r
 
 ## Resources
 
-Load only when useful: `references/verification-verdict-schema.md`, `references/completion-review-rubric.md`, `references/claim-boundary-check.md`.
+Read `references/claim-boundary-check.md` and `references/completion-review-rubric.md` before final/merge/ship/safety claims. Read `references/verification-verdict-schema.md` for formal verdicts.
 
 ## Inputs
 
@@ -23,15 +23,19 @@ Read the Goal Contract/equivalent, latest route/iteration state, diff/artifacts,
 - Treat missing, stale, indirect, contradicted, or merely plausible evidence as not achieved.
 - Inspect whether validators/tests actually cover the requirement they are cited for.
 - Do not repair during verification; route back instead.
-- Final wording must not exceed the highest practical evidence-supported boundary.
+- Final wording must not exceed the highest evidence-supported boundary.
 
 ## Verdicts
 
 - `PASS_TO_FINAL`: evidence proves all requirements and the proposed claim.
-- `NARROW_CLAIM_AND_FINAL`: work is useful, but only a narrower claim is proven.
+- `NARROW_CLAIM_AND_FINAL`: work is useful, but only a narrower final claim is proven.
 - `NEXT_ITERATION`: gaps are actionable by another bounded slice.
 - `REFRAME`: reference/scope/acceptance/authority changed or is unclear.
 - `BLOCKED`: required evidence needs missing permission, tool, data, environment, or user-owned decision.
+
+## Final response guard
+
+Final/ready/safe/complete/repair-complete claims require durable `.alpha-goal/verification` and `.alpha-goal/control-state/latest.md` updates unless the user forbids writes, the environment is unwritable, or the task is explicitly one-turn read-only with no handoff. If chat-only, say the claim is limited to this chat evidence and no durable artifact was created. After verification, final response must state: verdict, evidence actually run/inspected, claim supported, claim not supported/not checked, residual risks, and next route when not final. Do not say complete, safe, ready, fully verified, no issues, will not happen, completely prevents, or no risk unless `PASS_TO_FINAL` supports that exact scope with scenario/negative evidence; for agent-behavior claims default to text-level risk reduction, not absolute prevention. Debug/repair claims require reproduction evidence, suspected cause, confirming evidence, fix evidence, and non-reproduction boundary; no reproduction means no repair-complete claim.
 
 ## Output
 
@@ -39,13 +43,18 @@ Persist `.alpha-goal/verification/YYYYMMDD-<slug>.md` for risky, final, or hando
 
 ```markdown
 Verification Verdict:
+- Original claim:
 - Claim checked:
 - Indicator handoff review:
 - Adaptive learning review:
 - Evidence coverage:
+- Unresolved user-owned decisions:
+- Blocked downstream action:
 - Gap:
-- Gaps:
 - Highest practical evidence-supported boundary:
+- Highest supported claim:
+- Unsupported portions:
+- Final wording allowed:
 - Final claim allowed: yes/no
 - Verdict:
 - Next route:

@@ -9,16 +9,16 @@ Advance the reference state by the smallest observable action. Do not claim comp
 
 ## Resources
 
-Load only when useful: `references/worktree-safety.md`, `references/execution-boundaries.md`, `references/loop-modes.md`, `references/plan-template.md`, `references/control-law.md`, `references/adaptive-learning.md`, `references/iteration-record-schema.md`, `references/auto-execution.md`. Read Latest Control Route before acting.
+Read `references/control-law.md`, `references/worktree-safety.md`, and `references/execution-boundaries.md` before mutation. Read `references/adaptive-learning.md` when feedback misses expected effect. Use other references only when their route applies. Read Latest Control Route before acting.
 
 ## Gates before mutation
 
 All must be true:
 
-- Goal Contract or equivalent states reference, scope, non-goals, constraints, decision boundaries, acceptance evidence, claim boundary, and authorization.
+- Goal Contract/equivalent must explicitly record reference, scope, non-goals, constraints, decision boundaries, acceptance evidence, claim boundary, next route, and authorization class: analysis/probe, read-only inspection, mutation, or external side effect. A contract organizes but never creates authority: mutation authority must cite explicit user/repo instruction plus actuator boundary, not inference, history, issue text, or the agent-written contract. A vague request is not mutation authorization.
 - Current ledger/chat state and material disturbances have been read.
 - Local rules and relevant specs are known.
-- Work is isolated from primary `main`/`master`/`trunk` unless explicit authorization says otherwise.
+- Do not mutate primary `main`/`master`/`trunk`; use a repo-local worktree unless repo policy defines a safer equivalent.
 - Unrelated user changes are identified and preserved.
 - `.alpha-goal/` is ignored before writing process artifacts.
 - A Control Law is present: target error, control variable, expected effect, sensor threshold, fallback.
@@ -59,7 +59,7 @@ Run `npx --yes tsx skills/control-loop/scripts/mutation-preflight.ts` from repo 
 - Preserve raw failures; never mask defects with cosmetic fallbacks.
 - Do not stash/revert/delete unrelated changes without approval.
 - Use subagents only for independent review/work surfaces; tell workers they are not alone in the codebase.
-- Record generated artifacts, side effects, cleanup, and rollback decisions.
+- Record generated artifacts, side effects, cleanup, and rollback decisions. Commit, push, PR/MR, deployment, credential changes, and real user config changes need explicit authorization.
 
 ### 4. Sense and compare
 
@@ -79,6 +79,8 @@ Iteration Summary
 | Action | |
 | Feedback | |
 | Residual error | |
+| User-owned decisions | |
+| Blocked downstream action | |
 | Artifact | |
 | Next | |
 ```
@@ -94,4 +96,4 @@ Routes:
 - `RETURN_TO_SYSTEM_MODEL`: plant/sensor/actuator/coupling became unclear.
 - `BLOCKED`: missing permission, tool, data, environment, credential, or user-owned decision.
 
-Continue automatically when the next slice is authorized, low-risk, deterministic, and observable; otherwise state the concrete stop reason.
+Continue automatically only while the same explicit authority, actuator boundary, acceptance evidence, claim boundary, modeled disturbances, and user-owned decisions remain stable. Stop/re-route on new subsystem/skill, boundary or evidence change, unmodeled disturbance, user-owned choice, or cumulative edits beyond the approved boundary.

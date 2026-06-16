@@ -1,4 +1,0 @@
-interface:
-  display_name: "Control Loop"
-  short_description: "Execute bounded control cycles"
-  default_prompt: "Use $control-loop to run one bounded control iteration under the current Goal Contract, then record evidence, Adaptive Learning, and route."

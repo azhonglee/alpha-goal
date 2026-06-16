@@ -6,7 +6,7 @@
 scripts/install.sh
 ```
 
-默认 Codex home 是 `$HOME/.codex`，脚本会创建 `$HOME/.codex/skills/alpha-goal` 软链接，目标是本仓库的 `skills/`。该 `skills/` 树内包含六个必需技能：
+默认 Codex home 是 `$HOME/.codex`，脚本会在 `$HOME/.codex/skills/` 下为本仓库六个必需技能分别创建直接软链接：
 
 安装脚本会通过 `npx --yes tsx` 运行 TypeScript 校验器，因此本机需要可用的 Node.js/npm。
 
@@ -31,11 +31,11 @@ CODEX_HOME=/path/to/codex-home scripts/install.sh
 脚本会：
 
 - 安装前运行源码中的 `tools/validate_skills.ts` 校验六技能套件的结构、引用可发现性、闭环语义烟测和 fixture contract checks。
-- 创建 `${CODEX_HOME:-$HOME/.codex}/skills/alpha-goal` 软链接，目标是本仓库的 `skills/` 目录。
+- 创建 `${CODEX_HOME:-$HOME/.codex}/skills/<skill-name>` 直接软链接，分别指向本仓库 `skills/<skill-name>`。
 - 默认更新 Codex home 的 `AGENTS.md` 中带 `generate-with-template:agents-md` 标记的受管理模板块，并只补齐 `config.toml` 中缺失的模板设置；模板只补齐 multi-agent、child AGENTS 和结构化 `request_user_input` 相关开关，不设置 `sandbox_mode`、休眠行为或不稳定特性警告抑制项。
-- 自动替换指向本仓库旧顶层布局或旧 `skills/alpha-goal` 目录的 `alpha-goal` 软链接。
-- 清理旧版本可能留在目标 `skills/` 下、且指向本仓库的直连技能软链接。
-- 校验目标 `skills/alpha-goal` 软链接指向源码 `skills/` 目录，所有必需 skill 都能通过该链接访问，且旧支持目录没有作为本仓库 skill 安装。
+- 自动替换指向本仓库旧顶层布局、旧 `skills/<skill-name>` 目录或旧聚合 `skills/` 目录的同名技能软链接。
+- 清理旧版本可能留在目标 `skills/` 下、且指向本仓库的非技能支持目录软链接。
+- 校验每个目标 `skills/<skill-name>` 软链接指向对应源码技能目录，且每个已安装技能有顶层 `SKILL.md`。
 
 如果目标位置已有其他软链接：
 
@@ -66,7 +66,10 @@ scripts/install.sh --verbose
 
 ```bash
 tmp_codex_home="$(mktemp -d)"
-CODEX_HOME="$tmp_codex_home" scripts/install.sh
+CODEX_HOME="$tmp_codex_home" scripts/install.sh --no-sync-user-templates
+for skill in alpha-goal goal-contract system-model control-loop evidence-verify decision-synthesis; do
+  test -f "$tmp_codex_home/skills/$skill/SKILL.md"
+done
 npx --yes tsx tools/validate_skills.ts .
 rm -rf "$tmp_codex_home"
 ```
@@ -144,3 +147,7 @@ Expected behavior:
 - It should review Indicator Handoff and Adaptive Learning Record boundaries when present.
 - It should produce a Verification Verdict with judgment.
 - It should route to final, next iteration, reframe, or blocked.
+
+## 控制字节预算
+
+项目校验器强制整个 `skills/` 树不超过 30,000 bytes；该口径包含 `SKILL.md`、`references/`、`agents/` 和技能 `scripts/`。

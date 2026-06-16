@@ -18,9 +18,10 @@ Load only when useful: `references/control-model-schema.md`, `references/observa
 3. Map sensors: tests, logs, diffs, metrics, static checks, manual probes; mark latency and blind spots.
 4. Map actuators: files, commands, configs, scripts, docs, agents, external systems; mark authority limits.
 5. Rate observability and controllability as enough / weak / missing.
-6. Register material disturbances with likelihood, impact, sensor, containment, route trigger.
-7. If multiple local controllers affect one global objective, create Controller Hierarchy: global objective, local controller, coupling variable, arbitration rule, escalation trigger.
-8. Propose candidate Control Laws for `control-loop`: target error, control variable, expected effect, sensor threshold, fallback.
+6. Map authority / ownership: owner or source of truth, writable by agent yes/no/unknown, approval needed, generated/external-managed boundary.
+7. Register material disturbances with likelihood, impact, sensor, containment, route trigger.
+8. If multiple local controllers affect one global objective, create Controller Hierarchy: global objective, local controller, coupling variable, arbitration rule, escalation trigger.
+9. Propose candidate Control Laws for `control-loop`: target error, control variable, expected effect, sensor threshold, fallback.
 
 Use `npx --yes tsx skills/system-model/scripts/repo-sensor-snapshot.ts` from repo root, or equivalent manual checks, when repository facts are needed.
 
@@ -36,6 +37,9 @@ Control Model:
 - Controllability:
 - Actuators:
 - Sensors:
+- Authority / ownership:
+- Unresolved user-owned decisions: none / ...
+- Blocked downstream action: none / ...
 - Controller Hierarchy: none material / ...
 - Disturbance Register: none material / ...
 - Candidate control laws:
@@ -56,4 +60,4 @@ Model Summary
 | Next | |
 ```
 
-Route to `goal-contract` if the reference needs revision; to `control-loop` when a bounded law is ready; to `decision-synthesis` when arbitration is value-laden; to blocker/user when sensors or authority are missing.
+If unresolved user-owned decisions or blocked downstream action is not none, next route is ask/blocker, not control-loop. Local controllers must not replace the global objective; unclear coupling/arbitration routes to synthesis or user decision. Route to `goal-contract` if the reference needs revision; to `control-loop` when a bounded law is ready; to `decision-synthesis` when arbitration is value-laden; to blocker/user when sensors or authority are missing.

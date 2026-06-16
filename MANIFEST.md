@@ -23,7 +23,7 @@
 
 | Path | Mutates state? | Purpose |
 |---|---:|---|
-| `scripts/install.sh` | Yes | Creates one `${CODEX_HOME:-$HOME/.codex}/skills/alpha-goal` symlink to the repository `skills/` tree, replaces same-repo legacy skill links, merges user config templates by default unless `--no-sync-user-templates` is passed, cleans legacy support links, validates the six-skill suite, and validates the target symlink. |
+| `scripts/install.sh` | Yes | Creates direct `${CODEX_HOME:-$HOME/.codex}/skills/<skill-name>` symlinks to each repository skill directory, replaces same-repo legacy skill links, merges user config templates by default unless `--no-sync-user-templates` is passed, cleans legacy support links, validates the six-skill suite, and validates installed top-level `SKILL.md` files. |
 | `skills/system-model/scripts/repo-sensor-snapshot.ts` | No | Prints a repository sensor snapshot for system modeling and observability checks. |
 | `skills/control-loop/scripts/mutation-preflight.ts` | No | Prints git root, branch, status, worktrees, local rule files, ignored worktree/evidence paths, and submodules. |
 | `skills/evidence-verify/scripts/evidence-summary.ts` | No | Prints changed files, diff stat, diff check status, and recent commits. |
@@ -34,7 +34,7 @@
 
 | Path | Purpose |
 |---|---|
-| `.alpha-goal/control-state/YYYYMMDD-<slug>.md` | Optional Closed-loop Ledger for cross-stage control state and artifact registry: full Latest Control Route, reference, current state, artifact paths, feedback, residual error, and next route. |
+| `.alpha-goal/control-state/YYYYMMDD-<slug>.md` | Closed-loop Ledger for cross-stage control state and artifact registry; required when alpha-goal ledger triggers apply: full Latest Control Route, reference, current state, artifact paths, feedback, residual error, and next route. |
 | `.alpha-goal/context/YYYYMMDD-<slug>-goal-contract.md` | Optional full Goal Contract artifact. |
 | `.alpha-goal/models/YYYYMMDD-<slug>-system-model.md` | Optional full Control Model artifact. |
 | `.alpha-goal/synthesis/YYYYMMDD-<slug>-decision-synthesis.md` | Optional full Decision Synthesis Record artifact. |
@@ -48,3 +48,7 @@
 ```text
 INTENT -> alpha-goal(route/stability) -> decision-synthesis? -> system-model? -> goal-contract(reference input) -> control-loop(feedback control) -> evidence-verify(error detection) -> FINAL
 ```
+
+## Byte Budget
+
+The enforced control-byte budget is the whole `skills/` tree, including `SKILL.md`, `references/`, `agents/`, and skill `scripts/`, capped at 30,000 bytes.
