@@ -56,7 +56,7 @@ const LEGACY_ARTIFACT_PATH_REFERENCES = [
   ".alpha-goal/interviews",
 ];
 
-const MISLEADING_SEMANTIC_CONTRACTION_TERMS = ["最小语义"];
+const MISLEADING_SEMANTIC_CONTRACTION_TERMS = ["最小语义", "收窄草案", "收窄声明"];
 
 const GOAL_CONTRACT_FORBIDDEN_AMBIGUITY_TERMS = [
   "low / medium / high",
@@ -408,6 +408,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "指标转译",
       "量化模糊度闸门",
       "模糊度必须 `<= 0.15`",
+      "分值依据",
       "不使用定性等级",
       "不选择配置档位",
       "候选解释",
@@ -418,7 +419,10 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "完整语义候选",
       "选定语义",
       "未选解释",
+      "用户裁决依据",
+      "待用户确认的收窄候选",
       "不得把执行切片的最小范围当成目标语义",
+      "不得把任一候选解释写成选定语义",
       "目标契约默认是草案",
       "待用户确认",
       "stage_decision: ROUTE_TO_USER",
@@ -777,6 +781,7 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
       "- 参考状态:",
       "- 语义对齐:",
       "- 模糊度数值:",
+      "- 分值依据:",
       "- 范围:",
       "- 控制模型:",
       "- 指标转译:",
@@ -924,6 +929,7 @@ const DEFAULT_TUI_PROJECTION_GUARDS = [
       "契约摘要",
       "| 字段 | 内容 |",
       "| 参考 |",
+      "| 语义状态 |",
       "| 范围边界 |",
       "| 证据 |",
       "| 产物 |",

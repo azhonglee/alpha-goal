@@ -2,11 +2,11 @@
 
 需要形成可持久化或可交接的目标契约时，使用本参考。
 
-默认把完整契约持久化到 `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/goal-contract.json` 写入 schema sidecar。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `契约摘要`，包含参考状态、范围边界、证据、产物路径和下一步动作。
+默认把完整契约持久化到 `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md`。需要机器校验或恢复安全性时，在 `.alpha-goal/YYYYMMDD-<slug>/schema/goal-contract.json` 写入 schema sidecar。除非确实需要完整聊天输出，否则 TUI 应展示 Markdown 表格形式的 `契约摘要`，包含参考状态、语义状态、范围边界、证据、产物路径和下一步动作。
 
 目标契约默认是草案。用户确认前，下一路由写 `user`，schema sidecar 使用 `stage_decision: ROUTE_TO_USER` 和 `authorization_status: pending`。只有用户明确接受同一契约版本后，才写 `stage_decision: CONTRACT_APPROVED`、`authorization_status: approved` 并路由到 `control-loop`。
 
-目标契约记录完整语义，不记录被裁剪后的执行语义。必须保留完整语义候选、选定语义、未选解释、取舍依据和覆盖边界；首轮最小安全执行切片属于后续 `control-loop`，不能替代目标语义。
+目标契约记录完整语义，不记录被裁剪后的执行语义。必须保留完整语义候选、选定语义、未选解释、取舍依据、用户裁决依据和覆盖边界；首轮最小安全执行切片属于后续 `control-loop`，不能替代目标语义。用户未裁决的候选解释只能写入待确认草案，不能写成选定语义或参考状态。
 
 ```text
 目标契约:
@@ -18,6 +18,7 @@
   - 存量系统:
   - 控制:
   - 交接阈值: <= 0.15
+  - 分值依据:
 - 确认状态: 草案 | 待用户确认 | 已批准 | 被取代
 - 参考状态:
   - 期望结果:
@@ -28,6 +29,8 @@
   - 选定语义:
   - 未选解释:
   - 取舍依据:
+  - 用户裁决依据:
+  - 待确认候选:
   - 覆盖边界:
 - 当前状态:
   - 已观察事实:
