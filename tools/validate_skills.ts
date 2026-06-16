@@ -21,6 +21,21 @@ const LEGACY_SCRIPT_REFERENCES = [
   "scripts/evidence-summary.sh", "evidence-summary.sh",
 ];
 
+const DESCRIPTION_SEMANTIC_CHECKS: Record<string, { required: string[]; forbidden: string[] }> = {
+  "alpha-goal": {
+    required: ["Front-end router", "unclear", "discover facts before asking", "clarify intent/scope/non-goals/acceptance/authority", "Do not use for", "bounded execution", "final evidence verdicts"],
+    forbidden: ["execute or probe safely", "completion, correctness, readiness, safety"],
+  },
+  "control-loop": {
+    required: ["Bounded execution controller", "Use only after", "specific read-only probe or mutation boundary", "one observable iteration", "Do not use for ambiguous planning", "final completion/readiness claims"],
+    forbidden: ["discover facts before asking", "final evidence verdicts"],
+  },
+  "evidence-verify": {
+    required: ["Independent evidence comparator", "Use only when", "fresh evidence", "explicit Goal Contract or claim boundary", "Do not use to plan or implement changes"],
+    forbidden: ["discover facts before asking", "act, sense feedback"],
+  },
+};
+
 const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
   ["front controller frames/models/synthesizes/routes", "skills/alpha-goal/SKILL.md", [
     "Discover facts -> Pressure-test -> Confirm one decision", "Discovery interview", "minimum preflight", "prompt-safe summary", "repo language as evidence", "source-of-truth arbitration", "[from-code][auto-confirmed]", "[from-user]", "auto-confirm only descriptive facts", "residual ambiguity", "one high-leverage", "exactly one `questions[]` item", "weakest readiness gate", "Pressure-test", "materially change execution", "non-goals", "decision boundaries", "mandatory gates", "Generic edit verbs", "read-only/probe authority does not imply mutation authority", "minimal reproducer", "Durable docs", "Close the interview only", "Goal Contract", "Control Model", "Indicator Handoff", "user-owned decisions", "control-loop", "evidence-verify", "never creates", "Route Summary"
@@ -97,12 +112,21 @@ function validateSkillDir(root: string, dir: string, errors: string[], warnings:
     if (fm.name !== skillName) errors.push(`${skillName}: frontmatter name ${JSON.stringify(fm.name)} does not match directory`);
     if (!fm.description) errors.push(`${skillName}: SKILL.md frontmatter missing description`);
     if (fm.description && fm.description.length > 500) warnings.push(`${skillName}: description is long (${fm.description.length} chars)`);
+    validateDescriptionBoundary(skillName, fm.description, errors);
   } catch (error) { errors.push(`${skillName}: invalid SKILL.md frontmatter: ${errorMessage(error)}`); }
   const refs = path.join(dir, "references");
   if (isDirectory(refs)) for (const ref of fs.readdirSync(refs).filter(f => isFile(path.join(refs, f))).sort()) {
     const rel = `references/${ref}`;
     if (!text.includes(rel)) errors.push(`${skillName}: reference is not discoverable from SKILL.md: ${rel}`);
   }
+}
+
+function validateDescriptionBoundary(skillName: string, description: string, errors: string[]): void {
+  const check = DESCRIPTION_SEMANTIC_CHECKS[skillName];
+  if (!check) return;
+  const lower = description.toLowerCase();
+  for (const term of check.required) if (!lower.includes(term.toLowerCase())) errors.push(`${skillName}: description missing boundary term: ${term}`);
+  for (const term of check.forbidden) if (lower.includes(term.toLowerCase())) errors.push(`${skillName}: description overlaps another skill trigger: ${term}`);
 }
 
 function validateByteBudget(skills: string, errors: string[]): void {

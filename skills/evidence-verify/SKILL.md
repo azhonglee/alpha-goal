@@ -1,6 +1,6 @@
 ---
 name: evidence-verify
-description: "Judge whether fresh evidence satisfies a Goal Contract and supports completion, correctness, merge-readiness, ship-readiness, safety, or a narrowed final claim. Use for final comparator/error-boundary decisions, not implementation."
+description: "Independent evidence comparator. Use only when artifacts, commands, logs, tests, or other fresh evidence must be judged against an explicit Goal Contract or claim boundary for completion, correctness, readiness, safety, or a narrowed final claim. Do not use to plan or implement changes."
 ---
 
 # Evidence Verify

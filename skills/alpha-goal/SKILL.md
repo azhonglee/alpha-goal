@@ -1,6 +1,6 @@
 ---
 name: alpha-goal
-description: "Default entry for closed-loop engineering work and ambiguous task clarification: discover facts before asking, frame the goal, model the system, synthesize complex decisions, route to bounded execution or evidence verification, and maintain minimal ledger state. Use when the next safe step is unclear or the task needs planning, audit, design, debugging, implementation routing, readiness judgment, or fact-first human confirmation."
+description: "Front-end router for unclear or underspecified engineering work. Use when Codex must discover facts before asking, clarify intent/scope/non-goals/acceptance/authority, model or synthesize the system, choose the next controller, or maintain route ledger. Do not use for already-approved bounded execution iterations or final evidence verdicts."
 ---
 
 # Alpha Goal

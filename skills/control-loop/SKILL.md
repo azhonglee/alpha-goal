@@ -1,6 +1,6 @@
 ---
 name: control-loop
-description: "Run bounded control iterations under an approved Goal Contract: plan one slice, preflight, execute or probe safely, sense feedback, compare error, record evidence, and route to continue, harden, verify, reframe, or block."
+description: "Bounded execution controller. Use only after an explicit Goal Contract or equivalent grants a specific read-only probe or mutation boundary, and Codex must run one observable iteration: preflight, act, sense feedback, compare error, and route. Do not use for ambiguous planning, user-owned decisions, or final completion/readiness claims."
 ---
 
 # Control Loop
