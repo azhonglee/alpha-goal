@@ -13,5 +13,7 @@
   "evidence_boundary": "module",
   "residual_error": "none known for fixture",
   "claim_boundary": "fixture documents a bounded verification verdict sidecar",
+  "stage_decision": "PASS_TO_FINAL",
+  "authorization_status": "not-required",
   "generated_at": "2026-06-16T00:00:00Z"
 }

@@ -16,7 +16,7 @@ control-loop -> control-loop | evidence-verify | alpha-goal | system-model | blo
 evidence-verify -> final | control-loop | goal-contract | system-model | blocker
 ```
 
-Reject or reframe these transitions unless an explicit no-write chat state explains the exception:
+Reject or reframe these transitions. A no-write chat state may replace persisted ledger or artifact files only when file persistence is blocked; it never waives these safety gates:
 
 - `control-loop` before a reference and actuator boundary exist.
 - `evidence-verify` before fresh evidence exists.
@@ -40,36 +40,179 @@ Conditional transition rules:
 
 ## Schema sidecar
 
-When a task is long-running, high-risk, or likely to resume, emit a machine-readable Schema sidecar in `.alpha-goal/YYYYMMDD-<slug>/schema/` for the stage artifact. The sidecar is JSON and uses these required keys so a validator can check route recovery, state transitions, evidence boundaries, and claim boundaries:
+When a task is long-running, high-risk, or likely to resume, emit a machine-readable Schema sidecar in `.alpha-goal/YYYYMMDD-<slug>/schema/` for the stage artifact. The sidecar is JSON and must conform to this JSON Schema so a validator can check route recovery, state transitions, evidence boundaries, stage decisions, authorization, and claim boundaries:
 
 ```json
 {
-  "artifact_kind": "goal-contract | system-model | decision-synthesis | iteration-record | verification-verdict | conformance-report",
-  "task_slug": "YYYYMMDD-<slug>",
-  "artifact_path": ".alpha-goal/YYYYMMDD-<slug>/artifact.md",
-  "reference_id": "stable identifier or null",
-  "route_state": "alpha-goal | decision-synthesis | system-model | goal-contract | control-loop | evidence-verify | final | user | blocker",
-  "prior_route": "previous route or null",
-  "next_route": "next route or final",
-  "target_error": "mismatch being reduced or null",
-  "control_variable": "approved control variable or null",
-  "sensor": "fresh evidence signal or null",
-  "threshold_or_tolerance": "decision threshold or null",
-  "evidence_boundary": "artifact | helper | module | service | user-visible | production | safety | custom",
-  "residual_error": "remaining mismatch or null",
-  "claim_boundary": "widest claim supported by evidence or null",
-  "generated_at": "ISO-8601 timestamp"
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifact_kind",
+    "task_slug",
+    "artifact_path",
+    "reference_id",
+    "route_state",
+    "prior_route",
+    "next_route",
+    "target_error",
+    "control_variable",
+    "sensor",
+    "threshold_or_tolerance",
+    "evidence_boundary",
+    "residual_error",
+    "claim_boundary",
+    "stage_decision",
+    "authorization_status",
+    "generated_at"
+  ],
+  "properties": {
+    "artifact_kind": {
+      "type": "string",
+      "enum": [
+        "goal-contract",
+        "system-model",
+        "decision-synthesis",
+        "iteration-record",
+        "verification-verdict",
+        "conformance-report"
+      ]
+    },
+    "task_slug": {
+      "type": "string",
+      "pattern": "^\\d{8}-[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "artifact_path": {
+      "type": "string",
+      "pattern": "^\\.alpha-goal/\\d{8}-[a-z0-9]+(?:-[a-z0-9]+)*/.+\\.md$"
+    },
+    "reference_id": {
+      "type": ["string", "null"]
+    },
+    "route_state": {
+      "type": "string",
+      "enum": [
+        "alpha-goal",
+        "decision-synthesis",
+        "system-model",
+        "goal-contract",
+        "control-loop",
+        "evidence-verify",
+        "final",
+        "user",
+        "blocker"
+      ]
+    },
+    "prior_route": {
+      "type": ["string", "null"],
+      "enum": [
+        "alpha-goal",
+        "decision-synthesis",
+        "system-model",
+        "goal-contract",
+        "control-loop",
+        "evidence-verify",
+        "final",
+        "user",
+        "blocker",
+        null
+      ]
+    },
+    "next_route": {
+      "type": "string",
+      "enum": [
+        "alpha-goal",
+        "decision-synthesis",
+        "system-model",
+        "goal-contract",
+        "control-loop",
+        "evidence-verify",
+        "final",
+        "user",
+        "blocker"
+      ]
+    },
+    "target_error": {
+      "type": ["string", "null"]
+    },
+    "control_variable": {
+      "type": ["string", "null"]
+    },
+    "sensor": {
+      "type": ["string", "null"]
+    },
+    "threshold_or_tolerance": {
+      "type": ["string", "null"]
+    },
+    "evidence_boundary": {
+      "type": "string",
+      "enum": [
+        "artifact",
+        "helper",
+        "module",
+        "service",
+        "user-visible",
+        "production",
+        "safety",
+        "custom"
+      ]
+    },
+    "residual_error": {
+      "type": ["string", "null"]
+    },
+    "claim_boundary": {
+      "type": ["string", "null"]
+    },
+    "stage_decision": {
+      "type": "string",
+      "enum": [
+        "ROUTE_TO_GOAL_CONTRACT",
+        "ROUTE_TO_SYSTEM_MODEL",
+        "ROUTE_TO_CONTROL_LOOP",
+        "ROUTE_TO_EVIDENCE_VERIFY",
+        "ROUTE_TO_USER",
+        "CONTRACT_APPROVED",
+        "CONTRACT_REFRAME",
+        "ITERATION_CONTINUES",
+        "ITERATION_HARDEN",
+        "ITERATION_READY_FOR_VERIFY",
+        "RETURN_TO_ALPHA_GOAL",
+        "RETURN_TO_SYSTEM_MODEL",
+        "BLOCKED",
+        "PASS_TO_FINAL",
+        "NARROW_CLAIM_AND_FINAL",
+        "NEXT_ITERATION",
+        "REFRAME",
+        "CONFORMANCE_PASS",
+        "CONFORMANCE_FAIL"
+      ]
+    },
+    "authorization_status": {
+      "type": "string",
+      "enum": [
+        "approved",
+        "not-required",
+        "pending",
+        "blocked",
+        "unknown"
+      ]
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
 }
 ```
 
 Stage-specific required keys:
 
-- `goal-contract`: `reference_id`, `claim_boundary`, `evidence_boundary`, `next_route`.
-- `system-model`: `sensor`, `evidence_boundary`, `next_route`.
-- `decision-synthesis`: `reference_id` when reusing an existing Goal Contract, otherwise `claim_boundary` or `next_route`.
-- `iteration-record`: `target_error`, `control_variable`, `sensor`, `threshold_or_tolerance`, `residual_error`, `next_route`.
-- `verification-verdict`: `sensor`, `evidence_boundary`, `claim_boundary`, `residual_error`, `next_route`.
-- `conformance-report`: `artifact_path`, `route_state`, `prior_route`, `next_route`, `residual_error`, `claim_boundary`.
+- `goal-contract`: `reference_id`, `claim_boundary`, `evidence_boundary`, `next_route`, `stage_decision`, `authorization_status`; routing to `control-loop` requires `authorization_status: approved`.
+- `system-model`: `sensor`, `evidence_boundary`, `next_route`, `stage_decision`; routing to `control-loop` requires an existing `reference_id` and `authorization_status: approved`.
+- `decision-synthesis`: meaningful `next_route` and either `reference_id` or `claim_boundary`; routing to `control-loop` requires an existing `reference_id` and `authorization_status: approved`.
+- `iteration-record`: `target_error`, `control_variable`, `sensor`, `threshold_or_tolerance`, `residual_error`, `next_route`, `stage_decision`, `authorization_status`.
+- `verification-verdict`: `sensor`, `evidence_boundary`, `claim_boundary`, `residual_error`, `next_route`, `stage_decision`.
+- `conformance-report`: `artifact_path`, `route_state`, `prior_route`, `next_route`, `residual_error`, `claim_boundary`, `stage_decision`.
 
 ## Conformance report
 

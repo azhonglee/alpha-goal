@@ -4,7 +4,7 @@
   "artifact_path": ".alpha-goal/20260616-cybernetic-fixture/goal-contract.md",
   "reference_id": "ref-cybernetic-fixture",
   "route_state": "goal-contract",
-  "prior_route": "alpha-goal",
+  "prior_route": "system-model",
   "next_route": "control-loop",
   "target_error": "unclear reference and acceptance evidence",
   "control_variable": "goal contract fields",
@@ -13,5 +13,7 @@
   "evidence_boundary": "artifact",
   "residual_error": "none known for fixture",
   "claim_boundary": "fixture documents a bounded goal contract sidecar",
+  "stage_decision": "CONTRACT_APPROVED",
+  "authorization_status": "approved",
   "generated_at": "2026-06-16T00:00:00Z"
 }

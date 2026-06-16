@@ -30,7 +30,7 @@ CODEX_HOME=/path/to/codex-home scripts/install.sh
 
 脚本会：
 
-- 安装前运行源码中的 `tools/validate_skills.ts` 校验六技能套件的结构、引用可发现性、闭环语义烟测和 fixture contract checks。
+- 安装前运行源码中的 `tools/validate_skills.ts` 校验六技能套件的结构、引用可发现性、安装脚本语法、配置模板解析、闭环语义烟测、schema sidecar 和 fixture contract checks。
 - 创建 `${CODEX_HOME:-$HOME/.codex}/skills/alpha-goal` 软链接，目标是本仓库的 `skills/` 目录。
 - 默认更新 Codex home 的 `AGENTS.md` 中带 `generate-with-template:agents-md` 标记的受管理模板块，并只补齐 `config.toml` 中缺失的模板设置；模板只补齐 multi-agent、child AGENTS 和结构化 `request_user_input` 相关开关，不设置 `sandbox_mode`、休眠行为或不稳定特性警告抑制项。
 - 自动替换指向本仓库旧顶层布局或旧 `skills/alpha-goal` 目录的 `alpha-goal` 软链接。

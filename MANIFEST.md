@@ -28,7 +28,7 @@
 | `skills/system-model/scripts/repo-sensor-snapshot.ts` | No | Prints a repository sensor snapshot for system modeling and observability checks. |
 | `skills/control-loop/scripts/mutation-preflight.ts` | No | Prints git root, branch, status, worktrees, local rule files, ignored worktree/evidence paths, and submodules. |
 | `skills/evidence-verify/scripts/evidence-summary.ts` | No | Prints changed files, diff stat, diff check status, and recent commits. |
-| `tools/validate_skills.ts` | No | Canonical lightweight validator for the closed-loop six-skill suite, including reference discoverability, task-scoped artifact layout checks, schema sidecar fixture/runtime checks, route consistency checks, semantic smoke checks, legacy path guards, and fixture contract checks. |
+| `tools/validate_skills.ts` | No | Canonical lightweight validator for the closed-loop six-skill suite, including reference discoverability, task-scoped artifact layout checks, install-surface checks, schema sidecar fixture/runtime checks, route consistency checks, semantic smoke checks, legacy path guards, and fixture contract checks. |
 | `tools/validate_skillset.ts` | No | Compatibility wrapper for older validation commands; delegates to `tools/validate_skills.ts`. |
 
 ## Runtime Artifacts

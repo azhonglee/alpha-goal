@@ -3,6 +3,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const FRONTMATTER_RE = /^---\n(.*?)\n---\n/s;
@@ -69,6 +70,8 @@ const SIDECAR_REQUIRED_KEYS = [
   "evidence_boundary",
   "residual_error",
   "claim_boundary",
+  "stage_decision",
+  "authorization_status",
   "generated_at",
 ];
 
@@ -95,6 +98,7 @@ const SIDECAR_ROUTE_STATES = [
 
 const SIDECAR_FIXTURE_DIR = "tools/fixtures/schema-sidecars";
 const SIDECAR_TASK_SLUG_RE = /^\d{8}-[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const ALLOWED_ALPHA_GOAL_NON_ARTIFACT_PATHS = new Set(["preflight-check"]);
 
 const SIDECAR_EVIDENCE_BOUNDARIES = [
   "artifact",
@@ -107,9 +111,46 @@ const SIDECAR_EVIDENCE_BOUNDARIES = [
   "custom",
 ];
 
+const SIDECAR_AUTHORIZATION_STATUSES = [
+  "approved",
+  "not-required",
+  "pending",
+  "blocked",
+  "unknown",
+];
+
+const SIDECAR_STAGE_DECISIONS = [
+  "ROUTE_TO_GOAL_CONTRACT",
+  "ROUTE_TO_SYSTEM_MODEL",
+  "ROUTE_TO_CONTROL_LOOP",
+  "ROUTE_TO_EVIDENCE_VERIFY",
+  "ROUTE_TO_USER",
+  "CONTRACT_APPROVED",
+  "CONTRACT_REFRAME",
+  "ITERATION_CONTINUES",
+  "ITERATION_HARDEN",
+  "ITERATION_READY_FOR_VERIFY",
+  "RETURN_TO_ALPHA_GOAL",
+  "RETURN_TO_SYSTEM_MODEL",
+  "BLOCKED",
+  "PASS_TO_FINAL",
+  "NARROW_CLAIM_AND_FINAL",
+  "NEXT_ITERATION",
+  "REFRAME",
+  "CONFORMANCE_PASS",
+  "CONFORMANCE_FAIL",
+];
+
 const STAGE_REQUIRED_SIDECAR_KEYS: Record<string, string[]> = {
-  "goal-contract": ["reference_id", "claim_boundary", "evidence_boundary", "next_route"],
-  "system-model": ["sensor", "evidence_boundary", "next_route"],
+  "goal-contract": [
+    "reference_id",
+    "claim_boundary",
+    "evidence_boundary",
+    "next_route",
+    "stage_decision",
+    "authorization_status",
+  ],
+  "system-model": ["sensor", "evidence_boundary", "next_route", "stage_decision"],
   "iteration-record": [
     "target_error",
     "control_variable",
@@ -117,6 +158,8 @@ const STAGE_REQUIRED_SIDECAR_KEYS: Record<string, string[]> = {
     "threshold_or_tolerance",
     "residual_error",
     "next_route",
+    "stage_decision",
+    "authorization_status",
   ],
   "verification-verdict": [
     "sensor",
@@ -124,6 +167,7 @@ const STAGE_REQUIRED_SIDECAR_KEYS: Record<string, string[]> = {
     "claim_boundary",
     "residual_error",
     "next_route",
+    "stage_decision",
   ],
   "conformance-report": [
     "artifact_path",
@@ -132,8 +176,60 @@ const STAGE_REQUIRED_SIDECAR_KEYS: Record<string, string[]> = {
     "next_route",
     "residual_error",
     "claim_boundary",
+    "stage_decision",
   ],
 };
+
+const SIDECAR_FIXTURE_TRACE = [
+  {
+    kind: "decision-synthesis",
+    route_state: "decision-synthesis",
+    prior_route: "alpha-goal",
+    next_route: "system-model",
+    stage_decision: "ROUTE_TO_SYSTEM_MODEL",
+    authorization_status: "not-required",
+  },
+  {
+    kind: "system-model",
+    route_state: "system-model",
+    prior_route: "decision-synthesis",
+    next_route: "goal-contract",
+    stage_decision: "ROUTE_TO_GOAL_CONTRACT",
+    authorization_status: "not-required",
+  },
+  {
+    kind: "goal-contract",
+    route_state: "goal-contract",
+    prior_route: "system-model",
+    next_route: "control-loop",
+    stage_decision: "CONTRACT_APPROVED",
+    authorization_status: "approved",
+  },
+  {
+    kind: "iteration-record",
+    route_state: "control-loop",
+    prior_route: "goal-contract",
+    next_route: "evidence-verify",
+    stage_decision: "ITERATION_READY_FOR_VERIFY",
+    authorization_status: "approved",
+  },
+  {
+    kind: "verification-verdict",
+    route_state: "evidence-verify",
+    prior_route: "control-loop",
+    next_route: "final",
+    stage_decision: "PASS_TO_FINAL",
+    authorization_status: "not-required",
+  },
+  {
+    kind: "conformance-report",
+    route_state: "evidence-verify",
+    prior_route: "control-loop",
+    next_route: "final",
+    stage_decision: "CONFORMANCE_PASS",
+    authorization_status: "not-required",
+  },
+];
 
 const ROUTE_TRANSITIONS: Record<string, string[]> = {
   START: ["alpha-goal"],
@@ -344,6 +440,8 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "comparator before final",
       "decision-synthesis -> control-loop",
       "\"artifact_kind\"",
+      "\"stage_decision\"",
+      "\"authorization_status\"",
       "Stage-specific required keys",
     ],
   ],
@@ -681,10 +779,12 @@ export function main(args = process.argv.slice(2)): number {
   }
 
   validateTypeScriptScriptSurface(root, errors, warnings);
-  validateRuntimeArtifactIgnore(root, errors);
+  validateInstallSurface(root, errors);
+  validateRuntimeArtifactIgnores(root, errors);
   validateLegacyScriptReferences(root, errors);
   validateLegacySkillReferences(root, errors);
   validateLegacyArtifactPathReferences(root, errors);
+  validateTaskScopedArtifactPathShape(root, errors);
   validateSchemaSidecarContract(root, errors);
   validateSchemaSidecarFixtures(root, errors);
   validateRuntimeSchemaSidecars(root, errors);
@@ -730,10 +830,50 @@ function validateTypeScriptScriptSurface(root: string, errors: string[], warning
   }
 }
 
-function validateRuntimeArtifactIgnore(root: string, errors: string[]): void {
+function validateInstallSurface(root: string, errors: string[]): void {
+  const installScript = path.join(root, "scripts/install.sh");
+  if (!isFile(installScript)) {
+    errors.push("missing install script: scripts/install.sh");
+  } else {
+    runReadOnlyCheck(root, errors, "install script syntax", "bash", ["-n", "scripts/install.sh"]);
+  }
+
+  const configTemplate = path.join(root, "templates/config.toml");
+  if (!isFile(configTemplate)) {
+    errors.push("missing config template: templates/config.toml");
+  } else {
+    runReadOnlyCheck(root, errors, "config template TOML parse", "python3", [
+      "-c",
+      "import pathlib,tomllib; tomllib.loads(pathlib.Path('templates/config.toml').read_text())",
+    ]);
+  }
+}
+
+function runReadOnlyCheck(
+  root: string,
+  errors: string[],
+  label: string,
+  command: string,
+  args: string[],
+): void {
+  const result = spawnSync(command, args, {
+    cwd: root,
+    encoding: "utf8",
+  });
+  if (result.error) {
+    errors.push(`${label}: failed to run ${command}: ${result.error.message}`);
+    return;
+  }
+  if (result.status !== 0) {
+    const output = [result.stderr, result.stdout].filter(Boolean).join("\n").trim();
+    errors.push(`${label}: command failed${output ? `: ${output}` : ""}`);
+  }
+}
+
+function validateRuntimeArtifactIgnores(root: string, errors: string[]): void {
   const gitignore = path.join(root, ".gitignore");
   if (!isFile(gitignore)) {
-    errors.push("missing .gitignore with required .alpha-goal/ runtime artifact ignore");
+    errors.push("missing .gitignore with required .alpha-goal/ and .worktrees/ ignores");
     return;
   }
 
@@ -743,6 +883,9 @@ function validateRuntimeArtifactIgnore(root: string, errors: string[]): void {
     .map((line) => line.trim());
   if (!lines.includes(".alpha-goal/")) {
     errors.push(".gitignore must include .alpha-goal/ for default ledger and runtime artifacts");
+  }
+  if (!lines.includes(".worktrees/")) {
+    errors.push(".gitignore must include .worktrees/ before repository-local worktrees are used");
   }
 }
 
@@ -812,6 +955,33 @@ function validateLegacyArtifactPathReferences(root: string, errors: string[]): v
   }
 }
 
+function validateTaskScopedArtifactPathShape(root: string, errors: string[]): void {
+  const pathPattern = /\.alpha-goal\/([^/`\s),]+)/g;
+  for (const rel of documentationFiles(root)) {
+    const file = path.join(root, rel);
+    if (!isFile(file)) {
+      continue;
+    }
+
+    const text = fs.readFileSync(file, "utf8");
+    for (const match of text.matchAll(pathPattern)) {
+      const segment = match[1];
+      if (ALLOWED_ALPHA_GOAL_NON_ARTIFACT_PATHS.has(segment)) {
+        continue;
+      }
+      if (segment.startsWith("\\\\d{8}")) {
+        continue;
+      }
+      if (segment === "YYYYMMDD-<slug>" || SIDECAR_TASK_SLUG_RE.test(segment)) {
+        continue;
+      }
+      errors.push(
+        `${rel}: .alpha-goal runtime artifact path must be task-scoped, found .alpha-goal/${segment}`,
+      );
+    }
+  }
+}
+
 function validateSchemaSidecarContract(root: string, errors: string[]): void {
   const rel = "skills/alpha-goal/references/cybernetic-conformance.md";
   const file = path.join(root, rel);
@@ -831,29 +1001,44 @@ function validateSchemaSidecarContract(root: string, errors: string[]): void {
   try {
     schema = JSON.parse(match[1]);
   } catch (error) {
-    errors.push(`${rel}: invalid JSON Schema sidecar example: ${errorMessage(error)}`);
+    errors.push(`${rel}: invalid JSON Schema sidecar block: ${errorMessage(error)}`);
+    return;
+  }
+
+  if (schema.$schema !== "https://json-schema.org/draft/2020-12/schema") {
+    errors.push(`${rel}: schema sidecar must declare JSON Schema draft 2020-12`);
+  }
+  if (schema.type !== "object") {
+    errors.push(`${rel}: schema sidecar root type must be object`);
+  }
+  if (schema.additionalProperties !== false) {
+    errors.push(`${rel}: schema sidecar must set additionalProperties to false`);
+  }
+
+  const required = stringArray(schema.required);
+  for (const key of SIDECAR_REQUIRED_KEYS) {
+    if (!required.includes(key)) {
+      errors.push(`${rel}: schema sidecar required list omits ${JSON.stringify(key)}`);
+    }
+  }
+
+  const properties = objectValue(schema.properties);
+  if (!properties) {
+    errors.push(`${rel}: schema sidecar missing properties object`);
     return;
   }
 
   for (const key of SIDECAR_REQUIRED_KEYS) {
-    if (!Object.hasOwn(schema, key)) {
-      errors.push(`${rel}: schema sidecar missing required key ${JSON.stringify(key)}`);
+    if (!Object.hasOwn(properties, key)) {
+      errors.push(`${rel}: schema sidecar properties omit ${JSON.stringify(key)}`);
     }
   }
 
-  const artifactKind = String(schema.artifact_kind ?? "");
-  for (const kind of SIDECAR_ARTIFACT_KINDS) {
-    if (!artifactKind.includes(kind)) {
-      errors.push(`${rel}: schema sidecar artifact_kind omits ${kind}`);
-    }
-  }
-
-  const routeState = String(schema.route_state ?? "");
-  for (const state of SIDECAR_ROUTE_STATES) {
-    if (!routeState.includes(state)) {
-      errors.push(`${rel}: schema sidecar route_state omits ${state}`);
-    }
-  }
+  validateSchemaEnum(rel, properties, "artifact_kind", SIDECAR_ARTIFACT_KINDS, errors);
+  validateSchemaEnum(rel, properties, "route_state", SIDECAR_ROUTE_STATES, errors);
+  validateSchemaEnum(rel, properties, "evidence_boundary", SIDECAR_EVIDENCE_BOUNDARIES, errors);
+  validateSchemaEnum(rel, properties, "stage_decision", SIDECAR_STAGE_DECISIONS, errors);
+  validateSchemaEnum(rel, properties, "authorization_status", SIDECAR_AUTHORIZATION_STATUSES, errors);
 
   for (const kind of SIDECAR_ARTIFACT_KINDS) {
     if (!text.includes(`- \`${kind}\``)) {
@@ -870,6 +1055,7 @@ function validateSchemaSidecarFixtures(root: string, errors: string[]): void {
   }
 
   const expectedFiles = new Set(SIDECAR_ARTIFACT_KINDS.map((kind) => `${kind}.json`));
+  const fixturesByKind = new Map<string, Record<string, unknown>>();
   const actualFiles = fs
     .readdirSync(dir, { withFileTypes: true })
     .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
@@ -904,7 +1090,10 @@ function validateSchemaSidecarFixtures(root: string, errors: string[]): void {
     }
 
     validateConcreteSidecarFixture(rel, fixture, kind, errors);
+    fixturesByKind.set(kind, fixture);
   }
+
+  validateSchemaSidecarFixtureTrace(fixturesByKind, errors);
 }
 
 function validateConcreteSidecarFixture(
@@ -943,6 +1132,8 @@ function validateConcreteSidecarFixture(
     errors.push(`${rel}: artifact_path must stay under .alpha-goal/${taskSlug}/`);
   } else if (!artifactPath.endsWith(".md")) {
     errors.push(`${rel}: artifact_path must point to the Markdown stage artifact`);
+  } else if (taskSlug && artifactKind && !artifactPathMatchesKind(artifactKind, taskSlug, artifactPath)) {
+    errors.push(`${rel}: artifact_path does not match artifact_kind ${artifactKind}`);
   }
 
   const routeState = stringValue(fixture.route_state);
@@ -978,6 +1169,47 @@ function validateConcreteSidecarFixture(
     errors.push(`${rel}: evidence_boundary has unsupported value ${JSON.stringify(evidenceBoundary)}`);
   }
 
+  const stageDecision = stringValue(fixture.stage_decision);
+  if (!stageDecision) {
+    errors.push(`${rel}: stage_decision must be a non-empty string`);
+  } else if (!SIDECAR_STAGE_DECISIONS.includes(stageDecision)) {
+    errors.push(`${rel}: stage_decision has unsupported value ${JSON.stringify(stageDecision)}`);
+  } else if (nextRoute && !stageDecisionMatchesRoute(stageDecision, nextRoute)) {
+    errors.push(`${rel}: stage_decision ${stageDecision} does not support next_route ${nextRoute}`);
+  }
+
+  const authorizationStatus = stringValue(fixture.authorization_status);
+  if (!authorizationStatus) {
+    errors.push(`${rel}: authorization_status must be a non-empty string`);
+  } else if (!SIDECAR_AUTHORIZATION_STATUSES.includes(authorizationStatus)) {
+    errors.push(`${rel}: authorization_status has unsupported value ${JSON.stringify(authorizationStatus)}`);
+  }
+
+  if (
+    nextRoute === "control-loop" &&
+    routeState !== "control-loop" &&
+    authorizationStatus !== "approved"
+  ) {
+    errors.push(`${rel}: routing into control-loop requires authorization_status=approved`);
+  }
+  if (routeState === "control-loop" && authorizationStatus !== "approved") {
+    errors.push(`${rel}: control-loop sidecar requires authorization_status=approved`);
+  }
+  if (
+    expectedKind === "decision-synthesis" &&
+    nextRoute === "control-loop" &&
+    !isMeaningfulSidecarValue(fixture.reference_id)
+  ) {
+    errors.push(`${rel}: decision-synthesis -> control-loop requires an existing reference_id`);
+  }
+  if (
+    expectedKind === "system-model" &&
+    nextRoute === "control-loop" &&
+    !isMeaningfulSidecarValue(fixture.reference_id)
+  ) {
+    errors.push(`${rel}: system-model -> control-loop requires an existing reference_id`);
+  }
+
   const generatedAt = stringValue(fixture.generated_at);
   if (!generatedAt) {
     errors.push(`${rel}: generated_at must be a non-empty ISO-8601 string`);
@@ -1010,6 +1242,8 @@ function validateRuntimeSchemaSidecars(root: string, errors: string[]): void {
     return;
   }
 
+  validateRuntimeArtifactTree(root, runtimeRoot, errors);
+  const sidecarsByTask = new Map<string, Record<string, unknown>[]>();
   const sidecarFiles = walk(runtimeRoot).filter((file) => {
     if (!isFile(file) || !file.endsWith(".json")) {
       return false;
@@ -1039,8 +1273,129 @@ function validateRuntimeSchemaSidecars(root: string, errors: string[]): void {
       continue;
     }
 
+    if (!sidecarFilenameMatchesKind(artifactKind, path.basename(file))) {
+      errors.push(`${rel}: runtime schema sidecar filename does not match artifact_kind ${artifactKind}`);
+    }
+
     const taskSlug = rel.match(/^\.alpha-goal\/([^/]+)\//)?.[1];
     validateConcreteSidecarFixture(rel, sidecar, artifactKind, errors, taskSlug);
+    if (taskSlug) {
+      const group = sidecarsByTask.get(taskSlug) ?? [];
+      group.push(sidecar);
+      sidecarsByTask.set(taskSlug, group);
+    }
+  }
+
+  validateRuntimeSidecarTraceGroups(root, sidecarsByTask, errors);
+}
+
+function validateRuntimeArtifactTree(root: string, runtimeRoot: string, errors: string[]): void {
+  const entries = fs.readdirSync(runtimeRoot, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+    if (!SIDECAR_TASK_SLUG_RE.test(entry.name)) {
+      errors.push(`.alpha-goal/${entry.name}: runtime artifact directory must be task-scoped`);
+    }
+  }
+}
+
+function validateRuntimeSidecarTraceGroups(
+  root: string,
+  sidecarsByTask: Map<string, Record<string, unknown>[]>,
+  errors: string[],
+): void {
+  for (const [taskSlug, sidecars] of sidecarsByTask) {
+    const relPrefix = `.alpha-goal/${taskSlug}/schema`;
+    const referenceIds = new Set(
+      sidecars
+        .map((sidecar) => stringValue(sidecar.reference_id))
+        .filter((value): value is string => Boolean(value)),
+    );
+    if (referenceIds.size > 1) {
+      errors.push(`${relPrefix}: runtime sidecars must share one reference_id`);
+    }
+
+    const hasControlLoop = sidecars.some((sidecar) => sidecar.route_state === "control-loop");
+    const hasApprovedContract = sidecars.some(
+      (sidecar) =>
+        sidecar.artifact_kind === "goal-contract" &&
+        sidecar.next_route === "control-loop" &&
+        sidecar.authorization_status === "approved",
+    );
+    if (hasControlLoop && !hasApprovedContract) {
+      errors.push(`${relPrefix}: control-loop runtime sidecar requires an approved goal-contract sidecar`);
+    }
+
+    const hasFinalRoute = sidecars.some((sidecar) => sidecar.next_route === "final");
+    const hasVerification = sidecars.some((sidecar) => sidecar.artifact_kind === "verification-verdict");
+    if (hasFinalRoute && !hasVerification) {
+      errors.push(`${relPrefix}: final route requires a verification-verdict sidecar`);
+    }
+
+    for (const sidecar of sidecars) {
+      const artifactPath = stringValue(sidecar.artifact_path);
+      if (artifactPath && !isFile(path.join(root, artifactPath))) {
+        errors.push(`${relPrefix}: sidecar artifact_path does not exist: ${artifactPath}`);
+      }
+
+      const priorRoute = nullableStringValue(sidecar.prior_route);
+      const routeState = stringValue(sidecar.route_state);
+      if (!priorRoute || priorRoute === "alpha-goal" || !routeState) {
+        continue;
+      }
+
+      const hasIncomingSource = sidecars.some(
+        (candidate) => candidate.route_state === priorRoute && candidate.next_route === routeState,
+      );
+      if (!hasIncomingSource) {
+        errors.push(`${relPrefix}: no prior sidecar connects ${priorRoute} -> ${routeState}`);
+      }
+    }
+  }
+}
+
+function validateSchemaSidecarFixtureTrace(
+  fixturesByKind: Map<string, Record<string, unknown>>,
+  errors: string[],
+): void {
+  const taskSlugs = new Set<string>();
+  const referenceIds = new Set<string>();
+
+  for (const step of SIDECAR_FIXTURE_TRACE) {
+    const rel = `${SIDECAR_FIXTURE_DIR}/${step.kind}.json`;
+    const fixture = fixturesByKind.get(step.kind);
+    if (!fixture) {
+      continue;
+    }
+
+    const taskSlug = stringValue(fixture.task_slug);
+    if (taskSlug) {
+      taskSlugs.add(taskSlug);
+    }
+
+    const referenceId = stringValue(fixture.reference_id);
+    if (referenceId) {
+      referenceIds.add(referenceId);
+    }
+
+    for (const key of ["route_state", "prior_route", "next_route"] as const) {
+      const expected = step[key];
+      const actual = stringValue(fixture[key]);
+      if (actual !== expected) {
+        errors.push(`${rel}: fixture trace requires ${key}=${expected}, got ${String(actual)}`);
+      }
+    }
+  }
+
+  if (taskSlugs.size !== 1) {
+    errors.push(`schema sidecar fixture trace must use exactly one task_slug, got ${[...taskSlugs].join(", ")}`);
+  }
+  if (referenceIds.size !== 1) {
+    errors.push(
+      `schema sidecar fixture trace must use exactly one reference_id, got ${[...referenceIds].join(", ")}`,
+    );
   }
 }
 
@@ -1166,6 +1521,26 @@ function hasSchemaBlock(text: string, label: string): boolean {
   return blockPattern.test(text) || headingPattern.test(text);
 }
 
+function validateSchemaEnum(
+  rel: string,
+  properties: Record<string, unknown>,
+  propertyName: string,
+  expectedValues: string[],
+  errors: string[],
+): void {
+  const property = objectValue(properties[propertyName]);
+  if (!property) {
+    errors.push(`${rel}: schema sidecar property ${propertyName} must be an object`);
+    return;
+  }
+  const actualValues = stringArray(property.enum);
+  for (const expected of expectedValues) {
+    if (!actualValues.includes(expected)) {
+      errors.push(`${rel}: schema sidecar ${propertyName} enum omits ${expected}`);
+    }
+  }
+}
+
 function readRequiredText(root: string, rel: string, errors: string[]): string | undefined {
   const file = path.join(root, rel);
   if (!isFile(file)) {
@@ -1173,6 +1548,20 @@ function readRequiredText(root: string, rel: string, errors: string[]): string |
     return undefined;
   }
   return fs.readFileSync(file, "utf8");
+}
+
+function objectValue(value: unknown): Record<string, unknown> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+  return value as Record<string, unknown>;
+}
+
+function stringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.filter((item): item is string => typeof item === "string");
 }
 
 function stringValue(value: unknown): string | undefined {
@@ -1196,6 +1585,81 @@ function isRouteToken(value: string): boolean {
 
 function canTransition(from: string, to: string): boolean {
   return (ROUTE_TRANSITIONS[from] ?? []).includes(to);
+}
+
+function stageDecisionMatchesRoute(stageDecision: string, nextRoute: string): boolean {
+  switch (stageDecision) {
+    case "ROUTE_TO_GOAL_CONTRACT":
+      return nextRoute === "goal-contract";
+    case "ROUTE_TO_SYSTEM_MODEL":
+    case "RETURN_TO_SYSTEM_MODEL":
+      return nextRoute === "system-model";
+    case "ROUTE_TO_CONTROL_LOOP":
+    case "CONTRACT_APPROVED":
+    case "ITERATION_CONTINUES":
+    case "ITERATION_HARDEN":
+    case "NEXT_ITERATION":
+      return nextRoute === "control-loop";
+    case "ROUTE_TO_EVIDENCE_VERIFY":
+    case "ITERATION_READY_FOR_VERIFY":
+      return nextRoute === "evidence-verify";
+    case "ROUTE_TO_USER":
+      return nextRoute === "user";
+    case "RETURN_TO_ALPHA_GOAL":
+      return nextRoute === "alpha-goal";
+    case "PASS_TO_FINAL":
+    case "NARROW_CLAIM_AND_FINAL":
+    case "CONFORMANCE_PASS":
+      return nextRoute === "final";
+    case "REFRAME":
+    case "CONTRACT_REFRAME":
+      return ["goal-contract", "system-model", "alpha-goal", "user"].includes(nextRoute);
+    case "CONFORMANCE_FAIL":
+      return ["control-loop", "goal-contract", "system-model", "blocker"].includes(nextRoute);
+    case "BLOCKED":
+      return nextRoute === "blocker";
+    default:
+      return false;
+  }
+}
+
+function artifactPathMatchesKind(kind: string, taskSlug: string, artifactPath: string): boolean {
+  const root = `.alpha-goal/${taskSlug}/`;
+  switch (kind) {
+    case "goal-contract":
+      return artifactPath === `${root}goal-contract.md`;
+    case "system-model":
+      return artifactPath === `${root}system-model.md`;
+    case "decision-synthesis":
+      return artifactPath === `${root}decision-synthesis.md`;
+    case "iteration-record":
+      return new RegExp(`^${escapeRegex(root)}iterations/[^/]+\\.md$`).test(artifactPath);
+    case "verification-verdict":
+      return artifactPath === `${root}verification-verdict.md`;
+    case "conformance-report":
+      return artifactPath === `${root}conformance-report.md`;
+    default:
+      return false;
+  }
+}
+
+function sidecarFilenameMatchesKind(kind: string, filename: string): boolean {
+  switch (kind) {
+    case "goal-contract":
+      return filename === "goal-contract.json";
+    case "system-model":
+      return filename === "system-model.json";
+    case "decision-synthesis":
+      return filename === "decision-synthesis.json";
+    case "iteration-record":
+      return /^iteration-(record|\d+|[a-z0-9]+(?:-[a-z0-9]+)*)\.json$/.test(filename);
+    case "verification-verdict":
+      return filename === "verification-verdict.json";
+    case "conformance-report":
+      return filename === "conformance-report.json";
+    default:
+      return false;
+  }
 }
 
 function printReport(root: string, errors: string[], warnings: string[]): void {

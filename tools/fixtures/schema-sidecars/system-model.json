@@ -4,7 +4,7 @@
   "artifact_path": ".alpha-goal/20260616-cybernetic-fixture/system-model.md",
   "reference_id": "ref-cybernetic-fixture",
   "route_state": "system-model",
-  "prior_route": "alpha-goal",
+  "prior_route": "decision-synthesis",
   "next_route": "goal-contract",
   "target_error": "unclear plant boundary and sensors",
   "control_variable": "system model fields",
@@ -13,5 +13,7 @@
   "evidence_boundary": "artifact",
   "residual_error": "remaining contract drafting",
   "claim_boundary": "fixture documents a bounded system model sidecar",
+  "stage_decision": "ROUTE_TO_GOAL_CONTRACT",
+  "authorization_status": "not-required",
   "generated_at": "2026-06-16T00:00:00Z"
 }

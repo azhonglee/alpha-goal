@@ -13,5 +13,7 @@
   "evidence_boundary": "artifact",
   "residual_error": "none known for fixture",
   "claim_boundary": "fixture documents a bounded conformance report sidecar",
+  "stage_decision": "CONFORMANCE_PASS",
+  "authorization_status": "not-required",
   "generated_at": "2026-06-16T00:00:00Z"
 }
