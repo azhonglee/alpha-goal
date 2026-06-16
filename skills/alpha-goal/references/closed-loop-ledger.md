@@ -172,7 +172,7 @@ Route Summary
 | Next | |
 ```
 
-- Stage summaries and the control-loop `执行检查` should use the same two-column Markdown table shape: field and value, with Chinese heading and field labels by default. If the user explicitly asks for another language, translate the same field semantics without showing multiple language templates. Values should be concise and point to artifact paths for long details. If a runtime cannot render Markdown tables, use a compact two-column plain-text table instead of bullet lists. Print full artifacts or raw internal Control Law blocks in chat only when the user asks, persistence is blocked, or a decision/risk requires explicit user review.
+- Stage summaries and the control-loop `执行检查` should use compact two-column Markdown table shapes. The control-loop `执行检查` uses Chinese heading and field labels by default; if the user explicitly asks for another language, translate the same field semantics without showing multiple language templates. Other stage summaries keep their established labels unless separately localized. Values should be concise and point to artifact paths for long details. If a runtime cannot render Markdown tables, use a compact two-column plain-text table instead of bullet lists. Print full artifacts or raw internal Control Law blocks in chat only when the user asks, persistence is blocked, or a decision/risk requires explicit user review.
 - Do not duplicate full command output; link or summarize evidence and point to `.alpha-goal/YYYYMMDD-<slug>/evidence/` when durable logs are needed.
 - Do not store secrets, tokens, credentials, private user data, or production-only sensitive records.
 - Label stale or superseded state instead of silently overwriting it.

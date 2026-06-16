@@ -534,6 +534,7 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "Adaptive learning",
       "执行检查",
       "Chinese heading and field labels by default",
+      "Other stage summaries keep their established labels unless separately localized",
       "raw internal Control Law blocks",
     ],
   ],
@@ -848,19 +849,48 @@ const DEFAULT_TUI_PROJECTION_GUARDS = [
     name: "control loop pre-action TUI",
     path: "skills/control-loop/SKILL.md",
     anchor: "TUI pre-action check:",
+    end_anchor: "Create or update a durable plan",
   },
   {
     name: "control law TUI projection",
     path: "skills/control-loop/references/control-law.md",
     anchor: "## TUI Projection",
+    end_anchor: "## Internal Schema",
   },
 ];
 
-const RAW_CONTROL_LAW_LINE_RE =
-  /(?:^|\n)\s*(?:Control Law:|- Target error:|- Control variable:|- Control action or probe:|- Variables held constant:|- Expected effect:|- Sensor:|- Threshold \/ tolerance:|- Feedback latency:|- Signal noise:|- Confidence:|- Damping \/ anti-oscillation:|- Saturation \/ containment:|- Feedback timing:|- Fallback action:|- Stop \/ reframe trigger:)/;
+const RAW_CONTROL_LAW_FIELD_PATTERNS = [
+  "control law",
+  "target error",
+  "control variable",
+  "control action or probe",
+  "variables held constant",
+  "expected effect",
+  "sensor",
+  "threshold / tolerance",
+  "feedback latency",
+  "signal noise",
+  "confidence",
+  "damping / anti-oscillation",
+  "saturation / containment",
+  "feedback timing",
+  "fallback action",
+  "stop / reframe trigger",
+];
 
 const MULTILINGUAL_TUI_EXAMPLE_RE =
-  /(?:For English conversations|English Check|Execution Check|\| Problem \||\| Action \||\| Held constant \||\| Main risk \||\| Fallback \|)/;
+  /(?:For English conversations|For non-Chinese users|English Check|Execution Check|English version|English variant|bilingual|translation|中英|双语|英文|对照|执行检查\s*\/|\/\s*execution|\| Problem \||\| Issue \||\| Action \||\| Held constant \||\| Evidence \||\| Main risk \||\| Fallback \|)/i;
+
+const DEFAULT_TUI_TEMPLATE_TERMS = [
+  "执行检查",
+  "| 字段 | 内容 |",
+  "| 问题 |",
+  "| 本轮动作 |",
+  "| 保持不变 |",
+  "| 验收证据 |",
+  "| 主要风险 |",
+  "| 失败处理 |",
+];
 
 const FIXTURE_CONTRACT_TESTS = [
   {
@@ -2105,18 +2135,34 @@ function validateDefaultTuiProjectionGuards(root: string, errors: string[]): voi
     }
 
     const text = fs.readFileSync(file, "utf8");
-    const section = textSectionAfterAnchor(text, guard.anchor);
+    const section = textBetweenAnchors(text, guard.anchor, guard.end_anchor);
     if (!section) {
       errors.push(
-        `default TUI projection guard ${JSON.stringify(guard.name)} failed in ${guard.path}: missing anchor ${guard.anchor}`,
+        `default TUI projection guard ${JSON.stringify(guard.name)} failed in ${guard.path}: missing anchor boundary ${guard.anchor}${guard.end_anchor ? ` -> ${guard.end_anchor}` : ""}`,
       );
       continue;
     }
 
-    const match = section.match(RAW_CONTROL_LAW_LINE_RE);
-    if (match) {
+    const codeFences = codeFenceBlocks(section);
+    if (codeFences.length !== 1) {
       errors.push(
-        `default TUI projection guard ${JSON.stringify(guard.name)} failed in ${guard.path}: default TUI section contains raw Control Law field ${JSON.stringify(match[0].trim())}`,
+        `default TUI projection guard ${JSON.stringify(guard.name)} failed in ${guard.path}: default TUI section must contain exactly one template code fence, got ${codeFences.length}`,
+      );
+    } else {
+      const missingTemplateTerms = DEFAULT_TUI_TEMPLATE_TERMS.filter(
+        (term) => !codeFences[0].content.includes(term),
+      );
+      if (missingTemplateTerms.length > 0) {
+        errors.push(
+          `default TUI projection guard ${JSON.stringify(guard.name)} failed in ${guard.path}: default TUI template is missing ${missingTemplateTerms.join(", ")}`,
+        );
+      }
+    }
+
+    const rawControlLaw = rawControlLawFieldLeak(section);
+    if (rawControlLaw) {
+      errors.push(
+        `default TUI projection guard ${JSON.stringify(guard.name)} failed in ${guard.path}: default TUI section contains raw Control Law field ${JSON.stringify(rawControlLaw)}`,
       );
     }
 
@@ -2245,6 +2291,65 @@ function textSectionAfterAnchor(text: string, anchor: string): string | undefine
     return after.slice(0, nextHeading + 1);
   }
   return after;
+}
+
+function textBetweenAnchors(
+  text: string,
+  startAnchor: string,
+  endAnchor?: string,
+): string | undefined {
+  const start = text.indexOf(startAnchor);
+  if (start < 0) {
+    return undefined;
+  }
+
+  const after = text.slice(start);
+  if (!endAnchor) {
+    return textSectionAfterAnchor(text, startAnchor);
+  }
+
+  const end = after.indexOf(endAnchor, startAnchor.length);
+  if (end < 0) {
+    return undefined;
+  }
+  return after.slice(0, end);
+}
+
+function codeFenceBlocks(text: string): Array<{ language: string; content: string }> {
+  const blocks: Array<{ language: string; content: string }> = [];
+  const fenceRe = /^```([A-Za-z0-9_-]*)[^\n]*\n([\s\S]*?)^```[ \t]*$/gm;
+  for (const match of text.matchAll(fenceRe)) {
+    blocks.push({ language: match[1] ?? "", content: match[2] ?? "" });
+  }
+  return blocks;
+}
+
+function rawControlLawFieldLeak(text: string): string | undefined {
+  for (const line of normalizeMarkdownControlLines(text)) {
+    for (const field of RAW_CONTROL_LAW_FIELD_PATTERNS) {
+      const escapedField = escapeRegex(field);
+      const fieldRe = new RegExp(`^(?:[-*+]\\s*)?${escapedField}\\s*:`);
+      const tableFieldRe = new RegExp(`^\\|\\s*${escapedField}\\s*\\|`);
+      if (fieldRe.test(line) || tableFieldRe.test(line)) {
+        return line;
+      }
+    }
+  }
+  return undefined;
+}
+
+function normalizeMarkdownControlLines(text: string): string[] {
+  return text
+    .split(/\r?\n/)
+    .map((line) =>
+      line
+        .replace(/[：]/g, ":")
+        .replace(/[`*_]/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase(),
+    )
+    .filter(Boolean);
 }
 
 function validateSchemaEnum(
