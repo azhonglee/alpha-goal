@@ -2,7 +2,9 @@
 
 Use this reference when planning or reviewing a `control-loop` slice that changes implementation, configuration, tests, documents, prompts, generated artifacts, or diagnostic probes. A control law explains why the selected action should reduce the target error and how feedback will decide the next route.
 
-## Schema
+## Internal Schema
+
+Persist this full schema in the Iteration Record, Closed-loop Ledger, or schema sidecar when it affects recovery, audit, or verification. It is not the default TUI shape.
 
 ```text
 Control Law:
@@ -22,6 +24,36 @@ Control Law:
 - Fallback action:
 - Stop / reframe trigger:
 ```
+
+## TUI Projection
+
+Show a concise `Execution Check` table in the TUI by default. Use it as a human-readable projection of the internal Control Law:
+
+```markdown
+Execution Check
+
+| Field | Value |
+| --- | --- |
+| Problem | |
+| Action | |
+| Held constant | |
+| Evidence | |
+| Main risk | |
+| Fallback | |
+```
+
+Map fields as follows:
+
+| TUI field | Internal source |
+| --- | --- |
+| Problem | Target error |
+| Action | Control variable plus control action or probe |
+| Held constant | Variables held constant plus saturation / containment |
+| Evidence | Sensor plus threshold / tolerance |
+| Main risk | Signal noise, damping / anti-oscillation, saturation / containment, or strongest material risk |
+| Fallback | Fallback action plus stop / reframe trigger |
+
+Keep the TUI values short enough to scan. Put long reasoning, exact thresholds, and stability guards in the persisted Control Law. Print the raw `Control Law:` block in chat only when the user asks, persistence is blocked, or a high-risk slice requires explicit review of every field before mutation.
 
 ## Rules
 

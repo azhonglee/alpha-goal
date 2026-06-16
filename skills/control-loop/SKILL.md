@@ -65,7 +65,26 @@ Dynamic planning answers only the current iteration:
 - success, failure, feedback, and reframe routes;
 - whether a durable plan is necessary.
 
-Before executing a mutation or diagnostic-probe slice, emit a compact `Control Law:` block or an equivalent clearly labeled plan section. Do not execute if the target error, approved control variable, observable sensor threshold, or fallback action is missing. For repeated, noisy, broad, or high-risk loops, also include feedback latency, signal noise, confidence, damping / anti-oscillation, and saturation / containment before acting again.
+Before executing a mutation or diagnostic-probe slice, prepare the full Control Law and persist it in the Iteration Record or Closed-loop Ledger. Do not print the raw `Control Law:` block in the TUI by default. Show a user-facing `Execution Check` table instead, then execute only if the target error, approved control variable, observable sensor threshold, and fallback action are present in the persisted Control Law. For repeated, noisy, broad, or high-risk loops, the persisted Control Law must also include feedback latency, signal noise, confidence, damping / anti-oscillation, and saturation / containment before acting again.
+
+Print the raw `Control Law:` block in chat only when the user asks for it, file persistence is blocked, or the slice is high-risk enough that the user must review every control field before mutation.
+
+TUI pre-action check:
+
+```markdown
+Execution Check
+
+| Field | Value |
+| --- | --- |
+| Problem | |
+| Action | |
+| Held constant | |
+| Evidence | |
+| Main risk | |
+| Fallback | |
+```
+
+Map `Problem` from target error, `Action` from control variable plus control action, `Held constant` from variables held constant and containment, `Evidence` from sensor plus threshold, `Main risk` from signal noise, damping, saturation, or strongest material risk, and `Fallback` from fallback action or stop/reframe trigger. Keep values concise and point to the persisted artifact for the full Control Law.
 
 Create or update a durable plan only for multiple independent loops, modules, repos, handoff/recovery needs, external side effects, irreversible/high-risk changes, rollback/compatibility decisions, contested ownership, or user request.
 

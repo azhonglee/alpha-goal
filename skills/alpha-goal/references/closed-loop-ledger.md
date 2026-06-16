@@ -150,7 +150,7 @@ Closed-loop Ledger:
 - `decision-synthesis`: read the latest route before synthesis; write the full Decision Synthesis Record under `.alpha-goal/YYYYMMDD-<slug>/decision-synthesis.md`, update the artifact registry and route-relevant synthesis state, and show a Markdown-table `Synthesis Summary` in the TUI by default.
 - `system-model`: read the latest route before modeling; write the full Control Model under `.alpha-goal/YYYYMMDD-<slug>/system-model.md`, update the artifact registry and model-relevant state, and show a Markdown-table `Model Summary` in the TUI by default.
 - `goal-contract`: read the latest route before changing the reference; write the full Goal Contract under `.alpha-goal/YYYYMMDD-<slug>/goal-contract.md`, update the artifact registry and reference state, and show a Markdown-table `Contract Summary` in the TUI by default.
-- `control-loop`: read the latest route before mutation/probe; write full Iteration Records under `.alpha-goal/YYYYMMDD-<slug>/iterations/`, durable logs under `.alpha-goal/YYYYMMDD-<slug>/evidence/` when needed, update the artifact registry and control state, and show a Markdown-table `Iteration Summary` in the TUI by default.
+- `control-loop`: read the latest route before mutation/probe; persist the full Control Law in the Iteration Record or ledger, show a Markdown-table `Execution Check` before mutation, write full Iteration Records under `.alpha-goal/YYYYMMDD-<slug>/iterations/`, durable logs under `.alpha-goal/YYYYMMDD-<slug>/evidence/` when needed, update the artifact registry and control state, and show a Markdown-table `Iteration Summary` after feedback by default.
 - `evidence-verify`: read the latest route before verdict; write the full Verification Verdict under `.alpha-goal/YYYYMMDD-<slug>/verification-verdict.md`, update the artifact registry and final comparator state, and show a Markdown-table `Verification Summary` in the TUI by default.
 
 ## Update rules
@@ -172,7 +172,7 @@ Route Summary
 | Next | |
 ```
 
-- Stage summaries should use the same two-column Markdown table shape: field and value. Values should be concise and point to artifact paths for long details. If a runtime cannot render Markdown tables, use a compact two-column plain-text table instead of bullet lists. Print full artifacts in chat only when the user asks, persistence is blocked, or a decision/risk requires explicit user review.
+- Stage summaries and the control-loop `Execution Check` should use the same two-column Markdown table shape: field and value. Values should be concise and point to artifact paths for long details. If a runtime cannot render Markdown tables, use a compact two-column plain-text table instead of bullet lists. Print full artifacts or raw internal Control Law blocks in chat only when the user asks, persistence is blocked, or a decision/risk requires explicit user review.
 - Do not duplicate full command output; link or summarize evidence and point to `.alpha-goal/YYYYMMDD-<slug>/evidence/` when durable logs are needed.
 - Do not store secrets, tokens, credentials, private user data, or production-only sensitive records.
 - Label stale or superseded state instead of silently overwriting it.
