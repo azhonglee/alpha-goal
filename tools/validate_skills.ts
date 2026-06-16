@@ -58,6 +58,20 @@ const LEGACY_ARTIFACT_PATH_REFERENCES = [
 
 const MISLEADING_SEMANTIC_CONTRACTION_TERMS = ["最小语义"];
 
+const GOAL_CONTRACT_FORBIDDEN_AMBIGUITY_TERMS = [
+  "low / medium / high",
+  "`low`",
+  "`medium`",
+  "`high`",
+  "quick",
+  "standard",
+  "deep",
+  "配置档位:",
+  "最终模糊度",
+  "<= 0.30",
+  "<= 0.20",
+];
+
 const SIDECAR_REQUIRED_KEYS = [
   "artifact_kind",
   "task_slug",
@@ -398,6 +412,10 @@ const SEMANTIC_SMOKE_TESTS: Array<[string, string, string[]]> = [
       "声明边界",
       "决策边界",
       "指标转译",
+      "量化模糊度闸门",
+      "模糊度必须 `<= 0.15`",
+      "不使用定性等级",
+      "不选择配置档位",
       "候选解释",
       "语义清晰度",
       "唯一的产品 / 工程语义",
@@ -764,6 +782,7 @@ const STRUCTURED_BLOCK_TESTS: StructuredBlockTest[] = [
     required_terms: [
       "- 参考状态:",
       "- 语义对齐:",
+      "- 模糊度数值:",
       "- 范围:",
       "- 控制模型:",
       "- 指标转译:",
@@ -1403,6 +1422,7 @@ export function main(args = process.argv.slice(2)): number {
   validateLegacySkillReferences(root, errors);
   validateLegacyArtifactPathReferences(root, errors);
   validateMisleadingSemanticContractions(root, errors);
+  validateGoalContractAmbiguityGate(root, errors);
   validateTaskScopedArtifactPathShape(root, errors);
   validateSchemaSidecarContract(root, errors);
   validateSchemaSidecarFixtures(root, errors);
@@ -1647,6 +1667,27 @@ function validateMisleadingSemanticContractions(root: string, errors: string[]):
       if (text.includes(term)) {
         errors.push(`${rel}: 目标契约语义不能写成 ${term}`);
       }
+    }
+  }
+}
+
+function validateGoalContractAmbiguityGate(root: string, errors: string[]): void {
+  const rels = [
+    "skills/goal-contract/SKILL.md",
+    "skills/goal-contract/references/ambiguity-scoring.md",
+    "skills/goal-contract/references/goal-contract-schema.md",
+  ];
+  for (const rel of rels) {
+    const file = path.join(root, rel);
+    if (!isFile(file)) {
+      continue;
+    }
+    const text = fs.readFileSync(file, "utf8");
+    const forbidden = GOAL_CONTRACT_FORBIDDEN_AMBIGUITY_TERMS.filter((term) =>
+      text.includes(term),
+    );
+    if (forbidden.length > 0) {
+      errors.push(`${rel}: goal-contract 模糊度闸门残留旧等级或旧档位: ${forbidden.join(", ")}`);
     }
   }
 }
