@@ -2,7 +2,13 @@
 
 语言： [English](README.md) | 简体中文
 
-面向Goal Engineering的最小闭环技能集。
+Alpha Goal 是面向 Goal Engineering 的最小闭环技能集。它让 agent 工作始终围绕明确目标、有界行动和有证据支撑的最终声明展开。
+
+## 适用场景
+
+- 请求含糊，需要先挖掘事实再澄清。
+- 实现任务需要一轮有边界、可观察的行动闭环。
+- final/ready/safe/complete/repair 等声明需要独立证据检查。
 
 ## 公开技能
 
@@ -20,21 +26,31 @@
 INTENT -> alpha-goal(discover/clarify/design/route) -> control-loop(action+feedback) -> evidence-verify(claim check) -> FINAL or NEXT LOOP
 ```
 
-## 安装
+## 快速开始
 
 ```bash
 scripts/install.sh
-```
-
-安装脚本会在 `$HOME/.codex/skills/` 下为三个公开技能创建直接软链接，并清理指向本仓库旧公开技能的软链接。
-
-## 校验
-
-```bash
 npx --yes tsx tools/validate_skills.ts .
 ```
 
-强制控制字节口径为整个 `skills/` 树，上限 30,000 bytes。
+安装脚本会在 `$HOME/.codex/skills/` 下为三个公开技能创建直接软链接，并清理指向本仓库旧公开技能的软链接。
+校验脚本会强制整个 `skills/` 树不超过 30,000 bytes。
+
+## 使用示例
+
+```text
+$alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继续闭环。
+$control-loop 根据已确认边界执行一轮最小安全变更。
+$evidence-verify 检查当前证据是否支持最终声明。
+```
+
+## 文档
+
+- [INSTALL.md](INSTALL.md)：安装选项和 smoke test。
+- [MANIFEST.md](MANIFEST.md)：公开技能、脚本和运行时产物清单。
+- [skills/alpha-goal/SKILL.md](skills/alpha-goal/SKILL.md)：默认入口和路由规则。
+- [skills/control-loop/SKILL.md](skills/control-loop/SKILL.md)：有界行动闭环契约。
+- [skills/evidence-verify/SKILL.md](skills/evidence-verify/SKILL.md)：证据比较契约。
 
 ## 结构
 
