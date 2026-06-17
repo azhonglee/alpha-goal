@@ -1,5 +1,7 @@
 # Alpha Goal
 
+语言： [English](README.md) | 简体中文
+
 面向Goal Engineering的最小闭环技能集。
 
 ## 公开技能
