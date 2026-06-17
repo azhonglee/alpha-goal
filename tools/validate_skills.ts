@@ -23,7 +23,7 @@ const LEGACY_SCRIPT_REFERENCES = [
 
 const DESCRIPTION_SEMANTIC_CHECKS: Record<string, { required: string[]; forbidden: string[] }> = {
   "alpha-goal": {
-    required: ["Unclear or underspecified engineering work router"],
+    required: ["clarify", "intention/requirements"],
     forbidden: ["execute or probe safely", "completion, correctness, readiness, safety"],
   },
   "control-loop": {
@@ -37,17 +37,19 @@ const DESCRIPTION_SEMANTIC_CHECKS: Record<string, { required: string[]; forbidde
 };
 
 const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
-  ["front controller frames/models/synthesizes/routes", "skills/alpha-goal/SKILL.md", [
-    "Discover facts -> Pressure-test -> Confirm one decision", "Discovery interview", "minimum preflight", "never ask the user to summarize discoverable repository facts", "prompt-safe summary", "navigation evidence, not requirements or authority", "do not score, crystallize, or hand off", "repo language as evidence", "Existing patterns are compatibility signals", "treat the answer as a claim to reconcile", "[from-code][auto-confirmed]", "[from-research] external/current fact", "[from-user]", "auto-confirm only descriptive facts", "Current-state facts cannot define desired behavior", "current external best practices", "bounded fresh evidence", "Readiness Gate Checklist", "blocking_gate_count = 0", "one decision variable", "exactly one `questions[]` item", "Pressure-test", "boundary scenario from inspected facts", "materially change execution", "non-goals", "decision boundaries", "mandatory gates", "Do not close on probable intent", "closure evidence", "Safe defaults apply only to reversible operational details", "Generic edit verbs", "read-only/probe authority does not imply mutation authority", "minimal reproducer", "Durable docs", "cannot upgrade", "Why not ask", "Why not execute", "Close the interview only", "Blocking gates", "Goal Contract", "Control Model", "Indicator Handoff", "user-owned decisions", "control-loop", "evidence-verify", "never creates", "Route Summary"
-  ]],
-  ["contract/model reference preserves pre-action discovery gates", "skills/alpha-goal/references/contract-and-model.md", [
-    "Discovery Record:", "Trigger / skip reason", "Task / probable intent", "Prompt-safe context status", "Inspected facts/sources", "Current-state facts", "Desired-state evidence", "Inferences not yet confirmed", "Fact labels", "[from-code][auto-confirmed]", "[from-research] external/current fact", "[from-user]", "Docs/terminology ledger", "discoverable fact", "fact needing confirmation", "user-owned decision", "Readiness Gate Checklist", "Blocking gate count", "First blocking gate", "Pressure pass", "one high-leverage question", "Question type", "Closure state", "Closure evidence", "blocking_gate_count=0", "Closure summary", "route evidence", "current/external facts", "Current-state facts and existing patterns cannot become desired behavior", "user/evidence contradiction", "source-of-truth conflict", "source/authority", "Authorization source", "Goal Contract:", "Control Model:", "Non-goals", "Decision boundaries", "Acceptance evidence", "Claim boundary", "Authorization class", "Disturbance Register", "Controller Hierarchy", "Candidate Control Law"
-  ]],
-  ["synthesis reference preserves qualitative quantitative integration", "skills/alpha-goal/references/synthesis.md", [
-    "Human/expert judgments", "Machine evidence/models", "Quantitative indicators", "Qualitative constraints", "User-owned decision", "Indicator handoff candidate"
-  ]],
-  ["alpha records cross-stage state", "skills/alpha-goal/SKILL.md", [
-    "Latest Control Route:", "Reference", "Current state", "Control law", "Sensor feedback", "User-owned decisions", "Blocked downstream action", "Claim boundary", "Next action"
+  ["alpha clarifies, scores, designs, and routes", "skills/alpha-goal/SKILL.md", [
+    "real intention", "outcome", "constraints", "boundaries", "authority", "Do not implement or make final claims",
+    "Pre-flight", "exploration", "design", "implementation", "diagnose", "maintenance",
+    "Trigger Discovery", "acceptance evidence", "non-goals", "decision boundaries", "minimal reproducer", "evidence-verify",
+    "Clarify", "Socratic-deep-interview", "minimum preflight", "never ask the user to summarize discoverable repository facts",
+    "one high-leverage question", "one decision variable", "exactly one `questions[]` item", "navigation evidence, not requirements or authority",
+    "repo language as evidence", "Existing patterns are compatibility signals", "Current-state facts cannot define desired behavior",
+    "[from-code][auto-confirmed]", "[from-research] external/current fact", "[from-user]", "bounded fresh evidence",
+    "Readiness Gate Check", "Indicator Handoff", "user-owned decisions", "pressure-test", "clarity_score",
+    "`Non-goals` must be explicit", "`Decision Boundaries` must be explicit", "pressure pass must be complete",
+    "Assumption Stress Test", "Contrarian", "Simplifier", "Ontologist",
+    "Design template", "Technical Context", "Assumptions + resolutions", "Claim boundary", "docs/specs/YYYYMMDD-<TaskName>.md",
+    "Self-review + Independent-review", "request_user_input", "control-loop", "Design Summary", "Blocking gates"
   ]],
   ["execution has hard safety gates", "skills/control-loop/SKILL.md", [
     "mutation authority", "explicit user/repo instruction", "A vague request is not mutation authorization", "Control Law", "Iteration Summary", "User-owned decisions", "Stop/re-route"
@@ -96,6 +98,7 @@ export function main(args = process.argv.slice(2)): number {
   validateLegacyReferences(root, errors);
   validateSemanticChecks(root, errors);
   validateSchemaConsistency(root, errors);
+  validateAlphaDesignSummary(root, errors);
   validateInstallDocumentation(root, errors);
 
   printReport(root, errors, warnings);
@@ -173,15 +176,18 @@ function validateSemanticChecks(root: string, errors: string[]): void {
 }
 
 function validateSchemaConsistency(root: string, errors: string[]): void {
-  const alpha = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
-  const fields = ["Reference", "Current state", "Last error signal", "Control law", "Sensor feedback", "Route decision", "Next state", "Artifact registry", "Adaptive learning", "Selected skill", "Boundary", "Disturbance", "User-owned decisions", "Blocked downstream action", "Claim boundary", "Next action"];
-  const positions = (text: string) => { const scoped = text.slice(Math.max(0, text.toLowerCase().indexOf("latest control route:"))).toLowerCase(); return fields.map(f => scoped.indexOf(`- ${f.toLowerCase()}:`)); };
-  const alphaPos = positions(alpha);
-  if (alphaPos.some(v => v < 0) || alphaPos.some((v, i) => i > 0 && v <= alphaPos[i - 1])) errors.push("ledger schema order mismatch: alpha");
   const evSkill = readIfFile(path.join(root, "skills/evidence-verify/SKILL.md"));
   const evRef = readIfFile(path.join(root, "skills/evidence-verify/references/verification-verdict-schema.md"));
   if (evSkill.includes("- Gaps:") || evRef.includes("- Gaps:")) errors.push("evidence verdict schema must use only `Gap:`");
   for (const term of ["PASS_TO_FINAL", "NARROW_CLAIM_AND_FINAL", "NEXT_ITERATION", "REFRAME", "BLOCKED"]) if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`evidence verdict enum mismatch: ${term}`);
+}
+
+function validateAlphaDesignSummary(root: string, errors: string[]): void {
+  const alpha = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
+  const fields = ["Intent", "Outcome", "Scope", "Constraints", "Acceptance evidence", "Non-goals", "Decision boundary", "Claim boundary", "Blocking gates", "Ledger", "Next"];
+  const scoped = alpha.slice(Math.max(0, alpha.toLowerCase().indexOf("design summary"))).toLowerCase();
+  const positions = fields.map(f => scoped.indexOf(`| ${f.toLowerCase()} |`));
+  if (positions.some(v => v < 0) || positions.some((v, i) => i > 0 && v <= positions[i - 1])) errors.push("alpha design summary order mismatch");
 }
 
 function validateInstallDocumentation(root: string, errors: string[]): void {

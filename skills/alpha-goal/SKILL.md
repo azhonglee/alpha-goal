@@ -26,7 +26,7 @@ For deictic bug requests without a discoverable locator, inspect immediate conte
 
 If work appears done or any final/ready/safe/complete/repair claim is needed, route to `evidence-verify`.
 
-## Phase 2: Calarify
+## Phase 2: Clarify
 
 Loop Socratic-deep-interview until you 100% understand the requirements and remain no ambiguity at all.
 
@@ -69,25 +69,25 @@ Track used modes in state to prevent repetition.
 1. When you have a clear understanding of the task, you can start to design the solution based on the information you have.
 
 Design template:
-Technical Context [context] 
+Technical Context [context]
 Intent[intent] （Why the user wants this）
-Outcome [outcome] 
-Scope [scope] 
-Constraints [constraints] 
-Assumptions + resolutions [assumptions_resolutions] 
+Outcome [outcome]
+Scope [scope]
+Constraints [constraints]
+Assumptions + resolutions [assumptions_resolutions]
 Acceptance evidence [acceptance_evidence]
 Non-goals [non_goal]
 Decision boundary [decision_boundary]
-Claim boundary [claim_boundary] 
+Claim boundary [claim_boundary]
 
 2. Store the design in `docs/specs/YYYYMMDD-<TaskName>.md`, or follow repository conventions.
-3. Dispatch Self-review + Independent-review of the design and fix any acceptant findings.
+3. Dispatch Self-review + Independent-review of the design and fix any accepted findings.
 
 ## Phase 5: Ask for Confirmation
 
 1. Show Summary of Design.
 2. Use `request_user_input` to ask for confirmation: approve and launch, refine or reject.
-- Approve and launch: Hand off the design to `$control_loop` to execute.
+- Approve and launch: Hand off the design to `control-loop` to execute.
 - Refine: Ask for refinement of the design and return to suitable phase.
 - Reject: Stop here.
 

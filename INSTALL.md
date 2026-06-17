@@ -45,7 +45,7 @@ rm -rf "$tmp_codex_home"
 ## Prompts
 
 ```text
-$alpha-goal 判断这个任务下一步应成帧、建模、综合、执行还是验证。
+$alpha-goal 澄清这个任务的真实意图、结果、边界和权限，并形成设计交接。
 $control-loop 根据已明确边界做一轮最小安全变更。
 $evidence-verify 检查当前证据是否支持最终声明。
 ```
