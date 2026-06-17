@@ -1,5 +1,7 @@
 # Alpha Goal
 
+Languages: English | [Chinese](README.zh-CN.md)
+
 A minimal closed-loop skillset for goal engineering work.
 
 ## Public skills
