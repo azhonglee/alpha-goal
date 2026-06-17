@@ -55,14 +55,14 @@ Create or update a durable plan only for multiple independent loops, modules, re
 ### 3. Act or probe
 - Stay inside the planned slice and the goal specification you read.
 - Check planned assumptions and stop conditions while executing; adjust within the approved context when safe, and stop rather than patch around material contradictions.
-- For a mutation slice, make one coherent targeted change unless the approved slice explicitly requires multiple coordinated edits.
-- For a read-only/probe slice, do not mutate; produce evidence, diagnosis, or route decisions only.
+- For an implementation slice, make one coherent targeted change unless the approved slice explicitly requires multiple coordinated edits.
+- For a read-only/probe slice, do not write; produce evidence, diagnosis, or route decisions only.
 - Preserve and interpret failing outputs; do not hide, rerun away, or summarize them as success.
 - Record produced artifacts, generated outputs, side effects, cleanup, and rollback/containment actions as they occur.
 - Preserve unrelated user changes; never stash, revert, move, or overwrite them without approval.
 - Prefer targeted edits; defer unrelated improvements unless they are necessary for the approved slice and their risk is recorded.
 - For debug work, identify and record the root cause before repair actions. If root cause is not confirmed, limit changes to diagnostic probes, reversible instrumentation, or explicitly hypothesis-testing slices that do not alter the intended fix surface; record uncertainty and do not present them as repairs.
-- Use subagents for safely isolated independent work, including separate ownership surfaces, read-only review, evidence audit, test/log analysis, or risk assessment; do not let subagents mutate overlapping files without coordination, and inspect their files, evidence, and concerns before accepting results.
+- Use subagents for safely isolated independent work, including separate ownership surfaces, read-only review, evidence audit, test/log analysis, or risk assessment; do not let subagents write overlapping files without coordination, and inspect their files, evidence, and concerns before accepting results.
 
 ### 4. Sense and compare
 
