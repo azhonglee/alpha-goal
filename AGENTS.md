@@ -7,12 +7,11 @@
 ## Build, Test, and Development Commands
 
 - `npx --yes tsx tools/validate_skills.ts .`：验证三公开技能结构、front matter、引用可发现性、闭环语义烟测、安装口径和 30K skills 字节预算。
-- `npx --yes tsx tools/validate_skillset.ts .`：兼容入口，委托给 `tools/validate_skills.ts`。
 - `bash -n scripts/install.sh`：检查安装脚本语法。
 - `npx --yes tsx skills/control-loop/scripts/mutation-preflight.ts`：检查迭代阶段脚本可运行。
 - `npx --yes tsx skills/evidence-verify/scripts/evidence-summary.ts`：检查验证阶段脚本可运行。
 - `python3 -c 'import pathlib,tomllib; tomllib.loads(pathlib.Path("templates/config.toml").read_text())'`：验证配置模板可解析。
-- 使用临时 `CODEX_HOME` 执行 `scripts/install.sh`，并从源码仓库运行 `tools/validate_skillset.ts`，验证安装说明可执行。
+- 使用临时 `CODEX_HOME` 执行 `scripts/install.sh`，并从源码仓库运行 `tools/validate_skills.ts`，验证安装说明可执行。
 
 ## Coding Style & Naming Conventions
 

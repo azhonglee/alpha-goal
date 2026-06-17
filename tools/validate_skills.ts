@@ -15,7 +15,7 @@ const LEGACY_SKILL_REFERENCES = [
   "goal-frame", "goal-loop", "goal-iterate", "goal-review", "goal-verify",
 ];
 const LEGACY_SCRIPT_REFERENCES = [
-  "tools/validate_skills.py", "tools/validate_skillset.py",
+  "tools/validate_skills.py", "tools/validate_skillset.py", "tools/validate_skillset.ts",
   "scripts/mutation-preflight.sh", "mutation-preflight.sh",
   "scripts/repo-sensor-snapshot.sh", "repo-sensor-snapshot.sh",
   "scripts/evidence-summary.sh", "evidence-summary.sh",

@@ -18,7 +18,6 @@ Former public framing/modeling/synthesis stages are folded into `skills/alpha-go
 | `skills/control-loop/scripts/mutation-preflight.ts` | No | Prints read-only git/path preflight evidence. |
 | `skills/evidence-verify/scripts/evidence-summary.ts` | No | Prints read-only diff/status evidence. |
 | `tools/validate_skills.ts` | No | Validates the three-skill contract, references, byte budget, scripts, docs, and schemas. |
-| `tools/validate_skillset.ts` | No | Compatibility wrapper for `tools/validate_skills.ts`. |
 
 ## Runtime Artifacts
 
