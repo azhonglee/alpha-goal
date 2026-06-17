@@ -25,7 +25,7 @@ Before asking, decide whether the missing input is material, discoverable, risky
 - If it is safely discoverable, inspect local evidence first.
 - If it is under-specified but safe defaults exist, state the defaults and continue only for reversible operational details inside an already confirmed goal; never default target, scope, acceptance, non-goals, side effects, risk acceptance, authority, or final claim.
 - If it changes target, scope, acceptance, non-goals, side effects, risk acceptance, or final claim, ask before proceeding.
-- If it requires implementation, destructive action, external side effects, credentials, push, PR/MR, deployment, or real user config changes without prior authorization, ask before proceeding.
+- Ask for permission before executing destructive actions, external side effects, credentials, or real user config changes.
 - Ask one high-leverage question per round, backed by evidence already checked.
 
 ## Isolation Principles
