@@ -1,6 +1,6 @@
 ---
 name: control-loop
-description: "Use only after an explicit goal specification or equivalent grants a specific read-only probe to implementation. Do not use for ambiguous planning."
+description: "Use only after an explicit goal specification authorizes bounded implementation or hardening. Do not use for ambiguous planning or standalone specific read-only probe requests."
 ---
 
 # Control Loop
