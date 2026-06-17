@@ -1,4 +1,0 @@
-interface:
-  display_name: "System Model"
-  short_description: "Model plant and hierarchy"
-  default_prompt: "Use $system-model to map system boundary, sensors, actuators, Controller Hierarchy, disturbances, and coupling before execution."
