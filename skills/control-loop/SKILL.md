@@ -93,7 +93,7 @@ Routes:
 - `ITERATION_CONTINUES`: next safe slice remains. Continue with `Act/probe` or re-plan with `Plan slice`.
 - `ITERATION_HARDEN`: direction is valid but evidence/edge/compatibility/cleanup is weak. Continue with `Act/probe` to harden.
 - `ITERATION_READY_FOR_VERIFY`: evidence totally covers acceptance and claim boundary. Handoff to `$evidence-verify`.
-- `RETURN_TO_ALPHA_GOAL`: target/scope/authority/claim changed or became unclear. Continue with `Plan slice` to re-plan.
+- `RETURN_TO_ALPHA_GOAL`: target/scope/authority/claim changed or became unclear. Stop execution and hand off to `$alpha-goal` for clarification or re-authorization.
 - `BLOCKED`: missing permission, tool, data, environment, credential, or user-owned decision. Ask user for help when you cannot deal with it.
 
 Continue automatically only while the same explicit authority, actuator boundary, acceptance evidence, claim boundary, modeled disturbances, and user-owned decisions remain stable. Stop/re-route on new subsystem/skill, boundary or evidence change, unmodeled disturbance, user-owned choice, or cumulative edits beyond the approved boundary.
