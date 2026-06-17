@@ -1,6 +1,6 @@
 # Alpha Goal
 
-面向工程任务的最小闭环 Codex 技能集。
+面向Goal Engineering的最小闭环技能集。
 
 ## 公开技能
 
