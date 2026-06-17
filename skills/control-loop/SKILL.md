@@ -11,7 +11,7 @@ Exert your utmost effort to achieve the goal you are assigned.
 
 Read `docs/specs/YYYYMMDD-<TaskName>.md` for the goal specification and interview records in `.alpha-goal/YYYYMMDD-<TaskName>/interview.md`.
 If the goal specification is not available, report the issue and route to `alpha-goal` or blocker instead of editing.
-If from `$evidence-verify`, need read `.alpha-goal/YYYYMMDD-<TaskName>/verification.md` and continue with `Act/probe` to harden.
+If from `$evidence-verify`, read `.alpha-goal/YYYYMMDD-<TaskName>/verification.md` first. Route by verdict gap: harden only for fixable evidence/edge/compatibility/cleanup gaps inside the same goal; `RETURN_TO_ALPHA_GOAL` when target/scope/authority/claim boundary is wrong or unclear; `BLOCKED` when permission, tool, data, environment, or credential is missing.
 
 ## Gates before mutation
 
@@ -74,7 +74,7 @@ Compare observed feedback to the goal specification you read. If the expected ef
 
 ### 5. Record and route
 
-Persist `.alpha-goal/YYYYMMDD-<TaskName>/iteration.md` for multi-turn/risky/handoff work; otherwise summarize in chat. Store bulky evidence under `.alpha-goal/YYYYMMDD-<TaskName>/evidence.md` when useful.
+Persist `.alpha-goal/YYYYMMDD-<TaskName>/iteration.md` for multi-turn/risky/handoff work; otherwise summarize in chat. Before `ITERATION_READY_FOR_VERIFY`, always persist or update `.alpha-goal/YYYYMMDD-<TaskName>/iteration.md` and `.alpha-goal/YYYYMMDD-<TaskName>/evidence.md` with acceptance-to-evidence mapping, command/output references, residual risks, and unsupported or not-run checks.
 
 ```markdown
 Iteration Summary
@@ -92,7 +92,7 @@ Routes:
 
 - `ITERATION_CONTINUES`: next safe slice remains. Continue with `Act/probe` or re-plan with `Plan slice`.
 - `ITERATION_HARDEN`: direction is valid but evidence/edge/compatibility/cleanup is weak. Continue with `Act/probe` to harden.
-- `ITERATION_READY_FOR_VERIFY`: evidence totally covers acceptance and claim boundary. Handoff to `$evidence-verify`.
+- `ITERATION_READY_FOR_VERIFY`: persisted evidence totally covers acceptance and claim boundary. Handoff to `$evidence-verify`.
 - `RETURN_TO_ALPHA_GOAL`: target/scope/authority/claim changed or became unclear. Stop execution and hand off to `$alpha-goal` for clarification or re-authorization.
 - `BLOCKED`: missing permission, tool, data, environment, credential, or user-owned decision. Ask user for help when you cannot deal with it.
 
