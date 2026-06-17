@@ -31,8 +31,6 @@ Run `npx --yes tsx skills/control-loop/scripts/mutation-preflight.ts` from repo 
 
 Iterate until you have 100% confidence in the goal completion.
 
-### 1. Plan slice
-
 ```text
 Plan slice -> Act/probe -> Sense -> Compare -> Record -> Route
 ```
