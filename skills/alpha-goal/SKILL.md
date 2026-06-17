@@ -1,6 +1,6 @@
 ---
 name: alpha-goal
-description: "Use for any engineering/design/implementation/diagnose requests; clarify real intention/requirements, identify outcome, scope, non-goals, decision boundaries, authority, and design."
+description: "Use for any engineering/design/implementation/diagnose/repair requests; clarify real intention/requirements, identify outcome, scope, non-goals, decision boundaries, authority, and design."
 ---
 
 # Alpha Goal
