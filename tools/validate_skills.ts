@@ -44,7 +44,7 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     ".alpha-goal/YYYYMMDD-<TaskName>/interview.md", "docs/specs/YYYYMMDD-<TaskName>.md", "Design Summary", "Blocking gates", "Ledger", "Next"
   ]],
   ["execution has hard safety gates", "skills/control-loop/SKILL.md", [
-    "Do not mutate primary", "repo-local worktree", "Unrelated user changes", ".alpha-goal/", "mutation-preflight", "approved target", "authorization", "claim boundary", "Act/probe", "read-only/probe slice", "Preserve unrelated user changes", "root cause", "Iteration Summary", "ITERATION_READY_FOR_VERIFY", "$evidence-verify", "verification.md", "Route by verdict gap", "acceptance-to-evidence", "persisted evidence", "RETURN_TO_ALPHA_GOAL", "BLOCKED", "Stop/re-route"
+    "Do not mutate primary", "repo-local worktree", "Unrelated user changes", ".alpha-goal/", "mutation-preflight", "approved target", "authorization", "claim boundary", "### 1. Plan slice", "### 2. Act or probe", "### 3. Sense and compare", "### 4. Record and route", "Act/probe", "read-only/probe slice", "Preserve unrelated user changes", "root cause", "Iteration Summary", "ITERATION_READY_FOR_VERIFY", "$evidence-verify", "verification.md", "Route by verdict gap", "acceptance-to-evidence", "persisted evidence", "RETURN_TO_ALPHA_GOAL", "BLOCKED", "Stop/re-route"
   ]],
   ["verification limits final claims", "skills/evidence-verify/SKILL.md", [
     "PASS_TO_FINAL", "NEXT_ITERATION", "Do not narrow the claim as a successful outcome", "Final response guard", "Highest practical evidence-supported boundary", "Final wording allowed", "repair-complete", "no risk", "Verification Summary"
