@@ -2,7 +2,15 @@
 
 Languages: English | [Chinese](README.zh-CN.md)
 
-A minimal closed-loop skillset for goal engineering work.
+Alpha Goal is a minimal closed-loop skillset for goal engineering work.
+It keeps agent work grounded in explicit goals, bounded action, and evidence-backed
+final claims.
+
+## When to use it
+
+- A request is ambiguous and needs fact discovery before clarification.
+- An implementation task needs one bounded, observable action loop.
+- A final, ready, safe, complete, or repair claim needs independent evidence.
 
 ## Public skills
 
@@ -20,21 +28,31 @@ Former public framing/modeling/synthesis stages are folded into `skills/alpha-go
 INTENT -> alpha-goal(discover/clarify/design/route) -> control-loop(action+feedback) -> evidence-verify(claim check) -> FINAL or NEXT LOOP
 ```
 
-## Install
+## Quick start
 
 ```bash
 scripts/install.sh
-```
-
-The installer creates direct symlinks for the three public skills under `$HOME/.codex/skills/` and cleans same-repo links for merged old public skills.
-
-## Validate
-
-```bash
 npx --yes tsx tools/validate_skills.ts .
 ```
 
-The enforced control-byte budget is the whole `skills/` tree, capped at 30,000 bytes.
+The installer creates direct symlinks for the three public skills under `$HOME/.codex/skills/` and cleans same-repo links for merged old public skills.
+The validator enforces the whole `skills/` tree under 30,000 bytes.
+
+## Usage examples
+
+```text
+$alpha-goal Decide whether this task should clarify, execute, verify, or continue a loop.
+$control-loop Run one bounded safe execution step from the agreed boundary.
+$evidence-verify Check whether current evidence supports the final claim.
+```
+
+## Docs
+
+- [INSTALL.md](INSTALL.md): installation options and smoke test.
+- [MANIFEST.md](MANIFEST.md): public skills, scripts, and runtime artifacts.
+- [skills/alpha-goal/SKILL.md](skills/alpha-goal/SKILL.md): default entry and routing rules.
+- [skills/control-loop/SKILL.md](skills/control-loop/SKILL.md): bounded action loop contract.
+- [skills/evidence-verify/SKILL.md](skills/evidence-verify/SKILL.md): evidence comparison contract.
 
 ## Structure
 
