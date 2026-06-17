@@ -1,15 +1,15 @@
 ---
 name: alpha-goal
-description: "Use to clarify for real intention/requirements."
+description: "Use for any engineering/design/implementation/diagnose requests; clarify real intention/requirements, identify outcome, scope, non-goals, decision boundaries, authority, and design."
 ---
 
 # Alpha Goal
 
-Exert your utmost efforts to clarify the real intention, outcome, constraints, boundaries, and authority of the request. Do not implement or make final claims.
+Exert your utmost efforts to clarify the real intention, outcome, constraints, boundaries, and success criteria of the request. Do not implement or make final claims inside this skill.
 
 ## Pre-flight
 1. Classify if the work type as one of the following:
-   - `exploration`: Just skip this skill and do it yourself.
+   - `exploration`: Skip only for concrete read-only fact lookup; use this skill when exploration is about intent, scope, acceptance, or decision boundaries.
    - `design`: Follow up all phases.
    - `implementation`: Follow up all phases.
    - `diagnose`: Discover the root cause you 100% confirm, show the proof, and then follow up from Phase 2 if need fix.
@@ -46,7 +46,7 @@ Track interview records, and append to the `.alpha-goal/YYYYMMDD-<TaskName>/inte
 
 ### 辅助工具
 
-使用清晰度辅助判断你是否需要继续提问。
+Use the clarity helper to decide whether you need to keep asking questions.
 Score each weighted dimension in `[0.0, 1.0]` with justification + gap：
 clarity_score = 0.3 * intent + 0.2 * outcome + 0.15 * scope + 0.12 * constraints + 0.1 * success + 0.08 * decision_boundary + 0.05 * context
 
