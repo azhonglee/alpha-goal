@@ -54,7 +54,7 @@ Create a durable plan when:
 - external side effects exist
 - recovery may be required
 
-### 3. Act or probe
+### 2. Act or probe
 - Stay inside the planned slice and the goal specification you read.
 - Check planned assumptions and stop conditions while executing; adjust within the approved context when safe, and stop rather than patch around material contradictions.
 - For an implementation slice, make one coherent targeted change unless the approved slice explicitly requires multiple coordinated edits.
@@ -66,13 +66,13 @@ Create a durable plan when:
 - For debug work, identify and record the root cause before repair actions. If root cause is not confirmed, limit changes to diagnostic probes, reversible instrumentation, or explicitly hypothesis-testing slices that do not alter the intended fix surface; record uncertainty and do not present them as repairs.
 - Use subagents for safely isolated independent work, including separate ownership surfaces, read-only review, evidence audit, test/log analysis, or risk assessment; do not let subagents write overlapping files without coordination, and inspect their files, evidence, and concerns before accepting results.
 
-### 4. Sense and compare
+### 3. Sense and compare
 
 Collect fresh evidence after the action: tests, builds, linters, type checks, runtime probes, logs, screenshots, diffs, or manual inspection. Classify it as gate / advisory / exploration / blocked evidence.
 
 Compare observed feedback to the goal specification you read. If the expected effect or threshold is not met, harden, fallback, reframe, or block. If feedback contradicts a reusable assumption, record an Adaptive Learning Record: trigger, mismatch, adjustment, reuse condition, invalidation condition.
 
-### 5. Record and route
+### 4. Record and route
 
 Persist `.alpha-goal/YYYYMMDD-<TaskName>/iteration.md` for multi-turn/risky/handoff work; otherwise summarize in chat. Before `ITERATION_READY_FOR_VERIFY`, always persist or update `.alpha-goal/YYYYMMDD-<TaskName>/iteration.md` and `.alpha-goal/YYYYMMDD-<TaskName>/evidence.md` with acceptance-to-evidence mapping, command/output references, residual risks, and unsupported or not-run checks.
 
