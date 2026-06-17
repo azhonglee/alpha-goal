@@ -13,7 +13,7 @@ Read `references/claim-boundary.md` before final/merge/ship/safety claims. Read 
 
 ## Inputs
 
-Read the Goal Contract/equivalent, latest route/iteration state, diff/artifacts, command outputs, tests, logs, reviewer/user feedback, and relevant specs. 
+Read the Goal Contract/equivalent, latest route/iteration state, diff/artifacts, command outputs, tests, logs, reviewer/user feedback, and relevant specs.
 Read `.alpha-goal/YYYYMMDD-<TaskName>/evidence.md` for evidence summary. Its content is the evidence summary of the latest iteration. Check but do not trust it.
 
 ## Verification rules
@@ -29,7 +29,10 @@ Read `.alpha-goal/YYYYMMDD-<TaskName>/evidence.md` for evidence summary. Its con
 ## Verdicts
 
 - `PASS_TO_FINAL`: evidence proves all requirements and the proposed claim.
+- `NARROW_CLAIM_AND_FINAL`: evidence supports only a narrower final statement.
 - `NEXT_ITERATION`: gaps are actionable by another bounded slice.
+- `REFRAME`: reference, scope, acceptance evidence, or claim boundary is wrong or incomplete.
+- `BLOCKED`: required environment, data, permission, credential, tool, or user-owned decision is missing.
 
 ## Final response guard
 

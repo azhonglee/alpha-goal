@@ -20,13 +20,15 @@ Exert your utmost efforts to clarify the real intention, outcome, constraints, b
 
 ## Phase 1: Discovery
 
+Load `references/contract-and-model.md` when a durable Goal Contract or Control Model is needed. Load `references/synthesis.md` when qualitative, multi-party, weakly quantified, or value-laden objectives need synthesis.
+
 Trigger Discovery for vague, overloaded, brownfield, high-consequence, missing-acceptance, or user-says-"don't assume" requests. Skip only when concrete targets, acceptance evidence, non-goals, decision boundaries, and authority are already explicit.
 
 For deictic bug requests without a discoverable locator, inspect immediate context; if no failing command/log/issue/code pointer is discoverable, ask for the minimal reproducer or error signal before execution routing.
 
 If work appears done or any final/ready/safe/complete/repair claim is needed, route to `evidence-verify`.
 
-## Phase 2: Calarify
+## Phase 2: Clarify
 
 Loop Socratic-deep-interview until you 100% understand the requirements and remain no ambiguity at all.
 
@@ -71,16 +73,16 @@ Track used modes in state to prevent repetition.
 1. When you have a clear understanding of the task, you can start to design the solution based on the information you have.
 
 Design template:
-Technical Context [context] 
+Technical Context [context]
 Intent[intent] （Why the user wants this）
-Outcome [outcome] 
-Scope [scope] 
-Constraints [constraints] 
-Assumptions + resolutions [assumptions_resolutions] 
+Outcome [outcome]
+Scope [scope]
+Constraints [constraints]
+Assumptions + resolutions [assumptions_resolutions]
 Acceptance evidence [acceptance_evidence]
 Non-goals [non_goal]
 Decision boundary [decision_boundary]
-Claim boundary [claim_boundary] 
+Claim boundary [claim_boundary]
 
 2. Persist `docs/specs/YYYYMMDD-<TaskName>.md`, or follow repository conventions.
 3. Dispatch Self-review + Independent-review of the design and fix any acceptant findings.

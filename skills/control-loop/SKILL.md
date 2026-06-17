@@ -81,7 +81,7 @@ Iteration Summary
 | --- | --- |
 | Action | |
 | Feedback | |
-| Residual error | | 
+| Residual error | |
 | Artifact | |
 | Next State | |
 ```
