@@ -42,6 +42,8 @@ Before the first user-facing question, complete minimum preflight: applicable AG
 7. If user-owned decisions, credentials, permissions, external side effects, public claims, irreversible commitments, missing acceptance evidence, or unresolved source-of-truth conflicts remain, ask/block.
 8. Before asking or closing non-trivial ambiguous work, pressure-test the current interpretation with at least one boundary scenario from inspected facts; use it to choose the next single question. After each material user answer, pressure-test again if it could change scope, acceptance, authority, or claim boundary. Continue ordinary questioning only when the next answer could materially change execution, acceptance, authority, or claim boundary.
 
+Track interview records, and append to the `.alpha-goal/YYYYMMDD-<TaskName>/interview.md` directory. `.alpha-goal/` is ignored before writing process artifacts.
+
 ### 辅助工具
 
 使用清晰度辅助判断你是否需要继续提问。
@@ -80,7 +82,7 @@ Non-goals [non_goal]
 Decision boundary [decision_boundary]
 Claim boundary [claim_boundary] 
 
-2. Store the design in `docs/specs/YYYYMMDD-<TaskName>.md`, or follow repository conventions.
+2. Persist `docs/specs/YYYYMMDD-<TaskName>.md`, or follow repository conventions.
 3. Dispatch Self-review + Independent-review of the design and fix any acceptant findings.
 
 ## Phase 5: Ask for Confirmation

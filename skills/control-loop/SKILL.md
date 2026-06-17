@@ -1,75 +1,78 @@
 ---
 name: control-loop
-description: "Bounded execution controller. Use only after an explicit Goal Contract or equivalent grants a specific read-only probe or mutation boundary, and Codex must run one observable iteration: preflight, act, sense feedback, compare error, and route. Do not use for ambiguous planning, user-owned decisions, or final completion/readiness claims."
+description: "Use only after an explicit goal specification or equivalent grants a specific read-only probe to implementation. Do not use for ambiguous planning."
 ---
 
 # Control Loop
 
-Advance the reference state by the smallest observable action. Do not claim completion; hand claims to `evidence-verify`.
+Exert your utmost effort to achieve the goal you are assigned.
 
 ## Resources
 
-Read `references/control-law.md`, `references/safety-boundaries.md` before mutation. Read `references/adaptive-learning.md` when feedback misses expected effect. Use other references only when their route applies. Read Latest Control Route before acting.
+Read `docs/specs/YYYYMMDD-<TaskName>.md` for the goal specification and interview records in `.alpha-goal/YYYYMMDD-<TaskName>/interview.md`.
+If the goal specification is not available, report the issue and route to `alpha-goal` or blocker instead of editing.
+If from `$evidence-verify`, need read `.alpha-goal/YYYYMMDD-<TaskName>/verification.md` and continue with `Act/probe` to harden.
 
 ## Gates before mutation
 
 All must be true:
 
-- Goal Contract/equivalent must explicitly record reference, scope, non-goals, constraints, decision boundaries, acceptance evidence, claim boundary, next route, and authorization class: analysis/probe, read-only inspection, mutation, or external side effect. A contract organizes but never creates authority: mutation authority must cite explicit user/repo instruction plus actuator boundary, not inference, history, issue text, or the agent-written contract. A vague request is not mutation authorization.
-- Current ledger/chat state and material disturbances have been read.
-- Local rules and relevant specs are known.
 - Do not mutate primary `main`/`master`/`trunk`; use a repo-local worktree unless repo policy defines a safer equivalent.
 - Unrelated user changes are identified and preserved.
 - `.alpha-goal/` is ignored before writing process artifacts.
-- A Control Law is present: target error, control variable, expected effect, sensor threshold, fallback.
 
 If any gate is missing, route to `alpha-goal` or blocker instead of editing.
 
+## Preflight
+
+Run `npx --yes tsx skills/control-loop/scripts/mutation-preflight.ts` from repo root, or record equivalent facts: root, branch/worktree, status, applicable rule files, ignored `.worktrees/` and `.alpha-goal/`, submodules, strongest evidence floor.
+
 ## Iteration
 
+Iterate until you have 100% confidence in the goal completion.
+
+### 1. Plan slice
+
 ```text
-Plan slice -> Preflight -> Act/probe -> Sense -> Compare -> Record -> Route
+Plan slice -> Act/probe -> Sense -> Compare -> Record -> Route
 ```
 
 ### 1. Plan slice
 
-Choose one coherent acceptance-relevant slice. State:
+Dynamic planning answers only the current iteration:
+- stay inside the approved target, scope, non-goals, constraints, authorization, and claim boundary.
+- the most useful coherent acceptance-relevant slice that can be completed and verified now;
+- fresh evidence needed after the slice and how it will be collected;
+- files, modules, repos, generated outputs, and ownership surfaces allowed to change;
+- assumptions to check and stop conditions for reframe, blocked, or unsafe execution;
+- expected artifacts, side effects, cleanup, and rollback/containment needs;
+- strongest material risk and evidence floor;
+- success, failure, feedback, and reframe routes;
+- whether a durable plan is necessary.
 
-```text
-Control Law:
-- Target error:
-- Control variable:
-- Expected effect:
-- Sensor threshold:
-- Fallback:
-- Allowed changes:
-- Held constant:
-```
-
-Create a durable plan only for multi-module, multi-agent, risky, external-side-effect, rollback-heavy, or user-requested work.
-
-### 2. Preflight
-
-Run `npx --yes tsx skills/control-loop/scripts/mutation-preflight.ts` from repo root, or record equivalent facts: root, branch/worktree, status, applicable rule files, ignored `.worktrees/` and `.alpha-goal/`, submodules, strongest evidence floor.
+Create or update a durable plan only for multiple independent loops, modules, repos, handoff/recovery needs, external side effects, irreversible/high-risk changes, rollback/compatibility decisions, contested ownership, or user request. Small patches can keep the plan in chat.
 
 ### 3. Act or probe
-
-- Mutate only the approved boundary.
-- Prefer targeted edits and existing tools.
-- Preserve raw failures; never mask defects with cosmetic fallbacks.
-- Do not stash/revert/delete unrelated changes without approval.
-- Use subagents only for independent review/work surfaces; tell workers they are not alone in the codebase.
-- Record generated artifacts, side effects, cleanup, and rollback decisions. Commit, push, PR/MR, deployment, credential changes, and real user config changes need explicit authorization.
+- Stay inside the planned slice and the goal specification you read.
+- Check planned assumptions and stop conditions while executing; adjust within the approved context when safe, and stop rather than patch around material contradictions.
+- For a mutation slice, make one coherent targeted change unless the approved slice explicitly requires multiple coordinated edits.
+- For a read-only/probe slice, do not mutate; produce evidence, diagnosis, or route decisions only.
+- Preserve and interpret failing outputs; do not hide, rerun away, or summarize them as success.
+- Record produced artifacts, generated outputs, side effects, cleanup, and rollback/containment actions as they occur.
+- Preserve unrelated user changes; never stash, revert, move, or overwrite them without approval.
+- Prefer targeted edits; defer unrelated improvements unless they are necessary for the approved slice and their risk is recorded.
+- For debug work, identify and record the root cause before repair actions. If root cause is not confirmed, limit changes to diagnostic probes, reversible instrumentation, or explicitly hypothesis-testing slices that do not alter the intended fix surface; record uncertainty and do not present them as repairs.
+- Use subagents for safely isolated independent work, including separate ownership surfaces, read-only review, evidence audit, test/log analysis, or risk assessment; do not let subagents mutate overlapping files without coordination, and inspect their files, evidence, and concerns before accepting results.
 
 ### 4. Sense and compare
 
 Collect fresh evidence after the action: tests, builds, linters, type checks, runtime probes, logs, screenshots, diffs, or manual inspection. Classify it as gate / advisory / exploration / blocked evidence.
 
-Compare observed feedback to the Control Law and Goal Contract. If the expected effect or threshold is not met, harden, fallback, reframe, or block. If feedback contradicts a reusable assumption, record an Adaptive Learning Record: trigger, mismatch, adjustment, reuse condition, invalidation condition.
+Compare observed feedback to the goal specification you read. If the expected effect or threshold is not met, harden, fallback, reframe, or block. If feedback contradicts a reusable assumption, record an Adaptive Learning Record: trigger, mismatch, adjustment, reuse condition, invalidation condition.
 
 ### 5. Record and route
 
-Persist `.alpha-goal/iterations/YYYYMMDD-<slug>.md` for multi-turn/risky/handoff work; otherwise summarize in chat. Store bulky evidence under `.alpha-goal/evidence/` when useful.
+Persist `.alpha-goal/YYYYMMDD-<TaskName>/iteration.md` for multi-turn/risky/handoff work; otherwise summarize in chat. Store bulky evidence under `.alpha-goal/YYYYMMDD-<TaskName>/evidence.md` when useful.
 
 ```markdown
 Iteration Summary
@@ -78,22 +81,17 @@ Iteration Summary
 | --- | --- |
 | Action | |
 | Feedback | |
-| Residual error | |
-| User-owned decisions | |
-| Blocked downstream action | |
+| Residual error | | 
 | Artifact | |
-| Next | |
+| Next State | |
 ```
-
-Ledger update records input state, control action, sensor feedback, residual error, and next state.
 
 Routes:
 
-- `ITERATION_CONTINUES`: next safe slice remains.
-- `ITERATION_HARDEN`: direction is valid but evidence/edge/compatibility/cleanup is weak.
-- `ITERATION_READY_FOR_VERIFY`: evidence plausibly covers acceptance and claim boundary.
-- `RETURN_TO_ALPHA_GOAL`: target/scope/authority/claim changed.
-- `RETURN_TO_ALPHA_GOAL`: target/plant/sensor/actuator/coupling became unclear.
-- `BLOCKED`: missing permission, tool, data, environment, credential, or user-owned decision.
+- `ITERATION_CONTINUES`: next safe slice remains. Continue with `Act/probe` or re-plan with `Plan slice`.
+- `ITERATION_HARDEN`: direction is valid but evidence/edge/compatibility/cleanup is weak. Continue with `Act/probe` to harden.
+- `ITERATION_READY_FOR_VERIFY`: evidence totally covers acceptance and claim boundary. Handoff to `$evidence-verify`.
+- `RETURN_TO_ALPHA_GOAL`: target/scope/authority/claim changed or became unclear. Continue with `Plan slice` to re-plan.
+- `BLOCKED`: missing permission, tool, data, environment, credential, or user-owned decision. Ask user for help when you cannot deal with it.
 
 Continue automatically only while the same explicit authority, actuator boundary, acceptance evidence, claim boundary, modeled disturbances, and user-owned decisions remain stable. Stop/re-route on new subsystem/skill, boundary or evidence change, unmodeled disturbance, user-owned choice, or cumulative edits beyond the approved boundary.

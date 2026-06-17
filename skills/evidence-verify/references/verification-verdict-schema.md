@@ -20,4 +20,3 @@ Verification Verdict:
 ```
 
 Indicator handoff review
-Adaptive learning review
