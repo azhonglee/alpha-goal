@@ -183,7 +183,11 @@ link_path() {
 
     local legacy_top_level_source="$repo_root/$label"
     local legacy_skill_dir_source="$source_skill_root/$label"
-    if [[ "$current_target" == "$legacy_top_level_source" || "$current_target" == "$legacy_skill_dir_source" ]]; then
+    local legacy_skillset_source=""
+    if [[ "$label" == "alpha-goal" ]]; then
+      legacy_skillset_source="$source_skill_root"
+    fi
+    if [[ "$current_target" == "$legacy_top_level_source" || "$current_target" == "$legacy_skill_dir_source" || ( -n "$legacy_skillset_source" && "$current_target" == "$legacy_skillset_source" ) ]]; then
       rm "$target"
       replaced=true
     elif [[ "$force" == true ]]; then
