@@ -14,7 +14,7 @@ Use subagents for independent parallel subtasks when that improves throughput.
 - "Done" requires evidence: claim completion only when requirements are truly met and validation passes; validation must run against the final target state, not paths that will be deleted or invalidated.
 - Commit promptly after changes are complete and verified.
 - Stay goal-oriented and prioritize building on existing persistent artifacts.
-- When goal is complete and has committed changes, push the task branch and create a PR/MR only when user or repo instructions already authorize those external side effects. Otherwise leave the branch committed and provide a PR/MR-ready summary with verification evidence.
+- When goal is complete and has committed changes, push the task branch and create a PR/MR.
 
 ## Human-in-the-Loop Policy
 
