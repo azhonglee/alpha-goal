@@ -48,7 +48,11 @@ Dynamic planning answers only the current iteration:
 - success, failure, feedback, and reframe routes;
 - whether a durable plan is necessary.
 
-Create or update a durable plan only for multiple independent loops, modules, repos, handoff/recovery needs, external side effects, irreversible/high-risk changes, rollback/compatibility decisions, contested ownership, or user request. Small patches can keep the plan in chat.
+Create a durable plan when:
+- work spans multiple iterations
+- more than one ownership surface
+- external side effects exist
+- recovery may be required
 
 ### 3. Act or probe
 - Stay inside the planned slice and the goal specification you read.
