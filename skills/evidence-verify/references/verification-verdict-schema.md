@@ -1,102 +1,21 @@
 # Verification Verdict Schema
 
-Use this full schema for formal acceptance records, merge-ready or ship-ready judgments, high-risk claims, contested evidence, or handoff. For low-risk checks, a compact verdict is enough if it preserves the semantics. Persist the full verdict at `.alpha-goal/verification/YYYYMMDD-<slug>-verdict.md` by default. The TUI should show a Markdown-table `Verification Summary` with verdict, claim boundary, evidence, artifact path, and next action unless full chat output is required.
-
-## Compact verdict
-
-```text
+```markdown
 Verification Verdict:
-- Verdict:
-- Evidence coverage:
-- Claim allowed:
-- Gaps:
-- Artifact:
-- Next step:
-```
-
-## Full verdict
-
-```text
-Verification Verdict:
-- Verdict:
-- Acceptance evidence matrix:
-- Contract review:
-- System model review:
-- Artifact review:
-- Control law review:
+- Original claim:
+- Claim checked:
 - Indicator handoff review:
 - Adaptive learning review:
-- Claim boundary:
-- Risk/evidence review:
-- Fresh checks run:
-- Diff/scope review:
-- Feedback review:
-- Judgment:
-- Unresolved gaps:
-- Required next step:
+- Evidence coverage:
+- Unresolved user-owned decisions:
+- Gap:
+- Highest practical evidence-supported boundary:
+- Highest supported claim:
+- Unsupported portions:
+- Final wording allowed:
 - Final claim allowed:
-- Ledger update:
-  - Control-state path:
-  - Artifact path:
-  - Verdict:
-  - Next route:
+- Verdict: PASS_TO_FINAL / NEXT_ITERATION
+- Next route: control-loop
 ```
 
-## Verdict
-
-Exactly one:
-
-- `PASS_TO_FINAL`
-- `NARROW_CLAIM_AND_FINAL`
-- `NEXT_ITERATION`
-- `REFRAME`
-- `BLOCKED`
-
-## Acceptance evidence matrix
-
-For each acceptance expectation:
-
-- evidence;
-- boundary;
-- freshness;
-- status: `covered`, `partially covered`, `not covered`, `blocked`, or `not applicable`.
-
-Root-cause claims should record symptom, first divergence point, narrowed component, excluded alternatives, and remaining uncertainty.
-
-## Control law review
-
-For each material control action or diagnostic probe:
-
-- target error;
-- expected effect;
-- sensor and threshold;
-- observed feedback;
-- threshold status: `met`, `partially met`, `not met`, `blocked`, or `not applicable`;
-- fallback or residual error.
-
-## Indicator handoff review
-
-For each material qualitative objective or synthesis metric:
-
-- operational definition;
-- sensor / evidence source;
-- timing;
-- threshold or tolerance;
-- evidence boundary;
-- status: `covered`, `partially covered`, `not covered`, `blocked`, or `not applicable`.
-
-## Adaptive learning review
-
-For each material learning record:
-
-- learning trigger;
-- observed mismatch;
-- evidence;
-- adjustment;
-- reuse condition;
-- invalidation condition;
-- whether the final claim stays inside the evidence boundary.
-
-## Final claim allowed
-
-Write the widest final statement that fresh evidence supports. It must not imply broader product, integration, production, tenant, security, or safety validation than evidence shows.
+Indicator handoff review

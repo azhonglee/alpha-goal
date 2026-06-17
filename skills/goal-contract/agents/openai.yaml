@@ -1,4 +1,0 @@
-interface:
-  display_name: "Goal Contract"
-  short_description: "Form measurable goal contracts"
-  default_prompt: "Use $goal-contract to form a Goal Contract with reference state, scope, non-goals, Indicator Handoff, evidence, and handoff boundary."

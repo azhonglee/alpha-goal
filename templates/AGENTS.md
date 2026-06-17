@@ -23,23 +23,22 @@ Use Human-in-the-Loop (HIL) policy for decisions, not for discoverable facts.
 Before asking, decide whether the missing input is material, discoverable, risky, and user-owned.
 
 - If it is safely discoverable, inspect local evidence first.
-- If it is under-specified but safe defaults exist, state the defaults and continue.
+- If it is under-specified but safe defaults exist, state the defaults and continue only for reversible operational details inside an already confirmed goal; never default target, scope, acceptance, non-goals, side effects, risk acceptance, authority, or final claim.
 - If it changes target, scope, acceptance, non-goals, side effects, risk acceptance, or final claim, ask before proceeding.
-- If it requires mutation, destructive action, external side effects, credentials, push, PR/MR, deployment, or real user config changes without prior authorization, ask before proceeding.
+- If it requires implementation, destructive action, external side effects, credentials, push, PR/MR, deployment, or real user config changes without prior authorization, ask before proceeding.
 - Ask one high-leverage question per round, backed by evidence already checked.
-- Do not ask the user to substitute for missing evidence; gather evidence, narrow the claim, or report the gap.
 
 ## Isolation Principles
 
-- Ensure `.worktrees/` is ignored before placing repository-local worktrees there. Default runtime evidence, reviews, scratch artifacts, and Closed-loop Ledger files go under `.alpha-goal/`; if `.alpha-goal/` is missing from the repo root `.gitignore`, add `.alpha-goal/` before writing those artifacts.
-- Use repository-local worktrees to isolate changes per goal/task batch. Create them under `<repo>/.worktrees/codex/<task-slug>/` unless the repository already defines a stricter convention or the path is not technically usable.
-- In monorepos, create the worktree under the owning subrepo's `.worktrees/codex/<task-slug>/`.
+- Ensure `.worktrees/` is ignored before placing repository-local worktrees there. Put default runtime evidence, review notes, scratch artifacts, interview records, iteration records, and verification records under `.alpha-goal/`; if `.alpha-goal/` is missing from the repo root `.gitignore`, add `.alpha-goal/` before writing those artifacts.
+- Use repository-local worktrees to isolate changes per goal/task batch. Create them under `<repo>/.worktrees/codex/<goal-slug>/` unless the repository already defines a stricter convention or the path is not technically usable.
+- In monorepos, create the worktree under the owning subrepo's `.worktrees/codex/<goal-slug>/`.
 - Never edit/delete directly on main/master; always work in a worktree.
 - Delete the worktree after PR/MR merge or local merge into main/master; do not proactively merge into main/master locally.
 
 ## Interaction Agreement
 
-- Use `request_user_input` default, and only after presenting the necessary clear context. Do not use it for purely open-ended questions or mere data entry.
+- Use `request_user_input` default, backed by presenting the necessary clear context. Do not use it for purely open-ended questions or mere data entry.
 - 输出和写作默认使用中文，包括持久化文档，确保阅读友好，风格一致，逻辑清晰，避免直译。涉及专业术语，可根据上下文选择性使用英文。
 
 <!-- generate-with-template:agents-md -->

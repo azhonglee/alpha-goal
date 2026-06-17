@@ -5,8 +5,8 @@ usage() {
   cat <<'EOF'
 Usage: scripts/install.sh [--codex-home PATH] [--force] [--no-sync-user-templates] [--verbose]
 
-Install this repository's skills/ tree by creating a single alpha-goal
-symlink under ${CODEX_HOME:-$HOME/.codex}/skills.
+Install this repository's public skill directories as direct symlinks
+under ${CODEX_HOME:-$HOME/.codex}/skills.
 
 By default, this script merges templates/AGENTS.md into user-level AGENTS.md
 and fills missing config.toml settings from templates/config.toml.
@@ -89,8 +89,6 @@ log() {
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd "$script_dir/.." && pwd -P)"
 source_skill_root="$repo_root/skills"
-install_link_name="alpha-goal"
-install_source="$source_skill_root"
 validation_tool="$repo_root/tools/validate_skills.ts"
 validation_tool_label="tools/validate_skills.ts"
 
@@ -185,7 +183,11 @@ link_path() {
 
     local legacy_top_level_source="$repo_root/$label"
     local legacy_skill_dir_source="$source_skill_root/$label"
-    if [[ "$current_target" == "$legacy_top_level_source" || "$current_target" == "$legacy_skill_dir_source" ]]; then
+    local legacy_skillset_source=""
+    if [[ "$label" == "alpha-goal" ]]; then
+      legacy_skillset_source="$source_skill_root"
+    fi
+    if [[ "$current_target" == "$legacy_top_level_source" || "$current_target" == "$legacy_skill_dir_source" || ( -n "$legacy_skillset_source" && "$current_target" == "$legacy_skillset_source" ) ]]; then
       rm "$target"
       replaced=true
     elif [[ "$force" == true ]]; then
@@ -246,84 +248,33 @@ remove_obsolete_skill_link() {
   fi
 }
 
-preflight_install_targets() {
-  local target="$target_root/$install_link_name"
-
-  if [[ -L "$target" ]]; then
-    local current_target
-    current_target="$(resolve_link_target "$target")"
-    local legacy_top_level_source="$repo_root/$install_link_name"
-    local legacy_skill_dir_source="$source_skill_root/$install_link_name"
-    if [[ "$current_target" == "$install_source" || "$current_target" == "$legacy_top_level_source" || "$current_target" == "$legacy_skill_dir_source" || "$force" == true ]]; then
-      return
-    fi
-    echo "Refusing to replace existing symlink: $target -> $(readlink "$target")" >&2
-    echo "Re-run with --force to replace symlinks." >&2
-    exit 1
-  elif [[ -e "$target" ]]; then
-    echo "Refusing to replace existing non-symlink path: $target" >&2
-    exit 1
-  fi
-}
-
 validate_installed_links() {
   local failed=false
-  local target="$target_root/$install_link_name"
-
-  if [[ ! -L "$target" ]]; then
-    echo "Installed skillset is not a symlink: $target" >&2
-    failed=true
-  else
-    local current_target
-    current_target="$(resolve_link_target "$target")"
-    if [[ "$current_target" != "$install_source" ]]; then
-      echo "Installed skillset points elsewhere: $target -> $current_target" >&2
-      failed=true
-    fi
-  fi
-
   for skill_file in "${skill_files[@]}"; do
-    local skill_dir
+    local skill_dir skill_name target current_target
     skill_dir="$(cd "$(dirname "$skill_file")" && pwd -P)"
-    local skill_name
     skill_name="$(basename "$skill_dir")"
-
-    if [[ ! -f "$target/$skill_name/SKILL.md" ]]; then
-      echo "Installed skillset is missing $skill_name/SKILL.md through symlink: $target" >&2
-      failed=true
-      continue
+    target="$target_root/$skill_name"
+    if [[ ! -L "$target" ]]; then
+      echo "Installed skill is not a symlink: $target" >&2; failed=true; continue
     fi
-
-    local direct_target="$target_root/$skill_name"
-    if [[ "$skill_name" == "$install_link_name" || ! -L "$direct_target" ]]; then
-      continue
+    current_target="$(resolve_link_target "$target")"
+    if [[ "$current_target" != "$skill_dir" ]]; then
+      echo "Installed skill points elsewhere: $target -> $current_target" >&2; failed=true
     fi
-
-    local direct_current_target
-    direct_current_target="$(resolve_link_target "$direct_target")"
-    if [[ "$direct_current_target" == "$skill_dir" || "$direct_current_target" == "$repo_root/$skill_name" ]]; then
-      echo "Required skill should be installed through $install_link_name, not as a direct same-repo link: $direct_target" >&2
-      failed=true
+    if [[ ! -f "$target/SKILL.md" ]]; then
+      echo "Installed skill is missing top-level SKILL.md: $target" >&2; failed=true
     fi
   done
-
   for support_name in adapters tools templates scripts; do
-    local target="$target_root/$support_name"
-    local legacy_source="$repo_root/$support_name"
-
+    local target="$target_root/$support_name" legacy_source="$repo_root/$support_name"
     if [[ -L "$target" && "$(resolve_link_target "$target")" == "$legacy_source" ]]; then
-      echo "Support directory should not be installed as a skill: $target" >&2
-      failed=true
+      echo "Support directory should not be installed as a skill: $target" >&2; failed=true
     fi
   done
-
-  if [[ "$failed" == true ]]; then
-    exit 1
-  fi
-
-  log "Validated installed skillset link in $target_root"
+  if [[ "$failed" == true ]]; then exit 1; fi
+  log "Validated installed direct skill links in $target_root"
 }
-
 inject_agents_template() {
   local template_content
   template_content="$(<"$agents_template")"
@@ -661,7 +612,7 @@ print_summary() {
     status="installed"
   fi
 
-  echo "Alpha Goal skillset $status: $installed -> $target_root"
+  echo "Alpha Goal skills $status: $installed -> $target_root"
   echo "Codex home: $codex_home"
   echo "Validation: passed ($validation_tool_label)"
   if [[ "$sync_user_templates" == true ]]; then
@@ -685,7 +636,7 @@ fi
 
 run_skillset_validation
 
-required_skills=(alpha-goal goal-contract system-model control-loop evidence-verify decision-synthesis)
+required_skills=(alpha-goal control-loop evidence-verify)
 skill_files=()
 for skill_name in "${required_skills[@]}"; do
   skill_file="$source_skill_root/$skill_name/SKILL.md"
@@ -705,7 +656,6 @@ if [[ "${#discovered_skill_files[@]}" -ne "${#required_skills[@]}" ]]; then
 fi
 
 mkdir -p "$codex_home" "$target_root"
-preflight_install_targets
 
 if [[ "$sync_user_templates" == true ]]; then
   inject_agents_template
@@ -715,21 +665,18 @@ else
 fi
 
 installed=0
-link_path "$install_source" "$target_root/$install_link_name" "$install_link_name"
-installed=1
+for skill_file in "${skill_files[@]}"; do
+  skill_dir="$(cd "$(dirname "$skill_file")" && pwd -P)"
+  skill_name="$(basename "$skill_dir")"
+  link_path "$skill_dir" "$target_root/$skill_name" "$skill_name"
+  installed=$((installed + 1))
+done
 
 for support_name in adapters tools templates scripts; do
   remove_legacy_support_link "$support_name"
 done
 
-for skill_name in "${required_skills[@]}"; do
-  if [[ "$skill_name" == "$install_link_name" ]]; then
-    continue
-  fi
-  remove_obsolete_skill_link "$skill_name"
-done
-
-for obsolete_skill in control-kernel loop verify meta-synthesis goal-frame goal-loop goal-iterate goal-review goal-verify; do
+for obsolete_skill in goal-contract system-model decision-synthesis control-kernel loop verify meta-synthesis goal-frame goal-loop goal-iterate goal-review goal-verify; do
   remove_obsolete_skill_link "$obsolete_skill"
 done
 
