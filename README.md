@@ -6,16 +6,14 @@ A minimal closed-loop Codex skillset for engineering work.
 
 | Skill | Role |
 | --- | --- |
-| `alpha-goal` | Default entry: discover facts for ambiguous requests, frame goal, model system, synthesize complex decisions, route next controller, maintain ledger. |
-| `control-loop` | Bounded execution/probe with mutation safety, feedback, and residual-error routing. |
+| `alpha-goal` | Default entry: clarify real intent, outcome, constraints, boundaries, authority, record interviews, design the handoff, and route approved launches. |
+| `control-loop` | Goal-specification execution/probe with preflight gates, feedback, and residual-error routing. |
 | `evidence-verify` | Independent comparator for final/ready/safe/complete/repair claims and evidence boundaries. |
-
-Internal framing/modeling/synthesis rules live under `skills/alpha-goal/references/`; they are not installed as public skills.
 
 ## Flow
 
 ```text
-INTENT -> alpha-goal(discover/frame/model/synthesize/route) -> control-loop(action+feedback) -> evidence-verify(claim check) -> FINAL or NEXT LOOP
+INTENT -> alpha-goal(clarify/discover/stress/design/confirm) -> control-loop(action+feedback) -> evidence-verify(claim check) -> FINAL or NEXT LOOP
 ```
 
 ## Install
@@ -49,8 +47,8 @@ tools/
 
 - Fact discovery before clarification questions.
 - Current code facts describe current state; they do not define desired behavior without authority.
-- Goals before action.
-- Model only what changes safe control.
+- Clear intent, outcome, boundaries, and authority before action.
+- Design handoff before execution.
 - User-owned decisions gate execution; ask one high-leverage question per round.
 - Bounded action beats broad refactor.
 - Evidence bounds final claims.

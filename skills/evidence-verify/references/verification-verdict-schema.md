@@ -15,9 +15,8 @@ Verification Verdict:
 - Unsupported portions:
 - Final wording allowed:
 - Final claim allowed:
-- Verdict: PASS_TO_FINAL / NARROW_CLAIM_AND_FINAL / NEXT_ITERATION / REFRAME / BLOCKED
+- Verdict: PASS_TO_FINAL / NEXT_ITERATION
 - Next route:
 ```
 
 Indicator handoff review
-Adaptive learning review
