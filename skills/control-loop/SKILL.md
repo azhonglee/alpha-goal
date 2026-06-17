@@ -11,7 +11,7 @@ Exert your utmost effort to achieve the goal you are assigned.
 
 Read `docs/specs/YYYYMMDD-<TaskName>.md` for the goal specification and interview records in `.alpha-goal/YYYYMMDD-<TaskName>/interview.md`.
 If the goal specification is not available, report the issue and route to `alpha-goal` or blocker instead of editing.
-If from `$evidence-verify`, read `.alpha-goal/YYYYMMDD-<TaskName>/verification.md` first. Route by verdict gap: harden only for fixable evidence/edge/compatibility/cleanup gaps inside the same goal; `RETURN_TO_ALPHA_GOAL` when target/scope/authority/claim boundary is wrong or unclear; `BLOCKED` when permission, tool, data, environment, or credential is missing.
+If from `$evidence-verify`, need read `.alpha-goal/YYYYMMDD-<TaskName>/verification.md` and continue with `Act/probe` to harden.
 
 ## Gates before mutation
 
