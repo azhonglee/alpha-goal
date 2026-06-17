@@ -44,9 +44,9 @@ Before the first user-facing question, complete minimum preflight: applicable AG
 
 Track interview records, and append to the `.alpha-goal/YYYYMMDD-<TaskName>/interview.md`. Make `.alpha-goal/` ignored before writing process artifacts.
 
-### 辅助工具
+### Clarity score
 
-Use the clarity helper to decide whether you need to keep asking questions.
+Use the clarity_score to decide whether you need to keep asking questions.
 Score each weighted dimension in `[0.0, 1.0]` with justification + gap：
 clarity_score = 0.3 * intent + 0.2 * outcome + 0.15 * scope + 0.12 * constraints + 0.1 * success + 0.08 * decision_boundary + 0.05 * context
 
@@ -62,7 +62,7 @@ Use each mode once when applicable. These are normal escalation tools, not rare 
 
 - **Contrarian** (round 2+ or immediately when an answer rests on an untested assumption): challenge core assumptions
 - **Simplifier** (round 4+ or when scope expands faster than outcome clarity): probe minimal viable scope
-- **Ontologist** (round 5+ and clarity_score < 0.15, or when the user keeps describing symptoms): ask for essence-level reframing
+- **Ontologist** (round 5+ and clarity_score < 0.85, or when the user keeps describing symptoms): ask for essence-level reframing
 
 Track used modes in state to prevent repetition.
 
