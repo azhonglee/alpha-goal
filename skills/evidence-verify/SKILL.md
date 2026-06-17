@@ -1,6 +1,6 @@
 ---
 name: evidence-verify
-description: "Independent evidence comparator. Use only when artifacts, commands, logs, tests, or other fresh evidence must be judged against an explicit Goal Contract or claim boundary for completion, correctness, readiness, safety, or a narrowed final claim. Do not use to plan or implement changes."
+description: "Independent evidence comparator. Use only when artifacts, commands, logs, tests, or other fresh evidence must be judged against an explicit Goal Contract or claim boundary for completion, correctness, readiness, or safety. Do not use to plan or implement changes."
 ---
 
 # Evidence Verify
@@ -25,14 +25,12 @@ Read `.alpha-goal/YYYYMMDD-<TaskName>/evidence.md` for evidence summary. Its con
 - Inspect whether validators/tests actually cover the requirement they are cited for.
 - Do not repair during verification; route back instead.
 - Final wording must not exceed the highest evidence-supported boundary.
+- Do not narrow the claim as a successful outcome. If evidence cannot support the proposed claim, record the gap and return `NEXT_ITERATION`.
 
 ## Verdicts
 
 - `PASS_TO_FINAL`: evidence proves all requirements and the proposed claim.
-- `NARROW_CLAIM_AND_FINAL`: evidence supports only a narrower final statement.
-- `NEXT_ITERATION`: gaps are actionable by another bounded slice.
-- `REFRAME`: reference, scope, acceptance evidence, or claim boundary is wrong or incomplete.
-- `BLOCKED`: required environment, data, permission, credential, tool, or user-owned decision is missing.
+- `NEXT_ITERATION`: evidence does not prove the proposed claim, including when checks are missing, stale, indirect, too narrow, contradicted, unavailable because of environment/permissions/data, or show the reference/scope/claim boundary is wrong. Handoff to `$control-loop` for next iteration.
 
 ## Final response guard
 
@@ -50,15 +48,14 @@ Verification Verdict:
 - Adaptive learning review:
 - Evidence coverage:
 - Unresolved user-owned decisions:
-- Blocked downstream action:
 - Gap:
 - Highest practical evidence-supported boundary:
 - Highest supported claim:
 - Unsupported portions:
 - Final wording allowed:
 - Final claim allowed: yes/no
-- Verdict:
-- Next route:
+- Verdict: PASS_TO_FINAL / NEXT_ITERATION
+- Next route: control-loop
 ```
 
 TUI summary:

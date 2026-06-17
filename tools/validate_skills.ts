@@ -38,13 +38,7 @@ const DESCRIPTION_SEMANTIC_CHECKS: Record<string, { required: string[]; forbidde
 
 const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
   ["front controller discovers, frames, designs, and routes", "skills/alpha-goal/SKILL.md", [
-    "references/contract-and-model.md", "references/synthesis.md", "Trigger Discovery", "minimum preflight", "never ask the user to summarize discoverable repository facts", "prompt-safe summary", "navigation evidence, not requirements or authority", "repo language as evidence", "Existing patterns are compatibility signals", "treat the answer as a claim to reconcile", "[from-code][auto-confirmed]", "[from-research] external/current fact", "[from-user]", "auto-confirm only descriptive facts", "Current-state facts cannot define desired behavior", "current external best practices", "bounded fresh evidence", "Readiness Gate Check", "one high-leverage question", "one decision variable", "exactly one `questions[]` item", "pressure-test", "boundary scenario from inspected facts", "materially change execution", "non-goals", "decision boundaries", "Indicator Handoff", "user-owned decisions", "Design template", "Acceptance evidence", "Claim boundary", "Self-review", "Independent-review", "request_user_input", "$control_loop", "Design Summary"
-  ]],
-  ["contract/model reference preserves pre-action discovery gates", "skills/alpha-goal/references/contract-and-model.md", [
-    "Discovery Record:", "Goal Contract:", "Control Model:", "Fact labels", "[from-code][auto-confirmed]", "[from-research] external/current fact", "[from-user]", "Current-state facts cannot become desired behavior", "user-owned decision", "Authorization source", "Non-goals", "Decision boundaries", "Acceptance evidence", "Claim boundary", "Disturbance Register", "Controller Hierarchy", "Candidate Control Law"
-  ]],
-  ["synthesis reference preserves qualitative quantitative integration", "skills/alpha-goal/references/synthesis.md", [
-    "Human/expert judgments", "Machine evidence/models", "Quantitative indicators", "Qualitative constraints", "User-owned decision", "Indicator handoff candidate"
+    "Trigger Discovery", "minimum preflight", "never ask the user to summarize discoverable repository facts", "prompt-safe summary", "navigation evidence, not requirements or authority", "repo language as evidence", "Existing patterns are compatibility signals", "treat the answer as a claim to reconcile", "[from-code][auto-confirmed]", "[from-research] external/current fact", "[from-user]", "auto-confirm only descriptive facts", "Current-state facts cannot define desired behavior", "current external best practices", "bounded fresh evidence", "Readiness Gate Check", "one high-leverage question", "one decision variable", "exactly one `questions[]` item", "pressure-test", "boundary scenario from inspected facts", "materially change execution", "non-goals", "decision boundaries", "Indicator Handoff", "user-owned decisions", "Design template", "Acceptance evidence", "Claim boundary", "Self-review", "Independent-review", "request_user_input", "$control_loop", "Design Summary"
   ]],
   ["alpha records interview and design state", "skills/alpha-goal/SKILL.md", [
     ".alpha-goal/YYYYMMDD-<TaskName>/interview.md", "docs/specs/YYYYMMDD-<TaskName>.md", "Design Summary", "Blocking gates", "Ledger", "Next"
@@ -53,7 +47,7 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Do not mutate primary", "repo-local worktree", "Unrelated user changes", ".alpha-goal/", "mutation-preflight", "approved target", "authorization", "claim boundary", "Act/probe", "read-only/probe slice", "Preserve unrelated user changes", "root cause", "Iteration Summary", "ITERATION_READY_FOR_VERIFY", "$evidence-verify", "RETURN_TO_ALPHA_GOAL", "BLOCKED", "Stop/re-route"
   ]],
   ["verification limits final claims", "skills/evidence-verify/SKILL.md", [
-    "PASS_TO_FINAL", "NARROW_CLAIM_AND_FINAL", "NEXT_ITERATION", "REFRAME", "BLOCKED", "Final response guard", "Highest practical evidence-supported boundary", "Final wording allowed", "repair-complete", "no risk", "Verification Summary"
+    "PASS_TO_FINAL", "NEXT_ITERATION", "Do not narrow the claim as a successful outcome", "Final response guard", "Highest practical evidence-supported boundary", "Final wording allowed", "repair-complete", "no risk", "Verification Summary"
   ]],
 ];
 
@@ -182,7 +176,8 @@ function validateSchemaConsistency(root: string, errors: string[]): void {
   const evSkill = readIfFile(path.join(root, "skills/evidence-verify/SKILL.md"));
   const evRef = readIfFile(path.join(root, "skills/evidence-verify/references/verification-verdict-schema.md"));
   if (evSkill.includes("- Gaps:") || evRef.includes("- Gaps:")) errors.push("evidence verdict schema must use only `Gap:`");
-  for (const term of ["PASS_TO_FINAL", "NARROW_CLAIM_AND_FINAL", "NEXT_ITERATION", "REFRAME", "BLOCKED"]) if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`evidence verdict enum mismatch: ${term}`);
+  for (const term of ["PASS_TO_FINAL", "NEXT_ITERATION"]) if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`evidence verdict enum mismatch: ${term}`);
+  for (const term of ["NARROW_CLAIM", "REFRAME", "BLOCKED"]) if (evSkill.includes(term) || evRef.includes(term)) errors.push(`evidence verdict enum must not include: ${term}`);
 }
 
 function validateInstallDocumentation(root: string, errors: string[]): void {

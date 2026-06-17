@@ -4,11 +4,11 @@
 
 | Directory | Purpose |
 |---|---|
-| `skills/alpha-goal/` | Front-end controller: fact discovery, frame, model, synthesize, route, ledger. |
+| `skills/alpha-goal/` | Front-end controller: fact discovery, clarification, handoff design, route, ledger. |
 | `skills/control-loop/` | Bounded actuator/controller for safe execution and feedback. |
 | `skills/evidence-verify/` | Independent comparator for evidence and claim boundaries. |
 
-Former public framing/modeling/synthesis stages are now internal `alpha-goal` references.
+Former public framing/modeling/synthesis stages are folded into `skills/alpha-goal/SKILL.md`.
 
 ## Scripts
 

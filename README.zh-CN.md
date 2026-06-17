@@ -6,16 +6,16 @@
 
 | Skill | 职责 |
 | --- | --- |
-| `alpha-goal` | 默认入口：模糊请求先挖掘事实，再目标成帧、系统建模、复杂决策综合、路由下一控制器、维护 ledger。 |
+| `alpha-goal` | 默认入口：模糊请求先挖掘事实，再澄清目标边界、形成交付设计、路由下一控制器、维护 ledger。 |
 | `control-loop` | 有界执行/探针：变更安全门、反馈采样、残余误差路由。 |
 | `evidence-verify` | 独立比较器：检查 final/ready/safe/complete/repair 声明与证据边界。 |
 
-目标契约、系统建模、综合研判已内化为 `skills/alpha-goal/references/` 下的规则，不再作为公开技能安装。
+目标契约、系统建模、综合研判已折叠进 `skills/alpha-goal/SKILL.md`，不再作为公开技能安装。
 
 ## 流程
 
 ```text
-INTENT -> alpha-goal(discover/frame/model/synthesize/route) -> control-loop(action+feedback) -> evidence-verify(claim check) -> FINAL or NEXT LOOP
+INTENT -> alpha-goal(discover/clarify/design/route) -> control-loop(action+feedback) -> evidence-verify(claim check) -> FINAL or NEXT LOOP
 ```
 
 ## 安装

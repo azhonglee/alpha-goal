@@ -20,8 +20,6 @@ Exert your utmost efforts to clarify the real intention, outcome, constraints, b
 
 ## Phase 1: Discovery
 
-Load `references/contract-and-model.md` when a durable Goal Contract or Control Model is needed. Load `references/synthesis.md` when qualitative, multi-party, weakly quantified, or value-laden objectives need synthesis.
-
 Trigger Discovery for vague, overloaded, brownfield, high-consequence, missing-acceptance, or user-says-"don't assume" requests. Skip only when concrete targets, acceptance evidence, non-goals, decision boundaries, and authority are already explicit.
 
 For deictic bug requests without a discoverable locator, inspect immediate context; if no failing command/log/issue/code pointer is discoverable, ask for the minimal reproducer or error signal before execution routing.

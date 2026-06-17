@@ -6,16 +6,16 @@ A minimal closed-loop Codex skillset for engineering work.
 
 | Skill | Role |
 | --- | --- |
-| `alpha-goal` | Default entry: discover facts for ambiguous requests, frame goal, model system, synthesize complex decisions, route next controller, maintain ledger. |
+| `alpha-goal` | Default entry: discover facts for ambiguous requests, clarify goal boundaries, design the handoff, route next controller, maintain ledger. |
 | `control-loop` | Bounded execution/probe with mutation safety, feedback, and residual-error routing. |
 | `evidence-verify` | Independent comparator for final/ready/safe/complete/repair claims and evidence boundaries. |
 
-Internal framing/modeling/synthesis rules live under `skills/alpha-goal/references/`; they are not installed as public skills.
+Former public framing/modeling/synthesis stages are folded into `skills/alpha-goal/SKILL.md`; they are not installed as public skills.
 
 ## Flow
 
 ```text
-INTENT -> alpha-goal(discover/frame/model/synthesize/route) -> control-loop(action+feedback) -> evidence-verify(claim check) -> FINAL or NEXT LOOP
+INTENT -> alpha-goal(discover/clarify/design/route) -> control-loop(action+feedback) -> evidence-verify(claim check) -> FINAL or NEXT LOOP
 ```
 
 ## Install
