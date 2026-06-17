@@ -1,129 +1,114 @@
 ---
 name: alpha-goal
-description: "Route engineering, debugging, design, and verification work through the closed-loop control skill suite: goal-contract, system-model, control-loop, evidence-verify, and decision-synthesis. Use when the next skill or control boundary is unclear. Use for any rengineering, debugging, design, or verification request."
+description: "Use to clarify for real intention/requirements."
 ---
 
 # Alpha Goal
 
-Use this skill to select and stabilize the next action in the skill suite. It is a router and control governor, not an implementation skill.
+Exert your utmost efforts to clarify the real intention, outcome, constraints, boundaries, and authority of the request. Do not implement or make final claims.
 
-## Cybernetic frame
+## Pre-flight
+1. Classify if the work type as one of the following:
+   - `exploration`: Just skip this skill and do it yourself.
+   - `design`: Follow up all phases.
+   - `implementation`: Follow up all phases.
+   - `diagnose`: Discover the root cause you 100% confirm, show the proof, and then follow up from Phase 2 if need fix.
+   - `maintenance`: Follow up all phases.
+   - `other`: Ask for more details to clarify again.
 
-Treat the user request as a control problem:
+2. If the work may be mixed, ask for more details and plan accordingly.
 
-- `reference`: desired outcome, acceptance criteria, and final claim boundary;
-- `plant`: repository, product, data flow, document system, workflow, or organization being changed;
-- `state`: what is currently known about goal, scope, implementation, evidence, risk, and blockers;
-- `observer`: tests, logs, diffs, runtime probes, user feedback, reviewer feedback, and read-only repository facts;
-- `actuator`: bounded changes made by `control-loop` under an approved Goal Contract;
-- `comparator`: `evidence-verify`, which compares fresh evidence against the reference and claim boundary;
-- `memory`: a Closed-loop Ledger that carries reference, current state, error, control action, feedback, and route history across skills;
-- `adaptation`: Adaptive Learning Records that correct reusable control assumptions without silently changing scope or authority;
-- `disturbance`: changing requirements, dirty working tree, missing tools, flaky tests, conflicting specs, hidden ownership, broad claims, or external side effects, tracked through a Disturbance Register when material.
+## Phase 1: Discovery
 
-## Boundaries
+Trigger Discovery for vague, overloaded, brownfield, high-consequence, missing-acceptance, or user-says-"don't assume" requests. Skip only when concrete targets, acceptance evidence, non-goals, decision boundaries, and authority are already explicit.
 
-- Do not mutate implementation files, deploy, push, open PRs/MRs, repair data, or claim completion.
-- Do not bypass `goal-contract` when the desired reference state is ambiguous.
-- Do not bypass `system-model` when observability, controllability, ownership, or coupling is unclear enough to affect safe action.
-- Do not bypass `evidence-verify` when making a completion, correctness, readiness, merge, ship, or safety claim.
-- Keep routing proportional: choose the smallest next skill that reduces material uncertainty.
-- Default to durable process memory under `.alpha-goal/`. Before the first write in a repository, ensure `.alpha-goal/` is ignored; if it is missing from the repo root `.gitignore`, add `.alpha-goal/` there before writing ledger artifacts.
-- Use chat-only ledger state only when the user explicitly forbids file writes, no repository path exists, or `.gitignore` cannot be updated safely.
+For deictic bug requests without a discoverable locator, inspect immediate context; if no failing command/log/issue/code pointer is discoverable, ask for the minimal reproducer or error signal before execution routing.
 
-## Load resources when needed
+If work appears done or any final/ready/safe/complete/repair claim is needed, route to `evidence-verify`.
 
-- `references/cybernetic-routing.md`: route selection and stability failure patterns.
-- `references/closed-loop-ledger.md`: cross-stage state memory schema and update rules.
+## Phase 2: Clarify
 
-## Process
+Loop Socratic-deep-interview until you 100% understand the requirements and remain no ambiguity at all.
 
-```text
-Classify state -> Select next skill -> Check stability gates -> Persist route card -> Show route summary
-```
+Before the first user-facing question, complete minimum preflight: applicable AGENTS/repo rules, README/getting-started/install docs, relevant docs/plans/ADRs/contracts, target files/current implementation, local glossary/context if present, current branch/status when mutation may follow, and direct contradictions. If missing, name the missing observer instead of asking for repo facts; never ask the user to summarize discoverable repository facts merely to save inspection effort.
 
-### 1. Classify state
+### Socratic Interviewing Loop
+1. Ask one high-leverage question per round. One question means one decision variable. The question should confirm a conflict, request a decision, demand an example, expose an assumption, force a tradeoff, or test one boundary-stressing scenario. Use `request_user_input` with exactly one `questions[]` item when available; otherwise ask plainly.
+2. Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps. If context is too large, first inspect prompt-safe local indexes/filenames/docs/likely target surfaces. Treat the answer as navigation evidence, not requirements or authority.
+3. Treat repo language as evidence, not authority. Cross-check user claims against discoverable code/docs; if sources conflict, name the competing sources. Existing patterns are compatibility signals or hypotheses, not requirements by themselves; if they affect desired behavior, scope, acceptance, or tradeoff, confirm with the user or cite an authoritative spec before mutation. If the user's answer contradicts discovered facts, treat the answer as a claim to reconcile, not as an override.
+4. Classify each gap as `[from-code][auto-confirmed]` descriptive fact, `[from-code]` inferred fact needing confirmation, `[from-research] external/current fact`, or `[from-user]` human decision. Do not ask for discoverable facts until inspected; auto-confirm only descriptive facts, never choices about desired behavior, scope, pattern, or tradeoff. Current-state facts cannot define desired behavior, requirements, acceptance evidence, non-goals, tradeoffs, or authority without explicit user request or authoritative spec/issue. If unresolved ambiguity depends on current external best practices, standards, APIs, dependency versions, laws, schedules, or prices, gather bounded fresh evidence first, then ask the user only for the decision boundary.
+5. Readiness Gate Check. Mark each gate `pass` only when explicit or source-backed: intent, outcome, scope, constraints, acceptance evidence, context/current facts, non-goals, decision boundaries, claim boundary, authorization source, source-of-truth conflicts, external/current facts, actuator boundary, and sensor/observer. Count unresolved gates; target the first blocking gate each round and prefer intent/boundaries before implementation detail.
+6. If qualitative, value-laden, multi-party, weakly quantified, or UX/performance/quality-adjective objectives exist, synthesize and create Indicator Handoff with primary metric, guardrail metric, tradeoff owner, and evidence boundary before action/claims.
+7. If user-owned decisions, credentials, permissions, external side effects, public claims, irreversible commitments, missing acceptance evidence, or unresolved source-of-truth conflicts remain, ask/block.
+8. Before asking or closing non-trivial ambiguous work, pressure-test the current interpretation with at least one boundary scenario from inspected facts; use it to choose the next single question. After each material user answer, pressure-test again if it could change scope, acceptance, authority, or claim boundary. Continue ordinary questioning only when the next answer could materially change execution, acceptance, authority, or claim boundary.
 
-Identify the current dominant uncertainty. If a Closed-loop Ledger exists, read its latest reference, current state, residual error, and route decision before classifying:
+Track interview records, and append to the `.alpha-goal/YYYYMMDD-<TaskName>/interview.md`. Make `.alpha-goal/` ignored before writing process artifacts.
 
-- unclear target, intent, scope, non-goals, acceptance, or authorization -> goal ambiguity;
-- unclear plant boundary, state variables, observability, controllability, disturbances, or coupling -> model ambiguity;
-- unclear controller hierarchy, local/global objective conflict, or coupling arbitration -> coordination ambiguity;
-- approved goal exists and a bounded action can improve evidence or implementation -> execution need;
-- repeated residual error, failed threshold, or contradicted control assumption -> adaptation need;
-- work appears done but claim/evidence boundary is unresolved -> verification need;
-- many stakeholders, weak quantification, conflicting values, or complex giant-system behavior -> synthesis need;
-- missing tool, permission, data, environment, or user-owned decision -> blocker.
+### 辅助工具
 
-If no ledger exists and the task is likely to span multiple skills, initialize `.alpha-goal/control-state/YYYYMMDD-<slug>.md` after ensuring `.alpha-goal/` is ignored. Add `.alpha-goal/` to the repo root `.gitignore` first when needed.
+使用清晰度辅助判断你是否需要继续提问。
+Score each weighted dimension in `[0.0, 1.0]` with justification + gap：
+clarity_score = 0.3 * intent + 0.2 * outcome + 0.15 * scope + 0.12 * constraints + 0.1 * success + 0.08 * decision_boundary + 0.05 * context
 
-### 2. Select next skill
+Readiness gate:
+- `Non-goals` must be explicit
+- `Decision Boundaries` must be explicit
+- A pressure pass must be complete: at least one earlier answer has been revisited with an evidence, assumption, or tradeoff follow-up
+- If either gate is unresolved, or the pressure pass is incomplete, continue interviewing even when weighted clarity is above threshold
 
-Use this routing table:
+## Phase 3: Assumption Stress Test
 
-| Current state | Next skill | Reason |
-| --- | --- | --- |
-| User asks for implementation but goal boundary is unclear | `goal-contract` | define reference/setpoint before control action |
-| Goal is broad and system structure is unclear | `system-model` then `goal-contract` | model the plant before writing the contract |
-| Multiple local controllers can affect one global objective | `system-model` or `decision-synthesis` | map hierarchy, coupling, arbitration, and user-owned priorities |
-| Active approved Goal Contract exists and mutation/probe is needed | `control-loop` | execute one bounded control action and collect feedback |
-| Evidence bundle exists and a final claim is proposed | `evidence-verify` | compare output state to reference and claim boundary |
-| Problem is socio-technical, strategic, multi-agent, or complex giant-system-like | `decision-synthesis` | synthesize qualitative and quantitative views before contract |
-| Required user-owned decision or external permission is missing | user clarification / blocker | do not invent authority |
+Use each mode once when applicable. These are normal escalation tools, not rare rescue moves:
 
-### 3. Check stability gates
+- **Contrarian** (round 2+ or immediately when an answer rests on an untested assumption): challenge core assumptions
+- **Simplifier** (round 4+ or when scope expands faster than outcome clarity): probe minimal viable scope
+- **Ontologist** (round 5+ and clarity_score < 0.15, or when the user keeps describing symptoms): ask for essence-level reframing
 
-Before routing to an execution-capable path, ensure:
+Track used modes in state to prevent repetition.
 
-- the reference state is explicit enough to detect error;
-- an execution route has a candidate Control Law: target error, control variable, expected effect, sensor threshold, fallback;
-- the actuator boundary says what may change and what must not change;
-- observer signals are available or a missing-observer blocker is stated;
-- qualitative objectives have accepted indicators or explicitly missing sensors before execution claims depend on them;
-- material disturbances are registered with likelihood, impact, sensor, containment, and route trigger, or routed to modeling/synthesis/user/blocker;
-- prior Adaptive Learning Records are applied only when reuse conditions hold and invalidation conditions do not hold;
-- the ledger records the last error signal and why the selected next skill reduces it, or chat-only state is explicitly justified by a no-write constraint;
-- final claims will be checked by `evidence-verify` rather than stated by the executor.
+## Phase 4: Design
 
-### 4. Persist route card and show summary
+1. When you have a clear understanding of the task, you can start to design the solution based on the information you have.
 
-Persist the full route card to the Closed-loop Ledger by default. Do not print the full card in the TUI unless the user explicitly asks for it, persistence is blocked, or the route is high-risk enough that the user must review every field before continuing.
+Design template:
+Technical Context [context]
+Intent[intent] （Why the user wants this）
+Outcome [outcome]
+Scope [scope]
+Constraints [constraints]
+Assumptions + resolutions [assumptions_resolutions]
+Acceptance evidence [acceptance_evidence]
+Non-goals [non_goal]
+Decision boundary [decision_boundary]
+Claim boundary [claim_boundary]
 
-Write or update this section in `.alpha-goal/control-state/YYYYMMDD-<slug>.md`:
+2. Persist `docs/specs/YYYYMMDD-<TaskName>.md`, or follow repository conventions.
+3. Dispatch Self-review + Independent-review of the design and fix any acceptant findings.
 
-```text
-Latest Control Route:
-Control Route:
-- Ledger path:
-- Active state:
-- Dominant uncertainty:
-- Error signal:
-- Control law:
-- Indicator handoff:
-- Adaptive learning:
-- Controller hierarchy:
-- Disturbance register:
-- Selected skill:
-- Why this skill:
-- Required context to load or ask for:
-- Safety boundary:
-- Next action:
-```
+## Phase 5: Ask for Confirmation
 
-Then show only a TUI-friendly summary as a Markdown table:
+1. Show Summary of Design.
+2. Use `request_user_input` to ask for confirmation: approve and launch, refine or reject.
+- Approve and launch: Hand off the design to `$control_loop` to execute.
+- Refine: Ask for refinement of the design and return to suitable phase.
+- Reject: Stop here.
+
+TUI summary Style:
 
 ```markdown
-Route Summary
+Design Summary
 
 | Field | Value |
 | --- | --- |
-| Route | |
-| Why | |
-| Boundary | |
+| Intent | |
+| Outcome | |
+| Scope | |
+| Constraints | |
+| Acceptance evidence | |
+| Non-goals | |
+| Decision boundary | |
+| Claim boundary | |
+| Blocking gates | |
 | Ledger | |
 | Next | |
 ```
-
-The summary must be enough for the user to understand the selected route without reading a long field list. Keep each table value concise; put long reasoning in the ledger artifact. Other skills must recover the full route from `.alpha-goal/control-state/` instead of relying on the TUI transcript. If writing is explicitly forbidden or impossible, include the full `Control Route` in chat and state the no-write reason in `Ledger`.
-
-If the user explicitly named a skill and the route is safe, respect that selection and state any residual gates.
