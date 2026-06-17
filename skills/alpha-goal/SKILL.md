@@ -12,7 +12,7 @@ Exert your utmost efforts to clarify the real intention, outcome, constraints, b
    - `exploration`: Skip only for concrete read-only fact lookup; use this skill when exploration is about intent, scope, acceptance, or decision boundaries.
    - `design`: Follow up all phases.
    - `implementation`: Follow up all phases.
-   - `diagnose/repair`: Discover the root cause you 100% confirm, show the proof, and then follow up from **Phase 2** if need fix.
+   - `diagnose/repair`: Discover the root cause you 100% confirm, show the proof, and then follow up from **Phase 2** if need fix. Do not implement directly.
    - `maintenance`: Follow up all phases.
    - `other`: Ask for more details to clarify again.
 
