@@ -1,112 +1,112 @@
 ---
 name: alpha-goal
-description: "Unclear or underspecified engineering work router."
+description: "Use to clarify for real intention/requirements."
 ---
 
 # Alpha Goal
 
-Act as the front-end controller. Do not mutate files or make final claims. Reduce uncertainty until the next safe controller is obvious. Output follows conversation/repo language; keep schema labels stable.
+Exert your utmost efforts to clarify the real intention, outcome, constraints, boundaries, and authority of the request. Do not implement or make final claims.
 
-## Kernel
+## Pre-flight
+1. Classify if the work type as one of the following:
+   - `exploration`: Just skip this skill and do it yourself.
+   - `design`: Follow up all phases.
+   - `implementation`: Follow up all phases.
+   - `diagnose`: Discover the root cause you 100% confirm, show the proof, and then follow up from Phase 2 if need fix.
+   - `maintenance`: Follow up all phases.
+   - `other`: Ask for more details to clarify again.
 
-- Discovery interview: preflight context, inspect safely discoverable facts, evaluate readiness gates as pass/fail, pressure-test assumptions, then ask one high-leverage human question only for confirmation or user-owned decisions.
-- Reference: desired state, scope, non-goals, acceptance evidence, claim boundary.
-- Plant/model: system boundary, state variables, sensors, actuators, ownership, coupling.
-- Synthesis: qualitative judgment + quantitative signals + user-owned decisions for complex work.
-- Actuator: `control-loop` only, after explicit mutation/probe authority and actuator boundary.
-- Comparator: `evidence-verify` for final/ready/safe/complete/repair claims.
-- Memory: chat for one-turn low-risk read-only work; durable `.alpha-goal/` ledger for handoff, mutation, risk, or claims.
+2. If the work may be mixed, ask for more details and plan accordingly.
 
-## Resources
+## Phase 1: Discovery
 
-Do not load references by default. Use them only when the compact rules below are insufficient:
+Trigger Discovery for vague, overloaded, brownfield, high-consequence, missing-acceptance, or user-says-"don't assume" requests. Skip only when concrete targets, acceptance evidence, non-goals, decision boundaries, and authority are already explicit.
 
-- `references/contract-and-model.md`: target/evidence/authority or plant/sensor/actuator/ownership/coupling remains unclear after fact discovery.
-- `references/synthesis.md`: stakeholder/value/indicator conflict, high coupling, high consequence, or complex-giant-like work.
+For deictic bug requests without a discoverable locator, inspect immediate context; if no failing command/log/issue/code pointer is discoverable, ask for the minimal reproducer or error signal before execution routing.
 
-## Process
+If work appears done or any final/ready/safe/complete/repair claim is needed, route to `evidence-verify`.
 
-```text
-Discover facts -> Pressure-test -> Confirm one decision -> Frame -> Model -> Synthesize if needed -> Route -> Ledger handoff
-```
+## Phase 2: Calarify
 
-1. Trigger Discovery Interview for vague, overloaded, brownfield, high-consequence, missing-acceptance, or user-says-"don't assume" requests. Skip only when concrete targets, acceptance evidence, non-goals, decision boundaries, and authority are already explicit.
-2. Before the first user-facing question, complete minimum preflight: applicable AGENTS/repo rules, README/getting-started/install docs, relevant docs/plans/ADRs/contracts, target files/current implementation, local glossary/context if present, current branch/status when mutation may follow, and direct contradictions. If missing, name the missing observer instead of asking for repo facts; never ask the user to summarize discoverable repository facts merely to save inspection effort.
-3. Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps. If context is too large, first inspect prompt-safe local indexes/filenames/docs/likely target surfaces; ask for a prompt-safe summary only when no local observer can identify the relevant surface. Treat the answer as navigation evidence, not requirements or authority; do not score, crystallize, or hand off until that summary exists.
-4. Treat repo language as evidence, not authority. Cross-check user claims against discoverable code/docs; if sources conflict, name the competing sources. Existing patterns are compatibility signals or hypotheses, not requirements by themselves; if they affect desired behavior, scope, acceptance, or tradeoff, confirm with the user or cite an authoritative spec before mutation. If the user's answer contradicts discovered facts, treat the answer as a claim to reconcile, not as an override.
-5. Classify each gap as `[from-code][auto-confirmed]` descriptive fact, `[from-code]` inferred fact needing confirmation, `[from-research] external/current fact`, or `[from-user]` human decision. Do not ask for discoverable facts until inspected; auto-confirm only descriptive facts, never choices about desired behavior, scope, pattern, or tradeoff. Current-state facts cannot define desired behavior, requirements, acceptance evidence, non-goals, tradeoffs, or authority without explicit user request or authoritative spec/issue. If unresolved ambiguity depends on current external best practices, standards, APIs, dependency versions, laws, schedules, or prices, gather bounded fresh evidence first, then ask the user only for the decision boundary.
-6. Replace qualitative ambiguity scoring with a Readiness Gate Checklist. Mark each gate `pass` only when explicit or source-backed: intent, outcome, scope, constraints, acceptance evidence, context/current facts, non-goals, decision boundaries, claim boundary, authorization source, source-of-truth conflicts, external/current facts, actuator boundary, and sensor/observer. Count unresolved gates; target the first blocking gate each round and prefer intent/boundaries before implementation detail.
-7. Ask at most one high-leverage question per round. One question means one decision variable. The question should confirm a conflict, request a decision, demand an example, expose an assumption, force a tradeoff, or test one boundary-stressing scenario. Use `request_user_input` with exactly one `questions[]` item when available; otherwise ask plainly. Multi-select is allowed only within one decision surface, not to mix scope, acceptance, authority, non-goals, or tradeoff; do not pack multiple confirmations into one option.
+Loop Socratic-deep-interview until you 100% understand the requirements and remain no ambiguity at all.
+
+Before the first user-facing question, complete minimum preflight: applicable AGENTS/repo rules, README/getting-started/install docs, relevant docs/plans/ADRs/contracts, target files/current implementation, local glossary/context if present, current branch/status when mutation may follow, and direct contradictions. If missing, name the missing observer instead of asking for repo facts; never ask the user to summarize discoverable repository facts merely to save inspection effort.
+
+### Socratic Interviewing Loop
+1. Ask one high-leverage question per round. One question means one decision variable. The question should confirm a conflict, request a decision, demand an example, expose an assumption, force a tradeoff, or test one boundary-stressing scenario. Use `request_user_input` with exactly one `questions[]` item when available; otherwise ask plainly. Multi-select is allowed only within one decision surface, not to mix scope, acceptance, authority, non-goals, or tradeoff; do not pack multiple confirmations into one option.
+2. Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps. If context is too large, first inspect prompt-safe local indexes/filenames/docs/likely target surfaces; ask for a prompt-safe summary only when no local observer can identify the relevant surface. Treat the answer as navigation evidence, not requirements or authority; do not crystallize, or hand off until that summary exists.
+3. Treat repo language as evidence, not authority. Cross-check user claims against discoverable code/docs; if sources conflict, name the competing sources. Existing patterns are compatibility signals or hypotheses, not requirements by themselves; if they affect desired behavior, scope, acceptance, or tradeoff, confirm with the user or cite an authoritative spec before mutation. If the user's answer contradicts discovered facts, treat the answer as a claim to reconcile, not as an override.
+4. Classify each gap as `[from-code][auto-confirmed]` descriptive fact, `[from-code]` inferred fact needing confirmation, `[from-research] external/current fact`, or `[from-user]` human decision. Do not ask for discoverable facts until inspected; auto-confirm only descriptive facts, never choices about desired behavior, scope, pattern, or tradeoff. Current-state facts cannot define desired behavior, requirements, acceptance evidence, non-goals, tradeoffs, or authority without explicit user request or authoritative spec/issue. If unresolved ambiguity depends on current external best practices, standards, APIs, dependency versions, laws, schedules, or prices, gather bounded fresh evidence first, then ask the user only for the decision boundary.
+5. Readiness Gate Check. Mark each gate `pass` only when explicit or source-backed: intent, outcome, scope, constraints, acceptance evidence, context/current facts, non-goals, decision boundaries, claim boundary, authorization source, source-of-truth conflicts, external/current facts, actuator boundary, and sensor/observer. Count unresolved gates; target the first blocking gate each round and prefer intent/boundaries before implementation detail.
+6. If qualitative, value-laden, multi-party, weakly quantified, or UX/performance/quality-adjective objectives exist, synthesize and create Indicator Handoff with primary metric, guardrail metric, tradeoff owner, and evidence boundary before action/claims.
+7. If user-owned decisions, credentials, permissions, external side effects, public claims, irreversible commitments, missing acceptance evidence, or unresolved source-of-truth conflicts remain, ask/block.
 8. Before asking or closing non-trivial ambiguous work, pressure-test the current interpretation with at least one boundary scenario from inspected facts; use it to choose the next single question. After each material user answer, pressure-test again if it could change scope, acceptance, authority, or claim boundary. Continue ordinary questioning only when the next answer could materially change execution, acceptance, authority, or claim boundary.
-9. Close the interview only when `blocking_gate_count = 0` for the selected route. Non-goals and decision boundaries are mandatory gates. Do not close on probable intent; missing non-goals or decision boundaries are unresolved until user-confirmed or source-backed. Closure must state: gates passed, facts settled, user decisions settled, unsupported assumptions, closure evidence, and next route.
-10. If target/scope/evidence/claim/authority remains unclear, produce a Goal Contract using `references/contract-and-model.md`. A Goal Contract may record missing authority but cannot upgrade it; absent or generic authorization source means ask/blocker, not `control-loop`.
-11. If plant/sensor/actuator/ownership/coupling remains unclear, produce a Control Model before execution.
-12. If qualitative, value-laden, multi-party, weakly quantified, or UX/performance/quality-adjective objectives exist, synthesize and create Indicator Handoff with primary metric, guardrail metric, tradeoff owner, and evidence boundary before action/claims.
-13. If user-owned decisions, credentials, permissions, external side effects, public claims, irreversible commitments, missing acceptance evidence, or unresolved source-of-truth conflicts remain, ask/block.
-14. If explicit bounded action authority exists and material ambiguity is resolved, route only to the granted authorization class; read-only/probe authority does not imply mutation authority. Safe defaults apply only to reversible operational details inside a confirmed goal. Generic edit verbs like refactor/fix/optimize/add, or urgency like “execute now”, do not define scope, acceptance, non-goals, side effects, risk acceptance, claim boundary, or unsafe mutation authority.
-15. For deictic bug requests without a discoverable locator, inspect immediate context; if no failing command/log/issue/code pointer is discoverable, ask for the minimal reproducer or error signal before execution routing.
-16. Durable docs/glossary/ADR/memory updates are opt-in; recommend them if useful but do not make them in-scope without explicit authority.
-17. If explicit bounded action authority exists and material ambiguity is resolved, route to `control-loop`; `alpha-goal` may record authority but never creates it.
-18. If work appears done or any final/ready/safe/complete/repair claim is needed, route to `evidence-verify`.
 
-## Stability gates
+### 辅助工具
 
-Before execution-capable routing, verify:
+使用清晰度辅助判断你是否需要继续提问。
+Score each weighted dimension in `[0.0, 1.0]` with justification + gap：
+clarity_score = 0.3 * intent + 0.2 * outcome + 0.15 * scope + 0.12 * constraints + 0.1 * success + 0.08 * decision_boundary + 0.05 * context
 
-- Discovery Interview was triggered or explicitly skipped with a concrete reason;
-- preflight context intake inspected relevant local facts before asking, or the missing observer is named;
-- repo/doc/code terminology conflicts are surfaced, not silently resolved;
-- facts vs judgments are labeled; user answers that contradict evidence are reconciled before routing;
-- Readiness Gate Checklist has `blocking_gate_count = 0` for execution-capable routing; missing mandatory gates cannot be hidden by subjective ambiguity labels;
-- at least one pressure pass occurred for non-trivial ambiguous work, or the reason it was unnecessary is recorded;
-- reference state is explicit enough to observe error;
-- actuator boundary says what may and may not change;
-- mutation/probe authority comes from explicit user/repo instruction, not generic edit verbs, urgency, or an agent-written contract;
-- sensor evidence exists or the missing observer is named;
-- strongest disturbance has sensor, containment, and route trigger;
-- user-owned decisions and blocked downstream actions are recorded;
-- final claims will be compared by `evidence-verify`, not asserted here.
+Readiness gate:
+- `Non-goals` must be explicit
+- `Decision Boundaries` must be explicit
+- A pressure pass must be complete: at least one earlier answer has been revisited with an evidence, assumption, or tradeoff follow-up
+- If either gate is unresolved, or the pressure pass is incomplete, continue interviewing even when weighted clarity is above threshold
 
-## Ledger
+## Phase 3: Assumption Stress Test
 
-Use `.alpha-goal/control-state/latest.md` when durable handoff is required. Before writing `.alpha-goal/`, ensure it is ignored; add `.alpha-goal/` to repo root `.gitignore` only as a process-artifact setup mutation.
+Use each mode once when applicable. These are normal escalation tools, not rare rescue moves:
 
-TUI summary:
+- **Contrarian** (round 2+ or immediately when an answer rests on an untested assumption): challenge core assumptions
+- **Simplifier** (round 4+ or when scope expands faster than outcome clarity): probe minimal viable scope
+- **Ontologist** (round 5+ and clarity_score < 0.15, or when the user keeps describing symptoms): ask for essence-level reframing
+
+Track used modes in state to prevent repetition.
+
+## Phase 4: Design
+
+1. When you have a clear understanding of the task, you can start to design the solution based on the information you have.
+
+Design template:
+Technical Context [context] 
+Intent[intent] （Why the user wants this）
+Outcome [outcome] 
+Scope [scope] 
+Constraints [constraints] 
+Assumptions + resolutions [assumptions_resolutions] 
+Acceptance evidence [acceptance_evidence]
+Non-goals [non_goal]
+Decision boundary [decision_boundary]
+Claim boundary [claim_boundary] 
+
+2. Store the design in `docs/specs/YYYYMMDD-<TaskName>.md`, or follow repository conventions.
+3. Dispatch Self-review + Independent-review of the design and fix any acceptant findings.
+
+## Phase 5: Ask for Confirmation
+
+1. Show Summary of Design.
+2. Use `request_user_input` to ask for confirmation: approve and launch, refine or reject.
+- Approve and launch: Hand off the design to `$control_loop` to execute.
+- Refine: Ask for refinement of the design and return to suitable phase.
+- Reject: Stop here.
+
+TUI summary Style:
 
 ```markdown
-Route Summary
+Design Summary
 
 | Field | Value |
 | --- | --- |
-| Route | |
-| Why | |
-| Boundary | |
-| Why not ask | |
-| Why not execute | |
+| Intent | |
+| Outcome | |
+| Scope | |
+| Constraints | |
+| Acceptance evidence | |
+| Non-goals | |
+| Decision boundary | |
+| Claim boundary | |
 | Blocking gates | |
 | Ledger | |
 | Next | |
-```
-
-
-Appendix schema:
-
-```text
-Latest Control Route:
-- Reference:
-- Current state:
-- Last error signal:
-- Control law:
-- Sensor feedback:
-- Route decision:
-- Next state:
-- Artifact registry:
-- Adaptive learning:
-- Selected skill:
-- Boundary:
-- Disturbance:
-- User-owned decisions:
-- Blocked downstream action:
-- Claim boundary:
-- Next action:
 ```
