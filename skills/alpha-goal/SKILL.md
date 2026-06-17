@@ -88,10 +88,6 @@ Claim boundary [claim_boundary]
 ## Phase 5: Ask for Confirmation
 
 1. Show Summary of Design.
-2. Use `request_user_input` to ask for confirmation: approve and launch, refine or reject.
-- Approve and launch: Hand off the design to `$control_loop` to execute.
-- Refine: Ask for refinement of the design and return to suitable phase.
-- Reject: Stop here.
 
 TUI summary Style:
 
@@ -112,3 +108,8 @@ Design Summary
 | Ledger | |
 | Next | |
 ```
+
+2. Use `request_user_input` to ask for confirmation: approve and launch, refine or reject.
+- Approve and launch: Hand off the design to `$control_loop` to execute.
+- Refine: Ask for refinement of the design and return to suitable phase.
+- Reject: Stop here.
