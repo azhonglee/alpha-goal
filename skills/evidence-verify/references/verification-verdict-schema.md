@@ -15,7 +15,7 @@ Verification Verdict:
 - Final wording allowed:
 - Final claim allowed:
 - Verdict: PASS_TO_FINAL / NEXT_ITERATION
-- Next route: control-loop
+- Next route: control-loop / alpha-goal / BLOCKED
 ```
 
 Indicator handoff review
