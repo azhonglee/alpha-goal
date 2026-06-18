@@ -7,6 +7,10 @@ description: "Use for any engineering/design/implementation/diagnose/repair requ
 
 Exert your utmost efforts to clarify the real intention, outcome, constraints, boundaries, and success criteria of the request. Do not implement or make final claims inside this skill.
 
+## State root
+
+Resolve the Alpha Goal state root before writing runtime artifacts. Use `ALPHA_GOAL_STATE_ROOT` when set; otherwise default to `${CODEX_HOME:-$HOME/.codex}/state/alpha-goal/<workspace-slug>/`. Derive `<workspace-slug>` from the absolute git root when inside a repo, otherwise from the absolute working directory or task context; strip leading slashes, replace characters outside `[A-Za-z0-9_.-]` with `-`, keep the last 80 characters, and fallback to `workspace`. Do not require a repo root for state files. Use repo-local `.alpha-goal/` only when user/project policy explicitly requires that override; then ensure `.alpha-goal/` is ignored before writing.
+
 ## Pre-flight
 1. Classify if the work type as one of the following:
    - `exploration`: Skip only for concrete read-only fact lookup; use this skill when exploration is about intent, scope, acceptance, or decision boundaries.
@@ -42,7 +46,7 @@ Before the first user-facing question, complete minimum preflight: applicable AG
 7. If user-owned decisions, credentials, permissions, external side effects, public claims, irreversible commitments, missing acceptance evidence, or unresolved source-of-truth conflicts remain, ask/block.
 8. Before asking or closing non-trivial ambiguous work, pressure-test the current interpretation with at least one boundary scenario from inspected facts; use it to choose the next single question. After each material user answer, pressure-test again if it could change scope, acceptance, authority, or claim boundary. Continue ordinary questioning only when the next answer could materially change execution, acceptance, authority, or claim boundary.
 
-Track interview records, and append to the `.alpha-goal/YYYYMMDD-<TaskName>/interview.md`. Make `.alpha-goal/` ignored before writing process artifacts.
+Track interview records, and append to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/interview.md`.
 
 ### Clarity score
 

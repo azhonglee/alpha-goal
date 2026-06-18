@@ -38,6 +38,8 @@ npx --yes tsx tools/validate_skills.ts .
 The installer creates direct symlinks for the three public skills under `$HOME/.codex/skills/` and cleans same-repo links for merged old public skills.
 The validator enforces the whole `skills/` tree under 30,000 bytes.
 
+Runtime records use the Alpha Goal state root: `ALPHA_GOAL_STATE_ROOT` when set, otherwise `${CODEX_HOME:-$HOME/.codex}/state/alpha-goal/<workspace-slug>/`. Repo-local `.alpha-goal/` is only a compatibility or explicit project-policy override.
+
 ## Usage examples
 
 ```text

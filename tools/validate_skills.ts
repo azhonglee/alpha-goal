@@ -20,6 +20,31 @@ const LEGACY_SCRIPT_REFERENCES = [
   "scripts/repo-sensor-snapshot.sh", "repo-sensor-snapshot.sh",
   "scripts/evidence-summary.sh", "evidence-summary.sh",
 ];
+const STATE_ROOT_FILES = [
+  "skills/alpha-goal/SKILL.md",
+  "skills/control-loop/SKILL.md",
+  "skills/evidence-verify/SKILL.md",
+  "templates/AGENTS.md",
+];
+const STATE_ROOT_REQUIRED_TERMS = [
+  "Alpha Goal state root",
+  "ALPHA_GOAL_STATE_ROOT",
+  "${CODEX_HOME:-$HOME/.codex}/state/alpha-goal/<workspace-slug>/",
+  "require a repo root",
+  "repo-local `.alpha-goal/` only",
+  "strip leading slashes",
+  "replace characters outside `[A-Za-z0-9_.-]` with `-`",
+  "keep the last 80 characters",
+  "fallback to `workspace`",
+];
+const STATE_ROOT_FORBIDDEN_PATTERNS: Array<[RegExp, string]> = [
+  [/\.alpha-goal\/YYYYMMDD-<TaskName>/, "hard-coded repo-local task artifact path"],
+  [/default runtime .*write.*\.alpha-goal\//i, "default runtime writes to repo-local .alpha-goal"],
+  [/default runtime .*under `?\.alpha-goal\//i, "default runtime lives under repo-local .alpha-goal"],
+  [/if .*\.alpha-goal\/.*missing.*\.gitignore.*add/i, "repo .gitignore required before state writes"],
+  [/\.gitignore.*must include .*\.alpha-goal\//i, "repo .gitignore hard requirement"],
+  [/missing \.gitignore with required \.alpha-goal/i, "validator requires repo .gitignore for state"],
+];
 
 const DESCRIPTION_SEMANTIC_CHECKS: Record<string, { required: string[]; forbidden: string[] }> = {
   "alpha-goal": {
@@ -41,13 +66,13 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Trigger Discovery", "minimum preflight", "never ask the user to summarize discoverable repository facts", "navigation evidence, not requirements or authority", "repo language as evidence", "Existing patterns are compatibility signals", "treat the answer as a claim to reconcile", "[from-code][auto-confirmed]", "[from-research] external/current fact", "[from-user]", "auto-confirm only descriptive facts", "Current-state facts cannot define desired behavior", "current external best practices", "bounded fresh evidence", "Readiness Gate Check", "one high-leverage question", "one decision variable", "exactly one `questions[]` item", "pressure-test", "boundary scenario from inspected facts", "materially change execution", "non-goals", "decision boundaries", "Indicator Handoff", "user-owned decisions", "Design template", "Acceptance evidence", "Claim boundary", "Self-review", "Independent-review", "request_user_input", "$control_loop", "Design Summary"
   ]],
   ["alpha records interview and design state", "skills/alpha-goal/SKILL.md", [
-    ".alpha-goal/YYYYMMDD-<TaskName>/interview.md", "docs/specs/YYYYMMDD-<TaskName>.md", "Design Summary", "Blocking gates", "Ledger", "Next"
+    "Alpha Goal state root", "YYYYMMDD-<TaskName>/interview.md", "docs/specs/YYYYMMDD-<TaskName>.md", "Design Summary", "Blocking gates", "Ledger", "Next"
   ]],
   ["execution has hard safety gates", "skills/control-loop/SKILL.md", [
-    "Do not mutate primary", "repo-local worktree", "Unrelated user changes", ".alpha-goal/", "mutation-preflight", "approved target", "authorization", "claim boundary", "### 1. Plan slice", "### 2. Act or probe", "### 3. Sense and compare", "### 4. Record and route", "Act/probe", "read-only/probe slice", "Preserve unrelated user changes", "root cause", "Iteration Summary", "ITERATION_READY_FOR_VERIFY", "$evidence-verify", "verification.md", "acceptance-to-evidence", "persisted evidence", "RETURN_TO_ALPHA_GOAL", "BLOCKED", "Stop/re-route"
+    "Do not mutate primary", "repo-local worktree", "Unrelated user changes", "Alpha Goal state root", "mutation-preflight", "approved target", "authorization", "claim boundary", "### 1. Plan slice", "### 2. Act or probe", "### 3. Sense and compare", "### 4. Record and route", "Act/probe", "read-only/probe slice", "Preserve unrelated user changes", "root cause", "Iteration Summary", "ITERATION_READY_FOR_VERIFY", "$evidence-verify", "verification.md", "acceptance-to-evidence", "persisted evidence", "RETURN_TO_ALPHA_GOAL", "BLOCKED", "Stop/re-route"
   ]],
   ["verification limits final claims", "skills/evidence-verify/SKILL.md", [
-    "PASS_TO_FINAL", "NEXT_ITERATION", "Do not narrow the claim as a successful outcome", "Final response guard", "Highest practical evidence-supported boundary", "Final wording allowed", "repair-complete", "no risk", "Verification Summary"
+    "PASS_TO_FINAL", "NEXT_ITERATION", "Alpha Goal state root", "ALPHA_GOAL_STATE_ROOT", "Do not narrow the claim as a successful outcome", "Final response guard", "Highest practical evidence-supported boundary", "Final wording allowed", "repair-complete", "no risk", "Verification Summary"
   ]],
 ];
 
@@ -85,7 +110,7 @@ export function main(args = process.argv.slice(2)): number {
 
   for (const dir of skillDirs) validateSkillDir(root, dir, errors, warnings);
   validateByteBudget(skills, errors);
-  validateRuntimeArtifactIgnore(root, errors);
+  validateRuntimeArtifactState(root, errors, warnings);
   validateScriptSurface(root, errors, warnings);
   validateLegacyReferences(root, errors);
   validateSemanticChecks(root, errors);
@@ -129,11 +154,22 @@ function validateByteBudget(skills: string, errors: string[]): void {
   if (total > SKILLS_BYTE_BUDGET) errors.push(`skills byte budget exceeded: ${total} > ${SKILLS_BYTE_BUDGET}`);
 }
 
-function validateRuntimeArtifactIgnore(root: string, errors: string[]): void {
+function validateRuntimeArtifactState(root: string, errors: string[], warnings: string[]): void {
+  for (const rel of STATE_ROOT_FILES) {
+    const text = readIfFile(path.join(root, rel));
+    if (!text) { errors.push(`${rel}: missing state-root file`); continue; }
+    for (const term of STATE_ROOT_REQUIRED_TERMS) if (!text.includes(term)) errors.push(`${rel}: missing state-root guidance: ${term}`);
+  }
+  const scanned = ["AGENTS.md", "README.md", "README.zh-CN.md", "MANIFEST.md", ...STATE_ROOT_FILES, "tools/validate_skills.ts"];
+  for (const rel of scanned) {
+    const text = readIfFile(path.join(root, rel));
+    for (const [pattern, label] of STATE_ROOT_FORBIDDEN_PATTERNS) if (pattern.test(text)) errors.push(`${rel}: forbidden state-root dependency remains: ${label}`);
+  }
   const gitignore = path.join(root, ".gitignore");
-  if (!isFile(gitignore)) { errors.push("missing .gitignore with required .alpha-goal/ runtime artifact ignore"); return; }
-  const lines = fs.readFileSync(gitignore, "utf8").split(/\r?\n/).map(l => l.trim());
-  if (!lines.includes(".alpha-goal/")) errors.push(".gitignore must include .alpha-goal/");
+  if (isFile(gitignore)) {
+    const lines = fs.readFileSync(gitignore, "utf8").split(/\r?\n/).map(l => l.trim());
+    if (!lines.includes(".alpha-goal/")) warnings.push(".gitignore does not ignore legacy repo-local .alpha-goal/ when that override is selected");
+  }
 }
 
 function validateScriptSurface(root: string, errors: string[], warnings: string[]): void {
