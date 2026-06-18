@@ -14,7 +14,7 @@ Read `references/claim-boundary.md` before final/merge/ship/safety claims. Read 
 ## Inputs
 
 Read the Goal Contract/equivalent, latest route/iteration state, diff/artifacts, command outputs, tests, logs, reviewer/user feedback, and relevant specs.
-Read `.alpha-goal/YYYYMMDD-<TaskName>/evidence.md` for evidence summary. Its content is the evidence summary of the latest iteration. Check but do not trust it.
+Resolve the Alpha Goal state root the same way as `$alpha-goal`: always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path. Read `<Alpha Goal state root>/YYYYMMDD-<TaskName>/evidence.md` for evidence summary. Its content is the evidence summary of the latest iteration. Check but do not trust it.
 
 ## Verification rules
 
@@ -37,11 +37,11 @@ Read `.alpha-goal/YYYYMMDD-<TaskName>/evidence.md` for evidence summary. Its con
 
 ## Final response guard
 
-Final/ready/safe/complete/repair-complete claims require durable `.alpha-goal/YYYYMMDD-<TaskName>/verification.md` updates unless the user forbids writes, the environment is unwritable, or the task is explicitly one-turn read-only with no handoff. If chat-only, say the claim is limited to this chat evidence and no durable artifact was created. After verification, final response must state: verdict, evidence actually run/inspected, claim supported, claim not supported/not checked, residual risks, and next route when not final. Do not say complete, safe, ready, fully verified, no issues, will not happen, completely prevents, or no risk unless `PASS_TO_FINAL` supports that exact scope with scenario/negative evidence; for agent-behavior claims default to text-level risk reduction, not absolute prevention. Debug/repair claims require reproduction evidence, suspected cause, confirming evidence, fix evidence, and non-reproduction boundary; no reproduction means no repair-complete claim.
+Final/ready/safe/complete/repair-complete claims require durable `<Alpha Goal state root>/YYYYMMDD-<TaskName>/verification.md` updates unless the user forbids writes, the environment is unwritable, or the task is explicitly one-turn read-only with no handoff. If chat-only, say the claim is limited to this chat evidence and no durable artifact was created. After verification, final response must state: verdict, evidence actually run/inspected, claim supported, claim not supported/not checked, residual risks, and next route when not final. Do not say complete, safe, ready, fully verified, no issues, will not happen, completely prevents, or no risk unless `PASS_TO_FINAL` supports that exact scope with scenario/negative evidence; for agent-behavior claims default to text-level risk reduction, not absolute prevention. Debug/repair claims require reproduction evidence, suspected cause, confirming evidence, fix evidence, and non-reproduction boundary; no reproduction means no repair-complete claim.
 
 ## Output
 
-Persist `.alpha-goal/YYYYMMDD-<TaskName>/verification.md` for risky, final, or handoff claims.
+Persist `<Alpha Goal state root>/YYYYMMDD-<TaskName>/verification.md` for risky, final, or handoff claims.
 
 ```markdown
 Verification Verdict:
