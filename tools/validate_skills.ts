@@ -268,6 +268,7 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
     for (const term of [COMPACT_RECOVERY_HOOK_MARKER, "^compact$", "$alpha-goal", "$control-loop", "$evidence-verify"]) {
       if (!hooksTemplate.includes(term)) errors.push(`${HOOKS_TEMPLATE}: missing compact recovery hook term: ${term}`);
     }
+    if (hooksTemplate.includes(`[${COMPACT_RECOVERY_HOOK_MARKER}]`)) errors.push(`${HOOKS_TEMPLATE}: compact recovery marker must not be printed to model context`);
   }
   const readme = readIfFile(path.join(root, "README.md"));
   if (!readme.includes("Current code facts describe current state")) errors.push("README.md missing current-state-not-desired-state principle");
