@@ -40,9 +40,9 @@ Runtime records use the user-level Alpha Goal state root: `${CODEX_HOME:-$HOME/.
 
 ```text
 $alpha-goal Decide whether this task should clarify, execute, verify, or continue a loop.
-$control-loop Run one bounded safe execution step from the agreed boundary.
-$evidence-verify Check whether current evidence supports the final claim.
 ```
+
+It can also be triggered implicitly: just describe the need to the Agent.
 
 ## Docs
 

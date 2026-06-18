@@ -38,9 +38,9 @@ npx --no-install tsx tools/validate_skills.ts .
 
 ```text
 $alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继续闭环。
-$control-loop 根据已确认边界执行一轮最小安全变更。
-$evidence-verify 检查当前证据是否支持最终声明。
 ```
+
+也可以隐式触发：直接向 Agent 描述需求即可。
 
 ## 文档
 
