@@ -3,14 +3,16 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: scripts/install.sh [--codex-home PATH] [--force] [--no-sync-user-templates] [--verbose]
+Usage: scripts/install.sh [--codex-home PATH] [--force] [--no-sync-user-templates] [--no-sync-user-hooks] [--verbose]
 
 Install this repository's public skill directories as direct symlinks
 under ${CODEX_HOME:-$HOME/.codex}/skills.
 
-By default, this script merges templates/AGENTS.md into user-level AGENTS.md
-and fills missing config.toml settings from templates/config.toml.
+By default, this script merges templates/AGENTS.md into user-level AGENTS.md,
+fills missing config.toml settings from templates/config.toml, and syncs
+templates/hooks.json into user-level hooks.json.
 Use --no-sync-user-templates to skip user-level template updates.
+Use --no-sync-user-hooks to skip hook updates.
 
 Options:
   --codex-home PATH
@@ -21,6 +23,10 @@ Options:
             Skip updating Codex home AGENTS.md and config.toml from templates/.
   --sync-user-templates
             Compatibility no-op; user templates are synced by default.
+  --no-sync-user-hooks
+            Skip updating Codex home hooks.json.
+  --sync-user-hooks
+            Compatibility no-op; user hooks are synced by default.
   --verbose Print detailed install and validation output.
 EOF
 }
@@ -33,6 +39,7 @@ die() {
 force=false
 verbose=false
 sync_user_templates=true
+sync_user_hooks=true
 codex_home_arg=""
 
 while [[ $# -gt 0 ]]; do
@@ -62,6 +69,14 @@ while [[ $# -gt 0 ]]; do
       ;;
     --no-sync-user-templates)
       sync_user_templates=false
+      shift
+      ;;
+    --sync-user-hooks)
+      sync_user_hooks=true
+      shift
+      ;;
+    --no-sync-user-hooks)
+      sync_user_hooks=false
       shift
       ;;
     --verbose)
@@ -166,8 +181,10 @@ codex_home="$(absolute_path "$(default_codex_home)")"
 target_root="$codex_home/skills"
 agents_template="$repo_root/templates/AGENTS.md"
 config_template="$repo_root/templates/config.toml"
+hooks_template="$repo_root/templates/hooks.json"
 agents_target="$codex_home/AGENTS.md"
 config_target="$codex_home/config.toml"
+hooks_target="$codex_home/hooks.json"
 agents_template_marker="<!-- generate-with-template:agents-md -->"
 linked_count=0
 replaced_count=0
@@ -175,6 +192,7 @@ already_count=0
 legacy_removed_count=0
 agents_action="skipped"
 config_action="skipped"
+hooks_action="skipped"
 
 resolve_link_target() {
   local link_path="$1"
@@ -608,6 +626,187 @@ PY
   esac
 }
 
+sync_hooks_template() {
+  if [[ -e "$hooks_target" && ! -f "$hooks_target" ]]; then
+    echo "Refusing to write hooks into non-file path: $hooks_target" >&2
+    exit 1
+  fi
+
+  if [[ ! -f "$hooks_template" ]]; then
+    echo "No hooks template found at $hooks_template" >&2
+    exit 1
+  fi
+
+  local result
+  result="$(python3 - "$hooks_target" "$hooks_template" "$config_target" <<'PY'
+from __future__ import annotations
+
+import json
+import re
+import shutil
+import sys
+import tomllib
+from datetime import datetime
+from pathlib import Path
+
+hooks_path = Path(sys.argv[1])
+template_path = Path(sys.argv[2])
+config_path = Path(sys.argv[3])
+MARKER_RE = re.compile(r"codex-[A-Za-z0-9_.:-]+:v\d+")
+
+
+def load_json(path: Path, *, empty_default: dict | None = None) -> dict:
+    if empty_default is not None and (not path.exists() or not path.read_text(encoding="utf-8").strip()):
+        return empty_default
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        print(f"Invalid JSON in {path}: {exc}", file=sys.stderr)
+        raise SystemExit(1)
+    if not isinstance(data, dict):
+        print(f"{path} must contain a JSON object", file=sys.stderr)
+        raise SystemExit(1)
+    return data
+
+
+def validate_hooks_object(data: dict, path: Path) -> dict:
+    hooks = data.setdefault("hooks", {})
+    if not isinstance(hooks, dict):
+        print(f"{path}: top-level hooks field must be a JSON object", file=sys.stderr)
+        raise SystemExit(1)
+    for event, groups in hooks.items():
+        if not isinstance(event, str) or not isinstance(groups, list):
+            print(f"{path}: hooks.{event} must be a JSON array", file=sys.stderr)
+            raise SystemExit(1)
+    return hooks
+
+
+def collect_template_markers(data: dict) -> set[str]:
+    text = json.dumps(data, ensure_ascii=False)
+    markers = set(MARKER_RE.findall(text))
+    if not markers:
+        print(f"{template_path}: hooks template must include at least one codex managed marker", file=sys.stderr)
+        raise SystemExit(1)
+    return markers
+
+
+def warn_if_hooks_disabled(path: Path) -> None:
+    if not path.exists() or not path.read_text(encoding="utf-8").strip():
+        return
+    try:
+        data = tomllib.loads(path.read_text(encoding="utf-8"))
+    except tomllib.TOMLDecodeError as exc:
+        print(f"Warning: cannot inspect hooks feature in {path}: {exc}", file=sys.stderr)
+        return
+    features = data.get("features", {})
+    if isinstance(features, dict) and features.get("hooks") is False:
+        print(
+            f"Warning: installed {hooks_path}, but [features].hooks is false in {path}; Codex will not run user hooks until hooks are enabled.",
+            file=sys.stderr,
+        )
+
+
+def group_contains_marker(group: object, markers: set[str]) -> bool:
+    return any(marker in json.dumps(group, ensure_ascii=False) for marker in markers)
+
+
+def remove_template_managed_hooks(hooks: dict, markers: set[str]) -> int:
+    removed = 0
+    for event, groups in list(hooks.items()):
+        cleaned_groups = []
+        for group in groups:
+            if not isinstance(group, dict) or not group_contains_marker(group, markers):
+                cleaned_groups.append(group)
+                continue
+
+            group_hooks = group.get("hooks")
+            if not isinstance(group_hooks, list):
+                removed += 1
+                continue
+
+            next_group_hooks = []
+            for hook in group_hooks:
+                if group_contains_marker(hook, markers):
+                    removed += 1
+                else:
+                    next_group_hooks.append(hook)
+
+            if next_group_hooks:
+                next_group = dict(group)
+                next_group["hooks"] = next_group_hooks
+                cleaned_groups.append(next_group)
+        hooks[event] = cleaned_groups
+    return removed
+
+
+def merge_template_hooks(target_hooks: dict, template_hooks: dict) -> None:
+    for event, groups in template_hooks.items():
+        target_hooks.setdefault(event, [])
+        if not isinstance(target_hooks[event], list):
+            print(f"{hooks_path}: hooks.{event} must be a JSON array", file=sys.stderr)
+            raise SystemExit(1)
+        target_hooks[event].extend(groups)
+
+
+def main() -> None:
+    hooks_path.parent.mkdir(parents=True, exist_ok=True)
+    data = load_json(hooks_path, empty_default={"hooks": {}})
+    template_data = load_json(template_path)
+    hooks = validate_hooks_object(data, hooks_path)
+    template_hooks = validate_hooks_object(template_data, template_path)
+    markers = collect_template_markers(template_data)
+
+    remove_template_managed_hooks(hooks, markers)
+    merge_template_hooks(hooks, template_hooks)
+
+    new_text = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+    old_text = hooks_path.read_text(encoding="utf-8") if hooks_path.exists() else ""
+    if old_text == new_text:
+        warn_if_hooks_disabled(config_path)
+        print("current")
+        return
+
+    existed = hooks_path.exists()
+    backup_path = ""
+    if existed:
+        stamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        backup = hooks_path.with_name(f"{hooks_path.name}.bak-{stamp}")
+        shutil.copy2(hooks_path, backup)
+        backup_path = str(backup)
+
+    tmp_path = hooks_path.with_name(f"{hooks_path.name}.tmp")
+    tmp_path.write_text(new_text, encoding="utf-8")
+    tmp_path.replace(hooks_path)
+    warn_if_hooks_disabled(config_path)
+    print(f"updated:{backup_path}" if existed else "created")
+
+
+main()
+PY
+)"
+
+  case "$result" in
+    current)
+      hooks_action="current"
+      log "hooks.json already has current hooks template content: $hooks_target"
+      ;;
+    created)
+      hooks_action="created"
+      log "Created hooks.json from template: $hooks_target"
+      ;;
+    updated:*)
+      hooks_action="updated"
+      if [[ -n "${result#updated:}" ]]; then
+        log "Backed up hooks.json: ${result#updated:}"
+      fi
+      log "Updated hooks.json from template: $hooks_target"
+      ;;
+    *)
+      die "Unexpected hook template sync result: $result"
+      ;;
+  esac
+}
+
 run_skillset_validation() {
   if [[ ! -f "$validation_tool" ]]; then
     echo "Missing validation tool: $validation_tool" >&2
@@ -635,6 +834,9 @@ print_summary() {
   if [[ "$sync_user_templates" == true && ( "$agents_action" != "current" || "$config_action" != "current" ) ]]; then
     status="installed"
   fi
+  if [[ "$sync_user_hooks" == true && "$hooks_action" != "current" ]]; then
+    status="installed"
+  fi
 
   echo "Alpha Goal skills $status: $installed -> $target_root"
   echo "Codex home: $codex_home"
@@ -643,6 +845,11 @@ print_summary() {
     echo "User templates: AGENTS.md $agents_action, config.toml $config_action"
   else
     echo "User templates: skipped (--no-sync-user-templates)"
+  fi
+  if [[ "$sync_user_hooks" == true ]]; then
+    echo "User hooks: hooks.json $hooks_action"
+  else
+    echo "User hooks: skipped (--no-sync-user-hooks)"
   fi
 }
 
@@ -705,5 +912,11 @@ for obsolete_skill in goal-contract system-model decision-synthesis control-kern
 done
 
 validate_installed_links
+
+if [[ "$sync_user_hooks" == true ]]; then
+  sync_hooks_template
+else
+  log "Skipped user hook sync due to --no-sync-user-hooks"
+fi
 
 print_summary

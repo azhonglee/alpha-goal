@@ -7,6 +7,8 @@ const FRONTMATTER_RE = /^---\n(.*?)\n---\n/s;
 const FIELD_RE = /^([A-Za-z0-9_-]+):\s*(.*?)\s*$/;
 const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
 const SKILLS_BYTE_BUDGET = 30_000;
+const COMPACT_RECOVERY_HOOK_MARKER = "codex-alpha-goal-compact-recovery:v1";
+const HOOKS_TEMPLATE = "templates/hooks.json";
 const REQUIRED_SKILL_NAMES = ["alpha-goal", "control-loop", "evidence-verify"];
 const MERGED_SKILL_NAMES = ["goal-contract", "system-model", "decision-synthesis"];
 const LEGACY_SKILL_REFERENCES = [
@@ -251,10 +253,32 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   const install = readIfFile(path.join(root, "scripts/install.sh"));
   for (const name of REQUIRED_SKILL_NAMES) if (!install.includes(name)) errors.push(`scripts/install.sh missing required skill: ${name}`);
   for (const name of MERGED_SKILL_NAMES) if (!install.includes(name)) errors.push(`scripts/install.sh should clean merged old skill: ${name}`);
+  if (install.includes(COMPACT_RECOVERY_HOOK_MARKER)) errors.push("scripts/install.sh must not hard-code compact recovery hook marker; keep hook policy in templates/hooks.json");
+  if (!install.includes("--no-sync-user-hooks")) errors.push("scripts/install.sh missing --no-sync-user-hooks option");
+  if (!install.includes("hooks_template")) errors.push("scripts/install.sh missing hooks template sync");
+  const hooksTemplate = readIfFile(path.join(root, HOOKS_TEMPLATE));
+  if (!hooksTemplate) errors.push(`${HOOKS_TEMPLATE}: missing hooks template`);
+  else {
+    try {
+      const parsed = JSON.parse(hooksTemplate);
+      if (!parsed?.hooks?.SessionStart) errors.push(`${HOOKS_TEMPLATE}: missing hooks.SessionStart`);
+    } catch (error) {
+      errors.push(`${HOOKS_TEMPLATE}: invalid JSON: ${errorMessage(error)}`);
+    }
+    for (const term of [COMPACT_RECOVERY_HOOK_MARKER, "^compact$", "$alpha-goal", "$control-loop", "$evidence-verify"]) {
+      if (!hooksTemplate.includes(term)) errors.push(`${HOOKS_TEMPLATE}: missing compact recovery hook term: ${term}`);
+    }
+    if (hooksTemplate.includes(`[${COMPACT_RECOVERY_HOOK_MARKER}]`)) errors.push(`${HOOKS_TEMPLATE}: compact recovery marker must not be printed to model context`);
+  }
   const readme = readIfFile(path.join(root, "README.md"));
   if (!readme.includes("Current code facts describe current state")) errors.push("README.md missing current-state-not-desired-state principle");
   const readmeZh = readIfFile(path.join(root, "README.zh-CN.md"));
   if (!readmeZh.includes("当前代码事实只描述现状")) errors.push("README.zh-CN.md missing current-state-not-desired-state principle");
+  const installDoc = readIfFile(path.join(root, "INSTALL.md"));
+  if (!installDoc.includes("--no-sync-user-hooks")) errors.push("INSTALL.md missing --no-sync-user-hooks option");
+  if (!installDoc.includes(HOOKS_TEMPLATE)) errors.push("INSTALL.md missing hooks template behavior");
+  const manifest = readIfFile(path.join(root, "MANIFEST.md"));
+  if (!manifest.includes(HOOKS_TEMPLATE) || !manifest.includes(COMPACT_RECOVERY_HOOK_MARKER)) errors.push("MANIFEST.md missing hooks template marker");
   const templateAgents = readIfFile(path.join(root, "templates/AGENTS.md"));
   if (!templateAgents.includes("never default target, scope, acceptance, non-goals, side effects, risk acceptance, authority, or final claim")) errors.push("templates/AGENTS.md must not let safe defaults bypass alpha-goal gates");
   for (const doc of ["README.md", "README.zh-CN.md", "INSTALL.md", "MANIFEST.md"]) {
