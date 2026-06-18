@@ -653,6 +653,7 @@ hooks_path = Path(sys.argv[1])
 template_path = Path(sys.argv[2])
 config_path = Path(sys.argv[3])
 MARKER_RE = re.compile(r"codex-[A-Za-z0-9_.:-]+:v\d+")
+LEGACY_MANAGED_MARKER_FAMILIES = {"codex-compact-skill-recovery"}
 
 
 def load_json(path: Path, *, empty_default: dict | None = None) -> dict:
@@ -681,13 +682,17 @@ def validate_hooks_object(data: dict, path: Path) -> dict:
     return hooks
 
 
-def collect_template_markers(data: dict) -> set[str]:
+def marker_family(marker: str) -> str:
+    return re.sub(r":v\d+$", "", marker)
+
+
+def collect_template_marker_families(data: dict) -> set[str]:
     text = json.dumps(data, ensure_ascii=False)
     markers = set(MARKER_RE.findall(text))
     if not markers:
         print(f"{template_path}: hooks template must include at least one codex managed marker", file=sys.stderr)
         raise SystemExit(1)
-    return markers
+    return {marker_family(marker) for marker in markers} | LEGACY_MANAGED_MARKER_FAMILIES
 
 
 def warn_if_hooks_disabled(path: Path) -> None:
@@ -706,16 +711,17 @@ def warn_if_hooks_disabled(path: Path) -> None:
         )
 
 
-def group_contains_marker(group: object, markers: set[str]) -> bool:
-    return any(marker in json.dumps(group, ensure_ascii=False) for marker in markers)
+def group_contains_managed_family(group: object, marker_families: set[str]) -> bool:
+    group_text = json.dumps(group, ensure_ascii=False)
+    return any(marker_family in group_text for marker_family in marker_families)
 
 
-def remove_template_managed_hooks(hooks: dict, markers: set[str]) -> int:
+def remove_template_managed_hooks(hooks: dict, marker_families: set[str]) -> int:
     removed = 0
     for event, groups in list(hooks.items()):
         cleaned_groups = []
         for group in groups:
-            if not isinstance(group, dict) or not group_contains_marker(group, markers):
+            if not isinstance(group, dict) or not group_contains_managed_family(group, marker_families):
                 cleaned_groups.append(group)
                 continue
 
@@ -726,7 +732,7 @@ def remove_template_managed_hooks(hooks: dict, markers: set[str]) -> int:
 
             next_group_hooks = []
             for hook in group_hooks:
-                if group_contains_marker(hook, markers):
+                if group_contains_managed_family(hook, marker_families):
                     removed += 1
                 else:
                     next_group_hooks.append(hook)
@@ -754,9 +760,9 @@ def main() -> None:
     template_data = load_json(template_path)
     hooks = validate_hooks_object(data, hooks_path)
     template_hooks = validate_hooks_object(template_data, template_path)
-    markers = collect_template_markers(template_data)
+    marker_families = collect_template_marker_families(template_data)
 
-    remove_template_managed_hooks(hooks, markers)
+    remove_template_managed_hooks(hooks, marker_families)
     merge_template_hooks(hooks, template_hooks)
 
     new_text = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
