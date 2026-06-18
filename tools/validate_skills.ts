@@ -256,6 +256,8 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   if (install.includes(COMPACT_RECOVERY_HOOK_MARKER)) errors.push("scripts/install.sh must not hard-code compact recovery hook marker; keep hook policy in templates/hooks.json");
   if (!install.includes("--no-sync-user-hooks")) errors.push("scripts/install.sh missing --no-sync-user-hooks option");
   if (!install.includes("hooks_template")) errors.push("scripts/install.sh missing hooks template sync");
+  if (!install.includes("LEGACY_MANAGED_MARKER_FAMILIES")) errors.push("scripts/install.sh missing legacy managed hook migration");
+  if (!install.includes("marker_family")) errors.push("scripts/install.sh missing version-independent marker family handling");
   const hooksTemplate = readIfFile(path.join(root, HOOKS_TEMPLATE));
   if (!hooksTemplate) errors.push(`${HOOKS_TEMPLATE}: missing hooks template`);
   else {
@@ -277,8 +279,10 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
   if (!installDoc.includes("--no-sync-user-hooks")) errors.push("INSTALL.md missing --no-sync-user-hooks option");
   if (!installDoc.includes(HOOKS_TEMPLATE)) errors.push("INSTALL.md missing hooks template behavior");
+  if (!installDoc.includes("codex-compact-skill-recovery")) errors.push("INSTALL.md missing legacy hook migration behavior");
   const manifest = readIfFile(path.join(root, "MANIFEST.md"));
   if (!manifest.includes(HOOKS_TEMPLATE) || !manifest.includes(COMPACT_RECOVERY_HOOK_MARKER)) errors.push("MANIFEST.md missing hooks template marker");
+  if (!manifest.includes("marker family") || !manifest.includes("codex-compact-skill-recovery")) errors.push("MANIFEST.md missing hook upgrade strategy");
   const templateAgents = readIfFile(path.join(root, "templates/AGENTS.md"));
   if (!templateAgents.includes("never default target, scope, acceptance, non-goals, side effects, risk acceptance, authority, or final claim")) errors.push("templates/AGENTS.md must not let safe defaults bypass alpha-goal gates");
   for (const doc of ["README.md", "README.zh-CN.md", "INSTALL.md", "MANIFEST.md"]) {
