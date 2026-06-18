@@ -7,6 +7,7 @@ const FRONTMATTER_RE = /^---\n(.*?)\n---\n/s;
 const FIELD_RE = /^([A-Za-z0-9_-]+):\s*(.*?)\s*$/;
 const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
 const SKILLS_BYTE_BUDGET = 30_000;
+const COMPACT_RECOVERY_HOOK_MARKER = "codex-alpha-goal-compact-recovery:v1";
 const REQUIRED_SKILL_NAMES = ["alpha-goal", "control-loop", "evidence-verify"];
 const MERGED_SKILL_NAMES = ["goal-contract", "system-model", "decision-synthesis"];
 const LEGACY_SKILL_REFERENCES = [
@@ -251,10 +252,20 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   const install = readIfFile(path.join(root, "scripts/install.sh"));
   for (const name of REQUIRED_SKILL_NAMES) if (!install.includes(name)) errors.push(`scripts/install.sh missing required skill: ${name}`);
   for (const name of MERGED_SKILL_NAMES) if (!install.includes(name)) errors.push(`scripts/install.sh should clean merged old skill: ${name}`);
+  if (!install.includes(COMPACT_RECOVERY_HOOK_MARKER)) errors.push("scripts/install.sh missing compact recovery hook marker");
+  if (!install.includes("--no-sync-user-hooks")) errors.push("scripts/install.sh missing --no-sync-user-hooks option");
+  if (!install.includes("hooks.json")) errors.push("scripts/install.sh missing hooks.json handling");
   const readme = readIfFile(path.join(root, "README.md"));
   if (!readme.includes("Current code facts describe current state")) errors.push("README.md missing current-state-not-desired-state principle");
+  if (!readme.includes("compact recovery hook")) errors.push("README.md missing compact recovery hook guidance");
   const readmeZh = readIfFile(path.join(root, "README.zh-CN.md"));
   if (!readmeZh.includes("当前代码事实只描述现状")) errors.push("README.zh-CN.md missing current-state-not-desired-state principle");
+  if (!readmeZh.includes("compact recovery hook")) errors.push("README.zh-CN.md missing compact recovery hook guidance");
+  const installDoc = readIfFile(path.join(root, "INSTALL.md"));
+  if (!installDoc.includes("--no-sync-user-hooks")) errors.push("INSTALL.md missing --no-sync-user-hooks option");
+  if (!installDoc.includes(COMPACT_RECOVERY_HOOK_MARKER)) errors.push("INSTALL.md missing compact recovery hook smoke test");
+  const manifest = readIfFile(path.join(root, "MANIFEST.md"));
+  if (!manifest.includes(COMPACT_RECOVERY_HOOK_MARKER)) errors.push("MANIFEST.md missing compact recovery hook marker");
   const templateAgents = readIfFile(path.join(root, "templates/AGENTS.md"));
   if (!templateAgents.includes("never default target, scope, acceptance, non-goals, side effects, risk acceptance, authority, or final claim")) errors.push("templates/AGENTS.md must not let safe defaults bypass alpha-goal gates");
   for (const doc of ["README.md", "README.zh-CN.md", "INSTALL.md", "MANIFEST.md"]) {

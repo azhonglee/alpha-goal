@@ -36,6 +36,7 @@ npx --no-install tsx tools/validate_skills.ts .
 ```
 
 The installer creates direct symlinks for the three public skills under `$HOME/.codex/skills/` and cleans same-repo links for merged old public skills.
+It also installs or updates a user-level compact recovery hook in `$HOME/.codex/hooks.json` so a compacted Codex thread is reminded to re-check these three skills and reread the relevant `SKILL.md` before continuing.
 The validator enforces the whole `skills/` tree under 30,000 bytes.
 
 Runtime records use the user-level Alpha Goal state root: `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`, where `<workspace-slug>` is the last directory name of the current session directory path.

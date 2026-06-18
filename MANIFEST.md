@@ -14,10 +14,14 @@ Former public framing/modeling/synthesis stages are folded into `skills/alpha-go
 
 | Path | Mutates state? | Purpose |
 |---|---:|---|
-| `scripts/install.sh` | Yes | Installs the three public skills as direct symlinks, cleans same-repo old skill links, syncs optional user templates, and validates install targets. |
+| `scripts/install.sh` | Yes | Installs the three public skills as direct symlinks, cleans same-repo old skill links, syncs optional user templates, installs or updates the compact recovery hook, and validates install targets. |
 | `skills/control-loop/scripts/mutation-preflight.ts` | No | Prints read-only git/path preflight evidence. |
 | `skills/evidence-verify/scripts/evidence-summary.ts` | No | Prints read-only diff/status evidence. |
 | `tools/validate_skills.ts` | No | Validates the three-skill contract, references, byte budget, scripts, docs, and schemas. |
+
+## User Hooks
+
+`scripts/install.sh` manages one user-level `SessionStart` / `^compact$` hook in `${CODEX_HOME:-$HOME/.codex}/hooks.json`, marked by `codex-alpha-goal-compact-recovery:v1`. The hook prints a static compact recovery policy that asks Codex to re-check `alpha-goal`, `control-loop`, and `evidence-verify` after compaction and reread the applicable `SKILL.md`.
 
 ## Runtime Artifacts
 

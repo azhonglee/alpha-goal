@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: scripts/install.sh [--codex-home PATH] [--force] [--no-sync-user-templates] [--verbose]
+Usage: scripts/install.sh [--codex-home PATH] [--force] [--no-sync-user-templates] [--no-sync-user-hooks] [--verbose]
 
 Install this repository's public skill directories as direct symlinks
 under ${CODEX_HOME:-$HOME/.codex}/skills.
@@ -11,6 +11,8 @@ under ${CODEX_HOME:-$HOME/.codex}/skills.
 By default, this script merges templates/AGENTS.md into user-level AGENTS.md
 and fills missing config.toml settings from templates/config.toml.
 Use --no-sync-user-templates to skip user-level template updates.
+It also installs or updates a compact-recovery hook in user-level hooks.json.
+Use --no-sync-user-hooks to skip hook updates.
 
 Options:
   --codex-home PATH
@@ -21,6 +23,10 @@ Options:
             Skip updating Codex home AGENTS.md and config.toml from templates/.
   --sync-user-templates
             Compatibility no-op; user templates are synced by default.
+  --no-sync-user-hooks
+            Skip updating Codex home hooks.json.
+  --sync-user-hooks
+            Compatibility no-op; user hooks are synced by default.
   --verbose Print detailed install and validation output.
 EOF
 }
@@ -33,6 +39,7 @@ die() {
 force=false
 verbose=false
 sync_user_templates=true
+sync_user_hooks=true
 codex_home_arg=""
 
 while [[ $# -gt 0 ]]; do
@@ -62,6 +69,14 @@ while [[ $# -gt 0 ]]; do
       ;;
     --no-sync-user-templates)
       sync_user_templates=false
+      shift
+      ;;
+    --sync-user-hooks)
+      sync_user_hooks=true
+      shift
+      ;;
+    --no-sync-user-hooks)
+      sync_user_hooks=false
       shift
       ;;
     --verbose)
@@ -168,13 +183,16 @@ agents_template="$repo_root/templates/AGENTS.md"
 config_template="$repo_root/templates/config.toml"
 agents_target="$codex_home/AGENTS.md"
 config_target="$codex_home/config.toml"
+hooks_target="$codex_home/hooks.json"
 agents_template_marker="<!-- generate-with-template:agents-md -->"
+compact_recovery_hook_marker="codex-alpha-goal-compact-recovery:v1"
 linked_count=0
 replaced_count=0
 already_count=0
 legacy_removed_count=0
 agents_action="skipped"
 config_action="skipped"
+hooks_action="skipped"
 
 resolve_link_target() {
   local link_path="$1"
@@ -608,6 +626,212 @@ PY
   esac
 }
 
+sync_compact_recovery_hook() {
+  if [[ -e "$hooks_target" && ! -f "$hooks_target" ]]; then
+    echo "Refusing to write hooks into non-file path: $hooks_target" >&2
+    exit 1
+  fi
+
+  local result
+  result="$(python3 - "$hooks_target" "$target_root" "$compact_recovery_hook_marker" "$config_target" <<'PY'
+from __future__ import annotations
+
+import json
+import shutil
+import sys
+import tomllib
+from datetime import datetime
+from pathlib import Path
+
+try:
+    import shlex
+except ModuleNotFoundError:
+    shlex = None
+
+hooks_path = Path(sys.argv[1])
+target_root = Path(sys.argv[2])
+marker = sys.argv[3]
+config_path = Path(sys.argv[4])
+
+
+def shell_quote(value: str) -> str:
+    if shlex is not None:
+        return shlex.quote(value)
+    return "'" + value.replace("'", "'\"'\"'") + "'"
+
+
+def load_hooks(path: Path) -> dict:
+    if not path.exists() or not path.read_text(encoding="utf-8").strip():
+        return {"hooks": {}}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        print(f"Invalid JSON in {path}: {exc}", file=sys.stderr)
+        raise SystemExit(1)
+    if not isinstance(data, dict):
+        print(f"{path} must contain a JSON object", file=sys.stderr)
+        raise SystemExit(1)
+    hooks = data.setdefault("hooks", {})
+    if not isinstance(hooks, dict):
+        print(f"{path}: top-level hooks field must be a JSON object", file=sys.stderr)
+        raise SystemExit(1)
+    return data
+
+
+def warn_if_hooks_disabled(path: Path) -> None:
+    if not path.exists() or not path.read_text(encoding="utf-8").strip():
+        return
+    try:
+        data = tomllib.loads(path.read_text(encoding="utf-8"))
+    except tomllib.TOMLDecodeError as exc:
+        print(f"Warning: cannot inspect hooks feature in {path}: {exc}", file=sys.stderr)
+        return
+    features = data.get("features", {})
+    if isinstance(features, dict) and features.get("hooks") is False:
+        print(
+            f"Warning: installed {hooks_path}, but [features].hooks is false in {path}; Codex will not run user hooks until hooks are enabled.",
+            file=sys.stderr,
+        )
+
+
+def build_hook_command() -> str:
+    skills = [
+        (
+            "alpha-goal",
+            "requirements, goal framing, design, scope, acceptance evidence, decision boundaries, and claim boundaries",
+        ),
+        (
+            "control-loop",
+            "bounded implementation or hardening after an explicit goal specification",
+        ),
+        (
+            "evidence-verify",
+            "judging fresh evidence against an explicit Goal Contract or claim boundary",
+        ),
+    ]
+    lines = [
+        f"[{marker}] Compact recovery policy:",
+        (
+            "After compaction, before the next substantive action, decide whether "
+            "one or more candidate skills below applies to the current task."
+        ),
+        (
+            "If a candidate applies, read its SKILL.md completely from the path "
+            "below before acting; treat pre-compaction remembered skill text as stale."
+        ),
+        "If none applies, continue normally without loading these skills.",
+        "Candidate skills:",
+    ]
+    for name, when in skills:
+        path = target_root / name / "SKILL.md"
+        lines.append(f"- ${name}: use for {when}. Path: {path}")
+    return "printf '%s\\n' " + " ".join(shell_quote(line) for line in lines)
+
+
+def build_hook_group() -> dict:
+    return {
+        "matcher": "^compact$",
+        "hooks": [
+            {
+                "type": "command",
+                "command": build_hook_command(),
+                "statusMessage": "Refreshing Alpha Goal compact recovery policy",
+            }
+        ],
+    }
+
+
+def remove_existing_recovery_hooks(session_start: list) -> tuple[list, int]:
+    cleaned = []
+    removed = 0
+    for group in session_start:
+        if not isinstance(group, dict):
+            cleaned.append(group)
+            continue
+        group_hooks = group.get("hooks")
+        if not isinstance(group_hooks, list):
+            cleaned.append(group)
+            continue
+
+        removed_from_group = 0
+        next_hooks = []
+        for hook in group_hooks:
+            command = hook.get("command", "") if isinstance(hook, dict) else ""
+            if marker in command:
+                removed += 1
+                removed_from_group += 1
+            else:
+                next_hooks.append(hook)
+
+        if removed_from_group == 0:
+            cleaned.append(group)
+        elif next_hooks:
+            next_group = dict(group)
+            next_group["hooks"] = next_hooks
+            cleaned.append(next_group)
+    return cleaned, removed
+
+
+def main() -> None:
+    hooks_path.parent.mkdir(parents=True, exist_ok=True)
+    data = load_hooks(hooks_path)
+    session_start = data["hooks"].setdefault("SessionStart", [])
+    if not isinstance(session_start, list):
+        print(f"{hooks_path}: hooks.SessionStart must be a JSON array", file=sys.stderr)
+        raise SystemExit(1)
+
+    cleaned, _removed = remove_existing_recovery_hooks(session_start)
+    cleaned.append(build_hook_group())
+    data["hooks"]["SessionStart"] = cleaned
+
+    new_text = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+    old_text = hooks_path.read_text(encoding="utf-8") if hooks_path.exists() else ""
+    if old_text == new_text:
+        warn_if_hooks_disabled(config_path)
+        print("current")
+        return
+
+    existed = hooks_path.exists()
+    backup_path = ""
+    if existed:
+        stamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        backup = hooks_path.with_name(f"{hooks_path.name}.bak-{stamp}")
+        shutil.copy2(hooks_path, backup)
+        backup_path = str(backup)
+
+    tmp_path = hooks_path.with_name(f"{hooks_path.name}.tmp")
+    tmp_path.write_text(new_text, encoding="utf-8")
+    tmp_path.replace(hooks_path)
+    warn_if_hooks_disabled(config_path)
+    print(f"updated:{backup_path}" if existed else "created")
+
+
+main()
+PY
+)"
+
+  case "$result" in
+    current)
+      hooks_action="current"
+      log "hooks.json already has current compact recovery hook: $hooks_target"
+      ;;
+    created)
+      hooks_action="created"
+      log "Created compact recovery hook: $hooks_target"
+      ;;
+    updated:*)
+      hooks_action="updated"
+      if [[ -n "${result#updated:}" ]]; then
+        log "Backed up hooks.json: ${result#updated:}"
+      fi
+      log "Updated compact recovery hook: $hooks_target"
+      ;;
+    *)
+      die "Unexpected hook sync result: $result"
+      ;;
+  esac
+}
+
 run_skillset_validation() {
   if [[ ! -f "$validation_tool" ]]; then
     echo "Missing validation tool: $validation_tool" >&2
@@ -635,6 +859,9 @@ print_summary() {
   if [[ "$sync_user_templates" == true && ( "$agents_action" != "current" || "$config_action" != "current" ) ]]; then
     status="installed"
   fi
+  if [[ "$sync_user_hooks" == true && "$hooks_action" != "current" ]]; then
+    status="installed"
+  fi
 
   echo "Alpha Goal skills $status: $installed -> $target_root"
   echo "Codex home: $codex_home"
@@ -643,6 +870,11 @@ print_summary() {
     echo "User templates: AGENTS.md $agents_action, config.toml $config_action"
   else
     echo "User templates: skipped (--no-sync-user-templates)"
+  fi
+  if [[ "$sync_user_hooks" == true ]]; then
+    echo "User hooks: hooks.json $hooks_action"
+  else
+    echo "User hooks: skipped (--no-sync-user-hooks)"
   fi
 }
 
@@ -705,5 +937,11 @@ for obsolete_skill in goal-contract system-model decision-synthesis control-kern
 done
 
 validate_installed_links
+
+if [[ "$sync_user_hooks" == true ]]; then
+  sync_compact_recovery_hook
+else
+  log "Skipped user hook sync due to --no-sync-user-hooks"
+fi
 
 print_summary
