@@ -2,24 +2,18 @@
 
 语言： [English](README.md) | 简体中文
 
-Alpha Goal 是面向 Goal Engineering 的最小闭环技能集。它让 agent 工作始终围绕明确目标、有界行动和有证据支撑的最终声明展开。
+Agent 工作出问题，通常不是因为不会改文件，而是因为在目标、边界和证据还不清楚时就开始行动。
+
+Alpha Goal 不是更重的流程，而是防止过早行动和无证据完成声明的护栏。它帮助 agent 先发现事实再提问，在明确边界内行动，并且只在证据支持的范围内做最终声明。
 
 ## 适用场景
 
 - 请求含糊，需要先挖掘事实再澄清。
 
-## 公开技能
-
-| Skill | 职责 |
-| --- | --- |
-| `alpha-goal` | 默认入口：模糊请求先挖掘事实，再澄清目标边界、形成交付设计、路由下一控制器、维护 ledger。 |
-| `control-loop` | 有界执行/探针：变更安全门、反馈采样、残余误差路由。 |
-| `evidence-verify` | 独立比较器：检查 final/ready/safe/complete/repair 声明与证据边界。 |
-
-## 流程
+## 工作方式
 
 ```text
-INTENT -> alpha-goal(discover/clarify/design/route) -> control-loop(action+feedback) -> evidence-verify(claim check) -> FINAL or NEXT LOOP
+描述需求 -> 发现事实 -> 澄清边界 -> 有界行动 -> 验证声明 -> 最终答复或下一轮闭环
 ```
 
 ## 快速开始
@@ -40,7 +34,15 @@ npx --no-install tsx tools/validate_skills.ts .
 $alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继续闭环。
 ```
 
-也可以隐式触发：直接向 Agent 描述需求即可。
+通常不需要显式写出 skill 名称。正常描述你的需求即可；当请求需要目标成帧、有界执行或有证据支撑的完成声明时，Alpha Goal 会隐式触发。
+
+## 公开技能
+
+| Skill | 作用 |
+| --- | --- |
+| `alpha-goal` | 在开始工作前澄清意图、边界、验收证据和下一步安全路由。 |
+| `control-loop` | 执行一轮已授权、可观察的行动，并把结果与目标比较。 |
+| `evidence-verify` | 检查新鲜证据是否支持 final/ready/safe/complete/repair 声明。 |
 
 ## 文档
 

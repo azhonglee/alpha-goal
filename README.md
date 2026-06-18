@@ -2,26 +2,18 @@
 
 Languages: English | [Chinese](README.zh-CN.md)
 
-Alpha Goal is a minimal closed-loop skillset for goal engineering work.
-It keeps agent work grounded in explicit goals, bounded action, and evidence-backed
-final claims.
+Agent work often goes wrong not because the agent cannot edit files, but because it acts before the goal, boundary, and evidence are clear.
+
+Alpha Goal is not a bigger process. It is a guardrail against premature action and unsupported completion claims. It helps agents discover facts before asking, work inside explicit boundaries, and make final claims only as far as evidence supports them.
 
 ## When to use it
 
 - A request is ambiguous and needs fact discovery before clarification.
 
-## Public skills
-
-| Skill | Role |
-| --- | --- |
-| `alpha-goal` | Default entry: discover facts for ambiguous requests, clarify goal boundaries, design the handoff, route next controller, maintain ledger. |
-| `control-loop` | Bounded execution/probe with implementation safety, feedback, and residual-error routing. |
-| `evidence-verify` | Independent comparator for final/ready/safe/complete/repair claims and evidence boundaries. |
-
-## Flow
+## How it works
 
 ```text
-INTENT -> alpha-goal(discover/clarify/design/route) -> control-loop(action+feedback) -> evidence-verify(claim check) -> FINAL or NEXT LOOP
+Describe the need -> discover facts -> clarify the boundary -> act in a bounded loop -> verify the claim -> final answer or next loop
 ```
 
 ## Quick start
@@ -42,7 +34,15 @@ Runtime records use the user-level Alpha Goal state root: `${CODEX_HOME:-$HOME/.
 $alpha-goal Decide whether this task should clarify, execute, verify, or continue a loop.
 ```
 
-It can also be triggered implicitly: just describe the need to the Agent.
+You usually do not need to name a skill. Describe the work normally; Alpha Goal is meant to activate when the request needs goal framing, bounded execution, or evidence-backed completion.
+
+## Public skills
+
+| Skill | What it helps with |
+| --- | --- |
+| `alpha-goal` | Clarify intent, boundaries, acceptance evidence, and the next safe route before work starts. |
+| `control-loop` | Carry out one authorized, observable step and compare the result to the goal. |
+| `evidence-verify` | Check whether fresh evidence supports final/ready/safe/complete/repair claims. |
 
 ## Docs
 
