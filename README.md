@@ -72,7 +72,6 @@ Alpha Goal 让 agent 工作保持目标明确、行动有界、声明受证据�
 - 证据先于授权：当前代码事实只描述现状；期望行为来自用户意图、规格、issue 或已接受契约。
 - 目标先于行动：outcome、scope、non-goals、acceptance evidence、决策 owner 和 claim boundary 共同限定什么可以被改变。
 - 只做有用建模：只有依赖、扰动和风险会影响安全控制、验证或路由时，才把它们纳入模型。
-- 每次一个决策：需要人判断时，只问一个高杠杆问题，并让答案塑造边界。
 - 有界执行：优先选择小而可观察的探针或定向变更，而不是宽泛重构和猜测式清理。
 - 独立验证：final/ready/safe/complete/repair 声明需要新鲜证据，并且要与执行过程分离检查。
 - 诚实路由：目标不清回到 `alpha-goal`，可修复的实现或证据缺口回到 `control-loop`，证据不足的最终声明继续进入 `evidence-verify`。

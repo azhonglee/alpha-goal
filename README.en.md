@@ -72,7 +72,6 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 - Evidence before authority: Current code facts describe current state; desired behavior comes from user intent, specs, issues, or accepted contracts.
 - Goals before action: outcome, scope, non-goals, acceptance evidence, decision owner, and claim boundary define what may change.
 - Minimal useful modeling: model dependencies, disturbances, and risks only when they affect safe control, validation, or routing.
-- One decision at a time: when human judgment is required, ask one high-leverage question and let the answer shape the boundary.
 - Bounded execution: prefer small observable probes or targeted changes over broad refactors and speculative cleanup.
 - Independent verification: final/ready/safe/complete/repair claims require fresh evidence, checked separately from execution.
 - Honest routing: unclear goals return to `alpha-goal`, fixable implementation or evidence gaps return to `control-loop`, and unsupported final claims continue through `evidence-verify`.
