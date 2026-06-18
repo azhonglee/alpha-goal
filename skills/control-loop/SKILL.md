@@ -25,7 +25,7 @@ If any gate is missing, route to `alpha-goal` or blocker instead of editing.
 
 ## Preflight
 
-Run `npx --yes tsx skills/control-loop/scripts/mutation-preflight.ts` from repo root, or record equivalent facts: root, branch/worktree, status, applicable rule files, ignored `.worktrees/` and `.alpha-goal/`, submodules, strongest evidence floor.
+Run `npx --no-install tsx skills/control-loop/scripts/mutation-preflight.ts` from repo root when an existing `tsx` runner is available, or record equivalent facts: root, branch/worktree, status, applicable rule files, ignored `.worktrees/` and `.alpha-goal/`, submodules, strongest evidence floor.
 
 ## Iteration
 

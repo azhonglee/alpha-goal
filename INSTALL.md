@@ -14,7 +14,7 @@ control-loop
 evidence-verify
 ```
 
-Node.js/npm must be available because validation uses `npx --yes tsx`.
+Node.js/npm must be available. Validation uses an existing `tsx` runner from `tsx` on `PATH` or `npx --no-install tsx`; the installer refuses to auto-download npm packages.
 
 ## Options
 
@@ -38,14 +38,14 @@ CODEX_HOME="$tmp_codex_home" scripts/install.sh --no-sync-user-templates
 for skill in alpha-goal control-loop evidence-verify; do
   test -f "$tmp_codex_home/skills/$skill/SKILL.md"
 done
-npx --yes tsx tools/validate_skills.ts .
+npx --no-install tsx tools/validate_skills.ts .
 rm -rf "$tmp_codex_home"
 ```
 
 ## Prompts
 
 ```text
-$alpha-goal 判断这个任务下一步应成帧、建模、综合、执行还是验证。
+$alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继续闭环。
 $control-loop 根据已明确边界做一轮最小安全变更。
 $evidence-verify 检查当前证据是否支持最终声明。
 ```

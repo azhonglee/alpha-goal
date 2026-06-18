@@ -1,4 +1,4 @@
-#!/usr/bin/env -S npx --yes tsx
+#!/usr/bin/env -S npx --no-install tsx
 import{spawnSync as x}from"node:child_process";
 const o=(a:string[])=>{const r=x("git",a,{encoding:"utf8"});return r.status===0?(r.stdout.trim()||"<empty>"):`<failed:${r.status}>`}, ok=(a:string[])=>x("git",a,{stdio:"ignore"}).status===0, s=(n:string,v:string)=>console.log(`\n== ${n} ==\n${v}`);
 s("cwd",process.cwd()); if(!ok(["rev-parse","--is-inside-work-tree"])){s("git","not inside work tree");process.exit(0)}

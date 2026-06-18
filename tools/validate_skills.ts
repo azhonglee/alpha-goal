@@ -1,4 +1,4 @@
-#!/usr/bin/env -S npx --yes tsx
+#!/usr/bin/env -S npx --no-install tsx
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -47,7 +47,7 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Do not mutate primary", "repo-local worktree", "Unrelated user changes", ".alpha-goal/", "mutation-preflight", "approved target", "authorization", "claim boundary", "### 1. Plan slice", "### 2. Act or probe", "### 3. Sense and compare", "### 4. Record and route", "Act/probe", "read-only/probe slice", "Preserve unrelated user changes", "root cause", "Iteration Summary", "ITERATION_READY_FOR_VERIFY", "$evidence-verify", "verification.md", "acceptance-to-evidence", "persisted evidence", "RETURN_TO_ALPHA_GOAL", "BLOCKED", "Stop/re-route"
   ]],
   ["verification limits final claims", "skills/evidence-verify/SKILL.md", [
-    "PASS_TO_FINAL", "NEXT_ITERATION", "Do not narrow the claim as a successful outcome", "Final response guard", "Highest practical evidence-supported boundary", "Final wording allowed", "repair-complete", "no risk", "Verification Summary"
+    "PASS_TO_FINAL", "NEXT_ITERATION", "fixable evidence", "target, scope, authority", "permission, tool, data, environment, credential", "Do not narrow the claim as a successful outcome", "Final response guard", "Highest practical evidence-supported boundary", "Final wording allowed", "repair-complete", "no risk", "Verification Summary"
   ]],
 ];
 
@@ -91,6 +91,7 @@ export function main(args = process.argv.slice(2)): number {
   validateSemanticChecks(root, errors);
   validateSchemaConsistency(root, errors);
   validateInstallDocumentation(root, errors);
+  validateNoAutoDownloadRunner(root, errors);
 
   printReport(root, errors, warnings);
   return errors.length ? 1 : 0;
@@ -177,7 +178,8 @@ function validateSchemaConsistency(root: string, errors: string[]): void {
   const evRef = readIfFile(path.join(root, "skills/evidence-verify/references/verification-verdict-schema.md"));
   if (evSkill.includes("- Gaps:") || evRef.includes("- Gaps:")) errors.push("evidence verdict schema must use only `Gap:`");
   for (const term of ["PASS_TO_FINAL", "NEXT_ITERATION"]) if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`evidence verdict enum mismatch: ${term}`);
-  for (const term of ["NARROW_CLAIM", "REFRAME", "BLOCKED"]) if (evSkill.includes(term) || evRef.includes(term)) errors.push(`evidence verdict enum must not include: ${term}`);
+  for (const term of ["NARROW_CLAIM", "REFRAME"]) if (evSkill.includes(term) || evRef.includes(term)) errors.push(`evidence verdict enum must not include: ${term}`);
+  for (const term of ["control-loop / alpha-goal / BLOCKED"]) if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`evidence next-route options mismatch: ${term}`);
 }
 
 function validateInstallDocumentation(root: string, errors: string[]): void {
@@ -192,7 +194,17 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   if (!templateAgents.includes("never default target, scope, acceptance, non-goals, side effects, risk acceptance, authority, or final claim")) errors.push("templates/AGENTS.md must not let safe defaults bypass alpha-goal gates");
   for (const doc of ["README.md", "README.zh-CN.md", "INSTALL.md", "MANIFEST.md"]) {
     const text = readIfFile(path.join(root, doc));
-    if (/six skills|六技能|六个技能|\$goal-contract|\$system-model|\$decision-synthesis/.test(text)) errors.push(`${doc}: stale six-skill public architecture wording`);
+    if (/six skills|六技能|六个技能|成帧、建模、综合|\$goal-contract|\$system-model|\$decision-synthesis/.test(text)) errors.push(`${doc}: stale six-skill public architecture wording`);
+  }
+}
+
+function validateNoAutoDownloadRunner(root: string, errors: string[]): void {
+  const autoDownloadTsx = /npx\s+--yes\s+tsx/;
+  for (const file of walk(root).filter(isFile)) {
+    const rel = relative(root, file);
+    if (rel.startsWith(".alpha-goal/")) continue;
+    if (!/\.(md|ts|sh|toml)$/.test(rel) && rel !== "AGENTS.md") continue;
+    if (autoDownloadTsx.test(fs.readFileSync(file, "utf8"))) errors.push(`${rel}: must not auto-download tsx with npx --yes`);
   }
 }
 
