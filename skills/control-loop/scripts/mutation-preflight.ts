@@ -1,10 +1,18 @@
 #!/usr/bin/env -S npx --no-install tsx
 import{spawnSync as x}from"node:child_process";
-import{basename}from"node:path";
-const o=(a:string[])=>x("git",a,{encoding:"utf8"}).stdout?.trim()||"<empty>", ok=(a:string[])=>x("git",a,{stdio:"ignore"}).status===0, s=(n:string,v:string)=>console.log(`\n== ${n} ==\n${v}`);
+import{existsSync}from"node:fs";
+import{basename,resolve}from"node:path";
+const g=(cwd:string,a:string[],stdio:"pipe"|"ignore"="pipe")=>x("git",a,{cwd,encoding:"utf8",stdio}), o=(cwd:string,a:string[])=>{const r=g(cwd,a);return r.stdout?.trim()||r.stderr?.trim()||"<empty>"}, ok=(cwd:string,a:string[])=>g(cwd,a,"ignore").status===0, s=(n:string,v:string)=>console.log(`\n== ${n} ==\n${v}`);
 const home=(process.env.CODEX_HOME||`${process.env.HOME||"~"}/.alphal-goal`).replace(/\/+$/,""), session=process.cwd(), state=`${home}/${basename(session)||"workspace"}/`;
-s("cwd",session); if(!ok(["rev-parse","--is-inside-work-tree"])){s("alpha goal state root",state);s("git","not inside work tree");process.exit(0)}
-const root=o(["rev-parse","--show-toplevel"]), b=o(["branch","--show-current"]); s("git root",root); s("branch",b); s("primary branch risk",["main","master","trunk"].includes(b)?"yes":"no/unknown"); s("status",o(["status","--short"])); s("worktrees",o(["worktree","list"])); s("submodules",o(["submodule","status"]));
-s("alpha goal state root",state);
-console.log(`.worktrees/codex/preflight-check: ${ok(["check-ignore","-q",".worktrees/codex/preflight-check"])?"ignored":"NOT ignored"}`);
-s("diff check",ok(["diff","--check"])?"pass":"fail"); s("reminder","Git evidence only; inspect rules, ownership, tests, and semantics separately.");
+const args=process.argv.slice(2), targets=(args.length?args:[session]).map(p=>resolve(session,p));
+s("cwd",session); s("alpha goal state root",state); s("multi-repo preflight",targets.length>1?`${targets.length} repos`:"single repo");
+for(const [i,target]of targets.entries()){
+  console.log(`\n## repo ${i+1}: ${target}`);
+  if(!existsSync(target)){s("path","missing");continue}
+  if(!ok(target,["rev-parse","--is-inside-work-tree"])){s("git","not inside work tree");continue}
+  const root=o(target,["rev-parse","--show-toplevel"]), b=o(root,["branch","--show-current"]);
+  s("git root",root); s("branch",b); s("primary branch risk",["main","master","trunk"].includes(b)?"yes":"no/unknown"); s("status",o(root,["status","--short"])); s("worktrees",o(root,["worktree","list"])); s("submodules",o(root,["submodule","status"]));
+  console.log(`.worktrees/codex/preflight-check: ${ok(root,["check-ignore","-q",".worktrees/codex/preflight-check"])?"ignored":"NOT ignored"}`);
+  s("diff check",ok(root,["diff","--check"])?"pass":"fail");
+}
+s("reminder","Git evidence only; inspect rules, ownership, tests, repo manifest, integration evidence, and semantics separately.");

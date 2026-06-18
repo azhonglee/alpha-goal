@@ -15,6 +15,7 @@ Read `references/claim-boundary.md` before final/merge/ship/safety claims. Read 
 
 Read the Goal Contract/equivalent, latest route/iteration state, diff/artifacts, command outputs, tests, logs, reviewer/user feedback, and relevant specs.
 Resolve the Alpha Goal state root the same way as `$alpha-goal`: always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path. Read `<Alpha Goal state root>/YYYYMMDD-<TaskName>/evidence.md` for evidence summary. Its content is the evidence summary of the latest iteration. Check but do not trust it.
+For cross-repo claims, read the repo manifest and the per-repo plus integration evidence from the same task-level state root.
 
 ## Verification rules
 
@@ -23,6 +24,8 @@ Resolve the Alpha Goal state root the same way as `$alpha-goal`: always use `${C
 - Match evidence scope to claim scope; narrow checks cannot prove broad claims.
 - Treat missing, stale, indirect, contradicted, or merely plausible evidence as not achieved.
 - Inspect whether validators/tests actually cover the requirement they are cited for.
+- For cross-repo claims, map evidence by repo surface and by integration relation; one repo's passing checks cannot prove another repo or the integrated behavior.
+- Version pins, generated clients, API contracts, dependent app behavior, and delivery links must be evidenced when the claim depends on them.
 - Do not repair during verification; route back instead.
 - Final wording must not exceed the highest evidence-supported boundary.
 - Do not narrow the claim as a successful outcome. If evidence cannot support the proposed claim, record the gap and return `NEXT_ITERATION`.
@@ -49,6 +52,7 @@ Verification Verdict:
 - Claim checked:
 - Indicator handoff review:
 - Adaptive learning review:
+- Repo surface coverage:
 - Evidence coverage:
 - Unresolved user-owned decisions:
 - Gap:

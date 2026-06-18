@@ -33,6 +33,7 @@ Before asking, decide whether the missing input is material, discoverable, risky
 - Ensure `.worktrees/` is ignored before placing repository-local worktrees there.
 - Use repository-local worktrees to isolate changes per goal/task batch. Create them under `<repo>/.worktrees/codex/<goal-slug>/` unless the repository already defines a stricter convention or the path is not technically usable.
 - In monorepos, create the worktree under the owning subrepo's `.worktrees/codex/<goal-slug>/`.
+- For cross-repo goals, keep one task-level Alpha Goal state root and record a repo manifest with each repo's role, authorized surfaces, worktree/branch, validation observer, integration evidence boundary, and delivery boundary.
 - Never edit/delete directly on main/master; always work in a worktree.
 - Delete the worktree after PR/MR merge or local merge into main/master; do not proactively merge into main/master locally.
 
