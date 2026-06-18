@@ -48,6 +48,14 @@ Before the first user-facing question, complete minimum preflight: applicable AG
 
 Track interview records, and append to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/interview.md`.
 
+### Cross-repo framing
+
+Trigger this when the requested outcome spans more than one git root, repository, subrepo, or ownership surface.
+
+- Keep a single task-level Alpha Goal state root. Do not split runtime records by repo; record a repo manifest inside the task records and design.
+- Before launch, identify each repo path/name, role, authorization source, allowed change surfaces, non-goals, branch/worktree expectation, validation observer, delivery boundary, and dependency/integration order.
+- Treat missing repo selection, write authority, integration evidence, or delivery boundary as a user-owned decision that blocks mutation.
+
 ### Clarity score
 
 Use the clarity_score to decide whether you need to keep asking questions.
@@ -79,9 +87,11 @@ Technical Context [context]
 Intent[intent] （Why the user wants this）
 Outcome [outcome]
 Scope [scope]
+Repo surfaces [repo_surfaces]
 Constraints [constraints]
 Assumptions + resolutions [assumptions_resolutions]
 Acceptance evidence [acceptance_evidence]
+Dependency/integration order [repo_integration_order]
 Non-goals [non_goal]
 Decision boundary [decision_boundary]
 Claim boundary [claim_boundary]
@@ -103,8 +113,10 @@ Design Summary
 | Intent | |
 | Outcome | |
 | Scope | |
+| Repo surfaces | |
 | Constraints | |
 | Acceptance evidence | |
+| Dependency/integration order | |
 | Non-goals | |
 | Decision boundary | |
 | Claim boundary | |

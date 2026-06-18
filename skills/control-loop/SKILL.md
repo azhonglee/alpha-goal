@@ -14,6 +14,7 @@ Resolve the Alpha Goal state root the same way as `$alpha-goal`: always use `${C
 Read `docs/specs/YYYYMMDD-<TaskName>.md` for the goal specification and interview records in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/interview.md`.
 If the goal specification is not available, report the issue and route to `alpha-goal` or blocker instead of editing.
 If from `$evidence-verify`, read `<Alpha Goal state root>/YYYYMMDD-<TaskName>/verification.md` and continue to harden the implementation or evidence until the verification gap closes.
+For cross-repo goals, use the single task-level state root and the repo manifest from the goal specification or task records; do not create separate task states per repo unless a repo policy explicitly requires it.
 
 ## Gates before mutation
 
@@ -22,12 +23,14 @@ All must be true:
 - Do not mutate primary `main`/`master`/`trunk`; use a repo-local worktree unless repo policy defines a safer equivalent.
 - Unrelated user changes are identified and preserved.
 - Alpha Goal state root is resolved before writing process artifacts.
+- For cross-repo goals, every repo has an approved change surface, worktree/branch plan, validation observer, integration evidence boundary, and delivery boundary.
 
 If any gate is missing, route to `alpha-goal` or blocker instead of editing.
 
 ## Preflight
 
 Run `npx --no-install tsx skills/control-loop/scripts/mutation-preflight.ts` from repo root when an existing `tsx` runner is available, or record equivalent facts: root, branch/worktree, status, applicable rule files, ignored `.worktrees/`, Alpha Goal state root, submodules, strongest evidence floor.
+For multi-repo preflight, run the same command with repo paths such as `npx --no-install tsx skills/control-loop/scripts/mutation-preflight.ts <repo-a> <repo-b>`, or record the equivalent facts per repo.
 
 ## Iteration
 
@@ -44,6 +47,7 @@ Dynamic planning answers only the current iteration:
 - the most useful coherent acceptance-relevant slice that can be completed and verified now;
 - fresh evidence needed after the slice and how it will be collected;
 - files, modules, repos, generated outputs, and ownership surfaces allowed to change;
+- for cross-repo work, the repo manifest slice: per-repo action, dependency/integration order, validation observer, commit/PR/MR boundary, and shared rollback or containment needs;
 - assumptions to check and stop conditions for reframe, blocked, or unsafe execution;
 - expected artifacts, side effects, cleanup, and rollback/containment needs;
 - strongest material risk and evidence floor;
@@ -64,6 +68,7 @@ Create a durable plan when:
 - Preserve and interpret failing outputs; do not hide, rerun away, or summarize them as success.
 - Record produced artifacts, generated outputs, side effects, cleanup, and rollback/containment actions as they occur.
 - Preserve unrelated user changes; never stash, revert, move, or overwrite them without approval.
+- Do not let edits leak outside the approved repo surface, and do not use one repo's commit, push, or PR as proof that another repo or the integrated behavior is verified.
 - Prefer targeted edits; defer unrelated improvements unless they are necessary for the approved slice and their risk is recorded.
 - For debug work, identify and record the root cause before repair actions. If root cause is not confirmed, limit changes to diagnostic probes, reversible instrumentation, or explicitly hypothesis-testing slices that do not alter the intended fix surface; record uncertainty and do not present them as repairs.
 - Use subagents for safely isolated independent work, including separate ownership surfaces, read-only review, evidence audit, test/log analysis, or risk assessment; do not let subagents write overlapping files without coordination, and inspect their files, evidence, and concerns before accepting results.
@@ -71,12 +76,13 @@ Create a durable plan when:
 ### 3. Sense and compare
 
 Collect fresh evidence after the action: tests, builds, linters, type checks, runtime probes, logs, screenshots, diffs, or manual inspection. Classify it as gate / advisory / exploration / blocked evidence.
+For cross-repo work, collect per-repo evidence and integration evidence that exercises the declared dependency/order boundary.
 
 Compare observed feedback to the goal specification you read. If the expected effect or threshold is not met, harden, fallback, reframe, or block. If feedback contradicts a reusable assumption, record an Adaptive Learning Record: trigger, mismatch, adjustment, reuse condition, invalidation condition.
 
 ### 4. Record and route
 
-Persist `<Alpha Goal state root>/YYYYMMDD-<TaskName>/iteration.md` for multi-turn/risky/handoff work; otherwise summarize in chat. Before `ITERATION_READY_FOR_VERIFY`, always persist or update `<Alpha Goal state root>/YYYYMMDD-<TaskName>/iteration.md` and `<Alpha Goal state root>/YYYYMMDD-<TaskName>/evidence.md` with acceptance-to-evidence mapping, command/output references, residual risks, and unsupported or not-run checks.
+Persist `<Alpha Goal state root>/YYYYMMDD-<TaskName>/iteration.md` for multi-turn/risky/handoff work; otherwise summarize in chat. Before `ITERATION_READY_FOR_VERIFY`, always persist or update `<Alpha Goal state root>/YYYYMMDD-<TaskName>/iteration.md` and `<Alpha Goal state root>/YYYYMMDD-<TaskName>/evidence.md` with acceptance-to-evidence mapping, command/output references, residual risks, and unsupported or not-run checks. For cross-repo work, group the mapping by repo surface and by integration relation.
 
 ```markdown
 Iteration Summary
