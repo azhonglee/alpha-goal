@@ -6,10 +6,10 @@
 
 ## Build, Test, and Development Commands
 
-- `npx --yes tsx tools/validate_skills.ts .`：验证三公开技能结构、front matter、引用可发现性、闭环语义烟测、安装口径和 30K skills 字节预算。
+- `npx --no-install tsx tools/validate_skills.ts .`：验证三公开技能结构、front matter、引用可发现性、闭环语义烟测、安装口径和 30K skills 字节预算。
 - `bash -n scripts/install.sh`：检查安装脚本语法。
-- `npx --yes tsx skills/control-loop/scripts/mutation-preflight.ts`：检查迭代阶段脚本可运行。
-- `npx --yes tsx skills/evidence-verify/scripts/evidence-summary.ts`：检查验证阶段脚本可运行。
+- `npx --no-install tsx skills/control-loop/scripts/mutation-preflight.ts`：检查迭代阶段脚本可运行。
+- `npx --no-install tsx skills/evidence-verify/scripts/evidence-summary.ts`：检查验证阶段脚本可运行。
 - `python3 -c 'import pathlib,tomllib; tomllib.loads(pathlib.Path("templates/config.toml").read_text())'`：验证配置模板可解析。
 - 使用临时 `CODEX_HOME` 执行 `scripts/install.sh`，并从源码仓库运行 `tools/validate_skills.ts`，验证安装说明可执行。
 
@@ -26,7 +26,7 @@
 
 ## Testing Guidelines
 
-当前没有独立测试框架。修改技能布局、front matter、安装文档、模板或阶段输出契约后，至少运行 `npx --yes tsx tools/validate_skills.ts .`。修改 TypeScript 脚本时运行对应 `npx --yes tsx <script.ts>`。修改安装脚本时运行 `bash -n scripts/install.sh`。修改 `templates/config.toml` 时验证 TOML 可解析。修改安装说明时必须用临时 `CODEX_HOME` 验证 `scripts/install.sh`，不要污染真实用户配置。默认运行态记录写入 `.alpha-goal/`；若仓库根 `.gitignore` 缺少 `.alpha-goal/`，先添加该条目。
+当前没有独立测试框架。修改技能布局、front matter、安装文档、模板或阶段输出契约后，至少运行 `npx --no-install tsx tools/validate_skills.ts .`。修改 TypeScript 脚本时运行对应 `npx --no-install tsx <script.ts>`。修改安装脚本时运行 `bash -n scripts/install.sh`。修改 `templates/config.toml` 时验证 TOML 可解析。修改安装说明时必须用临时 `CODEX_HOME` 验证 `scripts/install.sh`，不要污染真实用户配置。默认运行态记录写入 `.alpha-goal/`；若仓库根 `.gitignore` 缺少 `.alpha-goal/`，先添加该条目。
 
 ## Commit & Pull Request Guidelines
 

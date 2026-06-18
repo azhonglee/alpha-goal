@@ -30,7 +30,10 @@ Read `.alpha-goal/YYYYMMDD-<TaskName>/evidence.md` for evidence summary. Its con
 ## Verdicts
 
 - `PASS_TO_FINAL`: evidence proves all requirements and the proposed claim.
-- `NEXT_ITERATION`: evidence does not prove the proposed claim, including when checks are missing, stale, indirect, too narrow, contradicted, unavailable because of environment/permissions/data, or show the reference/scope/claim boundary is wrong. Handoff to `$control-loop` for next iteration.
+- `NEXT_ITERATION`: evidence does not prove the proposed claim. Choose next route by the gap:
+  - `control-loop` only for fixable evidence, test, edge, compatibility, or cleanup gaps inside the same goal.
+  - `alpha-goal` when target, scope, authority, source reference, or claim boundary is wrong or unclear.
+  - `BLOCKED` when permission, tool, data, environment, credential, or user-owned decision is missing.
 
 ## Final response guard
 
@@ -55,7 +58,7 @@ Verification Verdict:
 - Final wording allowed:
 - Final claim allowed: yes/no
 - Verdict: PASS_TO_FINAL / NEXT_ITERATION
-- Next route: control-loop
+- Next route: control-loop / alpha-goal / BLOCKED
 ```
 
 TUI summary:
