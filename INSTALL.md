@@ -33,6 +33,8 @@ The script validates the source skillset, creates `${CODEX_HOME:-$HOME/.codex}/s
 
 The compact recovery hook definition lives in `templates/hooks.json`. It is a `SessionStart` hook for `compact` starts and prints a static policy telling Codex to decide whether `alpha-goal`, `control-loop`, or `evidence-verify` applies after compaction, and to load the matching skill before continuing. Use `--no-sync-user-templates` to skip AGENTS/config template updates and `--no-sync-user-hooks` to skip hook template updates.
 
+Hook upgrades are keyed by marker family. If the template marker changes from `...:v1` to `...:v2`, the installer removes older hooks from the same family before adding the template hook. It also removes the earlier experimental `codex-compact-skill-recovery` hook family.
+
 Codex may require reviewing and trusting the changed hook with `/hooks` before it runs.
 
 ## Smoke test
