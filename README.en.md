@@ -2,9 +2,7 @@
 
 Languages: [Chinese](README.md) | English
 
-Agent work often goes wrong not because the agent cannot edit files, but because it acts before the goal, boundary, and evidence are clear.
-
-Alpha Goal is not a bigger process. It is a guardrail against premature action and unsupported completion claims. It helps agents discover facts before asking, work inside explicit boundaries, and make final claims only as far as evidence supports them.
+Alpha Goal is a minimal closed-loop skillset for goal engineering work. It helps agents discover facts before asking, work inside explicit boundaries, and make final claims only as far as evidence supports them.
 
 ## When to use it
 
@@ -12,7 +10,6 @@ Alpha Goal is not a bigger process. It is a guardrail against premature action a
 - Outcome, scope, non-goals, or acceptance evidence are unclear enough that acting now would be guesswork.
 - A diagnose/repair task needs root-cause proof before changing behavior or claiming repair.
 - Work crosses multiple files, repositories, or ownership surfaces and needs explicit authority, sequencing, and validation boundaries.
-- A final/ready/safe/complete/repair claim needs evidence coverage before it is stated.
 
 ## How it works
 
