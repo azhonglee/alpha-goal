@@ -67,13 +67,15 @@ scripts/
 tools/
 ```
 
-## Principles
+## Design Principles
 
-- Fact discovery before clarification questions.
-- Current code facts describe current state; they do not define desired behavior without authority.
-- Goals before action.
-- Model only what changes safe control.
-- User-owned decisions gate execution; ask one high-leverage question per round.
-- Bounded action beats broad refactor.
-- Evidence bounds final claims.
-- Execution and verification stay separate.
+These principles are decision rules for when an agent should ask, act, verify, or route back.
+
+- Discover before asking: inspect local facts, docs, status, and existing contracts before asking the user; ask only for decisions that cannot be safely discovered.
+- Treat facts as evidence, not authority: Current code facts describe current state; code and repo patterns do not define desired behavior without a user, spec, issue, or accepted contract.
+- Let goal boundaries control execution: define outcome, scope, non-goals, acceptance evidence, decision owner, and claim boundary before mutating.
+- Model only control-relevant uncertainty: capture dependencies, disturbances, and risks only when they change the safe next action, validation boundary, or route.
+- Ask one user-owned decision at a time: when human input is required, ask one high-leverage question that can change target, scope, acceptance, risk, authority, or final claim.
+- Execute in bounded loops: prefer the smallest coherent action or probe that can be sensed and compared over broad refactors or speculative cleanup.
+- Verify independently: fresh evidence must cover the claim; execution success, plausibility, or narrower wording is not proof.
+- Route on gaps: unclear targets return to `alpha-goal`, fixable implementation or evidence gaps return to `control-loop`, and final/ready/safe/complete/repair claims go through `evidence-verify`.
