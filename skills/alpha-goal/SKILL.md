@@ -12,15 +12,15 @@ Exert your utmost efforts to clarify the real intention, outcome, constraints, b
 Resolve the Alpha Goal state root before writing runtime artifacts. Always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
 
 ## Pre-flight
-1. Classify if the work type as one of the following:
+1. Classify the work type as one of the following:
    - `exploration`: Skip only for concrete read-only fact lookup; use this skill when exploration is about intent, scope, acceptance, or decision boundaries.
-   - `design`: Follow up all phases.
-   - `implementation`: Follow up all phases.
-   - `diagnose/repair`: Discover root causes you 100% confirm, show the proof, and then follow up from Phase 2 if need fix. Do not implement directly.
-   - `maintenance`: Follow up all phases.
-   - `other`: Ask for more details to clarify again.
+   - `design`: Run all phases.
+   - `implementation`: Run all phases.
+   - `maintenance`: Run all phases.
+   - `diagnose/repair`: Start with Phase 1 to frame the symptom and evidence boundary, then confirm the root cause with proof. If repair is needed, continue from Phase 2 through the remaining phases to define the repair boundary and authorization. If root cause is not 100% confirmed, limit follow-up to diagnostic probes or hypothesis-testing slices. Do not implement directly.
+   - `other`: Ask for more details to classify again.
 
-2. If the work may be mixed, ask for more details and plan accordingly to split it into a group of sequenced work items.
+2. If the work may be mixed, ask for the minimum details needed to split it into sequenced work items.
 
 ## Phase 1: Discovery
 
@@ -38,6 +38,8 @@ Loop Socratic-deep-interview until you 100% understand the requirements and rema
 
 Before the first user-facing question, complete minimum preflight: applicable AGENTS/repo rules, README/getting-started/install docs, relevant docs/plans/ADRs/contracts, target files/current implementation, local glossary/context if present, current branch/status when mutation may follow, and direct contradictions. If missing, name the missing observer instead of asking for repo facts; never ask the user to summarize discoverable repository facts merely to save inspection effort.
 
+For `diagnose/repair`, treat a confirmed root cause as evidence-backed context. Clarify the repair scope, affected surfaces, authorization, acceptance evidence, non-goals, and repair-complete claim boundary. If root cause is not confirmed, do not proceed to repair design; route only to diagnostic probes or hypothesis-testing slices.
+
 ### Socratic Interviewing Loop
 1. Ask User one high-leverage question per round. One question means one decision variable. The question should confirm a conflict, request a decision, demand an example, expose an assumption, force a tradeoff, or test one boundary-stressing scenario. Use `request_user_input` with exactly one `questions[]` item.
 2. Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps. If context is too large, first inspect prompt-safe local indexes/filenames/docs/likely target surfaces. Treat the answer as navigation evidence, not requirements or authority.
@@ -45,7 +47,7 @@ Before the first user-facing question, complete minimum preflight: applicable AG
 4. Classify each gap as `[from-code][auto-confirmed]` descriptive fact, `[from-code]` inferred fact needing confirmation, `[from-research] external/current fact`, or `[from-user]` human decision. Do not ask for discoverable facts until inspected; auto-confirm only descriptive facts, never choices about desired behavior, scope, pattern, or tradeoff. Current-state facts cannot define desired behavior, requirements, acceptance evidence, non-goals, tradeoffs, or authority without explicit user request or authoritative spec/issue. If unresolved ambiguity depends on current external best practices, standards, APIs, dependency versions, laws, schedules, or prices, gather bounded fresh evidence first, then ask the user only for the decision boundary.
 5. Readiness Gate Check. Mark each gate `pass` only when explicit or source-backed: intent, outcome, scope, constraints, acceptance evidence, context/current facts, non-goals, decision boundaries, claim boundary, authorization source, source-of-truth conflicts, external/current facts, actuator boundary, and sensor/observer. Count unresolved gates; target the first blocking gate each round and prefer intent/boundaries before implementation detail.
 6. If qualitative, value-laden, multi-party, weakly quantified, or UX/performance/quality-adjective objectives exist, synthesize and create Indicator Handoff with primary metric, guardrail metric, tradeoff owner, and evidence boundary before action/claims.
-7. If user-owned decisions, credentials, permissions, external side effects, public claims, irreversible commitments, missing acceptance evidence, or unresolved source-of-truth conflicts remain, ask/block.
+7. Ask or block when user-owned decisions, credentials, permissions, external side effects, public claims, irreversible commitments, missing acceptance evidence, or unresolved source-of-truth conflicts remain.
 8. Before asking or closing non-trivial ambiguous work, pressure-test the current interpretation with at least one boundary scenario from inspected facts; use it to choose the next single question. After each material user answer, pressure-test again if it could change scope, acceptance, authority, or claim boundary. Continue ordinary questioning only when the next answer could materially change execution, acceptance, authority, or claim boundary.
 
 Track interview records, and append to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/interview.md`.
