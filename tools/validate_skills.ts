@@ -236,7 +236,7 @@ function validateSemanticChecks(root: string, errors: string[]): void {
 
 function validateSchemaConsistency(root: string, errors: string[]): void {
   const alpha = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
-  const designFields = ["Intent", "Outcome", "Scope", "Constraints", "Acceptance evidence", "Non-goals", "Decision boundary", "Claim boundary", "Blocking gates", "Ledger", "Next"];
+  const designFields = ["Intent", "Outcome", "Root Cause", "Scope", "Constraints", "Acceptance evidence", "Non-goals", "Decision boundary", "Claim boundary", "Blocking gates", "Ledger", "Next"];
   const designStart = Math.max(0, alpha.toLowerCase().indexOf("design summary"));
   const designScoped = alpha.slice(designStart).toLowerCase();
   const designPos = designFields.map(field => designScoped.indexOf(`| ${field.toLowerCase()} |`));
