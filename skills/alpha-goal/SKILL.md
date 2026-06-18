@@ -7,6 +7,10 @@ description: "Use for any engineering/design/implementation/diagnose/repair requ
 
 Exert your utmost efforts to clarify the real intention, outcome, constraints, boundaries, and success criteria of the request. Do not implement or make final claims inside this skill.
 
+## State root
+
+Resolve the Alpha Goal state root before writing runtime artifacts. Always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
+
 ## Pre-flight
 1. Classify if the work type as one of the following:
    - `exploration`: Skip only for concrete read-only fact lookup; use this skill when exploration is about intent, scope, acceptance, or decision boundaries.
@@ -42,7 +46,7 @@ Before the first user-facing question, complete minimum preflight: applicable AG
 7. If user-owned decisions, credentials, permissions, external side effects, public claims, irreversible commitments, missing acceptance evidence, or unresolved source-of-truth conflicts remain, ask/block.
 8. Before asking or closing non-trivial ambiguous work, pressure-test the current interpretation with at least one boundary scenario from inspected facts; use it to choose the next single question. After each material user answer, pressure-test again if it could change scope, acceptance, authority, or claim boundary. Continue ordinary questioning only when the next answer could materially change execution, acceptance, authority, or claim boundary.
 
-Track interview records, and append to the `.alpha-goal/YYYYMMDD-<TaskName>/interview.md`. Make `.alpha-goal/` ignored before writing process artifacts.
+Track interview records, and append to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/interview.md`.
 
 ### Clarity score
 

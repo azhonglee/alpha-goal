@@ -9,9 +9,11 @@ Exert your utmost effort to achieve the goal you are assigned.
 
 ## Resources
 
-Read `docs/specs/YYYYMMDD-<TaskName>.md` for the goal specification and interview records in `.alpha-goal/YYYYMMDD-<TaskName>/interview.md`.
+Resolve the Alpha Goal state root the same way as `$alpha-goal`: always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
+
+Read `docs/specs/YYYYMMDD-<TaskName>.md` for the goal specification and interview records in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/interview.md`.
 If the goal specification is not available, report the issue and route to `alpha-goal` or blocker instead of editing.
-If from `$evidence-verify`, read `.alpha-goal/YYYYMMDD-<TaskName>/verification.md` and continue to harden the implementation or evidence until the verification gap closes.
+If from `$evidence-verify`, read `<Alpha Goal state root>/YYYYMMDD-<TaskName>/verification.md` and continue to harden the implementation or evidence until the verification gap closes.
 
 ## Gates before mutation
 
@@ -19,13 +21,13 @@ All must be true:
 
 - Do not mutate primary `main`/`master`/`trunk`; use a repo-local worktree unless repo policy defines a safer equivalent.
 - Unrelated user changes are identified and preserved.
-- `.alpha-goal/` is ignored before writing process artifacts.
+- Alpha Goal state root is resolved before writing process artifacts.
 
 If any gate is missing, route to `alpha-goal` or blocker instead of editing.
 
 ## Preflight
 
-Run `npx --no-install tsx skills/control-loop/scripts/mutation-preflight.ts` from repo root when an existing `tsx` runner is available, or record equivalent facts: root, branch/worktree, status, applicable rule files, ignored `.worktrees/` and `.alpha-goal/`, submodules, strongest evidence floor.
+Run `npx --no-install tsx skills/control-loop/scripts/mutation-preflight.ts` from repo root when an existing `tsx` runner is available, or record equivalent facts: root, branch/worktree, status, applicable rule files, ignored `.worktrees/`, Alpha Goal state root, submodules, strongest evidence floor.
 
 ## Iteration
 
@@ -74,7 +76,7 @@ Compare observed feedback to the goal specification you read. If the expected ef
 
 ### 4. Record and route
 
-Persist `.alpha-goal/YYYYMMDD-<TaskName>/iteration.md` for multi-turn/risky/handoff work; otherwise summarize in chat. Before `ITERATION_READY_FOR_VERIFY`, always persist or update `.alpha-goal/YYYYMMDD-<TaskName>/iteration.md` and `.alpha-goal/YYYYMMDD-<TaskName>/evidence.md` with acceptance-to-evidence mapping, command/output references, residual risks, and unsupported or not-run checks.
+Persist `<Alpha Goal state root>/YYYYMMDD-<TaskName>/iteration.md` for multi-turn/risky/handoff work; otherwise summarize in chat. Before `ITERATION_READY_FOR_VERIFY`, always persist or update `<Alpha Goal state root>/YYYYMMDD-<TaskName>/iteration.md` and `<Alpha Goal state root>/YYYYMMDD-<TaskName>/evidence.md` with acceptance-to-evidence mapping, command/output references, residual risks, and unsupported or not-run checks.
 
 ```markdown
 Iteration Summary
