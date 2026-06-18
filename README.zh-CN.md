@@ -7,8 +7,6 @@ Alpha Goal 是面向 Goal Engineering 的最小闭环技能集。它让 agent �
 ## 适用场景
 
 - 请求含糊，需要先挖掘事实再澄清。
-- 实现任务需要一轮有边界、可观察的行动闭环。
-- final/ready/safe/complete/repair 等声明需要独立证据检查。
 
 ## 公开技能
 
@@ -17,8 +15,6 @@ Alpha Goal 是面向 Goal Engineering 的最小闭环技能集。它让 agent �
 | `alpha-goal` | 默认入口：模糊请求先挖掘事实，再澄清目标边界、形成交付设计、路由下一控制器、维护 ledger。 |
 | `control-loop` | 有界执行/探针：变更安全门、反馈采样、残余误差路由。 |
 | `evidence-verify` | 独立比较器：检查 final/ready/safe/complete/repair 声明与证据边界。 |
-
-目标契约、系统建模、综合研判已折叠进 `skills/alpha-goal/SKILL.md`，不再作为公开技能安装。
 
 ## 流程
 

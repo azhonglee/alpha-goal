@@ -9,8 +9,6 @@ final claims.
 ## When to use it
 
 - A request is ambiguous and needs fact discovery before clarification.
-- An implementation task needs one bounded, observable action loop.
-- A final, ready, safe, complete, or repair claim needs independent evidence.
 
 ## Public skills
 
@@ -19,8 +17,6 @@ final claims.
 | `alpha-goal` | Default entry: discover facts for ambiguous requests, clarify goal boundaries, design the handoff, route next controller, maintain ledger. |
 | `control-loop` | Bounded execution/probe with implementation safety, feedback, and residual-error routing. |
 | `evidence-verify` | Independent comparator for final/ready/safe/complete/repair claims and evidence boundaries. |
-
-Former public framing/modeling/synthesis stages are folded into `skills/alpha-goal/SKILL.md`; they are not installed as public skills.
 
 ## Flow
 
