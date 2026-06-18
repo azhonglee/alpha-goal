@@ -21,15 +21,15 @@ Former public framing/modeling/synthesis stages are folded into `skills/alpha-go
 
 ## Runtime Artifacts
 
+Default runtime artifacts live under the user-level Alpha Goal state root: `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`, where `<workspace-slug>` is the last directory name of the current session directory path.
+
 | Path | Purpose |
 |---|---|
-| `.alpha-goal/control-state/latest.md` | Stable latest Closed-loop Ledger entry when durable handoff is required. |
-| `.alpha-goal/context/` | Optional goal/frame artifacts. |
-| `.alpha-goal/models/` | Optional model artifacts. |
-| `.alpha-goal/synthesis/` | Optional synthesis artifacts. |
-| `.alpha-goal/iterations/` | Optional execution iteration artifacts. |
-| `.alpha-goal/evidence/` | Optional durable evidence, logs, screenshots, traces, or check outputs. |
-| `.alpha-goal/verification/` | Optional verification verdict artifacts. |
+| `<state-root>/YYYYMMDD-<TaskName>/interview.md` | Clarification records and decision-boundary notes. |
+| `<state-root>/YYYYMMDD-<TaskName>/iteration.md` | Latest execution iteration state when durable handoff is required. |
+| `<state-root>/YYYYMMDD-<TaskName>/evidence.md` | Durable evidence, logs, screenshots, traces, or check outputs. |
+| `<state-root>/YYYYMMDD-<TaskName>/verification.md` | Verification verdict artifacts. |
+| `<state-root>/control-state/latest.md` | Stable latest Closed-loop Ledger entry when needed. |
 
 ## Byte Budget
 

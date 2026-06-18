@@ -29,7 +29,8 @@ Before asking, decide whether the missing input is material, discoverable, risky
 
 ## Isolation Principles
 
-- Ensure `.worktrees/` is ignored before placing repository-local worktrees there. Put default runtime evidence, review notes, scratch artifacts, interview records, iteration records, and verification records under `.alpha-goal/`; if `.alpha-goal/` is missing from the repo root `.gitignore`, add `.alpha-goal/` before writing those artifacts.
+- Resolve the Alpha Goal state root before writing runtime evidence, review notes, scratch artifacts, interview records, iteration records, or verification records. Always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
+- Ensure `.worktrees/` is ignored before placing repository-local worktrees there.
 - Use repository-local worktrees to isolate changes per goal/task batch. Create them under `<repo>/.worktrees/codex/<goal-slug>/` unless the repository already defines a stricter convention or the path is not technically usable.
 - In monorepos, create the worktree under the owning subrepo's `.worktrees/codex/<goal-slug>/`.
 - Never edit/delete directly on main/master; always work in a worktree.
