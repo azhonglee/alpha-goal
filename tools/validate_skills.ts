@@ -20,30 +20,47 @@ const LEGACY_SCRIPT_REFERENCES = [
   "scripts/repo-sensor-snapshot.sh", "repo-sensor-snapshot.sh",
   "scripts/evidence-summary.sh", "evidence-summary.sh",
 ];
-const STATE_ROOT_FILES = [
+const STATE_ROOT_CORE_FILES = [
   "skills/alpha-goal/SKILL.md",
   "skills/control-loop/SKILL.md",
   "skills/evidence-verify/SKILL.md",
   "templates/AGENTS.md",
 ];
+const STATE_ROOT_DOC_FILES = [
+  "AGENTS.md",
+  "README.md",
+  "README.zh-CN.md",
+  "MANIFEST.md",
+];
+const STATE_ROOT_SCRIPT_FILES = [
+  "skills/control-loop/scripts/mutation-preflight.ts",
+];
+const STATE_ROOT_DOC_REQUIRED_TERMS = [
+  "${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/",
+];
+const ENV_STATE_ROOT = "ALPHA_" + "GOAL_STATE_ROOT";
+const REPO_LOCAL_STATE = "\\.alpha-" + "goal";
 const STATE_ROOT_REQUIRED_TERMS = [
   "Alpha Goal state root",
-  "ALPHA_GOAL_STATE_ROOT",
-  "${CODEX_HOME:-$HOME/.codex}/state/alpha-goal/<workspace-slug>/",
-  "require a repo root",
-  "repo-local `.alpha-goal/` only",
-  "strip leading slashes",
-  "replace characters outside `[A-Za-z0-9_.-]` with `-`",
-  "keep the last 80 characters",
-  "fallback to `workspace`",
+  "${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/",
+  "last directory name of the current session directory path",
 ];
 const STATE_ROOT_FORBIDDEN_PATTERNS: Array<[RegExp, string]> = [
-  [/\.alpha-goal\/YYYYMMDD-<TaskName>/, "hard-coded repo-local task artifact path"],
-  [/default runtime .*write.*\.alpha-goal\//i, "default runtime writes to repo-local .alpha-goal"],
-  [/default runtime .*under `?\.alpha-goal\//i, "default runtime lives under repo-local .alpha-goal"],
-  [/if .*\.alpha-goal\/.*missing.*\.gitignore.*add/i, "repo .gitignore required before state writes"],
-  [/\.gitignore.*must include .*\.alpha-goal\//i, "repo .gitignore hard requirement"],
-  [/missing \.gitignore with required \.alpha-goal/i, "validator requires repo .gitignore for state"],
+  [new RegExp(ENV_STATE_ROOT), "state-root environment override remains"],
+  [new RegExp("\\$\\{CODEX_HOME:-\\$HOME/\\.codex\\}/state/alpha-goal/<workspace-slug>/"), "old Codex-home state root remains"],
+  [new RegExp(`${REPO_LOCAL_STATE}/YYYYMMDD-<TaskName>`), "hard-coded repo-local task artifact path"],
+  [new RegExp(`default runtime .*write.*${REPO_LOCAL_STATE}/`, "i"), "default runtime writes to repo-local state"],
+  [new RegExp(`default runtime .*under \`?${REPO_LOCAL_STATE}/`, "i"), "default runtime lives under repo-local state"],
+  [new RegExp(`if .*${REPO_LOCAL_STATE}/.*missing.*\\.gitignore.*add`, "i"), "repo .gitignore required before state writes"],
+  [new RegExp(`\\.gitignore.*must include .*${REPO_LOCAL_STATE}/`, "i"), "repo .gitignore hard requirement"],
+  [new RegExp(`missing \\.gitignore with required ${REPO_LOCAL_STATE}`, "i"), "validator requires repo .gitignore for state"],
+  [new RegExp(`repo-local .*${REPO_LOCAL_STATE}`, "i"), "repo-local state fallback remains"],
+  [new RegExp(`compatibility[^\\n]*${REPO_LOCAL_STATE}[^\\n]*override`, "i"), "repo-local compatibility override wording remains"],
+  [new RegExp(`explicit[^\\n]*policy[^\\n]*${REPO_LOCAL_STATE}[^\\n]*override`, "i"), "repo-local explicit policy override wording remains"],
+  [new RegExp("absolute " + "git root", "i"), "old git-root slug rule remains"],
+  [new RegExp("strip leading " + "slashes", "i"), "old slug sanitization rule remains"],
+  [new RegExp("replace characters " + "outside", "i"), "old slug sanitization rule remains"],
+  [new RegExp("keep the last " + "80 characters", "i"), "old slug truncation rule remains"],
 ];
 
 const DESCRIPTION_SEMANTIC_CHECKS: Record<string, { required: string[]; forbidden: string[] }> = {
@@ -69,10 +86,10 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Alpha Goal state root", "YYYYMMDD-<TaskName>/interview.md", "docs/specs/YYYYMMDD-<TaskName>.md", "Design Summary", "Blocking gates", "Ledger", "Next"
   ]],
   ["execution has hard safety gates", "skills/control-loop/SKILL.md", [
-    "Do not mutate primary", "repo-local worktree", "Unrelated user changes", "Alpha Goal state root", "mutation-preflight", "approved target", "authorization", "claim boundary", "### 1. Plan slice", "### 2. Act or probe", "### 3. Sense and compare", "### 4. Record and route", "Act/probe", "read-only/probe slice", "Preserve unrelated user changes", "root cause", "Iteration Summary", "ITERATION_READY_FOR_VERIFY", "$evidence-verify", "verification.md", "acceptance-to-evidence", "persisted evidence", "RETURN_TO_ALPHA_GOAL", "BLOCKED", "Stop/re-route"
+    "Do not mutate primary", "repo-local worktree", "Unrelated user changes", "Alpha Goal state root", "${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/", "mutation-preflight", "approved target", "authorization", "claim boundary", "### 1. Plan slice", "### 2. Act or probe", "### 3. Sense and compare", "### 4. Record and route", "Act/probe", "read-only/probe slice", "Preserve unrelated user changes", "root cause", "Iteration Summary", "ITERATION_READY_FOR_VERIFY", "$evidence-verify", "verification.md", "acceptance-to-evidence", "persisted evidence", "RETURN_TO_ALPHA_GOAL", "BLOCKED", "Stop/re-route"
   ]],
   ["verification limits final claims", "skills/evidence-verify/SKILL.md", [
-    "PASS_TO_FINAL", "NEXT_ITERATION", "Alpha Goal state root", "ALPHA_GOAL_STATE_ROOT", "Do not narrow the claim as a successful outcome", "Final response guard", "Highest practical evidence-supported boundary", "Final wording allowed", "repair-complete", "no risk", "Verification Summary"
+    "PASS_TO_FINAL", "NEXT_ITERATION", "Alpha Goal state root", "${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/", "Do not narrow the claim as a successful outcome", "Final response guard", "Highest practical evidence-supported boundary", "Final wording allowed", "repair-complete", "no risk", "Verification Summary"
   ]],
 ];
 
@@ -155,20 +172,29 @@ function validateByteBudget(skills: string, errors: string[]): void {
 }
 
 function validateRuntimeArtifactState(root: string, errors: string[], warnings: string[]): void {
-  for (const rel of STATE_ROOT_FILES) {
+  for (const rel of STATE_ROOT_CORE_FILES) {
     const text = readIfFile(path.join(root, rel));
     if (!text) { errors.push(`${rel}: missing state-root file`); continue; }
     for (const term of STATE_ROOT_REQUIRED_TERMS) if (!text.includes(term)) errors.push(`${rel}: missing state-root guidance: ${term}`);
   }
-  const scanned = ["AGENTS.md", "README.md", "README.zh-CN.md", "MANIFEST.md", ...STATE_ROOT_FILES, "tools/validate_skills.ts"];
+  for (const rel of STATE_ROOT_DOC_FILES) {
+    const text = readIfFile(path.join(root, rel));
+    if (!text) { errors.push(`${rel}: missing state-root doc`); continue; }
+    for (const term of STATE_ROOT_DOC_REQUIRED_TERMS) if (!text.includes(term)) errors.push(`${rel}: missing state-root doc guidance: ${term}`);
+    if (!text.includes("last directory name of the current session directory path") && !text.includes("当前会话目录路径最后一个目录名")) errors.push(`${rel}: missing last-directory workspace slug guidance`);
+  }
+  for (const rel of STATE_ROOT_SCRIPT_FILES) {
+    const text = readIfFile(path.join(root, rel));
+    if (!text) { errors.push(`${rel}: missing state-root script`); continue; }
+    if (!text.includes(".alphal-goal")) errors.push(`${rel}: missing .alphal-goal default state root`);
+    if (!text.includes("process.cwd()")) errors.push(`${rel}: state root must derive from process.cwd()`);
+    if (!text.includes("basename(session)")) errors.push(`${rel}: state root must use the session directory basename`);
+    if (/state\s*=\s*.*root/.test(text)) errors.push(`${rel}: state root must not derive from git root`);
+  }
+  const scanned = [...new Set([...STATE_ROOT_CORE_FILES, ...STATE_ROOT_DOC_FILES, ...STATE_ROOT_SCRIPT_FILES, "tools/validate_skills.ts"])];
   for (const rel of scanned) {
     const text = readIfFile(path.join(root, rel));
     for (const [pattern, label] of STATE_ROOT_FORBIDDEN_PATTERNS) if (pattern.test(text)) errors.push(`${rel}: forbidden state-root dependency remains: ${label}`);
-  }
-  const gitignore = path.join(root, ".gitignore");
-  if (isFile(gitignore)) {
-    const lines = fs.readFileSync(gitignore, "utf8").split(/\r?\n/).map(l => l.trim());
-    if (!lines.includes(".alpha-goal/")) warnings.push(".gitignore does not ignore legacy repo-local .alpha-goal/ when that override is selected");
   }
 }
 

@@ -29,8 +29,7 @@ Before asking, decide whether the missing input is material, discoverable, risky
 
 ## Isolation Principles
 
-- Resolve the Alpha Goal state root before writing runtime evidence, review notes, scratch artifacts, interview records, iteration records, or verification records. Use `ALPHA_GOAL_STATE_ROOT` when set; otherwise use `${CODEX_HOME:-$HOME/.codex}/state/alpha-goal/<workspace-slug>/`. Derive `<workspace-slug>` from the absolute git root when available, otherwise the absolute working directory or task context; strip leading slashes, replace characters outside `[A-Za-z0-9_.-]` with `-`, keep the last 80 characters, and fallback to `workspace`. Do not require a repo root for these files.
-- Use repo-local `.alpha-goal/` only when user/project policy explicitly requires that override. If repo-local `.alpha-goal/` is used, ensure it is ignored before writing artifacts.
+- Resolve the Alpha Goal state root before writing runtime evidence, review notes, scratch artifacts, interview records, iteration records, or verification records. Always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
 - Ensure `.worktrees/` is ignored before placing repository-local worktrees there.
 - Use repository-local worktrees to isolate changes per goal/task batch. Create them under `<repo>/.worktrees/codex/<goal-slug>/` unless the repository already defines a stricter convention or the path is not technically usable.
 - In monorepos, create the worktree under the owning subrepo's `.worktrees/codex/<goal-slug>/`.

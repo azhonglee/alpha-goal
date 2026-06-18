@@ -26,7 +26,7 @@
 
 ## Testing Guidelines
 
-当前没有独立测试框架。修改技能布局、front matter、安装文档、模板或阶段输出契约后，至少运行 `npx --yes tsx tools/validate_skills.ts .`。修改 TypeScript 脚本时运行对应 `npx --yes tsx <script.ts>`。修改安装脚本时运行 `bash -n scripts/install.sh`。修改 `templates/config.toml` 时验证 TOML 可解析。修改安装说明时必须用临时 `CODEX_HOME` 验证 `scripts/install.sh`，不要污染真实用户配置。默认运行态记录写入 Alpha Goal state root：优先 `ALPHA_GOAL_STATE_ROOT`，否则 `${CODEX_HOME:-$HOME/.codex}/state/alpha-goal/<workspace-slug>/`；只有显式项目策略要求 repo-local `.alpha-goal/` 时，才需要先确认该目录已被忽略。
+当前没有独立测试框架。修改技能布局、front matter、安装文档、模板或阶段输出契约后，至少运行 `npx --yes tsx tools/validate_skills.ts .`。修改 TypeScript 脚本时运行对应 `npx --yes tsx <script.ts>`。修改安装脚本时运行 `bash -n scripts/install.sh`。修改 `templates/config.toml` 时验证 TOML 可解析。修改安装说明时必须用临时 `CODEX_HOME` 验证 `scripts/install.sh`，不要污染真实用户配置。默认运行态记录只写入用户级 Alpha Goal state root：`${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`，其中 `<workspace-slug>` 是当前会话目录路径最后一个目录名。
 
 ## Commit & Pull Request Guidelines
 

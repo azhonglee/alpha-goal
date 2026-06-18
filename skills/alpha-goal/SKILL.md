@@ -9,7 +9,7 @@ Exert your utmost efforts to clarify the real intention, outcome, constraints, b
 
 ## State root
 
-Resolve the Alpha Goal state root before writing runtime artifacts. Use `ALPHA_GOAL_STATE_ROOT` when set; otherwise default to `${CODEX_HOME:-$HOME/.codex}/state/alpha-goal/<workspace-slug>/`. Derive `<workspace-slug>` from the absolute git root when inside a repo, otherwise from the absolute working directory or task context; strip leading slashes, replace characters outside `[A-Za-z0-9_.-]` with `-`, keep the last 80 characters, and fallback to `workspace`. Do not require a repo root for state files. Use repo-local `.alpha-goal/` only when user/project policy explicitly requires that override; then ensure `.alpha-goal/` is ignored before writing.
+Resolve the Alpha Goal state root before writing runtime artifacts. Always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
 
 ## Pre-flight
 1. Classify if the work type as one of the following:

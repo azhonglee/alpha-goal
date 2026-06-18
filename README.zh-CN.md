@@ -36,7 +36,7 @@ npx --yes tsx tools/validate_skills.ts .
 安装脚本会在 `$HOME/.codex/skills/` 下为三个公开技能创建直接软链接，并清理指向本仓库旧公开技能的软链接。
 校验脚本会强制整个 `skills/` 树不超过 30,000 bytes。
 
-运行态记录使用 Alpha Goal state root：优先读取 `ALPHA_GOAL_STATE_ROOT`，否则默认 `${CODEX_HOME:-$HOME/.codex}/state/alpha-goal/<workspace-slug>/`。repo 内 `.alpha-goal/` 只作为兼容旧产物或显式项目策略覆盖。
+运行态记录使用用户级 Alpha Goal state root：`${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`，其中 `<workspace-slug>` 是当前会话目录路径最后一个目录名。
 
 ## 使用示例
 

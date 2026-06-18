@@ -21,7 +21,7 @@ Former public framing/modeling/synthesis stages are folded into `skills/alpha-go
 
 ## Runtime Artifacts
 
-Default runtime artifacts live under the Alpha Goal state root. Resolve it from `ALPHA_GOAL_STATE_ROOT` when set; otherwise use `${CODEX_HOME:-$HOME/.codex}/state/alpha-goal/<workspace-slug>/`. The state root is user-level by default and does not require a repo. Repo-local `.alpha-goal/` is a compatibility/explicit-policy override only.
+Default runtime artifacts live under the user-level Alpha Goal state root: `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`, where `<workspace-slug>` is the last directory name of the current session directory path.
 
 | Path | Purpose |
 |---|---|

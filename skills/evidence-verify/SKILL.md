@@ -14,7 +14,7 @@ Read `references/claim-boundary.md` before final/merge/ship/safety claims. Read 
 ## Inputs
 
 Read the Goal Contract/equivalent, latest route/iteration state, diff/artifacts, command outputs, tests, logs, reviewer/user feedback, and relevant specs.
-Resolve the Alpha Goal state root the same way as `$alpha-goal`: `ALPHA_GOAL_STATE_ROOT` when set; otherwise `${CODEX_HOME:-$HOME/.codex}/state/alpha-goal/<workspace-slug>/`. Derive `<workspace-slug>` from the absolute git root when available, otherwise the absolute working directory or task context; strip leading slashes, replace characters outside `[A-Za-z0-9_.-]` with `-`, keep the last 80 characters, and fallback to `workspace`. Do not require a repo root; use repo-local `.alpha-goal/` only when user/project policy explicitly requires that override. Read `<Alpha Goal state root>/YYYYMMDD-<TaskName>/evidence.md` for evidence summary. Its content is the evidence summary of the latest iteration. Check but do not trust it.
+Resolve the Alpha Goal state root the same way as `$alpha-goal`: always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path. Read `<Alpha Goal state root>/YYYYMMDD-<TaskName>/evidence.md` for evidence summary. Its content is the evidence summary of the latest iteration. Check but do not trust it.
 
 ## Verification rules
 

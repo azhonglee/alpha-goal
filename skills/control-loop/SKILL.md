@@ -9,7 +9,7 @@ Exert your utmost effort to achieve the goal you are assigned.
 
 ## Resources
 
-Resolve the Alpha Goal state root the same way as `$alpha-goal`: `ALPHA_GOAL_STATE_ROOT` when set; otherwise `${CODEX_HOME:-$HOME/.codex}/state/alpha-goal/<workspace-slug>/`. Derive `<workspace-slug>` from the absolute git root when available, otherwise the absolute working directory or task context; strip leading slashes, replace characters outside `[A-Za-z0-9_.-]` with `-`, keep the last 80 characters, and fallback to `workspace`. It must not require a repo root. Use repo-local `.alpha-goal/` only when user/project policy explicitly requires that override.
+Resolve the Alpha Goal state root the same way as `$alpha-goal`: always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
 
 Read `docs/specs/YYYYMMDD-<TaskName>.md` for the goal specification and interview records in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/interview.md`.
 If the goal specification is not available, report the issue and route to `alpha-goal` or blocker instead of editing.
@@ -21,13 +21,13 @@ All must be true:
 
 - Do not mutate primary `main`/`master`/`trunk`; use a repo-local worktree unless repo policy defines a safer equivalent.
 - Unrelated user changes are identified and preserved.
-- Alpha Goal state root is resolved before writing process artifacts; if repo-local `.alpha-goal/` is selected, it is ignored first.
+- Alpha Goal state root is resolved before writing process artifacts.
 
 If any gate is missing, route to `alpha-goal` or blocker instead of editing.
 
 ## Preflight
 
-Run `npx --yes tsx skills/control-loop/scripts/mutation-preflight.ts` from repo root, or record equivalent facts: root, branch/worktree, status, applicable rule files, ignored `.worktrees/`, Alpha Goal state root, repo-local `.alpha-goal/` ignore status only when used, submodules, strongest evidence floor.
+Run `npx --yes tsx skills/control-loop/scripts/mutation-preflight.ts` from repo root, or record equivalent facts: root, branch/worktree, status, applicable rule files, ignored `.worktrees/`, Alpha Goal state root, submodules, strongest evidence floor.
 
 ## Iteration
 
