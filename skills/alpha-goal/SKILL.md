@@ -86,6 +86,7 @@ Design template:
 Technical Context [context]
 Intent[intent] （Why the user wants this）
 Outcome [outcome]
+Root Cause [root_cause] (optional, only for repair design)
 Scope [scope]
 Repo surfaces [repo_surfaces]
 Constraints [constraints]
@@ -96,12 +97,14 @@ Non-goals [non_goal]
 Decision boundary [decision_boundary]
 Claim boundary [claim_boundary]
 
+You may add task-specific fields when they improve the design, but do not omit, rename, or weaken the contract fields above.
+
 2. Persist `docs/specs/YYYYMMDD-<TaskName>.md`, or follow repository conventions.
 3. Dispatch Self-review + Independent-review of the design and fix any acceptant findings.
 
 ## Phase 5: Ask for Confirmation
 
-1. Show Summary of Design.
+1. Show Summary of Design. Include `Root Cause` only for repair designs.
 
 TUI summary Style:
 
@@ -112,6 +115,7 @@ Design Summary
 | --- | --- |
 | Intent | |
 | Outcome | |
+| Root Cause | |
 | Scope | |
 | Repo surfaces | |
 | Constraints | |
