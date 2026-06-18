@@ -34,7 +34,6 @@ npx --no-install tsx tools/validate_skills.ts .
 ```
 
 安装脚本会在 `$HOME/.codex/skills/` 下为三个公开技能创建直接软链接，并清理指向本仓库旧公开技能的软链接。
-它还会在 `$HOME/.codex/hooks.json` 中安装或更新用户级 compact recovery hook，让压缩恢复后的 Codex 线程重新检查这三个候选 skill，并在适用时重读对应的 `SKILL.md`。
 校验脚本会强制整个 `skills/` 树不超过 30,000 bytes。
 
 运行态记录使用用户级 Alpha Goal state root：`${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`，其中 `<workspace-slug>` 是当前会话目录路径最后一个目录名。

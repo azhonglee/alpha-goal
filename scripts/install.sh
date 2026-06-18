@@ -8,10 +8,10 @@ Usage: scripts/install.sh [--codex-home PATH] [--force] [--no-sync-user-template
 Install this repository's public skill directories as direct symlinks
 under ${CODEX_HOME:-$HOME/.codex}/skills.
 
-By default, this script merges templates/AGENTS.md into user-level AGENTS.md
-and fills missing config.toml settings from templates/config.toml.
+By default, this script merges templates/AGENTS.md into user-level AGENTS.md,
+fills missing config.toml settings from templates/config.toml, and syncs
+templates/hooks.json into user-level hooks.json.
 Use --no-sync-user-templates to skip user-level template updates.
-It also installs or updates a compact-recovery hook in user-level hooks.json.
 Use --no-sync-user-hooks to skip hook updates.
 
 Options:
@@ -181,11 +181,11 @@ codex_home="$(absolute_path "$(default_codex_home)")"
 target_root="$codex_home/skills"
 agents_template="$repo_root/templates/AGENTS.md"
 config_template="$repo_root/templates/config.toml"
+hooks_template="$repo_root/templates/hooks.json"
 agents_target="$codex_home/AGENTS.md"
 config_target="$codex_home/config.toml"
 hooks_target="$codex_home/hooks.json"
 agents_template_marker="<!-- generate-with-template:agents-md -->"
-compact_recovery_hook_marker="codex-alpha-goal-compact-recovery:v1"
 linked_count=0
 replaced_count=0
 already_count=0
@@ -626,43 +626,38 @@ PY
   esac
 }
 
-sync_compact_recovery_hook() {
+sync_hooks_template() {
   if [[ -e "$hooks_target" && ! -f "$hooks_target" ]]; then
     echo "Refusing to write hooks into non-file path: $hooks_target" >&2
     exit 1
   fi
 
+  if [[ ! -f "$hooks_template" ]]; then
+    echo "No hooks template found at $hooks_template" >&2
+    exit 1
+  fi
+
   local result
-  result="$(python3 - "$hooks_target" "$target_root" "$compact_recovery_hook_marker" "$config_target" <<'PY'
+  result="$(python3 - "$hooks_target" "$hooks_template" "$config_target" <<'PY'
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import sys
 import tomllib
 from datetime import datetime
 from pathlib import Path
 
-try:
-    import shlex
-except ModuleNotFoundError:
-    shlex = None
-
 hooks_path = Path(sys.argv[1])
-target_root = Path(sys.argv[2])
-marker = sys.argv[3]
-config_path = Path(sys.argv[4])
+template_path = Path(sys.argv[2])
+config_path = Path(sys.argv[3])
+MARKER_RE = re.compile(r"codex-[A-Za-z0-9_.:-]+:v\d+")
 
 
-def shell_quote(value: str) -> str:
-    if shlex is not None:
-        return shlex.quote(value)
-    return "'" + value.replace("'", "'\"'\"'") + "'"
-
-
-def load_hooks(path: Path) -> dict:
-    if not path.exists() or not path.read_text(encoding="utf-8").strip():
-        return {"hooks": {}}
+def load_json(path: Path, *, empty_default: dict | None = None) -> dict:
+    if empty_default is not None and (not path.exists() or not path.read_text(encoding="utf-8").strip()):
+        return empty_default
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
@@ -671,11 +666,28 @@ def load_hooks(path: Path) -> dict:
     if not isinstance(data, dict):
         print(f"{path} must contain a JSON object", file=sys.stderr)
         raise SystemExit(1)
+    return data
+
+
+def validate_hooks_object(data: dict, path: Path) -> dict:
     hooks = data.setdefault("hooks", {})
     if not isinstance(hooks, dict):
         print(f"{path}: top-level hooks field must be a JSON object", file=sys.stderr)
         raise SystemExit(1)
-    return data
+    for event, groups in hooks.items():
+        if not isinstance(event, str) or not isinstance(groups, list):
+            print(f"{path}: hooks.{event} must be a JSON array", file=sys.stderr)
+            raise SystemExit(1)
+    return hooks
+
+
+def collect_template_markers(data: dict) -> set[str]:
+    text = json.dumps(data, ensure_ascii=False)
+    markers = set(MARKER_RE.findall(text))
+    if not markers:
+        print(f"{template_path}: hooks template must include at least one codex managed marker", file=sys.stderr)
+        raise SystemExit(1)
+    return markers
 
 
 def warn_if_hooks_disabled(path: Path) -> None:
@@ -694,95 +706,58 @@ def warn_if_hooks_disabled(path: Path) -> None:
         )
 
 
-def build_hook_command() -> str:
-    skills = [
-        (
-            "alpha-goal",
-            "requirements, goal framing, design, scope, acceptance evidence, decision boundaries, and claim boundaries",
-        ),
-        (
-            "control-loop",
-            "bounded implementation or hardening after an explicit goal specification",
-        ),
-        (
-            "evidence-verify",
-            "judging fresh evidence against an explicit Goal Contract or claim boundary",
-        ),
-    ]
-    lines = [
-        f"[{marker}] Compact recovery policy:",
-        (
-            "After compaction, before the next substantive action, decide whether "
-            "one or more candidate skills below applies to the current task."
-        ),
-        (
-            "If a candidate applies, read its SKILL.md completely from the path "
-            "below before acting; treat pre-compaction remembered skill text as stale."
-        ),
-        "If none applies, continue normally without loading these skills.",
-        "Candidate skills:",
-    ]
-    for name, when in skills:
-        path = target_root / name / "SKILL.md"
-        lines.append(f"- ${name}: use for {when}. Path: {path}")
-    return "printf '%s\\n' " + " ".join(shell_quote(line) for line in lines)
+def group_contains_marker(group: object, markers: set[str]) -> bool:
+    return any(marker in json.dumps(group, ensure_ascii=False) for marker in markers)
 
 
-def build_hook_group() -> dict:
-    return {
-        "matcher": "^compact$",
-        "hooks": [
-            {
-                "type": "command",
-                "command": build_hook_command(),
-                "statusMessage": "Refreshing Alpha Goal compact recovery policy",
-            }
-        ],
-    }
-
-
-def remove_existing_recovery_hooks(session_start: list) -> tuple[list, int]:
-    cleaned = []
+def remove_template_managed_hooks(hooks: dict, markers: set[str]) -> int:
     removed = 0
-    for group in session_start:
-        if not isinstance(group, dict):
-            cleaned.append(group)
-            continue
-        group_hooks = group.get("hooks")
-        if not isinstance(group_hooks, list):
-            cleaned.append(group)
-            continue
+    for event, groups in list(hooks.items()):
+        cleaned_groups = []
+        for group in groups:
+            if not isinstance(group, dict) or not group_contains_marker(group, markers):
+                cleaned_groups.append(group)
+                continue
 
-        removed_from_group = 0
-        next_hooks = []
-        for hook in group_hooks:
-            command = hook.get("command", "") if isinstance(hook, dict) else ""
-            if marker in command:
+            group_hooks = group.get("hooks")
+            if not isinstance(group_hooks, list):
                 removed += 1
-                removed_from_group += 1
-            else:
-                next_hooks.append(hook)
+                continue
 
-        if removed_from_group == 0:
-            cleaned.append(group)
-        elif next_hooks:
-            next_group = dict(group)
-            next_group["hooks"] = next_hooks
-            cleaned.append(next_group)
-    return cleaned, removed
+            next_group_hooks = []
+            for hook in group_hooks:
+                if group_contains_marker(hook, markers):
+                    removed += 1
+                else:
+                    next_group_hooks.append(hook)
+
+            if next_group_hooks:
+                next_group = dict(group)
+                next_group["hooks"] = next_group_hooks
+                cleaned_groups.append(next_group)
+        hooks[event] = cleaned_groups
+    return removed
+
+
+def merge_template_hooks(target_hooks: dict, template_hooks: dict) -> None:
+    for event, groups in template_hooks.items():
+        target_hooks.setdefault(event, [])
+        if not isinstance(target_hooks[event], list):
+            print(f"{hooks_path}: hooks.{event} must be a JSON array", file=sys.stderr)
+            raise SystemExit(1)
+        target_hooks[event].extend(groups)
 
 
 def main() -> None:
     hooks_path.parent.mkdir(parents=True, exist_ok=True)
-    data = load_hooks(hooks_path)
-    session_start = data["hooks"].setdefault("SessionStart", [])
-    if not isinstance(session_start, list):
-        print(f"{hooks_path}: hooks.SessionStart must be a JSON array", file=sys.stderr)
-        raise SystemExit(1)
+    data = load_json(hooks_path, empty_default={"hooks": {}})
+    template_data = load_json(template_path)
+    hooks = validate_hooks_object(data, hooks_path)
+    template_hooks = validate_hooks_object(template_data, template_path)
+    markers = collect_template_markers(template_data)
 
-    cleaned, _removed = remove_existing_recovery_hooks(session_start)
-    cleaned.append(build_hook_group())
-    data["hooks"]["SessionStart"] = cleaned
+    remove_template_managed_hooks(hooks, markers)
+    merge_template_hooks(hooks, template_hooks)
 
     new_text = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
     old_text = hooks_path.read_text(encoding="utf-8") if hooks_path.exists() else ""
@@ -813,21 +788,21 @@ PY
   case "$result" in
     current)
       hooks_action="current"
-      log "hooks.json already has current compact recovery hook: $hooks_target"
+      log "hooks.json already has current hooks template content: $hooks_target"
       ;;
     created)
       hooks_action="created"
-      log "Created compact recovery hook: $hooks_target"
+      log "Created hooks.json from template: $hooks_target"
       ;;
     updated:*)
       hooks_action="updated"
       if [[ -n "${result#updated:}" ]]; then
         log "Backed up hooks.json: ${result#updated:}"
       fi
-      log "Updated compact recovery hook: $hooks_target"
+      log "Updated hooks.json from template: $hooks_target"
       ;;
     *)
-      die "Unexpected hook sync result: $result"
+      die "Unexpected hook template sync result: $result"
       ;;
   esac
 }
@@ -939,7 +914,7 @@ done
 validate_installed_links
 
 if [[ "$sync_user_hooks" == true ]]; then
-  sync_compact_recovery_hook
+  sync_hooks_template
 else
   log "Skipped user hook sync due to --no-sync-user-hooks"
 fi

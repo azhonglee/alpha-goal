@@ -29,9 +29,9 @@ scripts/install.sh --verbose
 
 ## Behavior
 
-The script validates the source skillset, creates `${CODEX_HOME:-$HOME/.codex}/skills/<skill-name>` links for public skills, cleans same-repo links for merged old public skills, and validates each installed top-level `SKILL.md`. By default it also syncs user-level templates and installs or updates a user-level compact recovery hook in `${CODEX_HOME:-$HOME/.codex}/hooks.json`.
+The script validates the source skillset, creates `${CODEX_HOME:-$HOME/.codex}/skills/<skill-name>` links for public skills, cleans same-repo links for merged old public skills, and validates each installed top-level `SKILL.md`. By default it also syncs user-level templates, including `templates/hooks.json` into `${CODEX_HOME:-$HOME/.codex}/hooks.json`.
 
-The compact recovery hook is a `SessionStart` hook for `compact` starts. It only prints a static policy telling Codex to decide whether `alpha-goal`, `control-loop`, or `evidence-verify` applies after compaction, and to reread the matching `SKILL.md` before continuing. Use `--no-sync-user-templates` to skip template updates and `--no-sync-user-hooks` to skip hook updates.
+The compact recovery hook definition lives in `templates/hooks.json`. It is a `SessionStart` hook for `compact` starts and prints a static policy telling Codex to decide whether `alpha-goal`, `control-loop`, or `evidence-verify` applies after compaction, and to reread the matching `SKILL.md` before continuing. Use `--no-sync-user-templates` to skip AGENTS/config template updates and `--no-sync-user-hooks` to skip hook template updates.
 
 Codex may require reviewing and trusting the changed hook with `/hooks` before it runs.
 
