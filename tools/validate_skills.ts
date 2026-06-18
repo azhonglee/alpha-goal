@@ -265,7 +265,7 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
     } catch (error) {
       errors.push(`${HOOKS_TEMPLATE}: invalid JSON: ${errorMessage(error)}`);
     }
-    for (const term of [COMPACT_RECOVERY_HOOK_MARKER, "^compact$", "${CODEX_HOME:-$HOME/.codex}", "alpha-goal/SKILL.md", "control-loop/SKILL.md", "evidence-verify/SKILL.md"]) {
+    for (const term of [COMPACT_RECOVERY_HOOK_MARKER, "^compact$", "$alpha-goal", "$control-loop", "$evidence-verify"]) {
       if (!hooksTemplate.includes(term)) errors.push(`${HOOKS_TEMPLATE}: missing compact recovery hook term: ${term}`);
     }
   }

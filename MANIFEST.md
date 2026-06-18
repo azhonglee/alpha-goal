@@ -21,7 +21,7 @@ Former public framing/modeling/synthesis stages are folded into `skills/alpha-go
 
 ## User Hooks
 
-`templates/hooks.json` defines one user-level `SessionStart` / `^compact$` hook, marked by `codex-alpha-goal-compact-recovery:v1`. `scripts/install.sh` merges that template into `${CODEX_HOME:-$HOME/.codex}/hooks.json`. The hook prints a static compact recovery policy that asks Codex to re-check `alpha-goal`, `control-loop`, and `evidence-verify` after compaction and reread the applicable `SKILL.md`.
+`templates/hooks.json` defines one user-level `SessionStart` / `^compact$` hook, marked by `codex-alpha-goal-compact-recovery:v1`. `scripts/install.sh` merges that template into `${CODEX_HOME:-$HOME/.codex}/hooks.json`. The hook prints a static compact recovery policy that asks Codex to re-check `alpha-goal`, `control-loop`, and `evidence-verify` after compaction and load the applicable skill.
 
 ## Runtime Artifacts
 
