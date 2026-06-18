@@ -31,7 +31,7 @@ const STATE_ROOT_CORE_FILES = [
 const STATE_ROOT_DOC_FILES = [
   "AGENTS.md",
   "README.md",
-  "README.zh-CN.md",
+  "README.en.md",
   "MANIFEST.md",
 ];
 const STATE_ROOT_SCRIPT_FILES = [
@@ -213,7 +213,7 @@ function validateScriptSurface(root: string, errors: string[], warnings: string[
 }
 
 function validateLegacyReferences(root: string, errors: string[]): void {
-  const files = ["AGENTS.md", "README.md", "README.zh-CN.md", "INSTALL.md", "MANIFEST.md", ...walk(path.join(root, "skills")).filter(isFile).map(f => relative(root, f))];
+  const files = ["AGENTS.md", "README.md", "README.en.md", "INSTALL.md", "MANIFEST.md", ...walk(path.join(root, "skills")).filter(isFile).map(f => relative(root, f))];
   for (const rel of files) {
     const file = path.join(root, rel); if (!isFile(file)) continue;
     const text = fs.readFileSync(file, "utf8");
@@ -273,9 +273,9 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
     if (hooksTemplate.includes(`[${COMPACT_RECOVERY_HOOK_MARKER}]`)) errors.push(`${HOOKS_TEMPLATE}: compact recovery marker must not be printed to model context`);
   }
   const readme = readIfFile(path.join(root, "README.md"));
-  if (!readme.includes("Current code facts describe current state")) errors.push("README.md missing current-state-not-desired-state principle");
-  const readmeZh = readIfFile(path.join(root, "README.zh-CN.md"));
-  if (!readmeZh.includes("当前代码事实只描述现状")) errors.push("README.zh-CN.md missing current-state-not-desired-state principle");
+  if (!readme.includes("当前代码事实只描述现状")) errors.push("README.md missing current-state-not-desired-state principle");
+  const readmeEn = readIfFile(path.join(root, "README.en.md"));
+  if (!readmeEn.includes("Current code facts describe current state")) errors.push("README.en.md missing current-state-not-desired-state principle");
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
   if (!installDoc.includes("--no-sync-user-hooks")) errors.push("INSTALL.md missing --no-sync-user-hooks option");
   if (!installDoc.includes(HOOKS_TEMPLATE)) errors.push("INSTALL.md missing hooks template behavior");
@@ -285,7 +285,7 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   if (!manifest.includes("marker family") || !manifest.includes("codex-compact-skill-recovery")) errors.push("MANIFEST.md missing hook upgrade strategy");
   const templateAgents = readIfFile(path.join(root, "templates/AGENTS.md"));
   if (!templateAgents.includes("never default target, scope, acceptance, non-goals, side effects, risk acceptance, authority, or final claim")) errors.push("templates/AGENTS.md must not let safe defaults bypass alpha-goal gates");
-  for (const doc of ["README.md", "README.zh-CN.md", "INSTALL.md", "MANIFEST.md"]) {
+  for (const doc of ["README.md", "README.en.md", "INSTALL.md", "MANIFEST.md"]) {
     const text = readIfFile(path.join(root, doc));
     if (/six skills|六技能|六个技能|成帧、建模、综合|\$goal-contract|\$system-model|\$decision-synthesis/.test(text)) errors.push(`${doc}: stale six-skill public architecture wording`);
   }
