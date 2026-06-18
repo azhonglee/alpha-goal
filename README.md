@@ -32,7 +32,7 @@ INTENT -> alpha-goal(discover/clarify/design/route) -> control-loop(action+feedb
 
 ```bash
 scripts/install.sh
-npx --yes tsx tools/validate_skills.ts .
+npx --no-install tsx tools/validate_skills.ts .
 ```
 
 The installer creates direct symlinks for the three public skills under `$HOME/.codex/skills/` and cleans same-repo links for merged old public skills.

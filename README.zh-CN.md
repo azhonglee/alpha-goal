@@ -30,7 +30,7 @@ INTENT -> alpha-goal(discover/clarify/design/route) -> control-loop(action+feedb
 
 ```bash
 scripts/install.sh
-npx --yes tsx tools/validate_skills.ts .
+npx --no-install tsx tools/validate_skills.ts .
 ```
 
 安装脚本会在 `$HOME/.codex/skills/` 下为三个公开技能创建直接软链接，并清理指向本仓库旧公开技能的软链接。
