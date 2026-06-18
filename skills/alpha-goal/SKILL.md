@@ -16,17 +16,19 @@ Resolve the Alpha Goal state root before writing runtime artifacts. Always use `
    - `exploration`: Skip only for concrete read-only fact lookup; use this skill when exploration is about intent, scope, acceptance, or decision boundaries.
    - `design`: Follow up all phases.
    - `implementation`: Follow up all phases.
-   - `diagnose/repair`: Discover the root cause you 100% confirm, show the proof, and then follow up from Phase 2 if need fix. Do not implement directly.
+   - `diagnose/repair`: Discover root causes you 100% confirm, show the proof, and then follow up from Phase 2 if need fix. Do not implement directly.
    - `maintenance`: Follow up all phases.
    - `other`: Ask for more details to clarify again.
 
-2. If the work may be mixed, ask for more details and plan accordingly.
+2. If the work may be mixed, ask for more details and plan accordingly to split it into a group of sequenced work items.
 
 ## Phase 1: Discovery
 
 Trigger Discovery for vague, overloaded, brownfield, high-consequence, missing-acceptance, or user-says-"don't assume" requests. Skip only when concrete targets, acceptance evidence, non-goals, decision boundaries, and authority are already explicit.
 
 For deictic bug requests without a discoverable locator, inspect immediate context; if no failing command/log/issue/code pointer is discoverable, ask for the minimal reproducer or error signal before execution routing.
+
+Use subagents, one or more, for independent parallel subtasks when that improves throughput.
 
 If work appears done or any final/ready/safe/complete/repair claim is needed, route to `evidence-verify`.
 
@@ -37,7 +39,7 @@ Loop Socratic-deep-interview until you 100% understand the requirements and rema
 Before the first user-facing question, complete minimum preflight: applicable AGENTS/repo rules, README/getting-started/install docs, relevant docs/plans/ADRs/contracts, target files/current implementation, local glossary/context if present, current branch/status when mutation may follow, and direct contradictions. If missing, name the missing observer instead of asking for repo facts; never ask the user to summarize discoverable repository facts merely to save inspection effort.
 
 ### Socratic Interviewing Loop
-1. Ask one high-leverage question per round. One question means one decision variable. The question should confirm a conflict, request a decision, demand an example, expose an assumption, force a tradeoff, or test one boundary-stressing scenario. Use `request_user_input` with exactly one `questions[]` item.
+1. Ask User one high-leverage question per round. One question means one decision variable. The question should confirm a conflict, request a decision, demand an example, expose an assumption, force a tradeoff, or test one boundary-stressing scenario. Use `request_user_input` with exactly one `questions[]` item.
 2. Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps. If context is too large, first inspect prompt-safe local indexes/filenames/docs/likely target surfaces. Treat the answer as navigation evidence, not requirements or authority.
 3. Treat repo language as evidence, not authority. Cross-check user claims against discoverable code/docs; if sources conflict, name the competing sources. Existing patterns are compatibility signals or hypotheses, not requirements by themselves; if they affect desired behavior, scope, acceptance, or tradeoff, confirm with the user or cite an authoritative spec before mutation. If the user's answer contradicts discovered facts, treat the answer as a claim to reconcile, not as an override.
 4. Classify each gap as `[from-code][auto-confirmed]` descriptive fact, `[from-code]` inferred fact needing confirmation, `[from-research] external/current fact`, or `[from-user]` human decision. Do not ask for discoverable facts until inspected; auto-confirm only descriptive facts, never choices about desired behavior, scope, pattern, or tradeoff. Current-state facts cannot define desired behavior, requirements, acceptance evidence, non-goals, tradeoffs, or authority without explicit user request or authoritative spec/issue. If unresolved ambiguity depends on current external best practices, standards, APIs, dependency versions, laws, schedules, or prices, gather bounded fresh evidence first, then ask the user only for the decision boundary.
@@ -85,8 +87,8 @@ Track used modes in state to prevent repetition.
 Design template:
 Technical Context [context]
 Intent[intent] （Why the user wants this）
-Outcome [outcome]
 Root Cause [root_cause] (optional, only for repair design)
+Outcome [outcome]
 Scope [scope]
 Repo surfaces [repo_surfaces]
 Constraints [constraints]
@@ -114,8 +116,8 @@ Design Summary
 | Field | Value |
 | --- | --- |
 | Intent | |
-| Outcome | |
 | Root Cause | |
+| Outcome | |
 | Scope | |
 | Repo surfaces | |
 | Constraints | |
