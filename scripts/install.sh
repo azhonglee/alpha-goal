@@ -91,6 +91,7 @@ repo_root="$(cd "$script_dir/.." && pwd -P)"
 source_skill_root="$repo_root/skills"
 validation_tool="$repo_root/tools/validate_skills.ts"
 validation_tool_label="tools/validate_skills.ts"
+tsx_runner=()
 
 normalize_path() {
   python3 - "$1" <<'PY'
@@ -136,6 +137,29 @@ default_codex_home() {
   fi
 
   printf '%s\n' "$HOME/.codex"
+}
+
+resolve_tsx_runner() {
+  if command -v tsx >/dev/null 2>&1; then
+    tsx_runner=(tsx)
+    return
+  fi
+
+  if command -v npx >/dev/null 2>&1 && npx --no-install tsx --version >/dev/null 2>&1; then
+    tsx_runner=(npx --no-install tsx)
+    return
+  fi
+
+  echo "Missing tsx runner; refusing to auto-download npm packages during install." >&2
+  echo "Install tsx explicitly or make it available through npx --no-install, then retry." >&2
+  exit 1
+}
+
+run_tsx() {
+  if [[ "${#tsx_runner[@]}" -eq 0 ]]; then
+    resolve_tsx_runner
+  fi
+  "${tsx_runner[@]}" "$@"
 }
 
 codex_home="$(absolute_path "$(default_codex_home)")"
@@ -591,12 +615,12 @@ run_skillset_validation() {
   fi
 
   if [[ "$verbose" == true ]]; then
-    npx --yes tsx "$validation_tool" "$repo_root"
+    run_tsx "$validation_tool" "$repo_root"
     return
   fi
 
   local output
-  if ! output="$(npx --yes tsx "$validation_tool" "$repo_root" 2>&1)"; then
+  if ! output="$(run_tsx "$validation_tool" "$repo_root" 2>&1)"; then
     echo "Validation failed ($validation_tool_label). Re-run with --verbose for full output." >&2
     printf '%s\n' "$output" | grep -E '^(ERRORS:|- |FAIL )' >&2 || true
     exit 1
