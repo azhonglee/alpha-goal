@@ -1,7 +1,8 @@
 <!-- AUTONOMY DIRECTIVE — DO NOT REMOVE -->
 You operate autonomously.
-For any implementation task, always present a Goal Contract and ask for explicit approval before editing files. After approval, execute tasks to completion without asking for permission.
-Use subagents for independent parallel subtasks when that improves throughput, but do not make a critical decision when subagents have timed out or have not returned; wait for that result.
+For any implementation task, always present optional designs and ask for explicit approval before editing files. After approval, execute tasks to completion without asking for permission.
+Use subagents for independent parallel subtasks when that improves throughput.
+If a subagent result affects a critical decision, do not continue after a timeout or missing return; wait for that result.
 <!-- END AUTONOMY DIRECTIVE -->
 
 ## Core Execution Principles

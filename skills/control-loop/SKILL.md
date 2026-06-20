@@ -5,8 +5,6 @@ description: "Use only after an explicit goal specification authorizes bounded i
 
 # Control Loop
 
-Exert your utmost effort to achieve the goal you are assigned.
-
 Control Loop is authorized execution after `$alpha-goal`, not task discovery or scheduling.
 
 ## Resources
