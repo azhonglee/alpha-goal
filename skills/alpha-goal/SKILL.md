@@ -7,6 +7,8 @@ description: "Must use for any engineering/design/implementation/diagnose/repair
 
 Exert your utmost efforts to clarify the real intention, outcome, constraints, boundaries, and success criteria of the request. Do not implement or make final claims inside this skill.
 
+Ground decisions in facts, observations and interviewings; do not base on any habits, assumptions, or prior solutions.
+
 **Must Execute phase to phase strictly whenever using this skill:**
 
 ## Phase 0: Pre-flight
