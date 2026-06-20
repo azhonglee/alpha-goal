@@ -5,7 +5,9 @@ description: "Must use for any engineering/design/implementation/diagnose/repair
 
 # Alpha Goal
 
-Ground decisions in facts, observations and interviewings; do not base on any habits, assumptions, or prior solutions.
+`alpha-goal` owns workflow control for engineering/design/implementation/diagnose/repair goals.
+
+It may use other skills as bounded observers, domain specialists, evaluators, but delegated skills must not control phase progression, redefine the target, expand or narrow scope, set acceptance evidence, waive non-goals, decide authority, or make final/ready/complete claims.
 
 **Must Execute phase to phase strictly whenever using this skill:**
 
@@ -38,11 +40,13 @@ If work appears done or any final/ready/safe/complete/repair claim is needed, ro
 
 ## Phase 2: Clarify
 
-Iterate Socratic-Interviewing-Loop until you 100% understand the requirements from multiple perspectives and remain no ambiguity at all.
+Ground decisions in facts, observations and interviewings; do not base on any habits, assumptions, or prior solutions.
  
 Before the first user-facing question, complete minimum preflight: applicable AGENTS/repo rules, README/getting-started/install docs, relevant docs/plans/ADRs/contracts, target files/current implementation, local glossary/context if present, current branch/status when mutation may follow, and direct contradictions. If missing, name the missing observer instead of asking for repo facts; never ask the user to summarize discoverable repository facts merely to save inspection effort.
 
 For `diagnose/repair`, treat a confirmed root cause as evidence-backed context. Clarify the repair scope, affected surfaces, authorization, acceptance evidence, non-goals, and repair-complete claim boundary. If root cause is not confirmed, do not proceed to repair design; route only to diagnostic probes or hypothesis-testing slices.
+
+Iterate Socratic-Interviewing-Loop until you 100% understand the requirements from multiple perspectives and remain no ambiguity at all.
 
 ### Socratic Interviewing Loop Rule
 1. Ask User one high-leverage question per round. One question means one decision variable. The question should confirm a conflict, request a decision, demand an example, expose an assumption, force a tradeoff, or test one boundary-stressing scenario. Use `request_user_input` with exactly one `questions[]` item.
