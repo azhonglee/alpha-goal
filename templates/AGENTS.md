@@ -1,11 +1,12 @@
 <!-- AUTONOMY DIRECTIVE — DO NOT REMOVE -->
-Use subagents for independent parallel subtasks when that improves throughput.
-If a subagent result affects a critical decision, do not continue when it has timed out or has not returned; wait for that result.
+You operate autonomously.
+For any implementation task, always present a Goal Contract and ask for explicit approval before editing files. After approval, execute tasks to completion without asking for permission.
+Use subagents for independent parallel subtasks when that improves throughput, but do not make a critical decision when subagents have timed out or have not returned; wait for that result.
 <!-- END AUTONOMY DIRECTIVE -->
 
 ## Core Execution Principles
 
-- Ground decisions in goals, requirements, constraints, and success criteria—not habits, assumptions, or prior solutions.
+- Ground decisions/actions in goals, requirements, constraints, and success criteria; do not base on any habits, assumptions, or prior solutions.
 - Clarify unclear problem definitions, motivations, or target outcomes before proceeding.
 - Do not modify, refactor, or alter behavior without fully understanding requirements, failure modes, or approved designs.
 - Surface contradictions, missing prerequisites, and false assumptions early.
@@ -26,7 +27,7 @@ Before asking, decide whether the missing input is material, discoverable, risky
 - If it is under-specified but safe defaults exist, state the defaults and continue only for reversible operational details inside an already confirmed goal; never default target, scope, acceptance, non-goals, side effects, risk acceptance, authority, or final claim.
 - If it changes target, scope, acceptance, non-goals, side effects, risk acceptance, or final claim, ask before proceeding.
 - Ask for permission before executing destructive actions, external side effects, credentials, or real user config changes.
-- Ask one high-leverage question per round, backed by evidence already checked.
+- Question must be backed by evidence already checked.
 
 ## Isolation Principles
 

@@ -1,15 +1,13 @@
 ---
 name: alpha-goal
-description: "Use for any engineering/design/implementation/diagnose/repair requests; clarify real intention/requirements, identify outcome, scope, non-goals, decision boundaries, authority, and design."
+description: "Must use for any engineering/design/implementation/diagnose/repair requests; clarify real intention/requirements, identify outcome, scope, non-goals, decision boundaries, authority, and design."
 ---
 
 # Alpha Goal
 
 Exert your utmost efforts to clarify the real intention, outcome, constraints, boundaries, and success criteria of the request. Do not implement or make final claims inside this skill.
 
-## State root
-
-Resolve the Alpha Goal state root before writing runtime artifacts. Always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
+Must follow the following steps strictly whenever using this skill:
 
 ## Pre-flight
 1. Classify the work type as one of the following:
@@ -21,6 +19,8 @@ Resolve the Alpha Goal state root before writing runtime artifacts. Always use `
    - `other`: Ask for more details to classify again.
 
 2. If the work may be mixed, ask for the minimum details needed to split it into sequenced work items.
+
+3. Resolve the Alpha Goal state root before writing runtime artifacts. Always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
 
 ## Phase 1: Discovery
 
