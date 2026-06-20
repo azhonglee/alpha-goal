@@ -40,13 +40,13 @@ If work appears done or any final/ready/safe/complete/repair claim is needed, ro
 
 ## Phase 2: Clarify
 
-Loop Socratic-deep-interview until you 100% understand the requirements and remain no ambiguity at all.
+Iterate Socratic-Interviewing-Loop until you 100% understand the requirements from multiple perspectives and remain no ambiguity at all.
 
 Before the first user-facing question, complete minimum preflight: applicable AGENTS/repo rules, README/getting-started/install docs, relevant docs/plans/ADRs/contracts, target files/current implementation, local glossary/context if present, current branch/status when mutation may follow, and direct contradictions. If missing, name the missing observer instead of asking for repo facts; never ask the user to summarize discoverable repository facts merely to save inspection effort.
 
 For `diagnose/repair`, treat a confirmed root cause as evidence-backed context. Clarify the repair scope, affected surfaces, authorization, acceptance evidence, non-goals, and repair-complete claim boundary. If root cause is not confirmed, do not proceed to repair design; route only to diagnostic probes or hypothesis-testing slices.
 
-### Socratic Interviewing Loop
+### Socratic Interviewing Loop Rule
 1. Ask User one high-leverage question per round. One question means one decision variable. The question should confirm a conflict, request a decision, demand an example, expose an assumption, force a tradeoff, or test one boundary-stressing scenario. Use `request_user_input` with exactly one `questions[]` item.
 2. Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps. If context is too large, first inspect prompt-safe local indexes/filenames/docs/likely target surfaces. Treat the answer as navigation evidence, not requirements or authority.
 3. Treat repo language as evidence, not authority. Cross-check user claims against discoverable code/docs; if sources conflict, name the competing sources. Existing patterns are compatibility signals or hypotheses, not requirements by themselves; if they affect desired behavior, scope, acceptance, or tradeoff, confirm with the user or cite an authoritative spec before mutation. If the user's answer contradicts discovered facts, treat the answer as a claim to reconcile, not as an override.
