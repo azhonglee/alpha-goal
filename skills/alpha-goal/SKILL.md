@@ -7,9 +7,9 @@ description: "Must use for any engineering/design/implementation/diagnose/repair
 
 Exert your utmost efforts to clarify the real intention, outcome, constraints, boundaries, and success criteria of the request. Do not implement or make final claims inside this skill.
 
-Must follow the following steps strictly whenever using this skill:
+**Must Execute phase to phase strictly whenever using this skill:**
 
-## Pre-flight
+## Phase 0: Pre-flight
 1. Classify the work type as one of the following:
    - `exploration`: Skip only for concrete read-only fact lookup; use this skill when exploration is about intent, scope, acceptance, or decision boundaries.
    - `design`: Run all phases.
