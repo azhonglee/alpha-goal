@@ -1,6 +1,6 @@
 ---
 name: alpha-goal
-description: "Must use for any engineering/design/implementation/diagnose/repair requests; clarify real intention/requirements, identify outcome, scope, non-goals, decision boundaries, authority, and design."
+description: "Must use for any engineering/design/implementation/diagnose/repair requests; through interviewings, clarify real intention/requirements, identify outcome, scope, non-goals, decision boundaries, authority, and design."
 ---
 
 # Alpha Goal
@@ -41,7 +41,7 @@ If work appears done or any final/ready/safe/complete/repair claim is needed, ro
 ## Phase 2: Clarify
 
 Iterate Socratic-Interviewing-Loop until you 100% understand the requirements from multiple perspectives and remain no ambiguity at all.
-
+ 
 Before the first user-facing question, complete minimum preflight: applicable AGENTS/repo rules, README/getting-started/install docs, relevant docs/plans/ADRs/contracts, target files/current implementation, local glossary/context if present, current branch/status when mutation may follow, and direct contradictions. If missing, name the missing observer instead of asking for repo facts; never ask the user to summarize discoverable repository facts merely to save inspection effort.
 
 For `diagnose/repair`, treat a confirmed root cause as evidence-backed context. Clarify the repair scope, affected surfaces, authorization, acceptance evidence, non-goals, and repair-complete claim boundary. If root cause is not confirmed, do not proceed to repair design; route only to diagnostic probes or hypothesis-testing slices.
