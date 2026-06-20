@@ -1,5 +1,6 @@
 <!-- AUTONOMY DIRECTIVE — DO NOT REMOVE -->
 Use subagents for independent parallel subtasks when that improves throughput.
+If a subagent result affects a critical decision, do not continue when it has timed out or has not returned; wait for that result.
 <!-- END AUTONOMY DIRECTIVE -->
 
 ## Core Execution Principles
