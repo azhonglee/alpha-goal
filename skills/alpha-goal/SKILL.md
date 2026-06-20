@@ -11,6 +11,10 @@ Ground decisions in facts, observations and interviewings; do not base on any ha
 
 **Must Execute phase to phase strictly whenever using this skill:**
 
+```text
+Pre-flight -> Discovery -> Clarify -> Assumption Stress Test -> Design -> Ask for Confirmation
+```
+
 ## Phase 0: Pre-flight
 1. Classify the work type as one of the following:
    - `exploration`: Skip only for concrete read-only fact lookup; use this skill when exploration is about intent, scope, acceptance, or decision boundaries.
