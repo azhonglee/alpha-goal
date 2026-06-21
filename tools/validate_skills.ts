@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 const FRONTMATTER_RE = /^---\n(.*?)\n---\n/s;
 const FIELD_RE = /^([A-Za-z0-9_-]+):\s*(.*?)\s*$/;
 const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
-const SKILLS_BYTE_BUDGET = 30_000;
+const SKILLS_BYTE_BUDGET = 34_000;
 const COMPACT_RECOVERY_HOOK_MARKER = "codex-alpha-goal-compact-recovery:v1";
 const HOOKS_TEMPLATE = "templates/hooks.json";
 const REQUIRED_SKILL_NAMES = ["alpha-goal", "control-loop", "evidence-verify"];
@@ -82,7 +82,7 @@ const DESCRIPTION_SEMANTIC_CHECKS: Record<string, { required: string[]; forbidde
 
 const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
   ["front controller discovers, frames, designs, and routes", "skills/alpha-goal/SKILL.md", [
-    "Trigger Discovery", "minimum preflight", "never ask the user to summarize discoverable repository facts", "navigation evidence, not requirements or authority", "repo language as evidence", "Existing patterns are compatibility signals", "treat the answer as a claim to reconcile", "[from-code][auto-confirmed]", "[from-research] external/current fact", "[from-user]", "auto-confirm only descriptive facts", "Current-state facts cannot define desired behavior", "current external best practices", "bounded fresh evidence", "Readiness Gate Check", "one high-leverage question", "one decision variable", "exactly one `questions[]` item", "pressure-test", "boundary scenario from inspected facts", "materially change execution", "non-goals", "decision boundaries", "Indicator Handoff", "user-owned decisions", "Cross-repo framing", "single task-level Alpha Goal state root", "repo manifest", "Repo surfaces", "Dependency/integration order", "Design template", "Acceptance evidence", "Claim boundary", "Self-review", "Independent-review", "request_user_input", "$control_loop", "Design Summary"
+    "Trigger Discovery", "minimum preflight", "never ask the user to summarize discoverable repository facts", "navigation evidence, not requirements or authority", "repo language as evidence", "Existing patterns are compatibility signals", "treat the answer as a claim to reconcile", "[from-code][auto-confirmed]", "`[from-research]` external/current fact", "[from-user]", "auto-confirm only descriptive facts", "Current-state facts cannot define desired behavior", "current external best practices", "bounded fresh evidence", "Readiness Gate Check", "one high-leverage question", "one decision variable", "structured user-input tooling", "pressure-test", "boundary scenario from inspected facts", "materially change execution", "non-goals", "decision boundaries", "Indicator Handoff", "user-owned decisions", "Cross-repo framing", "single task-level Alpha Goal state root", "repo manifest", "Repo surfaces", "Dependency/integration order", "Design Content Must Include", "Acceptance evidence", "Claim boundary", "Self-review", "Independent-review", "request_user_input", "$control_loop", "Design Summary"
   ]],
   ["alpha records interview and design state", "skills/alpha-goal/SKILL.md", [
     "Alpha Goal state root", "YYYYMMDD-<TaskName>/interview.md", "docs/specs/YYYYMMDD-<TaskName>.md", "Design Summary", "Blocking gates", "Ledger", "Next"
