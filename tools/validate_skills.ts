@@ -82,19 +82,74 @@ const DESCRIPTION_SEMANTIC_CHECKS: Record<string, { required: string[]; forbidde
 
 const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
   ["front controller discovers, frames, designs, and routes", "skills/alpha-goal/SKILL.md", [
-    "Trigger Discovery", "minimum preflight", "never ask the user to summarize discoverable repository facts", "navigation evidence, not requirements or authority", "repo language as evidence", "Existing patterns are compatibility signals", "treat the answer as a claim to reconcile", "[from-code][auto-confirmed]", "`[from-research]` external/current fact", "[from-user]", "auto-confirm only descriptive facts", "Current-state facts cannot define desired behavior", "current external best practices", "bounded fresh evidence", "Readiness Gate Check", "one high-leverage question", "one decision variable", "structured user-input tooling", "pressure-test", "boundary scenario from inspected facts", "materially change execution", "non-goals", "decision boundaries", "Indicator Handoff", "user-owned decisions", "Cross-repo framing", "single task-level Alpha Goal state root", "repo manifest", "Repo surfaces", "Dependency/integration order", "Design Content Must Include", "Acceptance evidence", "Claim boundary", "Self-review", "Independent-review", "request_user_input", "$control_loop", "Design Summary"
+    "Trigger Discovery",
+    "minimum preflight",
+    "one high-leverage question",
+    "one decision variable",
+    "navigation evidence, not requirements or authority",
+    "Current-state facts cannot define desired behavior",
+    "Readiness Gate Check",
+    "non-goals",
+    "decision boundaries",
+    "pressure-test",
+    "Design Content Must Include",
+    "Acceptance evidence",
+    "Claim boundary",
+    "request_user_input",
+    "$control_loop",
+    "Design Summary"
   ]],
   ["alpha records interview and design state", "skills/alpha-goal/SKILL.md", [
-    "Alpha Goal state root", "YYYYMMDD-<TaskName>/interview.md", "docs/specs/YYYYMMDD-<TaskName>.md", "Design Summary", "Blocking gates", "Ledger", "Next"
+    "Alpha Goal state root",
+    "YYYYMMDD-<TaskName>/interview.md",
+    "docs/specs/YYYYMMDD-<TaskName>.md",
+    "Design Summary"
   ]],
   ["execution has hard safety gates", "skills/control-loop/SKILL.md", [
-    "Do not mutate primary", "repo-local worktree", "Unrelated user changes", "Alpha Goal state root", "${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/", "run-profile.md", "not task discovery or scheduling", "Run mode", "Discovery source", "External side effects allowed", "Human checkpoint", "Evaluator route", "must not expand, narrow, reinterpret, waive, or replace", "already-authorized work", "active run profile", "loopholes", "claim overreach", "mutation-preflight", "multi-repo preflight", "<repo-a> <repo-b>", "repo manifest", "per-repo", "integration evidence", "delivery boundary", "approved target", "authorization", "claim boundary", "### 1. Plan slice", "### 2. Act or probe", "### 3. Sense and compare", "### 4. Record and route", "Act/probe", "read-only/probe slice", "Preserve unrelated user changes", "root cause", "Iteration Summary", "ITERATION_READY_FOR_VERIFY", "$evidence-verify", "verification.md", "acceptance-to-evidence", "persisted evidence", "RETURN_TO_ALPHA_GOAL", "BLOCKED", "Stop/re-route"
+    "not task discovery or scheduling",
+    "Do not mutate primary",
+    "repo-local worktree",
+    "Unrelated user changes",
+    "run-profile.md",
+    "Run mode",
+    "Discovery source",
+    "External side effects allowed",
+    "Human checkpoint",
+    "Evaluator route",
+    "must not expand, narrow, reinterpret, waive, or replace",
+    "active run profile",
+    "approved target",
+    "authorization",
+    "claim boundary",
+    "### 1. Plan slice",
+    "### 2. Act or probe",
+    "### 3. Sense and compare",
+    "### 4. Record and route",
+    "ITERATION_READY_FOR_VERIFY",
+    "$evidence-verify",
+    "RETURN_TO_ALPHA_GOAL",
+    "BLOCKED",
+    "Stop/re-route"
   ]],
   ["verification limits final claims", "skills/evidence-verify/SKILL.md", [
-    "PASS_TO_FINAL", "NEXT_ITERATION", "fixable evidence", "target, scope, authority", "permission, tool, data, environment, credential", "Alpha Goal state root", "${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/", "run-profile.md", "execution context only", "wrong-linked run profile", "repo manifest", "Repo surface coverage", "cross-repo claims", "integrated behavior", "Do not narrow the claim as a successful outcome", "Final response guard", "Highest practical evidence-supported boundary", "Final wording allowed", "repair-complete", "no risk", "Verification Summary"
+    "PASS_TO_FINAL",
+    "NEXT_ITERATION",
+    "fixable evidence",
+    "target, scope, authority",
+    "permission, tool, data, environment, credential",
+    "run-profile.md",
+    "execution context only",
+    "Do not narrow the claim as a successful outcome",
+    "Final response guard",
+    "Highest practical evidence-supported boundary",
+    "Final wording allowed",
+    "Verification Summary"
   ]],
   ["multi-repo preflight script", "skills/control-loop/scripts/mutation-preflight.ts", [
-    "process.argv.slice(2)", "multi-repo preflight", "targets", "repo ${i+1}", ".worktrees/codex/preflight-check", "repo manifest", "integration evidence"
+    "process.argv.slice(2)",
+    "multi-repo preflight",
+    "targets",
+    ".worktrees/codex/preflight-check"
   ]],
 ];
 
@@ -125,20 +180,22 @@ export function main(args = process.argv.slice(2)): number {
   const errors: string[] = [];
   const warnings: string[] = [];
   if (!isDirectory(skills)) errors.push(`missing skills directory: ${skills}`);
+  const allFiles = walk(root).filter(isFile);
+  const skillFiles = allFiles.filter(file => relative(root, file).startsWith("skills/"));
   const skillDirs = isDirectory(skills) ? fs.readdirSync(skills, { withFileTypes: true }).filter(e => e.isDirectory()).map(e => path.join(skills, e.name)).sort() : [];
   const discovered = skillDirs.map(d => path.basename(d));
   for (const name of REQUIRED_SKILL_NAMES) if (!discovered.includes(name)) errors.push(`missing required skill directory: skills/${name}`);
   for (const name of discovered) if (!REQUIRED_SKILL_NAMES.includes(name)) errors.push(`unexpected skill directory: skills/${name}`);
 
   for (const dir of skillDirs) validateSkillDir(root, dir, errors, warnings);
-  validateByteBudget(skills, errors);
+  validateByteBudget(skillFiles, errors);
   validateRuntimeArtifactState(root, errors, warnings);
-  validateScriptSurface(root, errors, warnings);
-  validateLegacyReferences(root, errors);
+  validateScriptSurface(root, allFiles, errors, warnings);
+  validateLegacyReferences(root, skillFiles, errors);
   validateSemanticChecks(root, errors);
   validateSchemaConsistency(root, errors);
   validateInstallDocumentation(root, errors);
-  validateNoAutoDownloadRunner(root, errors);
+  validateNoAutoDownloadRunner(root, allFiles, errors);
 
   printReport(root, errors, warnings);
   return errors.length ? 1 : 0;
@@ -171,9 +228,9 @@ function validateDescriptionBoundary(skillName: string, description: string, err
   for (const term of check.forbidden) if (lower.includes(term.toLowerCase())) errors.push(`${skillName}: description overlaps another skill trigger: ${term}`);
 }
 
-function validateByteBudget(skills: string, errors: string[]): void {
+function validateByteBudget(skillFiles: string[], errors: string[]): void {
   let total = 0;
-  for (const file of walk(skills)) if (isFile(file)) total += fs.statSync(file).size;
+  for (const file of skillFiles) total += fs.statSync(file).size;
   if (total > SKILLS_BYTE_BUDGET) errors.push(`skills byte budget exceeded: ${total} > ${SKILLS_BYTE_BUDGET}`);
 }
 
@@ -204,16 +261,19 @@ function validateRuntimeArtifactState(root: string, errors: string[], warnings: 
   }
 }
 
-function validateScriptSurface(root: string, errors: string[], warnings: string[]): void {
-  for (const file of walk(root).filter(f => isFile(f) && (relative(root, f).startsWith("tools/") || /^skills\/[^/]+\/scripts\//.test(relative(root, f))))) {
+function validateScriptSurface(root: string, files: string[], errors: string[], warnings: string[]): void {
+  for (const file of files.filter(f => {
+    const rel = relative(root, f);
+    return rel.startsWith("tools/") || /^skills\/[^/]+\/scripts\//.test(rel);
+  })) {
     const rel = relative(root, file);
     if (!rel.endsWith(".ts")) errors.push(`script surface must be TypeScript only: ${rel}`);
     if (fs.readFileSync(file, "utf8").startsWith("#!") && (fs.statSync(file).mode & 0o100) === 0) warnings.push(`${rel} has a shebang but is not user-executable`);
   }
 }
 
-function validateLegacyReferences(root: string, errors: string[]): void {
-  const files = ["AGENTS.md", "README.md", "README.en.md", "INSTALL.md", "MANIFEST.md", ...walk(path.join(root, "skills")).filter(isFile).map(f => relative(root, f))];
+function validateLegacyReferences(root: string, skillFiles: string[], errors: string[]): void {
+  const files = new Set(["AGENTS.md", "README.md", "README.en.md", "INSTALL.md", "MANIFEST.md", ...skillFiles.map(f => relative(root, f))]);
   for (const rel of files) {
     const file = path.join(root, rel); if (!isFile(file)) continue;
     const text = fs.readFileSync(file, "utf8");
@@ -287,7 +347,8 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   for (const term of [
     "Operating Contract",
     "top-level operating contract for the workspace",
-    "always clarify questions, present optional designs and ask for explicit approval before editing files",
+    "Must understand the requirements fully before proceeding",
+    "Do not modify, refactor, or alter behavior without fully understanding requirements, failure modes, or approved designs",
     "Do not bypass repo workflows, skill gates, phase rules, validation gates, or explicit user instructions",
   ]) {
     if (!templateAgents.includes(term)) errors.push(`templates/AGENTS.md missing operating contract term: ${term}`);
@@ -298,9 +359,9 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   }
 }
 
-function validateNoAutoDownloadRunner(root: string, errors: string[]): void {
+function validateNoAutoDownloadRunner(root: string, files: string[], errors: string[]): void {
   const autoDownloadTsx = /npx\s+--yes\s+tsx/;
-  for (const file of walk(root).filter(isFile)) {
+  for (const file of files) {
     const rel = relative(root, file);
     if (rel.startsWith(".alpha-goal/")) continue;
     if (!/\.(md|ts|sh|toml)$/.test(rel) && rel !== "AGENTS.md") continue;

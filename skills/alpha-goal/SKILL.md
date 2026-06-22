@@ -57,7 +57,7 @@ Record the discovery results with critical thinking to `<Alpha Goal state root>/
 
 Ground decisions in facts, observations and context; do not base on any habits, assumptions, or prior solutions.
 
-Loop Deep Discussion until you 100% understand the requirements from multiple perspectives and remain clarity score above threshold 0.85.
+Loop Deep Discussion until you 100% understand the requirements from multiple perspectives and remain clarity score above threshold 0.9.
 
 ### Deep Discussion Loop
 
@@ -96,8 +96,7 @@ Prefer staying on the same thread for multiple rounds when it has the highest le
 
 ```
 Round {n} | Target: {weakest_dimension} | Clarity: {score}%
-
-{question}
+{question backed by clear context}
 ```
 
 #### 2.3 Interpret answer
@@ -124,6 +123,7 @@ Current-state facts cannot define desired behavior, requirements, acceptance evi
 If unresolved ambiguity depends on current external best practices, standards, APIs, dependency versions, laws, schedules, or prices, gather bounded fresh evidence first, then ask the user only for the decision boundary.
 
 ### 2.4 Score and gate
+
 Use the clarity_score to decide whether you need to keep asking questions. Score each weighted dimension in `[0.0, 1.0]` with justification + gap:
 
 clarity_score = 0.3 * intent + 0.2 * outcome + 0.15 * scope + 0.12 * constraints + 0.1 * success + 0.08 * decision_boundary + 0.05 * context
@@ -174,7 +174,7 @@ Use each mode once when applicable. These are normal escalation tools, not rare 
 
 - **Contrarian** (round 2+ or immediately when an answer rests on an untested assumption): challenge core assumptions
 - **Simplifier** (round 4+ or when scope expands faster than outcome clarity): probe minimal viable scope
-- **Ontologist** (round 5+ and clarity_score < 0.85, or when the user keeps describing symptoms): ask for essence-level reframing
+- **Ontologist** (round 5+ and clarity_score < 0.9, or when the user keeps describing symptoms): ask for essence-level reframing
 
 Track used modes in state to prevent repetition.
 
