@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 const FRONTMATTER_RE = /^---\n(.*?)\n---\n/s;
 const FIELD_RE = /^([A-Za-z0-9_-]+):\s*(.*?)\s*$/;
 const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
-const SKILLS_BYTE_BUDGET = 30_000;
+const SKILLS_BYTE_BUDGET = 34_000;
 const COMPACT_RECOVERY_HOOK_MARKER = "codex-alpha-goal-compact-recovery:v1";
 const HOOKS_TEMPLATE = "templates/hooks.json";
 const REQUIRED_SKILL_NAMES = ["alpha-goal", "control-loop", "evidence-verify"];
@@ -82,16 +82,16 @@ const DESCRIPTION_SEMANTIC_CHECKS: Record<string, { required: string[]; forbidde
 
 const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
   ["front controller discovers, frames, designs, and routes", "skills/alpha-goal/SKILL.md", [
-    "Trigger Discovery", "minimum preflight", "never ask the user to summarize discoverable repository facts", "navigation evidence, not requirements or authority", "repo language as evidence", "Existing patterns are compatibility signals", "treat the answer as a claim to reconcile", "[from-code][auto-confirmed]", "[from-research] external/current fact", "[from-user]", "auto-confirm only descriptive facts", "Current-state facts cannot define desired behavior", "current external best practices", "bounded fresh evidence", "Readiness Gate Check", "one high-leverage question", "one decision variable", "exactly one `questions[]` item", "pressure-test", "boundary scenario from inspected facts", "materially change execution", "non-goals", "decision boundaries", "Indicator Handoff", "user-owned decisions", "Cross-repo framing", "single task-level Alpha Goal state root", "repo manifest", "Repo surfaces", "Dependency/integration order", "Design template", "Acceptance evidence", "Claim boundary", "Self-review", "Independent-review", "request_user_input", "$control_loop", "Design Summary"
+    "Trigger Discovery", "minimum preflight", "never ask the user to summarize discoverable repository facts", "navigation evidence, not requirements or authority", "repo language as evidence", "Existing patterns are compatibility signals", "treat the answer as a claim to reconcile", "[from-code][auto-confirmed]", "`[from-research]` external/current fact", "[from-user]", "auto-confirm only descriptive facts", "Current-state facts cannot define desired behavior", "current external best practices", "bounded fresh evidence", "Readiness Gate Check", "one high-leverage question", "one decision variable", "structured user-input tooling", "pressure-test", "boundary scenario from inspected facts", "materially change execution", "non-goals", "decision boundaries", "Indicator Handoff", "user-owned decisions", "Cross-repo framing", "single task-level Alpha Goal state root", "repo manifest", "Repo surfaces", "Dependency/integration order", "Design Content Must Include", "Acceptance evidence", "Claim boundary", "Self-review", "Independent-review", "request_user_input", "$control_loop", "Design Summary"
   ]],
   ["alpha records interview and design state", "skills/alpha-goal/SKILL.md", [
     "Alpha Goal state root", "YYYYMMDD-<TaskName>/interview.md", "docs/specs/YYYYMMDD-<TaskName>.md", "Design Summary", "Blocking gates", "Ledger", "Next"
   ]],
   ["execution has hard safety gates", "skills/control-loop/SKILL.md", [
-    "Do not mutate primary", "repo-local worktree", "Unrelated user changes", "Alpha Goal state root", "${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/", "mutation-preflight", "multi-repo preflight", "<repo-a> <repo-b>", "repo manifest", "per-repo", "integration evidence", "delivery boundary", "approved target", "authorization", "claim boundary", "### 1. Plan slice", "### 2. Act or probe", "### 3. Sense and compare", "### 4. Record and route", "Act/probe", "read-only/probe slice", "Preserve unrelated user changes", "root cause", "Iteration Summary", "ITERATION_READY_FOR_VERIFY", "$evidence-verify", "verification.md", "acceptance-to-evidence", "persisted evidence", "RETURN_TO_ALPHA_GOAL", "BLOCKED", "Stop/re-route"
+    "Do not mutate primary", "repo-local worktree", "Unrelated user changes", "Alpha Goal state root", "${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/", "run-profile.md", "not task discovery or scheduling", "Run mode", "Discovery source", "External side effects allowed", "Human checkpoint", "Evaluator route", "must not expand, narrow, reinterpret, waive, or replace", "already-authorized work", "active run profile", "loopholes", "claim overreach", "mutation-preflight", "multi-repo preflight", "<repo-a> <repo-b>", "repo manifest", "per-repo", "integration evidence", "delivery boundary", "approved target", "authorization", "claim boundary", "### 1. Plan slice", "### 2. Act or probe", "### 3. Sense and compare", "### 4. Record and route", "Act/probe", "read-only/probe slice", "Preserve unrelated user changes", "root cause", "Iteration Summary", "ITERATION_READY_FOR_VERIFY", "$evidence-verify", "verification.md", "acceptance-to-evidence", "persisted evidence", "RETURN_TO_ALPHA_GOAL", "BLOCKED", "Stop/re-route"
   ]],
   ["verification limits final claims", "skills/evidence-verify/SKILL.md", [
-    "PASS_TO_FINAL", "NEXT_ITERATION", "fixable evidence", "target, scope, authority", "permission, tool, data, environment, credential", "Alpha Goal state root", "${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/", "repo manifest", "Repo surface coverage", "cross-repo claims", "integrated behavior", "Do not narrow the claim as a successful outcome", "Final response guard", "Highest practical evidence-supported boundary", "Final wording allowed", "repair-complete", "no risk", "Verification Summary"
+    "PASS_TO_FINAL", "NEXT_ITERATION", "fixable evidence", "target, scope, authority", "permission, tool, data, environment, credential", "Alpha Goal state root", "${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/", "run-profile.md", "execution context only", "wrong-linked run profile", "repo manifest", "Repo surface coverage", "cross-repo claims", "integrated behavior", "Do not narrow the claim as a successful outcome", "Final response guard", "Highest practical evidence-supported boundary", "Final wording allowed", "repair-complete", "no risk", "Verification Summary"
   ]],
   ["multi-repo preflight script", "skills/control-loop/scripts/mutation-preflight.ts", [
     "process.argv.slice(2)", "multi-repo preflight", "targets", "repo ${i+1}", ".worktrees/codex/preflight-check", "repo manifest", "integration evidence"
@@ -284,7 +284,14 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   if (!manifest.includes(HOOKS_TEMPLATE) || !manifest.includes(COMPACT_RECOVERY_HOOK_MARKER)) errors.push("MANIFEST.md missing hooks template marker");
   if (!manifest.includes("marker family") || !manifest.includes("codex-compact-skill-recovery")) errors.push("MANIFEST.md missing hook upgrade strategy");
   const templateAgents = readIfFile(path.join(root, "templates/AGENTS.md"));
-  if (!templateAgents.includes("never default target, scope, acceptance, non-goals, side effects, risk acceptance, authority, or final claim")) errors.push("templates/AGENTS.md must not let safe defaults bypass alpha-goal gates");
+  for (const term of [
+    "Operating Contract",
+    "top-level operating contract for the workspace",
+    "always clarify questions, present optional designs and ask for explicit approval before editing files",
+    "Do not bypass repo workflows, skill gates, phase rules, validation gates, or explicit user instructions",
+  ]) {
+    if (!templateAgents.includes(term)) errors.push(`templates/AGENTS.md missing operating contract term: ${term}`);
+  }
   for (const doc of ["README.md", "README.en.md", "INSTALL.md", "MANIFEST.md"]) {
     const text = readIfFile(path.join(root, doc));
     if (/six skills|六技能|六个技能|成帧、建模、综合|\$goal-contract|\$system-model|\$decision-synthesis/.test(text)) errors.push(`${doc}: stale six-skill public architecture wording`);

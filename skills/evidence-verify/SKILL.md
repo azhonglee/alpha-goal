@@ -15,6 +15,7 @@ Read `references/claim-boundary.md` before final/merge/ship/safety claims. Read 
 
 Read the Goal Contract/equivalent, latest route/iteration state, diff/artifacts, command outputs, tests, logs, reviewer/user feedback, and relevant specs.
 Resolve the Alpha Goal state root the same way as `$alpha-goal`: always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path. Read `<Alpha Goal state root>/YYYYMMDD-<TaskName>/evidence.md` for evidence summary. Its content is the evidence summary of the latest iteration. Check but do not trust it.
+Read `<Alpha Goal state root>/YYYYMMDD-<TaskName>/run-profile.md` when present, referenced, or required by control-loop evidence. Treat it as execution context only, never as the Goal Contract.
 For cross-repo claims, read the repo manifest and the per-repo plus integration evidence from the same task-level state root.
 
 ## Verification rules
@@ -29,6 +30,9 @@ For cross-repo claims, read the repo manifest and the per-repo plus integration 
 - Do not repair during verification; route back instead.
 - Final wording must not exceed the highest evidence-supported boundary.
 - Do not narrow the claim as a successful outcome. If evidence cannot support the proposed claim, record the gap and return `NEXT_ITERATION`.
+- A run profile cannot expand, narrow, reinterpret, waive, or replace Goal Contract scope, authority, acceptance evidence, non-goals, or claim boundary. On conflict, verify against the Goal Contract and route back.
+- Missing evidence for run-profile checkpoints, named evaluators, or evaluator route is a gap.
+- If control-loop evidence depends on a missing, stale, or wrong-linked run profile, treat it as a gap.
 
 ## Verdicts
 
