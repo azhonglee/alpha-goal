@@ -51,7 +51,7 @@ Use subagents, one or more, for independent parallel subtasks when that improves
    - Are these hidden issues connected to the problem raised by the user?
    - Is there a deeper root cause hidden beneath the surface phenomena?
 
-Record the discovery results with critical thinking to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/context.md`
+Record key points with detail and concise results with critical thinking to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/context.md`
 
 ## Phase 2: Clarify with User
 
