@@ -15,6 +15,8 @@ It may use other skills as bounded observers, domain specialists, evaluators, bu
 Pre-flight -> Discovery -> Clarify with User -> Assumption Stress Test -> Final Design -> Ask for Confirmation
 ```
 
+`Clarify with User` is the core phase.
+
 ## Phase 0: Pre-flight
 1. Classify the work type as one of the following:
    - `exploration`: Skip only for concrete read-only fact lookup; use this skill when exploration is about intent, scope, acceptance, or decision boundaries.
@@ -25,8 +27,6 @@ Pre-flight -> Discovery -> Clarify with User -> Assumption Stress Test -> Final 
 2. If the work may be mixed, ask for the minimum details needed to split it into sequenced work items.
 
 3. Resolve the Alpha Goal state root before writing runtime artifacts. Always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
-
-4. `Clarify with User` is the core phase.
 
 ## Phase 1: Discovery
 
