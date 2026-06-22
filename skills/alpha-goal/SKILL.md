@@ -1,6 +1,6 @@
 ---
 name: alpha-goal
-description: "Must use for any engineering/design/implementation/diagnose/repair requests; through interviewings, clarify real intention/requirements, identify outcome, scope, decision boundaries, and design."
+description: "Must use for any engineering/design/implementation/diagnose/repair requests; through interviewing user, clarify real intention/requirements, identify outcome, scope, decision boundaries, and design."
 ---
 
 # Alpha Goal
@@ -12,19 +12,21 @@ It may use other skills as bounded observers, domain specialists, evaluators, bu
 **Must Execute phase to phase strictly whenever using this skill:**
 
 ```text
-Pre-flight -> Discovery -> Clarify -> Assumption Stress Test -> Final Design -> Ask for Confirmation
+Pre-flight -> Discovery -> Clarify with User -> Assumption Stress Test -> Final Design -> Ask for Confirmation
 ```
 
 ## Phase 0: Pre-flight
 1. Classify the work type as one of the following:
    - `exploration`: Skip only for concrete read-only fact lookup; use this skill when exploration is about intent, scope, acceptance, or decision boundaries.
    - `design/implementation/maintenance`: Follow all phases order strictly.
-   - `diagnose/repair`: Start with Phase 1 to frame symptom/evidence and confirm root cause. If root cause is not 100% confirmed, limit follow-up to diagnostic probes or hypothesis-testing slices. If repair is needed, treat confirmed root cause as evidence-backed context, use Phase 2+ to define repair boundary and authorization. Do not implement/design directly.
+   - `diagnose/repair`: Must start with Phase 1 to frame symptom/evidence and confirm root cause. If root cause is not 100% confirmed, limit follow-up to diagnostic probes or hypothesis-testing slices. If repair is needed, treat confirmed root cause as evidence-backed context, use Phase 2+ to define repair boundary and authorization. Do not implement/design directly.
    - `other`: Ask for more details to classify again.
 
 2. If the work may be mixed, ask for the minimum details needed to split it into sequenced work items.
 
 3. Resolve the Alpha Goal state root before writing runtime artifacts. Always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
+
+4. `Clarify with User` is the core phase.
 
 ## Phase 1: Discovery
 
@@ -49,9 +51,9 @@ Use subagents, one or more, for independent parallel subtasks when that improves
    - Are these hidden issues connected to the problem raised by the user?
    - Is there a deeper root cause hidden beneath the surface phenomena?
 
-Record the discovery results to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/context.md`
+Record the discovery results with critical thinking to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/context.md`
 
-## Phase 2: Clarify
+## Phase 2: Clarify with User
 
 Ground decisions in facts, observations and context; do not base on any habits, assumptions, or prior solutions.
 

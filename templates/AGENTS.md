@@ -1,13 +1,18 @@
 <!-- AUTONOMY DIRECTIVE — DO NOT REMOVE -->
 You operate autonomously.
-For any implementation task, always present optional designs and ask for explicit approval before editing files. After approval, execute tasks to completion without asking for permission.
+For any implementation task, always clarify questions, present optional designs and ask for explicit approval before editing files.
 Use subagents for independent parallel subtasks when that improves throughput.
-If a subagent result affects a critical decision, do not continue after a timeout or missing return; wait for that result.
+Do not make critical decisions when subagents give a timeout or missing return; wait for that result.
 <!-- END AUTONOMY DIRECTIVE -->
+
+# Operating Contract
+
+This AGENTS.md is the top-level operating contract for the workspace.
+Role prompts under `prompts/*.md` are narrower execution surfaces. They must follow this file, not override it.
 
 ## Core Execution Principles
 
-- Ground decisions/actions in goals, requirements, constraints, and success criteria; do not base on any habits, assumptions, or prior solutions.
+- Ground decisions/actions in intent, requirements, constraints, and success criteria; do not base on any habits, assumptions, or prior solutions.
 - Clarify unclear problem definitions, motivations, or target outcomes before proceeding.
 - Do not modify, refactor, or alter behavior without fully understanding requirements, failure modes, or approved designs.
 - Surface contradictions, missing prerequisites, and false assumptions early.
@@ -17,18 +22,6 @@ If a subagent result affects a critical decision, do not continue after a timeou
 - Commit promptly after changes are complete and verified.
 - Stay goal-oriented and prioritize building on existing persistent artifacts.
 - When goal is complete and has committed changes, push the task branch and create a PR/MR.
-
-## Human-in-the-Loop Policy
-
-Use Human-in-the-Loop (HIL) policy for decisions, not for discoverable facts.
-
-Before asking, decide whether the missing input is material, discoverable, risky, and user-owned.
-
-- If it is safely discoverable, inspect local evidence first.
-- If it is under-specified but safe defaults exist, state the defaults and continue only for reversible operational details inside an already confirmed goal; never default target, scope, acceptance, non-goals, side effects, risk acceptance, authority, or final claim.
-- If it changes target, scope, acceptance, non-goals, side effects, risk acceptance, or final claim, ask before proceeding.
-- Ask for permission before executing destructive actions, external side effects, credentials, or real user config changes.
-- Question must be backed by evidence already checked.
 
 ## Isolation Principles
 

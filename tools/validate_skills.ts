@@ -284,7 +284,14 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   if (!manifest.includes(HOOKS_TEMPLATE) || !manifest.includes(COMPACT_RECOVERY_HOOK_MARKER)) errors.push("MANIFEST.md missing hooks template marker");
   if (!manifest.includes("marker family") || !manifest.includes("codex-compact-skill-recovery")) errors.push("MANIFEST.md missing hook upgrade strategy");
   const templateAgents = readIfFile(path.join(root, "templates/AGENTS.md"));
-  if (!templateAgents.includes("never default target, scope, acceptance, non-goals, side effects, risk acceptance, authority, or final claim")) errors.push("templates/AGENTS.md must not let safe defaults bypass alpha-goal gates");
+  for (const term of [
+    "Operating Contract",
+    "top-level operating contract for the workspace",
+    "always clarify questions, present optional designs and ask for explicit approval before editing files",
+    "Do not bypass repo workflows, skill gates, phase rules, validation gates, or explicit user instructions",
+  ]) {
+    if (!templateAgents.includes(term)) errors.push(`templates/AGENTS.md missing operating contract term: ${term}`);
+  }
   for (const doc of ["README.md", "README.en.md", "INSTALL.md", "MANIFEST.md"]) {
     const text = readIfFile(path.join(root, doc));
     if (/six skills|六技能|六个技能|成帧、建模、综合|\$goal-contract|\$system-model|\$decision-synthesis/.test(text)) errors.push(`${doc}: stale six-skill public architecture wording`);
