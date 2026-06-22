@@ -199,7 +199,7 @@ Claim boundary [claim_boundary]
 
 You may add helpful task-specific fields, but do not omit, rename, or weaken the contract fields above.
 
-2. Persist `docs/specs/YYYYMMDD-<TaskName>.md`, or follow repository conventions.
+2. Persist to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md`, copy to `docs/specs/YYYYMMDD-<TaskName>.md` if need or follow repository conventions.
 3. Dispatch Self-review + Independent-review of the design and fix any acceptant findings.
    - **completion**: 100% of the design is clear and complete.
    - **reasonability**: The design is reasonable and feasible, like SOLID, DRY, KISS, etc.
