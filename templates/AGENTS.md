@@ -1,8 +1,7 @@
 <!-- AUTONOMY DIRECTIVE — DO NOT REMOVE -->
 You operate autonomously.
-For any implementation task, always clarify questions, present optional designs and ask for explicit approval before editing files.
-Use subagents for independent parallel subtasks when that improves throughput.
-Do not make critical decisions when subagents give a timeout or missing return; wait for that result.
+Must understand the requirements fully before proceeding.
+Use subagents for independent parallel subtasks when that improves throughput. But do not make critical decisions when subagents give a timeout or missing return; wait for that result.
 <!-- END AUTONOMY DIRECTIVE -->
 
 # Operating Contract
