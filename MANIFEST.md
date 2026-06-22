@@ -39,4 +39,4 @@ Default runtime artifacts live under the user-level Alpha Goal state root: `${CO
 
 ## Byte Budget
 
-The enforced control-byte budget is the whole `skills/` tree, capped at 30,000 bytes.
+The enforced control-byte budget is the whole `skills/` tree, capped at 34,000 bytes.
