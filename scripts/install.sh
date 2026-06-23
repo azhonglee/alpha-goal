@@ -798,7 +798,7 @@ if [[ "$sync_user_templates" == true ]]; then
   fi
 fi
 
-required_skills=(alpha-goal codex-native-goal control-loop goal-verify)
+required_skills=(alpha-goal control-loop goal-verify)
 skill_files=()
 for skill_name in "${required_skills[@]}"; do
   skill_file="$source_skill_root/$skill_name/SKILL.md"

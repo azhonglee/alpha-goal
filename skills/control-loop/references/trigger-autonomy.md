@@ -4,10 +4,11 @@ Load this reference only when run mode is not plain `manual`, requested action m
 
 ## Trigger Contract
 
-- `manual`: resume from matching `loop-state.md` unless the user overrides in the current turn.
-- `scheduled`: resume latest matching state only; the Trigger Contract must name schedule source/id, replay/staleness rule, and existing state mapping; reject stale/replayed events; do not introduce a new discovery source, scope, authority, side effect, or public claim.
+- `native-goal`: inspect current native goal state first. Create a native goal only on explicit user/system/developer request; if an unfinished native goal exists, resume it or route conflicting authority to `alpha-goal`.
+- `manual`: resume from the accepted Goal Contract and any existing `checkpoint.md`; use `control-state/latest.md` only when task identity is ambiguous. Add checkpoint `Loop State` only for multi-iteration recovery.
+- `scheduled`: resume latest matching accepted state via Trigger Contract and `control-state/latest.md` when needed; name schedule source/id, replay/staleness rule, and state mapping; reject stale/replayed events; do not add new discovery source, scope, authority, side effect, or public claim.
 - `webhook`: bind event id/dedupe key to the Trigger Contract and authorized payload-to-state mapping; unmatched, stale, replayed, or authority-changing events route to `alpha-goal`.
-- `verification-triggered`: consume only the latest verdict whose `Goal Contract`, `Loop State`, and `Evidence` bindings match the current task files, with `Next route: control-loop` and a same-goal fixable Gap.
+- `verification-triggered`: consume only the latest verdict whose `Goal Contract` and checkpoint `Verification`/`Evidence` bindings match the current accepted task files, with `Verdict: NEXT_ITERATION`, `Next route: control-loop`, and a same-goal fixable Gap.
 
 ## Autonomy Ladder
 
@@ -19,3 +20,5 @@ Requested action must be at or below current level:
 - `L5`: Merge/deploy only when explicitly authorized.
 
 If requested action exceeds the level, deny the action and route to user confirmation or `BLOCKED`.
+
+Native goal lifecycle actions do not bypass the ladder. `create_goal` needs explicit request, `update_goal complete` needs completed delivery boundary, and `update_goal blocked` needs the repeated-blocker gate.

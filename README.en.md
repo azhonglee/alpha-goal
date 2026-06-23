@@ -2,7 +2,7 @@
 
 Languages: [Chinese](README.md) | English
 
-Alpha Goal is a minimal persistent closed-loop skillset for goal engineering work. It helps agents discover facts before asking, resume from durable state and compressed memory, work inside explicit boundaries, and make final claims only as far as evidence supports them.
+Alpha Goal is a minimal persistent closed-loop skillset for goal engineering work. It helps agents discover facts before asking, resume from an accepted Goal Contract and required checkpoints, work inside explicit boundaries, and make final claims only as far as evidence supports them.
 
 ## When to use it
 
@@ -14,7 +14,7 @@ Alpha Goal is a minimal persistent closed-loop skillset for goal engineering wor
 ## How it works
 
 ```text
-Trigger -> Read Goal -> Read Loop State -> Read Memory -> Plan Slice -> Act/Probe -> Evidence -> $goal-verify -> Gap? -> Harden or Final Claim
+Trigger -> Resolve Task -> Read Goal -> Read Checkpoint -> Plan Slice -> Act/Probe -> Evidence -> $goal-verify -> Gap? -> Harden or Final Claim
 ```
 
 ## Quick start
@@ -24,16 +24,16 @@ scripts/install.sh
 npx --no-install tsx tools/validate_skills.ts .
 ```
 
-The installer creates direct symlinks for the four public skills under `$HOME/.codex/skills/` and cleans same-repo links for merged old public skills.
+The installer creates direct symlinks for the three public skills under `$HOME/.codex/skills/` and cleans same-repo links for merged old public skills.
 The validator enforces the whole `skills/` tree under 15,000 word+punctuation units, counted as words plus punctuation/symbol marks. This budget preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, autonomy gates, behavior-level gates, and evaluator feedback without over-compressing skill text.
 
-Runtime records use the user-level Alpha Goal state root: `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`, where `<workspace-slug>` is the last directory name of the current session directory path. The recovery entry is `<state-root>/control-state/latest.md`; recovery needs the pointer-bound `goal-contract.md`, `run-profile.md`, `loop-state.md`, and `memory.md`; missing or conflicting files route to `alpha-goal` or blocker.
+Runtime records use the user-level Alpha Goal state root: `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`, where `<workspace-slug>` is the last directory name of the current session directory path. `alpha-goal` writes only the accepted `goal-contract.md` by default, with discovery notes and interview ledger inside it; `checkpoint.md` is the single task-level conditional checkpoint created only for recovery, trigger handling, evidence handoff, or verification; `control-state/latest.md` is only a global recovery index, not stage content.
 
 ## Usage examples
 
 ```text
 $alpha-goal Decide whether this task should clarify, execute, verify, or continue a loop.
-$codex-native-goal Run or resume an explicit or active Codex Native Goal through a native-goal-driven execution loop.
+$control-loop Execute or resume an authorized goal; explicit or active Codex Native Goals are handled here through a native-goal-driven loop.
 ```
 
 You usually do not need to name a skill. Describe the work normally; Alpha Goal is meant to activate when the request needs goal framing, bounded execution, or evidence-backed completion.
@@ -43,8 +43,7 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
 | Skill | What it helps with |
 | --- | --- |
 | `alpha-goal` | Clarify intent, boundaries, acceptance evidence, and the next safe route before work starts. |
-| `codex-native-goal` | Execute an explicit or active Codex Native Goal through a native-goal-driven loop, returning to `alpha-goal` when framing is unclear and to `goal-verify` before final claims. |
-| `control-loop` | Execute or harden an authorized slice; `goal-contract.md`, `run-profile.md`, `loop-state.md`, and `memory.md` are recovery and constraint inputs. |
+| `control-loop` | Execute or harden an authorized slice; explicit or active Codex Native Goals are executed here, with `goal-contract.md` required and `checkpoint.md` used only as a conditional checkpoint. |
 | `goal-verify` | Verify goal completion, claim boundary, evidence coverage, and material unclaimed defects/risks, then return the next Gap. |
 
 ## Docs
@@ -52,15 +51,13 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
 - [INSTALL.md](INSTALL.md): installation options and smoke test.
 - [MANIFEST.md](MANIFEST.md): public skills, scripts, and runtime artifacts.
 - [skills/alpha-goal/SKILL.md](skills/alpha-goal/SKILL.md): default entry and routing rules.
-- [skills/codex-native-goal/SKILL.md](skills/codex-native-goal/SKILL.md): Codex Native Goal execution loop rules.
-- [skills/control-loop/SKILL.md](skills/control-loop/SKILL.md): bounded action loop contract.
+- [skills/control-loop/SKILL.md](skills/control-loop/SKILL.md): native-goal-driven bounded action loop contract.
 - [skills/goal-verify/SKILL.md](skills/goal-verify/SKILL.md): goal verification and defect/risk review contract.
 
 ## Structure
 
 ```text
 skills/alpha-goal/
-skills/codex-native-goal/
 skills/control-loop/
 skills/goal-verify/
 templates/
@@ -76,7 +73,7 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 - Evidence before authority: Current code facts describe current state; desired behavior comes from user intent, specs, issues, or accepted contracts.
 - Goals before action: outcome, scope, non-goals, acceptance evidence, decision owner, and claim boundary define what may change.
 - Minimal useful modeling: model dependencies, disturbances, and risks only when they affect safe control, validation, or routing.
-- Persistent state: `loop-state.md` records current state and the latest verification gap, `iteration.md` records this run's facts, and `memory.md` keeps compressed confirmed facts, constraints, and strategy outcomes with evidence, confidence, and invalidation.
+- Persistent state: `goal-contract.md` is the default `alpha-goal` output and directly contains discovery notes, interview ledger, and the final contract; `checkpoint.md` conditionally carries run profile, loop state, iteration, evidence, verification, and memory with evidence, confidence, and invalidation; `control-state/latest.md` only points to the latest accepted task when task identity is ambiguous.
 - Bounded execution: prefer small observable probes or targeted changes over broad refactors and speculative cleanup; run mode and the Autonomy Ladder constrain trigger behavior and action authority.
 - Independent verification: final/ready/safe/complete/repair/review claims require fresh evidence and defect/risk sweep, checked separately from execution.
-- Honest routing: unclear goals return to `alpha-goal`, fixable gaps for an active Native Goal return to `codex-native-goal`, other authorized execution gaps return to `control-loop`, and unsupported or under-reviewed final claims continue through `goal-verify`.
+- Honest routing: unclear goals return to `alpha-goal`, fixable gaps for an active Native Goal or other authorized execution return to `control-loop`, and unsupported or under-reviewed final claims continue through `goal-verify`.
