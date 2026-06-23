@@ -2,7 +2,7 @@
 
 语言：简体中文 | [English](README.en.md)
 
-Alpha Goal 是面向 Goal Engineering 的最小闭环技能集。它帮助 agent 先发现事实再提问，在明确边界内行动，并且只在证据支持的范围内做最终声明。
+Alpha Goal 是面向 Goal Engineering 的最小持久闭环技能集。它帮助 agent 先发现事实再提问，按持续状态和压缩记忆恢复执行，在明确边界内行动，并且只在证据支持的范围内做最终声明。
 
 ## 适用场景
 
@@ -14,7 +14,7 @@ Alpha Goal 是面向 Goal Engineering 的最小闭环技能集。它帮助 agent
 ## 工作方式
 
 ```text
-描述需求 -> 发现事实 -> 澄清边界 -> 有界行动 -> 验证声明 -> 最终答复或下一轮闭环
+Trigger -> Read Goal -> Read Loop State -> Read Memory -> Plan Slice -> Act/Probe -> Evidence -> $goal-verify -> Gap? -> Harden or Final Claim
 ```
 
 ## 快速开始
@@ -25,9 +25,9 @@ npx --no-install tsx tools/validate_skills.ts .
 ```
 
 安装脚本会在 `$HOME/.codex/skills/` 下为三个公开技能创建直接软链接，并清理指向本仓库旧公开技能的软链接。
-校验脚本会强制整个 `skills/` 树不超过 30,000 bytes。
+校验脚本会强制整个 `skills/` 树不超过 15,000 word+punctuation units；计数口径是单词数加标点/符号数。这个预算用于保留 Persistent Goal Loop 的触发行为、持久状态、记忆、自治门、行为级 gate 和 evaluator feedback，避免过分压缩技能正文。
 
-运行态记录使用用户级 Alpha Goal state root：`${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`，其中 `<workspace-slug>` 是当前会话目录路径最后一个目录名。
+运行态记录使用用户级 Alpha Goal state root：`${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`，其中 `<workspace-slug>` 是当前会话目录路径最后一个目录名。恢复入口是 `<state-root>/control-state/latest.md`；恢复执行至少需要该指针绑定的 `goal-contract.md`、`run-profile.md`、`loop-state.md`、`memory.md`；缺失或冲突时回到 `alpha-goal` 或阻塞。
 
 ## 使用示例
 
@@ -42,8 +42,8 @@ $alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继�
 | Skill | 作用 |
 | --- | --- |
 | `alpha-goal` | 在开始工作前澄清意图、边界、验收证据和下一步安全路由。 |
-| `control-loop` | 执行一轮已授权、可观察的行动，并把结果与目标比较。 |
-| `evidence-verify` | 检查新鲜证据是否支持 final/ready/safe/complete/repair 声明。 |
+| `control-loop` | 执行或加固已授权 slice；`goal-contract.md`、`run-profile.md`、`loop-state.md` 和 `memory.md` 只作为恢复和约束输入。 |
+| `goal-verify` | 验证目标完成、声明边界、证据覆盖和 material 未声明缺陷/风险，并输出下一轮 Gap。 |
 
 ## 文档
 
@@ -51,14 +51,14 @@ $alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继�
 - [MANIFEST.md](MANIFEST.md)：公开技能、脚本和运行时产物清单。
 - [skills/alpha-goal/SKILL.md](skills/alpha-goal/SKILL.md)：默认入口和路由规则。
 - [skills/control-loop/SKILL.md](skills/control-loop/SKILL.md)：有界行动闭环契约。
-- [skills/evidence-verify/SKILL.md](skills/evidence-verify/SKILL.md)：证据比较契约。
+- [skills/goal-verify/SKILL.md](skills/goal-verify/SKILL.md)：目标验证和缺陷/风险审查契约。
 
 ## 结构
 
 ```text
 skills/alpha-goal/
 skills/control-loop/
-skills/evidence-verify/
+skills/goal-verify/
 templates/
 scripts/
 tools/
@@ -72,6 +72,7 @@ Alpha Goal 让 agent 工作保持目标明确、行动有界、声明受证据�
 - 证据先于授权：当前代码事实只描述现状；期望行为来自用户意图、规格、issue 或已接受契约。
 - 目标先于行动：outcome、scope、non-goals、acceptance evidence、决策 owner 和 claim boundary 共同限定什么可以被改变。
 - 只做有用建模：只有依赖、扰动和风险会影响安全控制、验证或路由时，才把它们纳入模型。
-- 有界执行：优先选择小而可观察的探针或定向变更，而不是宽泛重构和猜测式清理。
-- 独立验证：final/ready/safe/complete/repair 声明需要新鲜证据，并且要与执行过程分离检查。
-- 诚实路由：目标不清回到 `alpha-goal`，可修复的实现或证据缺口回到 `control-loop`，证据不足的最终声明继续进入 `evidence-verify`。
+- 持久状态：`loop-state.md` 记录当前状态和最新验证缺口，`iteration.md` 记录本轮事实，`memory.md` 保留带证据、置信度和失效条件的确认事实、约束和策略结果。
+- 有界执行：优先选择小而可观察的探针或定向变更，而不是宽泛重构和猜测式清理；run mode 和 Autonomy Ladder 共同约束触发方式与动作权限。
+- 独立验证：final/ready/safe/complete/repair/review 声明需要新鲜证据和 defect/risk sweep，并且要与执行过程分离检查。
+- 诚实路由：目标不清回到 `alpha-goal`，可修复的实现、证据缺口或 material 风险缺口回到 `control-loop`，证据或审查面不足的最终声明继续进入 `goal-verify`。
