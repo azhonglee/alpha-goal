@@ -99,6 +99,8 @@ Create a durable plan when:
 
 ### 3. Sense and compare
 
+When risk, scope, or uncertainty warrants it, dispatch subagents to review and check the work from multiple perspectives: completion, accuracy, validity, relevance, risk.
+
 Collect fresh evidence after the action: tests, builds, linters, type checks, runtime probes, logs, screenshots, diffs, or manual inspection. Classify it as gate / advisory / exploration / blocked evidence.
 For cross-repo work, collect per-repo evidence and integration evidence that exercises the declared dependency/order boundary.
 
