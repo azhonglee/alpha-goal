@@ -434,7 +434,7 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
     "do_not_call(create_goal)",
     "goal = read_accepted_goal_contract(goal_contract)",
     "checkpoint = read_checkpoint_when_present_or_required(goal)",
-    "assert_authorized_boundary(goal, checkpoint, native_goal)",
+    "assert_boundaries(goal, checkpoint, native_goal)",
     "slice = plan_smallest_deliverable_slice(goal, checkpoint)",
     "outcome = act(slice)",
     "evidence = collect_raw_evidence(outcome)",
@@ -442,8 +442,8 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
     "return RETURN_TO_ALPHA_GOAL",
     "return BLOCKED",
     "verification = goal_verify_if_required",
-    "update_native_goal_lifecycle_if_allowed(native_goal, update_goal complete)",
-    "return PASS_TO_FINAL",
+    "route = route_after_verification(verification, native_goal)",
+    "return route",
   ], errors);
   requireOrderedTerms("control-loop boundary rules", markdownSection(text, "Boundaries"), [
     "accepted Goal Contract is canonical",
@@ -457,6 +457,7 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
   ], errors);
   requireOrderedTerms("control-loop routes", markdownSection(text, "Routes"), [
     "PASS_TO_FINAL",
+    "update_native_goal_lifecycle_if_allowed(native_goal, update_goal complete)",
     "NEXT_ITERATION",
     "RETURN_TO_ALPHA_GOAL",
     "BLOCKED",
