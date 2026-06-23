@@ -150,7 +150,7 @@ function checkTaskState(taskDir: string): boolean {
     ok = check("verification-triggered binding", verificationMatchesTask(readTaskFile(taskDir, "verification.md"), goalPath, loopStatePath, evidencePath), "verification binding missing or stale") && ok;
   }
   ok = check("loop actionability", !isUnset(nextSlice) && !isNone(nextSlice) || !isUnset(stopCondition) && !isNone(stopCondition), "missing actionable Next Slice or Stop Condition") && ok;
-  ok = check("evaluator route", field(runProfile, "Evaluator route").includes("$evidence-verify"), "missing $evidence-verify") && ok;
+  ok = check("evaluator route", field(runProfile, "Evaluator route").includes("$goal-verify"), "missing $goal-verify") && ok;
   ok = check("memory evidence", memoryAllowsEmpty(memory) || /Evidence:/i.test(memory) && /Confidence:/i.test(memory) && /Invalidation:/i.test(memory), "non-empty memory needs Evidence, Confidence, and Invalidation") && ok;
 
   section("trigger event", "checked");

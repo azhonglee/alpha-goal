@@ -11,24 +11,28 @@ const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
 const SKILLS_COUNT_BUDGET = 15_000;
 const COMPACT_RECOVERY_HOOK_MARKER = "codex-alpha-goal-compact-recovery:v1";
 const HOOKS_TEMPLATE = "templates/hooks.json";
-const REQUIRED_SKILL_NAMES = ["alpha-goal", "control-loop", "evidence-verify"];
+const REQUIRED_SKILL_NAMES = ["alpha-goal", "control-loop", "goal-verify"];
 const MERGED_SKILL_NAMES = ["goal-contract", "system-model", "decision-synthesis"];
 const LEGACY_SKILL_REFERENCES = [
   ...MERGED_SKILL_NAMES,
+  "evidence-verify",
   "control-kernel", "loop", "verify", "meta-synthesis",
-  "goal-frame", "goal-loop", "goal-iterate", "goal-review", "goal-verify",
+  "goal-frame", "goal-loop", "goal-iterate", "goal-review",
 ];
 const LEGACY_SCRIPT_REFERENCES = [
   "tools/validate_skills.py", "tools/validate_skillset.py", "tools/validate_skillset.ts",
   "scripts/mutation-preflight.sh", "mutation-preflight.sh",
   "scripts/repo-sensor-snapshot.sh", "repo-sensor-snapshot.sh",
+  "scripts/evidence-summary.ts", "evidence-summary.ts",
   "scripts/evidence-summary.sh", "evidence-summary.sh",
+  "scripts/goal-verification-summary.ts", "goal-verification-summary.ts",
+  "scripts/goal-verification-summary.sh", "goal-verification-summary.sh",
 ];
 const LEGACY_RUN_MODE_REFERENCES = ["automation-triggered", "from-verification", "Run mode: manual | automation"];
 const STATE_ROOT_CORE_FILES = [
   "skills/alpha-goal/SKILL.md",
   "skills/control-loop/SKILL.md",
-  "skills/evidence-verify/SKILL.md",
+  "skills/goal-verify/SKILL.md",
   "templates/AGENTS.md",
 ];
 const STATE_ROOT_DOC_FILES = [
@@ -77,8 +81,8 @@ const DESCRIPTION_SEMANTIC_CHECKS: Record<string, { required: string[]; forbidde
     required: ["Use only after", "explicit goal specification", "specific read-only probe", "implementation", "Do not use for ambiguous planning"],
     forbidden: ["discover facts before asking", "final evidence verdicts"],
   },
-  "evidence-verify": {
-    required: ["Independent evidence comparator", "Use only when", "fresh evidence", "explicit Goal Contract or claim boundary", "Do not use to plan or implement changes"],
+  "goal-verify": {
+    required: ["Independent goal verifier", "defect/risk reviewer", "review", "audit", "loophole-finding", "Goal Contract", "Do not plan or implement changes"],
     forbidden: ["discover facts before asking", "act, sense feedback"],
   },
 };
@@ -164,15 +168,16 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "### 4. Record and route",
     "ITERATION_READY_FOR_VERIFY",
     "NEXT_ITERATION` with fixable `Gap`",
-    "$evidence-verify",
+    "$goal-verify",
     "RETURN_TO_ALPHA_GOAL",
     "BLOCKED",
     "Stop/re-route"
   ]],
-  ["verification limits final claims", "skills/evidence-verify/SKILL.md", [
+  ["goal verification checks claims and defects", "skills/goal-verify/SKILL.md", [
     "PASS_TO_FINAL",
     "NEXT_ITERATION",
     "fixable evidence",
+    "same-goal fixable",
     "target, scope, authority",
     "permission, tool, data, environment, credential",
     "run-profile.md",
@@ -180,8 +185,16 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "loop-state.md",
     "required loop-state updates",
     "required memory updates",
-    "memory updates",
+    "required defect/risk sweep",
     "verification-gap hardening",
+    "Review mode",
+    "Goal satisfaction review",
+    "Defect/risk sweep",
+    "Unclaimed issues found",
+    "Negative/abuse cases checked",
+    "material unclaimed",
+    "no material issue found in checked surface",
+    "not checked",
     "Gap must be specific enough",
     "Do not narrow the claim as a successful outcome",
     "Final response guard",
@@ -208,22 +221,6 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "loop-state path",
     "memory path",
     "evaluator route"
-  ]],
-  ["evidence summary reads durable state", "skills/evidence-verify/scripts/evidence-summary.ts", [
-    "goal-contract.md",
-    "run-profile.md",
-    "loop-state.md",
-    "memory.md",
-    "evidence.md",
-    "verification.md",
-    "Goal Contract",
-    "Loop State",
-    "Evidence",
-    "Verified at",
-    "verification verdict",
-    "verification gap",
-    "next route",
-    "durable evidence gate"
   ]],
 ];
 
@@ -280,6 +277,7 @@ function validateSkillDir(root: string, dir: string, errors: string[], warnings:
   const skillName = path.basename(dir);
   const md = path.join(dir, "SKILL.md");
   if (!isFile(md)) { errors.push(`${skillName}: missing SKILL.md`); return; }
+  if (skillName === "goal-verify" && isDirectory(path.join(dir, "scripts"))) errors.push("goal-verify must not depend on runtime scripts");
   const text = fs.readFileSync(md, "utf8");
   try {
     const fm = parseFrontmatter(text);
@@ -389,19 +387,22 @@ function validateSchemaConsistency(root: string, errors: string[]): void {
   const designScoped = alpha.slice(designStart).toLowerCase();
   const designPos = designFields.map(field => designScoped.indexOf(`| ${field.toLowerCase()} |`));
   if (designPos.some(v => v < 0) || designPos.some((v, i) => i > 0 && v <= designPos[i - 1])) errors.push("design summary schema order mismatch: alpha");
-  const evSkill = readIfFile(path.join(root, "skills/evidence-verify/SKILL.md"));
-  const evRef = readIfFile(path.join(root, "skills/evidence-verify/references/verification-verdict-schema.md"));
-  if (evSkill.includes("- Gaps:") || evRef.includes("- Gaps:")) errors.push("evidence verdict schema must use only `Gap:`");
-  for (const term of ["PASS_TO_FINAL", "NEXT_ITERATION"]) if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`evidence verdict enum mismatch: ${term}`);
-  for (const term of ["Goal Contract", "Loop State", "Evidence", "Verified at", "Loop state review", "Memory review"]) if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`evidence verdict schema missing persistent-loop field: ${term}`);
-  for (const term of ["NARROW_CLAIM", "REFRAME"]) if (evSkill.includes(term) || evRef.includes(term)) errors.push(`evidence verdict enum must not include: ${term}`);
-  for (const term of ["none / control-loop / alpha-goal / BLOCKED"]) if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`evidence next-route options mismatch: ${term}`);
+  const evSkill = readIfFile(path.join(root, "skills/goal-verify/SKILL.md"));
+  const evRef = readIfFile(path.join(root, "skills/goal-verify/references/verification-verdict-schema.md"));
+  if (evSkill.includes("- Gaps:") || evRef.includes("- Gaps:")) errors.push("goal verification schema must use only `Gap:`");
+  for (const term of ["PASS_TO_FINAL", "NEXT_ITERATION"]) if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`goal verification verdict enum mismatch: ${term}`);
+  for (const term of ["Goal Contract", "Loop State", "Evidence", "Verified at", "Review mode", "Goal satisfaction review", "Defect/risk sweep", "Unclaimed issues found", "Negative/abuse cases checked", "Loop state review", "Memory review", "Final claim allowed"]) {
+    if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`goal verification schema missing field: ${term}`);
+  }
+  for (const term of ["NARROW_CLAIM", "REFRAME"]) if (evSkill.includes(term) || evRef.includes(term)) errors.push(`goal verification verdict enum must not include: ${term}`);
+  for (const term of ["none / control-loop / alpha-goal / BLOCKED"]) if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`goal verification next-route options mismatch: ${term}`);
 }
 
 function validateInstallDocumentation(root: string, errors: string[]): void {
   const install = readIfFile(path.join(root, "scripts/install.sh"));
   for (const name of REQUIRED_SKILL_NAMES) if (!install.includes(name)) errors.push(`scripts/install.sh missing required skill: ${name}`);
   for (const name of MERGED_SKILL_NAMES) if (!install.includes(name)) errors.push(`scripts/install.sh should clean merged old skill: ${name}`);
+  if (!install.includes("evidence-verify")) errors.push("scripts/install.sh should clean old evidence-verify skill link");
   for (const forbidden of ["tools/validate_skills.ts", "run_skillset_validation", "validate_installed_links", "resolve_tsx_runner", "Validation: passed"]) {
     if (install.includes(forbidden)) errors.push(`scripts/install.sh must not run install-time skill validation: ${forbidden}`);
   }
@@ -419,7 +420,7 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
     } catch (error) {
       errors.push(`${HOOKS_TEMPLATE}: invalid JSON: ${errorMessage(error)}`);
     }
-    for (const term of [COMPACT_RECOVERY_HOOK_MARKER, "^compact$", "$alpha-goal", "$control-loop", "$evidence-verify", "control-state/latest.md", "run-profile.md", "verification.md/evidence.md"]) {
+    for (const term of [COMPACT_RECOVERY_HOOK_MARKER, "^compact$", "$alpha-goal", "$control-loop", "$goal-verify", "control-state/latest.md", "run-profile.md", "verification.md/evidence.md", "defect/risk", "unclaimed"]) {
       if (!hooksTemplate.includes(term)) errors.push(`${HOOKS_TEMPLATE}: missing compact recovery hook term: ${term}`);
     }
     if (hooksTemplate.includes(`[${COMPACT_RECOVERY_HOOK_MARKER}]`)) errors.push(`${HOOKS_TEMPLATE}: compact recovery marker must not be printed to model context`);
@@ -434,7 +435,8 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   if (!installDoc.includes("--no-sync-user-hooks")) errors.push("INSTALL.md missing --no-sync-user-hooks option");
   if (!installDoc.includes(HOOKS_TEMPLATE)) errors.push("INSTALL.md missing hooks template behavior");
   if (!installDoc.includes("codex-compact-skill-recovery")) errors.push("INSTALL.md missing legacy hook migration behavior");
-  for (const term of ["set -euo pipefail", "export CODEX_HOME", "Goal spec:", "Goal Contract:", "control-state/latest.md", "goal-contract", "run-profile", "loop-state", "memory", "Verified at", "HARDENING or VERIFICATION", "15,000 word+punctuation units", "without over-compressing", "mutation-preflight.ts --task", "evidence-summary.ts --task", "verification.md/evidence.md"]) if (!installDoc.includes(term)) errors.push(`INSTALL.md missing persistent-loop term: ${term}`);
+  if (/tmp_codex_home\/skills\/[^"`\s]+\/scripts\//.test(installDoc)) errors.push("INSTALL.md smoke test must not require runtime skill scripts");
+  for (const term of ["set -euo pipefail", "export CODEX_HOME", "Goal spec:", "Goal Contract:", "control-state/latest.md", "goal-contract", "run-profile", "loop-state", "memory", "Verified at", "HARDENING or VERIFICATION", "15,000 word+punctuation units", "without over-compressing", "without requiring runtime skill scripts", "verification.md/evidence.md"]) if (!installDoc.includes(term)) errors.push(`INSTALL.md missing persistent-loop term: ${term}`);
   const manifest = readIfFile(path.join(root, "MANIFEST.md"));
   if (!manifest.includes(HOOKS_TEMPLATE) || !manifest.includes(COMPACT_RECOVERY_HOOK_MARKER)) errors.push("MANIFEST.md missing hooks template marker");
   if (!manifest.includes("marker family") || !manifest.includes("codex-compact-skill-recovery")) errors.push("MANIFEST.md missing hook upgrade strategy");
@@ -472,16 +474,6 @@ function validateRuntimeScriptBehavior(root: string, errors: string[]): void {
     expectExit("mutation-preflight stale latest binding blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "stale-latest"), 1, errors);
     writeTaskFixture(tmp, path.basename(root), "autonomy-overreach", { requestedAction: "merge", autonomyLevel: "L3 Modify worktree" });
     expectExit("mutation-preflight autonomy action ceiling blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "autonomy-overreach"), 1, errors);
-
-    expectExit("evidence-summary without --task blocks", runTsx(root, env, "skills/evidence-verify/scripts/evidence-summary.ts"), 1, errors);
-    expectExit("evidence-summary valid task passes", runTsx(root, env, "skills/evidence-verify/scripts/evidence-summary.ts", "--task", "valid"), 0, errors);
-
-    writeTaskFixture(tmp, path.basename(root), "missing-goal-contract", { goalContract: false });
-    expectExit("evidence-summary missing goal-contract blocks", runTsx(root, env, "skills/evidence-verify/scripts/evidence-summary.ts", "--task", "missing-goal-contract"), 1, errors);
-    writeTaskFixture(tmp, path.basename(root), "stale-verification", { verificationTarget: "valid" });
-    expectExit("evidence-summary stale verification binding blocks", runTsx(root, env, "skills/evidence-verify/scripts/evidence-summary.ts", "--task", "stale-verification"), 1, errors);
-    writeTaskFixture(tmp, path.basename(root), "missing-verification-fields", { verificationFields: false });
-    expectExit("evidence-summary missing verification fields blocks", runTsx(root, env, "skills/evidence-verify/scripts/evidence-summary.ts", "--task", "missing-verification-fields"), 1, errors);
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
@@ -498,7 +490,7 @@ function expectExit(label: string, result: ReturnType<typeof spawnSync>, expecte
   }
 }
 
-function writeTaskFixture(tmp: string, workspace: string, task: string, options: { goalContract?: boolean; runProfileGoalContract?: boolean; verificationFields?: boolean; requestedAction?: string; autonomyLevel?: string; latestTarget?: string; verificationTarget?: string }): void {
+function writeTaskFixture(tmp: string, workspace: string, task: string, options: { goalContract?: boolean; runProfileGoalContract?: boolean; verificationFields?: boolean; requestedAction?: string; autonomyLevel?: string; latestTarget?: string; verificationTarget?: string; verificationGap?: string; defectRiskSweep?: string; unclaimedIssues?: string; negativeCases?: string; goalSatisfaction?: string; finalClaimAllowed?: string }): void {
   const dir = path.join(tmp, workspace || "workspace", task);
   fs.mkdirSync(dir, { recursive: true });
   const goalPath = path.join(dir, "goal-contract.md");
@@ -539,7 +531,7 @@ function writeTaskFixture(tmp: string, workspace: string, task: string, options:
     "Discovery source: goal-spec-only",
     "External side effects allowed: none",
     "Human checkpoint: none",
-    "Evaluator route: $evidence-verify before final claim",
+    "Evaluator route: $goal-verify before final claim",
     `Autonomy level: ${autonomyLevel}`,
     "",
   ].join("\n"));
@@ -564,13 +556,25 @@ function writeTaskFixture(tmp: string, workspace: string, task: string, options:
   ].join("\n"));
   fs.writeFileSync(path.join(dir, "evidence.md"), "Evidence: fixture\n");
   const verificationDir = path.join(tmp, workspace || "workspace", options.verificationTarget ?? task);
+  const verificationGap = options.verificationGap ?? "None";
+  const goalSatisfaction = options.goalSatisfaction ?? "fixture goal evidence covers explicit contract";
+  const defectRiskSweep = options.defectRiskSweep ?? "no material issue found in checked surface";
+  const unclaimedIssues = options.unclaimedIssues ?? "None material in checked surface";
+  const negativeCases = options.negativeCases ?? "not applicable for fixture";
+  const finalClaimAllowed = options.finalClaimAllowed ?? "yes";
   fs.writeFileSync(path.join(dir, "verification.md"), verificationFields ? [
     `- Goal Contract: ${path.join(verificationDir, "goal-contract.md")}`,
     `- Loop State: ${path.join(verificationDir, "loop-state.md")}`,
     `- Evidence: ${path.join(verificationDir, "evidence.md")}`,
     "- Verified at: 2026-06-23T00:00:00Z",
+    "- Review mode: completion",
+    `- Goal satisfaction review: ${goalSatisfaction}`,
+    `- Defect/risk sweep: ${defectRiskSweep}`,
+    `- Unclaimed issues found: ${unclaimedIssues}`,
+    `- Negative/abuse cases checked: ${negativeCases}`,
+    `- Final claim allowed: ${finalClaimAllowed}`,
     "- Verdict: PASS_TO_FINAL",
-    "- Gap: None",
+    `- Gap: ${verificationGap}`,
     "- Next route: none",
     "",
   ].join("\n") : "- Verdict:\n- Gap:\n- Next route:\n");
