@@ -2,11 +2,11 @@
 
 ## Project Structure & Module Organization
 
-本仓库维护 `alpha-goal` Codex 技能包。公开技能位于 `skills/alpha-goal/`、`skills/control-loop/`、`skills/goal-verify/`；目标成帧、系统建模和综合研判已折叠进 `alpha-goal` 主技能。`templates/` 是可选用户配置模板，`scripts/install.sh` 负责软链接安装，`tools/validate_skills.ts` 用于本地布局校验。`README.md`、`INSTALL.md`、`MANIFEST.md` 应与这些路径和命令保持一致。
+本仓库维护 `alpha-goal` Codex 技能包。公开技能位于 `skills/alpha-goal/`、`skills/codex-native-goal/`、`skills/control-loop/`、`skills/goal-verify/`；目标成帧、系统建模和综合研判已折叠进 `alpha-goal` 主技能。`templates/` 是可选用户配置模板，`scripts/install.sh` 负责软链接安装，`tools/validate_skills.ts` 用于本地布局校验。`README.md`、`INSTALL.md`、`MANIFEST.md` 应与这些路径和命令保持一致。
 
 ## Build, Test, and Development Commands
 
-- `npx --no-install tsx tools/validate_skills.ts .`：验证三公开技能结构、front matter、引用可发现性、闭环语义烟测、安装口径和 15K skills word+punctuation 预算；预算按单词数加标点/符号数计，用于保留触发行为、持久状态、记忆、自治门、行为级 gate 和 evaluator feedback。
+- `npx --no-install tsx tools/validate_skills.ts .`：验证公开技能结构、front matter、引用可发现性、闭环语义烟测、安装口径和 15K skills word+punctuation 预算；预算按单词数加标点/符号数计，用于保留触发行为、持久状态、记忆、自治门、行为级 gate 和 evaluator feedback。
 - `bash -n scripts/install.sh`：检查安装脚本语法。
 - `npx --no-install tsx skills/control-loop/scripts/mutation-preflight.ts --task <TaskName>`：可选开发辅助，用于打印已创建任务状态的迭代阶段事实；运行时 gate 以事实记录为准，不依赖脚本。
 - `python3 -c 'import pathlib,tomllib; tomllib.loads(pathlib.Path("templates/config.toml").read_text())'`：验证配置模板可解析。

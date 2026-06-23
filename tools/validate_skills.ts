@@ -11,7 +11,7 @@ const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
 const SKILLS_COUNT_BUDGET = 15_000;
 const COMPACT_RECOVERY_HOOK_MARKER = "codex-alpha-goal-compact-recovery:v1";
 const HOOKS_TEMPLATE = "templates/hooks.json";
-const REQUIRED_SKILL_NAMES = ["alpha-goal", "control-loop", "goal-verify"];
+const REQUIRED_SKILL_NAMES = ["alpha-goal", "codex-native-goal", "control-loop", "goal-verify"];
 const MERGED_SKILL_NAMES = ["goal-contract", "system-model", "decision-synthesis"];
 const LEGACY_SKILL_REFERENCES = [
   ...MERGED_SKILL_NAMES,
@@ -31,6 +31,7 @@ const LEGACY_SCRIPT_REFERENCES = [
 const LEGACY_RUN_MODE_REFERENCES = ["automation-triggered", "from-verification", "Run mode: manual | automation"];
 const STATE_ROOT_CORE_FILES = [
   "skills/alpha-goal/SKILL.md",
+  "skills/codex-native-goal/SKILL.md",
   "skills/control-loop/SKILL.md",
   "skills/goal-verify/SKILL.md",
   "templates/AGENTS.md",
@@ -76,6 +77,10 @@ const DESCRIPTION_SEMANTIC_CHECKS: Record<string, { required: string[]; forbidde
   "alpha-goal": {
     required: ["clarify", "intention", "requirements"],
     forbidden: ["execute or probe safely", "completion, correctness, readiness, safety"],
+  },
+  "codex-native-goal": {
+    required: ["Execute", "explicit or active Codex Native Goal", "create_goal", "update_goal", "Do not use for ordinary tasks", "do not bridge execution through control-loop"],
+    forbidden: ["discover facts before asking", "Independent goal verifier"],
   },
   "control-loop": {
     required: ["Use only after", "explicit goal specification", "specific read-only probe", "implementation", "Do not use for ambiguous planning"],
@@ -124,6 +129,28 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "YYYYMMDD-<TaskName>/interview.md",
     "docs/specs/YYYYMMDD-<TaskName>.md",
     "Design Summary"
+  ]],
+  ["codex native goal execution loop", "skills/codex-native-goal/SKILL.md", [
+    "Execute an explicit or active Codex Native Goal",
+    "not a `$control-loop` bridge",
+    "Native Goal owns the app-level objective",
+    "This skill owns native-goal execution slices",
+    "Alpha Goal state root",
+    "${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/",
+    "last directory name of the current session directory path",
+    "do not call `create_goal`",
+    "route ordinary engineering work to `$alpha-goal`",
+    "Execute the native-goal slice directly",
+    "Do not route implementation or hardening through `$control-loop`",
+    "route to `$goal-verify`",
+    "unfinished native goal already exists",
+    "Mark `complete` only",
+    "Mark `blocked` only",
+    "three consecutive goal turns",
+    "## Create Goal Gate",
+    "## Completion Gate",
+    "## Blocked Gate",
+    "## Recovery"
   ]],
   ["execution has hard safety gates", "skills/control-loop/SKILL.md", [
     "bounded executor and hardener",
@@ -571,32 +598,36 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
     } catch (error) {
       errors.push(`${HOOKS_TEMPLATE}: invalid JSON: ${errorMessage(error)}`);
     }
-    for (const term of [COMPACT_RECOVERY_HOOK_MARKER, "^compact$", "$alpha-goal", "$control-loop", "$goal-verify", "control-state/latest.md", "run-profile.md", "verification.md/evidence.md", "defect/risk", "unclaimed"]) {
+    for (const term of [COMPACT_RECOVERY_HOOK_MARKER, "^compact$", "$alpha-goal", "$codex-native-goal", "$control-loop", "$goal-verify", "control-state/latest.md", "run-profile.md", "verification.md/evidence.md", "defect/risk", "unclaimed"]) {
       if (!hooksTemplate.includes(term)) errors.push(`${HOOKS_TEMPLATE}: missing compact recovery hook term: ${term}`);
     }
-    for (const term of ["$control-loop: use for bounded implementation or hardening after an explicit goal specification", "$goal-verify: use for goal completion/readiness/review/audit verification"]) {
+    for (const term of ["$codex-native-goal: use for explicit or active Codex Native Goals", "do not bridge execution through control-loop", "$control-loop: use for bounded implementation or hardening after an explicit goal specification", "$goal-verify: use for goal completion/readiness/review/audit verification"]) {
       if (!hooksTemplate.includes(term)) errors.push(`${HOOKS_TEMPLATE}: missing candidate skill semantic guard: ${term}`);
     }
     if (/evidence[- ]verify/i.test(hooksTemplate)) errors.push(`${HOOKS_TEMPLATE}: legacy evidence-verify hook prose remains`);
     if (hooksTemplate.includes(`[${COMPACT_RECOVERY_HOOK_MARKER}]`)) errors.push(`${HOOKS_TEMPLATE}: compact recovery marker must not be printed to model context`);
   }
   const readme = readIfFile(path.join(root, "README.md"));
+  for (const name of REQUIRED_SKILL_NAMES) if (!readme.includes(`skills/${name}/`) || !readme.includes(`\`${name}\``)) errors.push(`README.md missing public skill entry: ${name}`);
   if (!readme.includes("当前代码事实只描述现状")) errors.push("README.md missing current-state-not-desired-state principle");
   if (!readme.includes("执行或加固已授权 slice")) errors.push("README.md must describe control-loop as execution-first");
   if (!readme.includes("Act/Probe -> Evidence -> $goal-verify -> Gap?")) errors.push("README.md workflow must include evidence and goal-verify");
   for (const term of ["control-state/latest.md", "goal-contract.md", "run-profile.md", "loop-state.md", "memory.md", "15,000 word+punctuation units", "失效条件"]) if (!readme.includes(term)) errors.push(`README.md missing persistent-loop term: ${term}`);
   const readmeEn = readIfFile(path.join(root, "README.en.md"));
+  for (const name of REQUIRED_SKILL_NAMES) if (!readmeEn.includes(`skills/${name}/`) || !readmeEn.includes(`\`${name}\``)) errors.push(`README.en.md missing public skill entry: ${name}`);
   if (!readmeEn.includes("Current code facts describe current state")) errors.push("README.en.md missing current-state-not-desired-state principle");
   if (!readmeEn.includes("Execute or harden an authorized slice")) errors.push("README.en.md must describe control-loop as execution-first");
   if (!readmeEn.includes("Act/Probe -> Evidence -> $goal-verify -> Gap?")) errors.push("README.en.md workflow must include evidence and goal-verify");
   for (const term of ["control-state/latest.md", "goal-contract.md", "run-profile.md", "loop-state.md", "memory.md", "15,000 word+punctuation units", "invalidation"]) if (!readmeEn.includes(term)) errors.push(`README.en.md missing persistent-loop term: ${term}`);
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
+  for (const name of REQUIRED_SKILL_NAMES) if (!installDoc.includes(name)) errors.push(`INSTALL.md missing public skill: ${name}`);
   if (!installDoc.includes("--no-sync-user-hooks")) errors.push("INSTALL.md missing --no-sync-user-hooks option");
   if (!installDoc.includes(HOOKS_TEMPLATE)) errors.push("INSTALL.md missing hooks template behavior");
   if (!installDoc.includes("codex-compact-skill-recovery")) errors.push("INSTALL.md missing legacy hook migration behavior");
   if (/tmp_codex_home\/skills\/[^"`\s]+\/scripts\//.test(installDoc)) errors.push("INSTALL.md smoke test must not require runtime skill scripts");
   for (const term of ["set -euo pipefail", "export CODEX_HOME", "Goal spec:", "Goal Contract:", "control-state/latest.md", "goal-contract", "run-profile", "loop-state", "memory", "Verified at", "HARDENING or VERIFICATION", "15,000 word+punctuation units", "without over-compressing", "without requiring runtime skill scripts", "verification.md/evidence.md"]) if (!installDoc.includes(term)) errors.push(`INSTALL.md missing persistent-loop term: ${term}`);
   const manifest = readIfFile(path.join(root, "MANIFEST.md"));
+  for (const name of REQUIRED_SKILL_NAMES) if (!manifest.includes(`skills/${name}/`)) errors.push(`MANIFEST.md missing public skill directory: ${name}`);
   if (!manifest.includes(HOOKS_TEMPLATE) || !manifest.includes(COMPACT_RECOVERY_HOOK_MARKER)) errors.push("MANIFEST.md missing hooks template marker");
   if (!manifest.includes("marker family") || !manifest.includes("codex-compact-skill-recovery")) errors.push("MANIFEST.md missing hook upgrade strategy");
   if (!manifest.includes("act or harden authorized slices")) errors.push("MANIFEST.md must describe control-loop as execution-first");

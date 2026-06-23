@@ -24,7 +24,7 @@ scripts/install.sh
 npx --no-install tsx tools/validate_skills.ts .
 ```
 
-安装脚本会在 `$HOME/.codex/skills/` 下为三个公开技能创建直接软链接，并清理指向本仓库旧公开技能的软链接。
+安装脚本会在 `$HOME/.codex/skills/` 下为四个公开技能创建直接软链接，并清理指向本仓库旧公开技能的软链接。
 校验脚本会强制整个 `skills/` 树不超过 15,000 word+punctuation units；计数口径是单词数加标点/符号数。这个预算用于保留 Persistent Goal Loop 的触发行为、持久状态、记忆、自治门、行为级 gate 和 evaluator feedback，避免过分压缩技能正文。
 
 运行态记录使用用户级 Alpha Goal state root：`${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`，其中 `<workspace-slug>` 是当前会话目录路径最后一个目录名。恢复入口是 `<state-root>/control-state/latest.md`；恢复执行至少需要该指针绑定的 `goal-contract.md`、`run-profile.md`、`loop-state.md`、`memory.md`；缺失或冲突时回到 `alpha-goal` 或阻塞。
@@ -33,6 +33,7 @@ npx --no-install tsx tools/validate_skills.ts .
 
 ```text
 $alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继续闭环。
+$codex-native-goal 执行或恢复一个显式或活动的 Codex Native Goal，并使用 Native Goal 驱动的执行闭环。
 ```
 
 通常不需要显式写出 skill 名称。正常描述你的需求即可；当请求需要目标成帧、有界执行或有证据支撑的完成声明时，Alpha Goal 会隐式触发。
@@ -42,6 +43,7 @@ $alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继�
 | Skill | 作用 |
 | --- | --- |
 | `alpha-goal` | 在开始工作前澄清意图、边界、验收证据和下一步安全路由。 |
+| `codex-native-goal` | 以 Native Goal 驱动的闭环执行显式或活动的 Codex Native Goal，并在目标不清时回到 `alpha-goal`、完成声明前进入 `goal-verify`。 |
 | `control-loop` | 执行或加固已授权 slice；`goal-contract.md`、`run-profile.md`、`loop-state.md` 和 `memory.md` 只作为恢复和约束输入。 |
 | `goal-verify` | 验证目标完成、声明边界、证据覆盖和 material 未声明缺陷/风险，并输出下一轮 Gap。 |
 
@@ -50,6 +52,7 @@ $alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继�
 - [INSTALL.md](INSTALL.md)：安装选项和 smoke test。
 - [MANIFEST.md](MANIFEST.md)：公开技能、脚本和运行时产物清单。
 - [skills/alpha-goal/SKILL.md](skills/alpha-goal/SKILL.md)：默认入口和路由规则。
+- [skills/codex-native-goal/SKILL.md](skills/codex-native-goal/SKILL.md)：Codex Native Goal 原生执行闭环规则。
 - [skills/control-loop/SKILL.md](skills/control-loop/SKILL.md)：有界行动闭环契约。
 - [skills/goal-verify/SKILL.md](skills/goal-verify/SKILL.md)：目标验证和缺陷/风险审查契约。
 
@@ -57,6 +60,7 @@ $alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继�
 
 ```text
 skills/alpha-goal/
+skills/codex-native-goal/
 skills/control-loop/
 skills/goal-verify/
 templates/
@@ -75,4 +79,4 @@ Alpha Goal 让 agent 工作保持目标明确、行动有界、声明受证据�
 - 持久状态：`loop-state.md` 记录当前状态和最新验证缺口，`iteration.md` 记录本轮事实，`memory.md` 保留带证据、置信度和失效条件的确认事实、约束和策略结果。
 - 有界执行：优先选择小而可观察的探针或定向变更，而不是宽泛重构和猜测式清理；run mode 和 Autonomy Ladder 共同约束触发方式与动作权限。
 - 独立验证：final/ready/safe/complete/repair/review 声明需要新鲜证据和 defect/risk sweep，并且要与执行过程分离检查。
-- 诚实路由：目标不清回到 `alpha-goal`，可修复的实现、证据缺口或 material 风险缺口回到 `control-loop`，证据或审查面不足的最终声明继续进入 `goal-verify`。
+- 诚实路由：目标不清回到 `alpha-goal`，活动 Native Goal 的可修复缺口回到 `codex-native-goal`，其他已授权执行缺口回到 `control-loop`，证据或审查面不足的最终声明继续进入 `goal-verify`。

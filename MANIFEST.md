@@ -5,6 +5,7 @@
 | Directory | Purpose |
 |---|---|
 | `skills/alpha-goal/` | Front-end controller: fact discovery, clarification, Goal Contract, trigger contract, initial loop state, route. |
+| `skills/codex-native-goal/` | Execute explicit or active Codex Native Goals through a native-goal-driven loop with verification and native lifecycle gates. |
 | `skills/control-loop/` | Persistent bounded actuator/controller: act or harden authorized slices; use Goal Contract, run profile, loop state, and memory as recovery and constraint inputs. |
 | `skills/goal-verify/` | Independent goal verifier for evidence coverage, claim boundaries, defect/risk sweep, and verification gaps. |
 
@@ -14,13 +15,13 @@ Former public framing/modeling/synthesis stages are folded into `skills/alpha-go
 
 | Path | Mutates state? | Purpose |
 |---|---:|---|
-| `scripts/install.sh` | Yes | Installs the three public skills as direct symlinks, cleans same-repo old skill links, syncs optional user templates, and syncs `templates/hooks.json` without running skill validation. |
+| `scripts/install.sh` | Yes | Installs the four public skills as direct symlinks, cleans same-repo old skill links, syncs optional user templates, and syncs `templates/hooks.json` without running skill validation. |
 | `skills/control-loop/scripts/mutation-preflight.ts` | No | Prints read-only git/path preflight evidence. |
-| `tools/validate_skills.ts` | No | Validates the three-skill contract, references, word+punctuation budget, scripts, docs, and schemas. |
+| `tools/validate_skills.ts` | No | Validates the public-skill contract, references, word+punctuation budget, scripts, docs, and schemas. |
 
 ## User Hooks
 
-`templates/hooks.json` defines one user-level `SessionStart` / `^compact$` hook, marked by `codex-alpha-goal-compact-recovery:v1`. `scripts/install.sh` merges that template into `${CODEX_HOME:-$HOME/.codex}/hooks.json`. The hook prints a static compact recovery policy that asks Codex to re-check `alpha-goal`, `control-loop`, and `goal-verify` after compaction and load the applicable skill, including goal verification, claim-boundary checks, and defect/risk sweep when needed.
+`templates/hooks.json` defines one user-level `SessionStart` / `^compact$` hook, marked by `codex-alpha-goal-compact-recovery:v1`. `scripts/install.sh` merges that template into `${CODEX_HOME:-$HOME/.codex}/hooks.json`. The hook prints a static compact recovery policy that asks Codex to re-check `alpha-goal`, `codex-native-goal`, `control-loop`, and `goal-verify` after compaction and load the applicable skill, including native goal execution, goal verification, claim-boundary checks, and defect/risk sweep when needed.
 
 Hook replacement is by marker family, not exact version, so later `:v2` template markers replace existing `:v1` hooks. The installer also migrates the earlier experimental `codex-compact-skill-recovery` family.
 

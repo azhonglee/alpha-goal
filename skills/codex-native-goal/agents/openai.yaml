@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Native Goal"
+  short_description: "Execute explicit Codex Native Goals with a native loop."
+  default_prompt: "Use $codex-native-goal to run or resume an explicit or active Codex Native Goal through native planning, action, evidence, verification, and lifecycle gates."

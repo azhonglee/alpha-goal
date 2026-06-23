@@ -6,10 +6,11 @@
 scripts/install.sh
 ```
 
-Default Codex home is `$HOME/.codex`. The script installs three public skills as direct symlinks:
+Default Codex home is `$HOME/.codex`. The script installs four public skills as direct symlinks:
 
 ```text
 alpha-goal
+codex-native-goal
 control-loop
 goal-verify
 ```
@@ -29,7 +30,7 @@ scripts/install.sh --verbose
 
 The script creates `${CODEX_HOME:-$HOME/.codex}/skills/<skill-name>` links for required public skills and cleans same-repo links for merged old public skills. By default it also syncs user-level templates, including `templates/hooks.json` into `${CODEX_HOME:-$HOME/.codex}/hooks.json`.
 
-The compact recovery hook definition lives in `templates/hooks.json`. It is a `SessionStart` hook for `compact` starts and prints a static policy telling Codex to decide whether `alpha-goal`, `control-loop`, or `goal-verify` applies after compaction, and to load the matching skill before continuing. `goal-verify` covers evidence, claim boundary, defect/risk sweep, and material unclaimed issues. Use `--no-sync-user-templates` to skip AGENTS/config template updates and `--no-sync-user-hooks` to skip hook template updates.
+The compact recovery hook definition lives in `templates/hooks.json`. It is a `SessionStart` hook for `compact` starts and prints a static policy telling Codex to decide whether `alpha-goal`, `codex-native-goal`, `control-loop`, or `goal-verify` applies after compaction, and to load the matching skill before continuing. `codex-native-goal` executes explicit or active Codex Native Goals through its own native-goal-driven loop; `goal-verify` covers evidence, claim boundary, defect/risk sweep, and material unclaimed issues. Use `--no-sync-user-templates` to skip AGENTS/config template updates and `--no-sync-user-hooks` to skip hook template updates.
 
 Hook upgrades are keyed by marker family. If the template marker changes from `...:v1` to `...:v2`, the installer removes older hooks from the same family before adding the template hook. It also removes the earlier experimental `codex-compact-skill-recovery` hook family.
 
@@ -44,7 +45,7 @@ set -euo pipefail
 tmp_codex_home="$(mktemp -d)"
 export CODEX_HOME="$tmp_codex_home"
 scripts/install.sh --no-sync-user-templates
-for skill in alpha-goal control-loop goal-verify; do
+for skill in alpha-goal codex-native-goal control-loop goal-verify; do
   test -f "$tmp_codex_home/skills/$skill/SKILL.md"
 done
 task_root="$tmp_codex_home/$(basename "$PWD")/20260623-smoke"
@@ -127,6 +128,7 @@ grep -q "Memory: $task_root/memory.md" "$tmp_codex_home/$(basename "$PWD")/contr
 grep -q "HARDENING or VERIFICATION" "$tmp_codex_home/hooks.json"
 grep -q "verification.md/evidence.md" "$tmp_codex_home/hooks.json"
 grep -q '\$alpha-goal' "$tmp_codex_home/hooks.json"
+grep -q '\$codex-native-goal' "$tmp_codex_home/hooks.json"
 grep -q '\$control-loop' "$tmp_codex_home/hooks.json"
 grep -q '\$goal-verify' "$tmp_codex_home/hooks.json"
 npx --no-install tsx tools/validate_skills.ts .
@@ -137,6 +139,7 @@ rm -rf "$tmp_codex_home"
 
 ```text
 $alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继续闭环。
+$codex-native-goal 执行或恢复显式或活动的 Codex Native Goal，并使用 Native Goal 驱动的执行闭环。
 $control-loop 根据已明确边界、loop-state 和 memory 做下一轮最小安全 slice。
 $goal-verify 验证目标完成、证据覆盖、声明边界和 material 未声明缺陷/风险，并返回可继续 harden 的 Gap。
 ```
