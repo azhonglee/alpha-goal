@@ -49,81 +49,26 @@ for skill in alpha-goal control-loop goal-verify; do
 done
 task_root="$tmp_codex_home/$(basename "$PWD")/20260623-smoke"
 mkdir -p "$task_root"
+cat >"$task_root/context.md" <<'EOF'
+Context: smoke
+EOF
+cat >"$task_root/interview.md" <<'EOF'
+Interview: smoke
+EOF
 cat >"$task_root/goal-contract.md" <<'EOF'
 Trigger Contract: manual
 Autonomy Level: L3 Modify worktree
 EOF
-cat >"$task_root/run-profile.md" <<EOF
-Goal spec: $task_root/goal-contract.md
-Rule: Controls execution only; must not expand, narrow, reinterpret, waive, or replace the goal spec.
-Run mode: manual
-Goal Contract: $task_root/goal-contract.md
-Trigger event: none
-Requested action: modify-worktree
-Discovery source: goal-spec-only
-External side effects allowed: none
-Human checkpoint: none
-Evaluator route: \$goal-verify before final claim
-Autonomy level: L3 Modify worktree
-EOF
-cat >"$task_root/loop-state.md" <<'EOF'
-Current Objective: smoke
-Current Phase: VERIFICATION
-Completed: None yet
-Pending: None yet
-Known Risks: None yet
-Last Verification Gap: None yet
-Next Slice: run smoke validation
-Stop Condition: validation complete
-EOF
-cat >"$task_root/memory.md" <<'EOF'
-Confirmed Facts: None yet
-Confirmed Root Causes: None yet
-Known Constraints: None yet
-Working Strategies: None yet
-Failed Strategies: None yet
-EOF
-cat >"$task_root/evidence.md" <<'EOF'
-Evidence: smoke
-EOF
-mkdir -p "$tmp_codex_home/$(basename "$PWD")/control-state"
-cat >"$tmp_codex_home/$(basename "$PWD")/control-state/latest.md" <<EOF
-# Control State Latest
-State directory: $task_root
-Goal Contract: $task_root/goal-contract.md
-Run Profile: $task_root/run-profile.md
-Loop State: $task_root/loop-state.md
-Memory: $task_root/memory.md
-Evidence: $task_root/evidence.md
-Verification: $task_root/verification.md
-Current Phase: VERIFICATION
-Next route: none
-Updated at: 2026-06-23T00:00:00Z
-EOF
-cat >"$task_root/verification.md" <<EOF
-- Goal Contract: $task_root/goal-contract.md
-- Loop State: $task_root/loop-state.md
-- Evidence: $task_root/evidence.md
-- Verified at: 2026-06-23T00:00:00Z
-- Review mode: completion
-- Goal satisfaction review: smoke goal evidence covers explicit contract
-- Defect/risk sweep: no material issue found in checked surface
-- Unclaimed issues found: None material in checked surface
-- Negative/abuse cases checked: not applicable for smoke
-- Final claim allowed: yes
-- Verdict: PASS_TO_FINAL
-- Gap: None
-- Next route: none
-EOF
 python3 -m json.tool "$tmp_codex_home/hooks.json" >/dev/null
 grep -q "codex-alpha-goal-compact-recovery:v1" "$tmp_codex_home/hooks.json"
 grep -q "treat pre-compaction remembered skill text as stale" "$tmp_codex_home/hooks.json"
+grep -q "goal-contract.md first" "$tmp_codex_home/hooks.json"
+grep -q "context.md/interview.md" "$tmp_codex_home/hooks.json"
 grep -q "control-state/latest.md" "$tmp_codex_home/hooks.json"
 grep -q "goal-contract.md" "$tmp_codex_home/hooks.json"
 grep -q "run-profile.md" "$tmp_codex_home/hooks.json"
 grep -q "loop-state.md" "$tmp_codex_home/hooks.json"
 grep -q "memory.md" "$tmp_codex_home/hooks.json"
-grep -q "Memory: $task_root/memory.md" "$tmp_codex_home/$(basename "$PWD")/control-state/latest.md"
 grep -q "HARDENING or VERIFICATION" "$tmp_codex_home/hooks.json"
 grep -q "verification.md/evidence.md" "$tmp_codex_home/hooks.json"
 grep -q '\$alpha-goal' "$tmp_codex_home/hooks.json"
@@ -137,7 +82,7 @@ rm -rf "$tmp_codex_home"
 
 ```text
 $alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继续闭环。
-$control-loop 根据已明确边界、loop-state 和 memory 做下一轮最小安全 slice。
+$control-loop 根据 Goal Contract 和已有条件检查点做下一轮最小安全 slice。
 $goal-verify 验证目标完成、证据覆盖、声明边界和 material 未声明缺陷/风险，并返回可继续 harden 的 Gap。
 ```
 

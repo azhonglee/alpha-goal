@@ -101,60 +101,92 @@ function main(): number {
 
 function checkTaskState(taskDir: string): boolean {
   let ok = true;
-  for (const name of ["goal-contract.md", "run-profile.md", "loop-state.md", "memory.md"]) {
-    const path = `${taskDir}${name}`;
-    const label = name === "run-profile.md" ? "run profile path" : name === "loop-state.md" ? "loop-state path" : name === "memory.md" ? "memory path" : "goal-contract path";
-    section(label, path);
-    section(name, existsSync(path) ? "present" : "missing");
-    ok = existsSync(path) && ok;
-  }
-
-  const latestPath = `${taskDir.replace(/[^/]+\/$/, "")}control-state/latest.md`;
-  section("control-state/latest.md", existsSync(latestPath) ? `present: ${latestPath}` : `missing: ${latestPath}`);
-  ok = existsSync(latestPath) && ok;
-
-  const goalText = readTaskFile(taskDir, "goal-contract.md");
-  const runProfile = readTaskFile(taskDir, "run-profile.md");
-  const loopState = readTaskFile(taskDir, "loop-state.md");
-  const memory = readTaskFile(taskDir, "memory.md");
-  const latest = existsSync(latestPath) ? readFileSync(latestPath, "utf8") : "";
-  ok = requireFields("run profile", runProfile, ["Goal spec", "Goal Contract", "Run mode", "Trigger event", "Requested action", "Discovery source", "External side effects allowed", "Human checkpoint", "Evaluator route", "Autonomy level"], true) && ok;
-  ok = requireFields("loop state", loopState, ["Current Objective", "Current Phase"], false) && ok;
-  ok = requireFields("loop state ledger", loopState, ["Completed", "Pending", "Known Risks", "Last Verification Gap"], true) && ok;
-  ok = requireFields("memory", memory, ["Confirmed Facts", "Confirmed Root Causes", "Known Constraints", "Working Strategies", "Failed Strategies"], true) && ok;
-  ok = requireFields("control-state latest", latest, ["State directory", "Goal Contract", "Run Profile", "Loop State", "Memory", "Evidence", "Verification", "Current Phase", "Next route", "Updated at"], true) && ok;
-
-  const mode = field(runProfile, "Run mode");
-  const action = field(runProfile, "Requested action");
-  const autonomy = field(runProfile, "Autonomy level");
-  const phase = field(loopState, "Current Phase");
-  const goalContract = field(runProfile, "Goal Contract");
   const goalPath = `${taskDir}goal-contract.md`;
   const runProfilePath = `${taskDir}run-profile.md`;
   const loopStatePath = `${taskDir}loop-state.md`;
   const memoryPath = `${taskDir}memory.md`;
   const evidencePath = `${taskDir}evidence.md`;
   const verificationPath = `${taskDir}verification.md`;
+
+  section("goal-contract path", goalPath);
+  section("goal-contract.md", existsSync(goalPath) ? "present" : "missing");
+  ok = existsSync(goalPath) && ok;
+
+  for (const [label, path] of [
+    ["run profile path", runProfilePath],
+    ["loop-state path", loopStatePath],
+    ["memory path", memoryPath],
+  ]) {
+    section(label, path);
+    section(label.replace(" path", ""), existsSync(path) ? "present" : "absent (optional)");
+  }
+
+  const latestPath = `${taskDir.replace(/[^/]+\/$/, "")}control-state/latest.md`;
+  section("control-state/latest.md", existsSync(latestPath) ? `present: ${latestPath}` : `absent (optional): ${latestPath}`);
+
+  const goalText = readTaskFile(taskDir, "goal-contract.md");
+  const runProfile = readTaskFile(taskDir, "run-profile.md");
+  const loopState = readTaskFile(taskDir, "loop-state.md");
+  const memory = readTaskFile(taskDir, "memory.md");
+  const latest = existsSync(latestPath) ? readFileSync(latestPath, "utf8") : "";
+  const hasRunProfile = !!runProfile.trim();
+  const hasLoopState = !!loopState.trim();
+  const hasMemory = !!memory.trim();
+  const hasLatest = !!latest.trim();
+
+  if (hasRunProfile) ok = requireFields("run profile", runProfile, ["Goal spec", "Goal Contract", "Run mode", "Trigger event", "Requested action", "Discovery source", "External side effects allowed", "Human checkpoint", "Evaluator route", "Autonomy level"], true) && ok;
+  else section("run profile", "absent; plain manual L1-L3 work may execute from Goal Contract");
+
+  if (hasLoopState) {
+    ok = requireFields("loop state", loopState, ["Current Objective", "Current Phase"], false) && ok;
+    ok = requireFields("loop state ledger", loopState, ["Completed", "Pending", "Known Risks", "Last Verification Gap"], true) && ok;
+  } else {
+    section("loop state", "absent; no multi-iteration recovery checkpoint");
+  }
+
+  if (hasMemory) ok = requireFields("memory", memory, ["Confirmed Facts", "Confirmed Root Causes", "Known Constraints", "Working Strategies", "Failed Strategies"], true) && ok;
+  else section("memory", "absent; no reusable learning checkpoint");
+
+  if (hasLatest) ok = requireFields("control-state latest", latest, ["State directory", "Goal Contract", "Updated at"], false) && ok;
+
+  const mode = hasRunProfile ? field(runProfile, "Run mode") : inferRunMode(goalText);
+  const action = hasRunProfile ? field(runProfile, "Requested action") : "";
+  const autonomy = hasRunProfile ? field(runProfile, "Autonomy level") : field(goalText, "Autonomy Level");
+  const phase = field(loopState, "Current Phase");
+  const goalContract = field(runProfile, "Goal Contract");
   const nextSlice = field(loopState, "Next Slice");
   const stopCondition = field(loopState, "Stop Condition");
+  const runProfileRequired = ["scheduled", "webhook", "verification-triggered"].includes(mode) || actionRequiresProfile(action);
 
   ok = check("run mode", runModes.has(mode), `invalid: ${mode || "<empty>"}`) && ok;
-  ok = check("requested action", requestedActions.has(action), `invalid: ${action || "<empty>"}`) && ok;
+  if (hasRunProfile) ok = check("requested action", requestedActions.has(action), `invalid: ${action || "<empty>"}`) && ok;
   ok = check("autonomy level", /^L[1-5]\b/.test(autonomy), `invalid: ${autonomy || "<empty>"}`) && ok;
-  ok = check("autonomy action ceiling", actionAllowedByLevel(action, autonomy), `${action || "<empty>"} exceeds ${autonomy || "<empty>"}`) && ok;
-  ok = check("loop phase", loopPhases.has(phase), `invalid: ${phase || "<empty>"}`) && ok;
-  ok = check("goal contract binding", samePath(goalContract, goalPath), "run profile Goal Contract does not match current task") && ok;
+  if (hasRunProfile) ok = check("autonomy action ceiling", actionAllowedByLevel(action, autonomy), `${action || "<empty>"} exceeds ${autonomy || "<empty>"}`) && ok;
+  ok = check("run profile required", !runProfileRequired || hasRunProfile, `${mode || "<empty>"} / ${action || "<empty>"} requires run-profile.md`) && ok;
+  if (hasLoopState) ok = check("loop phase", loopPhases.has(phase), `invalid: ${phase || "<empty>"}`) && ok;
+  if (hasRunProfile) ok = check("goal contract binding", samePath(goalContract, goalPath), "run profile Goal Contract does not match current task") && ok;
   ok = check("trigger contract binding", triggerContractAllowsMode(goalText, mode), `Goal Contract does not authorize ${mode || "<empty>"} trigger`) && ok;
-  ok = check("latest binding", latestMatchesTask(latest, taskDir, goalPath, runProfilePath, loopStatePath, memoryPath, evidencePath, verificationPath, phase), "latest does not match current task files") && ok;
+  if (hasLatest) ok = check("latest binding", latestMatchesTask(latest, taskDir, goalPath, runProfilePath, loopStatePath, memoryPath, evidencePath, verificationPath, phase), "latest does not match current task files") && ok;
   if (mode === "verification-triggered") {
     ok = check("verification-triggered binding", verificationMatchesTask(readTaskFile(taskDir, "verification.md"), goalPath, loopStatePath, evidencePath), "verification binding missing or stale") && ok;
   }
-  ok = check("loop actionability", !isUnset(nextSlice) && !isNone(nextSlice) || !isUnset(stopCondition) && !isNone(stopCondition), "missing actionable Next Slice or Stop Condition") && ok;
-  ok = check("evaluator route", field(runProfile, "Evaluator route").includes("$goal-verify"), "missing $goal-verify") && ok;
-  ok = check("memory evidence", memoryAllowsEmpty(memory) || /Evidence:/i.test(memory) && /Confidence:/i.test(memory) && /Invalidation:/i.test(memory), "non-empty memory needs Evidence, Confidence, and Invalidation") && ok;
+  if (hasLoopState) ok = check("loop actionability", !isUnset(nextSlice) && !isNone(nextSlice) || !isUnset(stopCondition) && !isNone(stopCondition), "missing actionable Next Slice or Stop Condition") && ok;
+  if (hasRunProfile) ok = check("evaluator route", field(runProfile, "Evaluator route").includes("$goal-verify"), "missing $goal-verify") && ok;
+  if (hasMemory) ok = check("memory evidence", memoryAllowsEmpty(memory) || /Evidence:/i.test(memory) && /Confidence:/i.test(memory) && /Invalidation:/i.test(memory), "non-empty memory needs Evidence, Confidence, and Invalidation") && ok;
 
   section("trigger event", "checked");
   return ok;
+}
+
+function inferRunMode(goalText: string): string {
+  if (/verification-triggered/i.test(goalText)) return "verification-triggered";
+  if (/webhook/i.test(goalText)) return "webhook";
+  if (/scheduled|schedule/i.test(goalText)) return "scheduled";
+  return "manual";
+}
+
+function actionRequiresProfile(action: string): boolean {
+  return ["commit", "push", "open-pr", "merge"].includes(action);
 }
 
 function actionAllowedByLevel(action: string, level: string): boolean {
@@ -174,19 +206,23 @@ function samePath(actual: string, expected: string): boolean {
 function latestMatchesTask(latest: string, taskDir: string, goalPath: string, runProfilePath: string, loopStatePath: string, memoryPath: string, evidencePath: string, verificationPath: string, phase: string): boolean {
   return samePath(field(latest, "State directory"), taskDir.replace(/\/+$/, "")) &&
     samePath(field(latest, "Goal Contract"), goalPath) &&
-    samePath(field(latest, "Run Profile"), runProfilePath) &&
-    samePath(field(latest, "Loop State"), loopStatePath) &&
-    samePath(field(latest, "Memory"), memoryPath) &&
-    samePath(field(latest, "Evidence"), evidencePath) &&
-    samePath(field(latest, "Verification"), verificationPath) &&
-    field(latest, "Current Phase") === phase &&
+    optionalSamePath(field(latest, "Run Profile"), runProfilePath) &&
+    optionalSamePath(field(latest, "Loop State"), loopStatePath) &&
+    optionalSamePath(field(latest, "Memory"), memoryPath) &&
+    optionalSamePath(field(latest, "Evidence"), evidencePath) &&
+    optionalSamePath(field(latest, "Verification"), verificationPath) &&
+    (!field(latest, "Current Phase") || field(latest, "Current Phase") === phase) &&
     !!field(latest, "Updated at");
+}
+
+function optionalSamePath(actual: string, expected: string): boolean {
+  return !actual || samePath(actual, expected);
 }
 
 function verificationMatchesTask(verification: string, goalPath: string, loopStatePath: string, evidencePath: string): boolean {
   return samePath(field(verification, "- Goal Contract"), goalPath) &&
-    samePath(field(verification, "- Loop State"), loopStatePath) &&
-    samePath(field(verification, "- Evidence"), evidencePath) &&
+    optionalSamePath(field(verification, "- Loop State"), loopStatePath) &&
+    optionalSamePath(field(verification, "- Evidence"), evidencePath) &&
     !!field(verification, "- Verified at");
 }
 

@@ -7,7 +7,7 @@ description: "Independent goal verifier and defect/risk reviewer. Use when compl
 
 Act as an independent evaluator, not the executor. A final claim is unproven until both lenses pass:
 
-1. Goal satisfaction: evidence covers the explicit Goal Contract, acceptance evidence, constraints, non-goals, run-profile checkpoints, and proposed claim.
+1. Goal satisfaction: evidence covers the explicit Goal Contract, acceptance evidence, constraints, non-goals, any required run-profile checkpoints, and proposed claim.
 2. Defect/risk sweep: review the authorized surface for material unclaimed defects, regressions, unsafe old paths, scope drift, and unsupported risk claims.
 
 Use subagents for supporting review, risk, or evidence passes when useful; `goal-verify` owns the final verdict.
@@ -18,7 +18,7 @@ Read `references/claim-boundary.md` before final/merge/ship/safety claims. Read 
 
 Resolve the Alpha Goal state root the same way as `$alpha-goal`: always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
 
-Read canonical state-root Goal Contract, latest `loop-state.md`, `iteration.md`, `evidence.md`, `verification.md`, diff/artifacts, command outputs, tests, logs, reviewer/user feedback, and specs. Check but do not trust summaries.
+Read canonical state-root Goal Contract, existing `loop-state.md`, `iteration.md`, `evidence.md`, `verification.md`, diff/artifacts, command outputs, tests, logs, reviewer/user feedback, and specs. Check but do not trust summaries.
 
 Read `run-profile.md` when present, referenced, or required by control-loop evidence. Treat it as execution context only, never as the Goal Contract. For cross-repo claims, read the repo manifest and per-repo plus integration evidence from the same task-level state root.
 
@@ -37,22 +37,22 @@ Read `run-profile.md` when present, referenced, or required by control-loop evid
 - For replace, remove, disable, migrate, forbid, no-fallback, or security semantics, require positive evidence for the intended behavior and negative evidence that old/prohibited behavior is not reachable on default or realistic paths.
 - For cross-repo claims, map evidence and risk by repo surface and integration relation; one repo's passing checks cannot prove integrated behavior.
 - Version pins, generated clients, API contracts, dependent app behavior, data migration, rollback, delivery links, credentials, privacy, and security claims must be evidenced when the goal depends on them.
-- A verification used for `verification-triggered` recovery must bind to the checked Goal Contract, loop-state artifact, and evidence artifact; stale or cross-task bindings are gaps.
+- A verification used for `verification-triggered` recovery must bind to the checked Goal Contract and any loop-state or evidence artifacts it relies on; stale or cross-task bindings are gaps.
 - Do not repair during verification; route back instead.
 - Final wording must not exceed the highest evidence-supported boundary.
 - Do not narrow the claim as a successful outcome. If evidence or defect/risk sweep cannot support the proposed claim, record the gap and return `NEXT_ITERATION`.
 - A run profile cannot expand, narrow, reinterpret, waive, or replace Goal Contract scope, authority, acceptance evidence, non-goals, Trigger Contract, Autonomy level, or claim boundary. On conflict, verify against the Goal Contract and route back.
-- Missing evidence for run-profile checkpoints, named evaluators, evaluator route, trigger behavior, autonomy gate, required loop-state updates, required memory updates, or required defect/risk sweep is a gap for handoff or final claims.
+- Missing evidence for required run-profile checkpoints, named evaluators, evaluator route, trigger behavior, autonomy gate, required loop-state updates, required memory updates, or required defect/risk sweep is a gap for handoff or final claims.
 
 ## Verdicts
 
 - `PASS_TO_FINAL`: evidence proves goal satisfaction and the defect/risk sweep found no material unhandled issue in the checked surface; next route is `none`.
 - `NEXT_ITERATION`: goal satisfaction, evidence coverage, claim boundary, or defect/risk sweep does not prove the proposed final state. Choose next route by the Gap:
-  - `control-loop` only for same-goal fixable evidence, test, edge, compatibility, cleanup, loop-state, memory, defect/risk, or verification-gap hardening.
+  - `control-loop` only for same-goal fixable evidence, test, edge, compatibility, cleanup, required loop-state, required memory, defect/risk, or verification-gap hardening.
   - `alpha-goal` when target, scope, authority, source reference, acceptance evidence, non-goal, decision boundary, actuator boundary, Trigger Contract, Autonomy level, claim boundary, or required review surface is wrong or unclear.
   - `BLOCKED` when permission, tool, data, environment, credential, or user-owned decision is missing.
 
-The Gap must be specific enough for `$control-loop` to set `loop-state.md` Next Slice without reinterpreting the Goal Contract.
+The Gap must be specific enough for `$control-loop` to choose the next slice, and to set `loop-state.md` Next Slice when persistent recovery is needed, without reinterpreting the Goal Contract.
 
 ## Final response guard
 
@@ -66,12 +66,11 @@ Debug/repair claims require reproduction evidence, suspected cause, confirming e
 
 ## Output
 
-Persist `<Alpha Goal state root>/YYYYMMDD-<TaskName>/verification.md` for risky, final, review/audit, or handoff claims.
+Persist `<Alpha Goal state root>/YYYYMMDD-<TaskName>/verification.md` for risky, final, review/audit, verification-triggered, or handoff claims. Use the base verdict for ordinary checks and add conditional sections only when they apply.
 
 ```markdown
 Verification Verdict:
 - Goal Contract:
-- Loop State:
 - Evidence:
 - Verified at:
 - Review mode:
@@ -80,11 +79,6 @@ Verification Verdict:
 - Goal satisfaction review:
 - Defect/risk sweep:
 - Unclaimed issues found:
-- Negative/abuse cases checked:
-- Indicator handoff review:
-- Adaptive learning review:
-- Loop state review:
-- Memory review:
 - Repo surface coverage:
 - Evidence coverage:
 - Unresolved user-owned decisions:
@@ -96,6 +90,14 @@ Verification Verdict:
 - Final claim allowed: yes/no
 - Verdict: PASS_TO_FINAL / NEXT_ITERATION
 - Next route: none / control-loop / alpha-goal / BLOCKED
+
+Conditional sections, include only when applicable:
+- Run profile review:
+- Loop state review:
+- Memory review:
+- Negative/abuse cases checked:
+- Indicator handoff review:
+- Adaptive learning review:
 ```
 
 TUI summary:
