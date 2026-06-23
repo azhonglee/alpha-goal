@@ -2,7 +2,7 @@
 
 Languages: [Chinese](README.md) | English
 
-Alpha Goal is a minimal closed-loop skillset for goal engineering work. It helps agents discover facts before asking, work inside explicit boundaries, and make final claims only as far as evidence supports them.
+Alpha Goal is a minimal persistent closed-loop skillset for goal engineering work. It helps agents discover facts before asking, resume from durable state and compressed memory, work inside explicit boundaries, and make final claims only as far as evidence supports them.
 
 ## When to use it
 
@@ -14,7 +14,7 @@ Alpha Goal is a minimal closed-loop skillset for goal engineering work. It helps
 ## How it works
 
 ```text
-Describe the need -> discover facts -> clarify the boundary -> act in a bounded loop -> verify the claim -> final answer or next loop
+Trigger -> Read Goal -> Read Loop State -> Read Memory -> Plan Slice -> Act/Probe -> Evidence -> $goal-verify -> Gap? -> Harden or Final Claim
 ```
 
 ## Quick start
@@ -25,9 +25,9 @@ npx --no-install tsx tools/validate_skills.ts .
 ```
 
 The installer creates direct symlinks for the three public skills under `$HOME/.codex/skills/` and cleans same-repo links for merged old public skills.
-The validator enforces the whole `skills/` tree under 30,000 bytes.
+The validator enforces the whole `skills/` tree under 15,000 word+punctuation units, counted as words plus punctuation/symbol marks. This budget preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, autonomy gates, behavior-level gates, and evaluator feedback without over-compressing skill text.
 
-Runtime records use the user-level Alpha Goal state root: `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`, where `<workspace-slug>` is the last directory name of the current session directory path.
+Runtime records use the user-level Alpha Goal state root: `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`, where `<workspace-slug>` is the last directory name of the current session directory path. The recovery entry is `<state-root>/control-state/latest.md`; recovery needs the pointer-bound `goal-contract.md`, `run-profile.md`, `loop-state.md`, and `memory.md`; missing or conflicting files route to `alpha-goal` or blocker.
 
 ## Usage examples
 
@@ -42,8 +42,8 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
 | Skill | What it helps with |
 | --- | --- |
 | `alpha-goal` | Clarify intent, boundaries, acceptance evidence, and the next safe route before work starts. |
-| `control-loop` | Carry out one authorized, observable step and compare the result to the goal. |
-| `evidence-verify` | Check whether fresh evidence supports final/ready/safe/complete/repair claims. |
+| `control-loop` | Execute or harden an authorized slice; `goal-contract.md`, `run-profile.md`, `loop-state.md`, and `memory.md` are recovery and constraint inputs. |
+| `goal-verify` | Verify goal completion, claim boundary, evidence coverage, and material unclaimed defects/risks, then return the next Gap. |
 
 ## Docs
 
@@ -51,14 +51,14 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
 - [MANIFEST.md](MANIFEST.md): public skills, scripts, and runtime artifacts.
 - [skills/alpha-goal/SKILL.md](skills/alpha-goal/SKILL.md): default entry and routing rules.
 - [skills/control-loop/SKILL.md](skills/control-loop/SKILL.md): bounded action loop contract.
-- [skills/evidence-verify/SKILL.md](skills/evidence-verify/SKILL.md): evidence comparison contract.
+- [skills/goal-verify/SKILL.md](skills/goal-verify/SKILL.md): goal verification and defect/risk review contract.
 
 ## Structure
 
 ```text
 skills/alpha-goal/
 skills/control-loop/
-skills/evidence-verify/
+skills/goal-verify/
 templates/
 scripts/
 tools/
@@ -72,6 +72,7 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 - Evidence before authority: Current code facts describe current state; desired behavior comes from user intent, specs, issues, or accepted contracts.
 - Goals before action: outcome, scope, non-goals, acceptance evidence, decision owner, and claim boundary define what may change.
 - Minimal useful modeling: model dependencies, disturbances, and risks only when they affect safe control, validation, or routing.
-- Bounded execution: prefer small observable probes or targeted changes over broad refactors and speculative cleanup.
-- Independent verification: final/ready/safe/complete/repair claims require fresh evidence, checked separately from execution.
-- Honest routing: unclear goals return to `alpha-goal`, fixable implementation or evidence gaps return to `control-loop`, and unsupported final claims continue through `evidence-verify`.
+- Persistent state: `loop-state.md` records current state and the latest verification gap, `iteration.md` records this run's facts, and `memory.md` keeps compressed confirmed facts, constraints, and strategy outcomes with evidence, confidence, and invalidation.
+- Bounded execution: prefer small observable probes or targeted changes over broad refactors and speculative cleanup; run mode and the Autonomy Ladder constrain trigger behavior and action authority.
+- Independent verification: final/ready/safe/complete/repair/review claims require fresh evidence and defect/risk sweep, checked separately from execution.
+- Honest routing: unclear goals return to `alpha-goal`, fixable implementation, evidence, or material risk gaps return to `control-loop`, and unsupported or under-reviewed final claims continue through `goal-verify`.
