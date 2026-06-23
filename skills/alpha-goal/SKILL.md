@@ -17,6 +17,8 @@ Pre-flight -> Discovery -> Clarify with User -> Assumption Stress Test -> Final 
 
 `Clarify with User` is the core phase.
 
+**Do Not Compact or Merge phases.**
+
 ## Phase 0: Pre-flight
 
 1. Classify work type:
