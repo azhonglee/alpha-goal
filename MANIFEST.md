@@ -4,8 +4,8 @@
 
 | Directory | Purpose |
 |---|---|
-| `skills/alpha-goal/` | Front-end controller: fact discovery, clarification, Goal Contract, trigger contract, initial loop state, route. |
-| `skills/control-loop/` | Persistent bounded actuator/controller: act or harden authorized slices; use Goal Contract, run profile, loop state, and memory as recovery and constraint inputs. |
+| `skills/alpha-goal/` | Front-end controller: fact discovery, clarification, Goal Contract, trigger contract, autonomy boundary, route. |
+| `skills/control-loop/` | Bounded actuator/controller: act or harden authorized slices; use Goal Contract as the required input and one conditional checkpoint for recovery, trigger handling, durable evidence, or verification. |
 | `skills/goal-verify/` | Independent goal verifier for evidence coverage, claim boundaries, defect/risk sweep, and verification gaps. |
 
 Former public framing/modeling/synthesis stages are folded into `skills/alpha-goal/SKILL.md`.
@@ -30,15 +30,9 @@ Default runtime artifacts live under the user-level Alpha Goal state root: `${CO
 
 | Path | Purpose |
 |---|---|
-| `<state-root>/YYYYMMDD-<TaskName>/interview.md` | Clarification records and decision-boundary notes. |
-| `<state-root>/YYYYMMDD-<TaskName>/goal-contract.md` | Goal Contract, including Trigger Contract and Autonomy Level. |
-| `<state-root>/YYYYMMDD-<TaskName>/run-profile.md` | Execution profile for this run; cannot redefine the Goal Contract. |
-| `<state-root>/YYYYMMDD-<TaskName>/loop-state.md` | Durable current objective, phase, completed/pending work, known risks, last verification gap, next slice, stop condition. |
-| `<state-root>/YYYYMMDD-<TaskName>/memory.md` | Compressed loop memory: confirmed facts, root causes, constraints, working strategies, failed strategies, with evidence, confidence, and invalidation. |
-| `<state-root>/YYYYMMDD-<TaskName>/iteration.md` | Latest execution run log; records facts only and does not store persistent current state. |
-| `<state-root>/YYYYMMDD-<TaskName>/evidence.md` | Durable evidence, logs, screenshots, traces, or check outputs. |
-| `<state-root>/YYYYMMDD-<TaskName>/verification.md` | Verification verdict artifacts and next Gap for evaluator feedback. |
-| `<state-root>/control-state/latest.md` | Stable latest recovery pointer with State directory, Goal Contract, Run Profile, Loop State, Memory, Evidence, Verification, Current Phase, Next route, and Updated at. |
+| `<state-root>/YYYYMMDD-<TaskName>/goal-contract.md` | Default `alpha-goal` artifact and canonical accepted contract, including contract status, discovery notes, interview ledger, Trigger Contract, and Autonomy Level. |
+| `<state-root>/YYYYMMDD-<TaskName>/checkpoint.md` | Conditional task checkpoint containing only needed sections: run profile, loop state, memory, iteration, evidence, and verification; memory entries keep evidence, confidence, and invalidation. |
+| `<state-root>/control-state/latest.md` | Optional global recovery index pointing to the latest accepted task state, Goal Contract, optional checkpoint, phase, route, and update time; not a stage artifact. |
 
 ## Count Budget
 
