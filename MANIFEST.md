@@ -5,7 +5,7 @@
 | Directory | Purpose |
 |---|---|
 | `skills/alpha-goal/` | Front-end controller: fact discovery, clarification, Goal Contract, trigger contract, autonomy boundary, route. |
-| `skills/control-loop/` | Native-goal-driven bounded actuator/controller: act or harden authorized slices; use Goal Contract as the required input and one conditional checkpoint for recovery, trigger handling, durable evidence, or verification. |
+| `skills/control-loop/` | Goal-contract-driven bounded actuator/controller: act or harden authorized slices; use Goal Contract as the required input and one conditional checkpoint for recovery, trigger handling, durable evidence, or verification. |
 | `skills/goal-verify/` | Independent goal verifier for evidence coverage, claim boundaries, defect/risk sweep, and verification gaps. |
 
 Former public framing/modeling/synthesis stages are folded into `skills/alpha-goal/SKILL.md`.
@@ -20,7 +20,7 @@ Former public framing/modeling/synthesis stages are folded into `skills/alpha-go
 
 ## User Hooks
 
-`templates/hooks.json` defines one user-level `SessionStart` / `^compact$` hook, marked by `codex-alpha-goal-compact-recovery:v1`. `scripts/install.sh` merges that template into `${CODEX_HOME:-$HOME/.codex}/hooks.json`. The hook prints a static compact recovery policy that asks Codex to re-check `alpha-goal`, `control-loop`, and `goal-verify` after compaction and load the applicable skill, including native goal execution in `control-loop`, goal verification, claim-boundary checks, and defect/risk sweep when needed.
+`templates/hooks.json` defines one user-level `SessionStart` / `^compact$` hook, marked by `codex-alpha-goal-compact-recovery:v1`. `scripts/install.sh` merges that template into `${CODEX_HOME:-$HOME/.codex}/hooks.json`. The hook prints a static compact recovery policy that asks Codex to re-check `alpha-goal`, `control-loop`, and `goal-verify` after compaction and load the applicable skill, including accepted Goal Contract execution in `control-loop`, goal verification, claim-boundary checks, and defect/risk sweep when needed.
 
 Hook replacement is by marker family, not exact version, so later `:v2` template markers replace existing `:v1` hooks. The installer also migrates the earlier experimental `codex-compact-skill-recovery` family.
 

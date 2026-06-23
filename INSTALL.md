@@ -29,7 +29,7 @@ scripts/install.sh --verbose
 
 The script creates `${CODEX_HOME:-$HOME/.codex}/skills/<skill-name>` links for required public skills and cleans same-repo links for merged old public skills. By default it also syncs user-level templates, including `templates/hooks.json` into `${CODEX_HOME:-$HOME/.codex}/hooks.json`.
 
-The compact recovery hook definition lives in `templates/hooks.json`. It is a `SessionStart` hook for `compact` starts and prints a static policy telling Codex to decide whether `alpha-goal`, `control-loop`, or `goal-verify` applies after compaction, and to load the matching skill before continuing. `control-loop` executes explicit or active Codex Native Goals through its native-goal-driven loop; `goal-verify` covers evidence, claim boundary, defect/risk sweep, and material unclaimed issues. Use `--no-sync-user-templates` to skip AGENTS/config template updates and `--no-sync-user-hooks` to skip hook template updates.
+The compact recovery hook definition lives in `templates/hooks.json`. It is a `SessionStart` hook for `compact` starts and prints a static policy telling Codex to decide whether `alpha-goal`, `control-loop`, or `goal-verify` applies after compaction, and to load the matching skill before continuing. `control-loop` executes or hardens accepted Goal Contract work; `goal-verify` covers evidence, claim boundary, defect/risk sweep, and material unclaimed issues. Use `--no-sync-user-templates` to skip AGENTS/config template updates and `--no-sync-user-hooks` to skip hook template updates.
 
 Hook upgrades are keyed by marker family. If the template marker changes from `...:v1` to `...:v2`, the installer removes older hooks from the same family before adding the template hook. It also removes the earlier experimental `codex-compact-skill-recovery` hook family.
 
@@ -52,10 +52,23 @@ mkdir -p "$task_root"
 cat >"$task_root/goal-contract.md" <<'EOF'
 Contract status: accepted
 Issued by: alpha-goal
+Technical Context: smoke
 Discovery notes: smoke
 Interview ledger: smoke
+Intent: smoke
+Outcome: smoke
+Scope: smoke
+Repo surfaces: smoke
+Constraints: smoke
+Assumptions + resolutions: smoke
+Acceptance evidence: smoke
+Dependency/integration order: smoke
+Non-goals: smoke
+Decision boundary: smoke
+Claim boundary: smoke
 Trigger Contract: manual
 Autonomy Level: L3 Modify worktree
+Handoff ledger: smoke
 EOF
 mkdir -p "$tmp_codex_home/$(basename "$PWD")/control-state"
 cat >"$tmp_codex_home/$(basename "$PWD")/control-state/latest.md" <<EOF
@@ -87,7 +100,7 @@ rm -rf "$tmp_codex_home"
 
 ```text
 $alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继续闭环。
-$control-loop 根据 Goal Contract 和已有条件检查点做下一轮最小安全 slice；显式或活动 Codex Native Goal 也由它执行。
+$control-loop 根据 Goal Contract 和已有条件检查点做下一轮最小安全 slice。
 $goal-verify 验证目标完成、证据覆盖、声明边界和 material 未声明缺陷/风险，并返回可继续 harden 的 Gap。
 ```
 

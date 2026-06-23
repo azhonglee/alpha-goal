@@ -1,11 +1,11 @@
 ---
 name: control-loop
-description: "Native-goal-driven bounded executor and hardener. Use after an accepted Goal Contract authorizes implementation, or when an explicit or active Codex Native Goal must be run, resumed, finished, or reported through create_goal/update_goal gates. Do not use for ambiguous planning."
+description: "Goal-contract-driven bounded executor and hardener. Use only after an accepted Goal Contract authorizes implementation or hardening. Do not use for ambiguous planning."
 ---
 
 # Control Loop
 
-Control Loop is the native-goal-driven bounded executor and hardener after `$alpha-goal`, not task discovery or scheduling. Consume an accepted Goal Contract and optimize for useful target-state movement: ship the smallest verifiable slice, collect evidence, compare, then harden or finish.
+Control Loop is the Goal Contract driven bounded executor and hardener after `$alpha-goal`, not task discovery or scheduling. Consume an accepted Goal Contract and optimize for useful target-state movement: ship the smallest verifiable slice, collect evidence, compare, then harden or finish.
 
 State artifacts support execution and recovery; writing them is never the objective. Use `checkpoint.md` only when it protects recovery, evidence handoff, or verification.
 
@@ -15,15 +15,10 @@ Run the loop as behavior, not paperwork:
 
 ```pseudo
 function control_loop(goal_contract):
-  # Inspect Native Goal
-  native_goal = inspect_native_goal_if_available()
-  if native_goal.absent and !goal_contract.explicit_native_goal_start:
-    do_not_call(create_goal)  # do not call `create_goal`
-
   # Read Goal, Read Checkpoint
   goal = read_accepted_goal_contract(goal_contract)
   checkpoint = read_checkpoint_when_present_or_required(goal)
-  assert_goal_boundaries(goal, checkpoint, native_goal)
+  assert_goal_boundaries(goal, checkpoint)
   load_references_if_needed(goal, checkpoint)
 
   while true:
@@ -37,14 +32,13 @@ function control_loop(goal_contract):
     if gap.changed_contract_or_authority:
       return RETURN_TO_ALPHA_GOAL
     if gap.blocked:
-      update_native_goal_lifecycle_if_allowed(native_goal, update_goal blocked)
       return BLOCKED
     if gap.fixable:
       checkpoint_only_if_needed(gap)
       continue
 
     verification = goal_verify_if_required(evidence, goal)
-    route = route_after_verification(verification, native_goal)
+    route = route_after_verification(verification)
     if route == NEXT_ITERATION:
       checkpoint_only_if_needed(verification.gap)
       continue
@@ -54,26 +48,12 @@ function control_loop(goal_contract):
 ## Boundaries
 
 ```pseudo
-function assert_goal_boundaries(goal, checkpoint, native_goal):
+function assert_goal_boundaries(goal, checkpoint):
   require(goal.status == accepted, else = RETURN_TO_ALPHA_GOAL or BLOCKED)
   require(goal.issued_by == "alpha-goal")
   require(goal.is_canonical)  # accepted Goal Contract is canonical
-  deny(goal.created_or_derived_by_control_loop)  # control-loop` never creates or derives it
-
-  if native_goal.objective exists:
-    allow(native_goal.objective as intent_progress_budget_hint)  # native goal objective
-    deny(native_goal.objective changes_goal_authority)  # cannot expand, narrow, waive, or replace Goal Contract authority
-
-  if create_goal_is_requested:
-    require(explicit_create_goal_request)
-  else:
-    do_not_call(create_goal)
-
-  if unfinished_native_goal_already_exists:  # unfinished native goal already exists
-    resume_or_route_conflict_to($alpha-goal)
-
-  require(update_goal_complete_allowed(objective_achieved and no_required_work_remains))  # update_goal complete
-  require(update_goal_blocked_allowed(same_blocker_for_three_consecutive_goal_turns))  # update_goal blocked; three consecutive goal turns
+  require(goal.has_required_fields)  # Intent, Outcome, Scope, Acceptance evidence, Non-goals, Decision boundary, Claim boundary, Autonomy level
+  deny(goal.created_or_derived_by_control_loop)  # control-loop never creates or derives it
 
   deny(primary_branch_mutation)  # Do not mutate primary main/master/trunk
   require(worktree.kind == repo_local_worktree unless safer_repo_policy_exists)  # repo-local worktree
@@ -88,7 +68,7 @@ function assert_slice_boundaries(slice, goal):
   require(slice.effect within goal.authorization)
   require(slice.effect within goal.actuator_boundary)
   require(slice.claim within goal.claim_boundary)  # claim boundary
-  require(slice.requested_action <= goal.Autonomy_level)  # Autonomy level
+  require(autonomy_allows(goal.Autonomy_level, slice.requested_action))  # Autonomy level
 ```
 
 ## Reference Routing
@@ -118,15 +98,20 @@ function load_references_if_needed(goal, checkpoint):
 ## Routes
 
 ```pseudo
-function route_after_verification(verification, native_goal):
+function route_after_verification(verification):
   if verification.verdict == PASS_TO_FINAL:
     finish_delivery_boundary()
-    update_native_goal_lifecycle_if_allowed(native_goal, update_goal complete)
     return PASS_TO_FINAL
 
   if verification.verdict == NEXT_ITERATION:
-    require(verification.Gap.fixable)  # `NEXT_ITERATION` with fixable `Gap`
-    return NEXT_ITERATION
+    if verification.Gap.kind == same_goal_fixable:
+      # `NEXT_ITERATION` with fixable `Gap`
+      return NEXT_ITERATION
+    if verification.Gap.kind == scope_or_authority_change:
+      return RETURN_TO_ALPHA_GOAL
+    if verification.Gap.kind == missing_permission_or_external_state:
+      return BLOCKED
+    return route_verification_result(verification)
 
   if verification.changed_target_scope_authority_or_claim:
     return RETURN_TO_ALPHA_GOAL
@@ -137,7 +122,7 @@ function route_after_verification(verification, native_goal):
   # Stop/re-route
   if changed(authority or actuator_boundary or acceptance_evidence or claim_boundary):
     return RETURN_TO_ALPHA_GOAL
-  if changed(native_goal_binding or run_profile or risk or assumption or stop_condition):
+  if changed(run_profile or risk or assumption or stop_condition):
     return RETURN_TO_ALPHA_GOAL or BLOCKED
 
   return route_verification_result(verification)

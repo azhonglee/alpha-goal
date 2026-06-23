@@ -33,7 +33,7 @@ npx --no-install tsx tools/validate_skills.ts .
 
 ```text
 $alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继续闭环。
-$control-loop 执行或恢复已授权目标；显式或活动 Codex Native Goal 也由它通过 Native Goal 驱动闭环处理。
+$control-loop 根据已接受 Goal Contract 执行或加固下一轮最小安全 slice。
 ```
 
 通常不需要显式写出 skill 名称。正常描述你的需求即可；当请求需要目标成帧、有界执行或有证据支撑的完成声明时，Alpha Goal 会隐式触发。
@@ -43,7 +43,7 @@ $control-loop 执行或恢复已授权目标；显式或活动 Codex Native Goal
 | Skill | 作用 |
 | --- | --- |
 | `alpha-goal` | 在开始工作前澄清意图、边界、验收证据和下一步安全路由。 |
-| `control-loop` | 执行或加固已授权 slice；显式或活动 Codex Native Goal 也在这里执行，`goal-contract.md` 是必需输入，`checkpoint.md` 仅作为条件检查点。 |
+| `control-loop` | 执行或加固已授权 slice；`goal-contract.md` 是必需输入，`checkpoint.md` 仅作为条件检查点。 |
 | `goal-verify` | 验证目标完成、声明边界、证据覆盖和 material 未声明缺陷/风险，并输出下一轮 Gap。 |
 
 ## 文档
@@ -51,7 +51,7 @@ $control-loop 执行或恢复已授权目标；显式或活动 Codex Native Goal
 - [INSTALL.md](INSTALL.md)：安装选项和 smoke test。
 - [MANIFEST.md](MANIFEST.md)：公开技能、脚本和运行时产物清单。
 - [skills/alpha-goal/SKILL.md](skills/alpha-goal/SKILL.md)：默认入口和路由规则。
-- [skills/control-loop/SKILL.md](skills/control-loop/SKILL.md)：Native Goal 驱动的有界行动闭环契约。
+- [skills/control-loop/SKILL.md](skills/control-loop/SKILL.md)：Goal Contract 驱动的有界行动闭环契约。
 - [skills/goal-verify/SKILL.md](skills/goal-verify/SKILL.md)：目标验证和缺陷/风险审查契约。
 
 ## 结构
@@ -74,6 +74,6 @@ Alpha Goal 让 agent 工作保持目标明确、行动有界、声明受证据�
 - 目标先于行动：outcome、scope、non-goals、acceptance evidence、决策 owner 和 claim boundary 共同限定什么可以被改变。
 - 只做有用建模：只有依赖、扰动和风险会影响安全控制、验证或路由时，才把它们纳入模型。
 - 持久状态：`goal-contract.md` 是 `alpha-goal` 的默认产物，直接包含发现记录、访谈记录和最终契约；`checkpoint.md` 按需承载 run profile、loop state、iteration、evidence、verification 和带证据、置信度、失效条件的 memory；`control-state/latest.md` 只在任务身份不明时指向最新可恢复的已接受任务。
-- 有界执行：优先选择小而可观察的探针或定向变更，而不是宽泛重构和猜测式清理；run mode 和 Autonomy Ladder 共同约束触发方式与动作权限。
+- 有界执行：优先选择小而可观察的探针或定向变更，而不是宽泛重构和猜测式清理；已接受契约和 Autonomy Ladder 共同约束动作权限。
 - 独立验证：final/ready/safe/complete/repair/review 声明需要新鲜证据和 defect/risk sweep，并且要与执行过程分离检查。
-- 诚实路由：目标不清回到 `alpha-goal`，活动 Native Goal 或其他已授权执行缺口回到 `control-loop`，证据或审查面不足的最终声明继续进入 `goal-verify`。
+- 诚实路由：目标不清回到 `alpha-goal`，同一目标内可修复的执行缺口回到 `control-loop`，证据或审查面不足的最终声明继续进入 `goal-verify`。

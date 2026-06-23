@@ -27,11 +27,11 @@ Load this reference before any FINAL_RESPONSE_READY, READY, DONE, SAFE, COMPLETE
    Verification must cite raw observers, commands, artifacts, logs, or diffs.
    Summaries, intentions, plans, and assumptions are not evidence.
 
-6. Native Goal Lifecycle Gate:
-   `update_goal complete` is allowed only when the native goal objective is actually achieved,
-   no required work remains, and the supported claim matches the Goal Contract and evidence.
-   `update_goal blocked` is allowed only after the same blocker has repeated for at least
-   three consecutive goal turns and meaningful progress requires user input or external change.
+6. Delivery Boundary Gate:
+   The final response, PR/MR handoff, or delivery marker is allowed only when the supported
+   claim matches the accepted Goal Contract, raw evidence, verification verdict, and delivery
+   boundary. Missing required work, blocked external state, or unsupported claim breadth prevents
+   completion routing.
 
 If any gate fails:
 - Same-goal fixable gap -> `HARDENING`

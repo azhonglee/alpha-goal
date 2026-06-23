@@ -3,7 +3,28 @@ import { existsSync, readFileSync } from "node:fs";
 import { basename, resolve } from "node:path";
 
 const requestedActions = new Set(["suggest", "draft", "modify-worktree", "commit", "push", "open-pr", "merge"]);
-const loopPhases = new Set(["DISCOVERY", "IMPLEMENTATION", "HARDENING", "VERIFICATION", "FINAL_RESPONSE_READY", "COMPLETE", "BLOCKED"]);
+const loopPhases = new Set(["IMPLEMENTATION", "HARDENING", "VERIFICATION", "FINAL_RESPONSE_READY", "COMPLETE", "BLOCKED"]);
+const requiredGoalContractFields = [
+  "Contract status",
+  "Issued by",
+  "Technical Context",
+  "Discovery notes",
+  "Interview ledger",
+  "Intent",
+  "Outcome",
+  "Scope",
+  "Repo surfaces",
+  "Constraints",
+  "Assumptions + resolutions",
+  "Acceptance evidence",
+  "Dependency/integration order",
+  "Non-goals",
+  "Decision boundary",
+  "Claim boundary",
+  "Trigger Contract",
+  "Autonomy Level",
+  "Handoff ledger",
+];
 
 function section(name, value) {
   console.log(`\n== ${name} ==\n${value}`);
@@ -173,7 +194,7 @@ function checkTaskState(taskDir, stateRoot, options) {
   const hasVerification = !!verification;
   const hasLatest = !!latest.trim();
 
-  ok = requireFields("goal contract", goalText, ["Contract status", "Issued by", "Autonomy Level"], false) && ok;
+  ok = requireFields("goal contract", goalText, requiredGoalContractFields, false) && ok;
   ok = check("contract status", /^accepted$/i.test(field(goalText, "Contract status")), `not accepted: ${field(goalText, "Contract status") || "<empty>"}`) && ok;
   ok = check("contract issuer", /^alpha-goal$/i.test(field(goalText, "Issued by")), `invalid issuer: ${field(goalText, "Issued by") || "<empty>"}`) && ok;
 
@@ -198,7 +219,10 @@ function checkTaskState(taskDir, stateRoot, options) {
     ok = requireFields("checkpoint verification", verification, ["Goal Contract", "Evidence", "Verified at", "Review mode", "Verdict", "Next route"], false) && ok;
     ok = requireFields("checkpoint verification gap", verification, ["Gap"], true) && ok;
   }
-  if (hasLatest) ok = requireFields("latest pointer", latest, ["State directory", "Goal Contract", "Current Phase", "Next route", "Updated at"], false) && ok;
+  if (hasLatest) {
+    ok = requireFields("latest pointer", latest, ["State directory", "Goal Contract", "Current Phase", "Updated at"], false) && ok;
+    ok = requireFields("latest pointer nullable fields", latest, ["Checkpoint", "Next route"], true) && ok;
+  }
 
   const action = hasRunProfile ? field(runProfile, "Requested action") : options.requestedAction;
   const autonomy = hasRunProfile ? field(runProfile, "Autonomy level") : field(goalText, "Autonomy Level");
@@ -224,7 +248,7 @@ function checkTaskState(taskDir, stateRoot, options) {
   if (hasCheckpoint) {
     ok = check("goal contract binding", samePath(goalContract, goalPath), "checkpoint Goal Contract does not match current task") && ok;
   }
-  if (hasLatest || options.useLatest) ok = check("latest binding", latestMatchesTask(latest, taskDir, goalPath, checkpointPath, phase), "control-state/latest.md does not match current task") && ok;
+  if (hasLatest || options.useLatest) ok = check("latest binding", latestMatchesTask(latest, taskDir, goalPath, checkpointPath, phase, hasCheckpoint), "control-state/latest.md does not match current task") && ok;
   if (hasVerification) ok = check("verification binding", verificationMatchesTask(verification, goalPath), "checkpoint Verification missing, stale, or malformed") && ok;
   if (hasLoopState) ok = check("loop actionability", !isUnset(nextSlice) && !isNone(nextSlice) || !isUnset(stopCondition) && !isNone(stopCondition), "missing actionable Next Slice or Stop Condition") && ok;
   if (hasRunProfile) ok = check("evaluator route", field(runProfile, "Evaluator route").includes("$goal-verify"), "missing $goal-verify") && ok;
@@ -252,13 +276,15 @@ function samePath(actual, expected) {
   return normalizePath(actual) === normalizePath(expected);
 }
 
-function latestMatchesTask(latest, taskDir, goalPath, checkpointPath, phase) {
+function latestMatchesTask(latest, taskDir, goalPath, checkpointPath, phase, hasCheckpoint) {
   if (!latest.trim()) return false;
   const checkpoint = field(latest, "Checkpoint");
+  const route = field(latest, "Next route");
   return samePath(field(latest, "State directory"), taskDir.replace(/\/+$/, "")) &&
     samePath(field(latest, "Goal Contract"), goalPath) &&
-    (isUnset(checkpoint) || isNone(checkpoint) || samePath(checkpoint, checkpointPath)) &&
-    (!field(latest, "Current Phase") || !phase || field(latest, "Current Phase") === phase);
+    (hasCheckpoint ? samePath(checkpoint, checkpointPath) : isNone(checkpoint)) &&
+    (!field(latest, "Current Phase") || !phase || field(latest, "Current Phase") === phase) &&
+    /^(none|control-loop|alpha-goal|BLOCKED)$/i.test(route);
 }
 
 function verificationMatchesTask(verification, goalPath) {
@@ -283,16 +309,18 @@ function checkRepo(target) {
   const root = gitOutput(target, ["rev-parse", "--show-toplevel"]);
   const branch = gitOutput(root, ["branch", "--show-current"]);
   const diffOk = gitOk(root, ["diff", "--check"]);
+  const primary = ["main", "master", "trunk"].includes(branch);
+  const worktreesIgnored = gitOk(root, ["check-ignore", "-q", ".worktrees/codex/preflight-check"]);
 
   section("git root", root);
   section("branch", branch);
-  section("primary branch risk", ["main", "master", "trunk"].includes(branch) ? "yes" : "no/unknown");
+  section("primary branch risk", primary ? "BLOCKED" : "no/unknown");
   section("status", gitOutput(root, ["status", "--short"]));
   section("worktrees", gitOutput(root, ["worktree", "list"]));
   section("submodules", gitOutput(root, ["submodule", "status"]));
-  console.log(`.worktrees/codex/preflight-check: ${gitOk(root, ["check-ignore", "-q", ".worktrees/codex/preflight-check"]) ? "ignored" : "NOT ignored"}`);
+  console.log(`.worktrees/codex/preflight-check: ${worktreesIgnored ? "ignored" : "NOT ignored"}`);
   section("diff check", diffOk ? "pass" : "fail");
-  return diffOk;
+  return diffOk && !primary && worktreesIgnored;
 }
 
 function check(label, ok, failure) {

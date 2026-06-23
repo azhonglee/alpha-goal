@@ -32,7 +32,7 @@ Autonomy level: L1 Suggest only | L2 Draft changes | L3 Modify worktree | L4 Ope
 
 ## Loop State
 Current Objective:
-Current Phase: DISCOVERY | IMPLEMENTATION | HARDENING | VERIFICATION | FINAL_RESPONSE_READY | COMPLETE | BLOCKED
+Current Phase: IMPLEMENTATION | HARDENING | VERIFICATION | FINAL_RESPONSE_READY | COMPLETE | BLOCKED
 Completed:
 Pending:
 Known Risks:

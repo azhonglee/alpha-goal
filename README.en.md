@@ -33,7 +33,7 @@ Runtime records use the user-level Alpha Goal state root: `${CODEX_HOME:-$HOME/.
 
 ```text
 $alpha-goal Decide whether this task should clarify, execute, verify, or continue a loop.
-$control-loop Execute or resume an authorized goal; explicit or active Codex Native Goals are handled here through a native-goal-driven loop.
+$control-loop Execute or harden the next smallest safe slice from an accepted Goal Contract.
 ```
 
 You usually do not need to name a skill. Describe the work normally; Alpha Goal is meant to activate when the request needs goal framing, bounded execution, or evidence-backed completion.
@@ -43,7 +43,7 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
 | Skill | What it helps with |
 | --- | --- |
 | `alpha-goal` | Clarify intent, boundaries, acceptance evidence, and the next safe route before work starts. |
-| `control-loop` | Execute or harden an authorized slice; explicit or active Codex Native Goals are executed here, with `goal-contract.md` required and `checkpoint.md` used only as a conditional checkpoint. |
+| `control-loop` | Execute or harden an authorized slice, with `goal-contract.md` required and `checkpoint.md` used only as a conditional checkpoint. |
 | `goal-verify` | Verify goal completion, claim boundary, evidence coverage, and material unclaimed defects/risks, then return the next Gap. |
 
 ## Docs
@@ -51,7 +51,7 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
 - [INSTALL.md](INSTALL.md): installation options and smoke test.
 - [MANIFEST.md](MANIFEST.md): public skills, scripts, and runtime artifacts.
 - [skills/alpha-goal/SKILL.md](skills/alpha-goal/SKILL.md): default entry and routing rules.
-- [skills/control-loop/SKILL.md](skills/control-loop/SKILL.md): native-goal-driven bounded action loop contract.
+- [skills/control-loop/SKILL.md](skills/control-loop/SKILL.md): Goal Contract driven bounded action loop contract.
 - [skills/goal-verify/SKILL.md](skills/goal-verify/SKILL.md): goal verification and defect/risk review contract.
 
 ## Structure
@@ -74,6 +74,6 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 - Goals before action: outcome, scope, non-goals, acceptance evidence, decision owner, and claim boundary define what may change.
 - Minimal useful modeling: model dependencies, disturbances, and risks only when they affect safe control, validation, or routing.
 - Persistent state: `goal-contract.md` is the default `alpha-goal` output and directly contains discovery notes, interview ledger, and the final contract; `checkpoint.md` conditionally carries run profile, loop state, iteration, evidence, verification, and memory with evidence, confidence, and invalidation; `control-state/latest.md` only points to the latest accepted task when task identity is ambiguous.
-- Bounded execution: prefer small observable probes or targeted changes over broad refactors and speculative cleanup; run mode and the Autonomy Ladder constrain trigger behavior and action authority.
+- Bounded execution: prefer small observable probes or targeted changes over broad refactors and speculative cleanup; the accepted contract and Autonomy Ladder constrain action authority.
 - Independent verification: final/ready/safe/complete/repair/review claims require fresh evidence and defect/risk sweep, checked separately from execution.
-- Honest routing: unclear goals return to `alpha-goal`, fixable gaps for an active Native Goal or other authorized execution return to `control-loop`, and unsupported or under-reviewed final claims continue through `goal-verify`.
+- Honest routing: unclear goals return to `alpha-goal`, same-goal fixable execution gaps return to `control-loop`, and unsupported or under-reviewed final claims continue through `goal-verify`.
