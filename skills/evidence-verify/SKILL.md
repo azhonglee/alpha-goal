@@ -15,7 +15,7 @@ Read `references/claim-boundary.md` before final/merge/ship/safety claims. Read 
 
 Resolve the Alpha Goal state root the same way as `$alpha-goal`: always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
 
-Read the Goal Contract/equivalent, latest `loop-state.md`, `iteration.md`, `evidence.md`, diff/artifacts, command outputs, tests, logs, reviewer/user feedback, and relevant specs. Check but do not trust summaries.
+Read canonical state-root Goal Contract, latest `loop-state.md`, `iteration.md`, `evidence.md`, diff/artifacts, command outputs, tests, logs, reviewer/user feedback, and specs. Check but do not trust summaries.
 
 Read `run-profile.md` when present, referenced, or required by control-loop evidence. Treat it as execution context only, never as the Goal Contract. For cross-repo claims, read the repo manifest and per-repo plus integration evidence from the same task-level state root.
 
@@ -25,6 +25,7 @@ Read `run-profile.md` when present, referenced, or required by control-loop evid
 - Map every explicit requirement, named artifact, command, invariant, and deliverable to authoritative evidence.
 - Match evidence scope to claim scope; narrow checks cannot prove broad claims.
 - Treat missing, stale, indirect, contradicted, or merely plausible evidence as not achieved.
+- A verification used for `verification-triggered` recovery must bind to the checked Goal Contract, loop-state artifact, and evidence artifact; stale or cross-task bindings are gaps.
 - Inspect whether validators/tests actually cover the requirement they are cited for.
 - For cross-repo claims, map evidence by repo surface and integration relation; one repo's passing checks cannot prove integrated behavior.
 - Version pins, generated clients, API contracts, dependent app behavior, and delivery links must be evidenced when the claim depends on them.
@@ -36,17 +37,17 @@ Read `run-profile.md` when present, referenced, or required by control-loop evid
 
 ## Verdicts
 
-- `PASS_TO_FINAL`: evidence proves all requirements and the proposed claim.
+- `PASS_TO_FINAL`: evidence proves all requirements and the proposed claim; next route is `none`.
 - `NEXT_ITERATION`: evidence does not prove the proposed claim. Choose next route by the Gap:
   - `control-loop` only for fixable evidence, test, edge, compatibility, cleanup, loop-state, memory, or verification-gap hardening inside the same goal.
-  - `alpha-goal` when target, scope, authority, source reference, Trigger Contract, Autonomy level, or claim boundary is wrong or unclear.
+  - `alpha-goal` when target, scope, authority, source reference, acceptance evidence, non-goal, decision boundary, actuator boundary, Trigger Contract, Autonomy level, or claim boundary is wrong or unclear.
   - `BLOCKED` when permission, tool, data, environment, credential, or user-owned decision is missing.
 
 The Gap must be specific enough for `$control-loop` to set `loop-state.md` Next Slice without reinterpreting the Goal Contract.
 
 ## Final response guard
 
-Final/ready/safe/complete/repair-complete claims require durable `<Alpha Goal state root>/YYYYMMDD-<TaskName>/verification.md` updates unless the user forbids writes, the environment is unwritable, or the task is explicitly one-turn read-only with no handoff.
+Final/ready/safe/complete/repair-complete claims require durable `<Alpha Goal state root>/YYYYMMDD-<TaskName>/verification.md` updates unless the user forbids writes, the environment is unwritable, or the task is explicitly one-turn read-only with no handoff. If chat-only, say the claim is limited to chat evidence and do not make broad ready/safe/complete claims.
 
 After verification, final response must state: verdict, evidence actually run/inspected, claim supported, claim not supported/not checked, residual risks, and next route when not final.
 
@@ -60,6 +61,10 @@ Persist `<Alpha Goal state root>/YYYYMMDD-<TaskName>/verification.md` for risky,
 
 ```markdown
 Verification Verdict:
+- Goal Contract:
+- Loop State:
+- Evidence:
+- Verified at:
 - Original claim:
 - Claim checked:
 - Indicator handoff review:
@@ -76,7 +81,7 @@ Verification Verdict:
 - Final wording allowed:
 - Final claim allowed: yes/no
 - Verdict: PASS_TO_FINAL / NEXT_ITERATION
-- Next route: control-loop / alpha-goal / BLOCKED
+- Next route: none / control-loop / alpha-goal / BLOCKED
 ```
 
 TUI summary:

@@ -5,7 +5,7 @@ description: "Must use for any engineering/design/implementation/diagnose/repair
 
 # Alpha Goal
 
-`alpha-goal` owns workflow control for engineering/design/implementation/diagnose/repair goals. It discovers facts, clarifies user-owned decisions, writes the Goal Contract, initializes persistent loop state, and routes to `$control-loop`.
+`alpha-goal` owns workflow control for engineering/design/implementation/diagnose/repair goals. It discovers facts, clarifies user-owned decisions, writes the canonical Goal Contract, initializes persistent loop state, and routes to `$control-loop`.
 
 Delegated skills may observe, review, or evaluate, but must not control phase progression, redefine target/scope, set acceptance evidence, waive non-goals, decide authority, or make final/ready/complete claims.
 
@@ -26,11 +26,11 @@ Pre-flight -> Discovery -> Clarify with User -> Assumption Stress Test -> Final 
    - `other`: ask for minimum details needed to classify.
 2. Split mixed work into sequenced items before routing.
 3. Resolve the Alpha Goal state root before writing runtime artifacts. Always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
-4. If a task state already exists, read `goal-contract.md`, `loop-state.md`, and `memory.md` before asking. Resume from durable state unless the user explicitly overrides it.
+4. Match the task state by Goal Contract path, state directory, and trigger metadata. If matched, read `goal-contract.md`, `run-profile.md`, `loop-state.md`, and `memory.md`; if multiple or stale candidates remain after `control-state/latest.md`, clarify task identity before execution.
 
 ## Phase 1: Discovery
 
-Trigger Discovery for vague, overloaded, brownfield, high-consequence, missing-acceptance, or user-says-"don't assume" requests. Skip only when concrete targets, acceptance evidence, non-goals, decision boundaries, authority, and claim boundary are explicit.
+Trigger Discovery for vague, overloaded, brownfield, high-consequence, missing-acceptance, or user-says-"don't assume" requests. Skip only when target, acceptance evidence, non-goals, decision boundaries, authority, claim boundary, Trigger Contract, Autonomy Level, Initial Loop State, and Memory seed are explicit.
 
 Before asking, complete minimum preflight: inspect applicable AGENTS/repo rules, README/getting-started/install docs, relevant specs/ADRs/contracts, target files/current implementation, local glossary/context, current branch/status when mutation may follow, and direct contradictions. If missing, name the missing observer instead of asking the user to summarize discoverable repo facts.
 
@@ -121,6 +121,7 @@ Score each dimension in `[0.0, 1.0]` with justification and gap:
 Readiness Gate Check. Mark each gate `pass` only when explicit or source-backed: intent, outcome, scope, constraints, acceptance evidence, context/current facts, non-goals, decision boundaries, claim boundary, Trigger Contract, Autonomy Level, Initial Loop State, Memory seed, authorization source, source-of-truth conflicts, external/current facts, actuator boundary, and sensor/observer.
 
 Continue interviewing when:
+- Any readiness gate is unresolved.
 - `Non-goals` or `Decision Boundaries` are unresolved.
 - A pressure pass is incomplete: at least one earlier answer must be revisited with evidence, assumption, or tradeoff follow-up.
 - The next answer could materially change execution, acceptance, authority, or claim boundary.
@@ -135,11 +136,11 @@ Do not offer early exit before one explicit assumption probe and one persistent 
 
 For cross-repo framing, keep one task-level Alpha Goal state root and record a repo manifest: repo path/name, role, authorization source, allowed change surfaces, non-goals, branch/worktree expectation, validation observer, delivery boundary, and dependency/integration order.
 
-If target, scope, authority, source reference, non-goals, acceptance evidence, or claim boundary is wrong or unclear, keep Clarify active.
+If target, scope, authority, source reference, non-goals, acceptance evidence, decision boundary, actuator/sensor boundary, Trigger Contract, Autonomy Level, Initial Loop State, Memory seed, or claim boundary is wrong or unclear, keep Clarify active.
 
 ## Phase 3: Assumption Stress Test
 
-Use each applicable mode once:
+Use each applicable mode once; if none applies, record why:
 - **Contrarian**: challenge a core assumption.
 - **Simplifier**: probe minimum viable scope.
 - **Ontologist**: ask for essence-level reframing when the user keeps describing symptoms.
@@ -149,6 +150,7 @@ Track used modes in state to prevent repetition.
 ## Phase 4: Final Design
 
 Write the design to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md`; copy to `docs/specs/YYYYMMDD-<TaskName>.md` when useful or required by repo convention.
+The state-root `goal-contract.md` is canonical. Repo specs are mirrors or references only; conflicts route back to `alpha-goal`.
 
 Design Content Must Include:
 - Technical Context [context]
@@ -172,19 +174,19 @@ Design Content Must Include:
 ### Trigger Contract
 
 Define run behavior, not just a label:
-- `manual`: resume from last `loop-state.md` unless the user explicitly overrides.
-- `scheduled`: resume from `loop-state.md`; do not discover new scope or authority.
-- `webhook`: map the event to an existing authorized goal/state; if no match, return to `alpha-goal`.
-- `verification-triggered`: resume from `verification.md` Gap and update `loop-state.md` Next Slice.
+- `manual`: resume from the matching `loop-state.md` unless the user explicitly overrides.
+- `scheduled`: resume from `loop-state.md`; the Trigger Contract must name the schedule source/id, replay/staleness rule, and existing state mapping; do not discover new scope or authority.
+- `webhook`: map the event to an existing authorized goal/state from the Trigger Contract; the Trigger Contract must name event source/id, dedupe key, authorized payload-to-state mapping, and replay/staleness rule; if no match, return to `alpha-goal`.
+- `verification-triggered`: resume only when latest `verification.md` matches the Goal Contract path, loop-state binding, and evidence binding, has `Next route: control-loop`, and the Gap is fixable inside the same goal.
 
 ### Autonomy Ladder
 
 Set one level in the Goal Contract:
-- `L1 Suggest only`
-- `L2 Draft changes`
-- `L3 Modify worktree`
-- `L4 Open PR`
-- `L5 Merge automatically`
+- `L1 Suggest only`: no file writes except task-state notes.
+- `L2 Draft changes`: propose patches, do not apply repo edits.
+- `L3 Modify worktree`: edit approved worktree and task-state; no commit/push.
+- `L4 Open PR`: commit, push branch, open/update PR/MR.
+- `L5 Merge automatically`: merge/deploy only when explicitly authorized.
 
 Requested actions above the current level are denied and routed to user confirmation or blocker.
 
@@ -199,8 +201,25 @@ Current Phase: DISCOVERY | IMPLEMENTATION | HARDENING | VERIFICATION | FINAL_RES
 Completed:
 Pending:
 Known Risks:
+Last Verification Gap:
 Next Slice:
 Stop Condition:
+```
+
+`loop-state.md` is valid only with non-empty Current Objective, legal Current Phase, and at least one actionable Next Slice or Stop Condition. Maintain `<state-root>/control-state/latest.md` on Goal Contract, loop-state, evidence, and verification route updates:
+
+```markdown
+# Control State Latest
+State directory:
+Goal Contract:
+Run Profile:
+Loop State:
+Memory:
+Evidence:
+Verification:
+Current Phase:
+Next route:
+Updated at:
 ```
 
 Initialize `<Alpha Goal state root>/YYYYMMDD-<TaskName>/memory.md`:
@@ -214,7 +233,7 @@ Working Strategies:
 Failed Strategies:
 ```
 
-`iteration.md` is a run log. `loop-state.md` is the durable current state. `memory.md` is compressed learning; keep only evidence-backed facts, constraints, causes, and reusable strategy results.
+Each non-empty `memory.md` entry must include `Evidence`, `Confidence: confirmed | provisional`, and `Invalidation`. `iteration.md` is a run log. `loop-state.md` is the durable current state. `memory.md` is compressed learning; keep only evidence-backed facts, constraints, causes, and reusable strategy results.
 
 Self-review the design for completion and reasonability. Use subagents for independent review when useful, then fix accepted findings.
 
@@ -247,4 +266,4 @@ Design Summary
 | Next | |
 ```
 
-Use `request_user_input` to ask for approve/launch, refine, or reject unless an explicit workspace/user contract already authorizes autonomous launch. On approval or pre-authorized launch, hand off the design to `$control-loop`.
+Use `request_user_input` to ask for approve/launch, refine, or reject unless an explicit workspace/user contract already authorizes autonomous launch. Overrides may select an authorized pending slice only; target, scope, phase, claim, Trigger Contract, or Autonomy changes require Goal Contract update and gates. On approval or pre-authorized launch, hand off to `$control-loop`.

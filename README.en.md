@@ -25,9 +25,9 @@ npx --no-install tsx tools/validate_skills.ts .
 ```
 
 The installer creates direct symlinks for the three public skills under `$HOME/.codex/skills/` and cleans same-repo links for merged old public skills.
-The validator enforces the whole `skills/` tree under 34,000 bytes.
+The validator enforces the whole `skills/` tree under 50,000 bytes; this budget preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, autonomy gates, behavior-level script gates, and evaluator feedback without over-compressing skill text.
 
-Runtime records use the user-level Alpha Goal state root: `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`, where `<workspace-slug>` is the last directory name of the current session directory path.
+Runtime records use the user-level Alpha Goal state root: `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`, where `<workspace-slug>` is the last directory name of the current session directory path. The recovery entry is `<state-root>/control-state/latest.md`; recovery needs the pointer-bound `goal-contract.md`, `run-profile.md`, `loop-state.md`, and `memory.md`; missing or conflicting files route to `alpha-goal` or blocker.
 
 ## Usage examples
 
@@ -42,7 +42,7 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
 | Skill | What it helps with |
 | --- | --- |
 | `alpha-goal` | Clarify intent, boundaries, acceptance evidence, and the next safe route before work starts. |
-| `control-loop` | Resume from `loop-state.md` and `memory.md`, run an authorized slice, and continue hardening from verification gaps. |
+| `control-loop` | Resume from `goal-contract.md`, `run-profile.md`, `loop-state.md`, and `memory.md`, run an authorized slice, and continue hardening from verification gaps. |
 | `evidence-verify` | Check whether fresh evidence supports final/ready/safe/complete/repair claims and return the next Gap. |
 
 ## Docs
@@ -72,7 +72,7 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 - Evidence before authority: Current code facts describe current state; desired behavior comes from user intent, specs, issues, or accepted contracts.
 - Goals before action: outcome, scope, non-goals, acceptance evidence, decision owner, and claim boundary define what may change.
 - Minimal useful modeling: model dependencies, disturbances, and risks only when they affect safe control, validation, or routing.
-- Persistent state: `loop-state.md` records current state, `iteration.md` records this run's facts, and `memory.md` keeps compressed confirmed facts, constraints, and strategy outcomes.
+- Persistent state: `loop-state.md` records current state and the latest verification gap, `iteration.md` records this run's facts, and `memory.md` keeps compressed confirmed facts, constraints, and strategy outcomes with evidence, confidence, and invalidation.
 - Bounded execution: prefer small observable probes or targeted changes over broad refactors and speculative cleanup; run mode and the Autonomy Ladder constrain trigger behavior and action authority.
 - Independent verification: final/ready/safe/complete/repair claims require fresh evidence, checked separately from execution.
 - Honest routing: unclear goals return to `alpha-goal`, fixable implementation or evidence gaps return to `control-loop`, and unsupported final claims continue through `evidence-verify`.

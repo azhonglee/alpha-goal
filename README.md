@@ -25,9 +25,9 @@ npx --no-install tsx tools/validate_skills.ts .
 ```
 
 安装脚本会在 `$HOME/.codex/skills/` 下为三个公开技能创建直接软链接，并清理指向本仓库旧公开技能的软链接。
-校验脚本会强制整个 `skills/` 树不超过 34,000 bytes。
+校验脚本会强制整个 `skills/` 树不超过 50,000 bytes；这个预算用于保留 Persistent Goal Loop 的触发行为、持久状态、记忆、自治门、行为级脚本 gate 和 evaluator feedback，避免过分压缩技能正文。
 
-运行态记录使用用户级 Alpha Goal state root：`${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`，其中 `<workspace-slug>` 是当前会话目录路径最后一个目录名。
+运行态记录使用用户级 Alpha Goal state root：`${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`，其中 `<workspace-slug>` 是当前会话目录路径最后一个目录名。恢复入口是 `<state-root>/control-state/latest.md`；恢复执行至少需要该指针绑定的 `goal-contract.md`、`run-profile.md`、`loop-state.md`、`memory.md`；缺失或冲突时回到 `alpha-goal` 或阻塞。
 
 ## 使用示例
 
@@ -42,7 +42,7 @@ $alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继�
 | Skill | 作用 |
 | --- | --- |
 | `alpha-goal` | 在开始工作前澄清意图、边界、验收证据和下一步安全路由。 |
-| `control-loop` | 从 `loop-state.md` 和 `memory.md` 恢复，执行已授权 slice，并根据验证缺口继续 harden。 |
+| `control-loop` | 从 `goal-contract.md`、`run-profile.md`、`loop-state.md` 和 `memory.md` 恢复，执行已授权 slice，并根据验证缺口继续 harden。 |
 | `evidence-verify` | 检查新鲜证据是否支持 final/ready/safe/complete/repair 声明，并输出下一轮 Gap。 |
 
 ## 文档
@@ -72,7 +72,7 @@ Alpha Goal 让 agent 工作保持目标明确、行动有界、声明受证据�
 - 证据先于授权：当前代码事实只描述现状；期望行为来自用户意图、规格、issue 或已接受契约。
 - 目标先于行动：outcome、scope、non-goals、acceptance evidence、决策 owner 和 claim boundary 共同限定什么可以被改变。
 - 只做有用建模：只有依赖、扰动和风险会影响安全控制、验证或路由时，才把它们纳入模型。
-- 持久状态：`loop-state.md` 记录当前状态，`iteration.md` 记录本轮事实，`memory.md` 保留压缩后的确认事实、约束和策略结果。
+- 持久状态：`loop-state.md` 记录当前状态和最新验证缺口，`iteration.md` 记录本轮事实，`memory.md` 保留带证据、置信度和失效条件的确认事实、约束和策略结果。
 - 有界执行：优先选择小而可观察的探针或定向变更，而不是宽泛重构和猜测式清理；run mode 和 Autonomy Ladder 共同约束触发方式与动作权限。
 - 独立验证：final/ready/safe/complete/repair 声明需要新鲜证据，并且要与执行过程分离检查。
 - 诚实路由：目标不清回到 `alpha-goal`，可修复的实现或证据缺口回到 `control-loop`，证据不足的最终声明继续进入 `evidence-verify`。

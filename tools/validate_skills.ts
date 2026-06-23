@@ -1,12 +1,14 @@
 #!/usr/bin/env -S npx --no-install tsx
+import { spawnSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const FRONTMATTER_RE = /^---\n(.*?)\n---\n/s;
 const FIELD_RE = /^([A-Za-z0-9_-]+):\s*(.*?)\s*$/;
 const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
-const SKILLS_BYTE_BUDGET = 34_000;
+const SKILLS_BYTE_BUDGET = 50_000;
 const COMPACT_RECOVERY_HOOK_MARKER = "codex-alpha-goal-compact-recovery:v1";
 const HOOKS_TEMPLATE = "templates/hooks.json";
 const REQUIRED_SKILL_NAMES = ["alpha-goal", "control-loop", "evidence-verify"];
@@ -22,6 +24,7 @@ const LEGACY_SCRIPT_REFERENCES = [
   "scripts/repo-sensor-snapshot.sh", "repo-sensor-snapshot.sh",
   "scripts/evidence-summary.sh", "evidence-summary.sh",
 ];
+const LEGACY_RUN_MODE_REFERENCES = ["automation-triggered", "from-verification", "Run mode: manual | automation"];
 const STATE_ROOT_CORE_FILES = [
   "skills/alpha-goal/SKILL.md",
   "skills/control-loop/SKILL.md",
@@ -97,8 +100,16 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Claim boundary",
     "Trigger Contract",
     "Autonomy Level",
+    "Match the task state",
+    "run-profile.md",
+    "control-state/latest.md",
+    "State directory",
     "loop-state.md",
+    "Last Verification Gap",
     "memory.md",
+    "Confidence: confirmed | provisional",
+    "Invalidation",
+    "canonical",
     "`iteration.md` is a run log",
     "request_user_input",
     "$control-loop",
@@ -117,6 +128,10 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Unrelated user changes",
     "run-profile.md",
     "Run mode",
+    "Goal Contract:",
+    "control-state/latest.md",
+    "Trigger event",
+    "Requested action",
     "Trigger Contract",
     "scheduled",
     "webhook",
@@ -127,10 +142,17 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Evaluator route",
     "Autonomy level",
     "Autonomy Ladder",
+    "Commit, push branch",
+    "canonical",
+    "exact",
     "Read Loop State",
     "Read Memory",
     "loop-state.md",
+    "last verification gap",
     "memory.md",
+    "evidence, confidence, and invalidation",
+    "FINAL_RESPONSE_READY",
+    "delivery boundary evidence",
     "must not expand, narrow, reinterpret, waive, or replace",
     "active run profile",
     "approved target",
@@ -172,12 +194,36 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "multi-repo preflight",
     "targets",
     ".worktrees/codex/preflight-check",
+    "BLOCKED without --task",
+    "Goal spec",
+    "goal contract binding",
+    "loop actionability",
+    "autonomy action ceiling",
+    "latest binding",
     "run profile path",
     "trigger",
+    "trigger event",
+    "requested action",
     "autonomy level",
     "loop-state path",
     "memory path",
     "evaluator route"
+  ]],
+  ["evidence summary reads durable state", "skills/evidence-verify/scripts/evidence-summary.ts", [
+    "goal-contract.md",
+    "run-profile.md",
+    "loop-state.md",
+    "memory.md",
+    "evidence.md",
+    "verification.md",
+    "Goal Contract",
+    "Loop State",
+    "Evidence",
+    "Verified at",
+    "verification verdict",
+    "verification gap",
+    "next route",
+    "durable evidence gate"
   ]],
 ];
 
@@ -223,6 +269,7 @@ export function main(args = process.argv.slice(2)): number {
   validateSemanticChecks(root, errors);
   validateSchemaConsistency(root, errors);
   validateInstallDocumentation(root, errors);
+  validateRuntimeScriptBehavior(root, errors);
   validateNoAutoDownloadRunner(root, allFiles, errors);
 
   printReport(root, errors, warnings);
@@ -301,11 +348,12 @@ function validateScriptSurface(root: string, files: string[], errors: string[], 
 }
 
 function validateLegacyReferences(root: string, skillFiles: string[], errors: string[]): void {
-  const files = new Set(["AGENTS.md", "README.md", "README.en.md", "INSTALL.md", "MANIFEST.md", ...skillFiles.map(f => relative(root, f))]);
+  const files = new Set(["AGENTS.md", "README.md", "README.en.md", "INSTALL.md", "MANIFEST.md", "templates/AGENTS.md", "templates/hooks.json", ...skillFiles.map(f => relative(root, f))]);
   for (const rel of files) {
     const file = path.join(root, rel); if (!isFile(file)) continue;
     const text = fs.readFileSync(file, "utf8");
     for (const legacy of LEGACY_SCRIPT_REFERENCES) if (text.includes(legacy)) errors.push(`${rel}: legacy non-TypeScript script reference remains: ${legacy}`);
+    for (const legacy of LEGACY_RUN_MODE_REFERENCES) if (text.includes(legacy)) errors.push(`${rel}: legacy run-mode reference remains: ${legacy}`);
     for (const legacy of LEGACY_SKILL_REFERENCES) {
       const patterns = [`$${legacy}`, `skills/${legacy}`, `\`${legacy}\``];
       if (patterns.some(p => text.includes(p))) errors.push(`${rel}: legacy skill reference remains: ${legacy}`);
@@ -333,9 +381,9 @@ function validateSchemaConsistency(root: string, errors: string[]): void {
   const evRef = readIfFile(path.join(root, "skills/evidence-verify/references/verification-verdict-schema.md"));
   if (evSkill.includes("- Gaps:") || evRef.includes("- Gaps:")) errors.push("evidence verdict schema must use only `Gap:`");
   for (const term of ["PASS_TO_FINAL", "NEXT_ITERATION"]) if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`evidence verdict enum mismatch: ${term}`);
-  for (const term of ["Loop state review", "Memory review"]) if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`evidence verdict schema missing persistent-loop field: ${term}`);
+  for (const term of ["Goal Contract", "Loop State", "Evidence", "Verified at", "Loop state review", "Memory review"]) if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`evidence verdict schema missing persistent-loop field: ${term}`);
   for (const term of ["NARROW_CLAIM", "REFRAME"]) if (evSkill.includes(term) || evRef.includes(term)) errors.push(`evidence verdict enum must not include: ${term}`);
-  for (const term of ["control-loop / alpha-goal / BLOCKED"]) if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`evidence next-route options mismatch: ${term}`);
+  for (const term of ["none / control-loop / alpha-goal / BLOCKED"]) if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`evidence next-route options mismatch: ${term}`);
 }
 
 function validateInstallDocumentation(root: string, errors: string[]): void {
@@ -356,26 +404,26 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
     } catch (error) {
       errors.push(`${HOOKS_TEMPLATE}: invalid JSON: ${errorMessage(error)}`);
     }
-    for (const term of [COMPACT_RECOVERY_HOOK_MARKER, "^compact$", "$alpha-goal", "$control-loop", "$evidence-verify"]) {
+    for (const term of [COMPACT_RECOVERY_HOOK_MARKER, "^compact$", "$alpha-goal", "$control-loop", "$evidence-verify", "control-state/latest.md", "run-profile.md", "verification.md/evidence.md"]) {
       if (!hooksTemplate.includes(term)) errors.push(`${HOOKS_TEMPLATE}: missing compact recovery hook term: ${term}`);
     }
     if (hooksTemplate.includes(`[${COMPACT_RECOVERY_HOOK_MARKER}]`)) errors.push(`${HOOKS_TEMPLATE}: compact recovery marker must not be printed to model context`);
   }
   const readme = readIfFile(path.join(root, "README.md"));
   if (!readme.includes("当前代码事实只描述现状")) errors.push("README.md missing current-state-not-desired-state principle");
-  for (const term of ["loop-state.md", "memory.md", "34,000 bytes"]) if (!readme.includes(term)) errors.push(`README.md missing persistent-loop term: ${term}`);
+  for (const term of ["control-state/latest.md", "goal-contract.md", "run-profile.md", "loop-state.md", "memory.md", "50,000 bytes", "失效条件"]) if (!readme.includes(term)) errors.push(`README.md missing persistent-loop term: ${term}`);
   const readmeEn = readIfFile(path.join(root, "README.en.md"));
   if (!readmeEn.includes("Current code facts describe current state")) errors.push("README.en.md missing current-state-not-desired-state principle");
-  for (const term of ["loop-state.md", "memory.md", "34,000 bytes"]) if (!readmeEn.includes(term)) errors.push(`README.en.md missing persistent-loop term: ${term}`);
+  for (const term of ["control-state/latest.md", "goal-contract.md", "run-profile.md", "loop-state.md", "memory.md", "50,000 bytes", "invalidation"]) if (!readmeEn.includes(term)) errors.push(`README.en.md missing persistent-loop term: ${term}`);
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
   if (!installDoc.includes("--no-sync-user-hooks")) errors.push("INSTALL.md missing --no-sync-user-hooks option");
   if (!installDoc.includes(HOOKS_TEMPLATE)) errors.push("INSTALL.md missing hooks template behavior");
   if (!installDoc.includes("codex-compact-skill-recovery")) errors.push("INSTALL.md missing legacy hook migration behavior");
-  for (const term of ["loop-state", "memory", "34,000 bytes"]) if (!installDoc.includes(term)) errors.push(`INSTALL.md missing persistent-loop term: ${term}`);
+  for (const term of ["set -euo pipefail", "export CODEX_HOME", "Goal spec:", "Goal Contract:", "control-state/latest.md", "goal-contract", "run-profile", "loop-state", "memory", "Verified at", "HARDENING or VERIFICATION", "50,000 bytes", "without over-compressing", "mutation-preflight.ts --task", "evidence-summary.ts --task", "verification.md/evidence.md"]) if (!installDoc.includes(term)) errors.push(`INSTALL.md missing persistent-loop term: ${term}`);
   const manifest = readIfFile(path.join(root, "MANIFEST.md"));
   if (!manifest.includes(HOOKS_TEMPLATE) || !manifest.includes(COMPACT_RECOVERY_HOOK_MARKER)) errors.push("MANIFEST.md missing hooks template marker");
   if (!manifest.includes("marker family") || !manifest.includes("codex-compact-skill-recovery")) errors.push("MANIFEST.md missing hook upgrade strategy");
-  for (const term of ["loop-state.md", "memory.md", "Trigger Contract", "Autonomy Level"]) if (!manifest.includes(term)) errors.push(`MANIFEST.md missing persistent-loop term: ${term}`);
+  for (const term of ["loop-state.md", "memory.md", "run-profile.md", "control-state/latest.md", "Memory", "Trigger Contract", "Autonomy Level", "last verification gap", "invalidation", "50,000 bytes"]) if (!manifest.includes(term)) errors.push(`MANIFEST.md missing persistent-loop term: ${term}`);
   const templateAgents = readIfFile(path.join(root, "templates/AGENTS.md"));
   for (const term of [
     "Operating Contract",
@@ -390,6 +438,127 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
     const text = readIfFile(path.join(root, doc));
     if (/six skills|六技能|六个技能|成帧、建模、综合|\$goal-contract|\$system-model|\$decision-synthesis/.test(text)) errors.push(`${doc}: stale six-skill public architecture wording`);
   }
+}
+
+function validateRuntimeScriptBehavior(root: string, errors: string[]): void {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "alpha-goal-validate-"));
+  const env = { ...process.env, CODEX_HOME: tmp };
+  try {
+    writeTaskFixture(tmp, path.basename(root), "valid", {});
+    expectExit("mutation-preflight without --task blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts"), 1, errors);
+    expectExit("mutation-preflight valid task passes", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "valid"), 0, errors);
+
+    writeTaskFixture(tmp, path.basename(root), "missing-contract-binding", { runProfileGoalContract: false });
+    expectExit("mutation-preflight missing Goal Contract binding blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "missing-contract-binding"), 1, errors);
+    writeTaskFixture(tmp, path.basename(root), "missing-latest", {});
+    fs.rmSync(path.join(tmp, path.basename(root), "control-state", "latest.md"), { force: true });
+    expectExit("mutation-preflight missing latest binding blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "missing-latest"), 1, errors);
+    writeTaskFixture(tmp, path.basename(root), "stale-latest", { latestTarget: "valid" });
+    expectExit("mutation-preflight stale latest binding blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "stale-latest"), 1, errors);
+    writeTaskFixture(tmp, path.basename(root), "autonomy-overreach", { requestedAction: "merge", autonomyLevel: "L3 Modify worktree" });
+    expectExit("mutation-preflight autonomy action ceiling blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "autonomy-overreach"), 1, errors);
+
+    expectExit("evidence-summary without --task blocks", runTsx(root, env, "skills/evidence-verify/scripts/evidence-summary.ts"), 1, errors);
+    expectExit("evidence-summary valid task passes", runTsx(root, env, "skills/evidence-verify/scripts/evidence-summary.ts", "--task", "valid"), 0, errors);
+
+    writeTaskFixture(tmp, path.basename(root), "missing-goal-contract", { goalContract: false });
+    expectExit("evidence-summary missing goal-contract blocks", runTsx(root, env, "skills/evidence-verify/scripts/evidence-summary.ts", "--task", "missing-goal-contract"), 1, errors);
+    writeTaskFixture(tmp, path.basename(root), "stale-verification", { verificationTarget: "valid" });
+    expectExit("evidence-summary stale verification binding blocks", runTsx(root, env, "skills/evidence-verify/scripts/evidence-summary.ts", "--task", "stale-verification"), 1, errors);
+    writeTaskFixture(tmp, path.basename(root), "missing-verification-fields", { verificationFields: false });
+    expectExit("evidence-summary missing verification fields blocks", runTsx(root, env, "skills/evidence-verify/scripts/evidence-summary.ts", "--task", "missing-verification-fields"), 1, errors);
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+}
+
+function runTsx(root: string, env: NodeJS.ProcessEnv, rel: string, ...args: string[]) {
+  return spawnSync("npx", ["--no-install", "tsx", rel, ...args], { cwd: root, env, encoding: "utf8" });
+}
+
+function expectExit(label: string, result: ReturnType<typeof spawnSync>, expected: number, errors: string[]): void {
+  if (result.status !== expected) {
+    const out = `${result.stdout ?? ""}${result.stderr ?? ""}`.trim();
+    errors.push(`${label}: expected exit ${expected}, got ${result.status}; output: ${out.slice(0, 800)}`);
+  }
+}
+
+function writeTaskFixture(tmp: string, workspace: string, task: string, options: { goalContract?: boolean; runProfileGoalContract?: boolean; verificationFields?: boolean; requestedAction?: string; autonomyLevel?: string; latestTarget?: string; verificationTarget?: string }): void {
+  const dir = path.join(tmp, workspace || "workspace", task);
+  fs.mkdirSync(dir, { recursive: true });
+  const goalPath = path.join(dir, "goal-contract.md");
+  const goalContract = options.goalContract ?? true;
+  const runProfileGoalContract = options.runProfileGoalContract ?? true;
+  const verificationFields = options.verificationFields ?? true;
+  const requestedAction = options.requestedAction ?? "modify-worktree";
+  const autonomyLevel = options.autonomyLevel ?? "L3 Modify worktree";
+  if (goalContract) fs.writeFileSync(goalPath, [
+    "Trigger Contract: manual",
+    `Autonomy Level: ${autonomyLevel}`,
+    "",
+  ].join("\n"));
+  fs.mkdirSync(path.join(tmp, workspace || "workspace", "control-state"), { recursive: true });
+  const latestTask = options.latestTarget ?? task;
+  const latestDir = path.join(tmp, workspace || "workspace", latestTask);
+  fs.writeFileSync(path.join(tmp, workspace || "workspace", "control-state", "latest.md"), [
+    "# Control State Latest",
+    `State directory: ${latestDir}`,
+    `Goal Contract: ${path.join(latestDir, "goal-contract.md")}`,
+    `Run Profile: ${path.join(latestDir, "run-profile.md")}`,
+    `Loop State: ${path.join(latestDir, "loop-state.md")}`,
+    `Memory: ${path.join(latestDir, "memory.md")}`,
+    `Evidence: ${path.join(latestDir, "evidence.md")}`,
+    `Verification: ${path.join(latestDir, "verification.md")}`,
+    "Current Phase: VERIFICATION",
+    "Next route: none",
+    "Updated at: 2026-06-23T00:00:00Z",
+    "",
+  ].join("\n"));
+  fs.writeFileSync(path.join(dir, "run-profile.md"), [
+    `Goal spec: ${goalPath}`,
+    "Rule: Controls execution only; must not expand, narrow, reinterpret, waive, or replace the goal spec.",
+    "Run mode: manual",
+    runProfileGoalContract ? `Goal Contract: ${goalPath}` : "Goal Contract:",
+    "Trigger event: none",
+    `Requested action: ${requestedAction}`,
+    "Discovery source: goal-spec-only",
+    "External side effects allowed: none",
+    "Human checkpoint: none",
+    "Evaluator route: $evidence-verify before final claim",
+    `Autonomy level: ${autonomyLevel}`,
+    "",
+  ].join("\n"));
+  fs.writeFileSync(path.join(dir, "loop-state.md"), [
+    "Current Objective: fixture",
+    "Current Phase: VERIFICATION",
+    "Completed: None yet",
+    "Pending: None yet",
+    "Known Risks: None yet",
+    "Last Verification Gap: None yet",
+    "Next Slice: run validation",
+    "Stop Condition: validation complete",
+    "",
+  ].join("\n"));
+  fs.writeFileSync(path.join(dir, "memory.md"), [
+    "Confirmed Facts: None yet",
+    "Confirmed Root Causes: None yet",
+    "Known Constraints: None yet",
+    "Working Strategies: None yet",
+    "Failed Strategies: None yet",
+    "",
+  ].join("\n"));
+  fs.writeFileSync(path.join(dir, "evidence.md"), "Evidence: fixture\n");
+  const verificationDir = path.join(tmp, workspace || "workspace", options.verificationTarget ?? task);
+  fs.writeFileSync(path.join(dir, "verification.md"), verificationFields ? [
+    `- Goal Contract: ${path.join(verificationDir, "goal-contract.md")}`,
+    `- Loop State: ${path.join(verificationDir, "loop-state.md")}`,
+    `- Evidence: ${path.join(verificationDir, "evidence.md")}`,
+    "- Verified at: 2026-06-23T00:00:00Z",
+    "- Verdict: PASS_TO_FINAL",
+    "- Gap: None",
+    "- Next route: none",
+    "",
+  ].join("\n") : "- Verdict:\n- Gap:\n- Next route:\n");
 }
 
 function validateNoAutoDownloadRunner(root: string, files: string[], errors: string[]): void {

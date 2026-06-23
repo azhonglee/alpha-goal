@@ -5,7 +5,7 @@
 | Directory | Purpose |
 |---|---|
 | `skills/alpha-goal/` | Front-end controller: fact discovery, clarification, Goal Contract, trigger contract, initial loop state, route. |
-| `skills/control-loop/` | Persistent bounded actuator/controller: resume state and memory, act, collect feedback, harden from verification gaps. |
+| `skills/control-loop/` | Persistent bounded actuator/controller: resume Goal Contract, run profile, loop state, and memory; act, collect feedback, harden from verification gaps. |
 | `skills/evidence-verify/` | Independent comparator for evidence, verification gaps, and claim boundaries. |
 
 Former public framing/modeling/synthesis stages are folded into `skills/alpha-goal/SKILL.md`.
@@ -34,13 +34,13 @@ Default runtime artifacts live under the user-level Alpha Goal state root: `${CO
 | `<state-root>/YYYYMMDD-<TaskName>/interview.md` | Clarification records and decision-boundary notes. |
 | `<state-root>/YYYYMMDD-<TaskName>/goal-contract.md` | Goal Contract, including Trigger Contract and Autonomy Level. |
 | `<state-root>/YYYYMMDD-<TaskName>/run-profile.md` | Execution profile for this run; cannot redefine the Goal Contract. |
-| `<state-root>/YYYYMMDD-<TaskName>/loop-state.md` | Durable current objective, phase, completed/pending work, known risks, next slice, stop condition. |
-| `<state-root>/YYYYMMDD-<TaskName>/memory.md` | Compressed loop memory: confirmed facts, root causes, constraints, working strategies, failed strategies. |
+| `<state-root>/YYYYMMDD-<TaskName>/loop-state.md` | Durable current objective, phase, completed/pending work, known risks, last verification gap, next slice, stop condition. |
+| `<state-root>/YYYYMMDD-<TaskName>/memory.md` | Compressed loop memory: confirmed facts, root causes, constraints, working strategies, failed strategies, with evidence, confidence, and invalidation. |
 | `<state-root>/YYYYMMDD-<TaskName>/iteration.md` | Latest execution run log; records facts only and does not store persistent current state. |
 | `<state-root>/YYYYMMDD-<TaskName>/evidence.md` | Durable evidence, logs, screenshots, traces, or check outputs. |
 | `<state-root>/YYYYMMDD-<TaskName>/verification.md` | Verification verdict artifacts and next Gap for evaluator feedback. |
-| `<state-root>/control-state/latest.md` | Stable latest Closed-loop Ledger entry when needed. |
+| `<state-root>/control-state/latest.md` | Stable latest recovery pointer with State directory, Goal Contract, Run Profile, Loop State, Memory, Evidence, Verification, Current Phase, Next route, and Updated at. |
 
 ## Byte Budget
 
-The enforced control-byte budget is the whole `skills/` tree, capped at 34,000 bytes.
+The enforced control-byte budget is the whole `skills/` tree, capped at 50,000 bytes. The higher cap preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, autonomy gates, behavior-level script gates, and evaluator feedback without over-compressing their meaning.

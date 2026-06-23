@@ -2,6 +2,10 @@
 
 ```markdown
 Verification Verdict:
+- Goal Contract:
+- Loop State:
+- Evidence:
+- Verified at:
 - Original claim:
 - Claim checked:
 - Indicator handoff review:
@@ -18,7 +22,7 @@ Verification Verdict:
 - Final wording allowed:
 - Final claim allowed:
 - Verdict: PASS_TO_FINAL / NEXT_ITERATION
-- Next route: control-loop / alpha-goal / BLOCKED
+- Next route: none / control-loop / alpha-goal / BLOCKED
 ```
 
 Indicator handoff review
