@@ -105,19 +105,21 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Trigger Contract",
     "Autonomy Level",
     "Match the task state",
-    "context.md",
-    "interview.md",
+    "Discovery notes",
+    "Interview ledger",
+    "goal-contract.md",
     "canonical",
     "Artifact policy",
-    "writes only these task artifacts",
+    "writes only `goal-contract.md`",
     "request_user_input",
     "$control-loop",
     "Design Summary"
   ]],
   ["alpha records interview and design state", "skills/alpha-goal/SKILL.md", [
     "Alpha Goal state root",
-    "YYYYMMDD-<TaskName>/context.md",
-    "YYYYMMDD-<TaskName>/interview.md",
+    "YYYYMMDD-<TaskName>/goal-contract.md",
+    "Discovery notes",
+    "Interview ledger",
     "docs/specs/YYYYMMDD-<TaskName>.md",
     "Design Summary"
   ]],
@@ -127,16 +129,17 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "State artifacts support execution and recovery",
     "writing them is never the objective",
     "action/probe evidence changes or confirms",
-    "conditional checkpoints",
+    "conditional checkpoint",
     "Run the loop as behavior, not paperwork",
     "control-loop` never creates or derives it",
     "Do not mutate primary",
     "repo-local worktree",
     "Unrelated user changes",
-    "run-profile.md",
+    "checkpoint.md",
+    "Run Profile",
     "Run mode",
     "Goal Contract",
-    "control-state/latest.md",
+    "Latest",
     "Trigger event",
     "Requested action",
     "Trigger Contract",
@@ -150,15 +153,15 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Autonomy level",
     "canonical",
     "exact",
-    "Read Conditional Checkpoints",
+    "Read Checkpoint",
     "Reference Routing",
     "State writes are checkpoints, not progress",
     "references/state-artifacts.md",
     "references/trigger-autonomy.md",
     "references/completion-gates.md",
-    "loop-state.md",
+    "Loop State",
     "last verification gap",
-    "memory.md",
+    "Memory",
     "Evidence, Confidence, and Invalidation",
     "FINAL_RESPONSE_READY",
     "delivery boundary evidence",
@@ -182,21 +185,19 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
   ["control loop state artifacts schema", "skills/control-loop/references/state-artifacts.md", [
     "State writes are checkpoints, not progress",
     "Loop I/O",
-    "Use the matching task files as loop I/O when present or required",
+    "Use the matching task files as loop I/O",
+    "checkpoint.md",
+    "## Checkpoint",
     "Run Profile",
-    "Goal spec: same path as Goal Contract, reference only",
-    "Goal Contract remains canonical",
     "Loop State",
     "Current Phase: DISCOVERY | IMPLEMENTATION | HARDENING | VERIFICATION | FINAL_RESPONSE_READY | COMPLETE | BLOCKED",
     "Memory",
     "Confirmed Facts",
-    "Durable memory entries are added only when reusable and evidence-backed",
-    "Evidence, Confidence, and Invalidation",
-    "Latest Pointer",
-    "control-state/latest.md",
-    "not persistent current state",
     "Iteration",
-    "Iteration Summary"
+    "Evidence",
+    "Verification",
+    "Latest",
+    "Evidence, Confidence, and Invalidation"
   ]],
   ["control loop trigger and autonomy", "skills/control-loop/references/trigger-autonomy.md", [
     "Trigger Contract",
@@ -233,11 +234,11 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "same-goal fixable",
     "target, scope, authority",
     "permission, tool, data, environment, credential",
-    "run-profile.md",
+    "checkpoint",
     "execution context only",
-    "loop-state.md",
-    "required loop-state updates",
-    "required memory updates",
+    "checkpoint `Loop State`",
+    "required Loop State updates",
+    "required Memory updates",
     "required defect/risk sweep",
     "verification-gap hardening",
     "Review mode",
@@ -261,18 +262,18 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "targets",
     ".worktrees/codex/preflight-check",
     "BLOCKED without --task",
-    "Goal spec",
+    "checkpoint.md",
     "goal contract binding",
     "loop actionability",
     "autonomy action ceiling",
     "latest binding",
-    "run profile path",
+    "checkpoint path",
     "trigger",
     "trigger event",
     "requested action",
     "autonomy level",
-    "loop-state path",
-    "memory path",
+    "checkpoint loop state",
+    "checkpoint memory",
     "evaluator route"
   ]],
 ];
@@ -447,7 +448,7 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
   ];
   requireOrderedTerms("control-loop section order", text, sectionOrder, errors);
   requireOrderedTerms("control-loop execution chain", markdownSection(text, "Execution Loop"), [
-    "Trigger -> Read Goal -> Read Conditional Checkpoints -> Plan Slice -> Act/Probe -> Evidence -> $goal-verify -> Gap?",
+    "Trigger -> Read Goal -> Read Checkpoint -> Plan Slice -> Act/Probe -> Evidence -> $goal-verify -> Gap?",
     "Run the loop as behavior, not paperwork",
     "- Plan Slice:",
     "- Act/Probe:",
@@ -481,11 +482,14 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
   const stateRef = readIfFile(path.join(root, "skills/control-loop/references/state-artifacts.md"));
   requireOrderedTerms("control-loop state artifact schemas", stateRef, [
     "## Loop I/O",
+    "## Checkpoint",
     "## Run Profile",
     "## Loop State",
     "## Memory",
-    "## Latest Pointer",
     "## Iteration",
+    "## Evidence",
+    "## Verification",
+    "## Latest",
   ], errors);
   requireOrderedTerms("control-loop trigger autonomy reference", readIfFile(path.join(root, "skills/control-loop/references/trigger-autonomy.md")), [
     "## Trigger Contract",
@@ -568,7 +572,7 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
     } catch (error) {
       errors.push(`${HOOKS_TEMPLATE}: invalid JSON: ${errorMessage(error)}`);
     }
-    for (const term of [COMPACT_RECOVERY_HOOK_MARKER, "^compact$", "$alpha-goal", "$control-loop", "$goal-verify", "goal-contract.md first", "context.md/interview.md", "control-state/latest.md", "run-profile.md", "verification.md/evidence.md", "defect/risk", "unclaimed"]) {
+    for (const term of [COMPACT_RECOVERY_HOOK_MARKER, "^compact$", "$alpha-goal", "$control-loop", "$goal-verify", "goal-contract.md first", "checkpoint.md only", "Verification/Evidence", "defect/risk", "unclaimed"]) {
       if (!hooksTemplate.includes(term)) errors.push(`${HOOKS_TEMPLATE}: missing compact recovery hook term: ${term}`);
     }
     for (const term of ["$control-loop: use for bounded implementation or hardening after an explicit goal specification", "$goal-verify: use for goal completion/readiness/review/audit verification"]) {
@@ -581,23 +585,23 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   if (!readme.includes("当前代码事实只描述现状")) errors.push("README.md missing current-state-not-desired-state principle");
   if (!readme.includes("执行或加固已授权 slice")) errors.push("README.md must describe control-loop as execution-first");
   if (!readme.includes("Act/Probe -> Evidence -> $goal-verify -> Gap?")) errors.push("README.md workflow must include evidence and goal-verify");
-  for (const term of ["context.md", "interview.md", "goal-contract.md", "run-profile.md", "loop-state.md", "memory.md", "15,000 word+punctuation units", "失效条件"]) if (!readme.includes(term)) errors.push(`README.md missing persistent-loop term: ${term}`);
+  for (const term of ["goal-contract.md", "checkpoint.md", "discovery notes", "interview ledger", "15,000 word+punctuation units", "失效条件"]) if (!readme.includes(term)) errors.push(`README.md missing persistent-loop term: ${term}`);
   const readmeEn = readIfFile(path.join(root, "README.en.md"));
   if (!readmeEn.includes("Current code facts describe current state")) errors.push("README.en.md missing current-state-not-desired-state principle");
   if (!readmeEn.includes("Execute or harden an authorized slice")) errors.push("README.en.md must describe control-loop as execution-first");
   if (!readmeEn.includes("Act/Probe -> Evidence -> $goal-verify -> Gap?")) errors.push("README.en.md workflow must include evidence and goal-verify");
-  for (const term of ["context.md", "interview.md", "goal-contract.md", "run-profile.md", "loop-state.md", "memory.md", "15,000 word+punctuation units", "invalidation"]) if (!readmeEn.includes(term)) errors.push(`README.en.md missing persistent-loop term: ${term}`);
+  for (const term of ["goal-contract.md", "checkpoint.md", "discovery notes", "interview ledger", "15,000 word+punctuation units", "invalidation"]) if (!readmeEn.includes(term)) errors.push(`README.en.md missing persistent-loop term: ${term}`);
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
   if (!installDoc.includes("--no-sync-user-hooks")) errors.push("INSTALL.md missing --no-sync-user-hooks option");
   if (!installDoc.includes(HOOKS_TEMPLATE)) errors.push("INSTALL.md missing hooks template behavior");
   if (!installDoc.includes("codex-compact-skill-recovery")) errors.push("INSTALL.md missing legacy hook migration behavior");
   if (/tmp_codex_home\/skills\/[^"`\s]+\/scripts\//.test(installDoc)) errors.push("INSTALL.md smoke test must not require runtime skill scripts");
-  for (const term of ["set -euo pipefail", "export CODEX_HOME", "context.md", "interview.md", "Trigger Contract:", "goal-contract", "run-profile", "loop-state", "memory", "HARDENING or VERIFICATION", "15,000 word+punctuation units", "without over-compressing", "without requiring runtime skill scripts", "verification.md/evidence.md"]) if (!installDoc.includes(term)) errors.push(`INSTALL.md missing persistent-loop term: ${term}`);
+  for (const term of ["set -euo pipefail", "export CODEX_HOME", "Discovery notes", "Interview ledger", "Trigger Contract:", "goal-contract", "checkpoint", "HARDENING or VERIFICATION", "15,000 word+punctuation units", "without over-compressing", "without requiring runtime skill scripts", "Verification/Evidence"]) if (!installDoc.includes(term)) errors.push(`INSTALL.md missing persistent-loop term: ${term}`);
   const manifest = readIfFile(path.join(root, "MANIFEST.md"));
   if (!manifest.includes(HOOKS_TEMPLATE) || !manifest.includes(COMPACT_RECOVERY_HOOK_MARKER)) errors.push("MANIFEST.md missing hooks template marker");
   if (!manifest.includes("marker family") || !manifest.includes("codex-compact-skill-recovery")) errors.push("MANIFEST.md missing hook upgrade strategy");
   if (!manifest.includes("act or harden authorized slices")) errors.push("MANIFEST.md must describe control-loop as execution-first");
-  for (const term of ["context.md", "interview.md", "goal-contract.md", "loop-state.md", "memory.md", "run-profile.md", "control-state/latest.md", "Trigger Contract", "Autonomy Level", "last verification gap", "invalidation", "15,000 word+punctuation units"]) if (!manifest.includes(term)) errors.push(`MANIFEST.md missing persistent-loop term: ${term}`);
+  for (const term of ["goal-contract.md", "checkpoint.md", "Trigger Contract", "Autonomy Level", "latest recovery pointer", "invalidation", "15,000 word+punctuation units"]) if (!manifest.includes(term)) errors.push(`MANIFEST.md missing persistent-loop term: ${term}`);
   const templateAgents = readIfFile(path.join(root, "templates/AGENTS.md"));
   if (/clearified/i.test(templateAgents)) errors.push("templates/AGENTS.md contains misspelling: clearified");
   if (!templateAgents.includes("explicit user feedback, accepted contracts, or source-backed task records")) errors.push("templates/AGENTS.md missing autonomous execution clarity sources");
@@ -666,30 +670,26 @@ function writeTaskFixture(tmp: string, workspace: string, task: string, options:
     `Autonomy Level: ${autonomyLevel}`,
     "",
   ].join("\n"));
-  if (latestEnabled) {
-    fs.mkdirSync(path.join(tmp, workspace || "workspace", "control-state"), { recursive: true });
-    const latestTask = options.latestTarget ?? task;
-    const latestDir = path.join(tmp, workspace || "workspace", latestTask);
-    fs.writeFileSync(path.join(tmp, workspace || "workspace", "control-state", "latest.md"), [
-      "# Control State Latest",
-      `State directory: ${latestDir}`,
-      `Goal Contract: ${path.join(latestDir, "goal-contract.md")}`,
-      `Run Profile: ${path.join(latestDir, "run-profile.md")}`,
-      `Loop State: ${path.join(latestDir, "loop-state.md")}`,
-      `Memory: ${path.join(latestDir, "memory.md")}`,
-      `Evidence: ${path.join(latestDir, "evidence.md")}`,
-      `Verification: ${path.join(latestDir, "verification.md")}`,
-      "Current Phase: VERIFICATION",
-      "Next route: none",
-      "Updated at: 2026-06-23T00:00:00Z",
-      "",
-    ].join("\n"));
-  }
-  if (runProfileEnabled) fs.writeFileSync(path.join(dir, "run-profile.md"), [
-    `Goal spec: ${goalPath}`,
-    "Rule: Controls execution only; must not expand, narrow, reinterpret, waive, or replace the goal spec.",
-    "Run mode: manual",
+  const verificationDir = path.join(tmp, workspace || "workspace", options.verificationTarget ?? task);
+  const verificationGap = options.verificationGap ?? "None";
+  const goalSatisfaction = options.goalSatisfaction ?? "fixture goal evidence covers explicit contract";
+  const defectRiskSweep = options.defectRiskSweep ?? "no material issue found in checked surface";
+  const unclaimedIssues = options.unclaimedIssues ?? "None material in checked surface";
+  const negativeCases = options.negativeCases ?? "not applicable for fixture";
+  const finalClaimAllowed = options.finalClaimAllowed ?? "yes";
+  const checkpointEnabled = runProfileEnabled || loopStateEnabled || memoryEnabled || evidenceEnabled || verificationEnabled || latestEnabled;
+  if (!checkpointEnabled) return;
+
+  const checkpoint: string[] = [
+    "# Goal Checkpoint",
     runProfileGoalContract ? `Goal Contract: ${goalPath}` : "Goal Contract:",
+    "Updated at: 2026-06-23T00:00:00Z",
+    "",
+  ];
+  if (runProfileEnabled) checkpoint.push(
+    "## Run Profile",
+    "Rule: Controls execution only; must not expand, narrow, reinterpret, waive, or replace the Goal Contract.",
+    "Run mode: manual",
     "Trigger event: none",
     `Requested action: ${requestedAction}`,
     "Discovery source: goal-spec-only",
@@ -698,8 +698,9 @@ function writeTaskFixture(tmp: string, workspace: string, task: string, options:
     "Evaluator route: $goal-verify before final claim",
     `Autonomy level: ${autonomyLevel}`,
     "",
-  ].join("\n"));
-  if (loopStateEnabled) fs.writeFileSync(path.join(dir, "loop-state.md"), [
+  );
+  if (loopStateEnabled) checkpoint.push(
+    "## Loop State",
     "Current Objective: fixture",
     "Current Phase: VERIFICATION",
     "Completed: None yet",
@@ -709,39 +710,58 @@ function writeTaskFixture(tmp: string, workspace: string, task: string, options:
     "Next Slice: run validation",
     "Stop Condition: validation complete",
     "",
-  ].join("\n"));
-  if (memoryEnabled) fs.writeFileSync(path.join(dir, "memory.md"), [
+  );
+  if (memoryEnabled) checkpoint.push(
+    "## Memory",
     "Confirmed Facts: None yet",
     "Confirmed Root Causes: None yet",
     "Known Constraints: None yet",
     "Working Strategies: None yet",
     "Failed Strategies: None yet",
     "",
-  ].join("\n"));
-  if (evidenceEnabled) fs.writeFileSync(path.join(dir, "evidence.md"), "Evidence: fixture\n");
-  const verificationDir = path.join(tmp, workspace || "workspace", options.verificationTarget ?? task);
-  const verificationGap = options.verificationGap ?? "None";
-  const goalSatisfaction = options.goalSatisfaction ?? "fixture goal evidence covers explicit contract";
-  const defectRiskSweep = options.defectRiskSweep ?? "no material issue found in checked surface";
-  const unclaimedIssues = options.unclaimedIssues ?? "None material in checked surface";
-  const negativeCases = options.negativeCases ?? "not applicable for fixture";
-  const finalClaimAllowed = options.finalClaimAllowed ?? "yes";
-  if (verificationEnabled) fs.writeFileSync(path.join(dir, "verification.md"), verificationFields ? [
-    `- Goal Contract: ${path.join(verificationDir, "goal-contract.md")}`,
-    `- Loop State: ${path.join(verificationDir, "loop-state.md")}`,
-    `- Evidence: ${path.join(verificationDir, "evidence.md")}`,
-    "- Verified at: 2026-06-23T00:00:00Z",
-    "- Review mode: completion",
-    `- Goal satisfaction review: ${goalSatisfaction}`,
-    `- Defect/risk sweep: ${defectRiskSweep}`,
-    `- Unclaimed issues found: ${unclaimedIssues}`,
-    `- Negative/abuse cases checked: ${negativeCases}`,
-    `- Final claim allowed: ${finalClaimAllowed}`,
-    "- Verdict: PASS_TO_FINAL",
-    `- Gap: ${verificationGap}`,
-    "- Next route: none",
+  );
+  if (evidenceEnabled) checkpoint.push(
+    "## Evidence",
+    "Acceptance-to-evidence: fixture",
+    "Command/output references: fixture",
+    "Defect/risk sweep surface: fixture",
+    "Residual risks: None",
+    "Unsupported or not-run checks: None",
     "",
-  ].join("\n") : "- Verdict:\n- Gap:\n- Next route:\n");
+  );
+  if (verificationEnabled) checkpoint.push(...(verificationFields ? [
+    "## Verification",
+    `Goal Contract: ${path.join(verificationDir, "goal-contract.md")}`,
+    "Verified at: 2026-06-23T00:00:00Z",
+    "Review mode: completion",
+    `Goal satisfaction review: ${goalSatisfaction}`,
+    `Defect/risk sweep: ${defectRiskSweep}`,
+    `Unclaimed issues found: ${unclaimedIssues}`,
+    `Negative/abuse cases checked: ${negativeCases}`,
+    `Final claim allowed: ${finalClaimAllowed}`,
+    "Verdict: PASS_TO_FINAL",
+    `Gap: ${verificationGap}`,
+    "Next route: none",
+    "",
+  ] : [
+    "## Verification",
+    "Verdict:",
+    "Gap:",
+    "Next route:",
+    "",
+  ]));
+  if (latestEnabled) {
+    const latestTask = options.latestTarget ?? task;
+    const latestDir = path.join(tmp, workspace || "workspace", latestTask);
+    checkpoint.push(
+      "## Latest",
+      `State directory: ${latestDir}`,
+      "Current Phase: VERIFICATION",
+      "Next route: none",
+      "",
+    );
+  }
+  fs.writeFileSync(path.join(dir, "checkpoint.md"), checkpoint.join("\n"));
 }
 
 function validateNoAutoDownloadRunner(root: string, files: string[], errors: string[]): void {

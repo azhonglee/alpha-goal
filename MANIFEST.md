@@ -5,7 +5,7 @@
 | Directory | Purpose |
 |---|---|
 | `skills/alpha-goal/` | Front-end controller: fact discovery, clarification, Goal Contract, trigger contract, autonomy boundary, route. |
-| `skills/control-loop/` | Bounded actuator/controller: act or harden authorized slices; use Goal Contract as the required input and conditional checkpoints for recovery, trigger handling, durable evidence, or verification. |
+| `skills/control-loop/` | Bounded actuator/controller: act or harden authorized slices; use Goal Contract as the required input and one conditional checkpoint for recovery, trigger handling, durable evidence, or verification. |
 | `skills/goal-verify/` | Independent goal verifier for evidence coverage, claim boundaries, defect/risk sweep, and verification gaps. |
 
 Former public framing/modeling/synthesis stages are folded into `skills/alpha-goal/SKILL.md`.
@@ -30,16 +30,8 @@ Default runtime artifacts live under the user-level Alpha Goal state root: `${CO
 
 | Path | Purpose |
 |---|---|
-| `<state-root>/YYYYMMDD-<TaskName>/context.md` | Default `alpha-goal` artifact: discovered facts, contradictions, and concise critical thinking. |
-| `<state-root>/YYYYMMDD-<TaskName>/interview.md` | Default `alpha-goal` artifact: clarification records and decision-boundary notes. |
-| `<state-root>/YYYYMMDD-<TaskName>/goal-contract.md` | Default `alpha-goal` artifact and canonical contract, including Trigger Contract and Autonomy Level. |
-| `<state-root>/YYYYMMDD-<TaskName>/run-profile.md` | Conditional execution profile for scheduled/webhook/verification-triggered runs, external side effects, actions above L3, or explicit human checkpoints; cannot redefine the Goal Contract. |
-| `<state-root>/YYYYMMDD-<TaskName>/loop-state.md` | Conditional recovery checkpoint: current objective, phase, completed/pending work, known risks, last verification gap, next slice, stop condition. |
-| `<state-root>/YYYYMMDD-<TaskName>/memory.md` | Conditional compressed learning: reusable confirmed facts, root causes, constraints, working strategies, failed strategies, with evidence, confidence, and invalidation. |
-| `<state-root>/YYYYMMDD-<TaskName>/iteration.md` | Conditional execution run log for handoff/recovery; records facts only and does not store persistent current state. |
-| `<state-root>/YYYYMMDD-<TaskName>/evidence.md` | Conditional durable evidence, logs, screenshots, traces, or check outputs. |
-| `<state-root>/YYYYMMDD-<TaskName>/verification.md` | Conditional verification verdict artifacts and next Gap for evaluator feedback. |
-| `<state-root>/control-state/latest.md` | Conditional latest recovery pointer with State directory, Goal Contract, optional checkpoint paths, Current Phase, Next route, and Updated at. |
+| `<state-root>/YYYYMMDD-<TaskName>/goal-contract.md` | Default `alpha-goal` artifact and canonical contract, including discovery notes, interview ledger, Trigger Contract, and Autonomy Level. |
+| `<state-root>/YYYYMMDD-<TaskName>/checkpoint.md` | Conditional checkpoint containing only needed sections: run profile, loop state, memory, iteration, evidence, verification, and latest recovery pointer; memory entries keep evidence, confidence, and invalidation. |
 
 ## Count Budget
 

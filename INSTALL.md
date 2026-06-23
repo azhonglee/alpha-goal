@@ -49,13 +49,9 @@ for skill in alpha-goal control-loop goal-verify; do
 done
 task_root="$tmp_codex_home/$(basename "$PWD")/20260623-smoke"
 mkdir -p "$task_root"
-cat >"$task_root/context.md" <<'EOF'
-Context: smoke
-EOF
-cat >"$task_root/interview.md" <<'EOF'
-Interview: smoke
-EOF
 cat >"$task_root/goal-contract.md" <<'EOF'
+Discovery notes: smoke
+Interview ledger: smoke
 Trigger Contract: manual
 Autonomy Level: L3 Modify worktree
 EOF
@@ -63,14 +59,11 @@ python3 -m json.tool "$tmp_codex_home/hooks.json" >/dev/null
 grep -q "codex-alpha-goal-compact-recovery:v1" "$tmp_codex_home/hooks.json"
 grep -q "treat pre-compaction remembered skill text as stale" "$tmp_codex_home/hooks.json"
 grep -q "goal-contract.md first" "$tmp_codex_home/hooks.json"
-grep -q "context.md/interview.md" "$tmp_codex_home/hooks.json"
-grep -q "control-state/latest.md" "$tmp_codex_home/hooks.json"
+grep -q "checkpoint.md only" "$tmp_codex_home/hooks.json"
 grep -q "goal-contract.md" "$tmp_codex_home/hooks.json"
-grep -q "run-profile.md" "$tmp_codex_home/hooks.json"
-grep -q "loop-state.md" "$tmp_codex_home/hooks.json"
-grep -q "memory.md" "$tmp_codex_home/hooks.json"
+grep -q "checkpoint.md" "$tmp_codex_home/hooks.json"
 grep -q "HARDENING or VERIFICATION" "$tmp_codex_home/hooks.json"
-grep -q "verification.md/evidence.md" "$tmp_codex_home/hooks.json"
+grep -q "Verification/Evidence" "$tmp_codex_home/hooks.json"
 grep -q '\$alpha-goal' "$tmp_codex_home/hooks.json"
 grep -q '\$control-loop' "$tmp_codex_home/hooks.json"
 grep -q '\$goal-verify' "$tmp_codex_home/hooks.json"

@@ -102,77 +102,66 @@ function main(): number {
 function checkTaskState(taskDir: string): boolean {
   let ok = true;
   const goalPath = `${taskDir}goal-contract.md`;
-  const runProfilePath = `${taskDir}run-profile.md`;
-  const loopStatePath = `${taskDir}loop-state.md`;
-  const memoryPath = `${taskDir}memory.md`;
-  const evidencePath = `${taskDir}evidence.md`;
-  const verificationPath = `${taskDir}verification.md`;
+  const checkpointPath = `${taskDir}checkpoint.md`;
 
   section("goal-contract path", goalPath);
   section("goal-contract.md", existsSync(goalPath) ? "present" : "missing");
   ok = existsSync(goalPath) && ok;
 
-  for (const [label, path] of [
-    ["run profile path", runProfilePath],
-    ["loop-state path", loopStatePath],
-    ["memory path", memoryPath],
-  ]) {
-    section(label, path);
-    section(label.replace(" path", ""), existsSync(path) ? "present" : "absent (optional)");
-  }
-
-  const latestPath = `${taskDir.replace(/[^/]+\/$/, "")}control-state/latest.md`;
-  section("control-state/latest.md", existsSync(latestPath) ? `present: ${latestPath}` : `absent (optional): ${latestPath}`);
+  section("checkpoint path", checkpointPath);
+  section("checkpoint.md", existsSync(checkpointPath) ? "present" : "absent (optional)");
 
   const goalText = readTaskFile(taskDir, "goal-contract.md");
-  const runProfile = readTaskFile(taskDir, "run-profile.md");
-  const loopState = readTaskFile(taskDir, "loop-state.md");
-  const memory = readTaskFile(taskDir, "memory.md");
-  const latest = existsSync(latestPath) ? readFileSync(latestPath, "utf8") : "";
-  const hasRunProfile = !!runProfile.trim();
-  const hasLoopState = !!loopState.trim();
-  const hasMemory = !!memory.trim();
-  const hasLatest = !!latest.trim();
+  const checkpoint = readTaskFile(taskDir, "checkpoint.md");
+  const hasCheckpoint = !!checkpoint.trim();
+  const hasRunProfile = hasCheckpoint && /## Run Profile/i.test(checkpoint);
+  const hasLoopState = hasCheckpoint && /## Loop State/i.test(checkpoint);
+  const hasMemory = hasCheckpoint && /## Memory/i.test(checkpoint);
+  const hasLatest = hasCheckpoint && /## Latest/i.test(checkpoint);
+  const hasVerification = hasCheckpoint && /## Verification/i.test(checkpoint);
 
-  if (hasRunProfile) ok = requireFields("run profile", runProfile, ["Goal spec", "Goal Contract", "Run mode", "Trigger event", "Requested action", "Discovery source", "External side effects allowed", "Human checkpoint", "Evaluator route", "Autonomy level"], true) && ok;
-  else section("run profile", "absent; plain manual L1-L3 work may execute from Goal Contract");
+  if (hasCheckpoint) ok = requireFields("checkpoint", checkpoint, ["Goal Contract", "Updated at"], false) && ok;
+  else section("checkpoint", "absent; plain manual L1-L3 work may execute from Goal Contract");
+
+  if (hasRunProfile) ok = requireFields("checkpoint run profile", checkpoint, ["Run mode", "Trigger event", "Requested action", "Discovery source", "External side effects allowed", "Human checkpoint", "Evaluator route", "Autonomy level"], true) && ok;
+  else section("checkpoint run profile", "absent unless trigger/action/side-effect requires it");
 
   if (hasLoopState) {
-    ok = requireFields("loop state", loopState, ["Current Objective", "Current Phase"], false) && ok;
-    ok = requireFields("loop state ledger", loopState, ["Completed", "Pending", "Known Risks", "Last Verification Gap"], true) && ok;
+    ok = requireFields("checkpoint loop state", checkpoint, ["Current Objective", "Current Phase"], false) && ok;
+    ok = requireFields("checkpoint loop state ledger", checkpoint, ["Completed", "Pending", "Known Risks", "Last Verification Gap"], true) && ok;
   } else {
-    section("loop state", "absent; no multi-iteration recovery checkpoint");
+    section("checkpoint loop state", "absent; no multi-iteration recovery checkpoint");
   }
 
-  if (hasMemory) ok = requireFields("memory", memory, ["Confirmed Facts", "Confirmed Root Causes", "Known Constraints", "Working Strategies", "Failed Strategies"], true) && ok;
-  else section("memory", "absent; no reusable learning checkpoint");
+  if (hasMemory) ok = requireFields("checkpoint memory", checkpoint, ["Confirmed Facts", "Confirmed Root Causes", "Known Constraints", "Working Strategies", "Failed Strategies"], true) && ok;
+  else section("checkpoint memory", "absent; no reusable learning checkpoint");
 
-  if (hasLatest) ok = requireFields("control-state latest", latest, ["State directory", "Goal Contract", "Updated at"], false) && ok;
+  if (hasLatest) ok = requireFields("checkpoint latest", checkpoint, ["State directory", "Current Phase", "Next route"], true) && ok;
 
-  const mode = hasRunProfile ? field(runProfile, "Run mode") : inferRunMode(goalText);
-  const action = hasRunProfile ? field(runProfile, "Requested action") : "";
-  const autonomy = hasRunProfile ? field(runProfile, "Autonomy level") : field(goalText, "Autonomy Level");
-  const phase = field(loopState, "Current Phase");
-  const goalContract = field(runProfile, "Goal Contract");
-  const nextSlice = field(loopState, "Next Slice");
-  const stopCondition = field(loopState, "Stop Condition");
-  const runProfileRequired = ["scheduled", "webhook", "verification-triggered"].includes(mode) || actionRequiresProfile(action);
+  const mode = hasRunProfile ? field(checkpoint, "Run mode") : inferRunMode(goalText);
+  const action = hasRunProfile ? field(checkpoint, "Requested action") : "";
+  const autonomy = hasRunProfile ? field(checkpoint, "Autonomy level") : field(goalText, "Autonomy Level");
+  const phase = field(checkpoint, "Current Phase");
+  const goalContract = field(checkpoint, "Goal Contract");
+  const nextSlice = field(checkpoint, "Next Slice");
+  const stopCondition = field(checkpoint, "Stop Condition");
+  const checkpointRequired = ["scheduled", "webhook", "verification-triggered"].includes(mode) || actionRequiresProfile(action);
 
   ok = check("run mode", runModes.has(mode), `invalid: ${mode || "<empty>"}`) && ok;
   if (hasRunProfile) ok = check("requested action", requestedActions.has(action), `invalid: ${action || "<empty>"}`) && ok;
   ok = check("autonomy level", /^L[1-5]\b/.test(autonomy), `invalid: ${autonomy || "<empty>"}`) && ok;
   if (hasRunProfile) ok = check("autonomy action ceiling", actionAllowedByLevel(action, autonomy), `${action || "<empty>"} exceeds ${autonomy || "<empty>"}`) && ok;
-  ok = check("run profile required", !runProfileRequired || hasRunProfile, `${mode || "<empty>"} / ${action || "<empty>"} requires run-profile.md`) && ok;
+  ok = check("checkpoint required", !checkpointRequired || hasCheckpoint && hasRunProfile, `${mode || "<empty>"} / ${action || "<empty>"} requires checkpoint.md Run Profile`) && ok;
   if (hasLoopState) ok = check("loop phase", loopPhases.has(phase), `invalid: ${phase || "<empty>"}`) && ok;
-  if (hasRunProfile) ok = check("goal contract binding", samePath(goalContract, goalPath), "run profile Goal Contract does not match current task") && ok;
+  if (hasCheckpoint) ok = check("goal contract binding", samePath(goalContract, goalPath), "checkpoint Goal Contract does not match current task") && ok;
   ok = check("trigger contract binding", triggerContractAllowsMode(goalText, mode), `Goal Contract does not authorize ${mode || "<empty>"} trigger`) && ok;
-  if (hasLatest) ok = check("latest binding", latestMatchesTask(latest, taskDir, goalPath, runProfilePath, loopStatePath, memoryPath, evidencePath, verificationPath, phase), "latest does not match current task files") && ok;
+  if (hasLatest) ok = check("latest binding", latestMatchesTask(checkpoint, taskDir, phase), "checkpoint Latest does not match current task") && ok;
   if (mode === "verification-triggered") {
-    ok = check("verification-triggered binding", verificationMatchesTask(readTaskFile(taskDir, "verification.md"), goalPath, loopStatePath, evidencePath), "verification binding missing or stale") && ok;
+    ok = check("verification-triggered binding", hasVerification && verificationMatchesTask(checkpoint, goalPath), "checkpoint Verification missing or stale") && ok;
   }
   if (hasLoopState) ok = check("loop actionability", !isUnset(nextSlice) && !isNone(nextSlice) || !isUnset(stopCondition) && !isNone(stopCondition), "missing actionable Next Slice or Stop Condition") && ok;
-  if (hasRunProfile) ok = check("evaluator route", field(runProfile, "Evaluator route").includes("$goal-verify"), "missing $goal-verify") && ok;
-  if (hasMemory) ok = check("memory evidence", memoryAllowsEmpty(memory) || /Evidence:/i.test(memory) && /Confidence:/i.test(memory) && /Invalidation:/i.test(memory), "non-empty memory needs Evidence, Confidence, and Invalidation") && ok;
+  if (hasRunProfile) ok = check("evaluator route", field(checkpoint, "Evaluator route").includes("$goal-verify"), "missing $goal-verify") && ok;
+  if (hasMemory) ok = check("memory evidence", memoryAllowsEmpty(checkpoint) || /Evidence:/i.test(checkpoint) && /Confidence:/i.test(checkpoint) && /Invalidation:/i.test(checkpoint), "non-empty memory needs Evidence, Confidence, and Invalidation") && ok;
 
   section("trigger event", "checked");
   return ok;
@@ -203,32 +192,19 @@ function samePath(actual: string, expected: string): boolean {
   return normalizePath(actual) === normalizePath(expected);
 }
 
-function latestMatchesTask(latest: string, taskDir: string, goalPath: string, runProfilePath: string, loopStatePath: string, memoryPath: string, evidencePath: string, verificationPath: string, phase: string): boolean {
-  return samePath(field(latest, "State directory"), taskDir.replace(/\/+$/, "")) &&
-    samePath(field(latest, "Goal Contract"), goalPath) &&
-    optionalSamePath(field(latest, "Run Profile"), runProfilePath) &&
-    optionalSamePath(field(latest, "Loop State"), loopStatePath) &&
-    optionalSamePath(field(latest, "Memory"), memoryPath) &&
-    optionalSamePath(field(latest, "Evidence"), evidencePath) &&
-    optionalSamePath(field(latest, "Verification"), verificationPath) &&
-    (!field(latest, "Current Phase") || field(latest, "Current Phase") === phase) &&
-    !!field(latest, "Updated at");
+function latestMatchesTask(checkpoint: string, taskDir: string, phase: string): boolean {
+  return samePath(field(checkpoint, "State directory"), taskDir.replace(/\/+$/, "")) &&
+    (!field(checkpoint, "Current Phase") || field(checkpoint, "Current Phase") === phase);
 }
 
-function optionalSamePath(actual: string, expected: string): boolean {
-  return !actual || samePath(actual, expected);
-}
-
-function verificationMatchesTask(verification: string, goalPath: string, loopStatePath: string, evidencePath: string): boolean {
-  return samePath(field(verification, "- Goal Contract"), goalPath) &&
-    optionalSamePath(field(verification, "- Loop State"), loopStatePath) &&
-    optionalSamePath(field(verification, "- Evidence"), evidencePath) &&
-    !!field(verification, "- Verified at");
+function verificationMatchesTask(checkpoint: string, goalPath: string): boolean {
+  return samePath(field(checkpoint, "Goal Contract"), goalPath) &&
+    !!field(checkpoint, "Verified at");
 }
 
 function triggerContractAllowsMode(goalText: string, mode: string): boolean {
   if (mode === "manual") return /Trigger Contract:[\s\S]*manual/i.test(goalText);
-  if (mode === "verification-triggered") return /verification-triggered/i.test(goalText) || /verification\.md/i.test(goalText);
+  if (mode === "verification-triggered") return /verification-triggered/i.test(goalText) || /checkpoint\.md/i.test(goalText);
   if (mode === "scheduled") return /scheduled|schedule/i.test(goalText) && /stale|replay|source|id/i.test(goalText);
   if (mode === "webhook") return /webhook/i.test(goalText) && /dedupe|replay|payload|source|id/i.test(goalText);
   return false;

@@ -1,48 +1,37 @@
 # State Artifacts
 
-Use these schemas only when initializing, repairing, or validating conditional state artifacts. State writes are checkpoints, not progress; do not normalize these files unless missing or stale state blocks authorized execution, recovery, conditional trigger handling, durable evidence handoff, or verification.
+Use this schema only when initializing, repairing, or validating `checkpoint.md`. State writes are checkpoints, not progress; do not normalize the checkpoint unless missing or stale state blocks authorized execution, recovery, conditional trigger handling, durable evidence handoff, or verification.
 
 ## Loop I/O
 
-Use the matching task files as loop I/O when present or required:
-- `goal-contract.md`: canonical goal, acceptance evidence, non-goals, authority, claim boundary, Trigger Contract, and Autonomy Level.
-- `run-profile.md`: conditional execution context only; required for scheduled, webhook, verification-triggered, external side effects, actions above L3, or explicit human checkpoints.
-- `loop-state.md`: conditional recovery checkpoint: current objective, phase, completed/pending work, risks, last verification gap, next slice, stop condition.
-- `memory.md`: optional compressed learning: confirmed facts, causes, constraints, working strategies, failed strategies, each with evidence, confidence, and invalidation.
-- `iteration.md`: optional append-only run log; records what happened in the current run, not persistent current state.
-- `evidence.md`: optional durable acceptance-to-evidence mapping, command/output references, defect/risk sweep surface, residual risks, unsupported or not-run checks.
-- `verification.md`: optional latest `$goal-verify` verdict, Gap, evidence boundary, and Next route.
-- `<state-root>/control-state/latest.md`: optional latest matching task pointer for recovery. Read it when task identity is ambiguous, and update it only after checkpoint bindings or verification routes change.
+Use the matching task files as loop I/O:
+- `goal-contract.md`: canonical goal, discovery notes, interview ledger, acceptance evidence, non-goals, authority, claim boundary, Trigger Contract, and Autonomy Level.
+- `checkpoint.md`: conditional checkpoint that may contain run profile, loop state, memory, iteration, evidence, verification, and latest recovery pointer sections.
 
-## Run Profile
+`checkpoint.md` is required only for scheduled, webhook, verification-triggered, external side effects, actions above L3, explicit human checkpoints, multi-iteration recovery, durable evidence handoff, or persisted verification.
 
-When required, `run-profile.md` must keep this minimal shape:
+## Checkpoint
+
+`checkpoint.md` must keep this minimal shape when any section is required:
 
 ```markdown
-# Loop Run Profile
+# Goal Checkpoint
 
-Goal spec: same path as Goal Contract, reference only
-Rule: Controls execution only; must not expand, narrow, reinterpret, waive, or replace the goal spec.
-
-Run mode: manual | scheduled | webhook | verification-triggered
 Goal Contract:
+Updated at:
+
+## Run Profile
+Rule: Controls execution only; must not expand, narrow, reinterpret, waive, or replace the Goal Contract.
+Run mode: manual | scheduled | webhook | verification-triggered
 Trigger event: none | schedule id | webhook id | verification gap path
 Requested action: suggest | draft | modify-worktree | commit | push | open-pr | merge
-Discovery source: goal-spec-only | named source authorized by goal spec/task records
+Discovery source: goal-spec-only | named source authorized by Goal Contract/task records
 External side effects allowed: none | explicit list outside approved worktree and Alpha Goal state root
 Human checkpoint: none | explicit checkpoint before listed side effects or claims
 Evaluator route: $goal-verify before final claim | named evaluator plus $goal-verify
 Autonomy level: L1 Suggest only | L2 Draft changes | L3 Modify worktree | L4 Open PR | L5 Merge automatically
-```
-
-`Goal spec` is a compatibility alias/reference only. Goal Contract remains canonical.
 
 ## Loop State
-
-When required, `loop-state.md` must keep this minimal shape:
-
-```markdown
-# Loop State
 Current Objective:
 Current Phase: DISCOVERY | IMPLEMENTATION | HARDENING | VERIFICATION | FINAL_RESPONSE_READY | COMPLETE | BLOCKED
 Completed:
@@ -51,48 +40,15 @@ Known Risks:
 Last Verification Gap:
 Next Slice:
 Stop Condition:
-```
 
 ## Memory
-
-When required by reusable learning, `memory.md` must keep this minimal shape:
-
-```markdown
-# Loop Memory
 Confirmed Facts:
 Confirmed Root Causes:
 Known Constraints:
 Working Strategies:
 Failed Strategies:
-```
-
-Durable memory entries are added only when reusable and evidence-backed; each non-empty entry includes Evidence, Confidence, and Invalidation.
-
-## Latest Pointer
-
-When required for recovery, `control-state/latest.md` shape:
-
-```markdown
-# Control State Latest
-State directory:
-Goal Contract:
-Run Profile:
-Loop State:
-Memory:
-Evidence:
-Verification:
-Current Phase:
-Next route:
-Updated at:
-```
 
 ## Iteration
-
-When required for multi-step handoff or recovery, `iteration.md` shape:
-
-```markdown
-Iteration Summary
-
 | Field | Value |
 | --- | --- |
 | Action | |
@@ -100,4 +56,24 @@ Iteration Summary
 | Residual error | |
 | Artifact | |
 | Next State | |
+
+## Evidence
+Acceptance-to-evidence:
+Command/output references:
+Defect/risk sweep surface:
+Residual risks:
+Unsupported or not-run checks:
+
+## Verification
+Verified at:
+Review mode:
+Gap:
+Next route: none | control-loop | alpha-goal | BLOCKED
+
+## Latest
+State directory:
+Current Phase:
+Next route:
 ```
+
+Omit unused sections. Durable memory entries are added only when reusable and evidence-backed; each non-empty entry includes Evidence, Confidence, and Invalidation.

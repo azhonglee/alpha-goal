@@ -28,7 +28,7 @@ Pre-flight -> Discovery -> Clarify with User -> Assumption Stress Test -> Final 
    - `other`: ask for minimum details needed to classify.
 2. Split mixed work into sequenced items before routing.
 3. Resolve the Alpha Goal state root before writing runtime artifacts. Always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
-4. Match the task state by Goal Contract path, state directory, and trigger metadata. If matched, read `context.md`, `interview.md`, and `goal-contract.md`; if multiple or stale candidates remain after local state inspection, clarify task identity before execution.
+4. Match the task state by Goal Contract path, state directory, and trigger metadata. If matched, read `goal-contract.md`; if multiple or stale candidates remain after local state inspection, clarify task identity before execution.
 
 ## Phase 1: Discovery
 
@@ -45,7 +45,7 @@ Discovery critical thinking:
 - Context sufficientness: what can be concluded now; what must be supplemented; what is must-have vs ideal?
 - Hidden issues: what deeper root cause, adjacent issue, or overlooked dependency may affect the goal?
 
-Record key points with concise critical thinking to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/context.md`.
+Record key points with concise critical thinking in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Discovery notes`. If the contract is still draft, mark it as draft and keep target/scope fields unset until Final Design.
 
 ## Phase 2: Clarify with User
 
@@ -92,7 +92,7 @@ Round {n} | Target: {weakest_dimension} | Clarity: {score}%
 
 ### 2.3 Interpret answer
 
-Treat the answer as navigation evidence, not requirements or authority. Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/interview.md`.
+Treat the answer as navigation evidence, not requirements or authority. Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Interview ledger`.
 
 Treat repo language as evidence, not authority. Cross-check user claims against code/docs; name competing sources on conflict.
 
@@ -158,6 +158,8 @@ The state-root `goal-contract.md` is canonical. Repo specs are mirrors or refere
 
 Design Content Must Include:
 - Technical Context [context]
+- Discovery notes [discovery_notes]
+- Interview ledger [interview_ledger]
 - Intent [intent]
 - Root Cause [root_cause] optional, only for repair design
 - Outcome [outcome]
@@ -195,12 +197,12 @@ Requested actions above the current level are denied and routed to user confirma
 
 ### Artifact policy
 
-`alpha-goal` writes only these task artifacts:
-- `context.md`: concise discovered facts, contradictions, and critical thinking.
-- `interview.md`: clarification rounds, user-owned decisions, and unresolved boundary gaps.
-- `goal-contract.md`: canonical target, scope, non-goals, acceptance evidence, claim boundary, Trigger Contract, Autonomy Level, and handoff ledger.
+`alpha-goal` writes only `goal-contract.md`. The contract contains:
+- `Discovery notes`: concise discovered facts, contradictions, and critical thinking.
+- `Interview ledger`: clarification rounds, user-owned decisions, and unresolved boundary gaps.
+- Canonical target, scope, non-goals, acceptance evidence, claim boundary, Trigger Contract, Autonomy Level, and handoff ledger.
 
-Do not initialize `run-profile.md`, `loop-state.md`, `memory.md`, `iteration.md`, `evidence.md`, `verification.md`, or `control-state/latest.md` from `alpha-goal`. `$control-loop` or `$goal-verify` may create those files only when conditional execution, recovery, evidence handoff, or verification requires them.
+Do not create separate discovery, interview, loop, memory, evidence, verification, or latest-pointer files from `alpha-goal`. `$control-loop` or `$goal-verify` may create a single `checkpoint.md` only when conditional execution, recovery, evidence handoff, or verification requires it.
 
 Self-review the design for completion and reasonability. Use subagents for independent review when useful, then fix accepted findings.
 
