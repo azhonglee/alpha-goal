@@ -1,32 +1,69 @@
 ---
 name: control-loop
-description: "Native-goal-driven bounded executor and hardener. Use after an accepted Goal Contract authorizes implementation, or when an explicit or active Codex Native Goal must be run, resumed, finished, or reported through create_goal/update_goal gates. Do not use for ambiguous planning or standalone specific read-only probe requests."
+description: "Native-goal-driven bounded executor and hardener. Use after an accepted Goal Contract authorizes implementation, or when an explicit or active Codex Native Goal must be run, resumed, finished, or reported through create_goal/update_goal gates. Do not use for ambiguous planning."
 ---
 
 # Control Loop
 
 Control Loop is the native-goal-driven bounded executor and hardener after `$alpha-goal`, not task discovery or scheduling. Optimize for useful target-state movement: choose a small slice, act, collect evidence, compare, and either harden or finish.
 
-State artifacts support execution and recovery; writing them is never the objective. A slice is complete only when action/probe evidence changes or confirms target state. Use `checkpoint.md` only when it protects recovery, trigger handling, evidence handoff, or verification.
+State artifacts support execution and recovery; writing them is never the objective. A slice is complete only when action evidence changes or confirms target state. Use `checkpoint.md` only when it protects recovery, trigger handling, evidence handoff, or verification.
 
 ## Execution Loop
 
-```text
-Trigger -> Inspect Native Goal -> Resolve Task -> Read Goal -> Read Checkpoint -> Plan Slice -> Act/Probe -> Evidence -> $goal-verify -> Lifecycle/Gap?
-Gap yes -> update needed checkpoints -> harden/continue
-Gap no -> final claim and native goal lifecycle update within verified boundary
+Run the loop as behavior, not paperwork. Treat the execution as control flow:
+
+```pseudo
+function control_loop(trigger):
+  # Inspect Native Goal
+  native_goal = inspect_native_goal_if_available()
+  if native_goal.absent and !trigger.explicit_native_goal_start:
+    do_not_call(create_goal)
+
+  # Resolve Task, Read Goal, Read Checkpoint
+  task = resolve_task(trigger, latest_index = "control-state/latest.md")
+  goal = read_accepted_goal_contract(task)
+  checkpoint = read_checkpoint_when_present_or_required(task)
+  assert_authorized_boundary(goal, checkpoint, native_goal)
+
+  while true:
+    # Plan Slice
+    slice = plan_smallest_deliverable_slice(goal, checkpoint)
+
+    # Act, Evidence, Verify Gap
+    outcome = act(slice)
+    evidence = collect_raw_evidence(outcome)
+    gap = compare_to_goal(evidence, goal.acceptance_evidence, goal.claim_boundary)
+
+    if gap.changed_contract_or_authority:
+      return RETURN_TO_ALPHA_GOAL
+    if gap.blocked:
+      update_native_goal_lifecycle_if_allowed(native_goal, update_goal blocked)
+      return BLOCKED
+    if gap.fixable:
+      checkpoint_only_if_needed(gap)
+      continue
+
+    verification = goal_verify_if_required(evidence, goal, trigger)
+    if verification.pass:
+      finish_delivery_boundary()
+      update_native_goal_lifecycle_if_allowed(native_goal, update_goal complete)
+      return PASS_TO_FINAL
+
+    if verification.gap.fixable:
+      checkpoint_only_if_needed(verification.gap)
+      continue
+    return route_verification_result(verification)
 ```
 
-Run the loop as behavior, not paperwork:
-- Inspect Native Goal: use `get_goal` when available; without active native goal or explicit start request, do not call `create_goal`.
-- Resolve Task: when identity is ambiguous, use `<state-root>/control-state/latest.md` only as a global recovery index.
-- Read Goal: bind to the accepted `goal-contract.md`, approved target, acceptance evidence, non-goals, claim boundary, Trigger Contract, and Autonomy Level.
-- Read Checkpoint: read `checkpoint.md` only when present or required; do not memorize its fields here.
-- Plan Slice: choose the smallest valuable acceptance- and risk-relevant action/probe.
-- Act/Probe: make the targeted change or gather the missing observer.
-- Evidence: collect raw proof from tests, commands, diffs, logs, screenshots, probes, or inspection.
-- Verify Gap: send final/ready/safe/PR-ready, review/audit, high-risk, or verification-triggered work through `$goal-verify`.
-- Lifecycle update: call `update_goal complete` or `update_goal blocked` only when the native goal tool contract allows it.
+Helper meanings:
+- `inspect_native_goal_if_available`: use `get_goal` when available; without active native goal or explicit start request, do not call `create_goal`.
+- `resolve_task`: when identity is ambiguous, use `<state-root>/control-state/latest.md` only as a global recovery index.
+- `read_accepted_goal_contract`: bind to the accepted `goal-contract.md`, approved target, acceptance evidence, non-goals, claim boundary, Trigger Contract, and Autonomy Level.
+- `read_checkpoint_when_present_or_required`: read `checkpoint.md` only when present or required; do not memorize its fields here.
+- `act`: make the targeted change or gather the missing observer.
+- `collect_raw_evidence`: collect proof from tests, commands, diffs, logs, screenshots, probes, or inspection.
+- `goal_verify_if_required`: send final/ready/safe/PR-ready, review/audit, high-risk, or verification-triggered work through `$goal-verify`.
 
 ## Execution Invariants
 
@@ -79,7 +116,7 @@ Read the Goal Contract, then any needed checkpoint. Plan only the current slice:
 - define evidence before acting;
 - name key risks, assumptions, side effects, cleanup, and stop conditions.
 
-### 2. Act or probe
+### 2. Act
 
 - Stay inside the planned slice and Goal Contract.
 - Stop on material contradictions.
@@ -103,7 +140,7 @@ Persist only state needed for recovery, evidence, or the next route:
 - update `<state-root>/control-state/latest.md` only as a global recovery index.
 
 Routes:
-- `ITERATION_CONTINUES`: next safe slice remains; continue with `Act/probe` or re-plan.
+- `ITERATION_CONTINUES`: next safe slice remains; continue with `Act` or re-plan.
 - `ITERATION_HARDEN`: direction is valid but evidence, edge, compatibility, cleanup, or verification gap is weak.
 - `ITERATION_READY_FOR_VERIFY`: evidence appears to cover acceptance, claim boundary, and material defect/risk sweep. Handoff to `$goal-verify`.
 - `RETURN_TO_ALPHA_GOAL`: target, scope, authority, acceptance evidence, non-goal, decision boundary, actuator boundary, Trigger Contract, Autonomy level, or claim boundary changed or became unclear.
