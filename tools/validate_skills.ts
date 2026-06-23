@@ -138,7 +138,7 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Unrelated user changes",
     "run-profile.md",
     "Run mode",
-    "Goal Contract:",
+    "Goal Contract",
     "control-state/latest.md",
     "Trigger event",
     "Requested action",
@@ -151,18 +151,15 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Human checkpoint",
     "Evaluator route",
     "Autonomy level",
-    "Autonomy Ladder",
-    "Commit, push branch",
     "canonical",
     "exact",
     "Read Loop State",
     "Read Memory",
-    "State I/O Contract",
-    "Use the matching task files as loop I/O",
-    "Artifact Schemas",
-    "Goal spec` is a compatibility alias/reference only",
-    "Durable memory entries are added only when reusable and evidence-backed",
-    "not persistent current state",
+    "Reference Routing",
+    "State writes are checkpoints, not progress",
+    "references/state-artifacts.md",
+    "references/trigger-autonomy.md",
+    "references/completion-gates.md",
     "loop-state.md",
     "last verification gap",
     "memory.md",
@@ -184,6 +181,53 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "RETURN_TO_ALPHA_GOAL",
     "BLOCKED",
     "Stop/re-route"
+  ]],
+  ["control loop state artifacts schema", "skills/control-loop/references/state-artifacts.md", [
+    "State writes are checkpoints, not progress",
+    "Loop I/O",
+    "Use the matching task files as loop I/O",
+    "Run Profile",
+    "Goal spec: same path as Goal Contract, reference only",
+    "Goal Contract remains canonical",
+    "Loop State",
+    "Current Phase: DISCOVERY | IMPLEMENTATION | HARDENING | VERIFICATION | FINAL_RESPONSE_READY | COMPLETE | BLOCKED",
+    "Memory",
+    "Confirmed Facts",
+    "Durable memory entries are added only when reusable and evidence-backed",
+    "Evidence, Confidence, and Invalidation",
+    "Latest Pointer",
+    "control-state/latest.md",
+    "not persistent current state",
+    "Iteration",
+    "Iteration Summary"
+  ]],
+  ["control loop trigger and autonomy", "skills/control-loop/references/trigger-autonomy.md", [
+    "Trigger Contract",
+    "`manual`",
+    "`scheduled`",
+    "`webhook`",
+    "`verification-triggered`",
+    "Autonomy Ladder",
+    "`L1`: Suggest only",
+    "`L2`: Draft changes without applying",
+    "`L3`: Modify approved worktree and task-state; no commit/push",
+    "`L4`: Commit, push branch, and open/update PR/MR",
+    "`L5`: Merge/deploy only when explicitly authorized",
+    "If requested action exceeds the level",
+    "BLOCKED"
+  ]],
+  ["control loop completion gates", "skills/control-loop/references/completion-gates.md", [
+    "Universal Completion Gates",
+    "Scope Gate",
+    "Assertion Gate",
+    "Replacement/Prohibition Gate",
+    "Evidence Boundary Gate",
+    "Raw Evidence Gate",
+    "FINAL_RESPONSE_READY",
+    "MR-ready",
+    "Same-goal fixable gap -> `HARDENING`",
+    "Scope/authority/decision change -> `RETURN_TO_ALPHA_GOAL`",
+    "Missing permission/data/environment -> `BLOCKED`"
   ]],
   ["goal verification checks claims and defects", "skills/goal-verify/SKILL.md", [
     "PASS_TO_FINAL",
@@ -400,12 +444,8 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
     "## Execution Loop",
     "## Execution Invariants",
     "## Gates",
-    "## Trigger Contract",
-    "## Autonomy Ladder",
-    "## Universal Completion Gates",
     "## Preflight",
-    "## State I/O Contract",
-    "## Artifact Schemas",
+    "## Reference Routing",
     "## Iteration",
   ];
   requireOrderedTerms("control-loop section order", text, sectionOrder, errors);
@@ -428,9 +468,46 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
   for (const forbidden of [
     "Goal Contract, `run-profile.md`, `loop-state.md`, and `memory.md` exist or can be initialized only from authorized task records",
     "Before `ITERATION_READY_FOR_VERIFY`, update:",
+    "## Trigger Contract",
+    "## Autonomy Ladder",
+    "## Universal Completion Gates",
+    "## State I/O Contract",
+    "## Artifact Schemas",
+    "# Loop Run Profile",
+    "# Loop State",
+    "# Loop Memory",
+    "# Control State Latest",
+    "Iteration Summary",
   ]) {
     if (text.includes(forbidden)) errors.push(`control-loop reverted to unsafe wording: ${forbidden}`);
   }
+  const stateRef = readIfFile(path.join(root, "skills/control-loop/references/state-artifacts.md"));
+  requireOrderedTerms("control-loop state artifact schemas", stateRef, [
+    "## Loop I/O",
+    "## Run Profile",
+    "## Loop State",
+    "## Memory",
+    "## Latest Pointer",
+    "## Iteration",
+  ], errors);
+  requireOrderedTerms("control-loop trigger autonomy reference", readIfFile(path.join(root, "skills/control-loop/references/trigger-autonomy.md")), [
+    "## Trigger Contract",
+    "`manual`",
+    "`scheduled`",
+    "`webhook`",
+    "`verification-triggered`",
+    "## Autonomy Ladder",
+    "`L1`",
+    "`L5`",
+  ], errors);
+  requireOrderedTerms("control-loop completion gates reference", readIfFile(path.join(root, "skills/control-loop/references/completion-gates.md")), [
+    "## Universal Completion Gates",
+    "Scope Gate",
+    "Assertion Gate",
+    "Replacement/Prohibition Gate",
+    "Evidence Boundary Gate",
+    "Raw Evidence Gate",
+  ], errors);
 }
 
 function markdownSection(text: string, heading: string): string {
