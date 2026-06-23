@@ -27,7 +27,7 @@ npx --no-install tsx tools/validate_skills.ts .
 The installer creates direct symlinks for the three public skills under `$HOME/.codex/skills/` and cleans same-repo links for merged old public skills.
 The validator enforces the whole `skills/` tree under 15,000 word+punctuation units, counted as words plus punctuation/symbol marks. This budget preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, autonomy gates, behavior-level gates, and evaluator feedback without over-compressing skill text.
 
-Runtime records use the user-level Alpha Goal state root: `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`, where `<workspace-slug>` is the last directory name of the current session directory path. `alpha-goal` writes only the accepted `goal-contract.md` by default, with discovery notes and interview ledger inside it; `checkpoint.md` is the single task-level conditional checkpoint created only for recovery, trigger handling, evidence handoff, or verification; `control-state/latest.md` is only a global recovery index, not stage content.
+Runtime records use the user-level Alpha Goal state root: `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`, where `<workspace-slug>` is the last directory name of the current session directory path. `alpha-goal` writes only the accepted `goal-contract.md` by default, with discovery notes and interview ledger inside it; `checkpoint.md` is the single task-level conditional checkpoint created only for recovery, trigger handling, evidence handoff, or verification; `control-state/latest.md` is only a global recovery index, not stage content.
 
 ## Usage examples
 

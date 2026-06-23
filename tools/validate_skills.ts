@@ -56,13 +56,13 @@ const STATE_ROOT_SCRIPT_FILES = [
   "skills/control-loop/scripts/mutation-preflight.ts",
 ];
 const STATE_ROOT_DOC_REQUIRED_TERMS = [
-  "${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/",
+  "${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/",
 ];
 const ENV_STATE_ROOT = "ALPHA_" + "GOAL_STATE_ROOT";
 const REPO_LOCAL_STATE = "\\.alpha-" + "goal";
 const STATE_ROOT_REQUIRED_TERMS = [
   "Alpha Goal state root",
-  "${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/",
+  "${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/",
   "last directory name of the current session directory path",
 ];
 const STATE_ROOT_FORBIDDEN_PATTERNS: Array<[RegExp, string]> = [
@@ -378,7 +378,7 @@ function validateRuntimeArtifactState(root: string, errors: string[], warnings: 
   for (const rel of STATE_ROOT_SCRIPT_FILES) {
     const text = readIfFile(path.join(root, rel));
     if (!text) { errors.push(`${rel}: missing state-root script`); continue; }
-    if (!text.includes(".alphal-goal")) errors.push(`${rel}: missing .alphal-goal default state root`);
+    if (!text.includes(".alpha-goal")) errors.push(`${rel}: missing .alpha-goal default state root`);
     if (!text.includes("process.cwd()")) errors.push(`${rel}: state root must derive from process.cwd()`);
     if (!text.includes("basename(session)")) errors.push(`${rel}: state root must use the session directory basename`);
     if (/state\s*=\s*.*root/.test(text)) errors.push(`${rel}: state root must not derive from git root`);

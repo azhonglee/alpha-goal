@@ -76,7 +76,7 @@ function assert_slice_boundaries(slice, goal):
 
 ```pseudo
 function load_references_if_needed(goal, checkpoint):
-  state_root_template = "${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/"  # Alpha Goal state root
+  state_root_template = "${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/"  # Alpha Goal state root
   workspace_slug = basename(current_session_directory)  # last directory name of the current session directory path
   state_root = materialize(state_root_template, workspace_slug)
 

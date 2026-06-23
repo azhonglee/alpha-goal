@@ -136,7 +136,7 @@ function main() {
   const options = parseArgs(process.argv.slice(2));
   const task = options.task;
   const session = process.cwd();
-  const stateRoot = `${(process.env.CODEX_HOME || `${process.env.HOME || "~"}/.alphal-goal`).replace(/\/+$/, "")}/${basename(session) || "workspace"}/`;
+  const stateRoot = `${(process.env.CODEX_HOME || `${process.env.HOME || "~"}/.alpha-goal`).replace(/\/+$/, "")}/${basename(session) || "workspace"}/`;
   const taskDir = task ? `${stateRoot}${task}/` : "";
   const targets = (options.repos.length ? options.repos : [session]).map(repo => resolve(session, repo));
   let blocked = false;

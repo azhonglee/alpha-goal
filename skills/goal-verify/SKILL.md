@@ -16,7 +16,7 @@ Use subagents for supporting review, risk, or evidence passes; `goal-verify` own
 
 Read `references/claim-boundary.md` before final/merge/ship/safety claims. Read `references/defect-risk-rubric.md` for review, audit, loophole-finding, high-risk, cross-module, replacement, security, migration, or PR-ready checks. Read `references/verification-verdict-schema.md` for verdicts.
 
-Resolve the Alpha Goal state root the same way as `$alpha-goal`: always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
+Resolve the Alpha Goal state root the same way as `$alpha-goal`: always use `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
 
 Read canonical accepted state-root Goal Contract, existing `checkpoint.md`, diff/artifacts, command outputs, tests, logs, reviewer/user feedback, and specs. Check but do not trust summaries. A draft, missing, or unissued Goal Contract is a gap, not an execution target.
 
