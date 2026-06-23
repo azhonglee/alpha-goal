@@ -180,7 +180,7 @@ Track used modes in state to prevent repetition.
 
 ## Phase 4: Final Design
 
-1. When clear, design the solution detail around the goal.
+1. When clear, design the solution with key details around the goal.
 
 Design Content Must Include:
 Technical Context [context]
