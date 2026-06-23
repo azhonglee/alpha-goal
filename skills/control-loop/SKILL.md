@@ -14,16 +14,15 @@ State artifacts support execution and recovery; writing them is never the object
 Run the loop as behavior, not paperwork. Treat the execution as control flow:
 
 ```pseudo
-function control_loop(request):
+function control_loop(goal_contract):
   # Inspect Native Goal
   native_goal = inspect_native_goal_if_available()
-  if native_goal.absent and !request.explicit_native_goal_start:
+  if native_goal.absent and !goal_contract.explicit_native_goal_start:
     do_not_call(create_goal)
 
-  # Resolve Task, Read Goal, Read Checkpoint
-  task = resolve_task(request, latest_index = "control-state/latest.md")
-  goal = read_accepted_goal_contract(task)
-  checkpoint = read_checkpoint_when_present_or_required(task)
+  # Read Goal, Read Checkpoint
+  goal = read_accepted_goal_contract(goal_contract)
+  checkpoint = read_checkpoint_when_present_or_required(goal)
   assert_authorized_boundary(goal, checkpoint, native_goal)
 
   while true:
@@ -41,7 +40,7 @@ function control_loop(request):
       checkpoint_only_if_needed(gap)
       continue
 
-    verification = goal_verify_if_required(evidence, goal, request)
+    verification = goal_verify_if_required(evidence, goal)
     if verification.pass:
       finish_delivery_boundary()
       update_native_goal_lifecycle_if_allowed(native_goal, update_goal complete)

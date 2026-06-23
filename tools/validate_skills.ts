@@ -429,12 +429,11 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
   requireOrderedTerms("control-loop section order", text, sectionOrder, errors);
   requireOrderedTerms("control-loop execution pseudocode", markdownSection(text, "Execution Loop"), [
     "Run the loop as behavior, not paperwork",
-    "function control_loop(request):",
+    "function control_loop(goal_contract):",
     "native_goal = inspect_native_goal_if_available()",
     "do_not_call(create_goal)",
-    "task = resolve_task",
-    "goal = read_accepted_goal_contract(task)",
-    "checkpoint = read_checkpoint_when_present_or_required(task)",
+    "goal = read_accepted_goal_contract(goal_contract)",
+    "checkpoint = read_checkpoint_when_present_or_required(goal)",
     "assert_authorized_boundary(goal, checkpoint, native_goal)",
     "slice = plan_smallest_deliverable_slice(goal, checkpoint)",
     "outcome = act(slice)",
