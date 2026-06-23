@@ -4,8 +4,9 @@ import{existsSync}from"node:fs";
 import{basename,resolve}from"node:path";
 const g=(cwd:string,a:string[],stdio:"pipe"|"ignore"="pipe")=>x("git",a,{cwd,encoding:"utf8",stdio}), o=(cwd:string,a:string[])=>{const r=g(cwd,a);return r.stdout?.trim()||r.stderr?.trim()||"<empty>"}, ok=(cwd:string,a:string[])=>g(cwd,a,"ignore").status===0, s=(n:string,v:string)=>console.log(`\n== ${n} ==\n${v}`);
 const home=(process.env.CODEX_HOME||`${process.env.HOME||"~"}/.alphal-goal`).replace(/\/+$/,""), session=process.cwd(), state=`${home}/${basename(session)||"workspace"}/`;
-const args=process.argv.slice(2), targets=(args.length?args:[session]).map(p=>resolve(session,p));
+const raw=process.argv.slice(2), ti=raw.indexOf("--task"), task=ti>=0&&raw[ti+1]?raw[ti+1]:"<YYYYMMDD-TaskName>", args=ti>=0?raw.filter((_,i)=>i!==ti&&i!==ti+1):raw, targets=(args.length?args:[session]).map(p=>resolve(session,p)), taskDir=`${state}${task}/`;
 s("cwd",session); s("alpha goal state root",state); s("multi-repo preflight",targets.length>1?`${targets.length} repos`:"single repo");
+s("run profile path",`${taskDir}run-profile.md`); s("trigger","record Run mode and Trigger Contract from run-profile.md / Goal Contract"); s("autonomy level","record Autonomy level and requested action gate"); s("loop-state path",`${taskDir}loop-state.md`); s("memory path",`${taskDir}memory.md`); s("evaluator route","record Evaluator route and required $evidence-verify handoff");
 for(const [i,target]of targets.entries()){
   console.log(`\n## repo ${i+1}: ${target}`);
   if(!existsSync(target)){s("path","missing");continue}

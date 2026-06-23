@@ -95,8 +95,13 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Design Content Must Include",
     "Acceptance evidence",
     "Claim boundary",
+    "Trigger Contract",
+    "Autonomy Level",
+    "loop-state.md",
+    "memory.md",
+    "`iteration.md` is a run log",
     "request_user_input",
-    "$control_loop",
+    "$control-loop",
     "Design Summary"
   ]],
   ["alpha records interview and design state", "skills/alpha-goal/SKILL.md", [
@@ -112,10 +117,20 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Unrelated user changes",
     "run-profile.md",
     "Run mode",
+    "Trigger Contract",
+    "scheduled",
+    "webhook",
+    "verification-triggered",
     "Discovery source",
     "External side effects allowed",
     "Human checkpoint",
     "Evaluator route",
+    "Autonomy level",
+    "Autonomy Ladder",
+    "Read Loop State",
+    "Read Memory",
+    "loop-state.md",
+    "memory.md",
     "must not expand, narrow, reinterpret, waive, or replace",
     "active run profile",
     "approved target",
@@ -126,6 +141,7 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "### 3. Sense and compare",
     "### 4. Record and route",
     "ITERATION_READY_FOR_VERIFY",
+    "NEXT_ITERATION` with fixable `Gap`",
     "$evidence-verify",
     "RETURN_TO_ALPHA_GOAL",
     "BLOCKED",
@@ -139,6 +155,12 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "permission, tool, data, environment, credential",
     "run-profile.md",
     "execution context only",
+    "loop-state.md",
+    "required loop-state updates",
+    "required memory updates",
+    "memory updates",
+    "verification-gap hardening",
+    "Gap must be specific enough",
     "Do not narrow the claim as a successful outcome",
     "Final response guard",
     "Highest practical evidence-supported boundary",
@@ -149,7 +171,13 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "process.argv.slice(2)",
     "multi-repo preflight",
     "targets",
-    ".worktrees/codex/preflight-check"
+    ".worktrees/codex/preflight-check",
+    "run profile path",
+    "trigger",
+    "autonomy level",
+    "loop-state path",
+    "memory path",
+    "evaluator route"
   ]],
 ];
 
@@ -296,7 +324,7 @@ function validateSemanticChecks(root: string, errors: string[]): void {
 
 function validateSchemaConsistency(root: string, errors: string[]): void {
   const alpha = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
-  const designFields = ["Intent", "Root Cause", "Outcome", "Scope", "Constraints", "Acceptance evidence", "Non-goals", "Decision boundary", "Claim boundary", "Blocking gates", "Ledger", "Next"];
+  const designFields = ["Intent", "Root Cause", "Outcome", "Scope", "Constraints", "Acceptance evidence", "Non-goals", "Decision boundary", "Claim boundary", "Trigger contract", "Autonomy level", "Initial loop state", "Memory seed", "Blocking gates", "Ledger", "Next"];
   const designStart = Math.max(0, alpha.toLowerCase().indexOf("design summary"));
   const designScoped = alpha.slice(designStart).toLowerCase();
   const designPos = designFields.map(field => designScoped.indexOf(`| ${field.toLowerCase()} |`));
@@ -305,6 +333,7 @@ function validateSchemaConsistency(root: string, errors: string[]): void {
   const evRef = readIfFile(path.join(root, "skills/evidence-verify/references/verification-verdict-schema.md"));
   if (evSkill.includes("- Gaps:") || evRef.includes("- Gaps:")) errors.push("evidence verdict schema must use only `Gap:`");
   for (const term of ["PASS_TO_FINAL", "NEXT_ITERATION"]) if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`evidence verdict enum mismatch: ${term}`);
+  for (const term of ["Loop state review", "Memory review"]) if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`evidence verdict schema missing persistent-loop field: ${term}`);
   for (const term of ["NARROW_CLAIM", "REFRAME"]) if (evSkill.includes(term) || evRef.includes(term)) errors.push(`evidence verdict enum must not include: ${term}`);
   for (const term of ["control-loop / alpha-goal / BLOCKED"]) if (!evSkill.includes(term) || !evRef.includes(term)) errors.push(`evidence next-route options mismatch: ${term}`);
 }
@@ -334,15 +363,19 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   }
   const readme = readIfFile(path.join(root, "README.md"));
   if (!readme.includes("当前代码事实只描述现状")) errors.push("README.md missing current-state-not-desired-state principle");
+  for (const term of ["loop-state.md", "memory.md", "34,000 bytes"]) if (!readme.includes(term)) errors.push(`README.md missing persistent-loop term: ${term}`);
   const readmeEn = readIfFile(path.join(root, "README.en.md"));
   if (!readmeEn.includes("Current code facts describe current state")) errors.push("README.en.md missing current-state-not-desired-state principle");
+  for (const term of ["loop-state.md", "memory.md", "34,000 bytes"]) if (!readmeEn.includes(term)) errors.push(`README.en.md missing persistent-loop term: ${term}`);
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
   if (!installDoc.includes("--no-sync-user-hooks")) errors.push("INSTALL.md missing --no-sync-user-hooks option");
   if (!installDoc.includes(HOOKS_TEMPLATE)) errors.push("INSTALL.md missing hooks template behavior");
   if (!installDoc.includes("codex-compact-skill-recovery")) errors.push("INSTALL.md missing legacy hook migration behavior");
+  for (const term of ["loop-state", "memory", "34,000 bytes"]) if (!installDoc.includes(term)) errors.push(`INSTALL.md missing persistent-loop term: ${term}`);
   const manifest = readIfFile(path.join(root, "MANIFEST.md"));
   if (!manifest.includes(HOOKS_TEMPLATE) || !manifest.includes(COMPACT_RECOVERY_HOOK_MARKER)) errors.push("MANIFEST.md missing hooks template marker");
   if (!manifest.includes("marker family") || !manifest.includes("codex-compact-skill-recovery")) errors.push("MANIFEST.md missing hook upgrade strategy");
+  for (const term of ["loop-state.md", "memory.md", "Trigger Contract", "Autonomy Level"]) if (!manifest.includes(term)) errors.push(`MANIFEST.md missing persistent-loop term: ${term}`);
   const templateAgents = readIfFile(path.join(root, "templates/AGENTS.md"));
   for (const term of [
     "Operating Contract",

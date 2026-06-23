@@ -55,10 +55,10 @@ rm -rf "$tmp_codex_home"
 
 ```text
 $alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继续闭环。
-$control-loop 根据已明确边界做一轮最小安全变更。
-$evidence-verify 检查当前证据是否支持最终声明。
+$control-loop 根据已明确边界、loop-state 和 memory 做下一轮最小安全 slice。
+$evidence-verify 检查当前证据是否支持最终声明，并返回可继续 harden 的 Gap。
 ```
 
 ## Byte budget
 
-The validator enforces the whole `skills/` tree under 30,000 bytes.
+The validator enforces the whole `skills/` tree under 34,000 bytes.

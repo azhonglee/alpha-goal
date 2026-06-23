@@ -4,9 +4,9 @@
 
 | Directory | Purpose |
 |---|---|
-| `skills/alpha-goal/` | Front-end controller: fact discovery, clarification, handoff design, route, ledger. |
-| `skills/control-loop/` | Bounded actuator/controller for safe execution and feedback. |
-| `skills/evidence-verify/` | Independent comparator for evidence and claim boundaries. |
+| `skills/alpha-goal/` | Front-end controller: fact discovery, clarification, Goal Contract, trigger contract, initial loop state, route. |
+| `skills/control-loop/` | Persistent bounded actuator/controller: resume state and memory, act, collect feedback, harden from verification gaps. |
+| `skills/evidence-verify/` | Independent comparator for evidence, verification gaps, and claim boundaries. |
 
 Former public framing/modeling/synthesis stages are folded into `skills/alpha-goal/SKILL.md`.
 
@@ -32,9 +32,13 @@ Default runtime artifacts live under the user-level Alpha Goal state root: `${CO
 | Path | Purpose |
 |---|---|
 | `<state-root>/YYYYMMDD-<TaskName>/interview.md` | Clarification records and decision-boundary notes. |
-| `<state-root>/YYYYMMDD-<TaskName>/iteration.md` | Latest execution iteration state when durable handoff is required. |
+| `<state-root>/YYYYMMDD-<TaskName>/goal-contract.md` | Goal Contract, including Trigger Contract and Autonomy Level. |
+| `<state-root>/YYYYMMDD-<TaskName>/run-profile.md` | Execution profile for this run; cannot redefine the Goal Contract. |
+| `<state-root>/YYYYMMDD-<TaskName>/loop-state.md` | Durable current objective, phase, completed/pending work, known risks, next slice, stop condition. |
+| `<state-root>/YYYYMMDD-<TaskName>/memory.md` | Compressed loop memory: confirmed facts, root causes, constraints, working strategies, failed strategies. |
+| `<state-root>/YYYYMMDD-<TaskName>/iteration.md` | Latest execution run log; records facts only and does not store persistent current state. |
 | `<state-root>/YYYYMMDD-<TaskName>/evidence.md` | Durable evidence, logs, screenshots, traces, or check outputs. |
-| `<state-root>/YYYYMMDD-<TaskName>/verification.md` | Verification verdict artifacts. |
+| `<state-root>/YYYYMMDD-<TaskName>/verification.md` | Verification verdict artifacts and next Gap for evaluator feedback. |
 | `<state-root>/control-state/latest.md` | Stable latest Closed-loop Ledger entry when needed. |
 
 ## Byte Budget

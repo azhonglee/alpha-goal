@@ -13,12 +13,11 @@ Use subagents for supporting evidence review; evidence-verify owns the final ver
 
 Read `references/claim-boundary.md` before final/merge/ship/safety claims. Read `references/verification-verdict-schema.md` for formal verdicts.
 
-## Inputs
+Resolve the Alpha Goal state root the same way as `$alpha-goal`: always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
 
-Read the Goal Contract/equivalent, latest route/iteration state, diff/artifacts, command outputs, tests, logs, reviewer/user feedback, and relevant specs.
-Resolve the Alpha Goal state root the same way as `$alpha-goal`: always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path. Read `<Alpha Goal state root>/YYYYMMDD-<TaskName>/evidence.md` for evidence summary. Its content is the evidence summary of the latest iteration. Check but do not trust it.
-Read `<Alpha Goal state root>/YYYYMMDD-<TaskName>/run-profile.md` when present, referenced, or required by control-loop evidence. Treat it as execution context only, never as the Goal Contract.
-For cross-repo claims, read the repo manifest and the per-repo plus integration evidence from the same task-level state root.
+Read the Goal Contract/equivalent, latest `loop-state.md`, `iteration.md`, `evidence.md`, diff/artifacts, command outputs, tests, logs, reviewer/user feedback, and relevant specs. Check but do not trust summaries.
+
+Read `run-profile.md` when present, referenced, or required by control-loop evidence. Treat it as execution context only, never as the Goal Contract. For cross-repo claims, read the repo manifest and per-repo plus integration evidence from the same task-level state root.
 
 ## Verification rules
 
@@ -27,26 +26,33 @@ For cross-repo claims, read the repo manifest and the per-repo plus integration 
 - Match evidence scope to claim scope; narrow checks cannot prove broad claims.
 - Treat missing, stale, indirect, contradicted, or merely plausible evidence as not achieved.
 - Inspect whether validators/tests actually cover the requirement they are cited for.
-- For cross-repo claims, map evidence by repo surface and by integration relation; one repo's passing checks cannot prove another repo or the integrated behavior.
+- For cross-repo claims, map evidence by repo surface and integration relation; one repo's passing checks cannot prove integrated behavior.
 - Version pins, generated clients, API contracts, dependent app behavior, and delivery links must be evidenced when the claim depends on them.
 - Do not repair during verification; route back instead.
 - Final wording must not exceed the highest evidence-supported boundary.
 - Do not narrow the claim as a successful outcome. If evidence cannot support the proposed claim, record the gap and return `NEXT_ITERATION`.
-- A run profile cannot expand, narrow, reinterpret, waive, or replace Goal Contract scope, authority, acceptance evidence, non-goals, or claim boundary. On conflict, verify against the Goal Contract and route back.
-- Missing evidence for run-profile checkpoints, named evaluators, or evaluator route is a gap.
-- If control-loop evidence depends on a missing, stale, or wrong-linked run profile, treat it as a gap.
+- A run profile cannot expand, narrow, reinterpret, waive, or replace Goal Contract scope, authority, acceptance evidence, non-goals, Trigger Contract, Autonomy level, or claim boundary. On conflict, verify against the Goal Contract and route back.
+- Missing evidence for run-profile checkpoints, named evaluators, evaluator route, trigger behavior, autonomy gate, required loop-state updates, or required memory updates is a gap for handoff or final claims.
 
 ## Verdicts
 
 - `PASS_TO_FINAL`: evidence proves all requirements and the proposed claim.
-- `NEXT_ITERATION`: evidence does not prove the proposed claim. Choose next route by the gap:
-  - `control-loop` only for fixable evidence, test, edge, compatibility, or cleanup gaps inside the same goal.
-  - `alpha-goal` when target, scope, authority, source reference, or claim boundary is wrong or unclear.
+- `NEXT_ITERATION`: evidence does not prove the proposed claim. Choose next route by the Gap:
+  - `control-loop` only for fixable evidence, test, edge, compatibility, cleanup, loop-state, memory, or verification-gap hardening inside the same goal.
+  - `alpha-goal` when target, scope, authority, source reference, Trigger Contract, Autonomy level, or claim boundary is wrong or unclear.
   - `BLOCKED` when permission, tool, data, environment, credential, or user-owned decision is missing.
+
+The Gap must be specific enough for `$control-loop` to set `loop-state.md` Next Slice without reinterpreting the Goal Contract.
 
 ## Final response guard
 
-Final/ready/safe/complete/repair-complete claims require durable `<Alpha Goal state root>/YYYYMMDD-<TaskName>/verification.md` updates unless the user forbids writes, the environment is unwritable, or the task is explicitly one-turn read-only with no handoff. If chat-only, say the claim is limited to this chat evidence and no durable artifact was created. After verification, final response must state: verdict, evidence actually run/inspected, claim supported, claim not supported/not checked, residual risks, and next route when not final. Do not say complete, safe, ready, fully verified, no issues, will not happen, completely prevents, or no risk unless `PASS_TO_FINAL` supports that exact scope with scenario/negative evidence; for agent-behavior claims default to text-level risk reduction, not absolute prevention. Debug/repair claims require reproduction evidence, suspected cause, confirming evidence, fix evidence, and non-reproduction boundary; no reproduction means no repair-complete claim.
+Final/ready/safe/complete/repair-complete claims require durable `<Alpha Goal state root>/YYYYMMDD-<TaskName>/verification.md` updates unless the user forbids writes, the environment is unwritable, or the task is explicitly one-turn read-only with no handoff.
+
+After verification, final response must state: verdict, evidence actually run/inspected, claim supported, claim not supported/not checked, residual risks, and next route when not final.
+
+Do not say complete, safe, ready, fully verified, no issues, will not happen, completely prevents, or no risk unless `PASS_TO_FINAL` supports that exact scope with scenario/negative evidence.
+
+Debug/repair claims require reproduction evidence, suspected cause, confirming evidence, fix evidence, and non-reproduction boundary; no reproduction means no repair-complete claim.
 
 ## Output
 
@@ -58,6 +64,8 @@ Verification Verdict:
 - Claim checked:
 - Indicator handoff review:
 - Adaptive learning review:
+- Loop state review:
+- Memory review:
 - Repo surface coverage:
 - Evidence coverage:
 - Unresolved user-owned decisions:

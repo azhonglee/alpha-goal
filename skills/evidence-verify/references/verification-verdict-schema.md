@@ -6,6 +6,8 @@ Verification Verdict:
 - Claim checked:
 - Indicator handoff review:
 - Adaptive learning review:
+- Loop state review:
+- Memory review:
 - Repo surface coverage:
 - Evidence coverage:
 - Unresolved user-owned decisions:
