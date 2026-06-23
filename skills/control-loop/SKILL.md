@@ -22,12 +22,13 @@ function control_loop(goal_contract):
   load_references_if_needed(goal, checkpoint)
 
   while true:
-    slice = plan_smallest_deliverable_slice(goal, checkpoint)
+    slice = plan_most_useful_deliverable_slice_current(goal, checkpoint)
     assert_slice_boundaries(slice, goal)
 
     outcome = act(slice)
     evidence = collect_raw_evidence(outcome)
-    gap = compare_to_goal(evidence, goal.acceptance_evidence, goal.claim_boundary)
+    review = review_slice_outcome(slice, outcome, evidence, goal)
+    gap = compare_to_goal(evidence, review, goal.acceptance_evidence, goal.claim_boundary)
 
     if gap.changed_contract_or_authority:
       return RETURN_TO_ALPHA_GOAL
