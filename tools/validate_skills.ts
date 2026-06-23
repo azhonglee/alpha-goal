@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 const FRONTMATTER_RE = /^---\n(.*?)\n---\n/s;
 const FIELD_RE = /^([A-Za-z0-9_-]+):\s*(.*?)\s*$/;
 const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
-const SKILLS_BYTE_BUDGET = 50_000;
+const SKILLS_COUNT_BUDGET = 15_000;
 const COMPACT_RECOVERY_HOOK_MARKER = "codex-alpha-goal-compact-recovery:v1";
 const HOOKS_TEMPLATE = "templates/hooks.json";
 const REQUIRED_SKILL_NAMES = ["alpha-goal", "control-loop", "evidence-verify"];
@@ -262,7 +262,7 @@ export function main(args = process.argv.slice(2)): number {
   for (const name of discovered) if (!REQUIRED_SKILL_NAMES.includes(name)) errors.push(`unexpected skill directory: skills/${name}`);
 
   for (const dir of skillDirs) validateSkillDir(root, dir, errors, warnings);
-  validateByteBudget(skillFiles, errors);
+  validateSkillsCountBudget(skillFiles, errors);
   validateRuntimeArtifactState(root, errors, warnings);
   validateScriptSurface(root, allFiles, errors, warnings);
   validateLegacyReferences(root, skillFiles, errors);
@@ -303,10 +303,22 @@ function validateDescriptionBoundary(skillName: string, description: string, err
   for (const term of check.forbidden) if (lower.includes(term.toLowerCase())) errors.push(`${skillName}: description overlaps another skill trigger: ${term}`);
 }
 
-function validateByteBudget(skillFiles: string[], errors: string[]): void {
-  let total = 0;
-  for (const file of skillFiles) total += fs.statSync(file).size;
-  if (total > SKILLS_BYTE_BUDGET) errors.push(`skills byte budget exceeded: ${total} > ${SKILLS_BYTE_BUDGET}`);
+function validateSkillsCountBudget(skillFiles: string[], errors: string[]): void {
+  let words = 0;
+  let punctuation = 0;
+  for (const file of skillFiles) {
+    const text = fs.readFileSync(file, "utf8");
+    words += countMatches(text, /[\p{L}\p{N}\p{M}]+/gu);
+    punctuation += countMatches(text, /[\p{P}\p{S}]/gu);
+  }
+  const total = words + punctuation;
+  if (total > SKILLS_COUNT_BUDGET) {
+    errors.push(`skills word+punctuation budget exceeded: ${total} > ${SKILLS_COUNT_BUDGET} (words=${words}, punctuation=${punctuation})`);
+  }
+}
+
+function countMatches(text: string, pattern: RegExp): number {
+  return text.match(pattern)?.length ?? 0;
 }
 
 function validateRuntimeArtifactState(root: string, errors: string[], warnings: string[]): void {
@@ -390,6 +402,9 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   const install = readIfFile(path.join(root, "scripts/install.sh"));
   for (const name of REQUIRED_SKILL_NAMES) if (!install.includes(name)) errors.push(`scripts/install.sh missing required skill: ${name}`);
   for (const name of MERGED_SKILL_NAMES) if (!install.includes(name)) errors.push(`scripts/install.sh should clean merged old skill: ${name}`);
+  for (const forbidden of ["tools/validate_skills.ts", "run_skillset_validation", "validate_installed_links", "resolve_tsx_runner", "Validation: passed"]) {
+    if (install.includes(forbidden)) errors.push(`scripts/install.sh must not run install-time skill validation: ${forbidden}`);
+  }
   if (install.includes(COMPACT_RECOVERY_HOOK_MARKER)) errors.push("scripts/install.sh must not hard-code compact recovery hook marker; keep hook policy in templates/hooks.json");
   if (!install.includes("--no-sync-user-hooks")) errors.push("scripts/install.sh missing --no-sync-user-hooks option");
   if (!install.includes("hooks_template")) errors.push("scripts/install.sh missing hooks template sync");
@@ -411,19 +426,19 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   }
   const readme = readIfFile(path.join(root, "README.md"));
   if (!readme.includes("当前代码事实只描述现状")) errors.push("README.md missing current-state-not-desired-state principle");
-  for (const term of ["control-state/latest.md", "goal-contract.md", "run-profile.md", "loop-state.md", "memory.md", "50,000 bytes", "失效条件"]) if (!readme.includes(term)) errors.push(`README.md missing persistent-loop term: ${term}`);
+  for (const term of ["control-state/latest.md", "goal-contract.md", "run-profile.md", "loop-state.md", "memory.md", "15,000 word+punctuation units", "失效条件"]) if (!readme.includes(term)) errors.push(`README.md missing persistent-loop term: ${term}`);
   const readmeEn = readIfFile(path.join(root, "README.en.md"));
   if (!readmeEn.includes("Current code facts describe current state")) errors.push("README.en.md missing current-state-not-desired-state principle");
-  for (const term of ["control-state/latest.md", "goal-contract.md", "run-profile.md", "loop-state.md", "memory.md", "50,000 bytes", "invalidation"]) if (!readmeEn.includes(term)) errors.push(`README.en.md missing persistent-loop term: ${term}`);
+  for (const term of ["control-state/latest.md", "goal-contract.md", "run-profile.md", "loop-state.md", "memory.md", "15,000 word+punctuation units", "invalidation"]) if (!readmeEn.includes(term)) errors.push(`README.en.md missing persistent-loop term: ${term}`);
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
   if (!installDoc.includes("--no-sync-user-hooks")) errors.push("INSTALL.md missing --no-sync-user-hooks option");
   if (!installDoc.includes(HOOKS_TEMPLATE)) errors.push("INSTALL.md missing hooks template behavior");
   if (!installDoc.includes("codex-compact-skill-recovery")) errors.push("INSTALL.md missing legacy hook migration behavior");
-  for (const term of ["set -euo pipefail", "export CODEX_HOME", "Goal spec:", "Goal Contract:", "control-state/latest.md", "goal-contract", "run-profile", "loop-state", "memory", "Verified at", "HARDENING or VERIFICATION", "50,000 bytes", "without over-compressing", "mutation-preflight.ts --task", "evidence-summary.ts --task", "verification.md/evidence.md"]) if (!installDoc.includes(term)) errors.push(`INSTALL.md missing persistent-loop term: ${term}`);
+  for (const term of ["set -euo pipefail", "export CODEX_HOME", "Goal spec:", "Goal Contract:", "control-state/latest.md", "goal-contract", "run-profile", "loop-state", "memory", "Verified at", "HARDENING or VERIFICATION", "15,000 word+punctuation units", "without over-compressing", "mutation-preflight.ts --task", "evidence-summary.ts --task", "verification.md/evidence.md"]) if (!installDoc.includes(term)) errors.push(`INSTALL.md missing persistent-loop term: ${term}`);
   const manifest = readIfFile(path.join(root, "MANIFEST.md"));
   if (!manifest.includes(HOOKS_TEMPLATE) || !manifest.includes(COMPACT_RECOVERY_HOOK_MARKER)) errors.push("MANIFEST.md missing hooks template marker");
   if (!manifest.includes("marker family") || !manifest.includes("codex-compact-skill-recovery")) errors.push("MANIFEST.md missing hook upgrade strategy");
-  for (const term of ["loop-state.md", "memory.md", "run-profile.md", "control-state/latest.md", "Memory", "Trigger Contract", "Autonomy Level", "last verification gap", "invalidation", "50,000 bytes"]) if (!manifest.includes(term)) errors.push(`MANIFEST.md missing persistent-loop term: ${term}`);
+  for (const term of ["loop-state.md", "memory.md", "run-profile.md", "control-state/latest.md", "Memory", "Trigger Contract", "Autonomy Level", "last verification gap", "invalidation", "15,000 word+punctuation units"]) if (!manifest.includes(term)) errors.push(`MANIFEST.md missing persistent-loop term: ${term}`);
   const templateAgents = readIfFile(path.join(root, "templates/AGENTS.md"));
   for (const term of [
     "Operating Contract",

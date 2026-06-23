@@ -25,7 +25,7 @@ npx --no-install tsx tools/validate_skills.ts .
 ```
 
 The installer creates direct symlinks for the three public skills under `$HOME/.codex/skills/` and cleans same-repo links for merged old public skills.
-The validator enforces the whole `skills/` tree under 50,000 bytes; this budget preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, autonomy gates, behavior-level script gates, and evaluator feedback without over-compressing skill text.
+The validator enforces the whole `skills/` tree under 15,000 word+punctuation units, counted as words plus punctuation/symbol marks. This budget preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, autonomy gates, behavior-level script gates, and evaluator feedback without over-compressing skill text.
 
 Runtime records use the user-level Alpha Goal state root: `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`, where `<workspace-slug>` is the last directory name of the current session directory path. The recovery entry is `<state-root>/control-state/latest.md`; recovery needs the pointer-bound `goal-contract.md`, `run-profile.md`, `loop-state.md`, and `memory.md`; missing or conflicting files route to `alpha-goal` or blocker.
 

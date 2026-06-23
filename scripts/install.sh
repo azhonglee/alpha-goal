@@ -27,7 +27,7 @@ Options:
             Skip updating Codex home hooks.json.
   --sync-user-hooks
             Compatibility no-op; user hooks are synced by default.
-  --verbose Print detailed install and validation output.
+  --verbose Print detailed install output.
 EOF
 }
 
@@ -104,9 +104,6 @@ log() {
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd "$script_dir/.." && pwd -P)"
 source_skill_root="$repo_root/skills"
-validation_tool="$repo_root/tools/validate_skills.ts"
-validation_tool_label="tools/validate_skills.ts"
-tsx_runner=()
 
 normalize_path() {
   python3 - "$1" <<'PY'
@@ -152,29 +149,6 @@ default_codex_home() {
   fi
 
   printf '%s\n' "$HOME/.codex"
-}
-
-resolve_tsx_runner() {
-  if command -v tsx >/dev/null 2>&1; then
-    tsx_runner=(tsx)
-    return
-  fi
-
-  if command -v npx >/dev/null 2>&1 && npx --no-install tsx --version >/dev/null 2>&1; then
-    tsx_runner=(npx --no-install tsx)
-    return
-  fi
-
-  echo "Missing tsx runner; refusing to auto-download npm packages during install." >&2
-  echo "Install tsx explicitly or make it available through npx --no-install, then retry." >&2
-  exit 1
-}
-
-run_tsx() {
-  if [[ "${#tsx_runner[@]}" -eq 0 ]]; then
-    resolve_tsx_runner
-  fi
-  "${tsx_runner[@]}" "$@"
 }
 
 codex_home="$(absolute_path "$(default_codex_home)")"
@@ -290,33 +264,6 @@ remove_obsolete_skill_link() {
   fi
 }
 
-validate_installed_links() {
-  local failed=false
-  for skill_file in "${skill_files[@]}"; do
-    local skill_dir skill_name target current_target
-    skill_dir="$(cd "$(dirname "$skill_file")" && pwd -P)"
-    skill_name="$(basename "$skill_dir")"
-    target="$target_root/$skill_name"
-    if [[ ! -L "$target" ]]; then
-      echo "Installed skill is not a symlink: $target" >&2; failed=true; continue
-    fi
-    current_target="$(resolve_link_target "$target")"
-    if [[ "$current_target" != "$skill_dir" ]]; then
-      echo "Installed skill points elsewhere: $target -> $current_target" >&2; failed=true
-    fi
-    if [[ ! -f "$target/SKILL.md" ]]; then
-      echo "Installed skill is missing top-level SKILL.md: $target" >&2; failed=true
-    fi
-  done
-  for support_name in adapters tools templates scripts; do
-    local target="$target_root/$support_name" legacy_source="$repo_root/$support_name"
-    if [[ -L "$target" && "$(resolve_link_target "$target")" == "$legacy_source" ]]; then
-      echo "Support directory should not be installed as a skill: $target" >&2; failed=true
-    fi
-  done
-  if [[ "$failed" == true ]]; then exit 1; fi
-  log "Validated installed direct skill links in $target_root"
-}
 inject_agents_template() {
   local template_content
   template_content="$(<"$agents_template")"
@@ -813,25 +760,6 @@ PY
   esac
 }
 
-run_skillset_validation() {
-  if [[ ! -f "$validation_tool" ]]; then
-    echo "Missing validation tool: $validation_tool" >&2
-    exit 1
-  fi
-
-  if [[ "$verbose" == true ]]; then
-    run_tsx "$validation_tool" "$repo_root"
-    return
-  fi
-
-  local output
-  if ! output="$(run_tsx "$validation_tool" "$repo_root" 2>&1)"; then
-    echo "Validation failed ($validation_tool_label). Re-run with --verbose for full output." >&2
-    printf '%s\n' "$output" | grep -E '^(ERRORS:|- |FAIL )' >&2 || true
-    exit 1
-  fi
-}
-
 print_summary() {
   local status="ready"
   if [[ "$linked_count" -gt 0 || "$replaced_count" -gt 0 || "$legacy_removed_count" -gt 0 ]]; then
@@ -846,7 +774,6 @@ print_summary() {
 
   echo "Alpha Goal skills $status: $installed -> $target_root"
   echo "Codex home: $codex_home"
-  echo "Validation: passed ($validation_tool_label)"
   if [[ "$sync_user_templates" == true ]]; then
     echo "User templates: AGENTS.md $agents_action, config.toml $config_action"
   else
@@ -871,8 +798,6 @@ if [[ "$sync_user_templates" == true ]]; then
   fi
 fi
 
-run_skillset_validation
-
 required_skills=(alpha-goal control-loop evidence-verify)
 skill_files=()
 for skill_name in "${required_skills[@]}"; do
@@ -883,14 +808,6 @@ for skill_name in "${required_skills[@]}"; do
   fi
   skill_files+=("$skill_file")
 done
-
-shopt -s nullglob
-discovered_skill_files=("$source_skill_root"/*/SKILL.md)
-shopt -u nullglob
-if [[ "${#discovered_skill_files[@]}" -ne "${#required_skills[@]}" ]]; then
-  echo "Unexpected skill set under $source_skill_root; run $validation_tool_label for details." >&2
-  exit 1
-fi
 
 mkdir -p "$codex_home" "$target_root"
 
@@ -916,8 +833,6 @@ done
 for obsolete_skill in goal-contract system-model decision-synthesis control-kernel loop verify meta-synthesis goal-frame goal-loop goal-iterate goal-review goal-verify; do
   remove_obsolete_skill_link "$obsolete_skill"
 done
-
-validate_installed_links
 
 if [[ "$sync_user_hooks" == true ]]; then
   sync_hooks_template

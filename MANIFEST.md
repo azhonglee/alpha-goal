@@ -14,10 +14,10 @@ Former public framing/modeling/synthesis stages are folded into `skills/alpha-go
 
 | Path | Mutates state? | Purpose |
 |---|---:|---|
-| `scripts/install.sh` | Yes | Installs the three public skills as direct symlinks, cleans same-repo old skill links, syncs optional user templates, syncs `templates/hooks.json`, and validates install targets. |
+| `scripts/install.sh` | Yes | Installs the three public skills as direct symlinks, cleans same-repo old skill links, syncs optional user templates, and syncs `templates/hooks.json` without running skill validation. |
 | `skills/control-loop/scripts/mutation-preflight.ts` | No | Prints read-only git/path preflight evidence. |
 | `skills/evidence-verify/scripts/evidence-summary.ts` | No | Prints read-only diff/status evidence. |
-| `tools/validate_skills.ts` | No | Validates the three-skill contract, references, byte budget, scripts, docs, and schemas. |
+| `tools/validate_skills.ts` | No | Validates the three-skill contract, references, word+punctuation budget, scripts, docs, and schemas. |
 
 ## User Hooks
 
@@ -41,6 +41,6 @@ Default runtime artifacts live under the user-level Alpha Goal state root: `${CO
 | `<state-root>/YYYYMMDD-<TaskName>/verification.md` | Verification verdict artifacts and next Gap for evaluator feedback. |
 | `<state-root>/control-state/latest.md` | Stable latest recovery pointer with State directory, Goal Contract, Run Profile, Loop State, Memory, Evidence, Verification, Current Phase, Next route, and Updated at. |
 
-## Byte Budget
+## Count Budget
 
-The enforced control-byte budget is the whole `skills/` tree, capped at 50,000 bytes. The higher cap preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, autonomy gates, behavior-level script gates, and evaluator feedback without over-compressing their meaning.
+The enforced count budget is the whole `skills/` tree, capped at 15,000 word+punctuation units. Counted units are words plus punctuation/symbol marks. The cap preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, autonomy gates, behavior-level script gates, and evaluator feedback without over-compressing their meaning.

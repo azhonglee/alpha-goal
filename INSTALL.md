@@ -14,8 +14,6 @@ control-loop
 evidence-verify
 ```
 
-Node.js/npm must be available. Validation uses an existing `tsx` runner from `tsx` on `PATH` or `npx --no-install tsx`; the installer refuses to auto-download npm packages.
-
 ## Options
 
 ```bash
@@ -29,7 +27,7 @@ scripts/install.sh --verbose
 
 ## Behavior
 
-The script validates the source skillset, creates `${CODEX_HOME:-$HOME/.codex}/skills/<skill-name>` links for public skills, cleans same-repo links for merged old public skills, and validates each installed top-level `SKILL.md`. By default it also syncs user-level templates, including `templates/hooks.json` into `${CODEX_HOME:-$HOME/.codex}/hooks.json`.
+The script creates `${CODEX_HOME:-$HOME/.codex}/skills/<skill-name>` links for required public skills and cleans same-repo links for merged old public skills. By default it also syncs user-level templates, including `templates/hooks.json` into `${CODEX_HOME:-$HOME/.codex}/hooks.json`.
 
 The compact recovery hook definition lives in `templates/hooks.json`. It is a `SessionStart` hook for `compact` starts and prints a static policy telling Codex to decide whether `alpha-goal`, `control-loop`, or `evidence-verify` applies after compaction, and to load the matching skill before continuing. Use `--no-sync-user-templates` to skip AGENTS/config template updates and `--no-sync-user-hooks` to skip hook template updates.
 
@@ -39,7 +37,7 @@ Codex may require reviewing and trusting the changed hook with `/hooks` before i
 
 ## Smoke test
 
-The smoke test exercises installed skill links, hook recovery text, `mutation-preflight.ts --task`, and `evidence-summary.ts --task`.
+The smoke test separately checks installed skill links, hook recovery text, `mutation-preflight.ts --task`, and `evidence-summary.ts --task`.
 
 ```bash
 set -euo pipefail
@@ -139,7 +137,7 @@ $control-loop 根据已明确边界、loop-state 和 memory 做下一轮最小�
 $evidence-verify 检查当前证据是否支持最终声明，并返回可继续 harden 的 Gap。
 ```
 
-## Byte budget
+## Count budget
 
-The validator enforces the whole `skills/` tree under 50,000 bytes.
+The validator enforces the whole `skills/` tree under 15,000 word+punctuation units, counted as words plus punctuation/symbol marks.
 This budget preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, autonomy gates, behavior-level script gates, and evaluator feedback without over-compressing their meaning.

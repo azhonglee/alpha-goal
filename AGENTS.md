@@ -6,7 +6,7 @@
 
 ## Build, Test, and Development Commands
 
-- `npx --no-install tsx tools/validate_skills.ts .`：验证三公开技能结构、front matter、引用可发现性、闭环语义烟测、安装口径和 50K skills 字节预算；预算用于保留触发行为、持久状态、记忆、自治门、行为级脚本 gate 和 evaluator feedback。
+- `npx --no-install tsx tools/validate_skills.ts .`：验证三公开技能结构、front matter、引用可发现性、闭环语义烟测、安装口径和 15K skills word+punctuation 预算；预算按单词数加标点/符号数计，用于保留触发行为、持久状态、记忆、自治门、行为级脚本 gate 和 evaluator feedback。
 - `bash -n scripts/install.sh`：检查安装脚本语法。
 - `npx --no-install tsx skills/control-loop/scripts/mutation-preflight.ts --task <TaskName>`：针对已创建任务状态检查迭代阶段 gate；无 `--task` 必须阻断。
 - `npx --no-install tsx skills/evidence-verify/scripts/evidence-summary.ts --task <TaskName>`：针对已创建任务状态检查验证阶段 durable evidence gate。
