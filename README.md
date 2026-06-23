@@ -27,7 +27,7 @@ npx --no-install tsx tools/validate_skills.ts .
 安装脚本会在 `$HOME/.codex/skills/` 下为三个公开技能创建直接软链接，并清理指向本仓库旧公开技能的软链接。
 校验脚本会强制整个 `skills/` 树不超过 15,000 word+punctuation units；计数口径是单词数加标点/符号数。这个预算用于保留 Persistent Goal Loop 的触发行为、持久状态、记忆、自治门、行为级 gate 和 evaluator feedback，避免过分压缩技能正文。
 
-运行态记录使用用户级 Alpha Goal state root：`${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`，其中 `<workspace-slug>` 是当前会话目录路径最后一个目录名。`alpha-goal` 默认只写已接受的 `goal-contract.md`，其中包含 discovery notes 和 interview ledger；`checkpoint.md` 是按恢复、触发、证据移交或验证需要创建的唯一任务级条件检查点；`control-state/latest.md` 只是全局恢复索引，不承载阶段内容。
+运行态记录使用用户级 Alpha Goal state root：`${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`，其中 `<workspace-slug>` 来自稳定 workspace identity：`slug(repo_root or Goal Contract target workspace)`。`alpha-goal` 默认只写已接受的 `goal-contract.md`，其中包含 discovery notes 和 interview ledger；`checkpoint.md` 是按恢复、触发、证据移交或验证需要创建的唯一任务级条件检查点；`control-state/latest.md` 只是全局恢复索引，不承载阶段内容。
 
 ## 使用示例
 

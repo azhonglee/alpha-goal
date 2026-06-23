@@ -27,7 +27,7 @@ Pre-flight -> Discovery -> Clarify with User -> Assumption Stress Test -> Final 
    - `diagnose/repair`: start with Discovery. If root cause is not 100% confirmed, only run diagnostic probes or hypothesis-testing slices. Do not implement/design directly.
    - `other`: ask for minimum details needed to classify.
 2. Split mixed work into sequenced items before routing.
-3. Resolve the Alpha Goal state root before writing runtime artifacts. Always use `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
+3. Resolve the Alpha Goal state root before writing runtime artifacts. Always use `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from stable workspace identity: `slug(repo_root or Goal Contract target workspace)`, never from the session directory.
 4. Match the task state by Goal Contract path, state directory, and trigger metadata. If matched, read `goal-contract.md`; if multiple or stale candidates remain after local state inspection, clarify task identity before execution.
 
 ## Phase 1: Discovery

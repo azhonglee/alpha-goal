@@ -26,7 +26,7 @@ Hook replacement is by marker family, not exact version, so later `:v2` template
 
 ## Runtime Artifacts
 
-Default runtime artifacts live under the user-level Alpha Goal state root: `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`, where `<workspace-slug>` is the last directory name of the current session directory path.
+Default runtime artifacts live under the user-level Alpha Goal state root: `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`, where `<workspace-slug>` comes from stable workspace identity: `slug(repo_root or Goal Contract target workspace)`.
 
 | Path | Purpose |
 |---|---|

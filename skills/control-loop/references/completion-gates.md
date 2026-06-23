@@ -1,6 +1,6 @@
 # Completion Gates
 
-Load this reference before any FINAL_RESPONSE_READY, READY, DONE, SAFE, COMPLETE, MR-ready, replacement/prohibition, or broad evidence-boundary claim.
+Load this reference before any FINAL_RESPONSE_READY, READY, DONE, SAFE, COMPLETE, shipped, fixed, hardened, MR-ready, replacement/prohibition, or broad evidence-boundary claim.
 
 ## Universal Completion Gates
 

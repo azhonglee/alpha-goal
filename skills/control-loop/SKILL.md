@@ -22,7 +22,7 @@ function control_loop(goal_contract):
   load_references_if_needed(goal, checkpoint)
 
   while true:
-    slice = plan_most_useful_deliverable_slice_current(goal, checkpoint)
+    slice = plan_smallest_useful_verifiable_slice(goal, checkpoint)
     assert_slice_boundaries(slice, goal)
 
     outcome = act(slice)
@@ -38,7 +38,7 @@ function control_loop(goal_contract):
       checkpoint_only_if_needed(gap)
       continue
 
-    verification = goal_verify_if_required(evidence, goal)
+    verification = goal_verify_before_final_or_route(evidence, goal)
     route = route_after_verification(verification)
     if route == NEXT_ITERATION:
       checkpoint_only_if_needed(verification.gap)
@@ -59,7 +59,7 @@ function assert_goal_boundaries(goal, checkpoint):
   deny(primary_branch_mutation)  # Do not mutate primary main/master/trunk
   require(worktree.kind == repo_local_worktree unless safer_repo_policy_exists)  # repo-local worktree
   preserve(unrelated_user_changes)  # unrelated user changes
-  require(goal_verify_before_final_ready_safe_complete_claims)  # $goal-verify
+  require(goal_verify_before_final_ready_safe_complete_shipped_fixed_hardened_or_MR_ready_claims)  # Before any final_ready, safe, complete, shipped, fixed, hardened, or MR-ready claim, run $goal-verify.
 
 function assert_slice_boundaries(slice, goal):
   require(slice.target within goal.target)
@@ -77,7 +77,7 @@ function assert_slice_boundaries(slice, goal):
 ```pseudo
 function load_references_if_needed(goal, checkpoint):
   state_root_template = "${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/"  # Alpha Goal state root
-  workspace_slug = basename(current_session_directory)  # last directory name of the current session directory path
+  workspace_slug = slug(repo_root or Goal Contract target workspace)
   state_root = materialize(state_root_template, workspace_slug)
 
   # State writes are checkpoints, not progress.
@@ -86,7 +86,7 @@ function load_references_if_needed(goal, checkpoint):
     remember("control-state/latest.md is only a global recovery index")
     fields_may_include("Loop State", Memory, Evidence, Verification)
 
-  if final_ready_safe_complete_or_MR_ready_claim:
+  if final_ready_safe_complete_shipped_fixed_hardened_or_MR_ready_claim:
     read("references/completion-gates.md")
 
   if replacement_or_prohibition_or_broad_evidence_boundary:
@@ -124,7 +124,9 @@ function route_after_verification(verification):
   if changed(authority or actuator_boundary or acceptance_evidence or claim_boundary):
     return RETURN_TO_ALPHA_GOAL
   if changed(run_profile or risk or assumption or stop_condition):
-    return RETURN_TO_ALPHA_GOAL or BLOCKED
+    if user_or_goal_decision_required:
+      return RETURN_TO_ALPHA_GOAL
+    return BLOCKED
 
   return route_verification_result(verification)
 ```

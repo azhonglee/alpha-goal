@@ -63,7 +63,7 @@ const REPO_LOCAL_STATE = "\\.alpha-" + "goal";
 const STATE_ROOT_REQUIRED_TERMS = [
   "Alpha Goal state root",
   "${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/",
-  "last directory name of the current session directory path",
+  "slug(repo_root or Goal Contract target workspace)",
 ];
 const STATE_ROOT_FORBIDDEN_PATTERNS: Array<[RegExp, string]> = [
   [new RegExp(ENV_STATE_ROOT), "state-root environment override remains"],
@@ -77,7 +77,7 @@ const STATE_ROOT_FORBIDDEN_PATTERNS: Array<[RegExp, string]> = [
   [new RegExp(`repo-local .*${REPO_LOCAL_STATE}`, "i"), "repo-local state fallback remains"],
   [new RegExp(`compatibility[^\\n]*${REPO_LOCAL_STATE}[^\\n]*override`, "i"), "repo-local compatibility override wording remains"],
   [new RegExp(`explicit[^\\n]*policy[^\\n]*${REPO_LOCAL_STATE}[^\\n]*override`, "i"), "repo-local explicit policy override wording remains"],
-  [new RegExp("absolute " + "git root", "i"), "old git-root slug rule remains"],
+  [new RegExp("absolute " + "git root", "i"), "old absolute-path slug rule remains"],
   [new RegExp("strip leading " + "slashes", "i"), "old slug sanitization rule remains"],
   [new RegExp("replace characters " + "outside", "i"), "old slug sanitization rule remains"],
   [new RegExp("keep the last " + "80 characters", "i"), "old slug truncation rule remains"],
@@ -146,8 +146,9 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "function control_loop(goal_contract)",
     "read_accepted_goal_contract(goal_contract)",
     "assert_goal_boundaries(goal, checkpoint)",
-    "plan_most_useful_deliverable_slice_current",
+    "plan_smallest_useful_verifiable_slice",
     "review_slice_outcome",
+    "goal_verify_before_final_or_route",
     "control-loop never creates or derives it",
     "goal.has_required_fields",
     "Do not mutate primary",
@@ -373,15 +374,15 @@ function validateRuntimeArtifactState(root: string, errors: string[], warnings: 
     const text = readIfFile(path.join(root, rel));
     if (!text) { errors.push(`${rel}: missing state-root doc`); continue; }
     for (const term of STATE_ROOT_DOC_REQUIRED_TERMS) if (!text.includes(term)) errors.push(`${rel}: missing state-root doc guidance: ${term}`);
-    if (!text.includes("last directory name of the current session directory path") && !text.includes("当前会话目录路径最后一个目录名")) errors.push(`${rel}: missing last-directory workspace slug guidance`);
+    if (!text.includes("slug(repo_root or Goal Contract target workspace)")) errors.push(`${rel}: missing stable workspace slug guidance`);
   }
   for (const rel of STATE_ROOT_SCRIPT_FILES) {
     const text = readIfFile(path.join(root, rel));
     if (!text) { errors.push(`${rel}: missing state-root script`); continue; }
     if (!text.includes(".alpha-goal")) errors.push(`${rel}: missing .alpha-goal default state root`);
     if (!text.includes("process.cwd()")) errors.push(`${rel}: state root must derive from process.cwd()`);
-    if (!text.includes("basename(session)")) errors.push(`${rel}: state root must use the session directory basename`);
-    if (/state\s*=\s*.*root/.test(text)) errors.push(`${rel}: state root must not derive from git root`);
+    if (!text.includes("repoRoot(session)") || !text.includes("slugWorkspace(workspaceRoot)")) errors.push(`${rel}: state root must use stable repo/workspace slug`);
+    if (/basename\(session\)/.test(text)) errors.push(`${rel}: state root must not use the session directory basename`);
   }
   const scanned = [...new Set([...STATE_ROOT_CORE_FILES, ...STATE_ROOT_DOC_FILES, ...STATE_ROOT_SCRIPT_FILES, "tools/validate_skills.ts"])];
   for (const rel of scanned) {
@@ -442,7 +443,7 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
     "goal = read_accepted_goal_contract(goal_contract)",
     "checkpoint = read_checkpoint_when_present_or_required(goal)",
     "assert_goal_boundaries(goal, checkpoint)",
-    "slice = plan_most_useful_deliverable_slice_current(goal, checkpoint)",
+    "slice = plan_smallest_useful_verifiable_slice(goal, checkpoint)",
     "assert_slice_boundaries(slice, goal)",
     "outcome = act(slice)",
     "evidence = collect_raw_evidence(outcome)",
@@ -450,7 +451,7 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
     "gap = compare_to_goal(evidence, review",
     "return RETURN_TO_ALPHA_GOAL",
     "return BLOCKED",
-    "verification = goal_verify_if_required",
+    "verification = goal_verify_before_final_or_route",
     "route = route_after_verification(verification)",
     "return route",
   ], errors);

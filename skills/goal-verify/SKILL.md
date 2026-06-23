@@ -16,7 +16,7 @@ Use subagents for supporting review, risk, or evidence passes; `goal-verify` own
 
 Read `references/claim-boundary.md` before final/merge/ship/safety claims. Read `references/defect-risk-rubric.md` for review, audit, loophole-finding, high-risk, cross-module, replacement, security, migration, or PR-ready checks. Read `references/verification-verdict-schema.md` for verdicts.
 
-Resolve the Alpha Goal state root the same way as `$alpha-goal`: always use `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
+Resolve the Alpha Goal state root the same way as `$alpha-goal`: always use `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from stable workspace identity: `slug(repo_root or Goal Contract target workspace)`, never from the session directory.
 
 Read canonical accepted state-root Goal Contract, existing `checkpoint.md`, diff/artifacts, command outputs, tests, logs, reviewer/user feedback, and specs. Check but do not trust summaries. A draft, missing, or unissued Goal Contract is a gap, not an execution target.
 
@@ -56,7 +56,7 @@ The Gap must be specific enough for `$control-loop` to choose the next slice, an
 
 ## Final response guard
 
-Final/ready/safe/complete/repair-complete/PR-ready/no-issues claims require durable checkpoint `Verification` updates unless writes are forbidden, environment is unwritable, or task is one-turn read-only with no handoff. If chat-only, say the claim is limited to chat evidence and do not make broad ready/safe/complete/no-issues claims.
+Final/ready/safe/complete/shipped/fixed/hardened/repair-complete/MR-ready/PR-ready/no-issues claims require durable checkpoint `Verification` updates unless writes are forbidden, environment is unwritable, or task is one-turn read-only with no handoff. If chat-only, say the claim is limited to chat evidence and do not make broad ready/safe/complete/no-issues claims.
 
 After verification, final response must state: verdict, evidence run/inspected, checked surface, defect/risk sweep result, claim supported, claim not supported/not checked, residual risks, and next route when not final.
 

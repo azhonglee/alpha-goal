@@ -136,7 +136,9 @@ function main() {
   const options = parseArgs(process.argv.slice(2));
   const task = options.task;
   const session = process.cwd();
-  const stateRoot = `${(process.env.CODEX_HOME || `${process.env.HOME || "~"}/.alpha-goal`).replace(/\/+$/, "")}/${basename(session) || "workspace"}/`;
+  const workspaceRoot = repoRoot(session) || session;
+  const workspaceSlug = slugWorkspace(workspaceRoot);
+  const stateRoot = `${(process.env.CODEX_HOME || `${process.env.HOME || "~"}/.alpha-goal`).replace(/\/+$/, "")}/${workspaceSlug}/`;
   const taskDir = task ? `${stateRoot}${task}/` : "";
   const targets = (options.repos.length ? options.repos : [session]).map(repo => resolve(session, repo));
   let blocked = false;
@@ -266,6 +268,17 @@ function actionAllowedByLevel(action, level) {
   const ranks = { suggest: 1, draft: 2, "modify-worktree": 3, commit: 4, push: 4, "open-pr": 4, merge: 5 };
   const match = level.match(/^L([1-5])\b/);
   return !!match && (ranks[action] ?? 99) <= Number(match[1]);
+}
+
+function repoRoot(cwd) {
+  const result = git(cwd, ["rev-parse", "--show-toplevel"]);
+  return result.status === 0 ? result.stdout.trim() : "";
+}
+
+function slugWorkspace(value) {
+  return (basename(value.replace(/\/+$/, "")) || "workspace")
+    .replace(/[^A-Za-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "workspace";
 }
 
 function normalizePath(value) {
