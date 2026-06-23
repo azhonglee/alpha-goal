@@ -434,8 +434,9 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
     "do_not_call(create_goal)",
     "goal = read_accepted_goal_contract(goal_contract)",
     "checkpoint = read_checkpoint_when_present_or_required(goal)",
-    "assert_boundaries(goal, checkpoint, native_goal)",
+    "assert_goal_boundaries(goal, checkpoint, native_goal)",
     "slice = plan_smallest_deliverable_slice(goal, checkpoint)",
+    "assert_slice_boundaries(slice, goal)",
     "outcome = act(slice)",
     "evidence = collect_raw_evidence(outcome)",
     "gap = compare_to_goal",
@@ -454,6 +455,7 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
     "update_goal blocked",
     "Do not mutate primary",
     "$goal-verify",
+    "function assert_slice_boundaries",
   ], errors);
   requireOrderedTerms("control-loop routes", markdownSection(text, "Routes"), [
     "PASS_TO_FINAL",

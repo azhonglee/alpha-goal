@@ -5,7 +5,7 @@ description: "Native-goal-driven bounded executor and hardener. Use after an acc
 
 # Control Loop
 
-Control Loop is the native-goal-driven bounded executor and hardener after `$alpha-goal`, not task discovery or scheduling. Optimize for useful target-state movement.
+Control Loop is the native-goal-driven bounded executor and hardener after `$alpha-goal`, not task discovery or scheduling. Consume an accepted Goal Contract and optimize for useful target-state movement: ship the smallest verifiable slice, collect evidence, compare, then harden or finish.
 
 State artifacts support execution and recovery; writing them is never the objective. Use `checkpoint.md` only when it protects recovery, evidence handoff, or verification.
 
@@ -18,17 +18,18 @@ function control_loop(goal_contract):
   # Inspect Native Goal
   native_goal = inspect_native_goal_if_available()
   if native_goal.absent and !goal_contract.explicit_native_goal_start:
-    # do not call `create_goal`
-    do_not_call(create_goal)
+    do_not_call(create_goal)  # do not call `create_goal`
 
   # Read Goal, Read Checkpoint
   goal = read_accepted_goal_contract(goal_contract)
   checkpoint = read_checkpoint_when_present_or_required(goal)
-  assert_boundaries(goal, checkpoint, native_goal)
+  assert_goal_boundaries(goal, checkpoint, native_goal)
   load_references_if_needed(goal, checkpoint)
 
   while true:
     slice = plan_smallest_deliverable_slice(goal, checkpoint)
+    assert_slice_boundaries(slice, goal)
+
     outcome = act(slice)
     evidence = collect_raw_evidence(outcome)
     gap = compare_to_goal(evidence, goal.acceptance_evidence, goal.claim_boundary)
@@ -53,49 +54,50 @@ function control_loop(goal_contract):
 ## Boundaries
 
 ```pseudo
-function assert_boundaries(goal, checkpoint, native_goal):
+function assert_goal_boundaries(goal, checkpoint, native_goal):
   require(goal.status == accepted, else = RETURN_TO_ALPHA_GOAL or BLOCKED)
-  require("accepted Goal Contract is canonical")
-  deny("control-loop` never creates or derives it")
-
-  require(action in goal.target)
-  require(action in goal.scope)
-  require(action not_in goal.non_goals)
-  require(action within goal.constraints)
-  require(action within goal.authorization)
-  require(action within goal.actuator_boundary)
-  require(claim within goal.claim_boundary)  # claim boundary
-  require(action <= goal.Autonomy_level)  # Autonomy level
+  require(goal.issued_by == "alpha-goal")
+  require(goal.is_canonical)  # accepted Goal Contract is canonical
+  deny(goal.created_or_derived_by_control_loop)  # control-loop` never creates or derives it
 
   if native_goal.objective exists:
-    allow("native goal objective seeds intent/progress/budget")
-    deny("cannot expand, narrow, waive, or replace Goal Contract authority")
+    allow(native_goal.objective as intent_progress_budget_hint)  # native goal objective
+    deny(native_goal.objective changes_goal_authority)  # cannot expand, narrow, waive, or replace Goal Contract authority
 
-  if create_goal requested:
-    require(explicit_request)
+  if create_goal_is_requested:
+    require(explicit_create_goal_request)
   else:
     do_not_call(create_goal)
 
   if unfinished_native_goal_already_exists:  # unfinished native goal already exists
     resume_or_route_conflict_to($alpha-goal)
 
-  require(update_goal complete only_when objective_achieved and no_required_work_remains)
-  require(update_goal blocked only_after "same blocker for three consecutive goal turns")
+  require(update_goal_complete_allowed(objective_achieved and no_required_work_remains))  # update_goal complete
+  require(update_goal_blocked_allowed(same_blocker_for_three_consecutive_goal_turns))  # update_goal blocked; three consecutive goal turns
 
-  require("Do not mutate primary main/master/trunk")
-  require("repo-local worktree" unless safer_repo_policy_exists)
-  preserve("unrelated user changes")
-  require($goal-verify before final_ready_safe_complete_claims)
+  deny(primary_branch_mutation)  # Do not mutate primary main/master/trunk
+  require(worktree.kind == repo_local_worktree unless safer_repo_policy_exists)  # repo-local worktree
+  preserve(unrelated_user_changes)  # unrelated user changes
+  require(goal_verify_before_final_ready_safe_complete_claims)  # $goal-verify
+
+function assert_slice_boundaries(slice, goal):
+  require(slice.target within goal.target)
+  require(slice.scope within goal.scope)
+  require(slice.effect not_in goal.non_goals)
+  require(slice.effect within goal.constraints)
+  require(slice.effect within goal.authorization)
+  require(slice.effect within goal.actuator_boundary)
+  require(slice.claim within goal.claim_boundary)  # claim boundary
+  require(slice.requested_action <= goal.Autonomy_level)  # Autonomy level
 ```
 
 ## Reference Routing
 
 ```pseudo
 function load_references_if_needed(goal, checkpoint):
-  # Alpha Goal state root
-  state_root = "${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/"
-  # <workspace-slug> is the last directory name of the current session directory path
-  workspace_slug = basename(current_session_directory)
+  state_root_template = "${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/"  # Alpha Goal state root
+  workspace_slug = basename(current_session_directory)  # last directory name of the current session directory path
+  state_root = materialize(state_root_template, workspace_slug)
 
   # State writes are checkpoints, not progress.
   if exact checkpoint.md or control-state/latest.md fields are needed:
@@ -122,8 +124,8 @@ function route_after_verification(verification, native_goal):
     update_native_goal_lifecycle_if_allowed(native_goal, update_goal complete)
     return PASS_TO_FINAL
 
-  if verification.verdict == NEXT_ITERATION and verification.Gap.fixable:
-    # `NEXT_ITERATION` with fixable `Gap`
+  if verification.verdict == NEXT_ITERATION:
+    require(verification.Gap.fixable)  # `NEXT_ITERATION` with fixable `Gap`
     return NEXT_ITERATION
 
   if verification.changed_target_scope_authority_or_claim:
