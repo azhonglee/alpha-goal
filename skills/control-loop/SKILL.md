@@ -43,8 +43,8 @@ Run the loop as behavior, not paperwork:
 
 Before any act/probe, durable write, mutation, side effect, or final claim, all must be true:
 - Alpha Goal state root is resolved before writing process artifacts.
-- Goal Contract, `run-profile.md`, `loop-state.md`, and `memory.md` exist or can be initialized only from authorized task records.
-- Goal Contract path/version is exact and run-profile values are identical to or stricter than Goal Contract.
+- `goal-contract.md` already exists, was issued by `$alpha-goal`, and its Goal Contract path/version is exact. Missing, stale, or conflicting Goal Contract routes to `alpha-goal` or `BLOCKED`; `control-loop` never creates or derives it.
+- `run-profile.md`, `loop-state.md`, and `memory.md` exist or can be initialized only from the canonical Goal Contract and matching task records; run-profile values are identical to or stricter than Goal Contract.
 - `loop-state.md` has non-empty objective, legal phase, and actionable Next Slice or Stop Condition; empty memory says `None yet`.
 - Run mode, Trigger event, Requested action, Trigger Contract, Discovery source, External side effects allowed, Human checkpoint, Evaluator route, and Autonomy level are explicit; implicit/unknown fails the gate.
 - For `scheduled` and `webhook`, the canonical Trigger Contract names event source/id, replay or dedupe rule, and payload-to-existing-state mapping; run-profile `Trigger event` can only instantiate that contract.
@@ -123,7 +123,7 @@ Use the matching task files as loop I/O:
 - `iteration.md`: append-only run log; records what happened in the current run, not persistent current state.
 - `evidence.md`: acceptance-to-evidence mapping, command/output references, defect/risk sweep surface, residual risks, unsupported or not-run checks.
 - `verification.md`: latest `$goal-verify` verdict, Gap, evidence boundary, and Next route.
-- `<state-root>/control-state/latest.md`: latest matching task pointer for recovery. Read it when task identity is ambiguous, and update it after Goal Contract, loop-state, evidence, or verification route changes.
+- `<state-root>/control-state/latest.md`: latest matching task pointer for recovery. Read it when task identity is ambiguous, and update it after binding to an `$alpha-goal`-issued Goal Contract, or after loop-state, evidence, or verification route changes.
 
 If from `$goal-verify`, read `verification.md` and continue from its `Gap` and `Next route`. For cross-repo goals, use the single task-level state root and repo manifest from the Goal Contract.
 
@@ -134,7 +134,7 @@ If from `$goal-verify`, read `verification.md` and continue from its `Gap` and `
 ```markdown
 # Loop Run Profile
 
-Goal spec:
+Goal spec: same path as Goal Contract, reference only
 Rule: Controls execution only; must not expand, narrow, reinterpret, waive, or replace the goal spec.
 
 Run mode: manual | scheduled | webhook | verification-triggered
@@ -147,6 +147,35 @@ Human checkpoint: none | explicit checkpoint before listed side effects or claim
 Evaluator route: $goal-verify before final claim | named evaluator plus $goal-verify
 Autonomy level: L1 Suggest only | L2 Draft changes | L3 Modify worktree | L4 Open PR | L5 Merge automatically
 ```
+
+`Goal spec` is a compatibility alias/reference only. `Goal Contract` remains canonical.
+
+`loop-state.md` must keep this minimal shape:
+
+```markdown
+# Loop State
+Current Objective:
+Current Phase: DISCOVERY | IMPLEMENTATION | HARDENING | VERIFICATION | FINAL_RESPONSE_READY | COMPLETE | BLOCKED
+Completed:
+Pending:
+Known Risks:
+Last Verification Gap:
+Next Slice:
+Stop Condition:
+```
+
+`memory.md` must keep this minimal shape:
+
+```markdown
+# Loop Memory
+Confirmed Facts:
+Confirmed Root Causes:
+Known Constraints:
+Working Strategies:
+Failed Strategies:
+```
+
+Durable memory entries are added only when reusable and evidence-backed; each non-empty entry includes Evidence, Confidence, and Invalidation.
 
 `control-state/latest.md` shape:
 
@@ -206,6 +235,7 @@ Create a durable plan when work spans multiple iterations, ownership surfaces, e
 - Preserve failing outputs; do not hide, rerun away, or summarize them as success.
 - Preserve unrelated user changes; never stash, revert, move, or overwrite them without approval.
 - Keep edits inside approved repo surfaces. One repo's commit, push, or PR is not integrated evidence for another repo.
+- Record produced artifacts, generated outputs, external side effects, cleanup, and rollback/containment actions as they occur.
 - For debug work, identify and record root cause before repair. Without confirmed root cause, limit changes to diagnostics or hypothesis-testing slices and do not claim repair.
 - Use subagents for isolated review, evidence audit, test/log analysis, or risk assessment; inspect their artifacts before accepting results.
 
@@ -217,16 +247,16 @@ Compare feedback to the Goal Contract, active run profile, `loop-state.md`, and 
 
 For reusable mismatches, update `memory.md` with an Adaptive Learning Record: trigger, mismatch, adjustment, reuse condition, invalidation condition.
 
-For high-risk, subjective-quality, cross-module, external-side-effect, scheduled, webhook, verification-triggered, review/audit, loophole-finding, PR-ready, or final-claim work, `ITERATION_READY_FOR_VERIFY` requires `$goal-verify`. Named evaluators add supporting evidence only.
+For high-risk, subjective-quality, cross-module, external-side-effect, scheduled, webhook, verification-triggered, PR-ready, or final-claim work, `ITERATION_READY_FOR_VERIFY` requires `$goal-verify`. When review/audit/loophole-finding appears inside an authorized implementation or hardening slice, `control-loop` may collect evidence and apply same-goal fixes only; standalone judgment belongs to `$goal-verify` or read-only review. Named evaluators add supporting evidence only.
 
 ### 4. Record and route
 
-Before `ITERATION_READY_FOR_VERIFY`, update:
-- `iteration.md`: append-only facts of this run, or write `iteration-YYYYMMDD-HHMMSS.md`; reference failed outputs and never redefine goal spec, run profile, or loop state.
-- `evidence.md`: acceptance-to-evidence mapping, command/output references, defect/risk sweep surface, residual risks, unsupported or not-run checks.
-- `loop-state.md`: current objective, phase, completed, pending, known risks, last verification gap, next slice, stop condition.
-- `memory.md`: only evidence-backed confirmed facts, causes, constraints, working strategies, and failed strategies; each durable entry includes Evidence, Confidence, and Invalidation.
-- `<state-root>/control-state/latest.md`: update when the current task becomes the latest valid recovery target, when `loop-state.md` phase changes, or when verification changes the next route.
+Before `ITERATION_READY_FOR_VERIFY`, persist only the state needed for evidence, recovery, and the next route:
+- `iteration.md`: append facts of this run, or write `iteration-YYYYMMDD-HHMMSS.md`; reference failed outputs and never redefine goal spec, run profile, or loop state.
+- `evidence.md`: update acceptance-to-evidence mapping, command/output references, defect/risk sweep surface, residual risks, unsupported or not-run checks.
+- `loop-state.md`: update only when objective, phase, completed/pending work, known risks, last verification gap, next slice, or stop condition changed.
+- `memory.md`: update only for reusable evidence-backed facts, causes, constraints, working strategies, or failed strategies; each durable entry includes Evidence, Confidence, and Invalidation.
+- `<state-root>/control-state/latest.md`: update only when the current task becomes the latest valid recovery target, when binding changes, when `loop-state.md` phase changes, or when verification changes the next route.
 
 Routes:
 - `ITERATION_CONTINUES`: next safe slice remains. Continue with `Act/probe` or re-plan.

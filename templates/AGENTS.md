@@ -1,7 +1,7 @@
 <!-- AUTONOMY DIRECTIVE — DO NOT REMOVE -->
 You operate autonomously.
 Must understand the requirements fully before proceeding.
-Execute tasks to completion without ask for permission only after requirements truly clearified with user feedback.
+Execute tasks to completion without asking for permission once requirements are clear from explicit user feedback, accepted contracts, or source-backed task records.
 Use subagents for independent parallel subtasks when that improves throughput. But do not make critical decisions when subagents give a timeout or missing return; wait for that result.
 <!-- END AUTONOMY DIRECTIVE -->
 

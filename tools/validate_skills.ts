@@ -126,7 +126,13 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Design Summary"
   ]],
   ["execution has hard safety gates", "skills/control-loop/SKILL.md", [
+    "bounded executor and hardener",
     "not task discovery or scheduling",
+    "State artifacts support execution and recovery",
+    "writing them is never the objective",
+    "action/probe evidence changes or confirms",
+    "Run the loop as behavior, not paperwork",
+    "control-loop` never creates or derives it",
     "Do not mutate primary",
     "repo-local worktree",
     "Unrelated user changes",
@@ -151,6 +157,12 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "exact",
     "Read Loop State",
     "Read Memory",
+    "State I/O Contract",
+    "Use the matching task files as loop I/O",
+    "Artifact Schemas",
+    "Goal spec` is a compatibility alias/reference only",
+    "Durable memory entries are added only when reusable and evidence-backed",
+    "not persistent current state",
     "loop-state.md",
     "last verification gap",
     "memory.md",
@@ -264,6 +276,7 @@ export function main(args = process.argv.slice(2)): number {
   validateScriptSurface(root, allFiles, errors, warnings);
   validateLegacyReferences(root, skillFiles, errors);
   validateSemanticChecks(root, errors);
+  validateControlLoopStructure(root, errors);
   validateSchemaConsistency(root, errors);
   validateInstallDocumentation(root, errors);
   validateRuntimeScriptBehavior(root, errors);
@@ -364,6 +377,7 @@ function validateLegacyReferences(root: string, skillFiles: string[], errors: st
     const text = fs.readFileSync(file, "utf8");
     for (const legacy of LEGACY_SCRIPT_REFERENCES) if (text.includes(legacy)) errors.push(`${rel}: legacy non-TypeScript script reference remains: ${legacy}`);
     for (const legacy of LEGACY_RUN_MODE_REFERENCES) if (text.includes(legacy)) errors.push(`${rel}: legacy run-mode reference remains: ${legacy}`);
+    if (/evidence[- ]verify/i.test(text)) errors.push(`${rel}: legacy evidence-verify prose remains`);
     for (const legacy of LEGACY_SKILL_REFERENCES) {
       const patterns = [`$${legacy}`, `skills/${legacy}`, `\`${legacy}\``];
       if (patterns.some(p => text.includes(p))) errors.push(`${rel}: legacy skill reference remains: ${legacy}`);
@@ -377,6 +391,66 @@ function validateSemanticChecks(root: string, errors: string[]): void {
     if (!isFile(file)) { errors.push(`semantic check ${JSON.stringify(name)}: missing ${rel}`); continue; }
     const lower = fs.readFileSync(file, "utf8").toLowerCase();
     for (const term of terms) if (!lower.includes(term.toLowerCase())) errors.push(`semantic check ${JSON.stringify(name)} failed in ${rel}: missing ${term}`);
+  }
+}
+
+function validateControlLoopStructure(root: string, errors: string[]): void {
+  const text = readIfFile(path.join(root, "skills/control-loop/SKILL.md"));
+  const sectionOrder = [
+    "## Execution Loop",
+    "## Execution Invariants",
+    "## Gates",
+    "## Trigger Contract",
+    "## Autonomy Ladder",
+    "## Universal Completion Gates",
+    "## Preflight",
+    "## State I/O Contract",
+    "## Artifact Schemas",
+    "## Iteration",
+  ];
+  requireOrderedTerms("control-loop section order", text, sectionOrder, errors);
+  requireOrderedTerms("control-loop execution chain", markdownSection(text, "Execution Loop"), [
+    "Trigger -> Read Goal -> Read Loop State -> Read Memory -> Plan Slice -> Act/Probe -> Evidence -> $goal-verify -> Gap?",
+    "Run the loop as behavior, not paperwork",
+    "- Plan Slice:",
+    "- Act/Probe:",
+    "- Evidence:",
+    "- Verify Gap:",
+  ], errors);
+  requireOrderedTerms("control-loop iteration order", markdownSection(text, "Iteration"), [
+    "### 1. Plan slice",
+    "### 2. Act or probe",
+    "### 3. Sense and compare",
+    "### 4. Record and route",
+    "ITERATION_READY_FOR_VERIFY",
+    "After `$goal-verify`",
+  ], errors);
+  for (const forbidden of [
+    "Goal Contract, `run-profile.md`, `loop-state.md`, and `memory.md` exist or can be initialized only from authorized task records",
+    "Before `ITERATION_READY_FOR_VERIFY`, update:",
+  ]) {
+    if (text.includes(forbidden)) errors.push(`control-loop reverted to unsafe wording: ${forbidden}`);
+  }
+}
+
+function markdownSection(text: string, heading: string): string {
+  const marker = `## ${heading}`;
+  const start = text.indexOf(marker);
+  if (start < 0) return "";
+  const next = text.indexOf("\n## ", start + marker.length);
+  return text.slice(start, next < 0 ? undefined : next);
+}
+
+function requireOrderedTerms(label: string, text: string, terms: string[], errors: string[]): void {
+  let cursor = -1;
+  const lower = text.toLowerCase();
+  for (const term of terms) {
+    const index = lower.indexOf(term.toLowerCase(), cursor + 1);
+    if (index < 0) {
+      errors.push(`${label}: missing or out of order: ${term}`);
+      return;
+    }
+    cursor = index;
   }
 }
 
@@ -423,13 +497,21 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
     for (const term of [COMPACT_RECOVERY_HOOK_MARKER, "^compact$", "$alpha-goal", "$control-loop", "$goal-verify", "control-state/latest.md", "run-profile.md", "verification.md/evidence.md", "defect/risk", "unclaimed"]) {
       if (!hooksTemplate.includes(term)) errors.push(`${HOOKS_TEMPLATE}: missing compact recovery hook term: ${term}`);
     }
+    for (const term of ["$control-loop: use for bounded implementation or hardening after an explicit goal specification", "$goal-verify: use for goal completion/readiness/review/audit verification"]) {
+      if (!hooksTemplate.includes(term)) errors.push(`${HOOKS_TEMPLATE}: missing candidate skill semantic guard: ${term}`);
+    }
+    if (/evidence[- ]verify/i.test(hooksTemplate)) errors.push(`${HOOKS_TEMPLATE}: legacy evidence-verify hook prose remains`);
     if (hooksTemplate.includes(`[${COMPACT_RECOVERY_HOOK_MARKER}]`)) errors.push(`${HOOKS_TEMPLATE}: compact recovery marker must not be printed to model context`);
   }
   const readme = readIfFile(path.join(root, "README.md"));
   if (!readme.includes("当前代码事实只描述现状")) errors.push("README.md missing current-state-not-desired-state principle");
+  if (!readme.includes("执行或加固已授权 slice")) errors.push("README.md must describe control-loop as execution-first");
+  if (!readme.includes("Act/Probe -> Evidence -> $goal-verify -> Gap?")) errors.push("README.md workflow must include evidence and goal-verify");
   for (const term of ["control-state/latest.md", "goal-contract.md", "run-profile.md", "loop-state.md", "memory.md", "15,000 word+punctuation units", "失效条件"]) if (!readme.includes(term)) errors.push(`README.md missing persistent-loop term: ${term}`);
   const readmeEn = readIfFile(path.join(root, "README.en.md"));
   if (!readmeEn.includes("Current code facts describe current state")) errors.push("README.en.md missing current-state-not-desired-state principle");
+  if (!readmeEn.includes("Execute or harden an authorized slice")) errors.push("README.en.md must describe control-loop as execution-first");
+  if (!readmeEn.includes("Act/Probe -> Evidence -> $goal-verify -> Gap?")) errors.push("README.en.md workflow must include evidence and goal-verify");
   for (const term of ["control-state/latest.md", "goal-contract.md", "run-profile.md", "loop-state.md", "memory.md", "15,000 word+punctuation units", "invalidation"]) if (!readmeEn.includes(term)) errors.push(`README.en.md missing persistent-loop term: ${term}`);
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
   if (!installDoc.includes("--no-sync-user-hooks")) errors.push("INSTALL.md missing --no-sync-user-hooks option");
@@ -440,8 +522,11 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   const manifest = readIfFile(path.join(root, "MANIFEST.md"));
   if (!manifest.includes(HOOKS_TEMPLATE) || !manifest.includes(COMPACT_RECOVERY_HOOK_MARKER)) errors.push("MANIFEST.md missing hooks template marker");
   if (!manifest.includes("marker family") || !manifest.includes("codex-compact-skill-recovery")) errors.push("MANIFEST.md missing hook upgrade strategy");
+  if (!manifest.includes("act or harden authorized slices")) errors.push("MANIFEST.md must describe control-loop as execution-first");
   for (const term of ["loop-state.md", "memory.md", "run-profile.md", "control-state/latest.md", "Memory", "Trigger Contract", "Autonomy Level", "last verification gap", "invalidation", "15,000 word+punctuation units"]) if (!manifest.includes(term)) errors.push(`MANIFEST.md missing persistent-loop term: ${term}`);
   const templateAgents = readIfFile(path.join(root, "templates/AGENTS.md"));
+  if (/clearified/i.test(templateAgents)) errors.push("templates/AGENTS.md contains misspelling: clearified");
+  if (!templateAgents.includes("explicit user feedback, accepted contracts, or source-backed task records")) errors.push("templates/AGENTS.md missing autonomous execution clarity sources");
   for (const term of [
     "Operating Contract",
     "top-level operating contract for the workspace",

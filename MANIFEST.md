@@ -5,7 +5,7 @@
 | Directory | Purpose |
 |---|---|
 | `skills/alpha-goal/` | Front-end controller: fact discovery, clarification, Goal Contract, trigger contract, initial loop state, route. |
-| `skills/control-loop/` | Persistent bounded actuator/controller: resume Goal Contract, run profile, loop state, and memory; act, collect feedback, harden from verification gaps. |
+| `skills/control-loop/` | Persistent bounded actuator/controller: act or harden authorized slices; use Goal Contract, run profile, loop state, and memory as recovery and constraint inputs. |
 | `skills/goal-verify/` | Independent goal verifier for evidence coverage, claim boundaries, defect/risk sweep, and verification gaps. |
 
 Former public framing/modeling/synthesis stages are folded into `skills/alpha-goal/SKILL.md`.

@@ -14,7 +14,7 @@ Alpha Goal 是面向 Goal Engineering 的最小持久闭环技能集。它帮助
 ## 工作方式
 
 ```text
-Trigger -> Read Goal -> Read Loop State -> Read Memory -> Plan Slice -> Act -> Verify -> Gap? -> Harden or Complete
+Trigger -> Read Goal -> Read Loop State -> Read Memory -> Plan Slice -> Act/Probe -> Evidence -> $goal-verify -> Gap? -> Harden or Final Claim
 ```
 
 ## 快速开始
@@ -42,7 +42,7 @@ $alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继�
 | Skill | 作用 |
 | --- | --- |
 | `alpha-goal` | 在开始工作前澄清意图、边界、验收证据和下一步安全路由。 |
-| `control-loop` | 从 `goal-contract.md`、`run-profile.md`、`loop-state.md` 和 `memory.md` 恢复，执行已授权 slice，并根据验证缺口继续 harden。 |
+| `control-loop` | 执行或加固已授权 slice；`goal-contract.md`、`run-profile.md`、`loop-state.md` 和 `memory.md` 只作为恢复和约束输入。 |
 | `goal-verify` | 验证目标完成、声明边界、证据覆盖和 material 未声明缺陷/风险，并输出下一轮 Gap。 |
 
 ## 文档

@@ -14,7 +14,7 @@ Alpha Goal is a minimal persistent closed-loop skillset for goal engineering wor
 ## How it works
 
 ```text
-Trigger -> Read Goal -> Read Loop State -> Read Memory -> Plan Slice -> Act -> Verify -> Gap? -> Harden or Complete
+Trigger -> Read Goal -> Read Loop State -> Read Memory -> Plan Slice -> Act/Probe -> Evidence -> $goal-verify -> Gap? -> Harden or Final Claim
 ```
 
 ## Quick start
@@ -42,7 +42,7 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
 | Skill | What it helps with |
 | --- | --- |
 | `alpha-goal` | Clarify intent, boundaries, acceptance evidence, and the next safe route before work starts. |
-| `control-loop` | Resume from `goal-contract.md`, `run-profile.md`, `loop-state.md`, and `memory.md`, run an authorized slice, and continue hardening from verification gaps. |
+| `control-loop` | Execute or harden an authorized slice; `goal-contract.md`, `run-profile.md`, `loop-state.md`, and `memory.md` are recovery and constraint inputs. |
 | `goal-verify` | Verify goal completion, claim boundary, evidence coverage, and material unclaimed defects/risks, then return the next Gap. |
 
 ## Docs
