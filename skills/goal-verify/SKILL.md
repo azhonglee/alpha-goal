@@ -10,15 +10,15 @@ Act as an independent evaluator, not the executor. A final claim is unproven unt
 1. Goal satisfaction: evidence covers the explicit Goal Contract, acceptance evidence, constraints, non-goals, any required checkpoint sections, and proposed claim.
 2. Defect/risk sweep: review the authorized surface for material unclaimed defects, regressions, unsafe old paths, scope drift, and unsupported risk claims.
 
-Use subagents for supporting review, risk, or evidence passes when useful; `goal-verify` owns the final verdict.
+Use subagents for supporting review, risk, or evidence passes; `goal-verify` owns the final verdict.
 
 ## Resources
 
-Read `references/claim-boundary.md` before final/merge/ship/safety claims. Read `references/defect-risk-rubric.md` for review, audit, loophole-finding, high-risk, cross-module, replacement, security, migration, or PR-ready checks. Read `references/verification-verdict-schema.md` for formal verdicts.
+Read `references/claim-boundary.md` before final/merge/ship/safety claims. Read `references/defect-risk-rubric.md` for review, audit, loophole-finding, high-risk, cross-module, replacement, security, migration, or PR-ready checks. Read `references/verification-verdict-schema.md` for verdicts.
 
 Resolve the Alpha Goal state root the same way as `$alpha-goal`: always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
 
-Read canonical state-root Goal Contract, existing `checkpoint.md`, diff/artifacts, command outputs, tests, logs, reviewer/user feedback, and specs. Check but do not trust summaries.
+Read canonical accepted state-root Goal Contract, existing `checkpoint.md`, diff/artifacts, command outputs, tests, logs, reviewer/user feedback, and specs. Check but do not trust summaries. A draft, missing, or unissued Goal Contract is a gap, not an execution target.
 
 Read checkpoint `Run Profile` when present, referenced, or required by control-loop evidence. Treat it as execution context only, never as the Goal Contract. For cross-repo claims, read the repo manifest and per-repo plus integration evidence from the same task-level state root.
 
@@ -37,7 +37,7 @@ Read checkpoint `Run Profile` when present, referenced, or required by control-l
 - For replace, remove, disable, migrate, forbid, no-fallback, or security semantics, require positive evidence for the intended behavior and negative evidence that old/prohibited behavior is not reachable on default or realistic paths.
 - For cross-repo claims, map evidence and risk by repo surface and integration relation; one repo's passing checks cannot prove integrated behavior.
 - Version pins, generated clients, API contracts, dependent app behavior, data migration, rollback, delivery links, credentials, privacy, and security claims must be evidenced when the goal depends on them.
-- A verification used for `verification-triggered` recovery must bind to the checked Goal Contract and any checkpoint sections it relies on; stale or cross-task bindings are gaps.
+- A verification used for `verification-triggered` recovery must bind to the checked accepted Goal Contract and any checkpoint `Evidence` it relies on, with `Verdict: NEXT_ITERATION`, `Next route: control-loop`, and a same-goal fixable Gap; stale, final, or cross-task bindings are gaps.
 - Do not repair during verification; route back instead.
 - Final wording must not exceed the highest evidence-supported boundary.
 - Do not narrow the claim as a successful outcome. If evidence or defect/risk sweep cannot support the proposed claim, record the gap and return `NEXT_ITERATION`.
@@ -56,9 +56,9 @@ The Gap must be specific enough for `$control-loop` to choose the next slice, an
 
 ## Final response guard
 
-Final/ready/safe/complete/repair-complete/PR-ready/no-issues claims require durable checkpoint `Verification` updates unless the user forbids writes, the environment is unwritable, or the task is explicitly one-turn read-only with no handoff. If chat-only, say the claim is limited to chat evidence and do not make broad ready/safe/complete/no-issues claims.
+Final/ready/safe/complete/repair-complete/PR-ready/no-issues claims require durable checkpoint `Verification` updates unless writes are forbidden, environment is unwritable, or task is one-turn read-only with no handoff. If chat-only, say the claim is limited to chat evidence and do not make broad ready/safe/complete/no-issues claims.
 
-After verification, final response must state: verdict, evidence actually run/inspected, checked surface, defect/risk sweep result, claim supported, claim not supported/not checked, residual risks, and next route when not final.
+After verification, final response must state: verdict, evidence run/inspected, checked surface, defect/risk sweep result, claim supported, claim not supported/not checked, residual risks, and next route when not final.
 
 Do not say complete, safe, ready, fully verified, no issues, will not happen, completely prevents, or no risk unless `PASS_TO_FINAL` supports that exact scope with scenario/negative evidence and defect/risk sweep coverage.
 
@@ -100,20 +100,4 @@ Conditional sections, include only when applicable:
 - Adaptive learning review:
 ```
 
-TUI summary:
-
-```markdown
-Verification Summary
-
-| Field | Value |
-| --- | --- |
-| Review mode | |
-| Checked surface | |
-| Claim | |
-| Evidence | |
-| Defect/risk sweep | |
-| Unclaimed issues | |
-| Gaps | |
-| Verdict | |
-| Next | |
-```
+TUI summary: `Verification Summary` with Review mode, checked surface, claim, evidence, defect/risk sweep, unclaimed issues, Gap, Verdict, and Next.

@@ -4,10 +4,10 @@ Load this reference only when run mode is not plain `manual`, requested action m
 
 ## Trigger Contract
 
-- `manual`: resume from the Goal Contract and any existing `checkpoint.md`; do not add checkpoint `Loop State` unless multi-iteration recovery needs it.
-- `scheduled`: resume latest matching state only; the Trigger Contract must name schedule source/id, replay/staleness rule, and existing state mapping; reject stale/replayed events; do not introduce a new discovery source, scope, authority, side effect, or public claim.
+- `manual`: resume from the accepted Goal Contract and any existing `checkpoint.md`; use `control-state/latest.md` only when task identity is ambiguous. Add checkpoint `Loop State` only for multi-iteration recovery.
+- `scheduled`: resume latest matching accepted state via Trigger Contract and `control-state/latest.md` when needed; name schedule source/id, replay/staleness rule, and state mapping; reject stale/replayed events; do not add new discovery source, scope, authority, side effect, or public claim.
 - `webhook`: bind event id/dedupe key to the Trigger Contract and authorized payload-to-state mapping; unmatched, stale, replayed, or authority-changing events route to `alpha-goal`.
-- `verification-triggered`: consume only the latest verdict whose `Goal Contract` and checkpoint `Verification`/`Evidence` bindings match the current task files, with `Next route: control-loop` and a same-goal fixable Gap.
+- `verification-triggered`: consume only the latest verdict whose `Goal Contract` and checkpoint `Verification`/`Evidence` bindings match the current accepted task files, with `Verdict: NEXT_ITERATION`, `Next route: control-loop`, and a same-goal fixable Gap.
 
 ## Autonomy Ladder
 

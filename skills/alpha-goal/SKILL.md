@@ -45,7 +45,7 @@ Discovery critical thinking:
 - Context sufficientness: what can be concluded now; what must be supplemented; what is must-have vs ideal?
 - Hidden issues: what deeper root cause, adjacent issue, or overlooked dependency may affect the goal?
 
-Record key points with concise critical thinking in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Discovery notes`. If the contract is still draft, mark it as draft and keep target/scope fields unset until Final Design.
+Record key points with concise critical thinking in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Discovery notes`. If the contract is still draft, set `Contract status: draft` and `Issued by: alpha-goal`, then keep target/scope fields unset until Final Design.
 
 ## Phase 2: Clarify with User
 
@@ -155,8 +155,11 @@ Track used modes in state to prevent repetition.
 
 Write the design to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md`; copy to `docs/specs/YYYYMMDD-<TaskName>.md` when useful or required by repo convention.
 The state-root `goal-contract.md` is canonical. Repo specs are mirrors or references only; conflicts route back to `alpha-goal`.
+Keep `Contract status: draft` until user confirmation or an explicit workspace/user contract authorizes autonomous launch. `$control-loop` may execute only an accepted Goal Contract.
 
 Design Content Must Include:
+- Contract status [contract_status]
+- Issued by [issued_by]
 - Technical Context [context]
 - Discovery notes [discovery_notes]
 - Interview ledger [interview_ledger]
@@ -179,7 +182,7 @@ Design Content Must Include:
 ### Trigger Contract
 
 Define run behavior, not just a label:
-- `manual`: resume from the Goal Contract unless the user explicitly overrides; `control-loop` may create checkpoint files only when recovery needs them.
+- `manual`: resume from the Goal Contract unless the user explicitly overrides; `control-loop` may create `checkpoint.md` only when recovery needs it.
 - `scheduled`: the Trigger Contract must name the schedule source/id, replay/staleness rule, and existing Goal Contract mapping; do not discover new scope or authority.
 - `webhook`: map the event to an existing authorized Goal Contract from the Trigger Contract; the Trigger Contract must name event source/id, dedupe key, authorized payload-to-state mapping, and replay/staleness rule; if no match, return to `alpha-goal`.
 - `verification-triggered`: resume only when latest verification evidence matches the Goal Contract path, has `Next route: control-loop`, and the Gap is fixable inside the same goal.
@@ -198,11 +201,13 @@ Requested actions above the current level are denied and routed to user confirma
 ### Artifact policy
 
 `alpha-goal` writes only `goal-contract.md`. The contract contains:
-- `Discovery notes`: concise discovered facts, contradictions, and critical thinking.
-- `Interview ledger`: clarification rounds, user-owned decisions, and unresolved boundary gaps.
+- `Contract status`: `draft` until confirmed or explicitly pre-authorized; `accepted` before any `$control-loop` handoff.
+- `Issued by`: `alpha-goal`; other issuers are not authoritative for `$control-loop`.
+- `Discovery notes`: concise discovered facts, contradictions, and critical thinking; reference long logs instead of pasting them.
+- `Interview ledger`: clarification rounds, user-owned decisions, and unresolved boundary gaps; keep it as evidence ledger, not executable authority.
 - Canonical target, scope, non-goals, acceptance evidence, claim boundary, Trigger Contract, Autonomy Level, and handoff ledger.
 
-Do not create separate discovery, interview, loop, memory, evidence, verification, or latest-pointer files from `alpha-goal`. `$control-loop` or `$goal-verify` may create a single `checkpoint.md` only when conditional execution, recovery, evidence handoff, or verification requires it.
+Do not create separate discovery, interview, loop, memory, evidence, verification, or latest-pointer files from `alpha-goal`. `$control-loop` or `$goal-verify` may create a single task `checkpoint.md` only when conditional execution, recovery, evidence handoff, or verification requires it. A global `control-state/latest.md` may exist only as a recovery index to an accepted Goal Contract, not as a stage artifact.
 
 Self-review the design for completion and reasonability. Use subagents for independent review when useful, then fix accepted findings.
 
@@ -215,6 +220,7 @@ Design Summary
 
 | Field | Value |
 | --- | --- |
+| Contract status | |
 | Intent | |
 | Root Cause | |
 | Outcome | |
@@ -233,4 +239,4 @@ Design Summary
 | Next | |
 ```
 
-Use `request_user_input` to ask for approve/launch, refine, or reject unless an explicit workspace/user contract already authorizes autonomous launch. Overrides may select an authorized pending slice only; target, scope, phase, claim, Trigger Contract, or Autonomy changes require Goal Contract update and gates. On approval or pre-authorized launch, hand off to `$control-loop`.
+Use `request_user_input` to ask for approve/launch, refine, or reject unless an explicit workspace/user contract already authorizes autonomous launch. Overrides may select an authorized pending slice only; target, scope, phase, claim, Trigger Contract, or Autonomy changes require Goal Contract update and gates. On approval or pre-authorized launch, set `Contract status: accepted` and hand off to `$control-loop`.

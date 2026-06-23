@@ -12,14 +12,15 @@ State artifacts support execution and recovery; writing them is never the object
 ## Execution Loop
 
 ```text
-Trigger -> Read Goal -> Read Checkpoint -> Plan Slice -> Act/Probe -> Evidence -> $goal-verify -> Gap?
+Trigger -> Resolve Task -> Read Goal -> Read Checkpoint -> Plan Slice -> Act/Probe -> Evidence -> $goal-verify -> Gap?
 Gap yes -> update needed checkpoints -> harden/continue
 Gap no -> final claim within verified boundary
 ```
 
 Run the loop as behavior, not paperwork:
 - Read Goal: bind to the canonical Goal Contract and approved target.
-- Read Checkpoint: use `checkpoint.md` when present or required; it may contain run profile, loop state, memory, iteration, evidence, verification, and latest recovery pointer sections.
+- Resolve Task: when the task identity is ambiguous after compaction or trigger resume, use `<state-root>/control-state/latest.md` only as a global recovery index.
+- Read Checkpoint: use `checkpoint.md` when present or required; it may contain run profile, loop state, memory, iteration, evidence, and verification sections.
 - Plan Slice: choose one coherent acceptance- and risk-relevant action/probe.
 - Act/Probe: make the smallest useful authorized change or gather the missing observer.
 - Evidence: collect raw proof from tests, commands, diffs, logs, screenshots, runtime probes, or manual inspection.
@@ -27,7 +28,7 @@ Run the loop as behavior, not paperwork:
 
 ## Execution Invariants
 
-- The state-root `goal-contract.md` is canonical. `docs/specs/YYYYMMDD-<TaskName>.md` may mirror or reference it only; conflicts route to `alpha-goal`.
+- The state-root accepted `goal-contract.md` is canonical. `docs/specs/YYYYMMDD-<TaskName>.md` may mirror or reference it only; conflicts route to `alpha-goal`.
 - If no explicit goal specification exists, route to `alpha-goal` or blocker instead of editing.
 - Stay inside approved target, scope, non-goals, constraints, authorization, actuator boundary, claim boundary, active run profile when present, and Autonomy level.
 - Do not mutate primary `main`/`master`/`trunk`; use a repo-local worktree unless repo policy defines a safer equivalent.
@@ -42,13 +43,14 @@ Run the loop as behavior, not paperwork:
 
 Before any act/probe, durable write, mutation, side effect, or final claim, all must be true:
 - Alpha Goal state root is resolved before writing process artifacts.
-- `goal-contract.md` already exists, was issued by `$alpha-goal`, and its Goal Contract path/version is exact. Missing, stale, or conflicting Goal Contract routes to `alpha-goal` or `BLOCKED`; `control-loop` never creates or derives it.
+- `goal-contract.md` already exists, was issued by `$alpha-goal`, has `Contract status: accepted`, and its Goal Contract path is exact. Missing, draft, stale, or conflicting Goal Contract routes to `alpha-goal` or `BLOCKED`; `control-loop` never creates or derives it.
+- If `<state-root>/control-state/latest.md` is used, it binds the exact task state directory, Goal Contract path, optional checkpoint path, current phase, next route, and update time; stale or cross-task pointers are ignored or blocked.
 - If `checkpoint.md` exists or the run requires one, its relevant sections are identical to or stricter than the Goal Contract.
 - `checkpoint.md` is required only for `scheduled`, `webhook`, `verification-triggered`, external side effects, actions above L3, explicit human checkpoints, multi-iteration recovery, durable evidence handoff, or persisted verification. Plain manual L1-L3 work may execute directly from the Goal Contract.
 - If checkpoint `Run Profile` exists or is required, Run mode, Trigger event, Requested action, Discovery source, External side effects allowed, Human checkpoint, Evaluator route, and Autonomy level are explicit.
 - If checkpoint `Loop State` exists or multi-iteration recovery is needed, it has non-empty objective, legal phase, and an actionable Next Slice or Stop Condition.
 - If checkpoint `Memory` exists, non-empty entries include evidence, confidence, and invalidation; do not add empty memory just to pass a gate.
-- For `scheduled` and `webhook`, the canonical Trigger Contract names event source/id, replay or dedupe rule, and payload-to-existing-state mapping; run-profile `Trigger event` can only instantiate that contract.
+- For `scheduled` and `webhook`, the canonical Trigger Contract names event source/id, replay or dedupe rule, and payload-to-existing-state mapping; checkpoint `Run Profile` Trigger event can only instantiate that contract.
 - Discovery source is `goal-spec-only` or a named source already authorized by the goal specification or task records.
 - Evaluator route includes `$goal-verify` before final/ready/safe/complete claims.
 - The requested/planned action is within the active run profile when present, approved target, scope, authorization, non-goals, actuator boundary, claim boundary, and Autonomy level.
@@ -58,7 +60,7 @@ If any gate is missing, route to `alpha-goal` or blocker instead of editing.
 
 ## Preflight
 
-When an existing `tsx` runner and task state are available, `npx --no-install tsx skills/control-loop/scripts/mutation-preflight.ts --task YYYYMMDD-TaskName` can print preflight facts. Otherwise record equivalent facts directly: root, branch/worktree, status, applicable rule files, ignored `.worktrees/`, Alpha Goal state root, submodules, strongest evidence floor, Goal Contract binding, optional checkpoint path, run profile section, loop state section, memory section, and evaluator route. The gate is the observed facts, not the helper script.
+When an existing `tsx` runner and task state are available, `npx --no-install tsx skills/control-loop/scripts/mutation-preflight.ts --task YYYYMMDD-TaskName` can print preflight facts. Pass `--requested-action`, `--run-mode`, or side-effect flags when the planned action is above plain L1-L3 manual work. Otherwise record equivalent facts directly: root, branch/worktree, status, applicable rule files, ignored `.worktrees/`, Alpha Goal state root, latest pointer if used, submodules, strongest evidence floor, Goal Contract binding/status, optional checkpoint path, run profile section, loop state section, memory section, and evaluator route. The gate is the observed facts, not the helper script.
 
 For multi-repo preflight, pass repo paths to the same command or record equivalent facts per repo.
 
@@ -127,7 +129,7 @@ Before `ITERATION_READY_FOR_VERIFY`, persist only the state needed for evidence,
   - `Iteration` for multi-step recovery, handoff, or material failed outputs.
   - `Evidence` when proof must survive compaction, handoff, risky verification, PR-ready checks, or final claims.
   - `Verification` when verifier output must persist or drive the next route.
-  - `Latest` only when the current task becomes the latest valid recovery target or bindings/routes change.
+- `<state-root>/control-state/latest.md`: update only when the current accepted task becomes the latest valid recovery target or bindings/routes change. It is a global recovery index, not a stage artifact.
 
 Routes:
 - `ITERATION_CONTINUES`: next safe slice remains. Continue with `Act/probe` or re-plan.
@@ -144,4 +146,4 @@ After `$goal-verify`:
 
 If the active run profile blocks the goal, do not lower the claim. Use `ITERATION_HARDEN` only for gaps fixable inside the same profile.
 
-Continue automatically only while the same explicit authority, actuator boundary, acceptance evidence, claim boundary, active run profile, risks, assumptions, stop conditions, and user-owned decisions remain stable. Stop/re-route on new subsystem/skill, boundary or evidence change, run profile change, unmodeled risk, user-owned choice, or cumulative edits beyond the approved boundary.
+Continue only while authority, actuator boundary, acceptance evidence, claim boundary, active run profile, risks, assumptions, stop conditions, and user-owned decisions stay stable. Stop/re-route on new subsystem/skill, boundary, evidence, profile, risk, user choice, or edits beyond the approved boundary.

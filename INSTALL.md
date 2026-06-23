@@ -50,20 +50,32 @@ done
 task_root="$tmp_codex_home/$(basename "$PWD")/20260623-smoke"
 mkdir -p "$task_root"
 cat >"$task_root/goal-contract.md" <<'EOF'
+Contract status: accepted
+Issued by: alpha-goal
 Discovery notes: smoke
 Interview ledger: smoke
 Trigger Contract: manual
 Autonomy Level: L3 Modify worktree
 EOF
+mkdir -p "$tmp_codex_home/$(basename "$PWD")/control-state"
+cat >"$tmp_codex_home/$(basename "$PWD")/control-state/latest.md" <<EOF
+# Control State Latest
+State directory: $task_root
+Goal Contract: $task_root/goal-contract.md
+Checkpoint: none
+Current Phase: IMPLEMENTATION
+Next route: none
+Updated at: 2026-06-23T00:00:00Z
+EOF
 python3 -m json.tool "$tmp_codex_home/hooks.json" >/dev/null
 grep -q "codex-alpha-goal-compact-recovery:v1" "$tmp_codex_home/hooks.json"
 grep -q "treat pre-compaction remembered skill text as stale" "$tmp_codex_home/hooks.json"
 grep -q "goal-contract.md first" "$tmp_codex_home/hooks.json"
-grep -q "checkpoint.md only" "$tmp_codex_home/hooks.json"
+grep -q "control-state/latest.md" "$tmp_codex_home/hooks.json"
 grep -q "goal-contract.md" "$tmp_codex_home/hooks.json"
 grep -q "checkpoint.md" "$tmp_codex_home/hooks.json"
-grep -q "HARDENING or VERIFICATION" "$tmp_codex_home/hooks.json"
-grep -q "Verification/Evidence" "$tmp_codex_home/hooks.json"
+grep -q "verification-triggered recovery" "$tmp_codex_home/hooks.json"
+grep -q "Run Profile, Loop State, Verification, and Evidence" "$tmp_codex_home/hooks.json"
 grep -q '\$alpha-goal' "$tmp_codex_home/hooks.json"
 grep -q '\$control-loop' "$tmp_codex_home/hooks.json"
 grep -q '\$goal-verify' "$tmp_codex_home/hooks.json"

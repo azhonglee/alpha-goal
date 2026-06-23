@@ -2,7 +2,7 @@
 
 Languages: [Chinese](README.md) | English
 
-Alpha Goal is a minimal persistent closed-loop skillset for goal engineering work. It helps agents discover facts before asking, resume from durable state and compressed memory, work inside explicit boundaries, and make final claims only as far as evidence supports them.
+Alpha Goal is a minimal persistent closed-loop skillset for goal engineering work. It helps agents discover facts before asking, resume from an accepted Goal Contract and required checkpoints, work inside explicit boundaries, and make final claims only as far as evidence supports them.
 
 ## When to use it
 
@@ -14,7 +14,7 @@ Alpha Goal is a minimal persistent closed-loop skillset for goal engineering wor
 ## How it works
 
 ```text
-Trigger -> Read Goal -> Read Checkpoint -> Plan Slice -> Act/Probe -> Evidence -> $goal-verify -> Gap? -> Harden or Final Claim
+Trigger -> Resolve Task -> Read Goal -> Read Checkpoint -> Plan Slice -> Act/Probe -> Evidence -> $goal-verify -> Gap? -> Harden or Final Claim
 ```
 
 ## Quick start
@@ -27,7 +27,7 @@ npx --no-install tsx tools/validate_skills.ts .
 The installer creates direct symlinks for the three public skills under `$HOME/.codex/skills/` and cleans same-repo links for merged old public skills.
 The validator enforces the whole `skills/` tree under 15,000 word+punctuation units, counted as words plus punctuation/symbol marks. This budget preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, autonomy gates, behavior-level gates, and evaluator feedback without over-compressing skill text.
 
-Runtime records use the user-level Alpha Goal state root: `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`, where `<workspace-slug>` is the last directory name of the current session directory path. `alpha-goal` writes only `goal-contract.md` by default, with discovery notes and interview ledger inside it; `checkpoint.md` is the single conditional checkpoint created only for recovery, trigger handling, evidence handoff, or verification.
+Runtime records use the user-level Alpha Goal state root: `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`, where `<workspace-slug>` is the last directory name of the current session directory path. `alpha-goal` writes only the accepted `goal-contract.md` by default, with discovery notes and interview ledger inside it; `checkpoint.md` is the single task-level conditional checkpoint created only for recovery, trigger handling, evidence handoff, or verification; `control-state/latest.md` is only a global recovery index, not stage content.
 
 ## Usage examples
 
@@ -72,7 +72,7 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 - Evidence before authority: Current code facts describe current state; desired behavior comes from user intent, specs, issues, or accepted contracts.
 - Goals before action: outcome, scope, non-goals, acceptance evidence, decision owner, and claim boundary define what may change.
 - Minimal useful modeling: model dependencies, disturbances, and risks only when they affect safe control, validation, or routing.
-- Persistent state: `goal-contract.md` is the default `alpha-goal` output and directly contains discovery notes, interview ledger, and the final contract; `checkpoint.md` conditionally carries run profile, loop state, iteration, evidence, verification, and memory with evidence, confidence, and invalidation.
+- Persistent state: `goal-contract.md` is the default `alpha-goal` output and directly contains discovery notes, interview ledger, and the final contract; `checkpoint.md` conditionally carries run profile, loop state, iteration, evidence, verification, and memory with evidence, confidence, and invalidation; `control-state/latest.md` only points to the latest accepted task when task identity is ambiguous.
 - Bounded execution: prefer small observable probes or targeted changes over broad refactors and speculative cleanup; run mode and the Autonomy Ladder constrain trigger behavior and action authority.
 - Independent verification: final/ready/safe/complete/repair/review claims require fresh evidence and defect/risk sweep, checked separately from execution.
 - Honest routing: unclear goals return to `alpha-goal`, fixable implementation, evidence, or material risk gaps return to `control-loop`, and unsupported or under-reviewed final claims continue through `goal-verify`.

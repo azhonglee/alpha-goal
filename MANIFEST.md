@@ -30,8 +30,9 @@ Default runtime artifacts live under the user-level Alpha Goal state root: `${CO
 
 | Path | Purpose |
 |---|---|
-| `<state-root>/YYYYMMDD-<TaskName>/goal-contract.md` | Default `alpha-goal` artifact and canonical contract, including discovery notes, interview ledger, Trigger Contract, and Autonomy Level. |
-| `<state-root>/YYYYMMDD-<TaskName>/checkpoint.md` | Conditional checkpoint containing only needed sections: run profile, loop state, memory, iteration, evidence, verification, and latest recovery pointer; memory entries keep evidence, confidence, and invalidation. |
+| `<state-root>/YYYYMMDD-<TaskName>/goal-contract.md` | Default `alpha-goal` artifact and canonical accepted contract, including contract status, discovery notes, interview ledger, Trigger Contract, and Autonomy Level. |
+| `<state-root>/YYYYMMDD-<TaskName>/checkpoint.md` | Conditional task checkpoint containing only needed sections: run profile, loop state, memory, iteration, evidence, and verification; memory entries keep evidence, confidence, and invalidation. |
+| `<state-root>/control-state/latest.md` | Optional global recovery index pointing to the latest accepted task state, Goal Contract, optional checkpoint, phase, route, and update time; not a stage artifact. |
 
 ## Count Budget
 
