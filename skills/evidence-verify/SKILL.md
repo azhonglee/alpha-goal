@@ -7,6 +7,8 @@ description: "Independent evidence comparator. Use only when artifacts, commands
 
 Act as comparator. Completion is unproven until evidence covers every explicit requirement and claim boundary.
 
+Use subagents for supporting evidence review; evidence-verify owns the final verdict.
+
 ## Resources
 
 Read `references/claim-boundary.md` before final/merge/ship/safety claims. Read `references/verification-verdict-schema.md` for formal verdicts.
