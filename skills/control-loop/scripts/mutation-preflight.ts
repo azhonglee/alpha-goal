@@ -2,7 +2,6 @@ import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { basename, resolve } from "node:path";
 
-const runModes = new Set(["manual", "scheduled", "webhook", "verification-triggered"]);
 const requestedActions = new Set(["suggest", "draft", "modify-worktree", "commit", "push", "open-pr", "merge"]);
 const loopPhases = new Set(["DISCOVERY", "IMPLEMENTATION", "HARDENING", "VERIFICATION", "FINAL_RESPONSE_READY", "COMPLETE", "BLOCKED"]);
 
@@ -88,7 +87,7 @@ function parseArgs(rawArgs) {
   };
   const has = (name) => rawArgs.includes(name);
   const consumed = new Set();
-  for (const name of ["--task", "--run-mode", "--requested-action", "--external-side-effects", "--human-checkpoint"]) {
+  for (const name of ["--task", "--requested-action", "--external-side-effects", "--human-checkpoint"]) {
     const index = rawArgs.indexOf(name);
     if (index >= 0) {
       consumed.add(index);
@@ -102,7 +101,6 @@ function parseArgs(rawArgs) {
   return {
     task: take("--task"),
     repos: rawArgs.filter((_, index) => !consumed.has(index)),
-    runMode: take("--run-mode"),
     requestedAction: take("--requested-action"),
     externalSideEffects: take("--external-side-effects"),
     humanCheckpoint: take("--human-checkpoint"),
@@ -175,15 +173,15 @@ function checkTaskState(taskDir, stateRoot, options) {
   const hasVerification = !!verification;
   const hasLatest = !!latest.trim();
 
-  ok = requireFields("goal contract", goalText, ["Contract status", "Issued by", "Trigger Contract", "Autonomy Level"], false) && ok;
+  ok = requireFields("goal contract", goalText, ["Contract status", "Issued by", "Autonomy Level"], false) && ok;
   ok = check("contract status", /^accepted$/i.test(field(goalText, "Contract status")), `not accepted: ${field(goalText, "Contract status") || "<empty>"}`) && ok;
   ok = check("contract issuer", /^alpha-goal$/i.test(field(goalText, "Issued by")), `invalid issuer: ${field(goalText, "Issued by") || "<empty>"}`) && ok;
 
   if (hasCheckpoint) ok = requireFields("checkpoint", checkpointHeader, ["Goal Contract", "Updated at"], false) && ok;
   else section("checkpoint", "absent; plain manual L1-L3 work may execute from Goal Contract");
 
-  if (hasRunProfile) ok = requireFields("checkpoint run profile", runProfile, ["Run mode", "Trigger event", "Requested action", "Discovery source", "External side effects allowed", "Human checkpoint", "Evaluator route", "Autonomy level"], true) && ok;
-  else section("checkpoint run profile", "absent unless trigger/action/side-effect requires it");
+  if (hasRunProfile) ok = requireFields("checkpoint run profile", runProfile, ["Requested action", "Discovery source", "External side effects allowed", "Human checkpoint", "Evaluator route", "Autonomy level"], true) && ok;
+  else section("checkpoint run profile", "absent unless action/side-effect requires it");
 
   if (hasLoopState) {
     ok = requireFields("checkpoint loop state", loopState, ["Current Objective", "Current Phase"], false) && ok;
@@ -202,7 +200,6 @@ function checkTaskState(taskDir, stateRoot, options) {
   }
   if (hasLatest) ok = requireFields("latest pointer", latest, ["State directory", "Goal Contract", "Current Phase", "Next route", "Updated at"], false) && ok;
 
-  const mode = hasRunProfile ? field(runProfile, "Run mode") : options.runMode || inferRunMode(goalText);
   const action = hasRunProfile ? field(runProfile, "Requested action") : options.requestedAction;
   const autonomy = hasRunProfile ? field(runProfile, "Autonomy level") : field(goalText, "Autonomy Level");
   const phase = field(loopState, "Current Phase") || field(latest, "Current Phase");
@@ -211,43 +208,30 @@ function checkTaskState(taskDir, stateRoot, options) {
   const stopCondition = field(loopState, "Stop Condition");
   const externalSideEffects = hasRunProfile ? field(runProfile, "External side effects allowed") : options.externalSideEffects;
   const humanCheckpoint = hasRunProfile ? field(runProfile, "Human checkpoint") : options.humanCheckpoint;
-  const checkpointRequired = ["scheduled", "webhook", "verification-triggered"].includes(mode) ||
-    actionRequiresProfile(action) ||
+  const checkpointRequired = actionRequiresProfile(action) ||
     !isUnset(externalSideEffects) && !isNone(externalSideEffects) ||
     !isUnset(humanCheckpoint) && !isNone(humanCheckpoint) ||
     options.durableEvidence ||
     options.persistedVerification ||
     options.multiIteration;
 
-  ok = check("run mode", runModes.has(mode), `invalid: ${mode || "<empty>"}`) && ok;
   if (hasRunProfile) ok = check("requested action", requestedActions.has(action), `invalid: ${action || "<empty>"}`) && ok;
   if (!hasRunProfile && action) ok = check("requested action", requestedActions.has(action), `invalid: ${action || "<empty>"}`) && ok;
   ok = check("autonomy level", /^L[1-5]\b/.test(autonomy), `invalid: ${autonomy || "<empty>"}`) && ok;
   if (action) ok = check("autonomy action ceiling", actionAllowedByLevel(action, autonomy), `${action || "<empty>"} exceeds ${autonomy || "<empty>"}`) && ok;
-  ok = check("checkpoint required", !checkpointRequired || hasCheckpoint && hasRunProfile, `${mode || "<empty>"} / ${action || "<empty>"} requires checkpoint.md Run Profile`) && ok;
+  ok = check("checkpoint required", !checkpointRequired || hasCheckpoint && hasRunProfile, `${action || "<empty>"} requires checkpoint.md Run Profile`) && ok;
   if (hasLoopState) ok = check("loop phase", loopPhases.has(phase), `invalid: ${phase || "<empty>"}`) && ok;
   if (hasCheckpoint) {
     ok = check("goal contract binding", samePath(goalContract, goalPath), "checkpoint Goal Contract does not match current task") && ok;
   }
-  ok = check("trigger contract binding", triggerContractAllowsMode(goalText, mode), `Goal Contract does not authorize ${mode || "<empty>"} trigger`) && ok;
   if (hasLatest || options.useLatest) ok = check("latest binding", latestMatchesTask(latest, taskDir, goalPath, checkpointPath, phase), "control-state/latest.md does not match current task") && ok;
-  if (mode === "verification-triggered") {
-    ok = check("verification-triggered binding", hasVerification && verificationMatchesTask(verification, goalPath), "checkpoint Verification missing, stale, final, or not routed to control-loop") && ok;
-  }
+  if (hasVerification) ok = check("verification binding", verificationMatchesTask(verification, goalPath), "checkpoint Verification missing, stale, or malformed") && ok;
   if (hasLoopState) ok = check("loop actionability", !isUnset(nextSlice) && !isNone(nextSlice) || !isUnset(stopCondition) && !isNone(stopCondition), "missing actionable Next Slice or Stop Condition") && ok;
   if (hasRunProfile) ok = check("evaluator route", field(runProfile, "Evaluator route").includes("$goal-verify"), "missing $goal-verify") && ok;
   if (hasMemory) ok = check("memory evidence", memoryAllowsEmpty(memory) || /(?:^|\n)[ \t]*(?:[-*][ \t]+)?Evidence:/i.test(memory) && /(?:^|\n)[ \t]*(?:[-*][ \t]+)?Confidence:/i.test(memory) && /(?:^|\n)[ \t]*(?:[-*][ \t]+)?Invalidation:/i.test(memory), "non-empty memory needs Evidence, Confidence, and Invalidation") && ok;
 
-  section("trigger event", "checked");
+  section("preflight", "checked");
   return ok;
-}
-
-function inferRunMode(goalText) {
-  const trigger = triggerContract(goalText);
-  if (/verification-triggered/i.test(trigger)) return "verification-triggered";
-  if (/webhook/i.test(trigger)) return "webhook";
-  if (/scheduled|schedule/i.test(trigger)) return "scheduled";
-  return "manual";
 }
 
 function actionRequiresProfile(action) {
@@ -278,26 +262,16 @@ function latestMatchesTask(latest, taskDir, goalPath, checkpointPath, phase) {
 }
 
 function verificationMatchesTask(verification, goalPath) {
-  return samePath(field(verification, "Goal Contract"), goalPath) &&
+  const verdict = field(verification, "Verdict");
+  const nextRoute = field(verification, "Next route");
+  const gap = field(verification, "Gap");
+  const bound = samePath(field(verification, "Goal Contract"), goalPath) &&
     !isUnset(field(verification, "Evidence")) &&
-    !isUnset(field(verification, "Verified at")) &&
-    /^NEXT_ITERATION$/i.test(field(verification, "Verdict")) &&
-    /^control-loop$/i.test(field(verification, "Next route")) &&
-    !isUnset(field(verification, "Gap")) &&
-    !isNone(field(verification, "Gap"));
-}
-
-function triggerContractAllowsMode(goalText, mode) {
-  const trigger = triggerContract(goalText);
-  if (mode === "manual") return /\bmanual\b/i.test(trigger);
-  if (mode === "verification-triggered") return /verification-triggered/i.test(trigger) && /Goal Contract|same goal|Next route/i.test(trigger);
-  if (mode === "scheduled") return /scheduled|schedule/i.test(trigger) && /source|id/i.test(trigger) && /stale|replay/i.test(trigger) && /Goal Contract|state/i.test(trigger);
-  if (mode === "webhook") return /webhook/i.test(trigger) && /source|id/i.test(trigger) && /dedupe|replay/i.test(trigger) && /payload/i.test(trigger) && /Goal Contract|state/i.test(trigger);
+    !isUnset(field(verification, "Verified at"));
+  if (!bound) return false;
+  if (/^NEXT_ITERATION$/i.test(verdict)) return /^control-loop$/i.test(nextRoute) && !isUnset(gap) && !isNone(gap);
+  if (/^PASS_TO_FINAL$/i.test(verdict)) return /^none$/i.test(nextRoute) && (isUnset(gap) || isNone(gap));
   return false;
-}
-
-function triggerContract(goalText) {
-  return field(goalText, "Trigger Contract") || sectionText(goalText, "Trigger Contract");
 }
 
 function checkRepo(target) {

@@ -149,14 +149,12 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Goal Contract",
     "control-state/latest.md",
     "global recovery index",
-    "Trigger Contract",
     "Autonomy level",
     "canonical",
     "Read Checkpoint",
     "Reference Routing",
     "State writes are checkpoints, not progress",
     "references/state-artifacts.md",
-    "references/trigger-autonomy.md",
     "references/completion-gates.md",
     "Loop State",
     "Memory",
@@ -164,11 +162,9 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Verification",
     "target",
     "claim boundary",
-    "### 1. Plan slice",
-    "### 2. Act",
-    "### 3. Sense and compare",
-    "### 4. Record and route",
-    "ITERATION_READY_FOR_VERIFY",
+    "## Boundaries",
+    "## Routes",
+    "PASS_TO_FINAL",
     "NEXT_ITERATION` with fixable `Gap`",
     "$goal-verify",
     "RETURN_TO_ALPHA_GOAL",
@@ -193,21 +189,6 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Verification Verdict",
     "## Latest Pointer",
     "Evidence, Confidence, and Invalidation"
-  ]],
-  ["control loop trigger and autonomy", "skills/control-loop/references/trigger-autonomy.md", [
-    "Trigger Contract",
-    "`manual`",
-    "`scheduled`",
-    "`webhook`",
-    "`verification-triggered`",
-    "Autonomy Ladder",
-    "`L1`: Suggest only",
-    "`L2`: Draft changes without applying",
-    "`L3`: Modify approved worktree and task-state; no commit/push",
-    "`L4`: Commit, push branch, and open/update PR/MR",
-    "`L5`: Merge/deploy only when explicitly authorized",
-    "If requested action exceeds the level",
-    "BLOCKED"
   ]],
   ["control loop completion gates", "skills/control-loop/references/completion-gates.md", [
     "Universal Completion Gates",
@@ -263,14 +244,13 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "control-state/latest.md",
     "contract status",
     "goal contract binding",
-    "verification-triggered binding",
     "NEXT_ITERATION",
     "loop actionability",
     "autonomy action ceiling",
     "latest binding",
     "checkpoint path",
-    "trigger",
-    "trigger event",
+    "verification binding",
+    "preflight",
     "requested action",
     "autonomy level",
     "checkpoint loop state",
@@ -442,16 +422,14 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
   const text = readIfFile(path.join(root, "skills/control-loop/SKILL.md"));
   const sectionOrder = [
     "## Execution Loop",
-    "## Execution Invariants",
-    "## Gates",
-    "## Preflight",
+    "## Boundaries",
     "## Reference Routing",
-    "## Iteration",
+    "## Routes",
   ];
   requireOrderedTerms("control-loop section order", text, sectionOrder, errors);
   requireOrderedTerms("control-loop execution pseudocode", markdownSection(text, "Execution Loop"), [
     "Run the loop as behavior, not paperwork",
-    "function control_loop(trigger):",
+    "function control_loop(request):",
     "native_goal = inspect_native_goal_if_available()",
     "do_not_call(create_goal)",
     "task = resolve_task",
@@ -468,13 +446,22 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
     "update_native_goal_lifecycle_if_allowed(native_goal, update_goal complete)",
     "return PASS_TO_FINAL",
   ], errors);
-  requireOrderedTerms("control-loop iteration order", markdownSection(text, "Iteration"), [
-    "### 1. Plan slice",
-    "### 2. Act",
-    "### 3. Sense and compare",
-    "### 4. Record and route",
-    "ITERATION_READY_FOR_VERIFY",
-    "After `$goal-verify`",
+  requireOrderedTerms("control-loop boundary rules", markdownSection(text, "Boundaries"), [
+    "accepted Goal Contract is canonical",
+    "control-loop` never creates or derives it",
+    "native goal objective",
+    "create_goal",
+    "update_goal complete",
+    "update_goal blocked",
+    "Do not mutate primary",
+    "$goal-verify",
+  ], errors);
+  requireOrderedTerms("control-loop routes", markdownSection(text, "Routes"), [
+    "PASS_TO_FINAL",
+    "NEXT_ITERATION",
+    "RETURN_TO_ALPHA_GOAL",
+    "BLOCKED",
+    "Stop/re-route",
   ], errors);
   for (const forbidden of [
     "Goal Contract, `run-profile.md`, `loop-state.md`, and `memory.md` exist or can be initialized only from authorized task records",
@@ -503,16 +490,6 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
     "## Evidence",
     "## Verification",
     "## Latest Pointer",
-  ], errors);
-  requireOrderedTerms("control-loop trigger autonomy reference", readIfFile(path.join(root, "skills/control-loop/references/trigger-autonomy.md")), [
-    "## Trigger Contract",
-    "`manual`",
-    "`scheduled`",
-    "`webhook`",
-    "`verification-triggered`",
-    "## Autonomy Ladder",
-    "`L1`",
-    "`L5`",
   ], errors);
   requireOrderedTerms("control-loop completion gates reference", readIfFile(path.join(root, "skills/control-loop/references/completion-gates.md")), [
     "## Universal Completion Gates",
@@ -658,12 +635,8 @@ function validateRuntimeScriptBehavior(root: string, errors: string[]): void {
     expectExit("mutation-preflight stale Goal Contract binding blocks when run-profile exists", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "stale-contract-binding"), 1, errors);
     writeTaskFixture(tmp, path.basename(root), "stale-latest", { latestTarget: "valid" });
     expectExit("mutation-preflight stale latest binding blocks when latest exists", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "stale-latest"), 1, errors);
-    writeTaskFixture(tmp, path.basename(root), "valid-verification-triggered", { runMode: "verification-triggered", triggerContract: "verification-triggered from checkpoint Verification; bind Goal Contract and same goal Gap with Next route control-loop", verificationVerdict: "NEXT_ITERATION", verificationNextRoute: "control-loop", verificationGap: "same-goal fixable fixture gap" });
-    expectExit("mutation-preflight verification-triggered task passes", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "valid-verification-triggered"), 0, errors);
-    writeTaskFixture(tmp, path.basename(root), "stale-verification-section", { runMode: "verification-triggered", triggerContract: "verification-triggered from checkpoint Verification; bind Goal Contract and same goal Gap with Next route control-loop", verificationTarget: "other-task", verificationVerdict: "NEXT_ITERATION", verificationNextRoute: "control-loop", verificationGap: "same-goal fixable fixture gap" });
+    writeTaskFixture(tmp, path.basename(root), "stale-verification-section", { verificationTarget: "other-task", verificationVerdict: "NEXT_ITERATION", verificationNextRoute: "control-loop", verificationGap: "same-goal fixable fixture gap" });
     expectExit("mutation-preflight stale Verification binding blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "stale-verification-section"), 1, errors);
-    writeTaskFixture(tmp, path.basename(root), "pass-verification-recovery", { runMode: "verification-triggered", triggerContract: "verification-triggered from checkpoint Verification; bind Goal Contract and same goal Gap with Next route control-loop", verificationVerdict: "PASS_TO_FINAL", verificationNextRoute: "none", verificationGap: "None" });
-    expectExit("mutation-preflight PASS verification cannot trigger recovery", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "pass-verification-recovery"), 1, errors);
     writeTaskFixture(tmp, path.basename(root), "autonomy-overreach", { requestedAction: "merge", autonomyLevel: "L3 Modify worktree" });
     expectExit("mutation-preflight autonomy action ceiling blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "autonomy-overreach"), 1, errors);
   } finally {
@@ -682,14 +655,13 @@ function expectExit(label: string, result: ReturnType<typeof spawnSync>, expecte
   }
 }
 
-function writeTaskFixture(tmp: string, workspace: string, task: string, options: { goalContract?: boolean; contractStatus?: string; issuedBy?: string; triggerContract?: string; runProfile?: boolean; loopState?: boolean; memory?: boolean; evidence?: boolean; verification?: boolean; latest?: boolean; runProfileGoalContract?: boolean; verificationFields?: boolean; runMode?: string; requestedAction?: string; autonomyLevel?: string; latestTarget?: string; verificationTarget?: string; verificationGap?: string; verificationVerdict?: string; verificationNextRoute?: string; defectRiskSweep?: string; unclaimedIssues?: string; negativeCases?: string; goalSatisfaction?: string; finalClaimAllowed?: string }): void {
+function writeTaskFixture(tmp: string, workspace: string, task: string, options: { goalContract?: boolean; contractStatus?: string; issuedBy?: string; runProfile?: boolean; loopState?: boolean; memory?: boolean; evidence?: boolean; verification?: boolean; latest?: boolean; runProfileGoalContract?: boolean; verificationFields?: boolean; requestedAction?: string; autonomyLevel?: string; latestTarget?: string; verificationTarget?: string; verificationGap?: string; verificationVerdict?: string; verificationNextRoute?: string; defectRiskSweep?: string; unclaimedIssues?: string; negativeCases?: string; goalSatisfaction?: string; finalClaimAllowed?: string }): void {
   const dir = path.join(tmp, workspace || "workspace", task);
   fs.mkdirSync(dir, { recursive: true });
   const goalPath = path.join(dir, "goal-contract.md");
   const goalContract = options.goalContract ?? true;
   const contractStatus = options.contractStatus ?? "accepted";
   const issuedBy = options.issuedBy ?? "alpha-goal";
-  const triggerContract = options.triggerContract ?? "manual";
   const runProfileEnabled = options.runProfile ?? true;
   const loopStateEnabled = options.loopState ?? true;
   const memoryEnabled = options.memory ?? true;
@@ -698,7 +670,6 @@ function writeTaskFixture(tmp: string, workspace: string, task: string, options:
   const latestEnabled = options.latest ?? true;
   const runProfileGoalContract = options.runProfileGoalContract ?? true;
   const verificationFields = options.verificationFields ?? true;
-  const runMode = options.runMode ?? "manual";
   const requestedAction = options.requestedAction ?? "modify-worktree";
   const autonomyLevel = options.autonomyLevel ?? "L3 Modify worktree";
   if (goalContract) fs.writeFileSync(goalPath, [
@@ -706,7 +677,6 @@ function writeTaskFixture(tmp: string, workspace: string, task: string, options:
     `Issued by: ${issuedBy}`,
     "Discovery notes: fixture",
     "Interview ledger: fixture",
-    `Trigger Contract: ${triggerContract}`,
     `Autonomy Level: ${autonomyLevel}`,
     "",
   ].join("\n"));
@@ -719,7 +689,7 @@ function writeTaskFixture(tmp: string, workspace: string, task: string, options:
   const finalClaimAllowed = options.finalClaimAllowed ?? "yes";
   const verificationVerdict = options.verificationVerdict ?? "PASS_TO_FINAL";
   const verificationNextRoute = options.verificationNextRoute ?? "none";
-  const loopPhase = runMode === "verification-triggered" ? "HARDENING" : "VERIFICATION";
+  const loopPhase = "VERIFICATION";
   const checkpointEnabled = runProfileEnabled || loopStateEnabled || memoryEnabled || evidenceEnabled || verificationEnabled || latestEnabled;
   if (!checkpointEnabled) {
     if (latestEnabled) writeLatestPointer(tmp, workspace, task, goalPath, "none", "IMPLEMENTATION", "none", options.latestTarget);
@@ -735,8 +705,6 @@ function writeTaskFixture(tmp: string, workspace: string, task: string, options:
   if (runProfileEnabled) checkpoint.push(
     "## Run Profile",
     "Rule: Controls execution only; must not expand, narrow, reinterpret, waive, or replace the Goal Contract.",
-    `Run mode: ${runMode}`,
-    "Trigger event: none",
     `Requested action: ${requestedAction}`,
     "Discovery source: goal-spec-only",
     "External side effects allowed: none",
@@ -807,7 +775,7 @@ function writeTaskFixture(tmp: string, workspace: string, task: string, options:
     "",
   ]));
   fs.writeFileSync(path.join(dir, "checkpoint.md"), checkpoint.join("\n"));
-  const latestRoute = runMode === "verification-triggered" ? verificationNextRoute : "none";
+  const latestRoute = "none";
   const latestPhase = loopPhase;
   if (latestEnabled) writeLatestPointer(tmp, workspace, task, goalPath, path.join(dir, "checkpoint.md"), latestPhase, latestRoute, options.latestTarget);
 }
