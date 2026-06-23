@@ -49,7 +49,7 @@ Record key points with concise critical thinking to `<Alpha Goal state root>/YYY
 
 ## Phase 2: Clarify with User
 
-Ground decisions in facts and observations, not habits, assumptions, current implementation, or prior solutions. Loop Deep Discussion until clarity score is above `0.9` and readiness gates pass.
+Ground clarification in facts and observations, not habits, assumptions, current implementation, or prior solutions. Loop Deep Discussion until clarity score is above `0.92` and readiness gates pass.
 
 ### 2.1 Prepare the next question
 
@@ -63,9 +63,9 @@ Use current task state:
 - brownfield context and active Assumption Stress Test mode
 
 Target the first blocking gate or lowest-scoring dimension. Prefer intent and boundaries before implementation details:
-- Stage 1: intent, outcome, scope, non-goals, decision boundaries
-- Stage 2: constraints, success criteria, acceptance evidence, authority, claim boundary
-- Stage 3: context/current facts, actuator boundary, sensor/observer, external/current facts
+- Ladder 1: intent, outcome, scope, non-goals, decision boundaries
+- Ladder 2: constraints, success criteria, acceptance evidence, authority, claim boundary
+- Ladder 3: context/current facts, actuator boundary, sensor/observer, external/current facts
 
 Pressure ladder after each answer:
 1. Ask for concrete example, counterexample, or evidence signal.
@@ -81,7 +81,9 @@ Ask User one high-leverage question per round. One question means one decision v
 
 Do not ask for discoverable facts. Ask only for user-owned decisions, credentials, permissions, external side effects, public claims, irreversible commitments, missing acceptance evidence, or unresolved source-of-truth conflicts.
 
-Use structured user-input tooling (`request_user_input` / equivalent) when available:
+Present options conversationally with your recommendation and reasoning.
+
+Use structured user-input tooling (`request_user_input` / equivalent) to get user feedback:
 
 ```text
 Round {n} | Target: {weakest_dimension} | Clarity: {score}%
