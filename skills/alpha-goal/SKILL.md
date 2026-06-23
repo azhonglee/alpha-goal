@@ -83,7 +83,7 @@ Do not ask for discoverable facts. Ask only for user-owned decisions, credential
 
 Present options conversationally with your recommendation and reasoning.
 
-Use structured user-input tooling (`request_user_input` / equivalent) to get user feedback:
+Use structured user-input tooling (`request_user_input` / equivalent) to get user feedback and present:
 
 ```text
 Round {n} | Target: {weakest_dimension} | Clarity: {score}%

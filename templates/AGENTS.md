@@ -30,7 +30,7 @@ Role prompts under `prompts/*.md` are narrower execution surfaces. They must fol
 - Use repository-local worktrees to isolate changes per goal/task batch. Create them under `<repo>/.worktrees/codex/<goal-slug>/` unless the repository already defines a stricter convention or the path is not technically usable.
 - In monorepos, create the worktree under the owning subrepo's `.worktrees/codex/<goal-slug>/`.
 - For cross-repo goals, keep one task-level Alpha Goal state root and record a repo manifest with each repo's role, authorized surfaces, worktree/branch, validation observer, integration evidence boundary, and delivery boundary.
-- Never edit/delete directly on main/master; always work in a worktree.
+- Never edit/delete directly on main/master; always work in a worktree from original branch.
 - Delete the worktree after PR/MR merge or local merge into main/master; do not proactively merge into main/master locally.
 
 ## Interaction Agreement
