@@ -1,60 +1,135 @@
 ---
 name: alpha-goal
-description: "Must use for any engineering/design/implementation/diagnose/repair requests; through interviewing user, clarify real intention/requirements, identify outcome, scope, decision boundaries, and design."
+description: "Must use for any engineering/design/implementation requests."
 ---
 
-# Alpha Goal
+# Mission
 
-`alpha-goal` owns workflow control for engineering/design/implementation/diagnose/repair goals. It discovers facts, clarifies user-owned decisions, writes the canonical Goal Contract, and routes to `$control-loop`.
+`alpha-goal` owns workflow control for goal definition.
 
-Delegated skills may observe, review, or evaluate, but must not control phase progression, redefine target/scope, set acceptance evidence, waive non-goals, decide authority, or make final/ready/complete claims.
+Its responsibility is:
+- discover facts
+- clarify user intent
+- identify outcome
+- identify scope
+- identify constraints
+- identify acceptance evidence
+- identify decision boundaries
+- produce the canonical Goal Contract
 
-**Must Execute phase to phase strictly whenever using this skill:**
+alpha-goal does not implement.
+alpha-goal does not verify completion.
+alpha-goal does not make final-ready or complete claims.
 
-```text
-Pre-flight -> Discovery -> Clarify with User -> Assumption Stress Test -> Final Design -> Ask for Confirmation
-```
+Only an accepted Goal Contract may be handed to `$control-loop`.
 
-`Clarify with User` is the core phase.
+Quick Pass:
+- skip only for concrete read-only fact lookup; use this skill when intent, scope, acceptance, or decision boundaries are involved.
 
-**Do Not Compact or Merge phases.**
+## Authority
 
-## Phase 0: Pre-flight
+The accepted Goal Contract is the only execution authority.
 
-1. Classify work type:
-   - `exploration`: skip only for concrete read-only fact lookup; use this skill when intent, scope, acceptance, or decision boundaries are involved.
-   - `design/implementation/maintenance`: follow all phases.
-   - `diagnose/repair`: start with Discovery. If root cause is not 100% confirmed, only run diagnostic probes or hypothesis-testing slices. Do not implement/design directly.
-   - `other`: ask for minimum details needed to classify.
-2. Split mixed work into sequenced items before routing.
-3. Resolve the Alpha Goal state root before writing runtime artifacts. Always use `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from stable workspace identity: `slug(repo_root or Goal Contract target workspace)`, never from the session directory.
-4. Match the task state by Goal Contract path, state directory, and trigger metadata. If matched, read `goal-contract.md`; if multiple or stale candidates remain after local state inspection, clarify task identity before execution.
+Evidence ≠ Authority
 
-## Phase 1: Discovery
+Evidence may influence a Goal Contract, but not define it.
 
-Trigger Discovery for vague, overloaded, brownfield, high-consequence, missing-acceptance, or user-says-"don't assume" requests. Skip only when target, acceptance evidence, non-goals, decision boundaries, authority, claim boundary, and Trigger Contract are explicit.
+Current implementation is evidence.
+Repository conventions are evidence.
+Past conversations are evidence.
 
-Before asking, complete minimum preflight: inspect applicable AGENTS/repo rules, README/getting-started/install docs, relevant specs/ADRs/contracts, target files/current implementation, local glossary/context, current branch/status when mutation may follow, and direct contradictions. If missing, name the missing observer instead of asking the user to summarize discoverable repo facts.
+None of them may override:
+- user decisions
+- approved specifications
+- accepted Goal Contract
 
-For deictic bug requests without a discoverable locator, inspect immediate context; if no failing command/log/issue/code pointer is discoverable, ask for the minimal reproducer or error signal before execution routing.
+Delegated agents may:
+- inspect
+- review
+- evaluate
 
-Use subagents for independent parallel subtasks when that improves throughput.
+Delegated agents may not:
+- redefine target
+- redefine scope
+- redefine acceptance evidence
+- redefine non-goals
+- redefine authority
+- approve execution
 
-Discovery critical thinking:
+## Hard Gates
+Do not hand off to `$control-loop` until every gate passes.
+
+### Goal Gates
+
+PASS only if:
+- Intent is explicit.
+- Outcome is explicit.
+- Scope is explicit.
+- Acceptance evidence is explicit.
+- Non-goals are explicit.
+- Decision boundary is explicit.
+- Claim boundary is explicit.
+- Authorization source is explicit.
+- Calirity_Score above 0.92.
+- A pressure pass is incomplete: at least one earlier answer must be revisited with evidence, assumption, or tradeoff follow-up
+
+Otherwise:
+
+RETURN = Clarify with User
+
+### Authority Gates
+
+PASS only if:
+- The user, issue, spec, contract, or repository policy authorizes execution.
+- No unresolved source-of-truth conflict exists.
+
+Otherwise:
+
+RETURN = Clarify with User
+
+### Context Gates
+
+PASS only if:
+- Relevant repository facts have been inspected.
+- Current implementation has been inspected when applicable.
+- External facts have been verified when required.
+
+Otherwise:
+
+RETURN = Discovery
+### Repair Gate
+For diagnose/repair work:
+PASS only if root cause is confirmed.
+Otherwise diagnostic probes only.
+
+## Workflow
+
+### Phase 0: Preflight
+1. Resolve the Alpha Goal state root before writing runtime artifacts. Always use `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from stable workspace identity: `slug(repo_root or Goal Contract target workspace)`, never from the session directory.
+2. Match the task state by Goal Contract path, state directory, and trigger metadata. If matched, read `goal-contract.md`; if multiple or stale candidates remain after local state inspection, clarify task identity before execution.
+
+### Phase 1: Discovery
+
+Inspect applicable AGENTS/repo rules, README/getting-started/install docs, relevant specs/ADRs/contracts, target files/current implementation, local glossary/context, current branch/status when mutation may follow, and direct contradictions. 
+
+Critical thinking:
 - Problem validity: is the phenomenon truly a problem; are causal claims reliable; what assumptions need testing?
 - Context sufficientness: what can be concluded now; what must be supplemented; what is must-have vs ideal?
 - Hidden issues: what deeper root cause, adjacent issue, or overlooked dependency may affect the goal?
 
-Record key points with concise critical thinking in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Discovery notes`. If the contract is still draft, set `Contract status: draft` and `Issued by: alpha-goal`, then keep target/scope fields unset until Final Design.
+Identify:
+- facts
+- conflicts
+- unknowns
+- dependencies
 
-## Phase 2: Clarify with User
+Record Details in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Discovery notes`. If the contract is still draft, set `Contract status: draft` and `Issued by: alpha-goal`, then keep target/scope fields unset until Final Design.
 
-Ground clarification in facts and observations, not habits, assumptions, current implementation, or prior solutions. Loop Deep Discussion until clarity score is above `0.92` and readiness gates pass.
+### Phase 2: Clarify
 
-### 2.1 Prepare the next question
+Loop Q&A until clarity score is above `0.92` and readiness gates pass.
 
-Generate one question that confirms a conflict, requests a decision, demands an example, exposes an assumption, forces a tradeoff, or tests a boundary-stressing scenario.
-
+#### 2.1 Ask User Question
 Use current task state:
 - original request and probable intent
 - prior Q&A
@@ -67,22 +142,13 @@ Target the first blocking gate or lowest-scoring dimension. Prefer intent and bo
 - Ladder 2: constraints, success criteria, acceptance evidence, authority, claim boundary
 - Ladder 3: context/current facts, actuator boundary, sensor/observer, external/current facts
 
-Pressure ladder after each answer:
-1. Ask for concrete example, counterexample, or evidence signal.
-2. Probe the hidden assumption or dependency.
-3. Force a boundary/tradeoff: what to reject, defer, or not do.
-4. If the answer stays symptom-level, reframe toward essence/root cause.
-
 `Non-goals` and `Decision Boundaries` are mandatory readiness gates. Keep revisiting them until explicit.
 
-### 2.2 Ask one question
+Ask User one high-leverage question per round. One question means one decision variable, that confirms a conflict, requests a decision, demands an example, exposes an assumption, forces a tradeoff, or tests a boundary-stressing scenario.
 
-Ask User one high-leverage question per round. One question means one decision variable.
-
-Do not ask for discoverable facts. Ask only for user-owned decisions, credentials, permissions, external side effects, public claims, irreversible commitments, missing acceptance evidence, or unresolved source-of-truth conflicts.
+Do not ask for discoverable facts.
 
 Present options conversationally with your recommendation and reasoning.
-
 Use structured user-input tooling (`request_user_input` / equivalent) to get user feedback and present:
 
 ```text
@@ -90,23 +156,33 @@ Round {n} | Target: {weakest_dimension} | Clarity: {score}%
 {question backed by clear context}
 ```
 
-### 2.3 Interpret answer
+Pressure ladder after each answer:
+1. Ask for concrete example, counterexample, or evidence signal.
+2. Probe the hidden assumption or dependency.
+3. Force a boundary/tradeoff: what to reject, defer, or not do.
+4. If the answer stays symptom-level, reframe toward essence/root cause.
 
-Treat the answer as navigation evidence, not requirements or authority. Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Interview ledger`.
+#### 2.2 Interpret answer
+
+Treat the answer as classified input, not automatic authority. Classify each answer before updating the Goal Contract.
+
+Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Interview ledger`.
 
 Treat repo language as evidence, not authority. Cross-check user claims against code/docs; name competing sources on conflict.
 
-Classify gaps:
-- `[from-code][auto-confirmed]` descriptive fact
-- `[from-code]` inferred fact needing confirmation
+Classify inputs:
+- `[from-code][auto-confirmed]` descriptive implementation fact
+- `[from-code]` inferred implementation fact needing confirmation
 - `[from-research]` external/current fact
-- `[from-user]` human decision
+- `[from-user]` explicit user-provided decision, constraint, acceptance signal, non-goal, authority, example, or clarification
 
 Auto-confirm only descriptive facts. Current-state facts cannot define desired behavior, requirements, acceptance evidence, non-goals, tradeoffs, or authority without explicit user request or authoritative spec/issue.
 
+Only explicit user decisions, explicit authorization, or authoritative specs/issues may update Goal Contract authority fields.
+
 If ambiguity depends on current external best practices, standards, APIs, dependency versions, laws, schedules, or prices, gather bounded fresh evidence first, then ask only for the decision boundary.
 
-### 2.4 Score and gate
+#### 2.3 Score
 
 Use weighted clarity:
 
@@ -122,19 +198,7 @@ Score each dimension in `[0.0, 1.0]` with justification and gap:
 - Success Criteria Clarity
 - Context Clarity for brownfield work
 
-Readiness Gate Check. Mark each gate `pass` only when explicit or source-backed: intent, outcome, scope, constraints, acceptance evidence, context/current facts, non-goals, decision boundaries, claim boundary, Trigger Contract, authorization source, source-of-truth conflicts, external/current facts, actuator boundary, and sensor/observer.
-
-Continue interviewing when:
-- Any readiness gate is unresolved.
-- `Non-goals` or `Decision Boundaries` are unresolved.
-- A pressure pass is incomplete: at least one earlier answer must be revisited with evidence, assumption, or tradeoff follow-up.
-- The next answer could materially change execution, acceptance, authority, or claim boundary.
-
-For qualitative, value-laden, multi-party, weakly quantified, or UX/performance/quality-adjective objectives, create Indicator Handoff: primary metric, guardrail metric, tradeoff owner, and evidence boundary.
-
-Before closing Clarify, pressure-test the interpretation with at least one boundary scenario from inspected facts. If scope, acceptance, authority, or claim boundary changes, return to `2.1`.
-
-### 2.5 Record and Cycle-Control
+#### 2.4 Record and Cycle-Control
 
 Do not offer early exit before one explicit assumption probe and one persistent follow-up. Max 5 rounds per dimension; after that, proceed with warnings only when further questions would not change execution.
 
@@ -142,7 +206,7 @@ For cross-repo framing, keep one task-level Alpha Goal state root and record a r
 
 If target, scope, authority, source reference, non-goals, acceptance evidence, decision boundary, actuator/sensor boundary, Trigger Contract, or claim boundary is wrong or unclear, keep Clarify active.
 
-## Phase 3: Assumption Stress Test
+### Phase 3: Assumption Stress Test
 
 Use each applicable mode once; if none applies, record why:
 - **Contrarian**: challenge a core assumption.
@@ -151,55 +215,39 @@ Use each applicable mode once; if none applies, record why:
 
 Track used modes in state to prevent repetition.
 
-## Phase 4: Final Design
+### Phase 4: Goal Contract
 
-Write the design to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md`; copy to `docs/specs/YYYYMMDD-<TaskName>.md` when useful or required by repo convention.
+Write the Goal Contract to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md`; copy to `docs/specs/YYYYMMDD-<TaskName>.md` when useful or required by repo convention.
 The state-root `goal-contract.md` is canonical. Repo specs are mirrors or references only; conflicts route back to `alpha-goal`.
 Keep `Contract status: draft` until user confirmation or an explicit workspace/user contract authorizes autonomous launch. `$control-loop` may execute only an accepted Goal Contract.
 
-Design Content Must Include:
+Required Content:
 - Contract status [contract_status]
 - Issued by [issued_by]
 - Technical Context [context]
-- Discovery notes [discovery_notes]
-- Interview ledger [interview_ledger]
 - Intent [intent]
-- Root Cause [root_cause] optional, only for repair design
 - Outcome [outcome]
 - Scope [scope]
-- Repo surfaces [repo_surfaces]
 - Constraints [constraints]
-- Assumptions + resolutions [assumptions_resolutions]
 - Acceptance evidence [acceptance_evidence]
-- Dependency/integration order [repo_integration_order]
 - Non-goals [non_goal]
 - Decision boundary [decision_boundary]
 - Claim boundary [claim_boundary]
-- Trigger Contract [trigger_contract]
-- Handoff ledger [ledger]
+- Authorization Source [authorization_source]
 
-### Trigger Contract
+Optional Content:
+- Root Cause [root_cause] optional, only for repair design
+- Discovery notes [discovery_notes]
+- Interview ledger [interview_ledger]
+- Repo surfaces [repo_surfaces]
+- Assumptions + resolutions [assumptions_resolutions]
+- Dependency/integration order [repo_integration_order]
 
-Define run behavior, not just a label:
-- `manual`: resume from the Goal Contract unless the user explicitly overrides; `control-loop` may create `checkpoint.md` only when recovery needs it.
-- `scheduled`: the Trigger Contract must name the schedule source/id, replay/staleness rule, and existing Goal Contract mapping; do not discover new scope or authority.
-- `webhook`: map the event to an existing authorized Goal Contract from the Trigger Contract; the Trigger Contract must name event source/id, dedupe key, authorized payload-to-state mapping, and replay/staleness rule; if no match, return to `alpha-goal`.
-- `verification-triggered`: resume only when latest verification evidence matches the Goal Contract path, has `Next route: control-loop`, and the Gap is fixable inside the same goal.
+#### Artifact Review
 
-### Artifact policy
+Self-review the Goal Contract for completion and reasonability. Use subagents for independent review when useful, then fix accepted findings.
 
-`alpha-goal` writes only `goal-contract.md`. The contract contains:
-- `Contract status`: `draft` until confirmed or explicitly pre-authorized; `accepted` before any `$control-loop` handoff.
-- `Issued by`: `alpha-goal`; other issuers are not authoritative for `$control-loop`.
-- `Discovery notes`: concise discovered facts, contradictions, and critical thinking; reference long logs instead of pasting them.
-- `Interview ledger`: clarification rounds, user-owned decisions, and unresolved boundary gaps; keep it as evidence ledger, not executable authority.
-- Canonical target, scope, non-goals, acceptance evidence, claim boundary, Trigger Contract, and handoff ledger.
-
-Do not create separate discovery, interview, loop, memory, evidence, verification, or latest-pointer files from `alpha-goal`. `$control-loop` or `$goal-verify` may create a single task `checkpoint.md` only when conditional execution, recovery, evidence handoff, or verification requires it. A global `control-state/latest.md` may exist only as a recovery index to an accepted Goal Contract, not as a stage artifact.
-
-Self-review the design for completion and reasonability. Use subagents for independent review when useful, then fix accepted findings.
-
-## Phase 5: Ask for Confirmation
+### Phase 5: Ask for Confirmation
 
 Show Summary of Design. Include `Root Cause` only for repair designs.
 
@@ -220,10 +268,31 @@ Design Summary
 | Non-goals | |
 | Decision boundary | |
 | Claim boundary | |
-| Trigger contract | |
+| Authorization Source | |
 | Blocking gates | |
 | Ledger | |
 | Next | |
 ```
 
 Use `request_user_input` to ask for approve/launch, refine, or reject unless an explicit workspace/user contract already authorizes autonomous launch. Overrides may select an authorized pending slice only; target, scope, phase, claim, or Trigger Contract changes require Goal Contract update and gates. On approval or pre-authorized launch, set `Contract status: accepted` and hand off to `$control-loop`.
+
+## Before Handoff Checklist
+
+```markdown
+[ ] Goal Contract exists
+[ ] Contract status = accepted
+[ ] Issued by = alpha-goal
+[ ] Intent explicit
+[ ] Outcome explicit
+[ ] Scope explicit
+[ ] Constraints explicit
+[ ] Acceptance evidence explicit
+[ ] Non-goals explicit
+[ ] Decision boundary explicit
+[ ] Claim boundary explicit
+[ ] Authorization source explicit
+[ ] Repository inspection completed
+[ ] External facts verified
+[ ] Source-of-truth conflicts resolved
+[ ] Root cause confirmed (repair only)
+```
