@@ -134,7 +134,7 @@ For qualitative, value-laden, multi-party, weakly quantified, or UX/performance/
 
 Before closing Clarify, pressure-test the interpretation with at least one boundary scenario from inspected facts. If scope, acceptance, authority, or claim boundary changes, return to `2.1`.
 
-### 2.5 Record and route
+### 2.5 Record and Cycle-Control
 
 Do not offer early exit before one explicit assumption probe and one persistent follow-up. Max 5 rounds per dimension; after that, proceed with warnings only when further questions would not change execution.
 
