@@ -114,7 +114,6 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Acceptance evidence",
     "Claim boundary",
     "Trigger Contract",
-    "Autonomy Level",
     "Match the task state",
     "Contract status",
     "Discovery notes",
@@ -176,7 +175,6 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Goal Contract",
     "control-state/latest.md",
     "global recovery index",
-    "Autonomy level",
     "canonical",
     "Read Checkpoint",
     "Reference Routing",
@@ -187,13 +185,13 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Memory",
     "Evidence",
     "Verification",
-    "target",
+    "outcome",
     "claim boundary",
     "## Boundaries",
     "## Slice Execution",
     "## Routes",
     "PASS_TO_FINAL",
-    "NEXT_ITERATION` with fixable `Gap`",
+    "verification.Next_route == control-loop",
     "$goal-verify",
     "RETURN_TO_ALPHA_GOAL",
     "BLOCKED",
@@ -236,7 +234,7 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "NEXT_ITERATION",
     "fixable evidence",
     "same-goal fixable",
-    "target, scope, authority",
+    "outcome, scope, authority",
     "permission, tool, data, environment, credential",
     "checkpoint",
     "execution context only",
@@ -274,13 +272,12 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "goal contract binding",
     "NEXT_ITERATION",
     "loop actionability",
-    "autonomy action ceiling",
+    "checkpoint required",
     "latest binding",
     "checkpoint path",
     "verification binding",
     "preflight",
     "requested action",
-    "autonomy level",
     "checkpoint loop state",
     "checkpoint memory",
     "evaluator route"
@@ -515,7 +512,7 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
     "record(external_side_effects and cleanup_or_rollback_containment_actions)",
     "function review_slice_outcome(slice, outcome, evidence, goal, checkpoint):",
     "evidence.is_fresh",
-    "slice.complete only_if evidence.changes_or_confirms(goal.target_state)",
+    "slice.complete only_if evidence.changes_or_confirms(goal.outcome)",
     "deny(slice_complete_or_success_claim)",
     "inspect(material_defect_risk_surface(slice, goal))",
     "limit_claim_to_strongest_direct_evidence_and_checked_surface",
@@ -527,14 +524,14 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
   requireOrderedTerms("control-loop routes", markdownSection(text, "Routes"), [
     "PASS_TO_FINAL",
     "NEXT_ITERATION",
-    "verification.Gap.kind == same_goal_fixable",
-    "verification.Gap.kind == scope_or_authority_change",
-    "verification.Gap.kind == missing_permission_or_external_state",
-    "unclassified verifier gap cannot drive execution",
-    "RETURN_TO_ALPHA_GOAL",
-    "BLOCKED",
+    "verification.Next_route == control-loop",
+    "verification.Next_route == alpha-goal",
+    "verification.Next_route == BLOCKED",
+    "unrecognized verifier route cannot drive execution",
+    "if missing(permission or tool or data or environment or credential or user_owned_decision):",
+    "return BLOCKED",
     "Stop/re-route",
-    "changed_or_unclear(target or scope or authority or source_reference or acceptance_evidence or non_goal or decision_boundary or actuator_boundary or Trigger_Contract or Autonomy_level or claim_boundary)",
+    "changed_or_unclear(outcome or scope or authority or source_reference or acceptance_evidence or non_goal or decision_boundary or Trigger_Contract or claim_boundary)",
     "changed_or_unclear(run_profile or risk or assumption or stop_condition or user_owned_decision or new_subsystem_or_skill or edits_beyond_approved_boundary)",
     "if user_or_goal_decision_required:",
     "return RETURN_TO_ALPHA_GOAL",
@@ -543,9 +540,13 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
   ], errors);
   for (const forbidden of [
     "Goal Contract, `run-profile.md`, `loop-state.md`, and `memory.md` exist or can be initialized only from authorized task records",
+    "verification." + "Gap" + ".kind",
+    "verification." + "gap",
+    "same_" + "goal_gap",
+    "changed_target_scope_" + "authority_or_claim",
     "Before `ITERATION_READY_FOR_VERIFY`, update:",
     "## Trigger Contract",
-    "## Autonomy Ladder",
+    "## " + "Auton" + "omy " + "Ladder",
     "## Universal Completion Gates",
     "## State I/O Contract",
     "## Artifact Schemas",
@@ -602,9 +603,9 @@ function requireOrderedTerms(label: string, text: string, terms: string[], error
 
 function validateSchemaConsistency(root: string, errors: string[]): void {
   const alpha = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
-  const goalContractFields = ["Contract status", "Issued by", "Technical Context", "Discovery notes", "Interview ledger", "Intent", "Outcome", "Scope", "Repo surfaces", "Acceptance evidence", "Non-goals", "Decision boundary", "Claim boundary", "Trigger Contract", "Autonomy Level"];
+  const goalContractFields = ["Contract status", "Issued by", "Technical Context", "Discovery notes", "Interview ledger", "Intent", "Outcome", "Scope", "Repo surfaces", "Acceptance evidence", "Non-goals", "Decision boundary", "Claim boundary", "Trigger Contract"];
   for (const term of goalContractFields) if (!alpha.includes(term)) errors.push(`alpha Goal Contract content missing field: ${term}`);
-  const designFields = ["Contract status", "Intent", "Root Cause", "Outcome", "Scope", "Repo surfaces", "Constraints", "Acceptance evidence", "Dependency/integration order", "Non-goals", "Decision boundary", "Claim boundary", "Trigger contract", "Autonomy level", "Blocking gates", "Ledger", "Next"];
+  const designFields = ["Contract status", "Intent", "Root Cause", "Outcome", "Scope", "Repo surfaces", "Constraints", "Acceptance evidence", "Dependency/integration order", "Non-goals", "Decision boundary", "Claim boundary", "Trigger contract", "Blocking gates", "Ledger", "Next"];
   const designStart = Math.max(0, alpha.toLowerCase().indexOf("design summary"));
   const designScoped = alpha.slice(designStart).toLowerCase();
   const designPos = designFields.map(field => designScoped.indexOf(`| ${field.toLowerCase()} |`));
@@ -669,13 +670,15 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   if (!installDoc.includes(HOOKS_TEMPLATE)) errors.push("INSTALL.md missing hooks template behavior");
   if (!installDoc.includes("codex-compact-skill-recovery")) errors.push("INSTALL.md missing legacy hook migration behavior");
   if (/tmp_codex_home\/skills\/[^"`\s]+\/scripts\//.test(installDoc)) errors.push("INSTALL.md smoke test must not require runtime skill scripts");
+  if (!installDoc.includes("git rev-parse --show-toplevel")) errors.push("INSTALL.md smoke test must derive workspace slug from repo root");
+  if (/basename "\$PWD"|\$\(basename "\$PWD"\)/.test(installDoc)) errors.push("INSTALL.md smoke test must not derive state root from current session directory");
   for (const term of ["set -euo pipefail", "export CODEX_HOME", "Contract status: accepted", "Discovery notes", "Interview ledger", "Trigger Contract:", "goal-contract", "checkpoint", "control-state/latest.md", "verification-triggered recovery", "15,000 word+punctuation units", "without over-compressing", "without requiring runtime skill scripts", "Run Profile, Loop State, Verification, and Evidence"]) if (!installDoc.includes(term)) errors.push(`INSTALL.md missing persistent-loop term: ${term}`);
   const manifest = readIfFile(path.join(root, "MANIFEST.md"));
   for (const name of REQUIRED_SKILL_NAMES) if (!manifest.includes(`skills/${name}/`)) errors.push(`MANIFEST.md missing public skill directory: ${name}`);
   if (!manifest.includes(HOOKS_TEMPLATE) || !manifest.includes(COMPACT_RECOVERY_HOOK_MARKER)) errors.push("MANIFEST.md missing hooks template marker");
   if (!manifest.includes("marker family") || !manifest.includes("codex-compact-skill-recovery")) errors.push("MANIFEST.md missing hook upgrade strategy");
   if (!manifest.includes("act or harden authorized slices")) errors.push("MANIFEST.md must describe control-loop as execution-first");
-  for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "Trigger Contract", "Autonomy Level", "global recovery index", "invalidation", "15,000 word+punctuation units"]) if (!manifest.includes(term)) errors.push(`MANIFEST.md missing persistent-loop term: ${term}`);
+  for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "Trigger Contract", "global recovery index", "invalidation", "15,000 word+punctuation units"]) if (!manifest.includes(term)) errors.push(`MANIFEST.md missing persistent-loop term: ${term}`);
   const templateAgents = readIfFile(path.join(root, "templates/AGENTS.md"));
   if (/clearified/i.test(templateAgents)) errors.push("templates/AGENTS.md contains misspelling: clearified");
   if (!templateAgents.includes("explicit user feedback, accepted contracts, or source-backed task records")) errors.push("templates/AGENTS.md missing autonomous execution clarity sources");
@@ -708,8 +711,8 @@ function validateRuntimeScriptBehavior(root: string, errors: string[]): void {
     expectExit("mutation-preflight incomplete Goal Contract blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "incomplete-contract"), 1, errors);
     writeTaskFixture(tmp, path.basename(root), "latest-none-valid", { runProfile: false, loopState: false, memory: false, evidence: false, verification: false, latest: true });
     expectExit("mutation-preflight latest Checkpoint none passes", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "latest-none-valid"), 0, errors);
-    writeTaskFixture(tmp, path.basename(root), "open-pr-no-checkpoint", { runProfile: false, loopState: false, memory: false, evidence: false, verification: false, latest: false, autonomyLevel: "L4 Open PR" });
-    expectExit("mutation-preflight L4 action without checkpoint blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "open-pr-no-checkpoint", "--requested-action", "open-pr"), 1, errors);
+    writeTaskFixture(tmp, path.basename(root), "open-pr-no-checkpoint", { runProfile: false, loopState: false, memory: false, evidence: false, verification: false, latest: false });
+    expectExit("mutation-preflight open-pr action without checkpoint blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "open-pr-no-checkpoint", "--requested-action", "open-pr"), 1, errors);
     writeTaskFixture(tmp, path.basename(root), "side-effect-no-checkpoint", { runProfile: false, loopState: false, memory: false, evidence: false, verification: false, latest: false });
     expectExit("mutation-preflight side effect without checkpoint blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "side-effect-no-checkpoint", "--external-side-effects", "deploy"), 1, errors);
 
@@ -724,8 +727,6 @@ function validateRuntimeScriptBehavior(root: string, errors: string[]): void {
     expectExit("mutation-preflight stale Verification binding blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "stale-verification-section"), 1, errors);
     writeTaskFixture(tmp, path.basename(root), "discovery-loop-phase", { loopPhase: "DISCOVERY" });
     expectExit("mutation-preflight discovery loop phase blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "discovery-loop-phase"), 1, errors);
-    writeTaskFixture(tmp, path.basename(root), "autonomy-overreach", { requestedAction: "merge", autonomyLevel: "L3 Modify worktree" });
-    expectExit("mutation-preflight autonomy action ceiling blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "autonomy-overreach"), 1, errors);
     const primaryRepo = makePrimaryBranchRepo(tmp);
     writeTaskFixture(tmp, path.basename(root), "primary-branch-target", { runProfile: false, loopState: false, memory: false, evidence: false, verification: false, latest: false });
     expectExit("mutation-preflight primary branch target blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "primary-branch-target", primaryRepo), 1, errors);
@@ -745,7 +746,7 @@ function expectExit(label: string, result: ReturnType<typeof spawnSync>, expecte
   }
 }
 
-function writeTaskFixture(tmp: string, workspace: string, task: string, options: { goalContract?: boolean; contractStatus?: string; issuedBy?: string; completeGoalFields?: boolean; runProfile?: boolean; loopState?: boolean; memory?: boolean; evidence?: boolean; verification?: boolean; latest?: boolean; runProfileGoalContract?: boolean; verificationFields?: boolean; requestedAction?: string; autonomyLevel?: string; loopPhase?: string; latestTarget?: string; verificationTarget?: string; verificationGap?: string; verificationVerdict?: string; verificationNextRoute?: string; defectRiskSweep?: string; unclaimedIssues?: string; negativeCases?: string; goalSatisfaction?: string; finalClaimAllowed?: string }): void {
+function writeTaskFixture(tmp: string, workspace: string, task: string, options: { goalContract?: boolean; contractStatus?: string; issuedBy?: string; completeGoalFields?: boolean; runProfile?: boolean; loopState?: boolean; memory?: boolean; evidence?: boolean; verification?: boolean; latest?: boolean; runProfileGoalContract?: boolean; verificationFields?: boolean; requestedAction?: string; loopPhase?: string; latestTarget?: string; verificationTarget?: string; verificationGap?: string; verificationVerdict?: string; verificationNextRoute?: string; defectRiskSweep?: string; unclaimedIssues?: string; negativeCases?: string; goalSatisfaction?: string; finalClaimAllowed?: string }): void {
   const dir = path.join(tmp, workspace || "workspace", task);
   fs.mkdirSync(dir, { recursive: true });
   const goalPath = path.join(dir, "goal-contract.md");
@@ -762,13 +763,11 @@ function writeTaskFixture(tmp: string, workspace: string, task: string, options:
   const runProfileGoalContract = options.runProfileGoalContract ?? true;
   const verificationFields = options.verificationFields ?? true;
   const requestedAction = options.requestedAction ?? "modify-worktree";
-  const autonomyLevel = options.autonomyLevel ?? "L3 Modify worktree";
   const goalContractLines = [
     `Contract status: ${contractStatus}`,
     `Issued by: ${issuedBy}`,
     "Discovery notes: fixture",
     "Interview ledger: fixture",
-    `Autonomy Level: ${autonomyLevel}`,
   ];
   if (completeGoalFields) goalContractLines.splice(4, 0,
     "Technical Context: fixture context",
@@ -817,7 +816,6 @@ function writeTaskFixture(tmp: string, workspace: string, task: string, options:
     "External side effects allowed: none",
     "Human checkpoint: none",
     "Evaluator route: $goal-verify before final claim",
-    `Autonomy level: ${autonomyLevel}`,
     "",
   );
   if (loopStateEnabled) checkpoint.push(

@@ -22,7 +22,6 @@ const requiredGoalContractFields = [
   "Decision boundary",
   "Claim boundary",
   "Trigger Contract",
-  "Autonomy Level",
   "Handoff ledger",
 ];
 
@@ -201,9 +200,9 @@ function checkTaskState(taskDir, stateRoot, options) {
   ok = check("contract issuer", /^alpha-goal$/i.test(field(goalText, "Issued by")), `invalid issuer: ${field(goalText, "Issued by") || "<empty>"}`) && ok;
 
   if (hasCheckpoint) ok = requireFields("checkpoint", checkpointHeader, ["Goal Contract", "Updated at"], false) && ok;
-  else section("checkpoint", "absent; plain manual L1-L3 work may execute from Goal Contract");
+  else section("checkpoint", "absent; plain manual work may execute from Goal Contract");
 
-  if (hasRunProfile) ok = requireFields("checkpoint run profile", runProfile, ["Requested action", "Discovery source", "External side effects allowed", "Human checkpoint", "Evaluator route", "Autonomy level"], true) && ok;
+  if (hasRunProfile) ok = requireFields("checkpoint run profile", runProfile, ["Requested action", "Discovery source", "External side effects allowed", "Human checkpoint", "Evaluator route"], true) && ok;
   else section("checkpoint run profile", "absent unless action/side-effect requires it");
 
   if (hasLoopState) {
@@ -227,7 +226,6 @@ function checkTaskState(taskDir, stateRoot, options) {
   }
 
   const action = hasRunProfile ? field(runProfile, "Requested action") : options.requestedAction;
-  const autonomy = hasRunProfile ? field(runProfile, "Autonomy level") : field(goalText, "Autonomy Level");
   const phase = field(loopState, "Current Phase") || field(latest, "Current Phase");
   const goalContract = field(checkpointHeader, "Goal Contract");
   const nextSlice = field(loopState, "Next Slice");
@@ -243,8 +241,6 @@ function checkTaskState(taskDir, stateRoot, options) {
 
   if (hasRunProfile) ok = check("requested action", requestedActions.has(action), `invalid: ${action || "<empty>"}`) && ok;
   if (!hasRunProfile && action) ok = check("requested action", requestedActions.has(action), `invalid: ${action || "<empty>"}`) && ok;
-  ok = check("autonomy level", /^L[1-5]\b/.test(autonomy), `invalid: ${autonomy || "<empty>"}`) && ok;
-  if (action) ok = check("autonomy action ceiling", actionAllowedByLevel(action, autonomy), `${action || "<empty>"} exceeds ${autonomy || "<empty>"}`) && ok;
   ok = check("checkpoint required", !checkpointRequired || hasCheckpoint && hasRunProfile, `${action || "<empty>"} requires checkpoint.md Run Profile`) && ok;
   if (hasLoopState) ok = check("loop phase", loopPhases.has(phase), `invalid: ${phase || "<empty>"}`) && ok;
   if (hasCheckpoint) {
@@ -262,12 +258,6 @@ function checkTaskState(taskDir, stateRoot, options) {
 
 function actionRequiresProfile(action) {
   return ["commit", "push", "open-pr", "merge"].includes(action);
-}
-
-function actionAllowedByLevel(action, level) {
-  const ranks = { suggest: 1, draft: 2, "modify-worktree": 3, commit: 4, push: 4, "open-pr": 4, merge: 5 };
-  const match = level.match(/^L([1-5])\b/);
-  return !!match && (ranks[action] ?? 99) <= Number(match[1]);
 }
 
 function repoRoot(cwd) {

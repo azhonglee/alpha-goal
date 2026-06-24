@@ -41,15 +41,15 @@ Read checkpoint `Run Profile` when present, referenced, or required by control-l
 - Do not repair during verification; route back instead.
 - Final wording must not exceed the highest evidence-supported boundary.
 - Do not narrow the claim as a successful outcome. If evidence or defect/risk sweep cannot support the proposed claim, record the gap and return `NEXT_ITERATION`.
-- A run profile cannot expand, narrow, reinterpret, waive, or replace Goal Contract scope, authority, acceptance evidence, non-goals, Trigger Contract, Autonomy level, or claim boundary. On conflict, verify against the Goal Contract and route back.
-- Missing evidence for required checkpoint run profile, named evaluators, evaluator route, trigger behavior, autonomy gate, required Loop State updates, required Memory updates, or required defect/risk sweep is a gap for handoff or final claims.
+- A run profile cannot expand, narrow, reinterpret, waive, or replace Goal Contract scope, authority, acceptance evidence, non-goals, Trigger Contract, or claim boundary. On conflict, verify against the Goal Contract and route back.
+- Missing evidence for required checkpoint run profile, named evaluators, evaluator route, trigger behavior, action-authority gate, required Loop State updates, required Memory updates, or required defect/risk sweep is a gap for handoff or final claims.
 
 ## Verdicts
 
 - `PASS_TO_FINAL`: evidence proves goal satisfaction and the defect/risk sweep found no material unhandled issue in the checked surface; next route is `none`.
 - `NEXT_ITERATION`: goal satisfaction, evidence coverage, claim boundary, or defect/risk sweep does not prove the proposed final state. Choose next route by the Gap:
   - `control-loop` only for same-goal fixable evidence, test, edge, compatibility, cleanup, required checkpoint Loop State, required checkpoint Memory, defect/risk, or verification-gap hardening.
-  - `alpha-goal` when target, scope, authority, source reference, acceptance evidence, non-goal, decision boundary, actuator boundary, Trigger Contract, Autonomy level, claim boundary, or required review surface is wrong or unclear.
+  - `alpha-goal` when outcome, scope, authority, source reference, acceptance evidence, non-goal, decision boundary, Trigger Contract, claim boundary, or required review surface is wrong or unclear.
   - `BLOCKED` when permission, tool, data, environment, credential, or user-owned decision is missing.
 
 The Gap must be specific enough for `$control-loop` to choose the next slice, and to set checkpoint `Loop State` Next Slice when persistent recovery is needed, without reinterpreting the Goal Contract.

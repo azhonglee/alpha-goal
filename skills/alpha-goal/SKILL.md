@@ -32,7 +32,7 @@ Pre-flight -> Discovery -> Clarify with User -> Assumption Stress Test -> Final 
 
 ## Phase 1: Discovery
 
-Trigger Discovery for vague, overloaded, brownfield, high-consequence, missing-acceptance, or user-says-"don't assume" requests. Skip only when target, acceptance evidence, non-goals, decision boundaries, authority, claim boundary, Trigger Contract, and Autonomy Level are explicit.
+Trigger Discovery for vague, overloaded, brownfield, high-consequence, missing-acceptance, or user-says-"don't assume" requests. Skip only when target, acceptance evidence, non-goals, decision boundaries, authority, claim boundary, and Trigger Contract are explicit.
 
 Before asking, complete minimum preflight: inspect applicable AGENTS/repo rules, README/getting-started/install docs, relevant specs/ADRs/contracts, target files/current implementation, local glossary/context, current branch/status when mutation may follow, and direct contradictions. If missing, name the missing observer instead of asking the user to summarize discoverable repo facts.
 
@@ -122,7 +122,7 @@ Score each dimension in `[0.0, 1.0]` with justification and gap:
 - Success Criteria Clarity
 - Context Clarity for brownfield work
 
-Readiness Gate Check. Mark each gate `pass` only when explicit or source-backed: intent, outcome, scope, constraints, acceptance evidence, context/current facts, non-goals, decision boundaries, claim boundary, Trigger Contract, Autonomy Level, authorization source, source-of-truth conflicts, external/current facts, actuator boundary, and sensor/observer.
+Readiness Gate Check. Mark each gate `pass` only when explicit or source-backed: intent, outcome, scope, constraints, acceptance evidence, context/current facts, non-goals, decision boundaries, claim boundary, Trigger Contract, authorization source, source-of-truth conflicts, external/current facts, actuator boundary, and sensor/observer.
 
 Continue interviewing when:
 - Any readiness gate is unresolved.
@@ -140,7 +140,7 @@ Do not offer early exit before one explicit assumption probe and one persistent 
 
 For cross-repo framing, keep one task-level Alpha Goal state root and record a repo manifest: repo path/name, role, authorization source, allowed change surfaces, non-goals, branch/worktree expectation, validation observer, delivery boundary, and dependency/integration order.
 
-If target, scope, authority, source reference, non-goals, acceptance evidence, decision boundary, actuator/sensor boundary, Trigger Contract, Autonomy Level, or claim boundary is wrong or unclear, keep Clarify active.
+If target, scope, authority, source reference, non-goals, acceptance evidence, decision boundary, actuator/sensor boundary, Trigger Contract, or claim boundary is wrong or unclear, keep Clarify active.
 
 ## Phase 3: Assumption Stress Test
 
@@ -176,7 +176,6 @@ Design Content Must Include:
 - Decision boundary [decision_boundary]
 - Claim boundary [claim_boundary]
 - Trigger Contract [trigger_contract]
-- Autonomy Level [autonomy_level]
 - Handoff ledger [ledger]
 
 ### Trigger Contract
@@ -187,17 +186,6 @@ Define run behavior, not just a label:
 - `webhook`: map the event to an existing authorized Goal Contract from the Trigger Contract; the Trigger Contract must name event source/id, dedupe key, authorized payload-to-state mapping, and replay/staleness rule; if no match, return to `alpha-goal`.
 - `verification-triggered`: resume only when latest verification evidence matches the Goal Contract path, has `Next route: control-loop`, and the Gap is fixable inside the same goal.
 
-### Autonomy Ladder
-
-Set one level in the Goal Contract:
-- `L1 Suggest only`: no file writes except task-state notes.
-- `L2 Draft changes`: propose patches, do not apply repo edits.
-- `L3 Modify worktree`: edit approved worktree and task-state; no commit/push.
-- `L4 Open PR`: commit, push branch, open/update PR/MR.
-- `L5 Merge automatically`: merge/deploy only when explicitly authorized.
-
-Requested actions above the current level are denied and routed to user confirmation or blocker.
-
 ### Artifact policy
 
 `alpha-goal` writes only `goal-contract.md`. The contract contains:
@@ -205,7 +193,7 @@ Requested actions above the current level are denied and routed to user confirma
 - `Issued by`: `alpha-goal`; other issuers are not authoritative for `$control-loop`.
 - `Discovery notes`: concise discovered facts, contradictions, and critical thinking; reference long logs instead of pasting them.
 - `Interview ledger`: clarification rounds, user-owned decisions, and unresolved boundary gaps; keep it as evidence ledger, not executable authority.
-- Canonical target, scope, non-goals, acceptance evidence, claim boundary, Trigger Contract, Autonomy Level, and handoff ledger.
+- Canonical target, scope, non-goals, acceptance evidence, claim boundary, Trigger Contract, and handoff ledger.
 
 Do not create separate discovery, interview, loop, memory, evidence, verification, or latest-pointer files from `alpha-goal`. `$control-loop` or `$goal-verify` may create a single task `checkpoint.md` only when conditional execution, recovery, evidence handoff, or verification requires it. A global `control-state/latest.md` may exist only as a recovery index to an accepted Goal Contract, not as a stage artifact.
 
@@ -233,10 +221,9 @@ Design Summary
 | Decision boundary | |
 | Claim boundary | |
 | Trigger contract | |
-| Autonomy level | |
 | Blocking gates | |
 | Ledger | |
 | Next | |
 ```
 
-Use `request_user_input` to ask for approve/launch, refine, or reject unless an explicit workspace/user contract already authorizes autonomous launch. Overrides may select an authorized pending slice only; target, scope, phase, claim, Trigger Contract, or Autonomy changes require Goal Contract update and gates. On approval or pre-authorized launch, set `Contract status: accepted` and hand off to `$control-loop`.
+Use `request_user_input` to ask for approve/launch, refine, or reject unless an explicit workspace/user contract already authorizes autonomous launch. Overrides may select an authorized pending slice only; target, scope, phase, claim, or Trigger Contract changes require Goal Contract update and gates. On approval or pre-authorized launch, set `Contract status: accepted` and hand off to `$control-loop`.

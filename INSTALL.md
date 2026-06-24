@@ -44,10 +44,12 @@ set -euo pipefail
 tmp_codex_home="$(mktemp -d)"
 export CODEX_HOME="$tmp_codex_home"
 scripts/install.sh --no-sync-user-templates
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+workspace_slug="$(basename "$repo_root")"
 for skill in alpha-goal control-loop goal-verify; do
   test -f "$tmp_codex_home/skills/$skill/SKILL.md"
 done
-task_root="$tmp_codex_home/$(basename "$PWD")/20260623-smoke"
+task_root="$tmp_codex_home/$workspace_slug/20260623-smoke"
 mkdir -p "$task_root"
 cat >"$task_root/goal-contract.md" <<'EOF'
 Contract status: accepted
@@ -67,11 +69,10 @@ Non-goals: smoke
 Decision boundary: smoke
 Claim boundary: smoke
 Trigger Contract: manual
-Autonomy Level: L3 Modify worktree
 Handoff ledger: smoke
 EOF
-mkdir -p "$tmp_codex_home/$(basename "$PWD")/control-state"
-cat >"$tmp_codex_home/$(basename "$PWD")/control-state/latest.md" <<EOF
+mkdir -p "$tmp_codex_home/$workspace_slug/control-state"
+cat >"$tmp_codex_home/$workspace_slug/control-state/latest.md" <<EOF
 # Control State Latest
 State directory: $task_root
 Goal Contract: $task_root/goal-contract.md
@@ -107,4 +108,4 @@ $goal-verify 验证目标完成、证据覆盖、声明边界和 material 未声
 ## Count budget
 
 The validator enforces the whole `skills/` tree under 15,000 word+punctuation units, counted as words plus punctuation/symbol marks.
-This budget preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, autonomy gates, behavior-level gates, and evaluator feedback without over-compressing their meaning.
+This budget preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, authority gates, behavior-level gates, and evaluator feedback without over-compressing their meaning.

@@ -48,10 +48,10 @@ function control_loop(goal_contract):
       checkpoint_only_if_needed(gap)
       continue
 
-    verification = goal_verify_before_final_or_route(evidence, goal)
+    verification = goal_verify_before_final_or_route(evidence, review, outcome, goal, checkpoint, material_defect_risk_surface(slice, goal))
     route = route_after_verification(verification)
     if route == NEXT_ITERATION:
-      checkpoint_only_if_needed(verification.gap)
+      checkpoint_only_if_needed(verification.Gap)
       continue
     return route
 ```
@@ -65,7 +65,7 @@ function assert_goal_boundaries(goal, checkpoint):
   require(goal.status == accepted)
   require(goal.issued_by == "alpha-goal")
   require(goal.is_canonical)  # accepted Goal Contract is canonical
-  require(goal.has_required_fields)  # Intent, Outcome, Scope, Repo surfaces, Acceptance evidence, Non-goals, Decision boundary, Claim boundary, Autonomy level
+  require(goal.has_required_fields)  # alpha-goal Design Content fields
   deny(goal.created_or_derived_by_control_loop)  # control-loop never creates or derives it
 
   deny(primary_branch_mutation)  # Do not mutate primary main/master/trunk
@@ -75,16 +75,14 @@ function assert_goal_boundaries(goal, checkpoint):
   require(goal_verify_before_risky_broad_or_final_claims)  # high-risk, subjective-quality, cross-module, external-side-effect, scheduled, webhook, verification-triggered, PR-ready, or final-claim work requires $goal-verify.
 
 function assert_slice_boundaries(slice, goal, checkpoint):
-  require(slice.target within goal.target)
+  require(slice.outcome_moves_toward goal.outcome)
   require(slice.scope within goal.scope)
   require(slice.effect not_in goal.non_goals)
   require(slice.effect within goal.constraints)
-  require(slice.effect within goal.authorization)
-  require(slice.effect within goal.actuator_boundary)
+  require(slice.effect within goal.decision_boundary)
   require(slice.surface within goal.repo_surfaces)
   require(slice.claim within goal.claim_boundary)  # claim boundary
   require(slice.effect within checkpoint.run_profile when present)
-  require(autonomy_allows(goal.Autonomy_level, slice.requested_action))  # Autonomy level
   require(cross_repo_integration_claim only_if integration_evidence_covers_each_repo_boundary)
 ```
 
@@ -128,8 +126,8 @@ function execute_slice(slice, goal, checkpoint):
 
 function review_slice_outcome(slice, outcome, evidence, goal, checkpoint):
   require(evidence.is_fresh)
-  require(slice.complete only_if evidence.changes_or_confirms(goal.target_state))
-  if not evidence.changes_or_confirms(goal.target_state):
+  require(slice.complete only_if evidence.changes_or_confirms(goal.outcome))
+  if not evidence.changes_or_confirms(goal.outcome):
     deny(slice_complete_or_success_claim)
   classify(evidence as gate or advisory or exploration or blocked)
   compare(outcome, goal.acceptance_evidence, goal.claim_boundary, checkpoint.run_profile when present)
@@ -140,7 +138,7 @@ function review_slice_outcome(slice, outcome, evidence, goal, checkpoint):
 function compare_to_goal(evidence, review, acceptance_evidence, claim_boundary, risk_surface):
   gap = compare(evidence, review, acceptance_evidence, claim_boundary, risk_surface)
   if feedback_missing_expected_effect_or_threshold:
-    if authorized_acceptance_equivalent_fallback_exists:
+    if fallback_explicitly_authorized_by(goal.acceptance_evidence or (checkpoint.verification.Gap and checkpoint.verification.Next_route == control-loop)):
       return gap.fixable_by_authorized_acceptance_equivalent_fallback
     if direction_valid_and_weak(evidence or edge or compatibility or cleanup or verification_gap):
       return gap.harden
@@ -179,29 +177,33 @@ function load_references_if_needed(goal, checkpoint):
 ## Routes
 
 ```pseudo
+function route_material_contradiction_without_patching_around_it(outcome, goal, checkpoint):
+  if contradiction_changes(goal.outcome or scope or authority or acceptance_evidence or decision_boundary or claim_boundary):
+    return RETURN_TO_ALPHA_GOAL
+  if contradiction_depends_on(permission or tool or data or environment or credential or user_owned_decision):
+    return BLOCKED
+  return BLOCKED  # material contradictions must not be patched around inside the slice
+
 function route_after_verification(verification):
   if verification.verdict == PASS_TO_FINAL:
     finish_delivery_boundary()
     return PASS_TO_FINAL
 
   if verification.verdict == NEXT_ITERATION:
-    if verification.Gap.kind == same_goal_fixable:
-      # `NEXT_ITERATION` with fixable `Gap`
+    require(verification.Gap is specific_enough_for_next_slice, else = BLOCKED)
+    if verification.Next_route == control-loop:
       return NEXT_ITERATION
-    if verification.Gap.kind == scope_or_authority_change:
+    if verification.Next_route == alpha-goal:
       return RETURN_TO_ALPHA_GOAL
-    if verification.Gap.kind == missing_permission_or_external_state:
+    if verification.Next_route == BLOCKED:
       return BLOCKED
-    return BLOCKED  # unclassified verifier gap cannot drive execution
-
-  if verification.changed_target_scope_authority_or_claim:
-    return RETURN_TO_ALPHA_GOAL
+    return BLOCKED  # unrecognized verifier route cannot drive execution
 
   if missing(permission or tool or data or environment or credential or user_owned_decision):
     return BLOCKED
 
   # Stop/re-route
-  if changed_or_unclear(target or scope or authority or source_reference or acceptance_evidence or non_goal or decision_boundary or actuator_boundary or Trigger_Contract or Autonomy_level or claim_boundary):
+  if changed_or_unclear(outcome or scope or authority or source_reference or acceptance_evidence or non_goal or decision_boundary or Trigger_Contract or claim_boundary):
     return RETURN_TO_ALPHA_GOAL
   if changed_or_unclear(run_profile or risk or assumption or stop_condition or user_owned_decision or new_subsystem_or_skill or edits_beyond_approved_boundary):
     if user_or_goal_decision_required:
