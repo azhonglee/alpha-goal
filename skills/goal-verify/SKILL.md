@@ -9,6 +9,7 @@ description: "Compare execution evidence against an accepted Goal Contract and p
 goal-verify owns verification authority.
 
 goal-verify compares collected evidence against an accepted Goal Contract.
+When reading task evidence, resolve Alpha Goal state root as `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`, where `<workspace-slug>` is `slug(repo_root or Goal Contract target workspace)`.
 
 goal-verify does not:
 - redefine target
