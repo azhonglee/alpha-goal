@@ -1,6 +1,6 @@
 # Completion Gates
 
-Load this reference before any FINAL_RESPONSE_READY, READY, DONE, SAFE, COMPLETE, MR-ready, replacement/prohibition, or broad evidence-boundary claim.
+Load this reference before any FINAL_RESPONSE_READY, READY, DONE, SAFE, COMPLETE, shipped, fixed, hardened, MR-ready, replacement/prohibition, or broad evidence-boundary claim.
 
 ## Universal Completion Gates
 
@@ -26,6 +26,12 @@ Load this reference before any FINAL_RESPONSE_READY, READY, DONE, SAFE, COMPLETE
 5. Raw Evidence Gate:
    Verification must cite raw observers, commands, artifacts, logs, or diffs.
    Summaries, intentions, plans, and assumptions are not evidence.
+
+6. Delivery Boundary Gate:
+   The final response, PR/MR handoff, or delivery marker is allowed only when the supported
+   claim matches the accepted Goal Contract, raw evidence, verification verdict, and delivery
+   boundary. Missing required work, blocked external state, or unsupported claim breadth prevents
+   completion routing.
 
 If any gate fails:
 - Same-goal fixable gap -> `HARDENING`
