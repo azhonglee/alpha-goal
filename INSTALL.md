@@ -100,7 +100,7 @@ rm -rf "$tmp_codex_home"
 
 ```text
 $alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继续闭环。
-$control-loop 根据 Goal Contract 和已有条件检查点做下一轮最小安全 slice。
+$control-loop 根据 Goal Contract 和已有条件检查点做下一轮最有用且可验证的有界 slice。
 $goal-verify 验证目标完成、证据覆盖、声明边界和 material 未声明缺陷/风险，并返回可继续 harden 的 Gap。
 ```
 

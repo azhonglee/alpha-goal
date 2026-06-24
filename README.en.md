@@ -33,7 +33,7 @@ Runtime records use the user-level Alpha Goal state root: `${CODEX_HOME:-$HOME/.
 
 ```text
 $alpha-goal Decide whether this task should clarify, execute, verify, or continue a loop.
-$control-loop Execute or harden the next smallest safe slice from an accepted Goal Contract.
+$control-loop Execute or harden the next most useful verifiable bounded slice from an accepted Goal Contract.
 ```
 
 You usually do not need to name a skill. Describe the work normally; Alpha Goal is meant to activate when the request needs goal framing, bounded execution, or evidence-backed completion.
@@ -74,6 +74,6 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 - Goals before action: outcome, scope, non-goals, acceptance evidence, decision owner, and claim boundary define what may change.
 - Minimal useful modeling: model dependencies, disturbances, and risks only when they affect safe control, validation, or routing.
 - Persistent state: `goal-contract.md` is the default `alpha-goal` output and directly contains discovery notes, interview ledger, and the final contract; `checkpoint.md` conditionally carries run profile, loop state, iteration, evidence, verification, and memory with evidence, confidence, and invalidation; `control-state/latest.md` only points to the latest accepted task when task identity is ambiguous.
-- Bounded execution: prefer small evidence-producing actions or targeted changes over broad refactors and speculative cleanup; the accepted contract and Autonomy Ladder constrain action authority.
+- Bounded execution: prefer bounded evidence-producing actions or targeted changes over broad refactors and speculative cleanup; the accepted contract and Autonomy Ladder constrain action authority.
 - Independent verification: final/ready/safe/complete/repair/review claims require fresh evidence and defect/risk sweep, checked separately from execution.
 - Honest routing: unclear goals return to `alpha-goal`, same-goal fixable execution gaps return to `control-loop`, and unsupported or under-reviewed final claims continue through `goal-verify`.

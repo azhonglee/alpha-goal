@@ -5,7 +5,7 @@ description: "Goal-contract-driven bounded executor and hardener. Use only after
 
 # Control Loop
 
-Control Loop is the Goal Contract driven bounded executor and hardener after `$alpha-goal`, not task discovery or scheduling. Consume an accepted Goal Contract and optimize for useful target-state movement: ship the smallest verifiable slice, collect evidence, compare, then harden or finish.
+Control Loop is the Goal Contract driven bounded executor and hardener after `$alpha-goal`, not task discovery or scheduling. Consume an accepted Goal Contract and optimize for useful target-state movement: ship the most useful verifiable bounded slice, collect evidence, compare, then harden or finish.
 
 State artifacts support execution and recovery; writing them is never the objective. Use `checkpoint.md` only when it protects recovery, evidence handoff, or verification.
 
@@ -22,7 +22,7 @@ function control_loop(goal_contract):
   load_references_if_needed(goal, checkpoint)
 
   while true:
-    slice = plan_smallest_useful_verifiable_slice(goal, checkpoint)
+    slice = plan_most_useful_verifiable_slice(goal, checkpoint)
     assert_slice_boundaries(slice, goal, checkpoint)
 
     outcome = execute_slice(slice, goal, checkpoint)
@@ -82,8 +82,8 @@ function assert_slice_boundaries(slice, goal, checkpoint):
 ## Slice Execution
 
 ```pseudo
-function plan_smallest_useful_verifiable_slice(goal, checkpoint):
-  slice = choose_highest_value_small_action_verifiable_now(goal, checkpoint)
+function plan_most_useful_verifiable_slice(goal, checkpoint):
+  slice = choose_highest_value_bounded_action_verifiable_now(goal, checkpoint)
   require(slice.has_authorized_executable_action)
   require(slice.coherent_acceptance_and_risk_relevant)
   require(slice.evidence_defined_before_acting)
