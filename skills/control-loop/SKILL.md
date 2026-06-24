@@ -60,10 +60,8 @@ function control_loop(goal_contract):
 
 ```pseudo
 function assert_goal_boundaries(goal, checkpoint):
-  if goal_contract_unreadable_due_to_permission_tool_data_environment:
-    return BLOCKED
-  if goal.missing_or_draft_or_stale_or_conflicting:
-    return RETURN_TO_ALPHA_GOAL
+  require(goal_contract_readable, else = BLOCKED)
+  require(not goal.missing_or_draft_or_stale_or_conflicting, else = RETURN_TO_ALPHA_GOAL)
   require(goal.status == accepted)
   require(goal.issued_by == "alpha-goal")
   require(goal.is_canonical)  # accepted Goal Contract is canonical
@@ -194,7 +192,7 @@ function route_after_verification(verification):
       return RETURN_TO_ALPHA_GOAL
     if verification.Gap.kind == missing_permission_or_external_state:
       return BLOCKED
-    return route_verification_result(verification)
+    return BLOCKED  # unclassified verifier gap cannot drive execution
 
   if verification.changed_target_scope_authority_or_claim:
     return RETURN_TO_ALPHA_GOAL
@@ -210,5 +208,5 @@ function route_after_verification(verification):
       return RETURN_TO_ALPHA_GOAL
     return BLOCKED
 
-  return route_verification_result(verification)
+  return BLOCKED  # unrecognized verifier output cannot support progress
 ```

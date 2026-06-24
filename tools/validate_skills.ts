@@ -530,7 +530,7 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
     "verification.Gap.kind == same_goal_fixable",
     "verification.Gap.kind == scope_or_authority_change",
     "verification.Gap.kind == missing_permission_or_external_state",
-    "return route_verification_result(verification)",
+    "unclassified verifier gap cannot drive execution",
     "RETURN_TO_ALPHA_GOAL",
     "BLOCKED",
     "Stop/re-route",
@@ -539,6 +539,7 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
     "if user_or_goal_decision_required:",
     "return RETURN_TO_ALPHA_GOAL",
     "return BLOCKED",
+    "unrecognized verifier output cannot support progress",
   ], errors);
   for (const forbidden of [
     "Goal Contract, `run-profile.md`, `loop-state.md`, and `memory.md` exist or can be initialized only from authorized task records",
