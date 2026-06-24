@@ -174,14 +174,6 @@ Design Content Must Include:
 - Trigger Contract [trigger_contract]
 - Handoff ledger [ledger]
 
-## Trigger Contract
-
-Define run behavior, not just a label. This is a global routing rule for Pre-flight, handoff, and recovery:
-- `manual`: resume from the Goal Contract unless the user explicitly overrides; `control-loop` may create `checkpoint.md` only when recovery needs it.
-- `scheduled`: name schedule source/id, replay/staleness rule, and existing Goal Contract mapping; do not discover new scope or authority.
-- `webhook`: name event source/id, dedupe key, authorized payload-to-state mapping, and replay/staleness rule; if no authorized match, return to `alpha-goal`.
-- `verification-triggered`: resume only when latest verification evidence matches the Goal Contract path, has `Next route: control-loop`, and the Gap is fixable inside the same goal.
-
 ## Artifact policy
 
 `alpha-goal` writes only `goal-contract.md`. The contract contains `Contract status`, `Issued by`, `Discovery notes`, `Interview ledger`, canonical target, scope, non-goals, acceptance evidence, claim boundary, Trigger Contract, and handoff ledger.
