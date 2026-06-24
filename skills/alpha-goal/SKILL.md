@@ -188,7 +188,7 @@ If ambiguity depends on current external best practices, standards, APIs, depend
 Use weighted clarity:
 
 ```text
-clarity_score = 0.3 * intent + 0.2 * outcome + 0.15 * scope + 0.12 * constraints + 0.1 * success + 0.08 * decision_boundary + 0.05 * context
+clarity_score = 0.2 * intent + 0.18 * outcome + 0.15 * scope + 0.12 * constraints + 0.12 * solution + 0.1 * success + 0.08 * decision_boundary + 0.05 * context
 ```
 
 Score each dimension in `[0.0, 1.0]` with justification and gap:
@@ -198,6 +198,7 @@ Score each dimension in `[0.0, 1.0]` with justification and gap:
 - Constraint Clarity
 - Success Criteria Clarity
 - Context Clarity for brownfield work
+- Technical Solution Clarity (When cross-file operation, required; None otherwise, solution_clarity_score is 1)
 
 #### 2.4 Record and Cycle-Control
 
@@ -243,6 +244,9 @@ Optional Content:
 - Repo surfaces [repo_surfaces]
 - Assumptions + resolutions [assumptions_resolutions]
 - Dependency/integration order [repo_integration_order]
+
+Optional Specifications（When cross-file operation):
+- Technical Solution [technical_solution] (design includes architecture、data model、solution、 interface、protocol、performance、scalability、risk)
 
 #### Artifact Review
 
