@@ -2,9 +2,28 @@ import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { basename, resolve } from "node:path";
 
-const runModes = new Set(["manual", "scheduled", "webhook", "verification-triggered"]);
 const requestedActions = new Set(["suggest", "draft", "modify-worktree", "commit", "push", "open-pr", "merge"]);
-const loopPhases = new Set(["DISCOVERY", "IMPLEMENTATION", "HARDENING", "VERIFICATION", "FINAL_RESPONSE_READY", "COMPLETE", "BLOCKED"]);
+const loopPhases = new Set(["IMPLEMENTATION", "HARDENING", "VERIFICATION", "FINAL_RESPONSE_READY", "COMPLETE", "BLOCKED"]);
+const requiredGoalContractFields = [
+  "Contract status",
+  "Issued by",
+  "Technical Context",
+  "Discovery notes",
+  "Interview ledger",
+  "Intent",
+  "Outcome",
+  "Scope",
+  "Repo surfaces",
+  "Constraints",
+  "Assumptions + resolutions",
+  "Acceptance evidence",
+  "Dependency/integration order",
+  "Non-goals",
+  "Decision boundary",
+  "Claim boundary",
+  "Trigger Contract",
+  "Handoff ledger",
+];
 
 function section(name, value) {
   console.log(`\n== ${name} ==\n${value}`);
@@ -88,7 +107,7 @@ function parseArgs(rawArgs) {
   };
   const has = (name) => rawArgs.includes(name);
   const consumed = new Set();
-  for (const name of ["--task", "--run-mode", "--requested-action", "--external-side-effects", "--human-checkpoint"]) {
+  for (const name of ["--task", "--requested-action", "--external-side-effects", "--human-checkpoint"]) {
     const index = rawArgs.indexOf(name);
     if (index >= 0) {
       consumed.add(index);
@@ -102,7 +121,6 @@ function parseArgs(rawArgs) {
   return {
     task: take("--task"),
     repos: rawArgs.filter((_, index) => !consumed.has(index)),
-    runMode: take("--run-mode"),
     requestedAction: take("--requested-action"),
     externalSideEffects: take("--external-side-effects"),
     humanCheckpoint: take("--human-checkpoint"),
@@ -117,7 +135,9 @@ function main() {
   const options = parseArgs(process.argv.slice(2));
   const task = options.task;
   const session = process.cwd();
-  const stateRoot = `${(process.env.CODEX_HOME || `${process.env.HOME || "~"}/.alphal-goal`).replace(/\/+$/, "")}/${basename(session) || "workspace"}/`;
+  const workspaceRoot = repoRoot(session) || session;
+  const workspaceSlug = slugWorkspace(workspaceRoot);
+  const stateRoot = `${(process.env.CODEX_HOME || `${process.env.HOME || "~"}/.alpha-goal`).replace(/\/+$/, "")}/${workspaceSlug}/`;
   const taskDir = task ? `${stateRoot}${task}/` : "";
   const targets = (options.repos.length ? options.repos : [session]).map(repo => resolve(session, repo));
   let blocked = false;
@@ -175,15 +195,15 @@ function checkTaskState(taskDir, stateRoot, options) {
   const hasVerification = !!verification;
   const hasLatest = !!latest.trim();
 
-  ok = requireFields("goal contract", goalText, ["Contract status", "Issued by", "Trigger Contract", "Autonomy Level"], false) && ok;
+  ok = requireFields("goal contract", goalText, requiredGoalContractFields, false) && ok;
   ok = check("contract status", /^accepted$/i.test(field(goalText, "Contract status")), `not accepted: ${field(goalText, "Contract status") || "<empty>"}`) && ok;
   ok = check("contract issuer", /^alpha-goal$/i.test(field(goalText, "Issued by")), `invalid issuer: ${field(goalText, "Issued by") || "<empty>"}`) && ok;
 
   if (hasCheckpoint) ok = requireFields("checkpoint", checkpointHeader, ["Goal Contract", "Updated at"], false) && ok;
-  else section("checkpoint", "absent; plain manual L1-L3 work may execute from Goal Contract");
+  else section("checkpoint", "absent; plain manual work may execute from Goal Contract");
 
-  if (hasRunProfile) ok = requireFields("checkpoint run profile", runProfile, ["Run mode", "Trigger event", "Requested action", "Discovery source", "External side effects allowed", "Human checkpoint", "Evaluator route", "Autonomy level"], true) && ok;
-  else section("checkpoint run profile", "absent unless trigger/action/side-effect requires it");
+  if (hasRunProfile) ok = requireFields("checkpoint run profile", runProfile, ["Requested action", "Discovery source", "External side effects allowed", "Human checkpoint", "Evaluator route"], true) && ok;
+  else section("checkpoint run profile", "absent unless action/side-effect requires it");
 
   if (hasLoopState) {
     ok = requireFields("checkpoint loop state", loopState, ["Current Objective", "Current Phase"], false) && ok;
@@ -200,64 +220,55 @@ function checkTaskState(taskDir, stateRoot, options) {
     ok = requireFields("checkpoint verification", verification, ["Goal Contract", "Evidence", "Verified at", "Review mode", "Verdict", "Next route"], false) && ok;
     ok = requireFields("checkpoint verification gap", verification, ["Gap"], true) && ok;
   }
-  if (hasLatest) ok = requireFields("latest pointer", latest, ["State directory", "Goal Contract", "Current Phase", "Next route", "Updated at"], false) && ok;
+  if (hasLatest) {
+    ok = requireFields("latest pointer", latest, ["State directory", "Goal Contract", "Current Phase", "Updated at"], false) && ok;
+    ok = requireFields("latest pointer nullable fields", latest, ["Checkpoint", "Next route"], true) && ok;
+  }
 
-  const mode = hasRunProfile ? field(runProfile, "Run mode") : options.runMode || inferRunMode(goalText);
   const action = hasRunProfile ? field(runProfile, "Requested action") : options.requestedAction;
-  const autonomy = hasRunProfile ? field(runProfile, "Autonomy level") : field(goalText, "Autonomy Level");
   const phase = field(loopState, "Current Phase") || field(latest, "Current Phase");
   const goalContract = field(checkpointHeader, "Goal Contract");
   const nextSlice = field(loopState, "Next Slice");
   const stopCondition = field(loopState, "Stop Condition");
   const externalSideEffects = hasRunProfile ? field(runProfile, "External side effects allowed") : options.externalSideEffects;
   const humanCheckpoint = hasRunProfile ? field(runProfile, "Human checkpoint") : options.humanCheckpoint;
-  const checkpointRequired = ["scheduled", "webhook", "verification-triggered"].includes(mode) ||
-    actionRequiresProfile(action) ||
+  const checkpointRequired = actionRequiresProfile(action) ||
     !isUnset(externalSideEffects) && !isNone(externalSideEffects) ||
     !isUnset(humanCheckpoint) && !isNone(humanCheckpoint) ||
     options.durableEvidence ||
     options.persistedVerification ||
     options.multiIteration;
 
-  ok = check("run mode", runModes.has(mode), `invalid: ${mode || "<empty>"}`) && ok;
   if (hasRunProfile) ok = check("requested action", requestedActions.has(action), `invalid: ${action || "<empty>"}`) && ok;
   if (!hasRunProfile && action) ok = check("requested action", requestedActions.has(action), `invalid: ${action || "<empty>"}`) && ok;
-  ok = check("autonomy level", /^L[1-5]\b/.test(autonomy), `invalid: ${autonomy || "<empty>"}`) && ok;
-  if (action) ok = check("autonomy action ceiling", actionAllowedByLevel(action, autonomy), `${action || "<empty>"} exceeds ${autonomy || "<empty>"}`) && ok;
-  ok = check("checkpoint required", !checkpointRequired || hasCheckpoint && hasRunProfile, `${mode || "<empty>"} / ${action || "<empty>"} requires checkpoint.md Run Profile`) && ok;
+  ok = check("checkpoint required", !checkpointRequired || hasCheckpoint && hasRunProfile, `${action || "<empty>"} requires checkpoint.md Run Profile`) && ok;
   if (hasLoopState) ok = check("loop phase", loopPhases.has(phase), `invalid: ${phase || "<empty>"}`) && ok;
   if (hasCheckpoint) {
     ok = check("goal contract binding", samePath(goalContract, goalPath), "checkpoint Goal Contract does not match current task") && ok;
   }
-  ok = check("trigger contract binding", triggerContractAllowsMode(goalText, mode), `Goal Contract does not authorize ${mode || "<empty>"} trigger`) && ok;
-  if (hasLatest || options.useLatest) ok = check("latest binding", latestMatchesTask(latest, taskDir, goalPath, checkpointPath, phase), "control-state/latest.md does not match current task") && ok;
-  if (mode === "verification-triggered") {
-    ok = check("verification-triggered binding", hasVerification && verificationMatchesTask(verification, goalPath), "checkpoint Verification missing, stale, final, or not routed to control-loop") && ok;
-  }
+  if (hasLatest || options.useLatest) ok = check("latest binding", latestMatchesTask(latest, taskDir, goalPath, checkpointPath, phase, hasCheckpoint), "control-state/latest.md does not match current task") && ok;
+  if (hasVerification) ok = check("verification binding", verificationMatchesTask(verification, goalPath), "checkpoint Verification missing, stale, or malformed") && ok;
   if (hasLoopState) ok = check("loop actionability", !isUnset(nextSlice) && !isNone(nextSlice) || !isUnset(stopCondition) && !isNone(stopCondition), "missing actionable Next Slice or Stop Condition") && ok;
   if (hasRunProfile) ok = check("evaluator route", field(runProfile, "Evaluator route").includes("$goal-verify"), "missing $goal-verify") && ok;
   if (hasMemory) ok = check("memory evidence", memoryAllowsEmpty(memory) || /(?:^|\n)[ \t]*(?:[-*][ \t]+)?Evidence:/i.test(memory) && /(?:^|\n)[ \t]*(?:[-*][ \t]+)?Confidence:/i.test(memory) && /(?:^|\n)[ \t]*(?:[-*][ \t]+)?Invalidation:/i.test(memory), "non-empty memory needs Evidence, Confidence, and Invalidation") && ok;
 
-  section("trigger event", "checked");
+  section("preflight", "checked");
   return ok;
-}
-
-function inferRunMode(goalText) {
-  const trigger = triggerContract(goalText);
-  if (/verification-triggered/i.test(trigger)) return "verification-triggered";
-  if (/webhook/i.test(trigger)) return "webhook";
-  if (/scheduled|schedule/i.test(trigger)) return "scheduled";
-  return "manual";
 }
 
 function actionRequiresProfile(action) {
   return ["commit", "push", "open-pr", "merge"].includes(action);
 }
 
-function actionAllowedByLevel(action, level) {
-  const ranks = { suggest: 1, draft: 2, "modify-worktree": 3, commit: 4, push: 4, "open-pr": 4, merge: 5 };
-  const match = level.match(/^L([1-5])\b/);
-  return !!match && (ranks[action] ?? 99) <= Number(match[1]);
+function repoRoot(cwd) {
+  const result = git(cwd, ["rev-parse", "--show-toplevel"]);
+  return result.status === 0 ? result.stdout.trim() : "";
+}
+
+function slugWorkspace(value) {
+  return (basename(value.replace(/\/+$/, "")) || "workspace")
+    .replace(/[^A-Za-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "workspace";
 }
 
 function normalizePath(value) {
@@ -268,36 +279,28 @@ function samePath(actual, expected) {
   return normalizePath(actual) === normalizePath(expected);
 }
 
-function latestMatchesTask(latest, taskDir, goalPath, checkpointPath, phase) {
+function latestMatchesTask(latest, taskDir, goalPath, checkpointPath, phase, hasCheckpoint) {
   if (!latest.trim()) return false;
   const checkpoint = field(latest, "Checkpoint");
+  const route = field(latest, "Next route");
   return samePath(field(latest, "State directory"), taskDir.replace(/\/+$/, "")) &&
     samePath(field(latest, "Goal Contract"), goalPath) &&
-    (isUnset(checkpoint) || isNone(checkpoint) || samePath(checkpoint, checkpointPath)) &&
-    (!field(latest, "Current Phase") || !phase || field(latest, "Current Phase") === phase);
+    (hasCheckpoint ? samePath(checkpoint, checkpointPath) : isNone(checkpoint)) &&
+    (!field(latest, "Current Phase") || !phase || field(latest, "Current Phase") === phase) &&
+    /^(none|control-loop|alpha-goal|BLOCKED)$/i.test(route);
 }
 
 function verificationMatchesTask(verification, goalPath) {
-  return samePath(field(verification, "Goal Contract"), goalPath) &&
+  const verdict = field(verification, "Verdict");
+  const nextRoute = field(verification, "Next route");
+  const gap = field(verification, "Gap");
+  const bound = samePath(field(verification, "Goal Contract"), goalPath) &&
     !isUnset(field(verification, "Evidence")) &&
-    !isUnset(field(verification, "Verified at")) &&
-    /^NEXT_ITERATION$/i.test(field(verification, "Verdict")) &&
-    /^control-loop$/i.test(field(verification, "Next route")) &&
-    !isUnset(field(verification, "Gap")) &&
-    !isNone(field(verification, "Gap"));
-}
-
-function triggerContractAllowsMode(goalText, mode) {
-  const trigger = triggerContract(goalText);
-  if (mode === "manual") return /\bmanual\b/i.test(trigger);
-  if (mode === "verification-triggered") return /verification-triggered/i.test(trigger) && /Goal Contract|same goal|Next route/i.test(trigger);
-  if (mode === "scheduled") return /scheduled|schedule/i.test(trigger) && /source|id/i.test(trigger) && /stale|replay/i.test(trigger) && /Goal Contract|state/i.test(trigger);
-  if (mode === "webhook") return /webhook/i.test(trigger) && /source|id/i.test(trigger) && /dedupe|replay/i.test(trigger) && /payload/i.test(trigger) && /Goal Contract|state/i.test(trigger);
+    !isUnset(field(verification, "Verified at"));
+  if (!bound) return false;
+  if (/^NEXT_ITERATION$/i.test(verdict)) return /^control-loop$/i.test(nextRoute) && !isUnset(gap) && !isNone(gap);
+  if (/^PASS_TO_FINAL$/i.test(verdict)) return /^none$/i.test(nextRoute) && (isUnset(gap) || isNone(gap));
   return false;
-}
-
-function triggerContract(goalText) {
-  return field(goalText, "Trigger Contract") || sectionText(goalText, "Trigger Contract");
 }
 
 function checkRepo(target) {
@@ -309,16 +312,18 @@ function checkRepo(target) {
   const root = gitOutput(target, ["rev-parse", "--show-toplevel"]);
   const branch = gitOutput(root, ["branch", "--show-current"]);
   const diffOk = gitOk(root, ["diff", "--check"]);
+  const primary = ["main", "master", "trunk"].includes(branch);
+  const worktreesIgnored = gitOk(root, ["check-ignore", "-q", ".worktrees/codex/preflight-check"]);
 
   section("git root", root);
   section("branch", branch);
-  section("primary branch risk", ["main", "master", "trunk"].includes(branch) ? "yes" : "no/unknown");
+  section("primary branch risk", primary ? "BLOCKED" : "no/unknown");
   section("status", gitOutput(root, ["status", "--short"]));
   section("worktrees", gitOutput(root, ["worktree", "list"]));
   section("submodules", gitOutput(root, ["submodule", "status"]));
-  console.log(`.worktrees/codex/preflight-check: ${gitOk(root, ["check-ignore", "-q", ".worktrees/codex/preflight-check"]) ? "ignored" : "NOT ignored"}`);
+  console.log(`.worktrees/codex/preflight-check: ${worktreesIgnored ? "ignored" : "NOT ignored"}`);
   section("diff check", diffOk ? "pass" : "fail");
-  return diffOk;
+  return diffOk && !primary && worktreesIgnored;
 }
 
 function check(label, ok, failure) {
