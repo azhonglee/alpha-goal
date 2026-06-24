@@ -14,7 +14,7 @@ Alpha Goal 是面向 Goal Engineering 的最小持久闭环技能集。它帮助
 ## 工作方式
 
 ```text
-Trigger -> Resolve Task -> Read Goal -> Read Checkpoint -> Plan Slice -> Act/Probe -> Evidence -> $goal-verify -> Gap? -> Harden or Final Claim
+Trigger -> Resolve Task -> Read Goal -> Read Checkpoint -> Plan Slice -> Act -> Evidence -> $goal-verify -> Gap? -> Harden or Final Claim
 ```
 
 ## 快速开始
@@ -74,6 +74,6 @@ Alpha Goal 让 agent 工作保持目标明确、行动有界、声明受证据�
 - 目标先于行动：outcome、scope、non-goals、acceptance evidence、决策 owner 和 claim boundary 共同限定什么可以被改变。
 - 只做有用建模：只有依赖、扰动和风险会影响安全控制、验证或路由时，才把它们纳入模型。
 - 持久状态：`goal-contract.md` 是 `alpha-goal` 的默认产物，直接包含发现记录、访谈记录和最终契约；`checkpoint.md` 按需承载 run profile、loop state、iteration、evidence、verification 和带证据、置信度、失效条件的 memory；`control-state/latest.md` 只在任务身份不明时指向最新可恢复的已接受任务。
-- 有界执行：优先选择小而可观察的探针或定向变更，而不是宽泛重构和猜测式清理；已接受契约和 Autonomy Ladder 共同约束动作权限。
+- 有界执行：优先选择小而可取证的动作或定向变更，而不是宽泛重构和猜测式清理；已接受契约和 Autonomy Ladder 共同约束动作权限。
 - 独立验证：final/ready/safe/complete/repair/review 声明需要新鲜证据和 defect/risk sweep，并且要与执行过程分离检查。
 - 诚实路由：目标不清回到 `alpha-goal`，同一目标内可修复的执行缺口回到 `control-loop`，证据或审查面不足的最终声明继续进入 `goal-verify`。

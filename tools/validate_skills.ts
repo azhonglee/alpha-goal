@@ -86,7 +86,7 @@ const STATE_ROOT_FORBIDDEN_PATTERNS: Array<[RegExp, string]> = [
 const DESCRIPTION_SEMANTIC_CHECKS: Record<string, { required: string[]; forbidden: string[] }> = {
   "alpha-goal": {
     required: ["clarify", "intention", "requirements"],
-    forbidden: ["execute or probe safely", "completion, correctness, readiness, safety"],
+    forbidden: ["execute safely", "completion, correctness, readiness, safety"],
   },
   "control-loop": {
     required: ["Goal-contract-driven bounded executor", "accepted Goal Contract", "implementation", "hardening", "Do not use for ambiguous planning"],
@@ -465,7 +465,7 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
     "assert_goal_boundaries(goal, checkpoint)",
     "slice = plan_smallest_useful_verifiable_slice(goal, checkpoint)",
     "assert_slice_boundaries(slice, goal, checkpoint)",
-    "outcome = act_or_probe(slice, goal, checkpoint)",
+    "outcome = execute_slice(slice, goal, checkpoint)",
     "evidence = collect_raw_evidence(outcome, slice)",
     "review = review_slice_outcome(slice, outcome, evidence, goal, checkpoint)",
     "gap = compare_to_goal(evidence, review, goal.acceptance_evidence, goal.claim_boundary, material_defect_risk_surface(slice, goal))",
@@ -494,7 +494,7 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
     "slice.names_risks_assumptions_side_effects_cleanup_rollback_containment_stop_conditions",
     "slice.follows_repo_integration_order when cross_repo_goal",
     "return slice",
-    "function act_or_probe(slice, goal, checkpoint):",
+    "function execute_slice(slice, goal, checkpoint):",
     "material_contradiction",
     "gather_missing_observer(slice)",
     "make_one_targeted_change_unless_coordinated_edits_required",
@@ -645,13 +645,13 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   for (const name of REQUIRED_SKILL_NAMES) if (!readme.includes(`skills/${name}/`) || !readme.includes(`\`${name}\``)) errors.push(`README.md missing public skill entry: ${name}`);
   if (!readme.includes("当前代码事实只描述现状")) errors.push("README.md missing current-state-not-desired-state principle");
   if (!readme.includes("执行或加固已授权 slice")) errors.push("README.md must describe control-loop as execution-first");
-  if (!readme.includes("Act/Probe -> Evidence -> $goal-verify -> Gap?")) errors.push("README.md workflow must include evidence and goal-verify");
+  if (!readme.includes("Act -> Evidence -> $goal-verify -> Gap?")) errors.push("README.md workflow must include evidence and goal-verify");
   for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "discovery notes", "interview ledger", "15,000 word+punctuation units", "失效条件"]) if (!readme.includes(term)) errors.push(`README.md missing persistent-loop term: ${term}`);
   const readmeEn = readIfFile(path.join(root, "README.en.md"));
   for (const name of REQUIRED_SKILL_NAMES) if (!readmeEn.includes(`skills/${name}/`) || !readmeEn.includes(`\`${name}\``)) errors.push(`README.en.md missing public skill entry: ${name}`);
   if (!readmeEn.includes("Current code facts describe current state")) errors.push("README.en.md missing current-state-not-desired-state principle");
   if (!readmeEn.includes("Execute or harden an authorized slice")) errors.push("README.en.md must describe control-loop as execution-first");
-  if (!readmeEn.includes("Act/Probe -> Evidence -> $goal-verify -> Gap?")) errors.push("README.en.md workflow must include evidence and goal-verify");
+  if (!readmeEn.includes("Act -> Evidence -> $goal-verify -> Gap?")) errors.push("README.en.md workflow must include evidence and goal-verify");
   for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "discovery notes", "interview ledger", "15,000 word+punctuation units", "invalidation"]) if (!readmeEn.includes(term)) errors.push(`README.en.md missing persistent-loop term: ${term}`);
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
   for (const name of REQUIRED_SKILL_NAMES) if (!installDoc.includes(name)) errors.push(`INSTALL.md missing public skill: ${name}`);

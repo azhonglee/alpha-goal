@@ -25,7 +25,7 @@ function control_loop(goal_contract):
     slice = plan_smallest_useful_verifiable_slice(goal, checkpoint)
     assert_slice_boundaries(slice, goal, checkpoint)
 
-    outcome = act_or_probe(slice, goal, checkpoint)
+    outcome = execute_slice(slice, goal, checkpoint)
     evidence = collect_raw_evidence(outcome, slice)
     review = review_slice_outcome(slice, outcome, evidence, goal, checkpoint)
     gap = compare_to_goal(evidence, review, goal.acceptance_evidence, goal.claim_boundary, material_defect_risk_surface(slice, goal))
@@ -92,7 +92,7 @@ function plan_smallest_useful_verifiable_slice(goal, checkpoint):
   require(slice.follows_repo_integration_order when cross_repo_goal)
   return slice
 
-function act_or_probe(slice, goal, checkpoint):
+function execute_slice(slice, goal, checkpoint):
   require(slice.stays_inside_planned_slice_and_goal_contract)
   require(slice.effect within checkpoint.run_profile when present)
   check(slice.assumptions, slice.stop_conditions)
@@ -103,7 +103,7 @@ function act_or_probe(slice, goal, checkpoint):
   if slice.needs_missing_observer:
     return gather_missing_observer(slice)
 
-  if slice.kind == read_only_probe:
+  if slice.kind == read_only_evidence:
     deny(writes)
     return produce(evidence or diagnosis or route_decision)
 
