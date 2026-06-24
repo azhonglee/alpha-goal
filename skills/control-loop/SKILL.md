@@ -23,17 +23,20 @@ function control_loop(goal_contract):
 
   while true:
     slice = plan_smallest_useful_verifiable_slice(goal, checkpoint)
-    assert_slice_boundaries(slice, goal)
+    assert_slice_boundaries(slice, goal, checkpoint)
 
-    outcome = act(slice)
-    evidence = collect_raw_evidence(outcome)
-    review = review_slice_outcome(slice, outcome, evidence, goal)
-    gap = compare_to_goal(evidence, review, goal.acceptance_evidence, goal.claim_boundary)
+    outcome = act_or_probe(slice, goal, checkpoint)
+    evidence = collect_raw_evidence(outcome, slice)
+    review = review_slice_outcome(slice, outcome, evidence, goal, checkpoint)
+    gap = compare_to_goal(evidence, review, goal.acceptance_evidence, goal.claim_boundary, material_defect_risk_surface(slice, goal))
 
     if gap.changed_contract_or_authority:
       return RETURN_TO_ALPHA_GOAL
     if gap.blocked:
       return BLOCKED
+    if gap.harden:
+      checkpoint_only_if_needed(gap)
+      continue
     if gap.fixable:
       checkpoint_only_if_needed(gap)
       continue
@@ -53,23 +56,98 @@ function assert_goal_boundaries(goal, checkpoint):
   require(goal.status == accepted, else = RETURN_TO_ALPHA_GOAL or BLOCKED)
   require(goal.issued_by == "alpha-goal")
   require(goal.is_canonical)  # accepted Goal Contract is canonical
-  require(goal.has_required_fields)  # Intent, Outcome, Scope, Acceptance evidence, Non-goals, Decision boundary, Claim boundary, Autonomy level
+  require(goal.has_required_fields)  # Intent, Outcome, Scope, Repo surfaces, Acceptance evidence, Non-goals, Decision boundary, Claim boundary, Autonomy level
   deny(goal.created_or_derived_by_control_loop)  # control-loop never creates or derives it
 
   deny(primary_branch_mutation)  # Do not mutate primary main/master/trunk
   require(worktree.kind == repo_local_worktree unless safer_repo_policy_exists)  # repo-local worktree
   preserve(unrelated_user_changes)  # unrelated user changes
   require(goal_verify_before_final_ready_safe_complete_shipped_fixed_hardened_or_MR_ready_claims)  # Before any final_ready, safe, complete, shipped, fixed, hardened, or MR-ready claim, run $goal-verify.
+  require(goal_verify_before_risky_broad_or_final_claims)  # high-risk, subjective-quality, cross-module, external-side-effect, scheduled, webhook, verification-triggered, PR-ready, or final-claim work requires $goal-verify.
 
-function assert_slice_boundaries(slice, goal):
+function assert_slice_boundaries(slice, goal, checkpoint):
   require(slice.target within goal.target)
   require(slice.scope within goal.scope)
   require(slice.effect not_in goal.non_goals)
   require(slice.effect within goal.constraints)
   require(slice.effect within goal.authorization)
   require(slice.effect within goal.actuator_boundary)
+  require(slice.surface within goal.repo_surfaces)
   require(slice.claim within goal.claim_boundary)  # claim boundary
+  require(slice.effect within checkpoint.run_profile when present)
   require(autonomy_allows(goal.Autonomy_level, slice.requested_action))  # Autonomy level
+  require(cross_repo_integration_claim only_if integration_evidence_covers_each_repo_boundary)
+```
+
+## Slice Execution
+
+```pseudo
+function plan_smallest_useful_verifiable_slice(goal, checkpoint):
+  slice = choose_highest_value_small_action_verifiable_now(goal, checkpoint)
+  require(slice.coherent_acceptance_and_risk_relevant)
+  require(slice.evidence_defined_before_acting)
+  require(slice.evidence_maps_to(goal.acceptance_evidence, goal.claim_boundary, material_defect_risk_surface(slice, goal)))
+  require(slice.names_risks_assumptions_side_effects_cleanup_rollback_containment_stop_conditions)
+  require(slice.names_allowed_surfaces_unchecked_surfaces_and_strongest_material_risk)
+  require(slice.follows_repo_integration_order when cross_repo_goal)
+  return slice
+
+function act_or_probe(slice, goal, checkpoint):
+  require(slice.stays_inside_planned_slice_and_goal_contract)
+  require(slice.effect within checkpoint.run_profile when present)
+  check(slice.assumptions, slice.stop_conditions)
+
+  if material_contradiction:
+    stop_and_route_without_patching_around_it()
+
+  if slice.needs_missing_observer:
+    return gather_missing_observer(slice)
+
+  if slice.kind == read_only_probe:
+    deny(writes)
+    return produce(evidence or diagnosis or route_decision)
+
+  if slice.kind == implementation:
+    make_one_targeted_change_unless_coordinated_edits_required()
+
+  if slice.kind == debug_or_repair and not root_cause_confirmed:
+    limit_to(diagnostic_or_hypothesis_testing_slice_only)
+    deny(repair_claim)
+
+  if slice.kind == review_or_audit_or_loophole_finding:
+    require(slice.authorized_by_goal and slice.embedded_in_implementation_or_hardening)
+    allow(collect_evidence and apply_same_goal_fixes)
+    deny(standalone_final_judgment_without_goal_verify)
+
+  preserve(failing_outputs)
+  preserve(unrelated_user_changes)
+  deny(hiding_failed_outputs or rerunning_failures_away or summarizing_intentions_as_success)
+  record(external_side_effects and cleanup_or_rollback_containment_actions)
+  return outcome
+
+function review_slice_outcome(slice, outcome, evidence, goal, checkpoint):
+  require(evidence.is_fresh)
+  require(slice.complete only_if evidence.changes_or_confirms(goal.target_state))
+  require(evidence.changes_or_confirms_target_state)
+  classify(evidence as gate or advisory or exploration or blocked)
+  compare(outcome, goal.acceptance_evidence, goal.claim_boundary, checkpoint.run_profile when present)
+  inspect(material_defect_risk_surface(slice, goal))
+  limit_claim_to_strongest_direct_evidence_and_checked_surface()
+  return review
+
+function compare_to_goal(evidence, review, acceptance_evidence, claim_boundary, risk_surface):
+  gap = compare(evidence, review, acceptance_evidence, claim_boundary, risk_surface)
+  if feedback_missing_expected_effect_or_threshold:
+    if authorized_acceptance_equivalent_fallback_exists:
+      return gap.fixable_by_authorized_acceptance_equivalent_fallback
+    if direction_valid_and_weak(evidence or edge or compatibility or cleanup or verification_gap):
+      return gap.harden
+    if can_harden_inside_same_goal_and_profile:
+      return gap.fixable
+    if goal_or_boundary_must_change:  # reframe
+      return gap.changed_contract_or_authority
+    return gap.blocked
+  return gap
 ```
 
 ## Reference Routing
@@ -121,9 +199,9 @@ function route_after_verification(verification):
     return BLOCKED
 
   # Stop/re-route
-  if changed(authority or actuator_boundary or acceptance_evidence or claim_boundary):
+  if changed_or_unclear(target or scope or authority or source_reference or acceptance_evidence or non_goal or decision_boundary or actuator_boundary or Trigger_Contract or Autonomy_level or claim_boundary):
     return RETURN_TO_ALPHA_GOAL
-  if changed(run_profile or risk or assumption or stop_condition):
+  if changed_or_unclear(run_profile or risk or assumption or stop_condition or user_owned_decision or new_subsystem_or_skill or edits_beyond_approved_boundary):
     if user_or_goal_decision_required:
       return RETURN_TO_ALPHA_GOAL
     return BLOCKED
