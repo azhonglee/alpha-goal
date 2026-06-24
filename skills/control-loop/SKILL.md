@@ -84,9 +84,11 @@ function assert_slice_boundaries(slice, goal, checkpoint):
 ```pseudo
 function plan_smallest_useful_verifiable_slice(goal, checkpoint):
   slice = choose_highest_value_small_action_verifiable_now(goal, checkpoint)
+  require(slice.has_authorized_executable_action)
   require(slice.coherent_acceptance_and_risk_relevant)
   require(slice.evidence_defined_before_acting)
   require(slice.evidence_maps_to(goal.acceptance_evidence, goal.claim_boundary, material_defect_risk_surface(slice, goal)))
+  require(slice.validation_observer_available, else = BLOCKED)
   require(slice.names_risks_assumptions_side_effects_cleanup_rollback_containment_stop_conditions)
   require(slice.names_allowed_surfaces_unchecked_surfaces_and_strongest_material_risk)
   require(slice.follows_repo_integration_order when cross_repo_goal)
@@ -100,24 +102,19 @@ function execute_slice(slice, goal, checkpoint):
   if material_contradiction:
     stop_and_route_without_patching_around_it()
 
-  if slice.needs_missing_observer:
-    return gather_missing_observer(slice)
+  if slice.kind == repair and not root_cause_confirmed:
+    return RETURN_TO_ALPHA_GOAL
 
-  if slice.kind == read_only_evidence:
-    deny(writes)
-    return produce(evidence or diagnosis or route_decision)
-
-  if slice.kind == implementation:
+  if slice.kind in [implementation, hardening, repair]:
     make_one_targeted_change_unless_coordinated_edits_required()
-
-  if slice.kind == debug_or_repair and not root_cause_confirmed:
-    limit_to(diagnostic_or_hypothesis_testing_slice_only)
-    deny(repair_claim)
 
   if slice.kind == review_or_audit_or_loophole_finding:
     require(slice.authorized_by_goal and slice.embedded_in_implementation_or_hardening)
     allow(collect_evidence and apply_same_goal_fixes)
     deny(standalone_final_judgment_without_goal_verify)
+
+  if slice.kind not_in [implementation, hardening, repair, review_or_audit_or_loophole_finding]:
+    return BLOCKED
 
   preserve(failing_outputs)
   preserve(unrelated_user_changes)
