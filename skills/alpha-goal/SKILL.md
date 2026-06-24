@@ -3,8 +3,9 @@ name: alpha-goal
 description: "Must use for any engineering/design/implementation requests."
 ---
 
-# Mission
+# Alpha Goal
 
+## Mission
 `alpha-goal` owns workflow control for goal definition.
 
 Its responsibility is:
@@ -249,11 +250,9 @@ Self-review the Goal Contract for completion and reasonability. Use subagents fo
 
 ### Phase 5: Ask for Confirmation
 
-Show Summary of Design. Include `Root Cause` only for repair designs.
-
+Present Summary.
 ```markdown
 Design Summary
-
 | Field | Value |
 | --- | --- |
 | Contract status | |
@@ -274,7 +273,11 @@ Design Summary
 | Next | |
 ```
 
-Use `request_user_input` to ask for approve/launch, refine, or reject unless an explicit workspace/user contract already authorizes autonomous launch. Overrides may select an authorized pending slice only; target, scope, phase, claim, or Trigger Contract changes require Goal Contract update and gates. On approval or pre-authorized launch, set `Contract status: accepted` and hand off to `$control-loop`.
+Use `request_user_input` to ask for approve/launch, refine, or reject.
+- On approval: Contract status = accepted; hand off to `$control-loop`.
+- On rejection: Contract status = draft
+- On refine: Contract status = draft; return to Phase 2 with user feedback.
+
 
 ## Before Handoff Checklist
 
