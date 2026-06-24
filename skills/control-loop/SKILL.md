@@ -1,214 +1,202 @@
 ---
 name: control-loop
-description: "Goal-contract-driven bounded executor and hardener. Use only after an accepted Goal Contract authorizes implementation or hardening. Do not use for ambiguous planning."
+description: "Goal-contract-driven bounded executor and hardener. Use only after an accepted Goal Contract authorizes implementation, repair, or hardening. Do not use for ambiguous planning."
 ---
 
 # Control Loop
 
-Control Loop is the Goal Contract driven bounded executor and hardener after `$alpha-goal`, not task discovery or scheduling. Consume an accepted Goal Contract and optimize for useful target-state movement: ship the most useful verifiable bounded slice, collect evidence, compare, then harden or finish.
+## Core Principle
+1. Goal Contract is authority.
+2. Execution is actuator output.
+3. Evidence is sensor input.
+4. `$goal-verify` is comparator.
+5. Route decision is control output.
 
-State artifacts support execution and recovery; writing them is never the objective. Use `checkpoint.md` only when it protects recovery, evidence handoff, or verification.
+Execution results are evidence, not automatic completion.  
+Passing tests, changed files, clean builds, or successful commands may support a claim, but they do not by themselves authorize final-ready, safe, complete, fixed, shipped, or MR-ready claims.
 
-## Execution Loop
+`control-loop` may implement, repair, harden, and collect evidence inside the approved boundaries. It may not redefine target, scope, acceptance evidence, non-goals, decision boundaries, claim boundary, trigger contract, or authority.
 
-Run the loop as behavior, not paperwork:
+## Runtime Flow
+
+**Run the loop as behavior, not paperwork:**
 
 ```pseudo
 function control_loop(goal_contract):
-  # Read Goal, Read Checkpoint
   goal = read_accepted_goal_contract(goal_contract)
-  checkpoint = read_checkpoint_when_present_or_required(goal)
-  assert_goal_boundaries(goal, checkpoint)
-  load_references_if_needed(goal, checkpoint)
+  checkpoint = read_checkpoint_if_present_or_needed(goal)
+
+  assert_goal_contract_valid(goal)
+  assert_execution_environment_safe(goal)
 
   while true:
-    slice = plan_most_useful_verifiable_slice(goal, checkpoint)
-    assert_slice_boundaries(slice, goal, checkpoint)
-    if slice.kind == repair and not root_cause_confirmed:
+    slice = plan_highest_value_verifiable_slice(goal, checkpoint)
+    assert_slice_within_goal_contract(slice, goal)
+
+    outcome = execute_slice(slice)
+    evidence = collect_execution_evidence(slice, outcome)
+    classified = classify_execution_evidence(evidence, goal)
+
+    record_checkpoint_if_needed(classified)
+
+    if classified.changed_goal_authority:
       return RETURN_TO_ALPHA_GOAL
-    if slice.kind not_in [implementation, hardening, repair]:
+
+    if classified.blocked:
       return BLOCKED
 
-    outcome = execute_slice(slice, goal, checkpoint)
-    if outcome.material_contradiction:
-      return route_material_contradiction_without_patching_around_it(outcome, goal, checkpoint)
-
-    evidence = collect_raw_evidence(outcome, slice)
-    review = review_slice_outcome(slice, outcome, evidence, goal, checkpoint)
-    gap = compare_to_goal(evidence, review, goal.acceptance_evidence, goal.claim_boundary, material_defect_risk_surface(slice, goal))
-
-    if gap.changed_contract_or_authority:
-      return RETURN_TO_ALPHA_GOAL
-    if gap.blocked:
-      return BLOCKED
-    if gap.harden:
-      checkpoint_only_if_needed(gap)
-      continue
-    if gap.fixable:
-      checkpoint_only_if_needed(gap)
+    if classified.same_goal_fixable_gap:
       continue
 
-    verification = goal_verify_before_final_or_route(evidence, review, outcome, goal, checkpoint, material_defect_risk_surface(slice, goal))
-    route = route_after_verification(verification)
+    verification = run_goal_verify_before_completion_claim(classified, goal)
+    route = route_after_verification(verification, goal)
+
     if route == NEXT_ITERATION:
-      checkpoint_only_if_needed(verification.Gap)
       continue
+
     return route
 ```
 
-## Boundaries
+## Authority 
+The Goal Contract defines:
+- target
+- scope
+- constraints
+- acceptance evidence
+- non-goals
+- decision boundary
+- claim boundary
+- trigger contract
+- authorization source
 
-```pseudo
-function assert_goal_boundaries(goal, checkpoint):
-  require(goal_contract_readable, else = BLOCKED)
-  require(not goal.missing_or_draft_or_stale_or_conflicting, else = RETURN_TO_ALPHA_GOAL)
-  require(goal.status == accepted)
-  require(goal.issued_by == "alpha-goal")
-  require(goal.is_canonical)  # accepted Goal Contract is canonical
-  require(goal.has_required_fields)  # alpha-goal Design Content fields
-  deny(goal.created_or_derived_by_control_loop)  # control-loop never creates or derives it
+control-loop may not change any of them.
+If any of these need to change, RETURN_TO_ALPHA_GOAL
 
-  deny(primary_branch_mutation)  # Do not mutate primary main/master/trunk
-  require(worktree.kind == repo_local_worktree unless safer_repo_policy_exists)  # repo-local worktree
-  preserve(unrelated_user_changes)  # unrelated user changes
-  require(goal_verify_before_final_ready_safe_complete_shipped_fixed_hardened_or_MR_ready_claims)  # Before any final_ready, safe, complete, shipped, fixed, hardened, or MR-ready claim, run $goal-verify.
-  require(goal_verify_before_risky_broad_or_final_claims)  # high-risk, subjective-quality, cross-module, external-side-effect, scheduled, webhook, verification-triggered, PR-ready, or final-claim work requires $goal-verify.
+## Evidence Classification
+Treat execution output as classified evidence, not automatic authority.
 
-function assert_slice_boundaries(slice, goal, checkpoint):
-  require(slice.outcome_moves_toward goal.outcome)
-  require(slice.scope within goal.scope)
-  require(slice.effect not_in goal.non_goals)
-  require(slice.effect within goal.constraints)
-  require(slice.effect within goal.decision_boundary)
-  require(slice.surface within goal.repo_surfaces)
-  require(slice.claim within goal.claim_boundary)  # claim boundary
-  require(slice.effect within checkpoint.run_profile when present)
-  require(cross_repo_integration_claim only_if integration_evidence_covers_each_repo_boundary)
-```
+Classify each result before making a route decision:
+- [from-code-change] implementation change made inside authorized scope
+- [from-test-pass] test or check passed
+- [from-test-fail] test or check failed
+- [from-build-pass] build/type/lint check passed
+- [from-build-fail] build/type/lint check failed
+- [from-runtime-observation] observed runtime behavior
+- [from-review] reviewer or subagent finding
+- [from-environment] environment/tooling/credential state
+- [from-gap] difference between current evidence and acceptance evidence
+- [from-blocker] missing permission, tool, data, environment, credential, or user decision
 
-## Slice Execution
+Rules:
+Auto-confirm only raw execution facts.
+Do not infer completion from partial success.
+Do not infer safety from absence of failure.
+Do not infer acceptance from passing unrelated tests.
+Do not infer authority from implementation convenience.
+Only `$goal-verify` may support final-ready, safe, complete, fixed, hardened, shipped, or MR-ready claims.
 
-```pseudo
-function plan_most_useful_verifiable_slice(goal, checkpoint):
-  slice = choose_highest_value_bounded_action_verifiable_now(goal, checkpoint)
-  require(slice.has_authorized_executable_action)
-  require(slice.coherent_acceptance_and_risk_relevant)
-  require(slice.evidence_defined_before_acting)
-  require(slice.evidence_maps_to(goal.acceptance_evidence, goal.claim_boundary, material_defect_risk_surface(slice, goal)))
-  require(slice.validation_observer_available, else = BLOCKED)
-  require(slice.names_risks_assumptions_side_effects_cleanup_rollback_containment_stop_conditions)
-  require(slice.names_allowed_surfaces_unchecked_surfaces_and_strongest_material_risk)
-  require(slice.follows_repo_integration_order when cross_repo_goal)
-  return slice
+## Slice Boundary Gates
+Before executing a slice, all must pass:
+[ ] Slice target is inside Goal Contract target
+[ ] Slice scope is inside Goal Contract scope
+[ ] Slice does not violate non-goals
+[ ] Slice respects constraints
+[ ] Slice respects authorization source
+[ ] Slice respects actuator boundary
+[ ] Slice requested action is allowed by autonomy level
+[ ] Slice claim is inside claim boundary
+[ ] Slice has observable evidence path
 
-function execute_slice(slice, goal, checkpoint):
-  require(slice.stays_inside_planned_slice_and_goal_contract)
-  require(slice.effect within checkpoint.run_profile when present)
-  check(slice.assumptions, slice.stop_conditions)
+If any of these fail, DO NOT EXECUTE; RETURN_TO_ALPHA_GOAL or BLOCKED
 
-  if material_contradiction:
-    stop_without_patching_around_it()
-    return outcome(material_contradiction)
+## Execution Gates
+Before mutating files:
+[ ] Accepted Goal Contract loaded
+[ ] Issued by = alpha-goal
+[ ] Worktree / branch safety checked
+[ ] Primary branch mutation denied unless explicitly authorized
+[ ] Unrelated user changes identified and preserved
+[ ] Relevant repo rules inspected
+[ ] Required dependencies/tools available
+[ ] Rollback or recovery path understood for risky changes
 
-  make_one_targeted_change_unless_coordinated_edits_required()
+## Completion Gate
+Before returning final success:
+[ ] Acceptance evidence collected
+[ ] Evidence directly maps to Goal Contract acceptance evidence
+[ ] No unresolved same-goal fixable gap remains
+[ ] No unresolved blocker remains
+[ ] No source-of-truth conflict remains
+[ ] No scope/authority/claim-boundary change occurred
+[ ] `$goal-verify` verdict allows final route
 
-  if slice.requires_embedded_review_or_audit_or_loophole_finding:
-    require(slice.kind in [implementation, hardening, repair])
-    require(slice.authorized_by_goal and slice.embedded_in_implementation_or_hardening)
-    allow(collect_evidence and apply_same_goal_fixes)
-    deny(standalone_final_judgment_without_goal_verify)
+If any item is unchecked, DO NOT claim complete.
 
-  preserve(failing_outputs)
-  preserve(unrelated_user_changes)
-  deny(hiding_failed_outputs or rerunning_failures_away or summarizing_intentions_as_success)
-  record(external_side_effects and cleanup_or_rollback_containment_actions)
-  return outcome
+## Stop / Return Rules
+Return to $alpha-goal when:
+- Target changes
+- Scope changes
+- Acceptance evidence changes
+- Non-goals change
+- Decision boundary changes
+- Claim boundary changes
+- Authorization source changes
+- Trigger Contract changes
+- Autonomy level changes
+- Actuator boundary changes
 
-function review_slice_outcome(slice, outcome, evidence, goal, checkpoint):
-  require(evidence.is_fresh)
-  require(slice.complete only_if evidence.changes_or_confirms(goal.outcome))
-  if not evidence.changes_or_confirms(goal.outcome):
-    deny(slice_complete_or_success_claim)
-  classify(evidence as gate or advisory or exploration or blocked)
-  compare(outcome, goal.acceptance_evidence, goal.claim_boundary, checkpoint.run_profile when present)
-  inspect(material_defect_risk_surface(slice, goal))
-  limit_claim_to_strongest_direct_evidence_and_checked_surface()
-  return review
+Return BLOCKED when:
+- Permission missing
+- Credential missing
+- Environment unavailable
+- Tool unavailable
+- Required data unavailable
+- User-owned decision unresolved
+- External system unavailable
 
-function compare_to_goal(evidence, review, acceptance_evidence, claim_boundary, risk_surface):
-  gap = compare(evidence, review, acceptance_evidence, claim_boundary, risk_surface)
-  if feedback_missing_expected_effect_or_threshold:
-    if fallback_explicitly_authorized_by(goal.acceptance_evidence or (checkpoint.verification.Gap and checkpoint.verification.Next_route == control-loop)):
-      return gap.fixable_by_authorized_acceptance_equivalent_fallback
-    if direction_valid_and_weak(evidence or edge or compatibility or cleanup or verification_gap):
-      return gap.harden
-    if can_harden_inside_same_goal_and_profile:
-      return gap.fixable
-    if goal_or_boundary_must_change:  # reframe
-      return gap.changed_contract_or_authority
-    return gap.blocked
-  return gap
-```
+Continue next iteration when:
+- Gap is fixable
+- Gap is inside same Goal Contract
+- Required action is authorized
+- Evidence path is clear
 
-## Reference Routing
+Finish only when:
+- Goal Contract acceptance evidence is satisfied
+- goal-verify passes
+- No required work remains
 
-```pseudo
-function load_references_if_needed(goal, checkpoint):
-  state_root_template = "${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/"  # Alpha Goal state root
-  workspace_slug = slug(repo_root or Goal Contract target workspace)
-  state_root = materialize(state_root_template, workspace_slug)
+## Checkpoint Policy
+`<Alpha Goal state root>/YYYYMMDD-<TaskName>/checkpoint.md` is recovery support, not progress.
 
-  # State writes are checkpoints, not progress.
-  if exact checkpoint.md or control-state/latest.md fields are needed:
-    read("references/state-artifacts.md")
-    remember("control-state/latest.md is only a global recovery index")
-    fields_may_include("Loop State", Memory, Evidence, Verification)
+Create or update checkpoint only when it helps:
+- Recovery
+- Evidence handoff
+- Verification handoff
+- Long-running execution
+- Interrupted execution
+- Multi-step repair
 
-  if final_ready_safe_complete_shipped_fixed_hardened_or_MR_ready_claim:
-    read("references/completion-gates.md")
+Checkpoint may record:
+- Current slice
+- Completed actions
+- Raw evidence
+- Known gaps
+- Blockers
+- Next route
 
-  if replacement_or_prohibition_or_broad_evidence_boundary:
-    read("references/completion-gates.md")
+Checkpoint may not redefine:
+- Goal
+- Scope
+- Acceptance
+- Non-goals
+- Authority
+- Claim boundary
 
-  optional_preflight =
-    "npx --no-install tsx skills/control-loop/scripts/mutation-preflight.ts --task YYYYMMDD-TaskName"
-```
+## Before Final Response Checklist
+[ ] State what changed
+[ ] State evidence collected
+[ ] State verification result
+[ ] State remaining gaps, if any
+[ ] Avoid claims beyond Goal Contract claim boundary
+[ ] If incomplete, route clearly: NEXT_ITERATION / BLOCKED / RETURN_TO_ALPHA_GOAL
 
-## Routes
-
-```pseudo
-function route_material_contradiction_without_patching_around_it(outcome, goal, checkpoint):
-  if contradiction_changes(goal.outcome or scope or authority or acceptance_evidence or decision_boundary or claim_boundary):
-    return RETURN_TO_ALPHA_GOAL
-  if contradiction_depends_on(permission or tool or data or environment or credential or user_owned_decision):
-    return BLOCKED
-  return BLOCKED  # material contradictions must not be patched around inside the slice
-
-function route_after_verification(verification):
-  if verification.verdict == PASS_TO_FINAL:
-    finish_delivery_boundary()
-    return PASS_TO_FINAL
-
-  if verification.verdict == NEXT_ITERATION:
-    require(verification.Gap is specific_enough_for_next_slice, else = BLOCKED)
-    if verification.Next_route == control-loop:
-      return NEXT_ITERATION
-    if verification.Next_route == alpha-goal:
-      return RETURN_TO_ALPHA_GOAL
-    if verification.Next_route == BLOCKED:
-      return BLOCKED
-    return BLOCKED  # unrecognized verifier route cannot drive execution
-
-  if missing(permission or tool or data or environment or credential or user_owned_decision):
-    return BLOCKED
-
-  # Stop/re-route
-  if changed_or_unclear(outcome or scope or authority or source_reference or acceptance_evidence or non_goal or decision_boundary or Trigger_Contract or claim_boundary):
-    return RETURN_TO_ALPHA_GOAL
-  if changed_or_unclear(run_profile or risk or assumption or stop_condition or user_owned_decision or new_subsystem_or_skill or edits_beyond_approved_boundary):
-    if user_or_goal_decision_required:
-      return RETURN_TO_ALPHA_GOAL
-    return BLOCKED
-
-  return BLOCKED  # unrecognized verifier output cannot support progress
-```
