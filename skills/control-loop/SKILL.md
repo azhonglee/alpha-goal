@@ -26,6 +26,9 @@ function control_loop(goal_contract):
     assert_slice_boundaries(slice, goal, checkpoint)
 
     outcome = execute_slice(slice, goal, checkpoint)
+    if is_route(outcome):
+      return outcome.route
+
     evidence = collect_raw_evidence(outcome, slice)
     review = review_slice_outcome(slice, outcome, evidence, goal, checkpoint)
     gap = compare_to_goal(evidence, review, goal.acceptance_evidence, goal.claim_boundary, material_defect_risk_surface(slice, goal))
@@ -100,21 +103,22 @@ function execute_slice(slice, goal, checkpoint):
   check(slice.assumptions, slice.stop_conditions)
 
   if material_contradiction:
-    stop_and_route_without_patching_around_it()
+    return route_material_contradiction_without_patching_around_it()
 
   if slice.kind == repair and not root_cause_confirmed:
-    return RETURN_TO_ALPHA_GOAL
+    return route(RETURN_TO_ALPHA_GOAL)
 
   if slice.kind in [implementation, hardening, repair]:
     make_one_targeted_change_unless_coordinated_edits_required()
 
-  if slice.kind == review_or_audit_or_loophole_finding:
+  if slice.requires_embedded_review_or_audit_or_loophole_finding:
+    require(slice.kind in [implementation, hardening, repair])
     require(slice.authorized_by_goal and slice.embedded_in_implementation_or_hardening)
     allow(collect_evidence and apply_same_goal_fixes)
     deny(standalone_final_judgment_without_goal_verify)
 
-  if slice.kind not_in [implementation, hardening, repair, review_or_audit_or_loophole_finding]:
-    return BLOCKED
+  if slice.kind not_in [implementation, hardening, repair]:
+    return route(BLOCKED)
 
   preserve(failing_outputs)
   preserve(unrelated_user_changes)
@@ -125,7 +129,8 @@ function execute_slice(slice, goal, checkpoint):
 function review_slice_outcome(slice, outcome, evidence, goal, checkpoint):
   require(evidence.is_fresh)
   require(slice.complete only_if evidence.changes_or_confirms(goal.target_state))
-  require(evidence.changes_or_confirms_target_state)
+  if not evidence.changes_or_confirms(goal.target_state):
+    deny(slice_complete_or_success_claim)
   classify(evidence as gate or advisory or exploration or blocked)
   compare(outcome, goal.acceptance_evidence, goal.claim_boundary, checkpoint.run_profile when present)
   inspect(material_defect_risk_surface(slice, goal))
