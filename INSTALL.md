@@ -29,7 +29,7 @@ scripts/install.sh --verbose
 
 The script creates `${CODEX_HOME:-$HOME/.codex}/skills/<skill-name>` links for required public skills and cleans same-repo links for merged old public skills. By default it also syncs user-level templates, including `templates/hooks.json` into `${CODEX_HOME:-$HOME/.codex}/hooks.json`.
 
-The compact recovery hook definition lives in `templates/hooks.json`. It is a `SessionStart` hook for `compact` starts and prints a static policy telling Codex to decide whether `alpha-goal`, `control-loop`, or `goal-verify` applies after compaction, and to load the matching skill before continuing. `goal-verify` covers evidence, claim boundary, defect/risk sweep, and material unclaimed issues. Use `--no-sync-user-templates` to skip AGENTS/config template updates and `--no-sync-user-hooks` to skip hook template updates.
+The compact recovery hook definition lives in `templates/hooks.json`. It is a `SessionStart` hook for `compact` starts and prints a static policy telling Codex to decide whether `alpha-goal`, `control-loop`, or `goal-verify` applies after compaction, and to load the matching skill before continuing. `control-loop` executes or hardens accepted Goal Contract work; `goal-verify` covers evidence, claim boundary, defect/risk sweep, and material unclaimed issues. Use `--no-sync-user-templates` to skip AGENTS/config template updates and `--no-sync-user-hooks` to skip hook template updates.
 
 Hook upgrades are keyed by marker family. If the template marker changes from `...:v1` to `...:v2`, the installer removes older hooks from the same family before adding the template hook. It also removes the earlier experimental `codex-compact-skill-recovery` hook family.
 
@@ -44,21 +44,35 @@ set -euo pipefail
 tmp_codex_home="$(mktemp -d)"
 export CODEX_HOME="$tmp_codex_home"
 scripts/install.sh --no-sync-user-templates
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+workspace_slug="$(basename "$repo_root")"
 for skill in alpha-goal control-loop goal-verify; do
   test -f "$tmp_codex_home/skills/$skill/SKILL.md"
 done
-task_root="$tmp_codex_home/$(basename "$PWD")/20260623-smoke"
+task_root="$tmp_codex_home/$workspace_slug/20260623-smoke"
 mkdir -p "$task_root"
 cat >"$task_root/goal-contract.md" <<'EOF'
 Contract status: accepted
 Issued by: alpha-goal
+Technical Context: smoke
 Discovery notes: smoke
 Interview ledger: smoke
+Intent: smoke
+Outcome: smoke
+Scope: smoke
+Repo surfaces: smoke
+Constraints: smoke
+Assumptions + resolutions: smoke
+Acceptance evidence: smoke
+Dependency/integration order: smoke
+Non-goals: smoke
+Decision boundary: smoke
+Claim boundary: smoke
 Trigger Contract: manual
-Autonomy Level: L3 Modify worktree
+Handoff ledger: smoke
 EOF
-mkdir -p "$tmp_codex_home/$(basename "$PWD")/control-state"
-cat >"$tmp_codex_home/$(basename "$PWD")/control-state/latest.md" <<EOF
+mkdir -p "$tmp_codex_home/$workspace_slug/control-state"
+cat >"$tmp_codex_home/$workspace_slug/control-state/latest.md" <<EOF
 # Control State Latest
 State directory: $task_root
 Goal Contract: $task_root/goal-contract.md
@@ -87,11 +101,11 @@ rm -rf "$tmp_codex_home"
 
 ```text
 $alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继续闭环。
-$control-loop 根据 Goal Contract 和已有条件检查点做下一轮最小安全 slice。
+$control-loop 根据 Goal Contract 和已有条件检查点做下一轮最有用且可验证的有界 slice。
 $goal-verify 验证目标完成、证据覆盖、声明边界和 material 未声明缺陷/风险，并返回可继续 harden 的 Gap。
 ```
 
 ## Count budget
 
 The validator enforces the whole `skills/` tree under 15,000 word+punctuation units, counted as words plus punctuation/symbol marks.
-This budget preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, autonomy gates, behavior-level gates, and evaluator feedback without over-compressing their meaning.
+This budget preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, authority gates, behavior-level gates, and evaluator feedback without over-compressing their meaning.

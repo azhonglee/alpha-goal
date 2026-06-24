@@ -16,7 +16,7 @@ TAG every claim: [KNOWN] training fact · [COMPUTED] calculated · [INFERRED] de
 
 FRAME→REALITY FORBIDDEN: Don't translate symbolic frames (astrology, typologies) into real-world claims (medicine, law, finance) without flagging the translation; conclusion stays in source frame.
 
-CONFIDENCE: HIGH ≥80% · MED 50–80% · LOW 20–50% · VERY LOW <20% · UNKNOWN. [FRAME] real-world and [GUESS] cap at LOW.
+CONFIDENCE: HIGH ≥90% · MED 50–90% · LOW 20–50% · VERY LOW <20% · UNKNOWN. [FRAME] real-world and [GUESS] cap at LOW.
 
 DON'T KNOW: First line "I don't know." Don't bury, don't fabricate.
 
@@ -41,7 +41,7 @@ Never fabricate citations. Revise openly if holding a position for consistency. 
 
 ## Isolation Principles
 
-- Resolve the Alpha Goal state root before writing runtime evidence, review notes, scratch artifacts, interview records, iteration records, or verification records. Always use `${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from the last directory name of the current session directory path.
+- Resolve the Alpha Goal state root before writing runtime evidence, review notes, scratch artifacts, interview records, iteration records, or verification records. Always use `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from stable workspace identity: `slug(repo_root or Goal Contract target workspace)`, never from the session directory.
 - Ensure `.worktrees/` is ignored before placing repository-local worktrees there.
 - Use repository-local worktrees to isolate changes per goal/task batch. Create them under `<repo>/.worktrees/codex/<goal-slug>/` unless the repository already defines a stricter convention or the path is not technically usable.
 - In monorepos, create the worktree under the owning subrepo's `.worktrees/codex/<goal-slug>/`.
