@@ -205,7 +205,7 @@ Do not offer early exit before one explicit assumption probe and one persistent 
 
 For cross-repo framing, keep one task-level Alpha Goal state root and record a repo manifest: repo path/name, role, authorization source, allowed change surfaces, non-goals, branch/worktree expectation, validation observer, delivery boundary, and dependency/integration order.
 
-If target, scope, authority, source reference, non-goals, acceptance evidence, decision boundary, actuator/sensor boundary, Trigger Contract, or claim boundary is wrong or unclear, keep Clarify active.
+If target, scope, authority, source reference, non-goals, acceptance evidence, decision boundary, actuator/sensor boundary, or claim boundary is wrong or unclear, keep Clarify active.
 
 ### Phase 3: Assumption Stress Test
 

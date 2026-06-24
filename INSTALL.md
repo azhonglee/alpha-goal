@@ -68,7 +68,7 @@ Dependency/integration order: smoke
 Non-goals: smoke
 Decision boundary: smoke
 Claim boundary: smoke
-Trigger Contract: manual
+Authorization Source: smoke
 Handoff ledger: smoke
 EOF
 mkdir -p "$tmp_codex_home/$workspace_slug/control-state"

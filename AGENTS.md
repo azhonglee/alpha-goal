@@ -8,7 +8,6 @@
 
 - `npx --no-install tsx tools/validate_skills.ts .`：验证公开技能结构、front matter、引用可发现性、闭环语义烟测、安装口径和 15K skills word+punctuation 预算；预算按单词数加标点/符号数计，用于保留触发行为、持久状态、记忆、自治门、行为级 gate 和 evaluator feedback。
 - `bash -n scripts/install.sh`：检查安装脚本语法。
-- `npx --no-install tsx skills/control-loop/scripts/mutation-preflight.ts --task <TaskName>`：可选开发辅助，用于打印已创建任务状态的迭代阶段事实；运行时 gate 以事实记录为准，不依赖脚本。
 - `python3 -c 'import pathlib,tomllib; tomllib.loads(pathlib.Path("templates/config.toml").read_text())'`：验证配置模板可解析。
 - 使用临时 `CODEX_HOME` 执行 `scripts/install.sh`，并从源码仓库运行 `tools/validate_skills.ts`，验证安装说明可执行。
 

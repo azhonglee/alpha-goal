@@ -66,7 +66,6 @@ The Goal Contract defines:
 - non-goals
 - decision boundary
 - claim boundary
-- trigger contract
 - authorization source
 
 control-loop may not change any of them.
@@ -141,7 +140,6 @@ Return to $alpha-goal when:
 - Decision boundary changes
 - Claim boundary changes
 - Authorization source changes
-- Trigger Contract changes
 - Autonomy level changes
 - Actuator boundary changes
 
@@ -167,6 +165,7 @@ Finish only when:
 
 ## Checkpoint Policy
 `<Alpha Goal state root>/YYYYMMDD-<TaskName>/checkpoint.md` is recovery support, not progress.
+Resolve Alpha Goal state root as `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`, where `<workspace-slug>` is `slug(repo_root or Goal Contract target workspace)`.
 
 Create or update checkpoint only when it helps:
 - Recovery
@@ -199,4 +198,3 @@ Checkpoint may not redefine:
 [ ] State remaining gaps, if any
 [ ] Avoid claims beyond Goal Contract claim boundary
 [ ] If incomplete, route clearly: NEXT_ITERATION / BLOCKED / RETURN_TO_ALPHA_GOAL
-
