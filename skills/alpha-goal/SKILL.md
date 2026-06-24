@@ -32,10 +32,13 @@ function alpha_goal(request):
   discovery = discovery(state)
   if discovery.route == NEED_USER_INPUT:
     return request_user_input(discovery.question)
-  if discovery.route == RETURN_TO_ALPHA_GOAL:
-    return discovery.route
+  if discovery.route == BLOCKED:
+    return BLOCKED
+  if discovery.route != READY_TO_CLARIFY:
+    return BLOCKED
   write_draft_goal_contract(state, discovery)
 
+Clarify:
   while true:
     question = prepare_one_high_leverage_question(state)
     answer = request_user_input(question)
@@ -48,7 +51,7 @@ function alpha_goal(request):
   stress = assumption_stress_test(state)
   if stress.changes_intent_target_scope_acceptance_authority_or_claim_boundary:
     record_in_Interview_ledger(state, stress)
-    return RETURN_TO_CLARIFY
+    goto Clarify
 
   design = write_final_design(state)
   design = self_review_and_fix(design)
@@ -59,7 +62,7 @@ function alpha_goal(request):
   if confirmation == REFINE:
     update_draft_contract_from_feedback(design, confirmation)
     rerun_gates(state)
-    return RETURN_TO_ALPHA_GOAL
+    goto Clarify
   return STOP_REJECTED
 ```
 

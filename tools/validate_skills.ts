@@ -601,6 +601,12 @@ function requireOrderedTerms(label: string, text: string, terms: string[], error
 
 function validateSchemaConsistency(root: string, errors: string[]): void {
   const alpha = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
+  if (alpha.includes("discovery.route == RETURN_TO_ALPHA_GOAL")) errors.push("alpha Discovery must not self-route to RETURN_TO_ALPHA_GOAL");
+  if (/discovery\.route[^\n]*\[[^\]]*RETURN_TO_ALPHA_GOAL[^\]]*\]/.test(alpha)) errors.push("alpha Discovery route list must not include RETURN_TO_ALPHA_GOAL");
+  if (/discovery\.route[\s\S]{0,120}return discovery\.route/.test(alpha)) errors.push("alpha Discovery must not return discovery.route");
+  if (alpha.includes("return RETURN_TO_ALPHA_GOAL")) errors.push("alpha must use internal transitions instead of returning RETURN_TO_ALPHA_GOAL");
+  if (alpha.includes("RETURN_TO_CLARIFY")) errors.push("alpha must use internal Clarify transition instead of RETURN_TO_CLARIFY token");
+  for (const term of ["Clarify:", "discovery.route == BLOCKED", "discovery.route != READY_TO_CLARIFY", "goto Clarify"]) if (!alpha.includes(term)) errors.push(`alpha state machine missing internal-route guard: ${term}`);
   const goalContractFields = ["Contract status", "Issued by", "Technical Context", "Discovery notes", "Interview ledger", "Intent", "Outcome", "Scope", "Repo surfaces", "Acceptance evidence", "Non-goals", "Decision boundary", "Claim boundary", "Trigger Contract"];
   for (const term of goalContractFields) if (!alpha.includes(term)) errors.push(`alpha Goal Contract content missing field: ${term}`);
   const designFields = ["Contract status", "Intent", "Root Cause", "Outcome", "Scope", "Repo surfaces", "Constraints", "Acceptance evidence", "Dependency/integration order", "Non-goals", "Decision boundary", "Claim boundary", "Trigger contract", "Blocking gates", "Ledger", "Next"];
