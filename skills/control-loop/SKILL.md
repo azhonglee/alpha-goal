@@ -60,7 +60,11 @@ function control_loop(goal_contract):
 
 ```pseudo
 function assert_goal_boundaries(goal, checkpoint):
-  require(goal.status == accepted, else = RETURN_TO_ALPHA_GOAL or BLOCKED)
+  if goal_contract_unreadable_due_to_permission_tool_data_environment:
+    return BLOCKED
+  if goal.missing_or_draft_or_stale_or_conflicting:
+    return RETURN_TO_ALPHA_GOAL
+  require(goal.status == accepted)
   require(goal.issued_by == "alpha-goal")
   require(goal.is_canonical)  # accepted Goal Contract is canonical
   require(goal.has_required_fields)  # Intent, Outcome, Scope, Repo surfaces, Acceptance evidence, Non-goals, Decision boundary, Claim boundary, Autonomy level
