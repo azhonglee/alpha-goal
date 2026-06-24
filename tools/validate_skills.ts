@@ -30,6 +30,16 @@ const LEGACY_SCRIPT_REFERENCES = [
 ];
 const LEGACY_RUN_MODE_REFERENCES = ["automation-triggered", "from-verification", "Run mode: manual | automation"];
 const LEGACY_RUNTIME_ARTIFACT_REFERENCES = ["context.md", "interview.md", "run-profile.md", "loop-state.md", "memory.md", "iteration.md", "evidence.md", "verification.md"];
+const externalGoalOldPrefix = String.fromCharCode(78, 97, 116, 105, 118, 101);
+const externalGoalOldName = String.fromCharCode(71, 111, 97, 108);
+const externalGoalOldProduct = String.fromCharCode(67, 111, 100, 101, 120);
+const LEGACY_EXTERNAL_GOAL_REFERENCES: Array<[RegExp, string]> = [
+  [new RegExp(`${externalGoalOldPrefix} ${externalGoalOldName}`, "i"), "old external-goal lifecycle wording remains"],
+  [new RegExp(`${externalGoalOldPrefix.toLowerCase()}[-_ ]${externalGoalOldName.toLowerCase()}`, "i"), "old external-goal lifecycle wording remains"],
+  [new RegExp(`${externalGoalOldProduct} ${externalGoalOldPrefix}`, "i"), "old external-goal lifecycle wording remains"],
+  [new RegExp("create_" + "goal"), "old external-goal lifecycle tool reference remains"],
+  [new RegExp("update_" + "goal"), "old external-goal lifecycle tool reference remains"],
+];
 const STATE_ROOT_CORE_FILES = [
   "skills/alpha-goal/SKILL.md",
   "skills/control-loop/SKILL.md",
@@ -46,14 +56,14 @@ const STATE_ROOT_SCRIPT_FILES = [
   "skills/control-loop/scripts/mutation-preflight.ts",
 ];
 const STATE_ROOT_DOC_REQUIRED_TERMS = [
-  "${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/",
+  "${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/",
 ];
 const ENV_STATE_ROOT = "ALPHA_" + "GOAL_STATE_ROOT";
 const REPO_LOCAL_STATE = "\\.alpha-" + "goal";
 const STATE_ROOT_REQUIRED_TERMS = [
   "Alpha Goal state root",
-  "${CODEX_HOME:-$HOME/.alphal-goal}/<workspace-slug>/",
-  "last directory name of the current session directory path",
+  "${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/",
+  "slug(repo_root or Goal Contract target workspace)",
 ];
 const STATE_ROOT_FORBIDDEN_PATTERNS: Array<[RegExp, string]> = [
   [new RegExp(ENV_STATE_ROOT), "state-root environment override remains"],
@@ -67,7 +77,7 @@ const STATE_ROOT_FORBIDDEN_PATTERNS: Array<[RegExp, string]> = [
   [new RegExp(`repo-local .*${REPO_LOCAL_STATE}`, "i"), "repo-local state fallback remains"],
   [new RegExp(`compatibility[^\\n]*${REPO_LOCAL_STATE}[^\\n]*override`, "i"), "repo-local compatibility override wording remains"],
   [new RegExp(`explicit[^\\n]*policy[^\\n]*${REPO_LOCAL_STATE}[^\\n]*override`, "i"), "repo-local explicit policy override wording remains"],
-  [new RegExp("absolute " + "git root", "i"), "old git-root slug rule remains"],
+  [new RegExp("absolute " + "git root", "i"), "old absolute-path slug rule remains"],
   [new RegExp("strip leading " + "slashes", "i"), "old slug sanitization rule remains"],
   [new RegExp("replace characters " + "outside", "i"), "old slug sanitization rule remains"],
   [new RegExp("keep the last " + "80 characters", "i"), "old slug truncation rule remains"],
@@ -76,10 +86,10 @@ const STATE_ROOT_FORBIDDEN_PATTERNS: Array<[RegExp, string]> = [
 const DESCRIPTION_SEMANTIC_CHECKS: Record<string, { required: string[]; forbidden: string[] }> = {
   "alpha-goal": {
     required: ["clarify", "intention", "requirements"],
-    forbidden: ["execute or probe safely", "completion, correctness, readiness, safety"],
+    forbidden: ["execute safely", "completion, correctness, readiness, safety"],
   },
   "control-loop": {
-    required: ["Use only after", "explicit goal specification", "specific read-only probe", "implementation", "Do not use for ambiguous planning"],
+    required: ["Goal-contract-driven bounded executor", "accepted Goal Contract", "implementation", "hardening", "Do not use for ambiguous planning"],
     forbidden: ["discover facts before asking", "final evidence verdicts"],
   },
   "goal-verify": {
@@ -104,7 +114,6 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Acceptance evidence",
     "Claim boundary",
     "Trigger Contract",
-    "Autonomy Level",
     "Match the task state",
     "Contract status",
     "Discovery notes",
@@ -126,60 +135,63 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Design Summary"
   ]],
   ["execution has hard safety gates", "skills/control-loop/SKILL.md", [
-    "bounded executor and hardener",
+    "Goal Contract driven bounded executor and hardener",
     "not task discovery or scheduling",
+    "useful target-state movement",
     "State artifacts support execution and recovery",
     "writing them is never the objective",
-    "action/probe evidence changes or confirms",
-    "conditional checkpoint",
+    "Use `checkpoint.md` only when",
     "Run the loop as behavior, not paperwork",
-    "control-loop` never creates or derives it",
+    "function control_loop(goal_contract)",
+    "read_accepted_goal_contract(goal_contract)",
+    "assert_goal_boundaries(goal, checkpoint)",
+    "plan_most_useful_verifiable_slice",
+    "choose_highest_value_bounded_action_verifiable_now",
+    "slice.has_authorized_executable_action",
+    "slice.evidence_defined_before_acting",
+    "slice.validation_observer_available",
+    "slice.names_risks_assumptions_side_effects_cleanup_rollback_containment_stop_conditions",
+    "material_contradiction",
+    "make_one_targeted_change_unless_coordinated_edits_required",
+    "failing_outputs",
+    "requires_embedded_review_or_audit_or_loophole_finding",
+    "standalone_final_judgment_without_goal_verify",
+    "review_slice_outcome",
+    "evidence.is_fresh",
+    "slice.complete only_if",
+    "material_defect_risk_surface",
+    "authorized_acceptance_equivalent_fallback",
+    "direction_valid_and_weak",
+    "goal_verify_before_final_or_route",
+    "control-loop never creates or derives it",
+    "goal.has_required_fields",
     "Do not mutate primary",
     "repo-local worktree",
-    "Unrelated user changes",
+    "unrelated user changes",
+    "slice.surface within goal.repo_surfaces",
+    "integration_evidence_covers_each_repo_boundary",
+    "checkpoint.run_profile when present",
     "checkpoint.md",
-    "Run Profile",
-    "Run mode",
     "Goal Contract",
     "control-state/latest.md",
     "global recovery index",
-    "Trigger event",
-    "Requested action",
-    "Trigger Contract",
-    "scheduled",
-    "webhook",
-    "verification-triggered",
-    "Discovery source",
-    "External side effects allowed",
-    "Human checkpoint",
-    "Evaluator route",
-    "Autonomy level",
     "canonical",
-    "exact",
     "Read Checkpoint",
     "Reference Routing",
     "State writes are checkpoints, not progress",
     "references/state-artifacts.md",
-    "references/trigger-autonomy.md",
     "references/completion-gates.md",
     "Loop State",
-    "last verification gap",
     "Memory",
-    "Evidence, Confidence, and Invalidation",
-    "FINAL_RESPONSE_READY",
-    "delivery boundary evidence",
-    "must not expand, narrow, reinterpret, waive, or replace",
-    "active run profile",
-    "when present",
-    "approved target",
-    "authorization",
+    "Evidence",
+    "Verification",
+    "outcome",
     "claim boundary",
-    "### 1. Plan slice",
-    "### 2. Act or probe",
-    "### 3. Sense and compare",
-    "### 4. Record and route",
-    "ITERATION_READY_FOR_VERIFY",
-    "NEXT_ITERATION` with fixable `Gap`",
+    "## Boundaries",
+    "## Slice Execution",
+    "## Routes",
+    "PASS_TO_FINAL",
+    "verification.Next_route == control-loop",
     "$goal-verify",
     "RETURN_TO_ALPHA_GOAL",
     "BLOCKED",
@@ -194,7 +206,7 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "## Checkpoint",
     "Run Profile",
     "Loop State",
-    "Current Phase: DISCOVERY | IMPLEMENTATION | HARDENING | VERIFICATION | FINAL_RESPONSE_READY | COMPLETE | BLOCKED",
+    "Current Phase: IMPLEMENTATION | HARDENING | VERIFICATION | FINAL_RESPONSE_READY | COMPLETE | BLOCKED",
     "Memory",
     "Confirmed Facts",
     "Iteration",
@@ -203,21 +215,6 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Verification Verdict",
     "## Latest Pointer",
     "Evidence, Confidence, and Invalidation"
-  ]],
-  ["control loop trigger and autonomy", "skills/control-loop/references/trigger-autonomy.md", [
-    "Trigger Contract",
-    "`manual`",
-    "`scheduled`",
-    "`webhook`",
-    "`verification-triggered`",
-    "Autonomy Ladder",
-    "`L1`: Suggest only",
-    "`L2`: Draft changes without applying",
-    "`L3`: Modify approved worktree and task-state; no commit/push",
-    "`L4`: Commit, push branch, and open/update PR/MR",
-    "`L5`: Merge/deploy only when explicitly authorized",
-    "If requested action exceeds the level",
-    "BLOCKED"
   ]],
   ["control loop completion gates", "skills/control-loop/references/completion-gates.md", [
     "Universal Completion Gates",
@@ -237,7 +234,7 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "NEXT_ITERATION",
     "fixable evidence",
     "same-goal fixable",
-    "target, scope, authority",
+    "outcome, scope, authority",
     "permission, tool, data, environment, credential",
     "checkpoint",
     "execution context only",
@@ -273,16 +270,14 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "control-state/latest.md",
     "contract status",
     "goal contract binding",
-    "verification-triggered binding",
     "NEXT_ITERATION",
     "loop actionability",
-    "autonomy action ceiling",
+    "checkpoint required",
     "latest binding",
     "checkpoint path",
-    "trigger",
-    "trigger event",
+    "verification binding",
+    "preflight",
     "requested action",
-    "autonomy level",
     "checkpoint loop state",
     "checkpoint memory",
     "evaluator route"
@@ -395,15 +390,15 @@ function validateRuntimeArtifactState(root: string, errors: string[], warnings: 
     const text = readIfFile(path.join(root, rel));
     if (!text) { errors.push(`${rel}: missing state-root doc`); continue; }
     for (const term of STATE_ROOT_DOC_REQUIRED_TERMS) if (!text.includes(term)) errors.push(`${rel}: missing state-root doc guidance: ${term}`);
-    if (!text.includes("last directory name of the current session directory path") && !text.includes("当前会话目录路径最后一个目录名")) errors.push(`${rel}: missing last-directory workspace slug guidance`);
+    if (!text.includes("slug(repo_root or Goal Contract target workspace)")) errors.push(`${rel}: missing stable workspace slug guidance`);
   }
   for (const rel of STATE_ROOT_SCRIPT_FILES) {
     const text = readIfFile(path.join(root, rel));
     if (!text) { errors.push(`${rel}: missing state-root script`); continue; }
-    if (!text.includes(".alphal-goal")) errors.push(`${rel}: missing .alphal-goal default state root`);
+    if (!text.includes(".alpha-goal")) errors.push(`${rel}: missing .alpha-goal default state root`);
     if (!text.includes("process.cwd()")) errors.push(`${rel}: state root must derive from process.cwd()`);
-    if (!text.includes("basename(session)")) errors.push(`${rel}: state root must use the session directory basename`);
-    if (/state\s*=\s*.*root/.test(text)) errors.push(`${rel}: state root must not derive from git root`);
+    if (!text.includes("repoRoot(session)") || !text.includes("slugWorkspace(workspaceRoot)")) errors.push(`${rel}: state root must use stable repo/workspace slug`);
+    if (/basename\(session\)/.test(text)) errors.push(`${rel}: state root must not use the session directory basename`);
   }
   const scanned = [...new Set([...STATE_ROOT_CORE_FILES, ...STATE_ROOT_DOC_FILES, ...STATE_ROOT_SCRIPT_FILES, "tools/validate_skills.ts"])];
   for (const rel of scanned) {
@@ -424,13 +419,14 @@ function validateScriptSurface(root: string, files: string[], errors: string[], 
 }
 
 function validateLegacyReferences(root: string, skillFiles: string[], errors: string[]): void {
-  const files = new Set(["AGENTS.md", "README.md", "README.en.md", "INSTALL.md", "MANIFEST.md", "templates/AGENTS.md", "templates/hooks.json", ...skillFiles.map(f => relative(root, f))]);
+  const files = new Set(["AGENTS.md", "README.md", "README.en.md", "README.zh-CN.md", "INSTALL.md", "MANIFEST.md", "templates/AGENTS.md", "templates/hooks.json", ...skillFiles.map(f => relative(root, f))]);
   for (const rel of files) {
     const file = path.join(root, rel); if (!isFile(file)) continue;
     const text = fs.readFileSync(file, "utf8");
     for (const legacy of LEGACY_SCRIPT_REFERENCES) if (text.includes(legacy)) errors.push(`${rel}: legacy non-TypeScript script reference remains: ${legacy}`);
     for (const legacy of LEGACY_RUN_MODE_REFERENCES) if (text.includes(legacy)) errors.push(`${rel}: legacy run-mode reference remains: ${legacy}`);
     for (const legacy of LEGACY_RUNTIME_ARTIFACT_REFERENCES) if (text.includes(legacy)) errors.push(`${rel}: split runtime artifact reference remains: ${legacy}`);
+    for (const [pattern, label] of LEGACY_EXTERNAL_GOAL_REFERENCES) if (pattern.test(text)) errors.push(`${rel}: ${label}`);
     if (/evidence[- ]verify/i.test(text)) errors.push(`${rel}: legacy evidence-verify prose remains`);
     for (const legacy of LEGACY_SKILL_REFERENCES) {
       const patterns = [`$${legacy}`, `skills/${legacy}`, `\`${legacy}\``];
@@ -452,35 +448,105 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
   const text = readIfFile(path.join(root, "skills/control-loop/SKILL.md"));
   const sectionOrder = [
     "## Execution Loop",
-    "## Execution Invariants",
-    "## Gates",
-    "## Preflight",
+    "## Boundaries",
+    "## Slice Execution",
     "## Reference Routing",
-    "## Iteration",
+    "## Routes",
   ];
   requireOrderedTerms("control-loop section order", text, sectionOrder, errors);
-  requireOrderedTerms("control-loop execution chain", markdownSection(text, "Execution Loop"), [
-    "Trigger -> Resolve Task -> Read Goal -> Read Checkpoint -> Plan Slice -> Act/Probe -> Evidence -> $goal-verify -> Gap?",
+  requireOrderedTerms("control-loop execution pseudocode", markdownSection(text, "Execution Loop"), [
     "Run the loop as behavior, not paperwork",
-    "- Resolve Task:",
-    "- Plan Slice:",
-    "- Act/Probe:",
-    "- Evidence:",
-    "- Verify Gap:",
+    "function control_loop(goal_contract):",
+    "goal = read_accepted_goal_contract(goal_contract)",
+    "checkpoint = read_checkpoint_when_present_or_required(goal)",
+    "assert_goal_boundaries(goal, checkpoint)",
+    "slice = plan_most_useful_verifiable_slice(goal, checkpoint)",
+    "assert_slice_boundaries(slice, goal, checkpoint)",
+    "if slice.kind == repair and not root_cause_confirmed:",
+    "return RETURN_TO_ALPHA_GOAL",
+    "if slice.kind not_in [implementation, hardening, repair]:",
+    "return BLOCKED",
+    "outcome = execute_slice(slice, goal, checkpoint)",
+    "if outcome.material_contradiction:",
+    "route_material_contradiction_without_patching_around_it(outcome, goal, checkpoint)",
+    "evidence = collect_raw_evidence(outcome, slice)",
+    "review = review_slice_outcome(slice, outcome, evidence, goal, checkpoint)",
+    "gap = compare_to_goal(evidence, review, goal.acceptance_evidence, goal.claim_boundary, material_defect_risk_surface(slice, goal))",
+    "return RETURN_TO_ALPHA_GOAL",
+    "return BLOCKED",
+    "if gap.harden:",
+    "verification = goal_verify_before_final_or_route",
+    "route = route_after_verification(verification)",
+    "return route",
   ], errors);
-  requireOrderedTerms("control-loop iteration order", markdownSection(text, "Iteration"), [
-    "### 1. Plan slice",
-    "### 2. Act or probe",
-    "### 3. Sense and compare",
-    "### 4. Record and route",
-    "ITERATION_READY_FOR_VERIFY",
-    "After `$goal-verify`",
+  requireOrderedTerms("control-loop boundary rules", markdownSection(text, "Boundaries"), [
+    "accepted Goal Contract is canonical",
+    "goal.has_required_fields",
+    "control-loop never creates or derives it",
+    "Do not mutate primary",
+    "$goal-verify",
+    "function assert_slice_boundaries(slice, goal, checkpoint)",
+    "slice.surface within goal.repo_surfaces",
+    "checkpoint.run_profile when present",
+    "integration_evidence_covers_each_repo_boundary",
+  ], errors);
+  requireOrderedTerms("control-loop slice execution rules", markdownSection(text, "Slice Execution"), [
+    "function plan_most_useful_verifiable_slice(goal, checkpoint):",
+    "slice = choose_highest_value_bounded_action_verifiable_now(goal, checkpoint)",
+    "slice.has_authorized_executable_action",
+    "slice.evidence_defined_before_acting",
+    "slice.validation_observer_available",
+    "slice.names_risks_assumptions_side_effects_cleanup_rollback_containment_stop_conditions",
+    "slice.follows_repo_integration_order when cross_repo_goal",
+    "return slice",
+    "function execute_slice(slice, goal, checkpoint):",
+    "material_contradiction",
+    "stop_without_patching_around_it",
+    "outcome(material_contradiction)",
+    "make_one_targeted_change_unless_coordinated_edits_required",
+    "requires_embedded_review_or_audit_or_loophole_finding",
+    "slice.kind in [implementation, hardening, repair]",
+    "standalone_final_judgment_without_goal_verify",
+    "preserve(failing_outputs)",
+    "deny(hiding_failed_outputs or rerunning_failures_away or summarizing_intentions_as_success)",
+    "record(external_side_effects and cleanup_or_rollback_containment_actions)",
+    "function review_slice_outcome(slice, outcome, evidence, goal, checkpoint):",
+    "evidence.is_fresh",
+    "slice.complete only_if evidence.changes_or_confirms(goal.outcome)",
+    "deny(slice_complete_or_success_claim)",
+    "inspect(material_defect_risk_surface(slice, goal))",
+    "limit_claim_to_strongest_direct_evidence_and_checked_surface",
+    "function compare_to_goal(evidence, review, acceptance_evidence, claim_boundary, risk_surface):",
+    "authorized_acceptance_equivalent_fallback",
+    "direction_valid_and_weak(evidence or edge or compatibility or cleanup or verification_gap)",
+    "return gap.harden",
+  ], errors);
+  requireOrderedTerms("control-loop routes", markdownSection(text, "Routes"), [
+    "PASS_TO_FINAL",
+    "NEXT_ITERATION",
+    "verification.Next_route == control-loop",
+    "verification.Next_route == alpha-goal",
+    "verification.Next_route == BLOCKED",
+    "unrecognized verifier route cannot drive execution",
+    "if missing(permission or tool or data or environment or credential or user_owned_decision):",
+    "return BLOCKED",
+    "Stop/re-route",
+    "changed_or_unclear(outcome or scope or authority or source_reference or acceptance_evidence or non_goal or decision_boundary or Trigger_Contract or claim_boundary)",
+    "changed_or_unclear(run_profile or risk or assumption or stop_condition or user_owned_decision or new_subsystem_or_skill or edits_beyond_approved_boundary)",
+    "if user_or_goal_decision_required:",
+    "return RETURN_TO_ALPHA_GOAL",
+    "return BLOCKED",
+    "unrecognized verifier output cannot support progress",
   ], errors);
   for (const forbidden of [
     "Goal Contract, `run-profile.md`, `loop-state.md`, and `memory.md` exist or can be initialized only from authorized task records",
+    "verification." + "Gap" + ".kind",
+    "verification." + "gap",
+    "same_" + "goal_gap",
+    "changed_target_scope_" + "authority_or_claim",
     "Before `ITERATION_READY_FOR_VERIFY`, update:",
     "## Trigger Contract",
-    "## Autonomy Ladder",
+    "## " + "Auton" + "omy " + "Ladder",
     "## Universal Completion Gates",
     "## State I/O Contract",
     "## Artifact Schemas",
@@ -503,16 +569,6 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
     "## Evidence",
     "## Verification",
     "## Latest Pointer",
-  ], errors);
-  requireOrderedTerms("control-loop trigger autonomy reference", readIfFile(path.join(root, "skills/control-loop/references/trigger-autonomy.md")), [
-    "## Trigger Contract",
-    "`manual`",
-    "`scheduled`",
-    "`webhook`",
-    "`verification-triggered`",
-    "## Autonomy Ladder",
-    "`L1`",
-    "`L5`",
   ], errors);
   requireOrderedTerms("control-loop completion gates reference", readIfFile(path.join(root, "skills/control-loop/references/completion-gates.md")), [
     "## Universal Completion Gates",
@@ -547,9 +603,9 @@ function requireOrderedTerms(label: string, text: string, terms: string[], error
 
 function validateSchemaConsistency(root: string, errors: string[]): void {
   const alpha = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
-  const goalContractFields = ["Contract status", "Issued by", "Technical Context", "Discovery notes", "Interview ledger", "Intent", "Outcome", "Scope", "Repo surfaces", "Acceptance evidence", "Non-goals", "Decision boundary", "Claim boundary", "Trigger Contract", "Autonomy Level"];
+  const goalContractFields = ["Contract status", "Issued by", "Technical Context", "Discovery notes", "Interview ledger", "Intent", "Outcome", "Scope", "Repo surfaces", "Acceptance evidence", "Non-goals", "Decision boundary", "Claim boundary", "Trigger Contract"];
   for (const term of goalContractFields) if (!alpha.includes(term)) errors.push(`alpha Goal Contract content missing field: ${term}`);
-  const designFields = ["Contract status", "Intent", "Root Cause", "Outcome", "Scope", "Repo surfaces", "Constraints", "Acceptance evidence", "Dependency/integration order", "Non-goals", "Decision boundary", "Claim boundary", "Trigger contract", "Autonomy level", "Blocking gates", "Ledger", "Next"];
+  const designFields = ["Contract status", "Intent", "Root Cause", "Outcome", "Scope", "Repo surfaces", "Constraints", "Acceptance evidence", "Dependency/integration order", "Non-goals", "Decision boundary", "Claim boundary", "Trigger contract", "Blocking gates", "Ledger", "Next"];
   const designStart = Math.max(0, alpha.toLowerCase().indexOf("design summary"));
   const designScoped = alpha.slice(designStart).toLowerCase();
   const designPos = designFields.map(field => designScoped.indexOf(`| ${field.toLowerCase()} |`));
@@ -590,33 +646,39 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
     for (const term of [COMPACT_RECOVERY_HOOK_MARKER, "^compact$", "$alpha-goal", "$control-loop", "$goal-verify", "goal-contract.md first", "control-state/latest.md", "checkpoint.md", "Verification", "Evidence", "defect/risk", "unclaimed"]) {
       if (!hooksTemplate.includes(term)) errors.push(`${HOOKS_TEMPLATE}: missing compact recovery hook term: ${term}`);
     }
-    for (const term of ["$control-loop: use for bounded implementation or hardening after an explicit goal specification", "$goal-verify: use for goal completion/readiness/review/audit verification"]) {
+    for (const term of ["$control-loop: use for bounded implementation or hardening after an accepted Goal Contract authorizes it", "$goal-verify: use for goal completion/readiness/review/audit verification"]) {
       if (!hooksTemplate.includes(term)) errors.push(`${HOOKS_TEMPLATE}: missing candidate skill semantic guard: ${term}`);
     }
     if (/evidence[- ]verify/i.test(hooksTemplate)) errors.push(`${HOOKS_TEMPLATE}: legacy evidence-verify hook prose remains`);
     if (hooksTemplate.includes(`[${COMPACT_RECOVERY_HOOK_MARKER}]`)) errors.push(`${HOOKS_TEMPLATE}: compact recovery marker must not be printed to model context`);
   }
   const readme = readIfFile(path.join(root, "README.md"));
+  for (const name of REQUIRED_SKILL_NAMES) if (!readme.includes(`skills/${name}/`) || !readme.includes(`\`${name}\``)) errors.push(`README.md missing public skill entry: ${name}`);
   if (!readme.includes("当前代码事实只描述现状")) errors.push("README.md missing current-state-not-desired-state principle");
   if (!readme.includes("执行或加固已授权 slice")) errors.push("README.md must describe control-loop as execution-first");
-  if (!readme.includes("Act/Probe -> Evidence -> $goal-verify -> Gap?")) errors.push("README.md workflow must include evidence and goal-verify");
+  if (!readme.includes("Act -> Evidence -> $goal-verify -> Gap?")) errors.push("README.md workflow must include evidence and goal-verify");
   for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "discovery notes", "interview ledger", "15,000 word+punctuation units", "失效条件"]) if (!readme.includes(term)) errors.push(`README.md missing persistent-loop term: ${term}`);
   const readmeEn = readIfFile(path.join(root, "README.en.md"));
+  for (const name of REQUIRED_SKILL_NAMES) if (!readmeEn.includes(`skills/${name}/`) || !readmeEn.includes(`\`${name}\``)) errors.push(`README.en.md missing public skill entry: ${name}`);
   if (!readmeEn.includes("Current code facts describe current state")) errors.push("README.en.md missing current-state-not-desired-state principle");
   if (!readmeEn.includes("Execute or harden an authorized slice")) errors.push("README.en.md must describe control-loop as execution-first");
-  if (!readmeEn.includes("Act/Probe -> Evidence -> $goal-verify -> Gap?")) errors.push("README.en.md workflow must include evidence and goal-verify");
+  if (!readmeEn.includes("Act -> Evidence -> $goal-verify -> Gap?")) errors.push("README.en.md workflow must include evidence and goal-verify");
   for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "discovery notes", "interview ledger", "15,000 word+punctuation units", "invalidation"]) if (!readmeEn.includes(term)) errors.push(`README.en.md missing persistent-loop term: ${term}`);
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
+  for (const name of REQUIRED_SKILL_NAMES) if (!installDoc.includes(name)) errors.push(`INSTALL.md missing public skill: ${name}`);
   if (!installDoc.includes("--no-sync-user-hooks")) errors.push("INSTALL.md missing --no-sync-user-hooks option");
   if (!installDoc.includes(HOOKS_TEMPLATE)) errors.push("INSTALL.md missing hooks template behavior");
   if (!installDoc.includes("codex-compact-skill-recovery")) errors.push("INSTALL.md missing legacy hook migration behavior");
   if (/tmp_codex_home\/skills\/[^"`\s]+\/scripts\//.test(installDoc)) errors.push("INSTALL.md smoke test must not require runtime skill scripts");
+  if (!installDoc.includes("git rev-parse --show-toplevel")) errors.push("INSTALL.md smoke test must derive workspace slug from repo root");
+  if (/basename "\$PWD"|\$\(basename "\$PWD"\)/.test(installDoc)) errors.push("INSTALL.md smoke test must not derive state root from current session directory");
   for (const term of ["set -euo pipefail", "export CODEX_HOME", "Contract status: accepted", "Discovery notes", "Interview ledger", "Trigger Contract:", "goal-contract", "checkpoint", "control-state/latest.md", "verification-triggered recovery", "15,000 word+punctuation units", "without over-compressing", "without requiring runtime skill scripts", "Run Profile, Loop State, Verification, and Evidence"]) if (!installDoc.includes(term)) errors.push(`INSTALL.md missing persistent-loop term: ${term}`);
   const manifest = readIfFile(path.join(root, "MANIFEST.md"));
+  for (const name of REQUIRED_SKILL_NAMES) if (!manifest.includes(`skills/${name}/`)) errors.push(`MANIFEST.md missing public skill directory: ${name}`);
   if (!manifest.includes(HOOKS_TEMPLATE) || !manifest.includes(COMPACT_RECOVERY_HOOK_MARKER)) errors.push("MANIFEST.md missing hooks template marker");
   if (!manifest.includes("marker family") || !manifest.includes("codex-compact-skill-recovery")) errors.push("MANIFEST.md missing hook upgrade strategy");
   if (!manifest.includes("act or harden authorized slices")) errors.push("MANIFEST.md must describe control-loop as execution-first");
-  for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "Trigger Contract", "Autonomy Level", "global recovery index", "invalidation", "15,000 word+punctuation units"]) if (!manifest.includes(term)) errors.push(`MANIFEST.md missing persistent-loop term: ${term}`);
+  for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "Trigger Contract", "global recovery index", "invalidation", "15,000 word+punctuation units"]) if (!manifest.includes(term)) errors.push(`MANIFEST.md missing persistent-loop term: ${term}`);
   const templateAgents = readIfFile(path.join(root, "templates/AGENTS.md"));
   if (/clearified/i.test(templateAgents)) errors.push("templates/AGENTS.md contains misspelling: clearified");
   if (!templateAgents.includes("explicit user feedback, accepted contracts, or source-backed task records")) errors.push("templates/AGENTS.md missing autonomous execution clarity sources");
@@ -645,8 +707,12 @@ function validateRuntimeScriptBehavior(root: string, errors: string[]): void {
 
     writeTaskFixture(tmp, path.basename(root), "draft-contract", { contractStatus: "draft", runProfile: false, loopState: false, memory: false, evidence: false, verification: false, latest: false });
     expectExit("mutation-preflight draft Goal Contract blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "draft-contract"), 1, errors);
-    writeTaskFixture(tmp, path.basename(root), "open-pr-no-checkpoint", { runProfile: false, loopState: false, memory: false, evidence: false, verification: false, latest: false, autonomyLevel: "L4 Open PR" });
-    expectExit("mutation-preflight L4 action without checkpoint blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "open-pr-no-checkpoint", "--requested-action", "open-pr"), 1, errors);
+    writeTaskFixture(tmp, path.basename(root), "incomplete-contract", { completeGoalFields: false, runProfile: false, loopState: false, memory: false, evidence: false, verification: false, latest: false });
+    expectExit("mutation-preflight incomplete Goal Contract blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "incomplete-contract"), 1, errors);
+    writeTaskFixture(tmp, path.basename(root), "latest-none-valid", { runProfile: false, loopState: false, memory: false, evidence: false, verification: false, latest: true });
+    expectExit("mutation-preflight latest Checkpoint none passes", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "latest-none-valid"), 0, errors);
+    writeTaskFixture(tmp, path.basename(root), "open-pr-no-checkpoint", { runProfile: false, loopState: false, memory: false, evidence: false, verification: false, latest: false });
+    expectExit("mutation-preflight open-pr action without checkpoint blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "open-pr-no-checkpoint", "--requested-action", "open-pr"), 1, errors);
     writeTaskFixture(tmp, path.basename(root), "side-effect-no-checkpoint", { runProfile: false, loopState: false, memory: false, evidence: false, verification: false, latest: false });
     expectExit("mutation-preflight side effect without checkpoint blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "side-effect-no-checkpoint", "--external-side-effects", "deploy"), 1, errors);
 
@@ -654,14 +720,16 @@ function validateRuntimeScriptBehavior(root: string, errors: string[]): void {
     expectExit("mutation-preflight stale Goal Contract binding blocks when run-profile exists", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "stale-contract-binding"), 1, errors);
     writeTaskFixture(tmp, path.basename(root), "stale-latest", { latestTarget: "valid" });
     expectExit("mutation-preflight stale latest binding blocks when latest exists", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "stale-latest"), 1, errors);
-    writeTaskFixture(tmp, path.basename(root), "valid-verification-triggered", { runMode: "verification-triggered", triggerContract: "verification-triggered from checkpoint Verification; bind Goal Contract and same goal Gap with Next route control-loop", verificationVerdict: "NEXT_ITERATION", verificationNextRoute: "control-loop", verificationGap: "same-goal fixable fixture gap" });
-    expectExit("mutation-preflight verification-triggered task passes", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "valid-verification-triggered"), 0, errors);
-    writeTaskFixture(tmp, path.basename(root), "stale-verification-section", { runMode: "verification-triggered", triggerContract: "verification-triggered from checkpoint Verification; bind Goal Contract and same goal Gap with Next route control-loop", verificationTarget: "other-task", verificationVerdict: "NEXT_ITERATION", verificationNextRoute: "control-loop", verificationGap: "same-goal fixable fixture gap" });
+    writeTaskFixture(tmp, path.basename(root), "latest-missing-checkpoint", {});
+    removeLatestCheckpointField(tmp, path.basename(root));
+    expectExit("mutation-preflight latest missing Checkpoint blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "latest-missing-checkpoint"), 1, errors);
+    writeTaskFixture(tmp, path.basename(root), "stale-verification-section", { verificationTarget: "other-task", verificationVerdict: "NEXT_ITERATION", verificationNextRoute: "control-loop", verificationGap: "same-goal fixable fixture gap" });
     expectExit("mutation-preflight stale Verification binding blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "stale-verification-section"), 1, errors);
-    writeTaskFixture(tmp, path.basename(root), "pass-verification-recovery", { runMode: "verification-triggered", triggerContract: "verification-triggered from checkpoint Verification; bind Goal Contract and same goal Gap with Next route control-loop", verificationVerdict: "PASS_TO_FINAL", verificationNextRoute: "none", verificationGap: "None" });
-    expectExit("mutation-preflight PASS verification cannot trigger recovery", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "pass-verification-recovery"), 1, errors);
-    writeTaskFixture(tmp, path.basename(root), "autonomy-overreach", { requestedAction: "merge", autonomyLevel: "L3 Modify worktree" });
-    expectExit("mutation-preflight autonomy action ceiling blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "autonomy-overreach"), 1, errors);
+    writeTaskFixture(tmp, path.basename(root), "discovery-loop-phase", { loopPhase: "DISCOVERY" });
+    expectExit("mutation-preflight discovery loop phase blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "discovery-loop-phase"), 1, errors);
+    const primaryRepo = makePrimaryBranchRepo(tmp);
+    writeTaskFixture(tmp, path.basename(root), "primary-branch-target", { runProfile: false, loopState: false, memory: false, evidence: false, verification: false, latest: false });
+    expectExit("mutation-preflight primary branch target blocks", runTsx(root, env, "skills/control-loop/scripts/mutation-preflight.ts", "--task", "primary-branch-target", primaryRepo), 1, errors);
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
@@ -678,14 +746,14 @@ function expectExit(label: string, result: ReturnType<typeof spawnSync>, expecte
   }
 }
 
-function writeTaskFixture(tmp: string, workspace: string, task: string, options: { goalContract?: boolean; contractStatus?: string; issuedBy?: string; triggerContract?: string; runProfile?: boolean; loopState?: boolean; memory?: boolean; evidence?: boolean; verification?: boolean; latest?: boolean; runProfileGoalContract?: boolean; verificationFields?: boolean; runMode?: string; requestedAction?: string; autonomyLevel?: string; latestTarget?: string; verificationTarget?: string; verificationGap?: string; verificationVerdict?: string; verificationNextRoute?: string; defectRiskSweep?: string; unclaimedIssues?: string; negativeCases?: string; goalSatisfaction?: string; finalClaimAllowed?: string }): void {
+function writeTaskFixture(tmp: string, workspace: string, task: string, options: { goalContract?: boolean; contractStatus?: string; issuedBy?: string; completeGoalFields?: boolean; runProfile?: boolean; loopState?: boolean; memory?: boolean; evidence?: boolean; verification?: boolean; latest?: boolean; runProfileGoalContract?: boolean; verificationFields?: boolean; requestedAction?: string; loopPhase?: string; latestTarget?: string; verificationTarget?: string; verificationGap?: string; verificationVerdict?: string; verificationNextRoute?: string; defectRiskSweep?: string; unclaimedIssues?: string; negativeCases?: string; goalSatisfaction?: string; finalClaimAllowed?: string }): void {
   const dir = path.join(tmp, workspace || "workspace", task);
   fs.mkdirSync(dir, { recursive: true });
   const goalPath = path.join(dir, "goal-contract.md");
   const goalContract = options.goalContract ?? true;
   const contractStatus = options.contractStatus ?? "accepted";
   const issuedBy = options.issuedBy ?? "alpha-goal";
-  const triggerContract = options.triggerContract ?? "manual";
+  const completeGoalFields = options.completeGoalFields ?? true;
   const runProfileEnabled = options.runProfile ?? true;
   const loopStateEnabled = options.loopState ?? true;
   const memoryEnabled = options.memory ?? true;
@@ -694,18 +762,30 @@ function writeTaskFixture(tmp: string, workspace: string, task: string, options:
   const latestEnabled = options.latest ?? true;
   const runProfileGoalContract = options.runProfileGoalContract ?? true;
   const verificationFields = options.verificationFields ?? true;
-  const runMode = options.runMode ?? "manual";
   const requestedAction = options.requestedAction ?? "modify-worktree";
-  const autonomyLevel = options.autonomyLevel ?? "L3 Modify worktree";
-  if (goalContract) fs.writeFileSync(goalPath, [
+  const goalContractLines = [
     `Contract status: ${contractStatus}`,
     `Issued by: ${issuedBy}`,
     "Discovery notes: fixture",
     "Interview ledger: fixture",
-    `Trigger Contract: ${triggerContract}`,
-    `Autonomy Level: ${autonomyLevel}`,
-    "",
-  ].join("\n"));
+  ];
+  if (completeGoalFields) goalContractLines.splice(4, 0,
+    "Technical Context: fixture context",
+    "Intent: fixture intent",
+    "Outcome: fixture outcome",
+    "Scope: fixture scope",
+    "Repo surfaces: fixture repo surfaces",
+    "Constraints: fixture constraints",
+    "Assumptions + resolutions: fixture assumptions",
+    "Acceptance evidence: fixture acceptance",
+    "Dependency/integration order: fixture order",
+    "Non-goals: fixture non-goals",
+    "Decision boundary: fixture decision boundary",
+    "Claim boundary: fixture claim boundary",
+    "Trigger Contract: manual",
+    "Handoff ledger: fixture handoff",
+  );
+  if (goalContract) fs.writeFileSync(goalPath, [...goalContractLines, ""].join("\n"));
   const verificationDir = path.join(tmp, workspace || "workspace", options.verificationTarget ?? task);
   const verificationGap = options.verificationGap ?? "None";
   const goalSatisfaction = options.goalSatisfaction ?? "fixture goal evidence covers explicit contract";
@@ -715,8 +795,8 @@ function writeTaskFixture(tmp: string, workspace: string, task: string, options:
   const finalClaimAllowed = options.finalClaimAllowed ?? "yes";
   const verificationVerdict = options.verificationVerdict ?? "PASS_TO_FINAL";
   const verificationNextRoute = options.verificationNextRoute ?? "none";
-  const loopPhase = runMode === "verification-triggered" ? "HARDENING" : "VERIFICATION";
-  const checkpointEnabled = runProfileEnabled || loopStateEnabled || memoryEnabled || evidenceEnabled || verificationEnabled || latestEnabled;
+  const loopPhase = options.loopPhase ?? "VERIFICATION";
+  const checkpointEnabled = runProfileEnabled || loopStateEnabled || memoryEnabled || evidenceEnabled || verificationEnabled;
   if (!checkpointEnabled) {
     if (latestEnabled) writeLatestPointer(tmp, workspace, task, goalPath, "none", "IMPLEMENTATION", "none", options.latestTarget);
     return;
@@ -731,14 +811,11 @@ function writeTaskFixture(tmp: string, workspace: string, task: string, options:
   if (runProfileEnabled) checkpoint.push(
     "## Run Profile",
     "Rule: Controls execution only; must not expand, narrow, reinterpret, waive, or replace the Goal Contract.",
-    `Run mode: ${runMode}`,
-    "Trigger event: none",
     `Requested action: ${requestedAction}`,
     "Discovery source: goal-spec-only",
     "External side effects allowed: none",
     "Human checkpoint: none",
     "Evaluator route: $goal-verify before final claim",
-    `Autonomy level: ${autonomyLevel}`,
     "",
   );
   if (loopStateEnabled) checkpoint.push(
@@ -803,7 +880,7 @@ function writeTaskFixture(tmp: string, workspace: string, task: string, options:
     "",
   ]));
   fs.writeFileSync(path.join(dir, "checkpoint.md"), checkpoint.join("\n"));
-  const latestRoute = runMode === "verification-triggered" ? verificationNextRoute : "none";
+  const latestRoute = "none";
   const latestPhase = loopPhase;
   if (latestEnabled) writeLatestPointer(tmp, workspace, task, goalPath, path.join(dir, "checkpoint.md"), latestPhase, latestRoute, options.latestTarget);
 }
@@ -824,6 +901,20 @@ function writeLatestPointer(tmp: string, workspace: string, task: string, goalPa
     "Updated at: 2026-06-23T00:00:00Z",
     "",
   ].join("\n"));
+}
+
+function removeLatestCheckpointField(tmp: string, workspace: string): void {
+  const latest = path.join(tmp, workspace || "workspace", "control-state", "latest.md");
+  const text = fs.readFileSync(latest, "utf8");
+  fs.writeFileSync(latest, text.split(/\r?\n/).filter(line => !/^[ \t]*Checkpoint:/i.test(line)).join("\n"));
+}
+
+function makePrimaryBranchRepo(tmp: string): string {
+  const repo = path.join(tmp, "primary-branch-repo");
+  fs.mkdirSync(repo, { recursive: true });
+  spawnSync("git", ["init", "-b", "main"], { cwd: repo, encoding: "utf8" });
+  fs.writeFileSync(path.join(repo, ".gitignore"), ".worktrees/\n");
+  return repo;
 }
 
 function validateNoAutoDownloadRunner(root: string, files: string[], errors: string[]): void {

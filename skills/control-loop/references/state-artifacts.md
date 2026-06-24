@@ -1,15 +1,15 @@
 # State Artifacts
 
-Use this schema only when initializing, repairing, or validating `checkpoint.md` or the global latest pointer. State writes are checkpoints, not progress; do not normalize state unless missing or stale state blocks authorized execution, recovery, conditional trigger handling, durable evidence handoff, or verification.
+Use this schema only when initializing, repairing, or validating `checkpoint.md` or the global latest pointer. State writes are checkpoints, not progress; do not normalize state unless missing or stale state blocks authorized execution, recovery, durable evidence handoff, or verification.
 
 ## Loop I/O
 
 Use the matching task files as loop I/O:
-- `goal-contract.md`: canonical accepted goal, contract status, discovery notes, interview ledger, acceptance evidence, non-goals, authority, claim boundary, Trigger Contract, and Autonomy Level.
+- `goal-contract.md`: canonical accepted goal, contract status, discovery notes, interview ledger, outcome, scope, acceptance evidence, non-goals, authority, Trigger Contract, and claim boundary.
 - `checkpoint.md`: conditional task checkpoint that may contain run profile, loop state, memory, iteration, evidence, and verification sections.
 - `<state-root>/control-state/latest.md`: optional global recovery index used only to find the latest accepted task when task identity is ambiguous.
 
-`checkpoint.md` is required only for scheduled, webhook, verification-triggered, external side effects, actions above L3, human checkpoints, multi-iteration recovery, durable evidence handoff, or persisted verification.
+`checkpoint.md` is required only for external side effects, commit/push/open-pr/merge actions, human checkpoints, multi-iteration recovery, durable evidence handoff, or persisted verification.
 
 ## Checkpoint
 
@@ -23,18 +23,15 @@ Updated at:
 
 ## Run Profile
 Rule: Controls execution only; must not expand, narrow, reinterpret, waive, or replace the Goal Contract.
-Run mode: manual | scheduled | webhook | verification-triggered
-Trigger event: none | schedule id | webhook id | verification gap path
 Requested action: suggest | draft | modify-worktree | commit | push | open-pr | merge
 Discovery source: goal-spec-only | named source authorized by Goal Contract/task records
 External side effects allowed: none | explicit list outside approved worktree and Alpha Goal state root
 Human checkpoint: none | explicit checkpoint before listed side effects or claims
 Evaluator route: $goal-verify before final claim | named evaluator plus $goal-verify
-Autonomy level: L1 Suggest only | L2 Draft changes | L3 Modify worktree | L4 Open PR | L5 Merge automatically
 
 ## Loop State
 Current Objective:
-Current Phase: DISCOVERY | IMPLEMENTATION | HARDENING | VERIFICATION | FINAL_RESPONSE_READY | COMPLETE | BLOCKED
+Current Phase: IMPLEMENTATION | HARDENING | VERIFICATION | FINAL_RESPONSE_READY | COMPLETE | BLOCKED
 Completed:
 Pending:
 Known Risks:
