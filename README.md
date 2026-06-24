@@ -2,7 +2,7 @@
 
 语言：简体中文 | [English](README.en.md)
 
-Alpha Goal 是面向 Goal Engineering 的最小持久闭环技能集。它帮助 agent 先发现事实再提问，从已接受 Goal Contract 和必要 checkpoint 恢复执行，在明确边界内行动，并且只在证据支持的范围内做最终声明。
+Alpha Goal 是用于 Goal Engineering 的最小持久闭环技能集。它要求智能体先发现事实再提问，基于已接受的 Goal Contract 和必要 checkpoint 恢复执行，在明确边界内行动，并且只在证据支持的范围内做最终声明。
 
 ## 适用场景
 
@@ -25,9 +25,7 @@ npx --no-install tsx tools/validate_skills.ts .
 ```
 
 安装脚本会在 `$HOME/.codex/skills/` 下为三个公开技能创建直接软链接，并清理指向本仓库旧公开技能的软链接。
-校验脚本会强制整个 `skills/` 树不超过 15,000 word+punctuation units；计数口径是单词数加标点/符号数。这个预算用于保留 Persistent Goal Loop 的触发行为、持久状态、记忆、授权门、行为级 gate 和 evaluator feedback，避免过分压缩技能正文。
-
-运行态记录使用用户级 Alpha Goal state root：`${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`，其中 `<workspace-slug>` 来自稳定 workspace identity：`slug(repo_root or Goal Contract target workspace)`。`alpha-goal` 默认只写已接受的 `goal-contract.md`，其中包含 discovery notes 和 interview ledger；`checkpoint.md` 是按恢复、触发、证据移交或验证需要创建的唯一任务级条件检查点；`control-state/latest.md` 只是全局恢复索引，不承载阶段内容。
+校验脚本会检查整个 `skills/` 树是否控制在 15,000 word+punctuation units 以内；计数口径是单词数加标点/符号数。这个预算用于保留 Persistent Goal Loop 的触发行为、持久状态、记忆、授权门槛（authority gates）、行为级门槛（behavior-level gates）和评估反馈，避免过分压缩技能正文。
 
 ## 使用示例
 
@@ -44,11 +42,11 @@ $control-loop 根据已接受 Goal Contract 执行或加固下一轮最有用且
 | --- | --- |
 | `alpha-goal` | 在开始工作前澄清意图、边界、验收证据和下一步安全路由。 |
 | `control-loop` | 执行或加固已授权 slice；`goal-contract.md` 是必需输入，`checkpoint.md` 仅作为条件检查点。 |
-| `goal-verify` | 验证目标完成、声明边界、证据覆盖和 material 未声明缺陷/风险，并输出下一轮 Gap。 |
+| `goal-verify` | 验证目标完成、声明边界、证据覆盖和重要但未声明的缺陷/风险（material unclaimed defects/risks），并输出下一轮 Gap。 |
 
 ## 文档
 
-- [INSTALL.md](INSTALL.md)：安装选项和 smoke test。
+- [INSTALL.md](INSTALL.md)：安装选项和冒烟测试。
 - [MANIFEST.md](MANIFEST.md)：公开技能、脚本和运行时产物清单。
 - [skills/alpha-goal/SKILL.md](skills/alpha-goal/SKILL.md)：默认入口和路由规则。
 - [skills/control-loop/SKILL.md](skills/control-loop/SKILL.md)：Goal Contract 驱动的有界行动闭环契约。
@@ -71,9 +69,9 @@ Alpha Goal 让 agent 工作保持目标明确、行动有界、声明受证据�
 
 - 先发现，再澄清：提问前先检查本地事实、文档、状态和既有契约，让用户注意力只用于他们真正拥有的选择。
 - 证据先于授权：当前代码事实只描述现状；期望行为来自用户意图、规格、issue 或已接受契约。
-- 目标先于行动：outcome、scope、non-goals、acceptance evidence、决策 owner 和 claim boundary 共同限定什么可以被改变。
+- 目标先于行动：结果（outcome）、范围（scope）、非目标（non-goals）、验收证据（acceptance evidence）、决策负责人（decision owner）和声明边界（claim boundary）共同限定什么可以被改变。
 - 只做有用建模：只有依赖、扰动和风险会影响安全控制、验证或路由时，才把它们纳入模型。
-- 持久状态：`goal-contract.md` 是 `alpha-goal` 的默认产物，直接包含发现记录、访谈记录和最终契约；`checkpoint.md` 按需承载 run profile、loop state、iteration、evidence、verification 和带证据、置信度、失效条件的 memory；`control-state/latest.md` 只在任务身份不明时指向最新可恢复的已接受任务。
+- 持久状态：`goal-contract.md` 是 `alpha-goal` 的默认产物，直接包含发现记录、访谈记录和最终契约；`checkpoint.md` 按需承载运行档案（run profile）、循环状态（loop state）、迭代、证据、验证，以及带证据、置信度、失效条件的记忆（memory）；`control-state/latest.md` 只在任务身份不明时指向最新可恢复的已接受任务。
 - 有界执行：优先选择可取证的有界动作或定向变更，而不是宽泛重构和猜测式清理；已接受契约、必要 Run Profile 和仓库策略共同约束动作权限。
-- 独立验证：final/ready/safe/complete/repair/review 声明需要新鲜证据和 defect/risk sweep，并且要与执行过程分离检查。
+- 独立验证：最终、就绪、安全、完成、修复或评审等声明需要新鲜证据和缺陷/风险扫描（defect/risk sweep），并且要与执行过程分离检查。
 - 诚实路由：目标不清回到 `alpha-goal`，同一目标内可修复的执行缺口回到 `control-loop`，证据或审查面不足的最终声明继续进入 `goal-verify`。
