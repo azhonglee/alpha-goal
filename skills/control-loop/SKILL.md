@@ -24,10 +24,14 @@ function control_loop(goal_contract):
   while true:
     slice = plan_most_useful_verifiable_slice(goal, checkpoint)
     assert_slice_boundaries(slice, goal, checkpoint)
+    if slice.kind == repair and not root_cause_confirmed:
+      return RETURN_TO_ALPHA_GOAL
+    if slice.kind not_in [implementation, hardening, repair]:
+      return BLOCKED
 
     outcome = execute_slice(slice, goal, checkpoint)
-    if is_route(outcome):
-      return outcome.route
+    if outcome.material_contradiction:
+      return route_material_contradiction_without_patching_around_it(outcome, goal, checkpoint)
 
     evidence = collect_raw_evidence(outcome, slice)
     review = review_slice_outcome(slice, outcome, evidence, goal, checkpoint)
@@ -103,22 +107,16 @@ function execute_slice(slice, goal, checkpoint):
   check(slice.assumptions, slice.stop_conditions)
 
   if material_contradiction:
-    return route_material_contradiction_without_patching_around_it()
+    stop_without_patching_around_it()
+    return outcome(material_contradiction)
 
-  if slice.kind == repair and not root_cause_confirmed:
-    return route(RETURN_TO_ALPHA_GOAL)
-
-  if slice.kind in [implementation, hardening, repair]:
-    make_one_targeted_change_unless_coordinated_edits_required()
+  make_one_targeted_change_unless_coordinated_edits_required()
 
   if slice.requires_embedded_review_or_audit_or_loophole_finding:
     require(slice.kind in [implementation, hardening, repair])
     require(slice.authorized_by_goal and slice.embedded_in_implementation_or_hardening)
     allow(collect_evidence and apply_same_goal_fixes)
     deny(standalone_final_judgment_without_goal_verify)
-
-  if slice.kind not_in [implementation, hardening, repair]:
-    return route(BLOCKED)
 
   preserve(failing_outputs)
   preserve(unrelated_user_changes)
