@@ -232,7 +232,7 @@ Track used modes in state to prevent repetition.
 
 Write the Goal Contract to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md`; copy to `docs/specs/YYYYMMDD-<TaskName>.md` when useful or required by repo convention.
 The state-root `goal-contract.md` is canonical. Repo specs are mirrors or references only; conflicts route back to `alpha-goal`.
-Keep `Contract status: draft` until user confirmation or an explicit workspace/user contract authorizes autonomous launch. `$control-loop` may execute only an accepted Goal Contract.
+Keep `Contract status: draft` until user confirmation.
 
 Required Content:
 - Contract status [contract_status]
@@ -273,7 +273,7 @@ Use `request_user_input` to ask for if need Technical Solution.
 - Ask after each section whether it looks right so far
 - Cover: architecture, components, data flow, error handling, testing
 - Be ready to go back and clarify if something doesn't make sense
-- Update the Goal Contract with the Technical Solution After each section
+- Update the Technical Solution Content in Goal Contract After each section
 
 ### Phase 6: Artifact Review
 
