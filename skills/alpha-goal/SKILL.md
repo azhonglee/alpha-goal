@@ -8,7 +8,7 @@ description: "Must use for any engineering/design/implementation requests."
 ## Mission
 `alpha-goal` owns workflow control for goal definition.
 
-Discover facts, Clarify user intent, Identify outcome, Identify scope, Identify constraints, Identify acceptance evidence, Identify decision boundaries, Produce the canonical Goal Contract
+Loop Q&A until you really understand the requirements fully and design a perfect solution.
 
 ## Boundaries
 - alpha-goal does not implement, verify completion, make final-ready or complete claims
@@ -51,7 +51,7 @@ Loop Q&A until clarity score >= `0.92` and solution clarity >= `0.95` and readin
 
 Readiness gates = Goal Gates, Authority Gates, Context Gates, Repair Gate; exclude review, final user confirmation, accepted contract status, and the Before Handoff Checklist.
 
-### Loop Q&A
+### Q&A Loop
 
 **Step 1: Prepare a question**
 
@@ -83,7 +83,7 @@ Present options conversationally with recommendation and reasoning first.
 Prompt format:
 
 ```text
-Round {n} | Target: {weakest_dimension} | Clarity: {score}%
+Round {n} | Target: {highest_leverage_dimension} | Clarity: {score}%
 {question}
 ```
 
@@ -155,8 +155,9 @@ Follow the book template in `references/goal-contract-book.md` to write the Goal
 
 ### Phase 6: Ask for Confirmation
 
-Present the Goal Contract Summary with tabular format first.
+Present the Goal Contract Summary first.
 
+TUI Presentation Style:
 ```markdown
 Goal Contract Summary (Design Summary)
 | Field | Value |

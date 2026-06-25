@@ -1,5 +1,7 @@
 <!-- AUTONOMY DIRECTIVE — DO NOT REMOVE -->
 DO NOT MOVE FORWARD BASE ON ASSUMPTIONS.
+Must understand the requirements fully before proceeding.
+Execute tasks to completion without asking for permission only after user confirm gates.
 Use subagents for independent parallel subtasks when that improves throughput. But do not make critical decisions when subagents give a timeout or missing return; wait for that result.
 <!-- END AUTONOMY DIRECTIVE -->
 
