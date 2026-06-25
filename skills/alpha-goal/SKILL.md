@@ -14,7 +14,7 @@ Discover facts, Clarify user intent, Identify outcome, Identify scope, Identify 
 - alpha-goal does not implement, verify completion, make final-ready or complete claims
 - Only an accepted Goal Contract may be handed to `$control-loop`
 
-Quick Pass:
+Quick Path:
 - Skip only for concrete read-only fact lookup; Use this skill when intent, scope, acceptance, or decision boundaries are involved
 
 Anti-Pattern: "Build it yourself" or "Fix it yourself" or "Implement it yourself"
