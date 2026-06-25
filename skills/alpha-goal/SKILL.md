@@ -8,7 +8,6 @@ description: "Must use for any engineering/design/implementation requests."
 ## Mission
 `alpha-goal` owns workflow control for goal definition.
 
-## Responsibilities
 Discover facts, Clarify user intent, Identify outcome, Identify scope, Identify constraints, Identify acceptance evidence, Identify decision boundaries, Produce the canonical Goal Contract
 
 ## Boundaries
@@ -21,15 +20,14 @@ Quick Pass:
 Anti-Pattern: "Build it yourself" or "Fix it yourself" or "Implement it yourself"
 - Every project MUST go through the workflow below; The contract or design may be short, but it must be explicit and you must get approval
 
-## Workflow
+## Hard Gates
+PASS only if:
+- All explicit: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Acceptance evidence
+- Clarity score > 0.92
+- Solution clarity > 0.95
+- A pressure pass is complete: at least one earlier answer was revisited with evidence, assumption, or tradeoff follow-up
 
-You MUST create a `plan` for each item and complete them in order:
-1. **Discovery**: inspect repository facts, current implementation, and external facts when required.
-2. **Clarify**: loop Q&A until clarity score >= `92`, readiness gates pass, and required Technical Solution is explicit.
-3. **Assumption Stress Test**: challenge assumptions with evidence.
-4. **Write Contract**: produce the canonical Goal Contract and show the summary to the user.
-5. **Review**: review the Goal Contract with subagents when useful, then fix accepted findings.
-6. **Ask Confirm**: ask the user to approve, refine, or reject the Goal Contract.
+## Workflow
 
 ## Phase 1: Discovery
 Inspect applicable: AGENTS/repo rules, README/getting-started/install docs, Relevant specs/ADRs/contracts, Target files and current implementation, Local glossary/context, Current branch/status when mutation may follow, Direct contradictions
@@ -49,7 +47,7 @@ Record details in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md`
 If the contract is still draft, set `Contract status: draft` and `Issued by: alpha-goal`; keep outcome and scope fields unset until final design.
 
 ## Phase 2: Clarify
-Loop Q&A until clarity score >= `0.92` and readiness gates pass.
+Loop Q&A until clarity score >= `0.92` and solution clarity >= `0.95` and readiness gates pass.
 
 Readiness gates = Goal Gates, Authority Gates, Context Gates, Repair Gate; exclude review, final user confirmation, accepted contract status, and the Before Handoff Checklist.
 
@@ -64,11 +62,11 @@ Use current task state:
 - Current readiness gates and clarity dimensions
 - Brownfield context and active Assumption Stress Test mode
 
-Target the first blocking gate or lowest-scoring dimension:
-- Ladder 1: intent, outcome, scope, non-goals, decision boundaries
-- Ladder 2: constraints, success criteria, acceptance evidence, claim boundary
-- Ladder 3: context/current facts, actuator boundary, sensor/observer, external/current facts
-- Ladder 4: architecture, components, data flow, interfaces, testing strategy, scalability, and risk
+Target the highest leverage dimension:
+- Stage 1: intent, outcome, scope, non-goals, decision boundaries
+- Stage 2: constraints, success criteria, acceptance evidence, claim boundary
+- Stage 3: context/current facts, actuator boundary, sensor/observer, external/current facts
+- Stage 4: architecture, components, data flow, interfaces, testing strategy, scalability, and risk
 
 Rules:
 - `Non-goals` and `Decision boundary` are mandatory readiness gates
@@ -86,10 +84,10 @@ Prompt format:
 
 ```text
 Round {n} | Target: {weakest_dimension} | Clarity: {score}%
-{question backed by clear context}
+{question}
 ```
 
-**Step 3: Process answer and update answer**
+**Step 3: Challenge answer and update Goal Contract**
 
 Pressure ladder for each answer:
 1. Ask for concrete example, counterexample, or evidence signal.
@@ -121,17 +119,13 @@ Update the Goal Contract under `Technical Solution` when question is about archi
 Score:
 
 ```text
-clarity_score = 0.2 * intent + 0.18 * outcome + 0.15 * scope + 0.12 * constraints + 0.12 * solution + 0.1 * success + 0.08 * decision_boundary + 0.05 * context
+clarity_score = 0.25 * intent + 0.2 * outcome + 0.15 * scope + 0.12 * constraints + 0.1 * success + 0.08 * decision_boundary + 0.05 * context
+solution_clarity = architecture_clarity * 0.2 + component_clarity * 0.2 + data_flow_clarity * 0.2 + interface_clarity * 0.15 + testing_strategy_clarity * 0.15 + scalability_clarity * 0.05 + risk_clarity * 0.05
 ```
 
 Score each dimension in `[0, 100]` with justification and gap:
-- Intent Clarity
-- Outcome Clarity
-- Scope Clarity
-- Constraint Clarity
-- Success Criteria Clarity
-- Context Clarity for brownfield work
-- Technical Solution Clarity; use `1.0` when no cross-file predictive operation is required
+- Goal: Intent Clarity, Outcome Clarity, Scope Clarity, Constraint Clarity, Success Criteria Clarity, Context Clarity for brownfield work
+- Solution: Architecture Clarity, Component Clarity, Data Flow Clarity, Interface Clarity, Testing Strategy Clarity, Scalability Clarity, Risk Clarity
 
 **Step 5: Loop control**
 
@@ -140,7 +134,7 @@ Cycle control:
 - Max 6 rounds per dimension
 - Proceed with warnings only when further questions would not change execution
 - For cross-repo framing, keep one task-level Alpha Goal state root and record a repo manifest: repo path/name, role, authorization source, allowed change surfaces, non-goals, branch/worktree expectation, validation observer, delivery boundary, and dependency/integration order
-- Keep Clarify active if any gate fail or clarity score < 92
+- Keep Clarify active if not all stage dimensions have been asked or clarity score < 92 or solution clarity < 95
 
 ### Phase 3: Assumption Stress Test
 Use each applicable mode once; if none applies, record why:
