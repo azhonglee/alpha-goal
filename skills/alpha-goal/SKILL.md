@@ -17,7 +17,7 @@ Loop Q&A until you have 100% confidence to understand the requirements fully and
 Quick Path:
 - Skip only for concrete read-only fact lookup; Use this skill when intent, scope, acceptance, or decision boundaries are involved
 
-Anti-Pattern: "Build it yourself" or "Fix it yourself" or "Implement it yourself"
+Anti-Pattern: "Too Clear to Need clarification" or "Too Simple to Need design"
 - Every project MUST go through the workflow below; The contract or design may be short, but it must be explicit and you must get approval
 
 ## Hard Gates
