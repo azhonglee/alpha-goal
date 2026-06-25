@@ -63,6 +63,7 @@ For diagnose/repair work:
 - Otherwise perform diagnostic probes only
 
 ## Workflow
+
 You MUST create a `plan` for each item and complete them in order:
 1. **Discovery**: inspect repository facts, current implementation, and external facts when required.
 2. **Clarify**: loop Q&A until clarity score >= `0.92`, readiness gates pass, and required Technical Solution is explicit.
@@ -71,7 +72,7 @@ You MUST create a `plan` for each item and complete them in order:
 5. **Review**: review the Goal Contract with subagents when useful, then fix accepted findings.
 6. **Ask Confirm**: ask the user to approve, refine, or reject the Goal Contract.
 
-### Phase 1: Discovery
+## Phase 1: Discovery
 Inspect applicable: AGENTS/repo rules, README/getting-started/install docs, Relevant specs/ADRs/contracts, Target files and current implementation, Local glossary/context, Current branch/status when mutation may follow, Direct contradictions
 
 Evaluate:
@@ -88,10 +89,14 @@ Identify:
 Record details in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Discovery notes`.
 If the contract is still draft, set `Contract status: draft` and `Issued by: alpha-goal`; keep outcome and scope fields unset until final design.
 
-### Phase 2: Clarify
+## Phase 2: Clarify
 Loop Q&A until clarity score >= `0.92` and readiness gates pass.
 
 Readiness gates = Goal Gates, Authority Gates, Context Gates, Repair Gate; exclude review, final user confirmation, accepted contract status, and the Before Handoff Checklist.
+
+### Loop Q&A
+
+**Step 1: Prepare a question**
 
 Use current task state:
 - Original request and probable intent
@@ -114,6 +119,8 @@ Rules:
 - Present options conversationally with recommendation and reasoning
 - Use `request_user_input` or equivalent structured input when available
 
+**Step 2: Get answer from user**
+
 Present options conversationally with recommendation and reasoning first.
 
 Prompt format:
@@ -122,6 +129,8 @@ Prompt format:
 Round {n} | Target: {weakest_dimension} | Clarity: {score}%
 {question backed by clear context}
 ```
+
+**Step 3: Process answer and update answer**
 
 Pressure ladder for each answer:
 1. Ask for concrete example, counterexample, or evidence signal.
@@ -145,6 +154,11 @@ Authority rules:
 
 Boundary mapping: actuator boundary -> `Decision boundary`; sensor/observer boundary -> `Claim boundary`.
 
+Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Interview ledger`.
+Update the Goal Contract under `Technical Solution` when question is about architecture, components, data flow, interfaces, testing strategy, scalability, and risk.
+
+**Step 4: Evaluate clarity score**
+
 Score:
 
 ```text
@@ -160,8 +174,7 @@ Score each dimension in `[0.0, 1.0]` with justification and gap:
 - Context Clarity for brownfield work
 - Technical Solution Clarity; use `1.0` when no cross-file predictive operation is required
 
-Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Interview ledger`.
-Update the Goal Contract under `Technical Solution` when question is about architecture, components, data flow, interfaces, testing strategy, scalability, and risk.
+**Step 5: Loop control**
 
 Cycle control:
 - Do not offer early exit before one explicit assumption probe and one persistent follow-up
