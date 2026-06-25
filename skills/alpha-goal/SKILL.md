@@ -8,7 +8,7 @@ description: "Must use for any engineering/design/implementation requests."
 ## Mission
 `alpha-goal` owns workflow control for goal definition.
 
-Loop Q&A until you really understand the requirements fully and design a perfect solution.
+Loop Q&A until you have 100% confidence to understand the requirements fully and design a perfect solution.
 
 ## Boundaries
 - alpha-goal does not implement, verify completion, make final-ready or complete claims
