@@ -111,20 +111,27 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Decision boundary is explicit",
     "Claim boundary is explicit",
     "Authorization source is explicit",
-    "Calirity_Score above 0.92",
-    "pressure pass",
+    "Clarity score >= 0.92",
+    "A pressure pass is complete",
+    "revisited with evidence, assumption, or tradeoff follow-up",
+    "Readiness gates = Goal Gates, Authority Gates, Context Gates, Repair Gate",
+    "Evidence may influence a Goal Contract, but it does not define it",
+    "Evidence may not set or override target, outcome, scope, acceptance evidence, non-goals, decision boundary, claim boundary",
     "Repair Gate",
     "root cause is confirmed",
     "Anti-Pattern",
     "Every project MUST go through the workflow below",
     "must get approval",
     "Write Contract",
-    "Technical Solution Question",
+    "Technical Solution questions",
     "Resolve the Alpha Goal state root",
     "${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/",
     "one high-leverage question",
     "one decision variable",
+    "Cross-check user claims against code/docs",
     "Current-state facts cannot define desired behavior",
+    "actuator boundary -> `Decision boundary`",
+    "sensor/observer boundary -> `Claim boundary`",
     "Assumption Stress Test",
     "Required Content",
     "Contract status",
@@ -135,7 +142,11 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "request_user_input",
     "$control-loop",
     "Design Summary",
-    "Technical Solution explicit(if need)"
+    "Goal Contract Summary",
+    "Technical Solution is required when cross-file predictive operation may happen",
+    "section checks are progress checks, not final design approval",
+    "Final approval happens in Phase 6 with the complete Goal Contract",
+    "Technical Solution explicit if required"
   ]],
   ["alpha records interview and design state", "skills/alpha-goal/SKILL.md", [
     "Alpha Goal state root",
@@ -240,6 +251,7 @@ export function main(args = process.argv.slice(2)): number {
   validateScriptSurface(root, allFiles, errors, warnings);
   validateLegacyReferences(root, skillFiles, errors);
   validateSemanticChecks(root, errors);
+  validateAlphaGoalStructure(root, errors);
   validateControlLoopStructure(root, errors);
   validateSchemaConsistency(root, errors);
   validateInstallDocumentation(root, errors);
@@ -359,6 +371,62 @@ function validateSemanticChecks(root: string, errors: string[]): void {
   }
 }
 
+function validateAlphaGoalStructure(root: string, errors: string[]): void {
+  const text = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
+  requireOrderedTerms("alpha-goal goal gates", markdownSubsection(text, "Goal Gates"), [
+    "PASS only if:",
+    "Intent is explicit",
+    "Outcome is explicit",
+    "Scope is explicit",
+    "Acceptance evidence is explicit",
+    "Non-goals are explicit",
+    "Decision boundary is explicit",
+    "Claim boundary is explicit",
+    "Authorization source is explicit",
+    "Clarity score >= 0.92",
+    "A pressure pass is complete",
+    "revisited with evidence, assumption, or tradeoff follow-up",
+    "Otherwise:",
+    "RETURN = Clarify with User",
+  ], errors);
+  requireOrderedTerms("alpha-goal authority", markdownSection(text, "Authority"), [
+    "The accepted Goal Contract is the only execution authority",
+    "Target means the requested outcome within authorized scope",
+    "Evidence may influence a Goal Contract, but it does not define it",
+    "Evidence may not set or override target, outcome, scope, acceptance evidence, non-goals, decision boundary, claim boundary",
+    "Delegated agents may inspect, review, and evaluate",
+  ], errors);
+  requireOrderedTerms("alpha-goal workflow", markdownSection(text, "Workflow"), [
+    "You MUST create a `plan` for each item and complete them in order",
+    "Preflight and Discovery",
+    "Clarify",
+    "loop Q&A until clarity score >= `0.92`, readiness gates pass, and required Technical Solution is explicit",
+    "Review",
+    "Ask Confirm",
+  ], errors);
+  requireOrderedTerms("alpha-goal clarify phase", markdownSubsection(text, "Phase 2: Clarify"), [
+    "Loop Q&A until clarity score >= `0.92` and readiness gates pass",
+    "Readiness gates = Goal Gates, Authority Gates, Context Gates, Repair Gate",
+    "exclude review, final user confirmation, accepted contract status, and the Before Handoff Checklist",
+    "Cross-check user claims against code/docs",
+    "Boundary mapping",
+    "actuator boundary -> `Decision boundary`",
+    "sensor/observer boundary -> `Claim boundary`",
+    "Technical Solution questions",
+    "Technical Solution is required when cross-file predictive operation may happen",
+    "Use `request_user_input` to ask whether Technical Solution is needed only when unclear",
+    "Loop Q&A until design is explicit",
+    "section checks are progress checks, not final design approval",
+    "Final approval happens in Phase 6 with the complete Goal Contract",
+  ], errors);
+  requireOrderedTerms("alpha-goal confirmation phase", markdownSubsection(text, "Phase 6: Ask for Confirmation"), [
+    "Goal Contract Summary",
+    "Design Summary",
+    "| Contract status |",
+    "hand off to `$control-loop`",
+  ], errors);
+}
+
 function validateControlLoopStructure(root: string, errors: string[]): void {
   const text = readIfFile(path.join(root, "skills/control-loop/SKILL.md"));
   const sectionOrder = [
@@ -463,6 +531,15 @@ function markdownSection(text: string, heading: string): string {
   if (start < 0) return "";
   const next = text.indexOf("\n## ", start + marker.length);
   return text.slice(start, next < 0 ? undefined : next);
+}
+
+function markdownSubsection(text: string, heading: string): string {
+  const marker = `### ${heading}`;
+  const start = text.indexOf(marker);
+  if (start < 0) return "";
+  const rest = text.slice(start + marker.length);
+  const next = rest.search(/\n#{2,3} /);
+  return text.slice(start, next < 0 ? undefined : start + marker.length + next);
 }
 
 function requireOrderedTerms(label: string, text: string, terms: string[], errors: string[]): void {
