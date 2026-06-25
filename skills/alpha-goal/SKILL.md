@@ -8,196 +8,188 @@ description: "Must use for any engineering/design/implementation requests."
 ## Mission
 `alpha-goal` owns workflow control for goal definition.
 
-Its responsibility is:
-- discover facts
-- clarify user intent
-- identify outcome
-- identify scope
-- identify constraints
-- identify acceptance evidence
-- identify decision boundaries
-- produce the canonical Goal Contract
+## Responsibilities
+- Discover facts
+- Clarify user intent
+- Identify outcome
+- Identify scope
+- Identify constraints
+- Identify acceptance evidence
+- Identify decision boundaries
+- Produce the canonical Goal Contract
 
-alpha-goal does not implement.
-alpha-goal does not verify completion.
-alpha-goal does not make final-ready or complete claims.
-
-Only an accepted Goal Contract may be handed to `$control-loop`.
+## Boundaries
+- alpha-goal does not implement
+- alpha-goal does not verify completion
+- alpha-goal does not make final-ready or complete claims
+- Only an accepted Goal Contract may be handed to `$control-loop`
 
 Quick Pass:
-- skip only for concrete read-only fact lookup; use this skill when intent, scope, acceptance, or decision boundaries are involved.
+- Skip only for concrete read-only fact lookup
+- Use this skill when intent, scope, acceptance, or decision boundaries are involved
 
 Anti-Pattern: "Build it yourself" or "Fix it yourself" or "Implement it yourself"
-- Every project MUST go through the workflow below. Maybe contract or design is short, but it must be explicit and you must get approval.
-
-You MUST create a `plan` for each of these items and complete them in order:
-1. **Preflight && Discovery**: Inspect the repository facts, current implementation, and external facts when required.
-2. **Clarify**: Loop Q&A until clarity score is above `0.92` and goal gates pass.
-3. **Assumption Stress Test**: Challenge assumptions with evidence to verify them.
-4. **Write Contract**: Produce the canonical Goal Contract. Show summary to the user.
-5. **Technical Design**: When cross-file operation(predictive) may happen, Loop Q&A until design is explicit and approved.
-6. **Review**: Review the Goal Contract with subagents, and fix accepted findings.
-7. **Ask Confirm**: Ask user to review the Goal Contract and approved. Decide whether to continue or hand off to `$control-loop`.
+- Every project MUST go through the workflow below
+- The contract or design may be short, but it must be explicit and you must get approval
 
 ## Authority
-
 The accepted Goal Contract is the only execution authority.
+Target means the requested outcome within authorized scope.
 
-Evidence ≠ Authority
+Evidence may influence a Goal Contract, but it does not define it. Evidence includes current implementation, repository conventions, and past conversations.
 
-Evidence may influence a Goal Contract, but not define it.
+Evidence may not set or override target, outcome, scope, acceptance evidence, non-goals, decision boundary, claim boundary, user decisions, approved specifications, or the accepted Goal Contract.
 
-Current implementation is evidence.
-Repository conventions are evidence.
-Past conversations are evidence.
-
-None of them may override:
-- user decisions
-- approved specifications
-- accepted Goal Contract
-
-Delegated agents may:
-- inspect
-- review
-- evaluate
-
-Delegated agents may not:
-- redefine target
-- redefine scope
-- redefine acceptance evidence
-- redefine non-goals
-- redefine authority
-- approve execution
+Delegated agents may inspect, review, and evaluate. They may not redefine target, scope, acceptance evidence, non-goals, authority, or approve execution.
 
 ## Hard Gates
 Do not hand off to `$control-loop` until every gate passes.
 
 ### Goal Gates
-
 PASS only if:
-- Intent is explicit.
-- Outcome is explicit.
-- Scope is explicit.
-- Acceptance evidence is explicit.
-- Non-goals are explicit.
-- Decision boundary is explicit.
-- Claim boundary is explicit.
-- Authorization source is explicit.
-- Calirity_Score above 0.92.
-- A pressure pass is incomplete: at least one earlier answer must be revisited with evidence, assumption, or tradeoff follow-up
+- Intent is explicit
+- Outcome is explicit
+- Scope is explicit
+- Acceptance evidence is explicit
+- Non-goals are explicit
+- Decision boundary is explicit
+- Claim boundary is explicit
+- Authorization source is explicit
+- Clarity score >= 0.92
+- A pressure pass is complete: at least one earlier answer was revisited with evidence, assumption, or tradeoff follow-up
 
 Otherwise:
-
-RETURN = Clarify with User
+- RETURN = Clarify with User
 
 ### Authority Gates
-
 PASS only if:
-- The user, issue, spec, contract, or repository policy authorizes execution.
-- No unresolved source-of-truth conflict exists.
+- The user, issue, spec, contract, or repository policy authorizes execution
+- No unresolved source-of-truth conflict exists
 
 Otherwise:
-
-RETURN = Clarify with User
+- RETURN = Clarify with User
 
 ### Context Gates
-
 PASS only if:
-- Relevant repository facts have been inspected.
-- Current implementation has been inspected when applicable.
-- External facts have been verified when required.
+- Relevant repository facts have been inspected
+- Current implementation has been inspected when applicable
+- External facts have been verified when required
 
 Otherwise:
+- RETURN = Discovery
 
-RETURN = Discovery
 ### Repair Gate
 For diagnose/repair work:
-PASS only if root cause is confirmed.
-Otherwise diagnostic probes only.
+- PASS only if root cause is confirmed
+- Otherwise perform diagnostic probes only
 
 ## Workflow
+You MUST create a `plan` for each item and complete them in order:
+1. **Preflight and Discovery**: inspect repository facts, current implementation, and external facts when required.
+2. **Clarify**: loop Q&A until clarity score >= `0.92`, readiness gates pass, and required Technical Solution is explicit.
+3. **Assumption Stress Test**: challenge assumptions with evidence.
+4. **Write Contract**: produce the canonical Goal Contract and show the summary to the user.
+5. **Review**: review the Goal Contract with subagents when useful, then fix accepted findings.
+6. **Ask Confirm**: ask the user to approve, refine, or reject the Goal Contract.
 
 ### Phase 0: Preflight
-1. Resolve the Alpha Goal state root before writing runtime artifacts. Always use `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from stable workspace identity: `slug(repo_root or Goal Contract target workspace)`, never from the session directory.
-2. Match the task state by Goal Contract path, state directory, and trigger metadata. If matched, read `goal-contract.md`; if multiple or stale candidates remain after local state inspection, clarify task identity before execution.
+- Resolve the Alpha Goal state root before writing runtime artifacts
+- Always use `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`
+- Derive `<workspace-slug>` from stable workspace identity: `slug(repo_root or Goal Contract target workspace)`, never from the session directory
+- Match task state by Goal Contract path, state directory, and trigger metadata
+- If matched, read `goal-contract.md`
+- If multiple or stale candidates remain after local state inspection, clarify task identity before execution
 
 ### Phase 1: Discovery
+Inspect applicable:
+- AGENTS/repo rules
+- README/getting-started/install docs
+- Relevant specs/ADRs/contracts
+- Target files and current implementation
+- Local glossary/context
+- Current branch/status when mutation may follow
+- Direct contradictions
 
-Inspect applicable AGENTS/repo rules, README/getting-started/install docs, relevant specs/ADRs/contracts, target files/current implementation, local glossary/context, current branch/status when mutation may follow, and direct contradictions. 
-
-Critical thinking:
-- Problem validity: is the phenomenon truly a problem; are causal claims reliable; what assumptions need testing?
-- Context sufficientness: what can be concluded now; what must be supplemented; what is must-have vs ideal?
-- Hidden issues: what deeper root cause, adjacent issue, or overlooked dependency may affect the goal?
+Evaluate:
+- Problem validity: whether the phenomenon is real and causal claims are reliable
+- Context sufficiency: what is known, missing, must-have, or merely ideal
+- Hidden issues: deeper root cause, adjacent issue, or dependency risk
 
 Identify:
-- facts
-- conflicts
-- unknowns
-- dependencies
+- Facts
+- Conflicts
+- Unknowns
+- Dependencies
 
-Record Details in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Discovery notes`. If the contract is still draft, set `Contract status: draft` and `Issued by: alpha-goal`, then keep target/scope fields unset until Final Design.
+Record details in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Discovery notes`.
+If the contract is still draft, set `Contract status: draft` and `Issued by: alpha-goal`; keep outcome and scope fields unset until final design.
 
 ### Phase 2: Clarify
+Loop Q&A until clarity score >= `0.92` and readiness gates pass.
 
-Loop Q&A until clarity score is above `0.92` and readiness gates pass.
+Readiness gates = Goal Gates, Authority Gates, Context Gates, Repair Gate; exclude review, final user confirmation, accepted contract status, and the Before Handoff Checklist.
 
-#### 2.1 Ask User Question
 Use current task state:
-- original request and probable intent
-- prior Q&A
-- known facts, conflicts, unknowns, and source-of-truth conflicts
-- current readiness gates and clarity_score dimensions
-- brownfield context and active Assumption Stress Test mode
+- Original request and probable intent
+- Prior Q&A
+- Known facts, conflicts, unknowns, and source-of-truth conflicts
+- Current readiness gates and clarity dimensions
+- Brownfield context and active Assumption Stress Test mode
 
-Target the first blocking gate or lowest-scoring dimension. Prefer intent and boundaries before implementation details:
+Target the first blocking gate or lowest-scoring dimension:
 - Ladder 1: intent, outcome, scope, non-goals, decision boundaries
 - Ladder 2: constraints, success criteria, acceptance evidence, claim boundary
 - Ladder 3: context/current facts, actuator boundary, sensor/observer, external/current facts
 
-`Non-goals` and `Decision Boundaries` are mandatory readiness gates. Keep revisiting them until explicit.
+Rules:
+- `Non-goals` and `Decision boundary` are mandatory readiness gates
+- Ask one high-leverage question per round
+- One question means one decision variable: confirm a conflict, request a decision, demand an example, expose an assumption, force a tradeoff, or test a boundary-stressing case
+- Do not ask for discoverable facts
+- Present options conversationally with recommendation and reasoning
+- Use `request_user_input` or equivalent structured input when available
 
-Ask User one high-leverage question per round. One question means one decision variable, that confirms a conflict, requests a decision, demands an example, exposes an assumption, forces a tradeoff, or tests a boundary-stressing scenario.
-
-Do not ask for discoverable facts.
-
-Present options conversationally with your recommendation and reasoning.
-Use structured user-input tooling (`request_user_input` / equivalent) to get user feedback and present:
+Prompt format:
 
 ```text
 Round {n} | Target: {weakest_dimension} | Clarity: {score}%
 {question backed by clear context}
 ```
 
-Pressure ladder after each answer:
+Pressure ladder:
 1. Ask for concrete example, counterexample, or evidence signal.
-2. Probe the hidden assumption or dependency.
+2. Probe hidden assumption or dependency.
 3. Force a boundary/tradeoff: what to reject, defer, or not do.
 4. If the answer stays symptom-level, reframe toward essence/root cause.
 
-#### 2.2 Interpret answer
-
-Treat the answer as classified input, not automatic authority. Classify each answer before updating the Goal Contract.
-
-Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Interview ledger`.
-
-Treat repo language as evidence, not authority. Cross-check user claims against code/docs; name competing sources on conflict.
-
-Classify inputs:
+Classify each answer before updating the Goal Contract:
 - `[from-code][auto-confirmed]` descriptive implementation fact
 - `[from-code]` inferred implementation fact needing confirmation
 - `[from-research]` external/current fact
-- `[from-user]` explicit user-provided decision, constraint, acceptance signal, non-goal, authority, example, or clarification
+- `[from-user]` explicit user decision, constraint, acceptance signal, non-goal, authority, example, or clarification
 
-Auto-confirm only descriptive facts. Current-state facts cannot define desired behavior, requirements, acceptance evidence, non-goals, tradeoffs, or authority without explicit user request or authoritative spec/issue.
+Authority rules:
+- Auto-confirm only descriptive facts
+- Treat repo language as evidence, not authority
+- Cross-check user claims against code/docs; name competing sources on conflict
+- Current-state facts cannot define desired behavior, requirements, acceptance evidence, non-goals, tradeoffs, or authority
+- Only explicit user decisions, explicit authorization, or authoritative specs/issues may update Goal Contract authority fields
+- If ambiguity depends on current external best practices, standards, APIs, dependency versions, laws, schedules, or prices, gather bounded fresh evidence first; then ask only for the decision boundary
 
-Only explicit user decisions, explicit authorization, or authoritative specs/issues may update Goal Contract authority fields.
+Boundary mapping: actuator boundary -> `Decision boundary`; sensor/observer boundary -> `Claim boundary`.
 
-If ambiguity depends on current external best practices, standards, APIs, dependency versions, laws, schedules, or prices, gather bounded fresh evidence first, then ask only for the decision boundary.
+#### Technical Solution questions
+Use this branch inside Clarify when cross-file predictive operation may happen.
+- Technical Solution is required when cross-file predictive operation may happen
+- Use `request_user_input` to ask whether Technical Solution is needed only when unclear
+- Loop Q&A until design is explicit
+- Cover architecture, components, data flow, interfaces, testing strategy, scalability, and risk
+- Section checks are progress checks, not final design approval
+- Return to the relevant Clarify ladder when design exposes requirement ambiguity
+- Record the result as `Technical Solution [technical_solution]`
+- Final approval happens in Phase 6 with the complete Goal Contract
 
-#### 2.3 Score
-
-Use weighted clarity:
+Score:
 
 ```text
 clarity_score = 0.2 * intent + 0.18 * outcome + 0.15 * scope + 0.12 * constraints + 0.12 * solution + 0.1 * success + 0.08 * decision_boundary + 0.05 * context
@@ -210,29 +202,31 @@ Score each dimension in `[0.0, 1.0]` with justification and gap:
 - Constraint Clarity
 - Success Criteria Clarity
 - Context Clarity for brownfield work
-- Technical Solution Clarity (When need cross-file operation, required; None otherwise, solution_clarity_score is 1)
+- Technical Solution Clarity; use `1.0` when no cross-file predictive operation is required
 
-#### 2.4 Record and Cycle-Control
+Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Interview ledger`.
 
-Do not offer early exit before one explicit assumption probe and one persistent follow-up. Max 5 rounds per dimension; after that, proceed with warnings only when further questions would not change execution.
-
-For cross-repo framing, keep one task-level Alpha Goal state root and record a repo manifest: repo path/name, role, authorization source, allowed change surfaces, non-goals, branch/worktree expectation, validation observer, delivery boundary, and dependency/integration order.
-
-If target, scope, authority, source reference, non-goals, acceptance evidence, decision boundary, actuator/sensor boundary, or claim boundary is wrong or unclear, keep Clarify active.
+Cycle control:
+- Do not offer early exit before one explicit assumption probe and one persistent follow-up
+- Max 5 rounds per dimension
+- Proceed with warnings only when further questions would not change execution
+- For cross-repo framing, keep one task-level Alpha Goal state root and record a repo manifest: repo path/name, role, authorization source, allowed change surfaces, non-goals, branch/worktree expectation, validation observer, delivery boundary, and dependency/integration order
+- Keep Clarify active if target, scope, authority, source reference, non-goals, acceptance evidence, decision boundary, actuator/sensor boundary, or claim boundary is wrong or unclear
 
 ### Phase 3: Assumption Stress Test
-
 Use each applicable mode once; if none applies, record why:
-- **Contrarian**: challenge a core assumption.
-- **Simplifier**: probe minimum viable scope.
-- **Ontologist**: ask for essence-level reframing when the user keeps describing symptoms.
+- Contrarian: challenge a core assumption
+- Simplifier: probe minimum viable scope
+- Ontologist: ask for essence-level reframing when the user keeps describing symptoms
 
 Track used modes in state to prevent repetition.
 
 ### Phase 4: Write Contract
+Write the Goal Contract to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md`.
+Copy to `docs/specs/YYYYMMDD-<TaskName>.md` only when useful or required by repo convention.
 
-Write the Goal Contract to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md`; copy to `docs/specs/YYYYMMDD-<TaskName>.md` when useful or required by repo convention.
-The state-root `goal-contract.md` is canonical. Repo specs are mirrors or references only; conflicts route back to `alpha-goal`.
+The state-root `goal-contract.md` is canonical.
+Repo specs are mirrors or references only; conflicts route back to `alpha-goal`.
 Keep `Contract status: draft` until user confirmation.
 
 Required Content:
@@ -250,47 +244,29 @@ Required Content:
 - Authorization Source [authorization_source]
 
 Optional Content:
-- Root Cause [root_cause] optional, only for repair design
+- Root Cause [root_cause], only for repair design
 - Discovery notes [discovery_notes]
 - Interview ledger [interview_ledger]
 - Repo surfaces [repo_surfaces]
 - Assumptions + resolutions [assumptions_resolutions]
 - Dependency/integration order [repo_integration_order]
 
-Optional Specifications(When need cross-file operation):
-- Technical Solution [technical_solution] (design includes architecture、components、data flow、solution、interface、protocol、testing strategy、scalability、risk)
+Required Specification when cross-file predictive operation is required:
+- Technical Solution [technical_solution]: architecture, components, data flow, solution, interface, protocol, testing strategy, scalability, and risk
 
-### Phase 5: Technical Solution Question(Conditional)
+### Phase 5: Review
+- Self-review the Goal Contract for completeness and reasonableness
+- Use subagents for independent review when useful
+- Fix accepted findings
 
-Use `request_user_input` to ask for if need Technical Solution.
-- On approval: Continue this phase to 
-- On rejection: Skip to next phase.
-
-- Understand what you're building, present the design which includes:
-  - Architecture
-  - Components
-  - Data flow
-- Scale each section to its complexity: a few sentences if straightforward, up to 200-300 words if nuanced
-- Ask after each section whether it looks right so far
-- Cover: architecture, components, data flow, error handling, testing
-- Be ready to go back and clarify if something doesn't make sense
-- Update the Technical Solution Content in Goal Contract After each section
-
-### Phase 6: Artifact Review
-
-- Self-review the Goal Contract for completion and reasonability. 
-- Use subagents for independent review when useful.
-- Fix accepted findings.
-
-### Phase 7: Ask for Confirmation
-
-Present Goal Contract Summary First.
+### Phase 6: Ask for Confirmation
+Present the Goal Contract Summary first; this is the Design Summary used for confirmation.
 
 ```markdown
-Goal Contract Summary
+Goal Contract Summary (Design Summary)
 | Field | Value |
 | --- | --- |
-| Contract | |
+| Contract status | |
 | Intent | |
 | Root Cause | |
 | Outcome | |
@@ -309,12 +285,11 @@ Goal Contract Summary
 ```
 
 Use `request_user_input` to ask for approve/launch, refine, or reject.
-- On approval: Contract status = accepted; hand off to `$control-loop`.
-- On rejection: Contract status = draft
-- On refine: Contract status = draft; return to Phase 2 with user feedback.
+- On approval: set `Contract status: accepted`; hand off to `$control-loop`
+- On rejection: keep `Contract status: draft`
+- On refine: keep `Contract status: draft`; return to Phase 2 with user feedback
 
 ## Before Handoff Checklist
-
 - Goal Contract exists
 - Contract status = accepted
 - Issued by = alpha-goal
@@ -328,8 +303,7 @@ Use `request_user_input` to ask for approve/launch, refine, or reject.
 - Claim boundary explicit
 - Authorization source explicit
 - Repository inspection completed
-- External facts verified
+- External facts verified when required
 - Source-of-truth conflicts resolved
-- Root cause confirmed (repair only)
-- Technical Solution explicit(if need)
-
+- Root cause confirmed for repair work
+- Technical Solution explicit if required
