@@ -115,6 +115,11 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "pressure pass",
     "Repair Gate",
     "root cause is confirmed",
+    "Anti-Pattern",
+    "Every project MUST go through the workflow below",
+    "must get approval",
+    "Write Contract",
+    "Technical Solution Question",
     "Resolve the Alpha Goal state root",
     "${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/",
     "one high-leverage question",
@@ -129,7 +134,8 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "canonical",
     "request_user_input",
     "$control-loop",
-    "Design Summary"
+    "Design Summary",
+    "Technical Solution explicit(if need)"
   ]],
   ["alpha records interview and design state", "skills/alpha-goal/SKILL.md", [
     "Alpha Goal state root",
@@ -509,7 +515,7 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
     } catch (error) {
       errors.push(`${HOOKS_TEMPLATE}: invalid JSON: ${errorMessage(error)}`);
     }
-    for (const term of [COMPACT_RECOVERY_HOOK_MARKER, "^compact$", "$alpha-goal", "$control-loop", "$goal-verify", "goal-contract.md first", "control-state/latest.md", "checkpoint.md", "Verification", "Evidence", "defect/risk", "unclaimed"]) {
+    for (const term of [COMPACT_RECOVERY_HOOK_MARKER, "^compact$", "$alpha-goal", "$control-loop", "$goal-verify", "draft or accepted goal-contract.md first", "accepted status gates only control-loop execution handoff", "control-state/latest.md", "checkpoint.md", "Verification", "Evidence", "defect/risk", "unclaimed"]) {
       if (!hooksTemplate.includes(term)) errors.push(`${HOOKS_TEMPLATE}: missing compact recovery hook term: ${term}`);
     }
     for (const term of ["$control-loop: use for bounded implementation or hardening after an accepted Goal Contract authorizes it", "$goal-verify: use for goal completion/readiness/review/audit verification"]) {
@@ -523,13 +529,13 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   if (!readme.includes("当前代码事实只描述现状")) errors.push("README.md missing current-state-not-desired-state principle");
   if (!readme.includes("执行或加固已授权 slice")) errors.push("README.md must describe control-loop as execution-first");
   if (!readme.includes("Act -> Evidence -> $goal-verify -> Gap?")) errors.push("README.md workflow must include evidence and goal-verify");
-  for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "15,000 word+punctuation units", "失效条件"]) if (!readme.includes(term)) errors.push(`README.md missing persistent-loop term: ${term}`);
+  for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "失效条件", "显式确认门", "Technical Solution", "草稿或已接受"]) if (!readme.includes(term)) errors.push(`README.md missing persistent-loop term: ${term}`);
   const readmeEn = readIfFile(path.join(root, "README.en.md"));
   for (const name of REQUIRED_SKILL_NAMES) if (!readmeEn.includes(`skills/${name}/`) || !readmeEn.includes(`\`${name}\``)) errors.push(`README.en.md missing public skill entry: ${name}`);
   if (!readmeEn.includes("Current code facts describe current state")) errors.push("README.en.md missing current-state-not-desired-state principle");
   if (!readmeEn.includes("Execute or harden an authorized slice")) errors.push("README.en.md must describe control-loop as execution-first");
   if (!readmeEn.includes("Act -> Evidence -> $goal-verify -> Gap?")) errors.push("README.en.md workflow must include evidence and goal-verify");
-  for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "discovery notes", "interview ledger", "15,000 word+punctuation units", "invalidation"]) if (!readmeEn.includes(term)) errors.push(`README.en.md missing persistent-loop term: ${term}`);
+  for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "discovery notes", "interview ledger", "15,000 word+punctuation units", "invalidation", "user confirmation gates", "Technical Solution", "draft or accepted"]) if (!readmeEn.includes(term)) errors.push(`README.en.md missing persistent-loop term: ${term}`);
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
   for (const name of REQUIRED_SKILL_NAMES) if (!installDoc.includes(name)) errors.push(`INSTALL.md missing public skill: ${name}`);
   if (!installDoc.includes("--no-sync-user-hooks")) errors.push("INSTALL.md missing --no-sync-user-hooks option");
@@ -538,13 +544,13 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   if (/tmp_codex_home\/skills\/[^"`\s]+\/scripts\//.test(installDoc)) errors.push("INSTALL.md smoke test must not require runtime skill scripts");
   if (!installDoc.includes("git rev-parse --show-toplevel")) errors.push("INSTALL.md smoke test must derive workspace slug from repo root");
   if (/basename "\$PWD"|\$\(basename "\$PWD"\)/.test(installDoc)) errors.push("INSTALL.md smoke test must not derive state root from current session directory");
-  for (const term of ["set -euo pipefail", "export CODEX_HOME", "Contract status: accepted", "Discovery notes", "Interview ledger", "goal-contract", "checkpoint", "control-state/latest.md", "verification-triggered recovery", "15,000 word+punctuation units", "without over-compressing", "without requiring runtime skill scripts", "Run Profile, Loop State, Verification, and Evidence"]) if (!installDoc.includes(term)) errors.push(`INSTALL.md missing persistent-loop term: ${term}`);
+  for (const term of ["set -euo pipefail", "export CODEX_HOME", "Contract status: accepted", "Discovery notes", "Interview ledger", "goal-contract", "draft or accepted goal-contract.md first", "accepted status gates only control-loop execution handoff", "checkpoint", "control-state/latest.md", "verification-triggered recovery", "15,000 word+punctuation units", "without over-compressing", "without requiring runtime skill scripts", "Run Profile, Loop State, Verification, and Evidence"]) if (!installDoc.includes(term)) errors.push(`INSTALL.md missing persistent-loop term: ${term}`);
   const manifest = readIfFile(path.join(root, "MANIFEST.md"));
   for (const name of REQUIRED_SKILL_NAMES) if (!manifest.includes(`skills/${name}/`)) errors.push(`MANIFEST.md missing public skill directory: ${name}`);
   if (!manifest.includes(HOOKS_TEMPLATE) || !manifest.includes(COMPACT_RECOVERY_HOOK_MARKER)) errors.push("MANIFEST.md missing hooks template marker");
   if (!manifest.includes("marker family") || !manifest.includes("codex-compact-skill-recovery")) errors.push("MANIFEST.md missing hook upgrade strategy");
   if (!manifest.includes("act or harden authorized slices")) errors.push("MANIFEST.md must describe control-loop as execution-first");
-  for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "global recovery index", "invalidation", "15,000 word+punctuation units"]) if (!manifest.includes(term)) errors.push(`MANIFEST.md missing persistent-loop term: ${term}`);
+  for (const term of ["goal-contract.md", "draft or accepted", "accepted status", "checkpoint.md", "control-state/latest.md", "global recovery index", "invalidation", "15,000 word+punctuation units"]) if (!manifest.includes(term)) errors.push(`MANIFEST.md missing persistent-loop term: ${term}`);
   const templateAgents = readIfFile(path.join(root, "templates/AGENTS.md"));
   if (/clearified/i.test(templateAgents)) errors.push("templates/AGENTS.md contains misspelling: clearified");
   if (!templateAgents.includes("only after user confirm gates")) errors.push("templates/AGENTS.md missing user confirm gate wording");

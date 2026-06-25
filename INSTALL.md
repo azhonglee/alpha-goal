@@ -29,7 +29,7 @@ scripts/install.sh --verbose
 
 The script creates `${CODEX_HOME:-$HOME/.codex}/skills/<skill-name>` links for required public skills and cleans same-repo links for merged old public skills. By default it also syncs user-level templates, including `templates/hooks.json` into `${CODEX_HOME:-$HOME/.codex}/hooks.json`.
 
-The compact recovery hook definition lives in `templates/hooks.json`. It is a `SessionStart` hook for `compact` starts and prints a static policy telling Codex to decide whether `alpha-goal`, `control-loop`, or `goal-verify` applies after compaction, and to load the matching skill before continuing. `control-loop` executes or hardens accepted Goal Contract work; `goal-verify` covers evidence, claim boundary, defect/risk sweep, and material unclaimed issues. Use `--no-sync-user-templates` to skip AGENTS/config template updates and `--no-sync-user-hooks` to skip hook template updates.
+The compact recovery hook definition lives in `templates/hooks.json`. It is a `SessionStart` hook for `compact` starts and prints a static policy telling Codex to decide whether `alpha-goal`, `control-loop`, or `goal-verify` applies after compaction, and to load the matching skill before continuing. For active Alpha Goal tasks, it resumes from draft or accepted `goal-contract.md` first; accepted status gates only `control-loop` execution handoff. `goal-verify` covers evidence, claim boundary, defect/risk sweep, and material unclaimed issues. Use `--no-sync-user-templates` to skip AGENTS/config template updates and `--no-sync-user-hooks` to skip hook template updates.
 
 Hook upgrades are keyed by marker family. If the template marker changes from `...:v1` to `...:v2`, the installer removes older hooks from the same family before adding the template hook. It also removes the earlier experimental `codex-compact-skill-recovery` hook family.
 
@@ -84,7 +84,8 @@ EOF
 python3 -m json.tool "$tmp_codex_home/hooks.json" >/dev/null
 grep -q "codex-alpha-goal-compact-recovery:v1" "$tmp_codex_home/hooks.json"
 grep -q "treat pre-compaction remembered skill text as stale" "$tmp_codex_home/hooks.json"
-grep -q "goal-contract.md first" "$tmp_codex_home/hooks.json"
+grep -q "draft or accepted goal-contract.md first" "$tmp_codex_home/hooks.json"
+grep -q "accepted status gates only control-loop execution handoff" "$tmp_codex_home/hooks.json"
 grep -q "control-state/latest.md" "$tmp_codex_home/hooks.json"
 grep -q "goal-contract.md" "$tmp_codex_home/hooks.json"
 grep -q "checkpoint.md" "$tmp_codex_home/hooks.json"
