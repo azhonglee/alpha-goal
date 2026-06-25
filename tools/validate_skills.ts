@@ -547,7 +547,7 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "global recovery index", "invalidation", "15,000 word+punctuation units"]) if (!manifest.includes(term)) errors.push(`MANIFEST.md missing persistent-loop term: ${term}`);
   const templateAgents = readIfFile(path.join(root, "templates/AGENTS.md"));
   if (/clearified/i.test(templateAgents)) errors.push("templates/AGENTS.md contains misspelling: clearified");
-  if (!templateAgents.includes("explicit user answers, accepted contracts, or source-backed task records")) errors.push("templates/AGENTS.md missing autonomous execution clarity sources");
+  if (!templateAgents.includes("only after user confirm gates")) errors.push("templates/AGENTS.md missing user confirm gate wording");
   for (const term of [
     "Operating Contract",
     "top-level operating contract for the workspace",
