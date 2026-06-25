@@ -21,52 +21,11 @@ Quick Pass:
 Anti-Pattern: "Build it yourself" or "Fix it yourself" or "Implement it yourself"
 - Every project MUST go through the workflow below; The contract or design may be short, but it must be explicit and you must get approval
 
-## Authority
-The accepted Goal Contract is the only execution authority.
-Target means the requested outcome within authorized scope.
-
-Evidence may influence a Goal Contract, but it does not define it. Evidence includes current implementation, repository conventions, and past conversations.
-Evidence may not set or override target, outcome, scope, acceptance evidence, non-goals, decision boundary, claim boundary, user decisions, approved specifications, or the accepted Goal Contract.
-
-## Hard Gates
-Do not hand off to `$control-loop` until every gate passes.
-
-### Goal Gates
-PASS only if:
-- All explicit: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Acceptance evidence
-- Clarity score > 0.92
-- A pressure pass is complete: at least one earlier answer was revisited with evidence, assumption, or tradeoff follow-up
-
-Otherwise:
-- RETURN = Clarify with User
-
-### Authority Gates
-PASS only if:
-- The user, issue, spec, contract, or repository policy authorizes execution
-- No unresolved source-of-truth conflict exists
-
-Otherwise:
-- RETURN = Clarify with User
-
-### Context Gates
-PASS only if:
-- Relevant repository facts have been inspected
-- Current implementation has been inspected when applicable
-- External facts have been verified when required
-
-Otherwise:
-- RETURN = Discovery
-
-### Repair Gate
-For diagnose/repair work:
-- PASS only if root cause is confirmed
-- Otherwise perform diagnostic probes only
-
 ## Workflow
 
 You MUST create a `plan` for each item and complete them in order:
 1. **Discovery**: inspect repository facts, current implementation, and external facts when required.
-2. **Clarify**: loop Q&A until clarity score >= `0.92`, readiness gates pass, and required Technical Solution is explicit.
+2. **Clarify**: loop Q&A until clarity score >= `92`, readiness gates pass, and required Technical Solution is explicit.
 3. **Assumption Stress Test**: challenge assumptions with evidence.
 4. **Write Contract**: produce the canonical Goal Contract and show the summary to the user.
 5. **Review**: review the Goal Contract with subagents when useful, then fix accepted findings.
@@ -165,7 +124,7 @@ Score:
 clarity_score = 0.2 * intent + 0.18 * outcome + 0.15 * scope + 0.12 * constraints + 0.12 * solution + 0.1 * success + 0.08 * decision_boundary + 0.05 * context
 ```
 
-Score each dimension in `[0.0, 1.0]` with justification and gap:
+Score each dimension in `[0, 100]` with justification and gap:
 - Intent Clarity
 - Outcome Clarity
 - Scope Clarity
@@ -181,7 +140,7 @@ Cycle control:
 - Max 6 rounds per dimension
 - Proceed with warnings only when further questions would not change execution
 - For cross-repo framing, keep one task-level Alpha Goal state root and record a repo manifest: repo path/name, role, authorization source, allowed change surfaces, non-goals, branch/worktree expectation, validation observer, delivery boundary, and dependency/integration order
-- Keep Clarify active if any gate fail or clarity score < 0.92
+- Keep Clarify active if any gate fail or clarity score < 92
 
 ### Phase 3: Assumption Stress Test
 Use each applicable mode once; if none applies, record why:
