@@ -17,15 +17,8 @@ Loop Q&A until you have 100% confidence to understand the requirements fully and
 Quick Path:
 - Skip only for concrete read-only fact lookup; Use this skill when intent, scope, acceptance, or decision boundaries are involved
 
-Anti-Pattern: "Too Clear to Need clarification" or "Too Simple to Need design"
+**Anti-Pattern:** "Too Clear to Need clarification" or "Too Simple to Need design"
 - Every project MUST go through the workflow below; The contract or design may be short, but it must be explicit and you must get approval
-
-## Hard Gates
-PASS only if:
-- All explicit: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Acceptance evidence
-- Clarity score > 0.92
-- Solution clarity > 0.95
-- A pressure pass is complete: at least one earlier answer was revisited with evidence, assumption, or tradeoff follow-up
 
 ## Workflow
 
@@ -153,7 +146,7 @@ Follow the book template in `references/goal-contract-book.md` to write the Goal
 - Use subagents for independent review when useful
 - Fix accepted findings
 
-### Phase 6: Ask for Confirmation
+## Confirmation Gate
 
 Present the Goal Contract Summary first.
 
@@ -168,3 +161,10 @@ Use `request_user_input` to ask for approve/launch, refine, or reject.
 - On approval: set `Contract status: accepted`; hand off to `$control-loop`
 - On rejection: keep `Contract status: draft`
 - On refine: keep `Contract status: draft`; return to Phase 2 with user feedback
+
+## Hard Gates
+PASS only if:
+- All explicit: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Acceptance evidence
+- Clarity score > 0.92
+- Solution clarity > 0.95
+- A pressure pass is complete: at least one earlier answer was revisited with evidence, assumption, or tradeoff follow-up
