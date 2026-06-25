@@ -30,14 +30,14 @@ Quick Pass:
 Anti-Pattern: "Build it yourself" or "Fix it yourself" or "Implement it yourself"
 - Every project MUST go through the workflow below. Maybe contract or design is short, but it must be explicit and you must get approval.
 
-You MUST create a task for each of these items and complete them in order:
+You MUST create a `plan` for each of these items and complete them in order:
 1. **Preflight && Discovery**: Inspect the repository facts, current implementation, and external facts when required.
 2. **Clarify**: Loop Q&A until clarity score is above `0.92` and goal gates pass.
-3. **Assumption Stress Test**: Challenge assumptions with evidence.
-4. **Write Contract**: Produce the canonical Goal Contract. Show summary.
+3. **Assumption Stress Test**: Challenge assumptions with evidence to verify them.
+4. **Write Contract**: Produce the canonical Goal Contract. Show summary to the user.
 5. **Technical Design**: When cross-file operation(predictive) may happen, Loop Q&A until design is explicit and approved.
-6. **Review**: Review the Goal Contract with the subagent, and fix accepted findings.
-7. **Ask Confirm**: Ask the user to confirm the Goal Contract is explicit and approved. Decide whether to continue or hand off to `$control-loop`.
+6. **Review**: Review the Goal Contract with subagents, and fix accepted findings.
+7. **Ask Confirm**: Ask user to review the Goal Contract and approved. Decide whether to continue or hand off to `$control-loop`.
 
 ## Authority
 
