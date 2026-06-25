@@ -282,7 +282,7 @@ Use `request_user_input` to ask for if need Technical Solution.
 - Use subagents for independent review when useful.
 - Fix accepted findings.
 
-### Phase 5: Ask for Confirmation
+### Phase 7: Ask for Confirmation
 
 Present Goal Contract Summary First.
 
