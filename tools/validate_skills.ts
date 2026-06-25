@@ -38,8 +38,10 @@ const LEGACY_EXTERNAL_GOAL_REFERENCES: Array<[RegExp, string]> = [
   [new RegExp("create_" + "goal"), "old external-goal lifecycle tool reference remains"],
   [new RegExp("update_" + "goal"), "old external-goal lifecycle tool reference remains"],
 ];
-const STATE_ROOT_CORE_FILES = [
+const STATE_ROOT_ALPHA_FILES = [
   "skills/alpha-goal/SKILL.md",
+];
+const STATE_ROOT_CORE_FILES = [
   "skills/control-loop/SKILL.md",
   "skills/goal-verify/SKILL.md",
   "templates/AGENTS.md",
@@ -58,6 +60,9 @@ const STATE_ROOT_REQUIRED_TERMS = [
   "Alpha Goal state root",
   "${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/",
   "slug(repo_root or Goal Contract target workspace)",
+];
+const STATE_ROOT_ALPHA_REQUIRED_TERMS = [
+  "Alpha Goal state root",
 ];
 const STATE_ROOT_FORBIDDEN_PATTERNS: Array<[RegExp, string]> = [
   [new RegExp(ENV_STATE_ROOT), "state-root environment override remains"],
@@ -95,66 +100,68 @@ const DESCRIPTION_SEMANTIC_CHECKS: Record<string, { required: string[]; forbidde
 const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
   ["front controller defines goals before execution", "skills/alpha-goal/SKILL.md", [
     "owns workflow control for goal definition",
-    "discover facts",
-    "clarify user intent",
-    "produce the canonical Goal Contract",
+    "Loop Q&A until you really understand the requirements fully and design a perfect solution",
     "alpha-goal does not implement",
-    "alpha-goal does not verify completion",
+    "verify completion",
     "Only an accepted Goal Contract may be handed to `$control-loop`",
-    "The accepted Goal Contract is the only execution authority",
+    "Quick Path",
     "Hard Gates",
-    "Intent is explicit",
-    "Outcome is explicit",
-    "Scope is explicit",
-    "Acceptance evidence is explicit",
-    "Non-goals are explicit",
-    "Decision boundary is explicit",
-    "Claim boundary is explicit",
-    "Authorization source is explicit",
-    "Clarity score >= 0.92",
+    "All explicit: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Acceptance evidence",
+    "Clarity score > 0.92",
+    "Solution clarity > 0.95",
     "A pressure pass is complete",
     "revisited with evidence, assumption, or tradeoff follow-up",
+    "Phase 1: Discovery",
+    "Inspect applicable",
+    "Discovery notes",
+    "Phase 2: Clarify",
+    "Loop Q&A until clarity score >= `0.92` and solution clarity >= `0.95` and readiness gates pass",
     "Readiness gates = Goal Gates, Authority Gates, Context Gates, Repair Gate",
-    "Evidence may influence a Goal Contract, but it does not define it",
-    "Evidence may not set or override target, outcome, scope, acceptance evidence, non-goals, decision boundary, claim boundary",
-    "Repair Gate",
-    "root cause is confirmed",
+    "Q&A Loop",
     "Anti-Pattern",
     "Every project MUST go through the workflow below",
     "must get approval",
     "Write Contract",
-    "Technical Solution questions",
-    "Resolve the Alpha Goal state root",
-    "${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/",
     "one high-leverage question",
     "one decision variable",
+    "Do not ask for discoverable facts",
     "Cross-check user claims against code/docs",
     "Current-state facts cannot define desired behavior",
     "actuator boundary -> `Decision boundary`",
     "sensor/observer boundary -> `Claim boundary`",
+    "Technical Solution",
+    "solution_clarity",
     "Assumption Stress Test",
-    "Required Content",
     "Contract status",
     "Discovery notes",
     "Interview ledger",
     "goal-contract.md",
-    "canonical",
     "request_user_input",
     "$control-loop",
     "Design Summary",
-    "Goal Contract Summary",
-    "Technical Solution is required when cross-file predictive operation may happen",
-    "section checks are progress checks, not final design approval",
-    "Final approval happens in Phase 6 with the complete Goal Contract",
-    "Technical Solution explicit if required"
+    "Goal Contract Summary"
   ]],
   ["alpha records interview and design state", "skills/alpha-goal/SKILL.md", [
     "Alpha Goal state root",
     "YYYYMMDD-<TaskName>/goal-contract.md",
     "Discovery notes",
     "Interview ledger",
-    "docs/specs/YYYYMMDD-<TaskName>.md",
-    "Design Summary"
+    "Goal Contract Summary"
+  ]],
+  ["goal contract book defines required content", "skills/alpha-goal/references/goal-contract-book.md", [
+    "state-root `goal-contract.md` is canonical",
+    "Required Content",
+    "Contract status",
+    "Technical Context",
+    "Intent",
+    "Outcome",
+    "Scope",
+    "Acceptance evidence",
+    "Non-goals",
+    "Decision boundary",
+    "Claim boundary",
+    "Authorization Source",
+    "Technical Solution"
   ]],
   ["execution has hard safety gates", "skills/control-loop/SKILL.md", [
     "Goal Contract is authority",
@@ -308,6 +315,11 @@ function countMatches(text: string, pattern: RegExp): number {
 }
 
 function validateRuntimeArtifactState(root: string, errors: string[], warnings: string[]): void {
+  for (const rel of STATE_ROOT_ALPHA_FILES) {
+    const text = readIfFile(path.join(root, rel));
+    if (!text) { errors.push(`${rel}: missing state-root file`); continue; }
+    for (const term of STATE_ROOT_ALPHA_REQUIRED_TERMS) if (!text.includes(term)) errors.push(`${rel}: missing state-root guidance: ${term}`);
+  }
   for (const rel of STATE_ROOT_CORE_FILES) {
     const text = readIfFile(path.join(root, rel));
     if (!text) { errors.push(`${rel}: missing state-root file`); continue; }
@@ -327,7 +339,7 @@ function validateRuntimeArtifactState(root: string, errors: string[], warnings: 
     if (!text.includes("repoRoot(session)") || !text.includes("slugWorkspace(workspaceRoot)")) errors.push(`${rel}: state root must use stable repo/workspace slug`);
     if (/basename\(session\)/.test(text)) errors.push(`${rel}: state root must not use the session directory basename`);
   }
-  const scanned = [...new Set([...STATE_ROOT_CORE_FILES, ...STATE_ROOT_DOC_FILES, ...STATE_ROOT_SCRIPT_FILES, "tools/validate_skills.ts"])];
+  const scanned = [...new Set([...STATE_ROOT_ALPHA_FILES, ...STATE_ROOT_CORE_FILES, ...STATE_ROOT_DOC_FILES, ...STATE_ROOT_SCRIPT_FILES, "tools/validate_skills.ts"])];
   for (const rel of scanned) {
     const text = readIfFile(path.join(root, rel));
     for (const [pattern, label] of STATE_ROOT_FORBIDDEN_PATTERNS) if (pattern.test(text)) errors.push(`${rel}: forbidden state-root dependency remains: ${label}`);
@@ -373,56 +385,67 @@ function validateSemanticChecks(root: string, errors: string[]): void {
 
 function validateAlphaGoalStructure(root: string, errors: string[]): void {
   const text = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
-  requireOrderedTerms("alpha-goal goal gates", markdownSubsection(text, "Goal Gates"), [
+  requireOrderedTerms("alpha-goal hard gates", markdownSection(text, "Hard Gates"), [
     "PASS only if:",
-    "Intent is explicit",
-    "Outcome is explicit",
-    "Scope is explicit",
-    "Acceptance evidence is explicit",
-    "Non-goals are explicit",
-    "Decision boundary is explicit",
-    "Claim boundary is explicit",
-    "Authorization source is explicit",
-    "Clarity score >= 0.92",
+    "All explicit: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Acceptance evidence",
+    "Clarity score > 0.92",
+    "Solution clarity > 0.95",
     "A pressure pass is complete",
     "revisited with evidence, assumption, or tradeoff follow-up",
-    "Otherwise:",
-    "RETURN = Clarify with User",
   ], errors);
-  requireOrderedTerms("alpha-goal authority", markdownSection(text, "Authority"), [
-    "The accepted Goal Contract is the only execution authority",
-    "Target means the requested outcome within authorized scope",
-    "Evidence may influence a Goal Contract, but it does not define it",
-    "Evidence may not set or override target, outcome, scope, acceptance evidence, non-goals, decision boundary, claim boundary",
-    "Delegated agents may inspect, review, and evaluate",
+  requireOrderedTerms("alpha-goal boundaries", markdownSection(text, "Boundaries"), [
+    "alpha-goal does not implement, verify completion, make final-ready or complete claims",
+    "Only an accepted Goal Contract may be handed to `$control-loop`",
+    "Quick Path",
+    "Skip only for concrete read-only fact lookup",
+    "Anti-Pattern",
+    "Every project MUST go through the workflow below",
+    "must get approval",
   ], errors);
-  requireOrderedTerms("alpha-goal workflow", markdownSection(text, "Workflow"), [
-    "You MUST create a `plan` for each item and complete them in order",
-    "Preflight and Discovery",
-    "Clarify",
-    "loop Q&A until clarity score >= `0.92`, readiness gates pass, and required Technical Solution is explicit",
-    "Review",
-    "Ask Confirm",
+  requireOrderedTerms("alpha-goal workflow", text, [
+    "Phase 1: Discovery",
+    "Phase 2: Clarify",
+    "Phase 3: Assumption Stress Test",
+    "Phase 4: Write Contract",
+    "Phase 5: Review",
+    "Phase 6: Ask for Confirmation",
   ], errors);
-  requireOrderedTerms("alpha-goal clarify phase", markdownSubsection(text, "Phase 2: Clarify"), [
-    "Loop Q&A until clarity score >= `0.92` and readiness gates pass",
+  requireOrderedTerms("alpha-goal discovery phase", markdownSection(text, "Phase 1: Discovery"), [
+    "Inspect applicable",
+    "Evaluate:",
+    "Identify:",
+    "Discovery notes",
+    "Contract status: draft",
+    "Issued by: alpha-goal",
+  ], errors);
+  requireOrderedTerms("alpha-goal clarify phase", markdownSection(text, "Phase 2: Clarify"), [
+    "Loop Q&A until clarity score >= `0.92` and solution clarity >= `0.95` and readiness gates pass",
     "Readiness gates = Goal Gates, Authority Gates, Context Gates, Repair Gate",
     "exclude review, final user confirmation, accepted contract status, and the Before Handoff Checklist",
+    "Q&A Loop",
+    "one high-leverage question",
+    "one decision variable",
+    "Do not ask for discoverable facts",
+    "request_user_input",
+    "Challenge answer and update Goal Contract",
     "Cross-check user claims against code/docs",
+    "Current-state facts cannot define desired behavior",
     "Boundary mapping",
     "actuator boundary -> `Decision boundary`",
     "sensor/observer boundary -> `Claim boundary`",
-    "Technical Solution questions",
-    "Technical Solution is required when cross-file predictive operation may happen",
-    "Use `request_user_input` to ask whether Technical Solution is needed only when unclear",
-    "Loop Q&A until design is explicit",
-    "section checks are progress checks, not final design approval",
-    "Final approval happens in Phase 6 with the complete Goal Contract",
+    "Technical Solution",
+    "solution_clarity",
   ], errors);
-  requireOrderedTerms("alpha-goal confirmation phase", markdownSubsection(text, "Phase 6: Ask for Confirmation"), [
+  requireOrderedTerms("alpha-goal contract/review phases", markdownSection(text, "Phase 4: Write Contract") + markdownSection(text, "Phase 5: Review"), [
+    "references/goal-contract-book.md",
+    "Self-review the Goal Contract",
+    "Review",
+  ], errors);
+  requireOrderedTerms("alpha-goal confirmation phase", markdownSection(text, "Phase 6: Ask for Confirmation"), [
     "Goal Contract Summary",
     "Design Summary",
-    "| Contract status |",
+    "| Field | Value |",
+    "Use `request_user_input`",
     "hand off to `$control-loop`",
   ], errors);
 }
@@ -557,13 +580,17 @@ function requireOrderedTerms(label: string, text: string, terms: string[], error
 
 function validateSchemaConsistency(root: string, errors: string[]): void {
   const alpha = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
+  const goalContractBook = readIfFile(path.join(root, "skills/alpha-goal/references/goal-contract-book.md"));
+  const goalContractSpec = `${alpha}\n${goalContractBook}`;
   const goalContractFields = ["Contract status", "Issued by", "Technical Context", "Intent", "Outcome", "Scope", "Constraints", "Acceptance evidence", "Non-goals", "Decision boundary", "Claim boundary", "Authorization Source"];
-  for (const term of goalContractFields) if (!alpha.includes(term)) errors.push(`alpha Goal Contract content missing field: ${term}`);
-  const designFields = ["Contract status", "Intent", "Root Cause", "Outcome", "Scope", "Repo surfaces", "Constraints", "Acceptance evidence", "Dependency/integration order", "Non-goals", "Decision boundary", "Claim boundary", "Authorization Source", "Blocking gates", "Ledger", "Next"];
-  const designStart = Math.max(0, alpha.toLowerCase().indexOf("design summary"));
-  const designScoped = alpha.slice(designStart).toLowerCase();
-  const designPos = designFields.map(field => designScoped.indexOf(`| ${field.toLowerCase()} |`));
-  if (designPos.some(v => v < 0) || designPos.some((v, i) => i > 0 && v <= designPos[i - 1])) errors.push("design summary schema order mismatch: alpha");
+  for (const term of goalContractFields) if (!goalContractSpec.includes(term)) errors.push(`alpha Goal Contract content missing field: ${term}`);
+  const confirmation = markdownSection(alpha, "Phase 6: Ask for Confirmation");
+  requireOrderedTerms("alpha design summary presentation", confirmation, [
+    "Goal Contract Summary",
+    "Design Summary",
+    "| Field | Value |",
+    "| --- | --- |",
+  ], errors);
   const evSkill = readIfFile(path.join(root, "skills/goal-verify/SKILL.md"));
   for (const term of ["PASS_TO_FINAL", "NEXT_ITERATION", "BLOCKED", "RETURN_TO_ALPHA_GOAL"]) if (!evSkill.includes(term)) errors.push(`goal verification verdict enum mismatch: ${term}`);
   for (const term of ["same_goal_fixable", "scope_change", "authority_change", "external_blocker", "verification_complete"]) if (!evSkill.includes(term)) errors.push(`goal verification gap kind missing: ${term}`);
