@@ -27,6 +27,17 @@ Only an accepted Goal Contract may be handed to `$control-loop`.
 Quick Pass:
 - skip only for concrete read-only fact lookup; use this skill when intent, scope, acceptance, or decision boundaries are involved.
 
+Anti-Pattern: "Build it yourself" or "Fix it yourself" or "Implement it yourself"
+- Every project MUST go through the workflow below. Maybe contract or design is short, but it must be explicit and you must get approval.
+
+You MUST create a task for each of these items and complete them in order:
+1. **Preflight && Discovery**: Inspect the repository facts, current implementation, and external facts when required.
+2. **Clarify**: Loop Q&A until clarity score is above `0.92` and readiness gates pass.
+3. **Write Contract**: Produce the canonical Goal Contract. Show summary.
+4. **Design**: When cross-file operation(predictive) may happen, Loop Q&A until design is explicit and approved.
+5. **Review**: Review the Goal Contract with the subagent, and fix accepted findings.
+6. **Ask Confirm**: Ask the user to confirm the Goal Contract is explicit and approved. Decide whether to continue or hand off to `$control-loop`.
+
 ## Authority
 
 The accepted Goal Contract is the only execution authority.
@@ -103,18 +114,7 @@ For diagnose/repair work:
 PASS only if root cause is confirmed.
 Otherwise diagnostic probes only.
 
-### Anti-Pattern: "Build it" or "Fix it" or "Implement it"
-Every project MUST go through the workflow below. Maybe contract or design is short, but it must be explicit and you must get approval.
-
 ## Workflow
-
-You MUST create a task for each of these items and complete them in order:
-1. **Preflight && Discovery**: Inspect the repository facts, current implementation, and external facts when required.
-2. **Clarify**: Loop Q&A until clarity score is above `0.92` and readiness gates pass.
-3. **Write Contract**: Produce the canonical Goal Contract. Show summary.
-4. **Design**: When cross-file operation(predictive) may happen, Loop Q&A until design is explicit and approved.
-5. **Review**: Review the Goal Contract with the subagent, and fix accepted findings.
-6. **Ask Confirm**: Ask the user to confirm the Goal Contract is explicit and approved. Decide whether to continue or hand off to `$control-loop`.
 
 ### Phase 0: Preflight
 1. Resolve the Alpha Goal state root before writing runtime artifacts. Always use `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from stable workspace identity: `slug(repo_root or Goal Contract target workspace)`, never from the session directory.
@@ -151,7 +151,7 @@ Use current task state:
 
 Target the first blocking gate or lowest-scoring dimension. Prefer intent and boundaries before implementation details:
 - Ladder 1: intent, outcome, scope, non-goals, decision boundaries
-- Ladder 2: constraints, success criteria, acceptance evidence, authority, claim boundary
+- Ladder 2: constraints, success criteria, acceptance evidence, claim boundary
 - Ladder 3: context/current facts, actuator boundary, sensor/observer, external/current facts
 
 `Non-goals` and `Decision Boundaries` are mandatory readiness gates. Keep revisiting them until explicit.
@@ -283,12 +283,13 @@ Use `request_user_input` to ask for if need Technical Solution.
 
 ### Phase 5: Ask for Confirmation
 
-Present Summary First.
+Present Goal Contract Summary First.
+
 ```markdown
-Design Summary
+Goal Contract Summary
 | Field | Value |
 | --- | --- |
-| Contract status | |
+| Contract | |
 | Intent | |
 | Root Cause | |
 | Outcome | |
