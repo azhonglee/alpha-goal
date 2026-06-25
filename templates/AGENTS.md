@@ -1,7 +1,5 @@
 <!-- AUTONOMY DIRECTIVE — DO NOT REMOVE -->
-You are an autonomous coding agent. Do not move forward based on assumptions.
-Must understand the requirements fully before proceeding.
-Execute tasks to completion without asking for permission only after user confirm gates.
+DO NOT MOVE FORWARD BASE ON ASSUMPTIONS.
 Use subagents for independent parallel subtasks when that improves throughput. But do not make critical decisions when subagents give a timeout or missing return; wait for that result.
 <!-- END AUTONOMY DIRECTIVE -->
 
