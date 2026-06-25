@@ -103,7 +103,18 @@ For diagnose/repair work:
 PASS only if root cause is confirmed.
 Otherwise diagnostic probes only.
 
+### Anti-Pattern: "Build it" or "Fix it" or "Implement it"
+Every project MUST go through the workflow below. Maybe contract or design is short, but it must be explicit and you must get approval.
+
 ## Workflow
+
+You MUST create a task for each of these items and complete them in order:
+1. **Preflight && Discovery**: Inspect the repository facts, current implementation, and external facts when required.
+2. **Clarify**: Loop Q&A until clarity score is above `0.92` and readiness gates pass.
+3. **Write Contract**: Produce the canonical Goal Contract. Show summary.
+4. **Design**: When cross-file operation(predictive) may happen, Loop Q&A until design is explicit and approved.
+5. **Review**: Review the Goal Contract with the subagent, and fix accepted findings.
+6. **Ask Confirm**: Ask the user to confirm the Goal Contract is explicit and approved. Decide whether to continue or hand off to `$control-loop`.
 
 ### Phase 0: Preflight
 1. Resolve the Alpha Goal state root before writing runtime artifacts. Always use `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`. Derive `<workspace-slug>` from stable workspace identity: `slug(repo_root or Goal Contract target workspace)`, never from the session directory.
@@ -198,7 +209,7 @@ Score each dimension in `[0.0, 1.0]` with justification and gap:
 - Constraint Clarity
 - Success Criteria Clarity
 - Context Clarity for brownfield work
-- Technical Solution Clarity (When cross-file operation, required; None otherwise, solution_clarity_score is 1)
+- Technical Solution Clarity (When need cross-file operation, required; None otherwise, solution_clarity_score is 1)
 
 #### 2.4 Record and Cycle-Control
 
@@ -217,7 +228,7 @@ Use each applicable mode once; if none applies, record why:
 
 Track used modes in state to prevent repetition.
 
-### Phase 4: Goal Contract
+### Phase 4: Write Contract
 
 Write the Goal Contract to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md`; copy to `docs/specs/YYYYMMDD-<TaskName>.md` when useful or required by repo convention.
 The state-root `goal-contract.md` is canonical. Repo specs are mirrors or references only; conflicts route back to `alpha-goal`.
@@ -245,16 +256,34 @@ Optional Content:
 - Assumptions + resolutions [assumptions_resolutions]
 - Dependency/integration order [repo_integration_order]
 
-Optional Specifications（When cross-file operation):
-- Technical Solution [technical_solution] (design includes architecture、data model、solution、 interface、protocol、performance、scalability、risk)
+Optional Specifications(When need cross-file operation):
+- Technical Solution [technical_solution] (design includes architecture、components、data flow、solution、interface、protocol、testing strategy、scalability、risk)
 
-#### Artifact Review
+### Phase 5: Technical Solution Question(Conditional)
 
-Self-review the Goal Contract for completion and reasonability. Use subagents for independent review when useful, then fix accepted findings.
+Use `request_user_input` to ask for if need Technical Solution.
+- On approval: Continue this phase to 
+- On rejection: Skip to next phase.
+
+- Understand what you're building, present the design which includes:
+  - Architecture
+  - Components
+  - Data flow
+- Scale each section to its complexity: a few sentences if straightforward, up to 200-300 words if nuanced
+- Ask after each section whether it looks right so far
+- Cover: architecture, components, data flow, error handling, testing
+- Be ready to go back and clarify if something doesn't make sense
+- Update the Goal Contract with the Technical Solution After each section
+
+### Phase 6: Artifact Review
+
+- Self-review the Goal Contract for completion and reasonability. 
+- Use subagents for independent review when useful.
+- Fix accepted findings.
 
 ### Phase 5: Ask for Confirmation
 
-Present Summary.
+Present Summary First.
 ```markdown
 Design Summary
 | Field | Value |
@@ -282,24 +311,23 @@ Use `request_user_input` to ask for approve/launch, refine, or reject.
 - On rejection: Contract status = draft
 - On refine: Contract status = draft; return to Phase 2 with user feedback.
 
-
 ## Before Handoff Checklist
 
-```markdown
-[ ] Goal Contract exists
-[ ] Contract status = accepted
-[ ] Issued by = alpha-goal
-[ ] Intent explicit
-[ ] Outcome explicit
-[ ] Scope explicit
-[ ] Constraints explicit
-[ ] Acceptance evidence explicit
-[ ] Non-goals explicit
-[ ] Decision boundary explicit
-[ ] Claim boundary explicit
-[ ] Authorization source explicit
-[ ] Repository inspection completed
-[ ] External facts verified
-[ ] Source-of-truth conflicts resolved
-[ ] Root cause confirmed (repair only)
-```
+- Goal Contract exists
+- Contract status = accepted
+- Issued by = alpha-goal
+- Intent explicit
+- Outcome explicit
+- Scope explicit
+- Constraints explicit
+- Acceptance evidence explicit
+- Non-goals explicit
+- Decision boundary explicit
+- Claim boundary explicit
+- Authorization source explicit
+- Repository inspection completed
+- External facts verified
+- Source-of-truth conflicts resolved
+- Root cause confirmed (repair only)
+- Technical Solution explicit(if need)
+
