@@ -32,11 +32,12 @@ Anti-Pattern: "Build it yourself" or "Fix it yourself" or "Implement it yourself
 
 You MUST create a task for each of these items and complete them in order:
 1. **Preflight && Discovery**: Inspect the repository facts, current implementation, and external facts when required.
-2. **Clarify**: Loop Q&A until clarity score is above `0.92` and readiness gates pass.
-3. **Write Contract**: Produce the canonical Goal Contract. Show summary.
-4. **Design**: When cross-file operation(predictive) may happen, Loop Q&A until design is explicit and approved.
-5. **Review**: Review the Goal Contract with the subagent, and fix accepted findings.
-6. **Ask Confirm**: Ask the user to confirm the Goal Contract is explicit and approved. Decide whether to continue or hand off to `$control-loop`.
+2. **Clarify**: Loop Q&A until clarity score is above `0.92` and goal gates pass.
+3. **Assumption Stress Test**: Challenge assumptions with evidence.
+4. **Write Contract**: Produce the canonical Goal Contract. Show summary.
+5. **Technical Design**: When cross-file operation(predictive) may happen, Loop Q&A until design is explicit and approved.
+6. **Review**: Review the Goal Contract with the subagent, and fix accepted findings.
+7. **Ask Confirm**: Ask the user to confirm the Goal Contract is explicit and approved. Decide whether to continue or hand off to `$control-loop`.
 
 ## Authority
 
