@@ -114,6 +114,7 @@ Fail: RETURN_TO_ALPHA_GOAL
 Fail: BLOCKED
 
 ## Verification Algorithm
+**Run the algorithm as behavior, not paperwork:**
 ```pseudo
 function goal_verify(goal, evidence):
   assert_goal_contract_valid(goal)

@@ -39,7 +39,7 @@ Do not propose implementation, code edits, or `$control-loop` handoff while any 
 
 ## Clarification
 
-Evaluate:
+**Evaluate:**
 - Problem validity: whether the phenomenon is real and causal claims are reliable.
 - Context sufficiency: what is known, missing, must-have, or merely ideal.
 - Hidden issues: deeper root cause, adjacent issue, or dependency risk.
@@ -48,7 +48,7 @@ Loop Q&A until the user-owned decisions and technical design are explicit enough
 
 ### Loop Q&A
 
-Rules:
+**Rules:**
 - Ask one high-leverage question per round.
 - One question means one decision variable: confirm a conflict, request a decision, choose a solution, demand an example, expose an assumption, force a tradeoff, or test a boundary-stressing case.
 - Do not ask for discoverable facts.
@@ -137,9 +137,9 @@ Round count never closes Clarification.
 ### Assumption Stress Test
 
 Use each applicable mode once; if none applies, record why:
-- Contrarian: challenge a core assumption.
-- Simplifier: probe minimum viable scope.
-- Ontologist: ask for essence-level reframing when the user keeps describing symptoms.
+- **Contrarian:** challenge a core assumption.
+- **Simplifier:** probe minimum viable scope.
+- **Ontologist:** ask for essence-level reframing when the user keeps describing symptoms.
 
 Track used modes in state to prevent repetition.
 
@@ -149,7 +149,7 @@ Follow `references/goal-contract-book.md` to write the Goal Contract. Set `Issue
 Follow `references/technical-design-book.md` to write the Technical Design. Link the Goal Contract and Technical Design to each other.
 Write artifacts only from answered, auto-confirmed, or cited facts. Keep unresolved required fields as `[blocking]`; do not fill them from hypothetical answers.
 
-### Review Gate
+### Review Gate And Show Summary
 
 - Self-check the Goal Contract and Technical Design before asking for approval:
   - All required Goal Contract and Technical Design fields are present.
@@ -166,11 +166,8 @@ Write artifacts only from answered, auto-confirmed, or cited facts. Keep unresol
 - Record self-check and independent review results in the task artifacts or checkpoint.
 - Produce a visible Review Record with self-check result, independent review result or skipped reason, findings fixed, and remaining non-material uncertainties.
 
-## Confirmation Gate
-
-1. After Review Gate completes, present the Goal Contract Summary first.
-- The approval request message must include, in order: Goal Contract Summary, Review Record, then approve/refine/reject prompt.
-- Do not call `request_user_input` before showing the summary and Review Record.
+After Review Gate completes, present the Goal Contract Summary first.
+- The approval request message must include, in order: Goal Contract Summary, Review Record
 - If the summary or Review Record is missing or incomplete, stay in Review Gate.
 - TUI Presentation Style:
 ```markdown
@@ -181,12 +178,11 @@ Goal Contract Summary (Design Summary)
 | Non-goals | ... |
 | Execution boundary | ... |
 | Key design decisions | ... |
-| Acceptance evidence | ... |
-| Risks / non-material uncertainties | ... |
-| Validation plan | ... |
 ```
 
-2. Use `request_user_input` to ask for approve/launch, refine, or reject.
+## Confirmation Gate
+
+Use `request_user_input` to ask for approve/launch, refine, or reject.
 - On approval: set `Contract status: accepted`; hand off to `$control-loop`.
 - On rejection: keep `Contract status: draft`.
 - On refine: keep `Contract status: draft`; return to `Clarification` with user feedback.

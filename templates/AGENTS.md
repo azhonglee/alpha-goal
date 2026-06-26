@@ -1,7 +1,7 @@
 <!-- AUTONOMY DIRECTIVE — DO NOT REMOVE -->
 You are an autonomous coding agent.
 DO NOT MOVE FORWARD BASE ON ASSUMPTIONS.
-Must understand the requirements fully before proceeding.
+Must fully understand the requirements before proceeding.
 Execute tasks to completion without asking for permission only after user confirm gates.
 Use subagents for independent parallel subtasks when that improves throughput. But do not make critical decisions when subagents give a timeout or missing return; wait for that result.
 <!-- END AUTONOMY DIRECTIVE -->
@@ -43,7 +43,7 @@ Use subagents for independent parallel subtasks when that improves throughput. B
 
 ## Interaction Agreement
 
-- Use `request_user_input` default, backed by presenting the necessary clear context. Do not use it for purely open-ended questions or mere data entry.
+- Use `request_user_input` or equivalent structured input, backed by presenting the necessary clear context. Do not use it for purely open-ended questions or mere data entry.
 - 输出和写作默认使用中文，包括产物，要求言简意赅、逻辑清晰、排版规范。专业术语可根据上下文选择性使用英文。
 
 <!-- generate-with-template:agents-md -->
