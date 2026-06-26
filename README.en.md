@@ -11,24 +11,24 @@ Alpha Goal gives AI agents a Goal Engineering control loop for three common fail
 <table>
   <thead>
     <tr>
-      <th width="100" align="left">Problem</th>
+      <th width="260" align="left">Problem</th>
       <th align="left">What it looks like</th>
       <th align="left">Control point</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td width="100" align="left"><strong>Goal drift</strong></td>
+      <td width="260" align="left"><strong>Goal&nbsp;drift</strong></td>
       <td align="left">The agent starts before requirements are clear, gradually moves off target, and changes unrelated things along the way.</td>
       <td align="left"><code>alpha-goal</code> discovers facts, clarifies the goal, boundaries, non-goals, and acceptance evidence, then writes a user-confirmed <code>goal-contract.md</code>.</td>
     </tr>
     <tr>
-      <td width="100" align="left"><strong>Action overreach</strong></td>
+      <td width="260" align="left"><strong>Action&nbsp;overreach</strong></td>
       <td align="left">There is no explicit authority boundary, so work can exceed scope, touch the wrong branch, or treat current implementation as desired behavior.</td>
       <td align="left"><code>control-loop</code> executes only bounded slices inside an accepted contract, with worktree/branch, scope, non-goals, and claim-boundary checks before mutation.</td>
     </tr>
     <tr>
-      <td width="100" align="left"><strong>Evidence-free completion</strong></td>
+      <td width="260" align="left"><strong>Evidence&#8209;free&nbsp;completion</strong></td>
       <td align="left">A passing test or partial success is treated as proof that the goal is complete.</td>
       <td align="left"><code>goal-verify</code> compares evidence against acceptance evidence, classifies gaps, and returns a route decision.</td>
     </tr>
@@ -40,11 +40,11 @@ In practice, it compresses requirement clarification, authority boundaries, iter
 ## Core Architecture
 
 ```mermaid
-%%{init: {"theme":"base","flowchart":{"wrappingWidth":500,"nodeSpacing":80,"rankSpacing":70,"htmlLabels":true},"markdownAutoWrap":false,"themeVariables":{"background":"#364150","primaryColor":"#364150","primaryTextColor":"#f8fafc","primaryBorderColor":"#f8fafc","lineColor":"#f8fafc","edgeLabelBackground":"#364150","fontFamily":"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"}}}%%
+%%{init: {"theme":"base","flowchart":{"wrappingWidth":900,"nodeSpacing":80,"rankSpacing":70,"htmlLabels":true},"markdownAutoWrap":false,"themeVariables":{"background":"#364150","primaryColor":"#364150","primaryTextColor":"#f8fafc","primaryBorderColor":"#f8fafc","lineColor":"#f8fafc","edgeLabelBackground":"#364150","fontFamily":"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"}}}%%
 flowchart TD
-  AG["<div align='center'><strong>alpha-goal (entry)</strong></div><div align='left' style='width:550px'><br/>Discover facts → Clarify requirements → Pressure-test → Write Goal Contract → User confirmation<br/>Output: goal-contract.md (authority contract)</div>"]
-  CL["<div align='center'><strong>control-loop (execution)</strong></div><div align='left' style='width:550px'><br/>Slice by contract → Execute → Collect evidence → Classify evidence → Route<br/>Output: checkpoint.md (conditional recovery / evidence handoff)</div>"]
-  GV["<div align='center'><strong>goal-verify (verification)</strong></div><div align='left' style='width:550px'><br/>Evidence vs acceptance evidence → Gap analysis → Route decision<br/>Verdicts: PASS_TO_FINAL / NEXT_ITERATION / BLOCKED / RETURN...</div>"]
+  AG["<div align='center'><strong>alpha-goal (entry)</strong></div><div align='left' style='width:900px'><br/>Discover facts → Clarify requirements → Pressure-test → Write Goal Contract → User confirmation<br/>Output: goal-contract.md (authority contract)</div>"]
+  CL["<div align='center'><strong>control-loop (execution)</strong></div><div align='left' style='width:900px'><br/>Slice by contract → Execute → Collect evidence → Classify evidence → Route<br/>Output: checkpoint.md (conditional recovery / evidence handoff)</div>"]
+  GV["<div align='center'><strong>goal-verify (verification)</strong></div><div align='left' style='width:900px'><br/>Evidence vs acceptance evidence → Gap analysis → Route decision<br/>Verdicts: PASS_TO_FINAL / NEXT_ITERATION / BLOCKED / RETURN...</div>"]
 
   AG -->|"after contract is accepted"| CL
   CL --> GV
@@ -71,7 +71,6 @@ Validate: npx --no-install tsx tools/validate_skills.ts .
 ```
 
 The installer creates direct symlinks for the three public skills under `$HOME/.codex/skills/` and cleans same-repo links for merged old public skills.
-The validator checks that the whole `skills/` tree stays under 15,000 word+punctuation units, counted as words plus punctuation/symbol marks. This budget preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, authority gates, behavior-level gates, and evaluator feedback without over-compressing skill text.
 
 ## Usage examples
 

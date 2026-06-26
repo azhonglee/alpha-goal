@@ -751,7 +751,7 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   if (!readmeEn.includes("Current code facts describe current state")) errors.push("README.en.md missing current-state-not-desired-state principle");
   if (!readmeEn.includes("Execute or harden an authorized slice")) errors.push("README.en.md must describe control-loop as execution-first");
   if (!readmeEn.includes("Act -> Evidence -> $goal-verify -> Gap?")) errors.push("README.en.md workflow must include evidence and goal-verify");
-  for (const term of ["goal-contract.md", "checkpoint.md", "15,000 word+punctuation units", "Technical Design"]) if (!readmeEn.includes(term)) errors.push(`README.en.md missing persistent-loop term: ${term}`);
+  for (const term of ["goal-contract.md", "checkpoint.md", "Technical Design"]) if (!readmeEn.includes(term)) errors.push(`README.en.md missing persistent-loop term: ${term}`);
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
   for (const name of REQUIRED_SKILL_NAMES) if (!installDoc.includes(name)) errors.push(`INSTALL.md missing public skill: ${name}`);
   if (!installDoc.includes("--no-sync-user-hooks")) errors.push("INSTALL.md missing --no-sync-user-hooks option");
