@@ -37,8 +37,6 @@ flowchart TD
   class Pass,Next,Return route;
 ```
 
-运行态写入 `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`：`goal-contract.md` 是默认契约产物，`checkpoint.md` 是条件检查点，`control-state/latest.md` 只在任务身份不明时指向最新可恢复任务。
-
 ```text
 Trigger -> Preflight/Discovery -> Clarify -> Write Contract -> Technical Design? -> Review -> Confirm
 Accepted Goal Contract -> $control-loop -> Act -> Evidence -> $goal-verify -> Gap? -> Harden or Final Claim
@@ -74,13 +72,9 @@ $control-loop 根据已接受 Goal Contract 执行或加固下一轮最有用且
 
 Alpha Goal 让 agent 工作保持目标明确、行动有界、声明受证据约束。
 
-- 先发现，再澄清：提问前先检查本地事实、文档、状态和既有契约，让用户注意力只用于他们真正拥有的选择。
 - 证据先于授权：当前代码事实只描述现状；期望行为来自用户意图、规格、issue 或已接受契约。
 - 目标先于行动：结果（outcome）、范围（scope）、非目标（non-goals）、验收证据（acceptance evidence）、决策负责人（decision owner）和声明边界（claim boundary）共同限定什么可以被改变。
-- 显式确认门：每个项目都要先写清 Goal Contract；契约或设计可以很短，但必须明确并获得用户确认，才能进入 `$control-loop`。
-- 技术设计按需：当任务可能发生跨文件预测性操作时，Technical Design 需要覆盖架构、组件、数据流、接口、测试策略和风险。
-- 只做有用建模：只有依赖、扰动和风险会影响安全控制、验证或路由时，才把它们纳入模型。
-- 持久状态：`goal-contract.md` 是 `alpha-goal` 的默认产物，直接包含发现记录、访谈记录和最终契约；压缩恢复时优先读取草稿或已接受契约，accepted status 只限制执行交接；`checkpoint.md` 按需承载运行档案（run profile）、循环状态（loop state）、迭代、证据、验证，以及带证据、置信度、失效条件的记忆（memory）；`control-state/latest.md` 只在任务身份不明时指向最新可恢复任务。
+- 持久状态：`goal-contract.md` 是 `alpha-goal` 的默认产物，直接包含发现记录、访谈记录和最终契约；`checkpoint.md` 按需承载运行档案。
 - 有界执行：优先选择可取证的有界动作或定向变更，而不是宽泛重构和猜测式清理；已接受契约、必要 Run Profile 和仓库策略共同约束动作权限。
 - 独立验证：最终、就绪、安全、完成、修复或评审等声明需要新鲜证据和缺陷/风险扫描（defect/risk sweep），并且要与执行过程分离检查。
 - 诚实路由：目标不清回到 `alpha-goal`，同一目标内可修复的执行缺口回到 `control-loop`，证据或审查面不足的最终声明继续进入 `goal-verify`。

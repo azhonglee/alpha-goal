@@ -37,8 +37,6 @@ flowchart TD
   class Pass,Next,Return route;
 ```
 
-Runtime state lives under `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`: `goal-contract.md` is the default contract artifact, `checkpoint.md` is conditional, and `control-state/latest.md` points to the latest recoverable task only when task identity is ambiguous.
-
 ```text
 Trigger -> Preflight/Discovery -> Clarify -> Write Contract -> Technical Design? -> Review -> Confirm
 Accepted Goal Contract -> $control-loop -> Act -> Evidence -> $goal-verify -> Gap? -> Harden or Final Claim
@@ -75,13 +73,9 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
 
 Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 
-- Discovery before clarification: inspect local facts, docs, status, and existing contracts before asking questions, so user attention is reserved for choices only they can make.
 - Evidence before authority: Current code facts describe current state; desired behavior comes from user intent, specs, issues, or accepted contracts.
 - Goals before action: outcome, scope, non-goals, acceptance evidence, decision owner, and claim boundary define what may change.
-- Explicit confirmation gates: every project must first make the Goal Contract clear; the contract or design can be short, but it must be explicit and user-confirmed before `$control-loop`.
-- Technical Design when needed: when work may involve cross-file predictive operation, Technical Design covers architecture, components, data flow, interfaces, testing strategy, and risks.
-- Minimal useful modeling: model dependencies, disturbances, and risks only when they affect safe control, validation, or routing.
-- Persistent state: `goal-contract.md` is the default `alpha-goal` output and directly contains discovery notes, interview ledger, and the final contract; compact recovery reads draft or accepted contracts first, while accepted status only gates execution handoff; `checkpoint.md` conditionally carries run profile, loop state, iteration, evidence, verification, and memory with evidence, confidence, and invalidation; `control-state/latest.md` only points to the latest recoverable task when task identity is ambiguous.
+- Persistent state: `goal-contract.md` is the default `alpha-goal` output and directly contains discovery notes, interview ledger, and the final contract; `checkpoint.md` conditionally carries the run profile.
 - Bounded execution: prefer bounded evidence-producing actions or targeted changes over broad refactors and speculative cleanup; the accepted contract, required Run Profile, and repo policy constrain action authority.
 - Independent verification: final/ready/safe/complete/repair/review claims require fresh evidence and defect/risk sweep, checked separately from execution.
 - Honest routing: unclear goals return to `alpha-goal`, same-goal fixable execution gaps return to `control-loop`, and unsupported or under-reviewed final claims continue through `goal-verify`.
