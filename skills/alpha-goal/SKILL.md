@@ -1,48 +1,43 @@
 ---
 name: alpha-goal
-description: "Must use for any engineering/design/implementation requests."
+description: "Must use for any engineering/design/implementation requests after you have inspected the relevant files, docs, recent commits, and existing patterns. Loop Q&A until you have 100% confidence to understand the requirements fully and design a perfect solution."
 ---
 
 # Alpha Goal
 
-## Mission
 `alpha-goal` owns workflow control for goal definition.
-
 Loop Q&A until you have 100% confidence to understand the requirements fully and design a perfect solution.
 
-## Boundaries
-- alpha-goal does not implement, verify completion, make final-ready or complete claims
-- Only an accepted Goal Contract may be handed to `$control-loop`
+## Entry Gate
 
-Quick Path:
-- Skip only for concrete read-only fact lookup; Use this skill when intent, scope, acceptance, or decision boundaries are involved
+Enter `alpha-goal` for any engineering/design/implementation requests. Skip `alpha-goal` only for concrete read-only work.
 
 **Anti-Pattern:** "Too Clear to Need clarification" or "Too Simple to Need design"
 - Every project MUST go through the workflow below; The contract or design may be short, but it must be explicit and you must get approval
 
-## Workflow
+**Check Point:**
+- You have inspected the relevant files, docs, recent commits, and existing patterns.
+- You have identified the facts, conflicts, unknowns, and dependencies.
 
-## Phase 1: Discovery
-Inspect applicable: AGENTS/repo rules, README/getting-started/install docs, Relevant specs/ADRs/contracts, Target files and current implementation, Local glossary/context, Current branch/status when mutation may follow, Direct contradictions
+## Hard Gate
+Do not leave `Clarification` until these are explicit enough for the risk of the work:
+- Goal Contract explicit: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Acceptance evidence
+- Technical Solution well-defined: Architecture, Components, Interfaces, Data Models, Test Plans
+- Material assumptions have been pressure-tested at least once, or the remaining uncertainty is documented as non-material
+- Clarity score > 0.92
+- Solution score > 0.95
+- Reflect: Make sure you have 100% confidence to understand the requirements fully and design a perfect solution.
+
+## Clarification
 
 Evaluate:
 - Problem validity: whether the phenomenon is real and causal claims are reliable
 - Context sufficiency: what is known, missing, must-have, or merely ideal
 - Hidden issues: deeper root cause, adjacent issue, or dependency risk
 
-Identify:
-- Facts
-- Conflicts
-- Unknowns
-- Dependencies
+Record inspection results in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Discovery notes`.
 
-Record details in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Discovery notes`.
-If the contract is still draft, set `Contract status: draft` and `Issued by: alpha-goal`; keep outcome and scope fields unset until final design.
-
-## Phase 2: Clarify
-Loop Q&A until clarity score >= `0.92` and solution clarity >= `0.95` and readiness gates pass.
-
-Readiness gates = Goal Gates, Authority Gates, Context Gates, Repair Gate; exclude review, final user confirmation, accepted contract status, and the Before Handoff Checklist.
+Loop Q&A until you have 100% confidence to understand the requirements fully and design a perfect solution.
 
 ### Q&A Loop
 
@@ -56,10 +51,10 @@ Use current task state:
 - Brownfield context and active Assumption Stress Test mode
 
 Target the highest leverage dimension:
-- Stage 1: intent, outcome, scope, non-goals, decision boundaries
-- Stage 2: constraints, success criteria, acceptance evidence, claim boundary
-- Stage 3: context/current facts, actuator boundary, sensor/observer, external/current facts
-- Stage 4: architecture, components, data flow, interfaces, testing strategy, scalability, and risk
+- Priority 1: intent, outcome, scope, non-goals, decision boundaries
+- Priority 2: constraints, success criteria, acceptance evidence, claim boundary
+- Priority 3: context/current facts, actuator boundary, sensor/observer, external/current facts
+- Priority 4: architecture, components, data flow, interfaces, testing strategy, scalability, and risk
 
 Rules:
 - `Non-goals` and `Decision boundary` are mandatory readiness gates
@@ -94,7 +89,7 @@ Classify each answer before updating the Goal Contract:
 - `[from-research]` external/current fact
 - `[from-user]` explicit user decision, constraint, acceptance signal, non-goal, authority, example, or clarification
 
-Authority rules:
+Authority Contract :
 - Auto-confirm only descriptive facts
 - Treat repo language as evidence, not authority
 - Cross-check user claims against code/docs; name competing sources on conflict
@@ -113,7 +108,7 @@ Score:
 
 ```text
 clarity_score = 0.25 * intent + 0.2 * outcome + 0.15 * scope + 0.12 * constraints + 0.1 * success + 0.08 * decision_boundary + 0.05 * context
-solution_clarity = architecture_clarity * 0.2 + component_clarity * 0.2 + data_flow_clarity * 0.2 + interface_clarity * 0.15 + testing_strategy_clarity * 0.15 + scalability_clarity * 0.05 + risk_clarity * 0.05
+solution_score = architecture_clarity * 0.2 + component_clarity * 0.2 + data_flow_clarity * 0.2 + interface_clarity * 0.15 + testing_strategy_clarity * 0.15 + scalability_clarity * 0.05 + risk_clarity * 0.05
 ```
 
 Score each dimension in `[0, 100]` with justification and gap:
@@ -127,9 +122,9 @@ Cycle control:
 - Max 6 rounds per dimension
 - Proceed with warnings only when further questions would not change execution
 - For cross-repo framing, keep one task-level Alpha Goal state root and record a repo manifest: repo path/name, role, authorization source, allowed change surfaces, non-goals, branch/worktree expectation, validation observer, delivery boundary, and dependency/integration order
-- Keep Clarify active if not all stage dimensions have been asked or clarity score < 92 or solution clarity < 95
+- Keep Clarification active if not all priority dimensions have been asked or clarity score < 92 or solution score < 95
 
-### Phase 3: Assumption Stress Test
+### Assumption Stress Test
 Use each applicable mode once; if none applies, record why:
 - Contrarian: challenge a core assumption
 - Simplifier: probe minimum viable scope
@@ -137,11 +132,12 @@ Use each applicable mode once; if none applies, record why:
 
 Track used modes in state to prevent repetition.
 
-### Phase 4: Write Contract
+### Write Contract
 
 Follow the book template in `references/goal-contract-book.md` to write the Goal Contract.
+Set `Issued by = alpha-goal`.
 
-### Phase 5: Review
+### Review
 - Self-review the Goal Contract for completeness and reasonableness
 - Use subagents for independent review when useful
 - Fix accepted findings
@@ -160,11 +156,4 @@ Goal Contract Summary (Design Summary)
 Use `request_user_input` to ask for approve/launch, refine, or reject.
 - On approval: set `Contract status: accepted`; hand off to `$control-loop`
 - On rejection: keep `Contract status: draft`
-- On refine: keep `Contract status: draft`; return to Phase 2 with user feedback
-
-## Hard Gates
-PASS only if:
-- All explicit: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Acceptance evidence
-- Clarity score > 0.92
-- Solution clarity > 0.95
-- A pressure pass is complete: at least one earlier answer was revisited with evidence, assumption, or tradeoff follow-up
+- On refine: keep `Contract status: draft`; return to Clarification with user feedback

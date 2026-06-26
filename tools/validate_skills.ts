@@ -100,23 +100,21 @@ const DESCRIPTION_SEMANTIC_CHECKS: Record<string, { required: string[]; forbidde
 const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
   ["front controller defines goals before execution", "skills/alpha-goal/SKILL.md", [
     "owns workflow control for goal definition",
-    "Loop Q&A until you really understand the requirements fully and design a perfect solution",
-    "alpha-goal does not implement",
-    "verify completion",
-    "Only an accepted Goal Contract may be handed to `$control-loop`",
-    "Quick Path",
-    "Hard Gates",
-    "All explicit: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Acceptance evidence",
+    "Loop Q&A until you have 100% confidence to understand the requirements fully and design a perfect solution",
+    "after you have inspected the relevant files, docs, recent commits, and existing patterns",
+    "Entry Gate",
+    "Skip `alpha-goal` only for concrete read-only work",
+    "Check Point:",
+    "You have inspected the relevant files, docs, recent commits, and existing patterns",
+    "You have identified the facts, conflicts, unknowns, and dependencies",
+    "Hard Gate",
+    "Goal Contract explicit: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Acceptance evidence",
     "Clarity score > 0.92",
-    "Solution clarity > 0.95",
-    "A pressure pass is complete",
-    "revisited with evidence, assumption, or tradeoff follow-up",
-    "Phase 1: Discovery",
-    "Inspect applicable",
+    "Solution score > 0.95",
+    "Material assumptions have been pressure-tested",
+    "Clarification",
+    "Record inspection results",
     "Discovery notes",
-    "Phase 2: Clarify",
-    "Loop Q&A until clarity score >= `0.92` and solution clarity >= `0.95` and readiness gates pass",
-    "Readiness gates = Goal Gates, Authority Gates, Context Gates, Repair Gate",
     "Q&A Loop",
     "Anti-Pattern",
     "Every project MUST go through the workflow below",
@@ -130,9 +128,10 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "actuator boundary -> `Decision boundary`",
     "sensor/observer boundary -> `Claim boundary`",
     "Technical Solution",
-    "solution_clarity",
+    "solution_score",
     "Assumption Stress Test",
     "Contract status",
+    "Issued by = alpha-goal",
     "Discovery notes",
     "Interview ledger",
     "goal-contract.md",
@@ -385,44 +384,45 @@ function validateSemanticChecks(root: string, errors: string[]): void {
 
 function validateAlphaGoalStructure(root: string, errors: string[]): void {
   const text = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
-  requireOrderedTerms("alpha-goal hard gates", markdownSection(text, "Hard Gates"), [
-    "PASS only if:",
-    "All explicit: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Acceptance evidence",
-    "Clarity score > 0.92",
-    "Solution clarity > 0.95",
-    "A pressure pass is complete",
-    "revisited with evidence, assumption, or tradeoff follow-up",
+  requireOrderedTerms("alpha-goal top-level order", text, [
+    "## Entry Gate",
+    "## Hard Gate",
+    "## Clarification",
+    "## Confirmation Gate",
   ], errors);
-  requireOrderedTerms("alpha-goal boundaries", markdownSection(text, "Boundaries"), [
-    "alpha-goal does not implement, verify completion, make final-ready or complete claims",
-    "Only an accepted Goal Contract may be handed to `$control-loop`",
-    "Quick Path",
-    "Skip only for concrete read-only fact lookup",
+  requireOrderedTerms("alpha-goal entry gate", markdownSection(text, "Entry Gate"), [
+    "Enter `alpha-goal`",
+    "Skip `alpha-goal` only for concrete read-only work",
     "Anti-Pattern",
     "Every project MUST go through the workflow below",
     "must get approval",
+    "Check Point:",
+    "You have inspected the relevant files, docs, recent commits, and existing patterns",
+    "You have identified the facts, conflicts, unknowns, and dependencies",
   ], errors);
-  requireOrderedTerms("alpha-goal workflow", text, [
-    "Phase 1: Discovery",
-    "Phase 2: Clarify",
-    "Phase 3: Assumption Stress Test",
-    "Phase 4: Write Contract",
-    "Phase 5: Review",
-    "Phase 6: Ask for Confirmation",
+  requireOrderedTerms("alpha-goal hard gate", markdownSection(text, "Hard Gate"), [
+    "Do not leave `Clarification`",
+    "Goal Contract explicit: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Acceptance evidence",
+    "Technical Solution well-defined",
+    "Material assumptions have been pressure-tested",
+    "Clarity score > 0.92",
+    "Solution score > 0.95",
+    "100% confidence",
   ], errors);
-  requireOrderedTerms("alpha-goal discovery phase", markdownSection(text, "Phase 1: Discovery"), [
-    "Inspect applicable",
+  requireOrderedTerms("alpha-goal clarification", markdownSection(text, "Clarification"), [
     "Evaluate:",
-    "Identify:",
+    "Problem validity",
+    "Context sufficiency",
+    "Hidden issues",
+    "Record inspection results",
     "Discovery notes",
-    "Contract status: draft",
-    "Issued by: alpha-goal",
-  ], errors);
-  requireOrderedTerms("alpha-goal clarify phase", markdownSection(text, "Phase 2: Clarify"), [
-    "Loop Q&A until clarity score >= `0.92` and solution clarity >= `0.95` and readiness gates pass",
-    "Readiness gates = Goal Gates, Authority Gates, Context Gates, Repair Gate",
-    "exclude review, final user confirmation, accepted contract status, and the Before Handoff Checklist",
+    "Loop Q&A until you have 100% confidence",
     "Q&A Loop",
+    "Original request and probable intent",
+    "Priority 1",
+    "Priority 2",
+    "Priority 3",
+    "Priority 4",
     "one high-leverage question",
     "one decision variable",
     "Do not ask for discoverable facts",
@@ -434,14 +434,17 @@ function validateAlphaGoalStructure(root: string, errors: string[]): void {
     "actuator boundary -> `Decision boundary`",
     "sensor/observer boundary -> `Claim boundary`",
     "Technical Solution",
-    "solution_clarity",
-  ], errors);
-  requireOrderedTerms("alpha-goal contract/review phases", markdownSection(text, "Phase 4: Write Contract") + markdownSection(text, "Phase 5: Review"), [
+    "clarity_score = 0.25 * intent",
+    "solution_score = architecture_clarity * 0.2",
+    "Keep Clarification active",
+    "Assumption Stress Test",
+    "Write Contract",
     "references/goal-contract-book.md",
+    "Issued by = alpha-goal",
     "Self-review the Goal Contract",
     "Review",
   ], errors);
-  requireOrderedTerms("alpha-goal confirmation phase", markdownSection(text, "Phase 6: Ask for Confirmation"), [
+  requireOrderedTerms("alpha-goal confirmation gate", markdownSection(text, "Confirmation Gate"), [
     "Goal Contract Summary",
     "Design Summary",
     "| Field | Value |",
@@ -584,7 +587,7 @@ function validateSchemaConsistency(root: string, errors: string[]): void {
   const goalContractSpec = `${alpha}\n${goalContractBook}`;
   const goalContractFields = ["Contract status", "Issued by", "Technical Context", "Intent", "Outcome", "Scope", "Constraints", "Acceptance evidence", "Non-goals", "Decision boundary", "Claim boundary", "Authorization Source"];
   for (const term of goalContractFields) if (!goalContractSpec.includes(term)) errors.push(`alpha Goal Contract content missing field: ${term}`);
-  const confirmation = markdownSection(alpha, "Phase 6: Ask for Confirmation");
+  const confirmation = markdownSection(alpha, "Confirmation Gate");
   requireOrderedTerms("alpha design summary presentation", confirmation, [
     "Goal Contract Summary",
     "Design Summary",
