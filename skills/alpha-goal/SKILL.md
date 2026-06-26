@@ -6,7 +6,7 @@ description: "Must use to gate any engineering/design/implementation request bef
 # Alpha Goal
 
 `alpha-goal` owns workflow control for goal definition.
-Loop Q&A until you have 100% confidence to understand the requirements fully and design a perfect solution.
+Loop Q&A until you have 100% confidence to understand the requirements fully and design a perfect technical design.
 
 ## Entry Gate
 
@@ -23,11 +23,10 @@ Enter `alpha-goal` for any engineering/design/implementation request before modi
 ## Hard Gate
 Do not leave `Clarification` until these are explicit enough for the risk of the work:
 - Goal Contract explicit: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Acceptance evidence
-- Technical Solution well-defined: Architecture, Components, Interfaces, Data Models, Test Plans
+- Technical Design well-defined: Architecture, Components, Interfaces, Data Models, Test Plans
 - Material assumptions have been pressure-tested at least once, or the remaining uncertainty is documented as non-material
-- Clarity score > 0.92
-- Solution score > 0.95
-- Reflect: Make sure you have 100% confidence to understand the requirements fully and design a perfect solution.
+- Clarity confidence > 99%
+- Design confidence > 99%
 
 ## Clarification
 
@@ -38,9 +37,17 @@ Evaluate:
 
 Record inspection results in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Discovery notes`.
 
-Loop Q&A until you have 100% confidence to understand the requirements fully and design a perfect solution.
+Loop Q&A until you have 100% confidence to understand the requirements fully and design a perfect technical design.
 
 ### Q&A Loop
+
+Rules:
+- `Non-goals` and `Decision boundary` are mandatory readiness gates
+- Ask one high-leverage question per round
+- One question means one decision variable: confirm a conflict, request a decision, choose a solution, demand an example, expose an assumption, force a tradeoff, or test a boundary-stressing case
+- Do not ask for discoverable facts
+- Present options conversationally with recommendation and reasoning
+- Use `request_user_input` or equivalent structured input when available
 
 **Step 1: Prepare a question**
 
@@ -52,18 +59,12 @@ Use current task state:
 - Brownfield context and active Assumption Stress Test mode
 
 Target the highest leverage dimension:
-- Priority 1: intent, outcome, scope, non-goals, decision boundaries
-- Priority 2: constraints, success criteria, acceptance evidence, claim boundary
-- Priority 3: context/current facts, actuator boundary, sensor/observer, external/current facts
-- Priority 4: architecture, components, data flow, interfaces, testing strategy, scalability, and risk
-
-Rules:
-- `Non-goals` and `Decision boundary` are mandatory readiness gates
-- Ask one high-leverage question per round
-- One question means one decision variable: confirm a conflict, request a decision, demand an example, expose an assumption, force a tradeoff, or test a boundary-stressing case
-- Do not ask for discoverable facts
-- Present options conversationally with recommendation and reasoning
-- Use `request_user_input` or equivalent structured input when available
+| Priority | Dimension |
+| --- | --- |
+| 1 | intent, outcome, scope, non-goals, decision boundaries |
+| 2 | constraints, success criteria, acceptance evidence, claim boundary |
+| 3 | context/current facts, actuator boundary, sensor/observer, external/current facts |
+| 4 | architecture, components, data flow, interfaces, testing strategy, scalability, and risk |
 
 **Step 2: Get answer from user**
 
@@ -101,20 +102,20 @@ Authority Contract :
 Boundary mapping: actuator boundary -> `Decision boundary`; sensor/observer boundary -> `Claim boundary`.
 
 Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Interview ledger`.
-Update the Goal Contract under `Technical Solution` when question is about architecture, components, data flow, interfaces, testing strategy, scalability, and risk.
+Update `technical_design.md` when question is about architecture, components, data flow, interfaces, testing strategy, scalability, and risk. Link to the Goal Contract under `Technical Design`.
 
 **Step 4: Evaluate clarity score**
 
 Score:
 
 ```text
-clarity_score = 0.25 * intent + 0.2 * outcome + 0.15 * scope + 0.12 * constraints + 0.1 * success + 0.08 * decision_boundary + 0.05 * context
-solution_score = architecture_clarity * 0.2 + component_clarity * 0.2 + data_flow_clarity * 0.2 + interface_clarity * 0.15 + testing_strategy_clarity * 0.15 + scalability_clarity * 0.05 + risk_clarity * 0.05
+clarity_confidence = 0.25 * intent + 0.2 * outcome + 0.15 * scope + 0.12 * constraints + 0.1 * success + 0.08 * decision_boundary + 0.05 * context
+design_confidence = architecture_design * 0.2 + component_design * 0.2 + data_flow_design * 0.2 + interface_design * 0.15 + testing_strategy_design * 0.15 + scalability_design * 0.05 + risk_design * 0.05
 ```
 
-Score each dimension in `[0, 100]` with justification and gap:
-- Goal: Intent Clarity, Outcome Clarity, Scope Clarity, Constraint Clarity, Success Criteria Clarity, Context Clarity for brownfield work
-- Solution: Architecture Clarity, Component Clarity, Data Flow Clarity, Interface Clarity, Testing Strategy Clarity, Scalability Clarity, Risk Clarity
+Score each dimension in `[0, 100]` percentage with justification and gap:
+- Goal: Intent, Outcome, Scope, Constraints, Success Criteria, Context for brownfield work
+- Design: Architecture, Component, Data Flow, Interface, Testing Strategy, Scalability, Risk
 
 **Step 5: Loop control**
 
@@ -123,7 +124,7 @@ Cycle control:
 - Max 6 rounds per dimension
 - Proceed with warnings only when further questions would not change execution
 - For cross-repo framing, keep one task-level Alpha Goal state root and record a repo manifest: repo path/name, role, authorization source, allowed change surfaces, non-goals, branch/worktree expectation, validation observer, delivery boundary, and dependency/integration order
-- Keep Clarification active if not all priority dimensions have been asked or clarity score < 92 or solution score < 95
+- Keep Clarification active if not all priority dimensions have been asked or clarity_confidence < 99% or design_confidence < 99%
 
 ### Assumption Stress Test
 Use each applicable mode once; if none applies, record why:
@@ -138,23 +139,22 @@ Track used modes in state to prevent repetition.
 Follow the book template in `references/goal-contract-book.md` to write the Goal Contract.
 Set `Issued by = alpha-goal`.
 
-### Review
+### Review Gate
 - Self-review the Goal Contract for completeness and reasonableness
 - Use subagents for independent review when useful
 - Fix accepted findings
 
 ## Confirmation Gate
 
-After Review completes, present the Goal Contract Summary first.
-
-TUI Presentation Style:
+1. After Review Gate completes, present the Goal Contract Summary first.
+- TUI Presentation Style:
 ```markdown
 Goal Contract Summary (Design Summary)
 | Field | Value |
 | --- | --- |
 ```
 
-Use `request_user_input` to ask for approve/launch, refine, or reject.
+2. Use `request_user_input` to ask for approve/launch, refine, or reject.
 - On approval: set `Contract status: accepted`; hand off to `$control-loop`
 - On rejection: keep `Contract status: draft`
 - On refine: keep `Contract status: draft`; return to Clarification with user feedback
