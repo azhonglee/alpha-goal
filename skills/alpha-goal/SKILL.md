@@ -78,9 +78,10 @@ Present options conversationally with recommendation and reasoning first.
 Prompt format:
 
 ```text
-Round {n} | Target: {highest_leverage_dimension} | {Confidence}: {score}%
+Round {n} | Target: {highest_leverage_dimension} | {confidence_type}: {score}%
 {question}
 ```
+`confidence_type` is `Clarity` for goal dimensions and `Design` for design dimensions.
 
 **Step 3: Challenge answer and update Goal Contract**
 
@@ -115,12 +116,12 @@ Score:
 
 ```text
 clarity_confidence = 0.25 * intent + 0.2 * outcome + 0.15 * scope + 0.12 * constraints + 0.1 * success + 0.08 * decision_boundary + 0.05 * context
-design_confidence = architecture_design * 0.2 + component_design * 0.2 + data_flow_design * 0.2 + interface_design * 0.15 + testing_strategy_design * 0.15 + scalability_design * 0.05 + risk_design * 0.05
+design_confidence = architecture_design * 0.15 + component_design * 0.15 + data_flow_design * 0.15 + interface_design * 0.15 + data_model_design * 0.15 + testing_strategy_design * 0.15 + scalability_design * 0.05 + risk_design * 0.05
 ```
 
 Score each dimension in `[0, 100]` percentage with justification and gap:
 - Goal: Intent, Outcome, Scope, Constraints, Success Criteria, Context for brownfield work
-- Design: Architecture, Component, Data Flow, Interface, Testing Strategy, Scalability, Risk
+- Design: Architecture, Component, Data Flow, Interface, Data Models, Testing Strategy, Scalability, Risk
 
 ### Assumption Stress Test
 Use each applicable mode once; if none applies, record why:
