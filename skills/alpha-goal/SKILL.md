@@ -39,6 +39,20 @@ Record inspection results in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-c
 
 Loop Q&A until you have 100% confidence to understand the requirements fully and design a perfect solution.
 
+### Clarification Compression Guard
+
+Clarification may not be compressed into a flat summary while any readiness gate, conflict, assumption, or decision boundary remains unresolved.
+
+Before each question, before `Write Contract`, and after any context compaction or resume, reconstruct and preserve the live Clarification state in `goal-contract.md`:
+- Original request, probable intent, and latest user-owned decisions
+- Prior Q&A with source classification
+- Known facts, conflicts, unknowns, and source-of-truth conflicts
+- Current readiness gates, clarity dimensions, score justifications, and gaps
+- Material assumptions, pressure-test results, and used Assumption Stress Test modes
+- Next question target and why it is the highest-leverage unresolved dimension
+
+Exit is forbidden if this state cannot be reconstructed. Failure action: remain in `Clarification`, restore the missing structured state from `Discovery notes` and `Interview ledger`, inspect discoverable facts before asking, and ask only for the missing user-owned decision.
+
 ### Q&A Loop
 
 **Step 1: Prepare a question**
