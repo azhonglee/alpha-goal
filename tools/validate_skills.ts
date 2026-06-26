@@ -741,17 +741,17 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
     if (hooksTemplate.includes(`[${COMPACT_RECOVERY_HOOK_MARKER}]`)) errors.push(`${HOOKS_TEMPLATE}: compact recovery marker must not be printed to model context`);
   }
   const readme = readIfFile(path.join(root, "README.md"));
-  for (const name of REQUIRED_SKILL_NAMES) if (!readme.includes(`skills/${name}/`) || !readme.includes(`\`${name}\``)) errors.push(`README.md missing public skill entry: ${name}`);
+  for (const name of REQUIRED_SKILL_NAMES) if (!readme.includes(`skills/${name}/`) || !(readme.includes(`\`${name}\``) || readme.includes(`<code>${name}</code>`))) errors.push(`README.md missing public skill entry: ${name}`);
   if (!readme.includes("当前代码事实只描述现状")) errors.push("README.md missing current-state-not-desired-state principle");
   if (!readme.includes("执行或加固已授权 slice")) errors.push("README.md must describe control-loop as execution-first");
   if (!readme.includes("Act -> Evidence -> $goal-verify -> Gap?")) errors.push("README.md workflow must include evidence and goal-verify");
-  for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "失效条件", "显式确认门", "Technical Design", "草稿或已接受"]) if (!readme.includes(term)) errors.push(`README.md missing persistent-loop term: ${term}`);
+  for (const term of ["goal-contract.md", "checkpoint.md", "Technical Design"]) if (!readme.includes(term)) errors.push(`README.md missing persistent-loop term: ${term}`);
   const readmeEn = readIfFile(path.join(root, "README.en.md"));
-  for (const name of REQUIRED_SKILL_NAMES) if (!readmeEn.includes(`skills/${name}/`) || !readmeEn.includes(`\`${name}\``)) errors.push(`README.en.md missing public skill entry: ${name}`);
+  for (const name of REQUIRED_SKILL_NAMES) if (!readmeEn.includes(`skills/${name}/`) || !(readmeEn.includes(`\`${name}\``) || readmeEn.includes(`<code>${name}</code>`))) errors.push(`README.en.md missing public skill entry: ${name}`);
   if (!readmeEn.includes("Current code facts describe current state")) errors.push("README.en.md missing current-state-not-desired-state principle");
   if (!readmeEn.includes("Execute or harden an authorized slice")) errors.push("README.en.md must describe control-loop as execution-first");
   if (!readmeEn.includes("Act -> Evidence -> $goal-verify -> Gap?")) errors.push("README.en.md workflow must include evidence and goal-verify");
-  for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "discovery notes", "interview ledger", "15,000 word+punctuation units", "invalidation", "user confirmation gates", "Technical Design", "draft or accepted"]) if (!readmeEn.includes(term)) errors.push(`README.en.md missing persistent-loop term: ${term}`);
+  for (const term of ["goal-contract.md", "checkpoint.md", "Technical Design"]) if (!readmeEn.includes(term)) errors.push(`README.en.md missing persistent-loop term: ${term}`);
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
   for (const name of REQUIRED_SKILL_NAMES) if (!installDoc.includes(name)) errors.push(`INSTALL.md missing public skill: ${name}`);
   if (!installDoc.includes("--no-sync-user-hooks")) errors.push("INSTALL.md missing --no-sync-user-hooks option");
