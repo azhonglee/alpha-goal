@@ -18,26 +18,33 @@ In practice, it compresses requirement clarification, authority boundaries, iter
 
 ## Core Architecture
 
-```text
-alpha-goal (entry / contract)
-Discover facts -> Clarify requirements -> Pressure-test -> Write Goal Contract + Technical Design -> User confirmation
-Output: goal-contract.md (authority contract, draft or accepted) and technical_design.md when needed
-      |
-      | Contract status: accepted
-      v
-control-loop (execution / hardening)
-Read accepted Goal Contract -> Slice bounded work -> Execute -> Collect evidence -> Classify evidence -> Write checkpoint.md when useful
-Output: checkpoint.md (conditional recovery, evidence handoff, or verification handoff; not a fixed progress file)
-      |
-      v
-goal-verify (verification / routing)
-Evidence vs acceptance evidence -> Gap analysis -> Route decision
-Verdicts: PASS_TO_FINAL / NEXT_ITERATION / BLOCKED / RETURN_TO_ALPHA_GOAL
-      |
-      +-> PASS_TO_FINAL: final claim
-      +-> NEXT_ITERATION: continue the same goal through $control-loop
-      +-> BLOCKED: external dependency or user decision blocks progress
-      +-> RETURN_TO_ALPHA_GOAL: target, scope, authority, or claim boundary changed
+```mermaid
+flowchart TD
+  AG["alpha-goal<br/>Entry / contract"] --> AGFlow["Discover facts<br/>Clarify requirements<br/>Pressure-test<br/>Write Goal Contract + Technical Design<br/>User confirmation"]
+  AGFlow --> GC["goal-contract.md<br/>Authority contract: draft or accepted"]
+  AGFlow -.-> TD["technical_design.md<br/>Architecture / components / interfaces / tests / risks"]
+
+  GC -->|"Contract status: accepted"| CL["control-loop<br/>Execution / hardening"]
+  CL --> CLFlow["Read contract<br/>Slice bounded work<br/>Execute<br/>Collect and classify evidence"]
+  CLFlow -.-> CP["checkpoint.md<br/>Recovery / evidence handoff / verification handoff"]
+
+  CLFlow --> GV["goal-verify<br/>Verification / routing"]
+  GV --> Gap["Evidence vs acceptance evidence<br/>Gap analysis"]
+
+  Gap --> Pass["PASS_TO_FINAL<br/>Final claim"]
+  Gap --> Next["NEXT_ITERATION<br/>Continue same-goal execution"]
+  Gap --> Blocked["BLOCKED<br/>External dependency or user decision"]
+  Gap --> Return["RETURN_TO_ALPHA_GOAL<br/>Target / scope / authority / claim boundary changed"]
+
+  Next --> CL
+  Return --> AG
+
+  classDef skill fill:#eef6ff,stroke:#2563eb,color:#0f172a,stroke-width:1px;
+  classDef artifact fill:#f8fafc,stroke:#64748b,color:#0f172a,stroke-width:1px;
+  classDef route fill:#fff7ed,stroke:#ea580c,color:#0f172a,stroke-width:1px;
+  class AG,CL,GV skill;
+  class GC,TD,CP artifact;
+  class Pass,Next,Blocked,Return route;
 ```
 
 Runtime state lives under `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`: `goal-contract.md` is the default contract artifact, `checkpoint.md` is conditional, and `control-state/latest.md` points to the latest recoverable task only when task identity is ambiguous.

@@ -18,26 +18,33 @@ Alpha Goal 给 AI Agent 一套 Goal Engineering 控制闭环，重点约束三�
 
 ## 核心架构
 
-```text
-alpha-goal（入口 / 契约）
-发现事实 -> 澄清需求 -> 压力测试 -> 写 Goal Contract + Technical Design -> 用户确认
-产出：goal-contract.md（权威契约，草稿或已接受）和按需 technical_design.md
-      |
-      | Contract status: accepted
-      v
-control-loop（执行 / 加固）
-读取已接受 Goal Contract -> 切有界 slice -> 执行 -> 收集证据 -> 分类证据 -> 必要时写 checkpoint.md
-产出：checkpoint.md（按需恢复、证据交接或验证交接；不是固定进度文件）
-      |
-      v
-goal-verify（验证 / 路由）
-证据 vs acceptance evidence -> Gap 分析 -> Route decision
-裁决：PASS_TO_FINAL / NEXT_ITERATION / BLOCKED / RETURN_TO_ALPHA_GOAL
-      |
-      +-> PASS_TO_FINAL：最终声明
-      +-> NEXT_ITERATION：同一目标内继续 $control-loop
-      +-> BLOCKED：外部依赖或用户决策阻塞
-      +-> RETURN_TO_ALPHA_GOAL：目标、范围、授权或声明边界变化
+```mermaid
+flowchart TD
+  AG["alpha-goal<br/>入口 / 契约"] --> AGFlow["发现事实<br/>澄清需求<br/>压力测试<br/>写 Goal Contract + Technical Design<br/>用户确认"]
+  AGFlow --> GC["goal-contract.md<br/>权威契约：draft 或 accepted"]
+  AGFlow -.-> TD["technical_design.md<br/>架构 / 组件 / 接口 / 测试 / 风险"]
+
+  GC -->|"Contract status: accepted"| CL["control-loop<br/>执行 / 加固"]
+  CL --> CLFlow["读取契约<br/>切有界 slice<br/>执行<br/>收集并分类证据"]
+  CLFlow -.-> CP["checkpoint.md<br/>恢复 / 证据交接 / 验证交接"]
+
+  CLFlow --> GV["goal-verify<br/>验证 / 路由"]
+  GV --> Gap["证据 vs acceptance evidence<br/>Gap 分析"]
+
+  Gap --> Pass["PASS_TO_FINAL<br/>最终声明"]
+  Gap --> Next["NEXT_ITERATION<br/>同一目标继续执行"]
+  Gap --> Blocked["BLOCKED<br/>外部依赖或用户决策阻塞"]
+  Gap --> Return["RETURN_TO_ALPHA_GOAL<br/>目标 / 范围 / 授权 / 声明边界变化"]
+
+  Next --> CL
+  Return --> AG
+
+  classDef skill fill:#eef6ff,stroke:#2563eb,color:#0f172a,stroke-width:1px;
+  classDef artifact fill:#f8fafc,stroke:#64748b,color:#0f172a,stroke-width:1px;
+  classDef route fill:#fff7ed,stroke:#ea580c,color:#0f172a,stroke-width:1px;
+  class AG,CL,GV skill;
+  class GC,TD,CP artifact;
+  class Pass,Next,Blocked,Return route;
 ```
 
 运行态写入 `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`：`goal-contract.md` 是默认契约产物，`checkpoint.md` 是条件检查点，`control-state/latest.md` 只在任务身份不明时指向最新可恢复任务。
