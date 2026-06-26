@@ -14,7 +14,7 @@ Alpha Goal is a minimal persistent closed-loop skillset for goal engineering wor
 ## How it works
 
 ```text
-Trigger -> Preflight/Discovery -> Clarify -> Write Contract -> Technical Solution? -> Review -> Confirm
+Trigger -> Preflight/Discovery -> Clarify -> Write Contract -> Technical Design? -> Review -> Confirm
 Accepted Goal Contract -> $control-loop -> Act -> Evidence -> $goal-verify -> Gap? -> Harden or Final Claim
 ```
 
@@ -31,7 +31,7 @@ The validator checks that the whole `skills/` tree stays under 15,000 word+punct
 ## Usage examples
 
 ```text
-$alpha-goal Decide whether this task should discover facts, clarify, write a contract, add a technical solution, confirm, or hand off to execution/verification.
+$alpha-goal Decide whether this task should discover facts, clarify, write a contract, add a technical design, confirm, or hand off to execution/verification.
 $control-loop Execute or harden the next most useful verifiable bounded slice from an accepted Goal Contract.
 ```
 
@@ -41,7 +41,7 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
 
 | Skill | What it helps with |
 | --- | --- |
-| `alpha-goal` | Clarify intent, boundaries, and acceptance evidence, produce a Goal Contract for confirmation, and add a Technical Solution when cross-file predictive changes need one. |
+| `alpha-goal` | Clarify intent, boundaries, and acceptance evidence, produce a Goal Contract for confirmation, and add a Technical Design when cross-file predictive changes need one. |
 | `control-loop` | Execute or harden an authorized slice, with `goal-contract.md` required and `checkpoint.md` used only as a conditional checkpoint. |
 | `goal-verify` | Verify goal completion, claim boundary, evidence coverage, and material unclaimed defects/risks, then return the next Gap. |
 
@@ -72,7 +72,7 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 - Evidence before authority: Current code facts describe current state; desired behavior comes from user intent, specs, issues, or accepted contracts.
 - Goals before action: outcome, scope, non-goals, acceptance evidence, decision owner, and claim boundary define what may change.
 - Explicit confirmation gates: every project must first make the Goal Contract clear; the contract or design can be short, but it must be explicit and user-confirmed before `$control-loop`.
-- Technical Solution when needed: when work may involve cross-file predictive operation, Technical Solution covers architecture, components, data flow, interfaces, testing strategy, and risks.
+- Technical Design when needed: when work may involve cross-file predictive operation, Technical Design covers architecture, components, data flow, interfaces, testing strategy, and risks.
 - Minimal useful modeling: model dependencies, disturbances, and risks only when they affect safe control, validation, or routing.
 - Persistent state: `goal-contract.md` is the default `alpha-goal` output and directly contains discovery notes, interview ledger, and the final contract; compact recovery reads draft or accepted contracts first, while accepted status only gates execution handoff; `checkpoint.md` conditionally carries run profile, loop state, iteration, evidence, verification, and memory with evidence, confidence, and invalidation; `control-state/latest.md` only points to the latest recoverable task when task identity is ambiguous.
 - Bounded execution: prefer bounded evidence-producing actions or targeted changes over broad refactors and speculative cleanup; the accepted contract, required Run Profile, and repo policy constrain action authority.

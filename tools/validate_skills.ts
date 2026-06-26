@@ -106,14 +106,15 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Entry Gate",
     "Skip `alpha-goal` only for concrete read-only work",
     "Check Point:",
-    "You have inspected the relevant files, docs, recent commits, and existing patterns",
-    "You have identified the facts, conflicts, unknowns, and dependencies",
+    "inspected the relevant files, docs, recent commits, and existing patterns",
+    "identified the facts, conflicts, unknowns, and dependencies",
     "Inspection is entry evidence, not permission to modify",
-    "Hard Gate",
+    "Clarification Gate",
     "Goal Contract explicit: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Acceptance evidence",
-    "Clarity score > 0.92",
-    "Solution score > 0.95",
+    "Technical Design well-defined",
     "Material assumptions have been pressure-tested",
+    "Clarity confidence > 99%",
+    "Design confidence > 99%",
     "Clarification",
     "Record inspection results",
     "Discovery notes",
@@ -129,11 +130,13 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Current-state facts cannot define desired behavior",
     "actuator boundary -> `Decision boundary`",
     "sensor/observer boundary -> `Claim boundary`",
-    "Technical Solution",
-    "solution_score",
+    "technical_design.md",
+    "clarity_confidence",
+    "design_confidence",
     "Assumption Stress Test",
     "Contract status",
     "Issued by = alpha-goal",
+    "references/technical-design-book.md",
     "Discovery notes",
     "Interview ledger",
     "goal-contract.md",
@@ -161,8 +164,19 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Non-goals",
     "Decision boundary",
     "Claim boundary",
-    "Authorization Source",
-    "Technical Solution"
+    "Authorization Source"
+  ]],
+  ["technical design book defines required content", "skills/alpha-goal/references/technical-design-book.md", [
+    "state-root `technical_design.md` is canonical",
+    "Required Content",
+    "Goal Contract link",
+    "Design status",
+    "Architecture",
+    "Components",
+    "Interfaces",
+    "Data Models",
+    "Test Plans",
+    "Acceptance evidence mapping"
   ]],
   ["execution has hard safety gates", "skills/control-loop/SKILL.md", [
     "Goal Contract is authority",
@@ -388,14 +402,14 @@ function validateAlphaGoalStructure(root: string, errors: string[]): void {
   const text = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
   requireOrderedTerms("alpha-goal top-level order", text, [
     "## Entry Gate",
-    "## Hard Gate",
+    "## Clarification Gate",
     "## Clarification",
     "## Confirmation Gate",
   ], errors);
   requireOrderedTerms("alpha-goal review-to-confirmation handoff", text, [
-    "### Review",
+    "### Review Gate",
     "## Confirmation Gate",
-    "After Review completes, present the Goal Contract Summary first",
+    "After Review Gate completes, present the Goal Contract Summary first",
   ], errors);
   requireOrderedTerms("alpha-goal entry gate", markdownSection(text, "Entry Gate"), [
     "Enter `alpha-goal`",
@@ -412,14 +426,13 @@ function validateAlphaGoalStructure(root: string, errors: string[]): void {
   for (const forbidden of ["after you have inspected", "after inspecting", "after inspection"]) {
     if (entryGate.includes(forbidden)) errors.push(`alpha-goal entry gate must not use inspect-after trigger wording: ${forbidden}`);
   }
-  requireOrderedTerms("alpha-goal hard gate", markdownSection(text, "Hard Gate"), [
+  requireOrderedTerms("alpha-goal clarification gate", markdownSection(text, "Clarification Gate"), [
     "Do not leave `Clarification`",
     "Goal Contract explicit: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Acceptance evidence",
-    "Technical Solution well-defined",
+    "Technical Design well-defined",
     "Material assumptions have been pressure-tested",
-    "Clarity score > 0.92",
-    "Solution score > 0.95",
-    "100% confidence",
+    "Clarity confidence > 99%",
+    "Design confidence > 99%",
   ], errors);
   requireOrderedTerms("alpha-goal clarification", markdownSection(text, "Clarification"), [
     "Evaluate:",
@@ -430,34 +443,33 @@ function validateAlphaGoalStructure(root: string, errors: string[]): void {
     "Discovery notes",
     "Loop Q&A until you have 100% confidence",
     "Q&A Loop",
-    "Original request and probable intent",
-    "Priority 1",
-    "Priority 2",
-    "Priority 3",
-    "Priority 4",
     "one high-leverage question",
     "one decision variable",
     "Do not ask for discoverable facts",
     "request_user_input",
+    "Original request and probable intent",
+    "Target the highest leverage dimension",
+    "intent, outcome, scope, non-goals, decision boundaries",
+    "architecture, components, data flow, interfaces, testing strategy, scalability, and risk",
     "Challenge answer and update Goal Contract",
     "Cross-check user claims against code/docs",
     "Current-state facts cannot define desired behavior",
     "Boundary mapping",
     "actuator boundary -> `Decision boundary`",
     "sensor/observer boundary -> `Claim boundary`",
-    "Technical Solution",
-    "clarity_score = 0.25 * intent",
-    "solution_score = architecture_clarity * 0.2",
-    "Keep Clarification active",
+    "technical_design.md",
+    "clarity_confidence = 0.25 * intent",
+    "design_confidence = architecture_design * 0.2",
     "Assumption Stress Test",
     "Write Contract",
     "references/goal-contract-book.md",
     "Issued by = alpha-goal",
-    "Self-review the Goal Contract",
-    "Review",
+    "references/technical-design-book.md",
+    "Review Gate",
+    "Self-review the Goal Contract and Technical Design",
   ], errors);
   requireOrderedTerms("alpha-goal confirmation gate", markdownSection(text, "Confirmation Gate"), [
-    "After Review completes, present the Goal Contract Summary first",
+    "After Review Gate completes, present the Goal Contract Summary first",
     "Goal Contract Summary",
     "Design Summary",
     "| Field | Value |",
@@ -565,11 +577,13 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
 }
 
 function markdownSection(text: string, heading: string): string {
+  const lines = text.split(/\r?\n/);
   const marker = `## ${heading}`;
-  const start = text.indexOf(marker);
+  const start = lines.findIndex(line => line.trim() === marker);
   if (start < 0) return "";
-  const next = text.indexOf("\n## ", start + marker.length);
-  return text.slice(start, next < 0 ? undefined : next);
+  const next = lines.slice(start + 1).findIndex(line => /^##\s+/.test(line));
+  const end = next < 0 ? lines.length : start + 1 + next;
+  return lines.slice(start, end).join("\n");
 }
 
 function markdownSubsection(text: string, heading: string): string {
@@ -597,12 +611,16 @@ function requireOrderedTerms(label: string, text: string, terms: string[], error
 function validateSchemaConsistency(root: string, errors: string[]): void {
   const alpha = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
   const goalContractBook = readIfFile(path.join(root, "skills/alpha-goal/references/goal-contract-book.md"));
+  const technicalDesignBook = readIfFile(path.join(root, "skills/alpha-goal/references/technical-design-book.md"));
   const goalContractSpec = `${alpha}\n${goalContractBook}`;
   const goalContractFields = ["Contract status", "Issued by", "Technical Context", "Intent", "Outcome", "Scope", "Constraints", "Acceptance evidence", "Non-goals", "Decision boundary", "Claim boundary", "Authorization Source"];
   for (const term of goalContractFields) if (!goalContractSpec.includes(term)) errors.push(`alpha Goal Contract content missing field: ${term}`);
+  for (const term of ["Goal Contract link", "Design status", "Architecture", "Components", "Interfaces", "Data Models", "Test Plans", "Acceptance evidence mapping"]) {
+    if (!technicalDesignBook.includes(term)) errors.push(`alpha Technical Design content missing field: ${term}`);
+  }
   const confirmation = markdownSection(alpha, "Confirmation Gate");
   requireOrderedTerms("alpha design summary presentation", confirmation, [
-    "After Review completes, present the Goal Contract Summary first",
+    "After Review Gate completes, present the Goal Contract Summary first",
     "Goal Contract Summary",
     "Design Summary",
     "| Field | Value |",
@@ -650,13 +668,13 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   if (!readme.includes("当前代码事实只描述现状")) errors.push("README.md missing current-state-not-desired-state principle");
   if (!readme.includes("执行或加固已授权 slice")) errors.push("README.md must describe control-loop as execution-first");
   if (!readme.includes("Act -> Evidence -> $goal-verify -> Gap?")) errors.push("README.md workflow must include evidence and goal-verify");
-  for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "失效条件", "显式确认门", "Technical Solution", "草稿或已接受"]) if (!readme.includes(term)) errors.push(`README.md missing persistent-loop term: ${term}`);
+  for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "失效条件", "显式确认门", "Technical Design", "草稿或已接受"]) if (!readme.includes(term)) errors.push(`README.md missing persistent-loop term: ${term}`);
   const readmeEn = readIfFile(path.join(root, "README.en.md"));
   for (const name of REQUIRED_SKILL_NAMES) if (!readmeEn.includes(`skills/${name}/`) || !readmeEn.includes(`\`${name}\``)) errors.push(`README.en.md missing public skill entry: ${name}`);
   if (!readmeEn.includes("Current code facts describe current state")) errors.push("README.en.md missing current-state-not-desired-state principle");
   if (!readmeEn.includes("Execute or harden an authorized slice")) errors.push("README.en.md must describe control-loop as execution-first");
   if (!readmeEn.includes("Act -> Evidence -> $goal-verify -> Gap?")) errors.push("README.en.md workflow must include evidence and goal-verify");
-  for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "discovery notes", "interview ledger", "15,000 word+punctuation units", "invalidation", "user confirmation gates", "Technical Solution", "draft or accepted"]) if (!readmeEn.includes(term)) errors.push(`README.en.md missing persistent-loop term: ${term}`);
+  for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "discovery notes", "interview ledger", "15,000 word+punctuation units", "invalidation", "user confirmation gates", "Technical Design", "draft or accepted"]) if (!readmeEn.includes(term)) errors.push(`README.en.md missing persistent-loop term: ${term}`);
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
   for (const name of REQUIRED_SKILL_NAMES) if (!installDoc.includes(name)) errors.push(`INSTALL.md missing public skill: ${name}`);
   if (!installDoc.includes("--no-sync-user-hooks")) errors.push("INSTALL.md missing --no-sync-user-hooks option");

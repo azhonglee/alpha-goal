@@ -20,7 +20,7 @@ Enter `alpha-goal` for any engineering/design/implementation request before modi
 - You have identified the facts, conflicts, unknowns, and dependencies.
 - Inspection is entry evidence, not permission to modify; modification starts only after an accepted Goal Contract hands off to `$control-loop`.
 
-## Hard Gate
+## Clarification Gate
 Do not leave `Clarification` until these are explicit enough for the risk of the work:
 - Goal Contract explicit: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Acceptance evidence
 - Technical Design well-defined: Architecture, Components, Interfaces, Data Models, Test Plans
@@ -102,7 +102,7 @@ Authority Contract :
 Boundary mapping: actuator boundary -> `Decision boundary`; sensor/observer boundary -> `Claim boundary`.
 
 Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Interview ledger`.
-Update `technical_design.md` when question is about architecture, components, data flow, interfaces, testing strategy, scalability, and risk. Link to the Goal Contract under `Technical Design`.
+Update `technical_design.md` when question is about technical design dimensions.
 
 **Step 4: Evaluate clarity score**
 
@@ -123,8 +123,6 @@ Cycle control:
 - Do not offer early exit before one explicit assumption probe and one persistent follow-up
 - Max 6 rounds per dimension
 - Proceed with warnings only when further questions would not change execution
-- For cross-repo framing, keep one task-level Alpha Goal state root and record a repo manifest: repo path/name, role, authorization source, allowed change surfaces, non-goals, branch/worktree expectation, validation observer, delivery boundary, and dependency/integration order
-- Keep Clarification active if not all priority dimensions have been asked or clarity_confidence < 99% or design_confidence < 99%
 
 ### Assumption Stress Test
 Use each applicable mode once; if none applies, record why:
@@ -136,11 +134,11 @@ Track used modes in state to prevent repetition.
 
 ### Write Contract
 
-Follow the book template in `references/goal-contract-book.md` to write the Goal Contract.
-Set `Issued by = alpha-goal`.
+Follow the book template in `references/goal-contract-book.md` to write the Goal Contract. Set `Issued by = alpha-goal`.
+Follow the book template in `references/technical-design-book.md` to write the Technical Design. Link to the Goal Contract, under `Technical Design`.
 
 ### Review Gate
-- Self-review the Goal Contract for completeness and reasonableness
+- Self-review the Goal Contract and Technical Design for completeness and reasonableness
 - Use subagents for independent review when useful
 - Fix accepted findings
 

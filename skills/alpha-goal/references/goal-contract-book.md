@@ -25,8 +25,6 @@ Optional Content:
 - Discovery notes [discovery_notes]
 - Interview ledger [interview_ledger]
 - Repo surfaces [repo_surfaces]
+- Technical Design link [technical_design]
 - Assumptions + resolutions [assumptions_resolutions]
 - Dependency/integration order [repo_integration_order]
-
-Required Specification when cross-file predictive operation is required:
-- Technical Solution [technical_solution]: architecture, components, data flow, solution, interface, protocol, testing strategy, scalability, and risk
