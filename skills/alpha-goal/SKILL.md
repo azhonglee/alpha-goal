@@ -117,13 +117,6 @@ Score each dimension in `[0, 100]` percentage with justification and gap:
 - Goal: Intent, Outcome, Scope, Constraints, Success Criteria, Context for brownfield work
 - Design: Architecture, Component, Data Flow, Interface, Testing Strategy, Scalability, Risk
 
-**Step 5: Loop control**
-
-Cycle control:
-- Do not offer early exit before one explicit assumption probe and one persistent follow-up
-- Max 6 rounds per dimension
-- Proceed with warnings only when further questions would not change execution
-
 ### Assumption Stress Test
 Use each applicable mode once; if none applies, record why:
 - Contrarian: challenge a core assumption
