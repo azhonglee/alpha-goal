@@ -19,32 +19,23 @@ Alpha Goal 给 AI Agent 一套 Goal Engineering 控制闭环，重点约束三�
 ## 核心架构
 
 ```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#364150","primaryColor":"#364150","primaryTextColor":"#f8fafc","primaryBorderColor":"#f8fafc","lineColor":"#f8fafc","edgeLabelBackground":"#364150","fontFamily":"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"}}}%%
 flowchart TD
-  AG["alpha-goal<br/>入口 / 契约"] --> AGFlow["发现事实<br/>澄清需求<br/>压力测试<br/>写 Goal Contract + Technical Design<br/>用户确认"]
-  AGFlow --> GC["goal-contract.md<br/>权威契约：draft 或 accepted"]
-  AGFlow -.-> TD["technical_design.md<br/>架构 / 组件 / 接口 / 测试 / 风险"]
+  AG["alpha-goal（入口）<br/>发现事实 → 澄清需求 → 压力测试 → 写 Goal Contract → 用户确认<br/>产出：goal-contract.md（权威契约）"]
+  CL["control-loop（执行）<br/>按契约切 slice → 执行 → 收集证据 → 分类证据 → 判断路由<br/>产出：checkpoint.md（按需恢复 / 证据交接）"]
+  GV["goal-verify（验证）<br/>证据 vs 验收标准 → Gap 分析 → 给出路由裁决<br/>裁决：PASS_TO_FINAL / NEXT_ITERATION / BLOCKED / RETURN..."]
 
-  GC -->|"Contract status: accepted"| CL["control-loop<br/>执行 / 加固"]
-  CL --> CLFlow["读取契约<br/>切有界 slice<br/>执行<br/>收集并分类证据"]
-  CLFlow -.-> CP["checkpoint.md<br/>恢复 / 证据交接 / 验证交接"]
+  AG -->|"契约被 accept 之后"| CL
+  CL --> GV
+  GV --> Pass["完成交付<br/>（通过）"]
+  GV --> Next["继续下一轮<br/>（同目标可修）"]
+  GV --> Return["回 alpha-goal<br/>（目标变了 / 越权）"]
 
-  CLFlow --> GV["goal-verify<br/>验证 / 路由"]
-  GV --> Gap["证据 vs acceptance evidence<br/>Gap 分析"]
-
-  Gap --> Pass["PASS_TO_FINAL<br/>最终声明"]
-  Gap --> Next["NEXT_ITERATION<br/>同一目标继续执行"]
-  Gap --> Blocked["BLOCKED<br/>外部依赖或用户决策阻塞"]
-  Gap --> Return["RETURN_TO_ALPHA_GOAL<br/>目标 / 范围 / 授权 / 声明边界变化"]
-
-  Next --> CL
-  Return --> AG
-
-  classDef skill fill:#eef6ff,stroke:#2563eb,color:#0f172a,stroke-width:1px;
-  classDef artifact fill:#f8fafc,stroke:#64748b,color:#0f172a,stroke-width:1px;
-  classDef route fill:#fff7ed,stroke:#ea580c,color:#0f172a,stroke-width:1px;
-  class AG,CL,GV skill;
-  class GC,TD,CP artifact;
-  class Pass,Next,Blocked,Return route;
+  classDef stage fill:#364150,stroke:#f8fafc,color:#f8fafc,stroke-width:2px;
+  classDef route fill:#364150,stroke:#364150,color:#f8fafc,stroke-width:0px;
+  class AG,CL,GV stage;
+  class Pass,Next,Return route;
+  linkStyle default stroke:#f8fafc,stroke-width:1.5px,color:#f8fafc;
 ```
 
 运行态写入 `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`：`goal-contract.md` 是默认契约产物，`checkpoint.md` 是条件检查点，`control-state/latest.md` 只在任务身份不明时指向最新可恢复任务。
