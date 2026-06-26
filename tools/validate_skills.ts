@@ -392,6 +392,11 @@ function validateAlphaGoalStructure(root: string, errors: string[]): void {
     "## Clarification",
     "## Confirmation Gate",
   ], errors);
+  requireOrderedTerms("alpha-goal review-to-confirmation handoff", text, [
+    "### Review",
+    "## Confirmation Gate",
+    "After Review completes, present the Goal Contract Summary first",
+  ], errors);
   requireOrderedTerms("alpha-goal entry gate", markdownSection(text, "Entry Gate"), [
     "Enter `alpha-goal`",
     "Skip `alpha-goal` only for concrete read-only work",
@@ -452,6 +457,7 @@ function validateAlphaGoalStructure(root: string, errors: string[]): void {
     "Review",
   ], errors);
   requireOrderedTerms("alpha-goal confirmation gate", markdownSection(text, "Confirmation Gate"), [
+    "After Review completes, present the Goal Contract Summary first",
     "Goal Contract Summary",
     "Design Summary",
     "| Field | Value |",
@@ -596,6 +602,7 @@ function validateSchemaConsistency(root: string, errors: string[]): void {
   for (const term of goalContractFields) if (!goalContractSpec.includes(term)) errors.push(`alpha Goal Contract content missing field: ${term}`);
   const confirmation = markdownSection(alpha, "Confirmation Gate");
   requireOrderedTerms("alpha design summary presentation", confirmation, [
+    "After Review completes, present the Goal Contract Summary first",
     "Goal Contract Summary",
     "Design Summary",
     "| Field | Value |",

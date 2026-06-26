@@ -145,7 +145,7 @@ Set `Issued by = alpha-goal`.
 
 ## Confirmation Gate
 
-Present the Goal Contract Summary first.
+After Review completes, present the Goal Contract Summary first.
 
 TUI Presentation Style:
 ```markdown
