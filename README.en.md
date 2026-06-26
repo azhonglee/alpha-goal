@@ -8,11 +8,32 @@ Alpha Goal is a minimal persistent closed-loop skillset for goal engineering wor
 
 Alpha Goal gives AI agents a Goal Engineering control loop for three common failure modes:
 
-| Problem | What it looks like | Control point |
-| --- | --- | --- |
-| Goal drift | The agent starts before requirements are clear, gradually moves off target, and changes unrelated things along the way. | `alpha-goal` discovers facts, clarifies the goal, boundaries, non-goals, and acceptance evidence, then writes a user-confirmed `goal-contract.md`. |
-| Action overreach | There is no explicit authority boundary, so work can exceed scope, touch the wrong branch, or treat current implementation as desired behavior. | `control-loop` executes only bounded slices inside an accepted contract, with worktree/branch, scope, non-goals, and claim-boundary checks before mutation. |
-| Evidence-free completion | A passing test or partial success is treated as proof that the goal is complete. | `goal-verify` compares evidence against acceptance evidence, classifies gaps, and returns a route decision. |
+<table>
+  <thead>
+    <tr>
+      <th width="180">Problem</th>
+      <th>What it looks like</th>
+      <th>Control point</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td width="180"><strong>Goal drift</strong></td>
+      <td>The agent starts before requirements are clear, gradually moves off target, and changes unrelated things along the way.</td>
+      <td><code>alpha-goal</code> discovers facts, clarifies the goal, boundaries, non-goals, and acceptance evidence, then writes a user-confirmed <code>goal-contract.md</code>.</td>
+    </tr>
+    <tr>
+      <td width="180"><strong>Action overreach</strong></td>
+      <td>There is no explicit authority boundary, so work can exceed scope, touch the wrong branch, or treat current implementation as desired behavior.</td>
+      <td><code>control-loop</code> executes only bounded slices inside an accepted contract, with worktree/branch, scope, non-goals, and claim-boundary checks before mutation.</td>
+    </tr>
+    <tr>
+      <td width="180"><strong>Evidence-free completion</strong></td>
+      <td>A passing test or partial success is treated as proof that the goal is complete.</td>
+      <td><code>goal-verify</code> compares evidence against acceptance evidence, classifies gaps, and returns a route decision.</td>
+    </tr>
+  </tbody>
+</table>
 
 In practice, it compresses requirement clarification, authority boundaries, iterative execution, evidence verification, and delivery claims into a minimal persistent loop that an agent can understand, execute, and recover.
 
@@ -63,11 +84,28 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
 
 ## Public skills
 
-| Skill | What it helps with |
-| --- | --- |
-| [`alpha-goal`](skills/alpha-goal/) | Clarify intent, boundaries, and acceptance evidence, produce a Goal Contract for confirmation, and add a Technical Design when cross-file predictive changes need one. |
-| [`control-loop`](skills/control-loop/) | Execute or harden an authorized slice, with `goal-contract.md` required and `checkpoint.md` used only as a conditional checkpoint. |
-| [`goal-verify`](skills/goal-verify/) | Verify goal completion, claim boundary, evidence coverage, and material unclaimed defects/risks, then return the next Gap. |
+<table>
+  <thead>
+    <tr>
+      <th width="180">Skill</th>
+      <th>What it helps with</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td width="180"><a href="skills/alpha-goal/"><code>alpha-goal</code></a></td>
+      <td>Clarify intent, boundaries, and acceptance evidence, produce a Goal Contract for confirmation, and add a Technical Design when cross-file predictive changes need one.</td>
+    </tr>
+    <tr>
+      <td width="180"><a href="skills/control-loop/"><code>control-loop</code></a></td>
+      <td>Execute or harden an authorized slice, with <code>goal-contract.md</code> required and <code>checkpoint.md</code> used only as a conditional checkpoint.</td>
+    </tr>
+    <tr>
+      <td width="180"><a href="skills/goal-verify/"><code>goal-verify</code></a></td>
+      <td>Verify goal completion, claim boundary, evidence coverage, and material unclaimed defects/risks, then return the next Gap.</td>
+    </tr>
+  </tbody>
+</table>
 
 ## Principles
 
