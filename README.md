@@ -35,7 +35,6 @@ flowchart TD
   classDef route fill:#364150,stroke:#364150,color:#f8fafc,stroke-width:0px;
   class AG,CL,GV stage;
   class Pass,Next,Return route;
-  linkStyle default stroke:#f8fafc,stroke-width:1.5px,color:#f8fafc;
 ```
 
 运行态写入 `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`：`goal-contract.md` 是默认契约产物，`checkpoint.md` 是条件检查点，`control-state/latest.md` 只在任务身份不明时指向最新可恢复任务。

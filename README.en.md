@@ -35,7 +35,6 @@ flowchart TD
   classDef route fill:#364150,stroke:#364150,color:#f8fafc,stroke-width:0px;
   class AG,CL,GV stage;
   class Pass,Next,Return route;
-  linkStyle default stroke:#f8fafc,stroke-width:1.5px,color:#f8fafc;
 ```
 
 Runtime state lives under `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`: `goal-contract.md` is the default contract artifact, `checkpoint.md` is conditional, and `control-state/latest.md` points to the latest recoverable task only when task identity is ambiguous.
