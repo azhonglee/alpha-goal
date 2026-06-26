@@ -58,13 +58,18 @@ Use current task state:
 - Current readiness gates and clarity dimensions
 - Brownfield context and active Assumption Stress Test mode
 
-Target the highest leverage dimension:
-| Priority | Dimension |
+Target the highest leverage dimension following the priority:
+
+| Goal Priority | Dimension |
 | --- | --- |
 | 1 | intent, outcome, scope, non-goals, decision boundaries |
 | 2 | constraints, success criteria, acceptance evidence, claim boundary |
 | 3 | context/current facts, actuator boundary, sensor/observer, external/current facts |
-| 4 | architecture, components, data flow, interfaces, testing strategy, scalability, and risk |
+
+| Design Priority | Dimension |
+| --- | --- |
+| 1 | architecture, components, data flow, interfaces, data models |
+| 2 | testing strategy, scalability, and risk |
 
 **Step 2: Get answer from user**
 
@@ -73,7 +78,7 @@ Present options conversationally with recommendation and reasoning first.
 Prompt format:
 
 ```text
-Round {n} | Target: {highest_leverage_dimension} | Clarity: {score}%
+Round {n} | Target: {highest_leverage_dimension} | {Confidence}: {score}%
 {question}
 ```
 
@@ -104,7 +109,7 @@ Boundary mapping: actuator boundary -> `Decision boundary`; sensor/observer boun
 Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Interview ledger`.
 Update `technical_design.md` when question is about technical design dimensions.
 
-**Step 4: Evaluate clarity score**
+**Step 4: Evaluate confidence score**
 
 Score:
 
@@ -148,4 +153,4 @@ Goal Contract Summary (Design Summary)
 2. Use `request_user_input` to ask for approve/launch, refine, or reject.
 - On approval: set `Contract status: accepted`; hand off to `$control-loop`
 - On rejection: keep `Contract status: draft`
-- On refine: keep `Contract status: draft`; return to Clarification with user feedback
+- On refine: keep `Contract status: draft`; return to `Clarification` with user feedback
