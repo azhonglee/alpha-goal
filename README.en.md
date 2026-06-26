@@ -4,14 +4,43 @@ Languages: [Chinese](README.md) | English
 
 Alpha Goal is a minimal persistent closed-loop skillset for goal engineering work. It guides agents to discover facts before asking, resume goal framing from a draft or accepted `goal-contract.md`, pass user confirmation gates before handing an accepted Goal Contract to execution, and make final claims only as far as evidence supports them.
 
-## When to use it
+## What Problem It Solves
 
-- A request is ambiguous and needs fact discovery before clarification.
-- Outcome, scope, non-goals, or acceptance evidence are unclear enough that acting now would be guesswork.
-- A diagnose/repair task needs root-cause proof before changing behavior or claiming repair.
-- Work crosses multiple files, repositories, or ownership surfaces and needs explicit authority, sequencing, and validation boundaries.
+Alpha Goal gives AI agents a Goal Engineering control loop for three common failure modes:
 
-## How it works
+| Problem | What it looks like | Control point |
+| --- | --- | --- |
+| Goal drift | The agent starts before requirements are clear, gradually moves off target, and changes unrelated things along the way. | `alpha-goal` discovers facts, clarifies the goal, boundaries, non-goals, and acceptance evidence, then writes a user-confirmed `goal-contract.md`. |
+| Action overreach | There is no explicit authority boundary, so work can exceed scope, touch the wrong branch, or treat current implementation as desired behavior. | `control-loop` executes only bounded slices inside an accepted contract, with worktree/branch, scope, non-goals, and claim-boundary checks before mutation. |
+| Evidence-free completion | A passing test or partial success is treated as proof that the goal is complete. | `goal-verify` compares evidence against acceptance evidence, classifies gaps, and returns a route decision. |
+
+In practice, it compresses requirement clarification, authority boundaries, iterative execution, evidence verification, and delivery claims into a minimal persistent loop that an agent can understand, execute, and recover.
+
+## Core Architecture
+
+```text
+alpha-goal (entry / contract)
+Discover facts -> Clarify requirements -> Pressure-test -> Write Goal Contract + Technical Design -> User confirmation
+Output: goal-contract.md (authority contract, draft or accepted) and technical_design.md when needed
+      |
+      | Contract status: accepted
+      v
+control-loop (execution / hardening)
+Read accepted Goal Contract -> Slice bounded work -> Execute -> Collect evidence -> Classify evidence -> Write checkpoint.md when useful
+Output: checkpoint.md (conditional recovery, evidence handoff, or verification handoff; not a fixed progress file)
+      |
+      v
+goal-verify (verification / routing)
+Evidence vs acceptance evidence -> Gap analysis -> Route decision
+Verdicts: PASS_TO_FINAL / NEXT_ITERATION / BLOCKED / RETURN_TO_ALPHA_GOAL
+      |
+      +-> PASS_TO_FINAL: final claim
+      +-> NEXT_ITERATION: continue the same goal through $control-loop
+      +-> BLOCKED: external dependency or user decision blocks progress
+      +-> RETURN_TO_ALPHA_GOAL: target, scope, authority, or claim boundary changed
+```
+
+Runtime state lives under `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`: `goal-contract.md` is the default contract artifact, `checkpoint.md` is conditional, and `control-state/latest.md` points to the latest recoverable task only when task identity is ambiguous.
 
 ```text
 Trigger -> Preflight/Discovery -> Clarify -> Write Contract -> Technical Design? -> Review -> Confirm

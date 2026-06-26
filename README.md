@@ -4,14 +4,43 @@
 
 Alpha Goal 是用于 Goal Engineering 的最小持久闭环技能集。它要求智能体先发现事实再提问，基于已接受的 Goal Contract 和必要 checkpoint 恢复执行，在明确边界内行动，并且只在证据支持的范围内做最终声明。
 
-## 适用场景
+## 解决什么问题
 
-- 请求含糊，需要先挖掘事实再澄清。
-- 目标、范围、非目标或验收证据还不明确，直接执行会变成猜测。
-- 诊断/修复任务需要先确认根因，避免把假设当成修复结论。
-- 任务跨多个文件、仓库或职责面，需要明确授权边界、执行顺序和验证边界。
+Alpha Goal 给 AI Agent 一套 Goal Engineering 控制闭环，重点约束三类常见失控：
 
-## 工作方式
+| 问题 | 具体表现 | 控制方式 |
+| --- | --- | --- |
+| 目标漂移 | 需求没澄清就动手，做着做着方向偏了，顺手改一堆无关内容。 | `alpha-goal` 先发现事实、澄清目标、边界、非目标和验收证据，再写出用户确认的 `goal-contract.md`。 |
+| 行动越界 | 没有授权边界，越过 scope、改错分支，或把当前实现当成期望行为。 | `control-loop` 只执行已接受契约内的有界 slice，变更前检查 worktree/branch、scope、non-goals 和 claim boundary。 |
+| 完成无据 | 测试过了就说完成，或把局部成功当成目标达成。 | `goal-verify` 对照 acceptance evidence 做证据分类、Gap 分析和路由裁决。 |
+
+本质上，它把需求澄清、授权边界、迭代执行、证据验证和验收声明，压缩成 Agent 能理解、执行、恢复的最小持久闭环。
+
+## 核心架构
+
+```text
+alpha-goal（入口 / 契约）
+发现事实 -> 澄清需求 -> 压力测试 -> 写 Goal Contract + Technical Design -> 用户确认
+产出：goal-contract.md（权威契约，草稿或已接受）和按需 technical_design.md
+      |
+      | Contract status: accepted
+      v
+control-loop（执行 / 加固）
+读取已接受 Goal Contract -> 切有界 slice -> 执行 -> 收集证据 -> 分类证据 -> 必要时写 checkpoint.md
+产出：checkpoint.md（按需恢复、证据交接或验证交接；不是固定进度文件）
+      |
+      v
+goal-verify（验证 / 路由）
+证据 vs acceptance evidence -> Gap 分析 -> Route decision
+裁决：PASS_TO_FINAL / NEXT_ITERATION / BLOCKED / RETURN_TO_ALPHA_GOAL
+      |
+      +-> PASS_TO_FINAL：最终声明
+      +-> NEXT_ITERATION：同一目标内继续 $control-loop
+      +-> BLOCKED：外部依赖或用户决策阻塞
+      +-> RETURN_TO_ALPHA_GOAL：目标、范围、授权或声明边界变化
+```
+
+运行态写入 `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`：`goal-contract.md` 是默认契约产物，`checkpoint.md` 是条件检查点，`control-state/latest.md` 只在任务身份不明时指向最新可恢复任务。
 
 ```text
 Trigger -> Preflight/Discovery -> Clarify -> Write Contract -> Technical Design? -> Review -> Confirm
