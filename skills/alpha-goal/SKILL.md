@@ -29,8 +29,12 @@ Do not leave `Clarification` until the coverage matrix has no blocking gap:
 - Every unresolved unknown is classified as `blocking`, `non-material`, or `deferred non-goal`.
 - At least one design-detail probe and one acceptance-evidence probe are complete.
 - Material assumptions have been pressure-tested, or the remaining uncertainty is documented as non-material.
+- A dimension is not covered by one answer by default. Coverage requires a pressure-tested decision, boundary, implementation impact, and evidence signal.
+- The highest-risk goal dimension and highest-risk design dimension each receive follow-up until no blocking gap remains.
+- Planned questions, unanswered questions, and hypothetical answers do not reduce coverage.
 
 Do not use confidence alone as exit evidence.
+Do not use round count as completion evidence.
 Do not propose implementation, code edits, or `$control-loop` handoff while any blocking goal or design gap remains.
 
 ## Clarification
@@ -52,6 +56,9 @@ Rules:
 - Use `request_user_input` or equivalent structured input when available.
 - Update `goal-contract.md` and `technical_design.md` after each answer.
 - Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps in `goal-contract.md` under `Interview ledger`.
+- Revisit the same dimension when the first answer lacks an example, boundary, tradeoff, design consequence, or acceptance signal.
+- Ask one round, wait for the answer, then decide whether to follow up on the same dimension or move to the next one.
+- Do not pre-generate a complete questionnaire and then proceed as if the questions were answered.
 
 **Step 1: Pick the next question target**
 
@@ -106,7 +113,15 @@ Use the pressure ladder before treating a dimension as covered:
 1. Ask for concrete example, counterexample, or evidence signal.
 2. Probe hidden assumption or dependency.
 3. Force a boundary/tradeoff: what to reject, defer, or not do.
-4. If the answer stays symptom-level, reframe toward essence/root cause.
+4. Ask what architecture, component, interface, data model, data flow, test, or risk decision follows.
+5. If the answer stays symptom-level, reframe toward essence/root cause.
+
+Follow-up policy:
+- Do not mark a dimension `covered` after the first answer unless that answer already includes decision, boundary, design consequence, and acceptance evidence.
+- Ask another round for the same dimension when the pressure ladder exposes any blocking gap.
+- Do not rotate to the next dimension when the current answer creates a blocking design, boundary, or evidence gap.
+- Record the coverage chain for each required dimension: first question, answer source, pressure-test result, coverage status.
+- Prefer depth over breadth: fewer well-tested dimensions are better than many shallow checkmarks.
 
 **Step 4: Evaluate coverage**
 
@@ -117,6 +132,7 @@ For each dimension, record:
 - `deferred non-goal`: intentionally excluded from this goal.
 
 If any blocking gap remains, continue Loop Q&A.
+Round count never closes Clarification.
 
 ### Assumption Stress Test
 
@@ -131,22 +147,43 @@ Track used modes in state to prevent repetition.
 
 Follow `references/goal-contract-book.md` to write the Goal Contract. Set `Issued by = alpha-goal`.
 Follow `references/technical-design-book.md` to write the Technical Design. Link the Goal Contract and Technical Design to each other.
+Write artifacts only from answered, auto-confirmed, or cited facts. Keep unresolved required fields as `[blocking]`; do not fill them from hypothetical answers.
 
 ### Review Gate
 
-- Self-review the Goal Contract and Technical Design for completeness and reasonableness.
-- Verify no blocking goal or design gap remains.
-- Use subagents for independent review when useful.
+- Self-check the Goal Contract and Technical Design before asking for approval:
+  - All required Goal Contract and Technical Design fields are present.
+  - No required field relies on current-state facts as desired behavior.
+  - No blocking goal or design gap remains in the coverage matrix.
+  - Each success criterion maps to acceptance evidence and a validation observer.
+  - Key design decisions cover architecture, components, interfaces, data models, data flow, tests, and risks.
+  - Non-goals, execution boundary, decision boundary, and claim boundary are explicit.
+- Run independent review for non-trivial implementation, repair, refactor, hardening, or cross-file behavior changes:
+  - Prefer a subagent review when available; if skipped, record the reason.
+  - Pass raw artifacts and the user request, not your intended answer.
+  - Require the reviewer to check shallow Q&A, missing design detail, missing acceptance evidence, and premature implementation risk.
 - Fix accepted findings.
+- Record self-check and independent review results in the task artifacts or checkpoint.
+- Produce a visible Review Record with self-check result, independent review result or skipped reason, findings fixed, and remaining non-material uncertainties.
 
 ## Confirmation Gate
 
 1. After Review Gate completes, present the Goal Contract Summary first.
+- The approval request message must include, in order: Goal Contract Summary, Review Record, then approve/refine/reject prompt.
+- Do not call `request_user_input` before showing the summary and Review Record.
+- If the summary or Review Record is missing or incomplete, stay in Review Gate.
 - TUI Presentation Style:
 ```markdown
 Goal Contract Summary (Design Summary)
 | Field | Value |
 | --- | --- |
+| Goal | ... |
+| Non-goals | ... |
+| Execution boundary | ... |
+| Key design decisions | ... |
+| Acceptance evidence | ... |
+| Risks / non-material uncertainties | ... |
+| Validation plan | ... |
 ```
 
 2. Use `request_user_input` to ask for approve/launch, refine, or reject.
