@@ -42,9 +42,9 @@ Alpha Goal 给 AI Agent 一套 Goal Engineering 控制闭环，重点约束三�
 ```mermaid
 %%{init: {"theme":"base","flowchart":{"wrappingWidth":720,"nodeSpacing":80,"rankSpacing":70,"htmlLabels":true},"markdownAutoWrap":false,"themeVariables":{"background":"#364150","primaryColor":"#364150","primaryTextColor":"#f8fafc","primaryBorderColor":"#f8fafc","lineColor":"#f8fafc","edgeLabelBackground":"#364150","fontFamily":"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"}}}%%
 flowchart TD
-  AG["alpha-goal（入口）<br/>发现事实 → 澄清需求 → 压力测试 → 写 Goal Contract → 用户确认<br/>产出：goal-contract.md（权威契约）"]
-  CL["control-loop（执行）<br/>按契约切 slice → 执行 → 收集证据 → 分类证据 → 判断路由<br/>产出：checkpoint.md（按需恢复 / 证据交接）"]
-  GV["goal-verify（验证）<br/>证据 vs 验收标准 → Gap 分析 → 给出路由裁决<br/>裁决：PASS_TO_FINAL / NEXT_ITERATION / BLOCKED / RETURN..."]
+  AG["<div style='width:760px;text-align:left'><strong>alpha-goal（入口）</strong><br/>发现事实 → 澄清需求 → 压力测试 → 写 Goal Contract → 用户确认<br/>产出：goal-contract.md（权威契约）</div>"]
+  CL["<div style='width:760px;text-align:left'><strong>control-loop（执行）</strong><br/>按契约切 slice → 执行 → 收集证据 → 分类证据 → 判断路由<br/>产出：checkpoint.md（按需恢复 / 证据交接）</div>"]
+  GV["<div style='width:760px;text-align:left'><strong>goal-verify（验证）</strong><br/>证据 vs 验收标准 → Gap 分析 → 给出路由裁决<br/>裁决：PASS_TO_FINAL / NEXT_ITERATION / BLOCKED / RETURN...</div>"]
 
   AG -->|"契约被 accept 之后"| CL
   CL --> GV
@@ -52,7 +52,7 @@ flowchart TD
   GV --> Next["继续下一轮<br/>（同目标可修）"]
   GV --> Return["回 alpha-goal<br/>（目标变了 / 越权）"]
 
-  classDef stage fill:#364150,stroke:#f8fafc,color:#f8fafc,stroke-width:2px;
+  classDef stage fill:#364150,stroke:#f8fafc,color:#f8fafc,stroke-width:2px,text-align:left;
   classDef route fill:#364150,stroke:#364150,color:#f8fafc,stroke-width:0px;
   class AG,CL,GV stage;
   class Pass,Next,Return route;

@@ -42,9 +42,9 @@ In practice, it compresses requirement clarification, authority boundaries, iter
 ```mermaid
 %%{init: {"theme":"base","flowchart":{"wrappingWidth":720,"nodeSpacing":80,"rankSpacing":70,"htmlLabels":true},"markdownAutoWrap":false,"themeVariables":{"background":"#364150","primaryColor":"#364150","primaryTextColor":"#f8fafc","primaryBorderColor":"#f8fafc","lineColor":"#f8fafc","edgeLabelBackground":"#364150","fontFamily":"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"}}}%%
 flowchart TD
-  AG["alpha-goal (entry)<br/>Discover facts → Clarify requirements → Pressure-test → Write Goal Contract → User confirmation<br/>Output: goal-contract.md (authority contract)"]
-  CL["control-loop (execution)<br/>Slice by contract → Execute → Collect evidence → Classify evidence → Route<br/>Output: checkpoint.md (conditional recovery / evidence handoff)"]
-  GV["goal-verify (verification)<br/>Evidence vs acceptance evidence → Gap analysis → Route decision<br/>Verdicts: PASS_TO_FINAL / NEXT_ITERATION / BLOCKED / RETURN..."]
+  AG["<div style='width:760px;text-align:left'><strong>alpha-goal (entry)</strong><br/>Discover facts → Clarify requirements → Pressure-test → Write Goal Contract → User confirmation<br/>Output: goal-contract.md (authority contract)</div>"]
+  CL["<div style='width:760px;text-align:left'><strong>control-loop (execution)</strong><br/>Slice by contract → Execute → Collect evidence → Classify evidence → Route<br/>Output: checkpoint.md (conditional recovery / evidence handoff)</div>"]
+  GV["<div style='width:760px;text-align:left'><strong>goal-verify (verification)</strong><br/>Evidence vs acceptance evidence → Gap analysis → Route decision<br/>Verdicts: PASS_TO_FINAL / NEXT_ITERATION / BLOCKED / RETURN...</div>"]
 
   AG -->|"after contract is accepted"| CL
   CL --> GV
@@ -52,7 +52,7 @@ flowchart TD
   GV --> Next["Continue next round<br/>(same-goal fixable)"]
   GV --> Return["Return to alpha-goal<br/>(goal changed / overreach)"]
 
-  classDef stage fill:#364150,stroke:#f8fafc,color:#f8fafc,stroke-width:2px;
+  classDef stage fill:#364150,stroke:#f8fafc,color:#f8fafc,stroke-width:2px,text-align:left;
   classDef route fill:#364150,stroke:#364150,color:#f8fafc,stroke-width:0px;
   class AG,CL,GV stage;
   class Pass,Next,Return route;
