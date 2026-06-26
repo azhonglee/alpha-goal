@@ -156,9 +156,8 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "raw artifacts and the user request",
     "visible Review Record",
     "approval request message must include, in order",
-    "Do not call `request_user_input` before showing the summary and Review Record",
     "Key design decisions",
-    "Validation plan",
+    "If the summary or Review Record is missing or incomplete, stay in Review Gate",
     "Discovery notes",
     "Interview ledger",
     "goal-contract.md",
@@ -434,9 +433,10 @@ function validateAlphaGoalStructure(root: string, errors: string[]): void {
   ], errors);
   requireOrderedTerms("alpha-goal review-to-confirmation handoff", text, [
     "### Review Gate",
-    "## Confirmation Gate",
     "After Review Gate completes, present the Goal Contract Summary first",
-    "Do not call `request_user_input` before showing the summary and Review Record",
+    "The approval request message must include, in order: Goal Contract Summary, Review Record",
+    "If the summary or Review Record is missing or incomplete, stay in Review Gate",
+    "## Confirmation Gate",
   ], errors);
   requireOrderedTerms("alpha-goal entry gate", markdownSection(text, "Entry Gate"), [
     "Enter `alpha-goal`",
@@ -534,21 +534,9 @@ function validateAlphaGoalStructure(root: string, errors: string[]): void {
     "Produce a visible Review Record",
   ], errors);
   requireOrderedTerms("alpha-goal confirmation gate", markdownSection(text, "Confirmation Gate"), [
-    "After Review Gate completes, present the Goal Contract Summary first",
-    "The approval request message must include, in order: Goal Contract Summary, Review Record, then approve/refine/reject prompt",
-    "Do not call `request_user_input` before showing the summary and Review Record",
-    "If the summary or Review Record is missing or incomplete, stay in Review Gate",
-    "Goal Contract Summary",
-    "Design Summary",
-    "| Field | Value |",
-    "| Goal | ... |",
-    "| Non-goals | ... |",
-    "| Execution boundary | ... |",
-    "| Key design decisions | ... |",
-    "| Acceptance evidence | ... |",
-    "| Risks / non-material uncertainties | ... |",
-    "| Validation plan | ... |",
     "Use `request_user_input`",
+    "approve/launch, refine, or reject",
+    "Contract status: accepted",
     "hand off to `$control-loop`",
   ], errors);
 }
@@ -693,14 +681,18 @@ function validateSchemaConsistency(root: string, errors: string[]): void {
   for (const term of ["Goal Contract link", "Design status", "Architecture", "Components", "Data Flow", "Interfaces", "Data Models", "Test Plans", "Risks", "Acceptance evidence mapping"]) {
     if (!technicalDesignBook.includes(term)) errors.push(`alpha Technical Design content missing field: ${term}`);
   }
-  const confirmation = markdownSection(alpha, "Confirmation Gate");
-  requireOrderedTerms("alpha design summary presentation", confirmation, [
+  requireOrderedTerms("alpha design summary presentation", alpha, [
     "After Review Gate completes, present the Goal Contract Summary first",
-    "Do not call `request_user_input` before showing the summary and Review Record",
+    "The approval request message must include, in order: Goal Contract Summary, Review Record",
     "Goal Contract Summary",
     "Design Summary",
     "| Field | Value |",
     "| --- | --- |",
+    "| Goal | ... |",
+    "| Non-goals | ... |",
+    "| Execution boundary | ... |",
+    "| Key design decisions | ... |",
+    "## Confirmation Gate",
     "Use `request_user_input`",
   ], errors);
   const evSkill = readIfFile(path.join(root, "skills/goal-verify/SKILL.md"));
@@ -773,7 +765,7 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   for (const term of [
     "Operating Contract",
     "top-level operating contract for the workspace",
-    "Must understand the requirements fully before proceeding",
+    "Must fully understand the requirements before proceeding",
     "Do not modify, refactor, or alter behavior without fully understanding requirements, failure modes, or approved designs",
     "Do not bypass repo workflows, skill gates, phase rules, validation gates, or explicit user instructions",
   ]) {
