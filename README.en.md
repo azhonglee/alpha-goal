@@ -19,7 +19,7 @@ In practice, it compresses requirement clarification, authority boundaries, iter
 ## Core Architecture
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#364150","primaryColor":"#364150","primaryTextColor":"#f8fafc","primaryBorderColor":"#f8fafc","lineColor":"#f8fafc","edgeLabelBackground":"#364150","fontFamily":"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"}}}%%
+%%{init: {"theme":"base","flowchart":{"wrappingWidth":720,"nodeSpacing":80,"rankSpacing":70,"htmlLabels":true},"markdownAutoWrap":false,"themeVariables":{"background":"#364150","primaryColor":"#364150","primaryTextColor":"#f8fafc","primaryBorderColor":"#f8fafc","lineColor":"#f8fafc","edgeLabelBackground":"#364150","fontFamily":"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"}}}%%
 flowchart TD
   AG["alpha-goal (entry)<br/>Discover facts → Clarify requirements → Pressure-test → Write Goal Contract → User confirmation<br/>Output: goal-contract.md (authority contract)"]
   CL["control-loop (execution)<br/>Slice by contract → Execute → Collect evidence → Classify evidence → Route<br/>Output: checkpoint.md (conditional recovery / evidence handoff)"]
@@ -67,28 +67,9 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
 
 | Skill | What it helps with |
 | --- | --- |
-| `alpha-goal` | Clarify intent, boundaries, and acceptance evidence, produce a Goal Contract for confirmation, and add a Technical Design when cross-file predictive changes need one. |
-| `control-loop` | Execute or harden an authorized slice, with `goal-contract.md` required and `checkpoint.md` used only as a conditional checkpoint. |
-| `goal-verify` | Verify goal completion, claim boundary, evidence coverage, and material unclaimed defects/risks, then return the next Gap. |
-
-## Docs
-
-- [INSTALL.md](INSTALL.md): installation options and smoke test.
-- [MANIFEST.md](MANIFEST.md): public skills, scripts, and runtime artifacts.
-- [skills/alpha-goal/SKILL.md](skills/alpha-goal/SKILL.md): default entry and routing rules.
-- [skills/control-loop/SKILL.md](skills/control-loop/SKILL.md): Goal Contract driven bounded action loop contract.
-- [skills/goal-verify/SKILL.md](skills/goal-verify/SKILL.md): goal verification and defect/risk review contract.
-
-## Structure
-
-```text
-skills/alpha-goal/
-skills/control-loop/
-skills/goal-verify/
-templates/
-scripts/
-tools/
-```
+| [`alpha-goal`](skills/alpha-goal/) | Clarify intent, boundaries, and acceptance evidence, produce a Goal Contract for confirmation, and add a Technical Design when cross-file predictive changes need one. |
+| [`control-loop`](skills/control-loop/) | Execute or harden an authorized slice, with `goal-contract.md` required and `checkpoint.md` used only as a conditional checkpoint. |
+| [`goal-verify`](skills/goal-verify/) | Verify goal completion, claim boundary, evidence coverage, and material unclaimed defects/risks, then return the next Gap. |
 
 ## Principles
 

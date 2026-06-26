@@ -19,7 +19,7 @@ Alpha Goal 给 AI Agent 一套 Goal Engineering 控制闭环，重点约束三�
 ## 核心架构
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#364150","primaryColor":"#364150","primaryTextColor":"#f8fafc","primaryBorderColor":"#f8fafc","lineColor":"#f8fafc","edgeLabelBackground":"#364150","fontFamily":"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"}}}%%
+%%{init: {"theme":"base","flowchart":{"wrappingWidth":720,"nodeSpacing":80,"rankSpacing":70,"htmlLabels":true},"markdownAutoWrap":false,"themeVariables":{"background":"#364150","primaryColor":"#364150","primaryTextColor":"#f8fafc","primaryBorderColor":"#f8fafc","lineColor":"#f8fafc","edgeLabelBackground":"#364150","fontFamily":"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"}}}%%
 flowchart TD
   AG["alpha-goal（入口）<br/>发现事实 → 澄清需求 → 压力测试 → 写 Goal Contract → 用户确认<br/>产出：goal-contract.md（权威契约）"]
   CL["control-loop（执行）<br/>按契约切 slice → 执行 → 收集证据 → 分类证据 → 判断路由<br/>产出：checkpoint.md（按需恢复 / 证据交接）"]
@@ -66,28 +66,9 @@ $control-loop 根据已接受 Goal Contract 执行或加固下一轮最有用且
 
 | Skill | 作用 |
 | --- | --- |
-| `alpha-goal` | 在开始工作前澄清意图、边界、验收证据，产出待确认 Goal Contract；跨文件预测性变更按需补 Technical Design。 |
-| `control-loop` | 执行或加固已授权 slice；`goal-contract.md` 是必需输入，`checkpoint.md` 仅作为条件检查点。 |
-| `goal-verify` | 验证目标完成、声明边界、证据覆盖和重要但未声明的缺陷/风险（material unclaimed defects/risks），并输出下一轮 Gap。 |
-
-## 文档
-
-- [INSTALL.md](INSTALL.md)：安装选项和冒烟测试。
-- [MANIFEST.md](MANIFEST.md)：公开技能、脚本和运行时产物清单。
-- [skills/alpha-goal/SKILL.md](skills/alpha-goal/SKILL.md)：默认入口和路由规则。
-- [skills/control-loop/SKILL.md](skills/control-loop/SKILL.md)：Goal Contract 驱动的有界行动闭环契约。
-- [skills/goal-verify/SKILL.md](skills/goal-verify/SKILL.md)：目标验证和缺陷/风险审查契约。
-
-## 结构
-
-```text
-skills/alpha-goal/
-skills/control-loop/
-skills/goal-verify/
-templates/
-scripts/
-tools/
-```
+| [`alpha-goal`](skills/alpha-goal/) | 在开始工作前澄清意图、边界、验收证据，产出待确认 Goal Contract；跨文件预测性变更按需补 Technical Design。 |
+| [`control-loop`](skills/control-loop/) | 执行或加固已授权 slice；`goal-contract.md` 是必需输入，`checkpoint.md` 仅作为条件检查点。 |
+| [`goal-verify`](skills/goal-verify/) | 验证目标完成、声明边界、证据覆盖和重要但未声明的缺陷/风险（material unclaimed defects/risks），并输出下一轮 Gap。 |
 
 ## 设计原则
 
