@@ -10,14 +10,14 @@ Required Content:
 - Design status [design_status]
 - Architecture [architecture]
 - Components [components]
+- Data Flow [data_flow]
 - Interfaces [interfaces]
 - Data Models [data_models]
 - Test Plans [test_plans]
+- Risks [risks]
 - Acceptance evidence mapping [acceptance_evidence_mapping]
 
 Optional Content:
-- Data Flow [data_flow]
 - Scalability [scalability]
-- Risks [risks]
 - Rollback plan [rollback_plan]
 - Repo manifest [repo_manifest], only for cross-repo framing
