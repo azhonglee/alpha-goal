@@ -75,16 +75,22 @@ If any of these need to change, RETURN_TO_ALPHA_GOAL
 Treat execution output as classified evidence, not automatic authority.
 
 Classify each result before making a route decision:
-- [from-code-change] implementation change made inside authorized scope
-- [from-test-pass] test or check passed
-- [from-test-fail] test or check failed
-- [from-build-pass] build/type/lint check passed
-- [from-build-fail] build/type/lint check failed
-- [from-runtime-observation] observed runtime behavior
-- [from-review] reviewer or subagent finding
-- [from-environment] environment/tooling/credential state
-- [from-gap] difference between current evidence and acceptance evidence
-- [from-blocker] missing permission, tool, data, environment, credential, or user decision
+- [from-test] result=pass|fail; test or check evidence.
+- [from-build] result=pass|fail; build, type, lint, or syntax evidence.
+- [from-runtime] result=observed|failed; runtime behavior evidence.
+- [from-review] result=finding|clear; reviewer or subagent finding evidence.
+- [from-inspection] result=observed; implementation change or code inspection evidence.
+- [from-environment] result=available|unavailable; tooling, credential, or environment evidence.
+- [from-gap] result=same-goal-fixable|scope-change|authority-change; difference between current evidence and acceptance evidence.
+- [from-blocker] result=blocked; missing permission, tool, data, environment, credential, or user decision.
+
+Legacy evidence aliases map to canonical evidence:
+- `from-test-pass` -> [from-test] result=pass
+- `from-test-fail` -> [from-test] result=fail
+- `from-build-pass` -> [from-build] result=pass
+- `from-build-fail` -> [from-build] result=fail
+- `from-runtime-observation` -> [from-runtime] result=observed
+- `from-code-change` -> [from-inspection] result=observed
 
 Rules:
 Auto-confirm only raw execution facts.
@@ -161,6 +167,7 @@ Continue next iteration when:
 Finish only when:
 - Goal Contract acceptance evidence is satisfied
 - goal-verify passes
+- route is PASS_TO_FINAL
 - No required work remains
 
 ## Checkpoint Policy

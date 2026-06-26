@@ -33,9 +33,10 @@ Do not leave `Clarification` until the coverage matrix has no blocking gap:
 - The highest-risk goal dimension and highest-risk design dimension each receive follow-up until no blocking gap remains.
 - Planned questions, unanswered questions, and hypothetical answers do not reduce coverage.
 
-Do not use confidence alone as exit evidence.
-Do not use round count as completion evidence.
-Do not propose implementation, code edits, or `$control-loop` handoff while any blocking goal or design gap remains.
+Clarification exit invariants:
+- `no_confidence_only`: Do not use confidence alone as exit evidence.
+- `no_round_count`: Do not use round count as completion evidence.
+- `no_blocking_gap_handoff`: Do not propose implementation, code edits, or `$control-loop` handoff while any blocking goal or design gap remains.
 
 ## Clarification
 
@@ -167,7 +168,12 @@ Write artifacts only from answered, auto-confirmed, or cited facts. Keep unresol
 - Produce a visible Review Record with self-check result, independent review result or skipped reason, findings fixed, and remaining non-material uncertainties.
 
 After Review Gate completes, present the Goal Contract Summary first.
-- The approval request message must include, in order: Goal Contract Summary, Review Record
+- Before calling `request_user_input`, present:
+  1. Goal Contract Summary
+  2. Review Record
+  3. Approval choices: approve / refine / reject
+- Do not call `request_user_input` before showing the summary and Review Record.
+- The approval request message must include, in order: Goal Contract Summary, Review Record, then approve/refine/reject prompt.
 - If the summary or Review Record is missing or incomplete, stay in Review Gate.
 - TUI Presentation Style:
 ```markdown
@@ -178,6 +184,9 @@ Goal Contract Summary (Design Summary)
 | Non-goals | ... |
 | Execution boundary | ... |
 | Key design decisions | ... |
+| Acceptance evidence | ... |
+| Risks / non-material uncertainties | ... |
+| Validation plan | ... |
 ```
 
 ## Confirmation Gate

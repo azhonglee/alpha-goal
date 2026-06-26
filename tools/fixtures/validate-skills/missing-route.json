@@ -1,0 +1,11 @@
+{
+  "shouldPass": false,
+  "inheritRoot": true,
+  "replacements": [
+    {
+      "file": "skills/control-loop/SKILL.md",
+      "search": "- route is PASS_TO_FINAL\n",
+      "replace": ""
+    }
+  ]
+}

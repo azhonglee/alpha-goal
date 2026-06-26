@@ -1,0 +1,11 @@
+{
+  "shouldPass": true,
+  "inheritRoot": true,
+  "replacements": [
+    {
+      "file": "skills/alpha-goal/SKILL.md",
+      "search": "After Review Gate completes, present the Goal Contract Summary first.",
+      "replace": "Before asking for approval, show the Goal Contract Summary first."
+    }
+  ]
+}

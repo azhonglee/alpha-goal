@@ -1,0 +1,11 @@
+{
+  "shouldPass": false,
+  "inheritRoot": true,
+  "replacements": [
+    {
+      "file": "skills/alpha-goal/SKILL.md",
+      "search": "| Validation plan | ... |\n",
+      "replace": ""
+    }
+  ]
+}

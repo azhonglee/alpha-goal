@@ -1,0 +1,11 @@
+{
+  "shouldPass": false,
+  "inheritRoot": true,
+  "replacements": [
+    {
+      "file": "skills/goal-verify/SKILL.md",
+      "search": "- [from-runtime] result=observed|failed\n",
+      "replace": ""
+    }
+  ]
+}

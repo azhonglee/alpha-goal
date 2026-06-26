@@ -66,9 +66,11 @@ Accepted Goal Contract -> $control-loop -> Act -> Evidence -> $goal-verify -> Ga
 ## Quick start
 
 ```bash
-Install: bash ./scripts/install.sh
-Validate: npx --no-install tsx tools/validate_skills.ts .
+bash ./scripts/install.sh
+node tools/validate_skills.js .
 ```
+
+Requires Node.js 18+. The validator and installer TOML merge use repository-local JavaScript and vendored dependencies; `tsx` is not required.
 
 The installer creates direct symlinks for the three public skills under `$HOME/.codex/skills/` and cleans same-repo links for merged old public skills.
 
@@ -112,7 +114,7 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 
 - Evidence before authority: Current code facts describe current state; desired behavior comes from user intent, specs, issues, or accepted contracts.
 - Goals before action: expected outcome, scope, non-goals, acceptance evidence, decision owner, and claim boundary define what may change.
-- Persistent state: `goal-contract.md` is the default `alpha-goal` output and contains discovery notes, interview ledger, and the final contract; `checkpoint.md` conditionally carries the run profile.
+- Persistent state: `goal-contract.md` is the default `alpha-goal` output; `technical_design.md` is the first-class Technical Design artifact for implementation, repair, refactor, hardening, or cross-file changes; `checkpoint.md` conditionally carries recovery and evidence handoff.
 - Bounded execution: prefer bounded evidence-producing actions or targeted changes over broad refactors and speculative cleanup.
 - Independent verification: final/ready/safe/complete/repair/review claims require fresh evidence and defect/risk scanning, checked separately from execution.
 - Honest routing: unclear goals return to `alpha-goal`; same-goal fixable execution gaps return to `control-loop`.

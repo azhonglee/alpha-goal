@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "skills": ["alpha-goal", "control-loop", "goal-verify"],
+  "artifacts": [
+    {
+      "path": "goal-contract.md",
+      "kind": "task",
+      "requirement": "required",
+      "condition": "all alpha-goal tasks"
+    },
+    {
+      "path": "technical_design.md",
+      "kind": "task",
+      "requirement": "conditional",
+      "condition": "implementation, repair, refactor, hardening, or cross-file behavior changes"
+    },
+    {
+      "path": "checkpoint.md",
+      "kind": "task",
+      "requirement": "conditional",
+      "condition": "recovery, long-running execution, evidence handoff, or verification handoff"
+    },
+    {
+      "path": "control-state/latest.md",
+      "kind": "global",
+      "requirement": "conditional",
+      "condition": "task identity is ambiguous during recovery"
+    }
+  ],
+  "routes": [
+    {
+      "name": "NEXT_ITERATION",
+      "condition": "same-goal fixable gap"
+    },
+    {
+      "name": "RETURN_TO_ALPHA_GOAL",
+      "condition": "scope, authority, or claim-boundary change"
+    },
+    {
+      "name": "BLOCKED",
+      "condition": "external blocker"
+    },
+    {
+      "name": "PASS_TO_FINAL",
+      "condition": "acceptance evidence satisfied"
+    }
+  ],
+  "gapKinds": [
+    "same_goal_fixable",
+    "scope_change",
+    "authority_change",
+    "external_blocker",
+    "verification_complete"
+  ],
+  "evidenceTypes": [
+    {
+      "name": "from-test",
+      "results": ["pass", "fail"],
+      "aliases": [
+        { "label": "from-test-pass", "result": "pass" },
+        { "label": "from-test-fail", "result": "fail" },
+        { "label": "from-user-validation", "result": "pass" }
+      ]
+    },
+    {
+      "name": "from-build",
+      "results": ["pass", "fail"],
+      "aliases": [
+        { "label": "from-build-pass", "result": "pass" },
+        { "label": "from-build-fail", "result": "fail" }
+      ]
+    },
+    {
+      "name": "from-runtime",
+      "results": ["observed", "failed"],
+      "aliases": [
+        { "label": "from-runtime-observation", "result": "observed" },
+        { "label": "from-observer", "result": "observed" }
+      ]
+    },
+    {
+      "name": "from-review",
+      "results": ["finding", "clear"],
+      "aliases": []
+    },
+    {
+      "name": "from-inspection",
+      "results": ["observed"],
+      "aliases": [
+        { "label": "from-code-change", "result": "observed" }
+      ]
+    },
+    {
+      "name": "from-environment",
+      "results": ["available", "unavailable"],
+      "aliases": []
+    },
+    {
+      "name": "from-gap",
+      "results": ["same-goal-fixable", "scope-change", "authority-change"],
+      "aliases": []
+    },
+    {
+      "name": "from-blocker",
+      "results": ["blocked"],
+      "aliases": []
+    }
+  ],
+  "requiredGates": ["Entry Gate", "Clarification Gate", "Review Gate", "Confirmation Gate"],
+  "clarificationExitRules": [
+    "no_confidence_only",
+    "no_round_count",
+    "no_blocking_gap_handoff"
+  ],
+  "summaryFields": [
+    "Goal",
+    "Non-goals",
+    "Execution boundary",
+    "Key design decisions",
+    "Acceptance evidence",
+    "Risks / non-material uncertainties",
+    "Validation plan"
+  ],
+  "checkedFiles": [
+    "skills/alpha-goal/SKILL.md",
+    "skills/control-loop/SKILL.md",
+    "skills/goal-verify/SKILL.md",
+    "MANIFEST.md",
+    "templates/hooks.json",
+    "README.md",
+    "README.en.md",
+    "INSTALL.md",
+    "AGENTS.md"
+  ],
+  "nodeRequirement": "Node.js 18+"
+}
