@@ -101,12 +101,14 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
   ["front controller defines goals before execution", "skills/alpha-goal/SKILL.md", [
     "owns workflow control for goal definition",
     "Loop Q&A until you have 100% confidence to understand the requirements fully and design a perfect solution",
-    "after you have inspected the relevant files, docs, recent commits, and existing patterns",
+    "before modification, implementation, repair, refactor, or hardening",
+    "Use inspection facts as entry evidence; inspection alone does not authorize changes",
     "Entry Gate",
     "Skip `alpha-goal` only for concrete read-only work",
     "Check Point:",
     "You have inspected the relevant files, docs, recent commits, and existing patterns",
     "You have identified the facts, conflicts, unknowns, and dependencies",
+    "Inspection is entry evidence, not permission to modify",
     "Hard Gate",
     "Goal Contract explicit: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Acceptance evidence",
     "Clarity score > 0.92",
@@ -399,7 +401,12 @@ function validateAlphaGoalStructure(root: string, errors: string[]): void {
     "Check Point:",
     "You have inspected the relevant files, docs, recent commits, and existing patterns",
     "You have identified the facts, conflicts, unknowns, and dependencies",
+    "Inspection is entry evidence, not permission to modify",
   ], errors);
+  const entryGate = markdownSection(text, "Entry Gate").toLowerCase();
+  for (const forbidden of ["after you have inspected", "after inspecting", "after inspection"]) {
+    if (entryGate.includes(forbidden)) errors.push(`alpha-goal entry gate must not use inspect-after trigger wording: ${forbidden}`);
+  }
   requireOrderedTerms("alpha-goal hard gate", markdownSection(text, "Hard Gate"), [
     "Do not leave `Clarification`",
     "Goal Contract explicit: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Acceptance evidence",

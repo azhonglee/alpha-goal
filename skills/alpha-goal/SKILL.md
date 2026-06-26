@@ -1,6 +1,6 @@
 ---
 name: alpha-goal
-description: "Must use for any engineering/design/implementation requests after you have inspected the relevant files, docs, recent commits, and existing patterns. Loop Q&A until you have 100% confidence to understand the requirements fully and design a perfect solution."
+description: "Must use to gate any engineering/design/implementation request before modification, implementation, repair, refactor, or hardening. Use inspection facts as entry evidence; inspection alone does not authorize changes. Loop Q&A until you have 100% confidence to understand the requirements fully and design a perfect solution."
 ---
 
 # Alpha Goal
@@ -10,7 +10,7 @@ Loop Q&A until you have 100% confidence to understand the requirements fully and
 
 ## Entry Gate
 
-Enter `alpha-goal` for any engineering/design/implementation requests. Skip `alpha-goal` only for concrete read-only work.
+Enter `alpha-goal` for any engineering/design/implementation request before modification, implementation, repair, refactor, or hardening. Skip `alpha-goal` only for concrete read-only work.
 
 **Anti-Pattern:** "Too Clear to Need clarification" or "Too Simple to Need design"
 - Every project MUST go through the workflow below; The contract or design may be short, but it must be explicit and you must get approval
@@ -18,6 +18,7 @@ Enter `alpha-goal` for any engineering/design/implementation requests. Skip `alp
 **Check Point:**
 - You have inspected the relevant files, docs, recent commits, and existing patterns.
 - You have identified the facts, conflicts, unknowns, and dependencies.
+- Inspection is entry evidence, not permission to modify; modification starts only after an accepted Goal Contract hands off to `$control-loop`.
 
 ## Hard Gate
 Do not leave `Clarification` until these are explicit enough for the risk of the work:
