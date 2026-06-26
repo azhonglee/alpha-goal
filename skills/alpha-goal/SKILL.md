@@ -1,170 +1,192 @@
 ---
 name: alpha-goal
-description: "Must use for any engineering/design/implementation requests."
+description: "Must use to gate engineering/design/implementation requests before modification, implementation, repair, refactor, or hardening. Use inspection facts as entry evidence; run Loop Q&A to clarify intent, outcome, boundaries, non-goals, success criteria, acceptance evidence, and key technical design before producing a Goal Contract and Technical Design for user confirmation."
 ---
 
 # Alpha Goal
 
-## Mission
-`alpha-goal` owns workflow control for goal definition.
+`alpha-goal` owns goal definition and design clarification.
+Implementation starts only after a user-accepted Goal Contract hands off to `$control-loop`.
 
-Loop Q&A until you have 100% confidence to understand the requirements fully and design a perfect solution.
+## Entry Gate
 
-## Boundaries
-- alpha-goal does not implement, verify completion, make final-ready or complete claims
-- Only an accepted Goal Contract may be handed to `$control-loop`
-
-Quick Path:
-- Skip only for concrete read-only fact lookup; Use this skill when intent, scope, acceptance, or decision boundaries are involved
+Enter `alpha-goal` for any engineering, design, implementation, repair, refactor, or hardening request. Skip only for concrete read-only work.
 
 **Anti-Pattern:** "Too Clear to Need clarification" or "Too Simple to Need design"
-- Every project MUST go through the workflow below; The contract or design may be short, but it must be explicit and you must get approval
+- Every project MUST go through the workflow below; the contract or design may be short, but it must be explicit and user-confirmed.
 
-## Workflow
+**Check Point:**
+- Inspect the relevant files, docs, recent commits, and existing patterns.
+- Identify facts, conflicts, unknowns, dependencies, and source-of-truth conflicts.
+- Record inspection results in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Discovery notes`.
+- Inspection is entry evidence, not permission to modify.
 
-## Phase 1: Discovery
-Inspect applicable: AGENTS/repo rules, README/getting-started/install docs, Relevant specs/ADRs/contracts, Target files and current implementation, Local glossary/context, Current branch/status when mutation may follow, Direct contradictions
+## Clarification Gate
+
+Do not leave `Clarification` until the coverage matrix has no blocking gap:
+- Goal Contract coverage: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Success Criteria, Acceptance evidence.
+- Technical Design coverage: Architecture, Components, Interfaces, Data Models, Data Flow, Test Plans, Risks.
+- Every unresolved unknown is classified as `blocking`, `non-material`, or `deferred non-goal`.
+- At least one design-detail probe and one acceptance-evidence probe are complete.
+- Material assumptions have been pressure-tested, or the remaining uncertainty is documented as non-material.
+- A dimension is not covered by one answer by default. Coverage requires a pressure-tested decision, boundary, implementation impact, and evidence signal.
+- The highest-risk goal dimension and highest-risk design dimension each receive follow-up until no blocking gap remains.
+- Planned questions, unanswered questions, and hypothetical answers do not reduce coverage.
+
+Do not use confidence alone as exit evidence.
+Do not use round count as completion evidence.
+Do not propose implementation, code edits, or `$control-loop` handoff while any blocking goal or design gap remains.
+
+## Clarification
 
 Evaluate:
-- Problem validity: whether the phenomenon is real and causal claims are reliable
-- Context sufficiency: what is known, missing, must-have, or merely ideal
-- Hidden issues: deeper root cause, adjacent issue, or dependency risk
+- Problem validity: whether the phenomenon is real and causal claims are reliable.
+- Context sufficiency: what is known, missing, must-have, or merely ideal.
+- Hidden issues: deeper root cause, adjacent issue, or dependency risk.
 
-Identify:
-- Facts
-- Conflicts
-- Unknowns
-- Dependencies
+Loop Q&A until the user-owned decisions and technical design are explicit enough to write the artifacts.
 
-Record details in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Discovery notes`.
-If the contract is still draft, set `Contract status: draft` and `Issued by: alpha-goal`; keep outcome and scope fields unset until final design.
-
-## Phase 2: Clarify
-Loop Q&A until clarity score >= `0.92` and solution clarity >= `0.95` and readiness gates pass.
-
-Readiness gates = Goal Gates, Authority Gates, Context Gates, Repair Gate; exclude review, final user confirmation, accepted contract status, and the Before Handoff Checklist.
-
-### Q&A Loop
-
-**Step 1: Prepare a question**
-
-Use current task state:
-- Original request and probable intent
-- Prior Q&A
-- Known facts, conflicts, unknowns, and source-of-truth conflicts
-- Current readiness gates and clarity dimensions
-- Brownfield context and active Assumption Stress Test mode
-
-Target the highest leverage dimension:
-- Stage 1: intent, outcome, scope, non-goals, decision boundaries
-- Stage 2: constraints, success criteria, acceptance evidence, claim boundary
-- Stage 3: context/current facts, actuator boundary, sensor/observer, external/current facts
-- Stage 4: architecture, components, data flow, interfaces, testing strategy, scalability, and risk
+### Loop Q&A
 
 Rules:
-- `Non-goals` and `Decision boundary` are mandatory readiness gates
-- Ask one high-leverage question per round
-- One question means one decision variable: confirm a conflict, request a decision, demand an example, expose an assumption, force a tradeoff, or test a boundary-stressing case
-- Do not ask for discoverable facts
-- Present options conversationally with recommendation and reasoning
-- Use `request_user_input` or equivalent structured input when available
+- Ask one high-leverage question per round.
+- One question means one decision variable: confirm a conflict, request a decision, choose a solution, demand an example, expose an assumption, force a tradeoff, or test a boundary-stressing case.
+- Do not ask for discoverable facts.
+- Present options conversationally with recommendation and reasoning.
+- Use `request_user_input` or equivalent structured input when available.
+- Update `goal-contract.md` and `technical_design.md` after each answer.
+- Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps in `goal-contract.md` under `Interview ledger`.
+- Revisit the same dimension when the first answer lacks an example, boundary, tradeoff, design consequence, or acceptance signal.
+- Ask one round, wait for the answer, then decide whether to follow up on the same dimension or move to the next one.
+- Do not pre-generate a complete questionnaire and then proceed as if the questions were answered.
 
-**Step 2: Get answer from user**
+**Step 1: Pick the next question target**
 
-Present options conversationally with recommendation and reasoning first.
+Use current task state:
+- Original request and probable intent.
+- Prior Q&A.
+- Known facts, conflicts, unknowns, dependencies, and source-of-truth conflicts.
+- Current coverage matrix gaps.
+- Brownfield context and active Assumption Stress Test mode.
+
+Target dimensions step by step. Do not skip the Design table for implementation, repair, refactor, hardening, or cross-file behavior changes.
+
+| Goal Priority | Dimension |
+| --- | --- |
+| 1 | intent, outcome, scope, execution boundary, non-goals |
+| 2 | constraints, success criteria, acceptance evidence, claim boundary |
+| 3 | context/current facts, actuator boundary, sensor/observer, external/current facts |
+
+| Design Priority | Dimension |
+| --- | --- |
+| 1 | architecture, components, data flow, interfaces, data models |
+| 2 | test plans, scalability, risks, rollback |
+
+**Step 2: Ask and record**
 
 Prompt format:
 
 ```text
-Round {n} | Target: {highest_leverage_dimension} | Clarity: {score}%
+Round {n} | Target: {dimension} | Gap: {blocking|non-material|deferred}
 {question}
 ```
 
-**Step 3: Challenge answer and update Goal Contract**
+Classify each answer before updating artifacts:
+- `[from-code][auto-confirmed]` descriptive implementation fact.
+- `[from-code]` inferred implementation fact needing confirmation.
+- `[from-research]` external/current fact.
+- `[from-user]` explicit user decision, constraint, acceptance signal, non-goal, authority, example, or clarification.
 
-Pressure ladder for each answer:
-1. Ask for concrete example, counterexample, or evidence signal.
-2. Probe hidden assumption or dependency.
-3. Force a boundary/tradeoff: what to reject, defer, or not do.
-4. If the answer stays symptom-level, reframe toward essence/root cause.
-
-Classify each answer before updating the Goal Contract:
-- `[from-code][auto-confirmed]` descriptive implementation fact
-- `[from-code]` inferred implementation fact needing confirmation
-- `[from-research]` external/current fact
-- `[from-user]` explicit user decision, constraint, acceptance signal, non-goal, authority, example, or clarification
-
-Authority rules:
-- Auto-confirm only descriptive facts
-- Treat repo language as evidence, not authority
-- Cross-check user claims against code/docs; name competing sources on conflict
-- Current-state facts cannot define desired behavior, requirements, acceptance evidence, non-goals, tradeoffs, or authority
-- Only explicit user decisions, explicit authorization, or authoritative specs/issues may update Goal Contract authority fields
-- If ambiguity depends on current external best practices, standards, APIs, dependency versions, laws, schedules, or prices, gather bounded fresh evidence first; then ask only for the decision boundary
+Authority Contract:
+- Auto-confirm only descriptive facts.
+- Treat repo language as evidence, not authority.
+- Cross-check user claims against code/docs; name competing sources on conflict.
+- Current-state facts cannot define desired behavior, requirements, acceptance evidence, non-goals, tradeoffs, or authority.
+- Only explicit user decisions, explicit authorization, or authoritative specs/issues may update Goal Contract authority fields.
+- If ambiguity depends on current external best practices, standards, APIs, dependency versions, laws, schedules, or prices, gather bounded fresh evidence first; then ask only for the decision boundary.
 
 Boundary mapping: actuator boundary -> `Decision boundary`; sensor/observer boundary -> `Claim boundary`.
 
-Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Interview ledger`.
-Update the Goal Contract under `Technical Solution` when question is about architecture, components, data flow, interfaces, testing strategy, scalability, and risk.
+**Step 3: Pressure-test the answer**
 
-**Step 4: Evaluate clarity score**
+Use the pressure ladder before treating a dimension as covered:
+1. Ask for concrete example, counterexample, or evidence signal.
+2. Probe hidden assumption or dependency.
+3. Force a boundary/tradeoff: what to reject, defer, or not do.
+4. Ask what architecture, component, interface, data model, data flow, test, or risk decision follows.
+5. If the answer stays symptom-level, reframe toward essence/root cause.
 
-Score:
+Follow-up policy:
+- Do not mark a dimension `covered` after the first answer unless that answer already includes decision, boundary, design consequence, and acceptance evidence.
+- Ask another round for the same dimension when the pressure ladder exposes any blocking gap.
+- Do not rotate to the next dimension when the current answer creates a blocking design, boundary, or evidence gap.
+- Record the coverage chain for each required dimension: first question, answer source, pressure-test result, coverage status.
+- Prefer depth over breadth: fewer well-tested dimensions are better than many shallow checkmarks.
 
-```text
-clarity_score = 0.25 * intent + 0.2 * outcome + 0.15 * scope + 0.12 * constraints + 0.1 * success + 0.08 * decision_boundary + 0.05 * context
-solution_clarity = architecture_clarity * 0.2 + component_clarity * 0.2 + data_flow_clarity * 0.2 + interface_clarity * 0.15 + testing_strategy_clarity * 0.15 + scalability_clarity * 0.05 + risk_clarity * 0.05
-```
+**Step 4: Evaluate coverage**
 
-Score each dimension in `[0, 100]` with justification and gap:
-- Goal: Intent Clarity, Outcome Clarity, Scope Clarity, Constraint Clarity, Success Criteria Clarity, Context Clarity for brownfield work
-- Solution: Architecture Clarity, Component Clarity, Data Flow Clarity, Interface Clarity, Testing Strategy Clarity, Scalability Clarity, Risk Clarity
+For each dimension, record:
+- `covered`: explicit enough to drive execution and verification.
+- `blocking`: missing decision or design detail would change implementation.
+- `non-material`: uncertainty remains, but would not change execution.
+- `deferred non-goal`: intentionally excluded from this goal.
 
-**Step 5: Loop control**
+If any blocking gap remains, continue Loop Q&A.
+Round count never closes Clarification.
 
-Cycle control:
-- Do not offer early exit before one explicit assumption probe and one persistent follow-up
-- Max 6 rounds per dimension
-- Proceed with warnings only when further questions would not change execution
-- For cross-repo framing, keep one task-level Alpha Goal state root and record a repo manifest: repo path/name, role, authorization source, allowed change surfaces, non-goals, branch/worktree expectation, validation observer, delivery boundary, and dependency/integration order
-- Keep Clarify active if not all stage dimensions have been asked or clarity score < 92 or solution clarity < 95
+### Assumption Stress Test
 
-### Phase 3: Assumption Stress Test
 Use each applicable mode once; if none applies, record why:
-- Contrarian: challenge a core assumption
-- Simplifier: probe minimum viable scope
-- Ontologist: ask for essence-level reframing when the user keeps describing symptoms
+- Contrarian: challenge a core assumption.
+- Simplifier: probe minimum viable scope.
+- Ontologist: ask for essence-level reframing when the user keeps describing symptoms.
 
 Track used modes in state to prevent repetition.
 
-### Phase 4: Write Contract
+### Write Artifacts
 
-Follow the book template in `references/goal-contract-book.md` to write the Goal Contract.
+Follow `references/goal-contract-book.md` to write the Goal Contract. Set `Issued by = alpha-goal`.
+Follow `references/technical-design-book.md` to write the Technical Design. Link the Goal Contract and Technical Design to each other.
+Write artifacts only from answered, auto-confirmed, or cited facts. Keep unresolved required fields as `[blocking]`; do not fill them from hypothetical answers.
 
-### Phase 5: Review
-- Self-review the Goal Contract for completeness and reasonableness
-- Use subagents for independent review when useful
-- Fix accepted findings
+### Review Gate
+
+- Self-check the Goal Contract and Technical Design before asking for approval:
+  - All required Goal Contract and Technical Design fields are present.
+  - No required field relies on current-state facts as desired behavior.
+  - No blocking goal or design gap remains in the coverage matrix.
+  - Each success criterion maps to acceptance evidence and a validation observer.
+  - Key design decisions cover architecture, components, interfaces, data models, data flow, tests, and risks.
+  - Non-goals, execution boundary, decision boundary, and claim boundary are explicit.
+- Run independent review for non-trivial implementation, repair, refactor, hardening, or cross-file behavior changes:
+  - Prefer a subagent review when available; if skipped, record the reason.
+  - Pass raw artifacts and the user request, not your intended answer.
+  - Require the reviewer to check shallow Q&A, missing design detail, missing acceptance evidence, and premature implementation risk.
+- Fix accepted findings.
+- Record self-check and independent review results in the task artifacts or checkpoint.
+- Produce a visible Review Record with self-check result, independent review result or skipped reason, findings fixed, and remaining non-material uncertainties.
 
 ## Confirmation Gate
 
-Present the Goal Contract Summary first.
-
-TUI Presentation Style:
+1. After Review Gate completes, present the Goal Contract Summary first.
+- The approval request message must include, in order: Goal Contract Summary, Review Record, then approve/refine/reject prompt.
+- Do not call `request_user_input` before showing the summary and Review Record.
+- If the summary or Review Record is missing or incomplete, stay in Review Gate.
+- TUI Presentation Style:
 ```markdown
 Goal Contract Summary (Design Summary)
 | Field | Value |
 | --- | --- |
+| Goal | ... |
+| Non-goals | ... |
+| Execution boundary | ... |
+| Key design decisions | ... |
+| Acceptance evidence | ... |
+| Risks / non-material uncertainties | ... |
+| Validation plan | ... |
 ```
 
-Use `request_user_input` to ask for approve/launch, refine, or reject.
-- On approval: set `Contract status: accepted`; hand off to `$control-loop`
-- On rejection: keep `Contract status: draft`
-- On refine: keep `Contract status: draft`; return to Phase 2 with user feedback
-
-## Hard Gates
-PASS only if:
-- All explicit: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Acceptance evidence
-- Clarity score > 0.92
-- Solution clarity > 0.95
-- A pressure pass is complete: at least one earlier answer was revisited with evidence, assumption, or tradeoff follow-up
+2. Use `request_user_input` to ask for approve/launch, refine, or reject.
+- On approval: set `Contract status: accepted`; hand off to `$control-loop`.
+- On rejection: keep `Contract status: draft`.
+- On refine: keep `Contract status: draft`; return to `Clarification` with user feedback.

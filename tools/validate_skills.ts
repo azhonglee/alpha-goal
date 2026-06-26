@@ -99,40 +99,66 @@ const DESCRIPTION_SEMANTIC_CHECKS: Record<string, { required: string[]; forbidde
 
 const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
   ["front controller defines goals before execution", "skills/alpha-goal/SKILL.md", [
-    "owns workflow control for goal definition",
-    "Loop Q&A until you really understand the requirements fully and design a perfect solution",
-    "alpha-goal does not implement",
-    "verify completion",
-    "Only an accepted Goal Contract may be handed to `$control-loop`",
-    "Quick Path",
-    "Hard Gates",
-    "All explicit: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Acceptance evidence",
-    "Clarity score > 0.92",
-    "Solution clarity > 0.95",
-    "A pressure pass is complete",
-    "revisited with evidence, assumption, or tradeoff follow-up",
-    "Phase 1: Discovery",
-    "Inspect applicable",
+    "owns goal definition and design clarification",
+    "run Loop Q&A to clarify intent, outcome, boundaries, non-goals, success criteria, acceptance evidence, and key technical design",
+    "before modification, implementation, repair, refactor, or hardening",
+    "Use inspection facts as entry evidence",
+    "Entry Gate",
+    "Skip only for concrete read-only work",
+    "Check Point:",
+    "Inspect the relevant files, docs, recent commits, and existing patterns",
+    "Identify facts, conflicts, unknowns, dependencies, and source-of-truth conflicts",
+    "Inspection is entry evidence, not permission to modify",
+    "Clarification Gate",
+    "coverage matrix has no blocking gap",
+    "Goal Contract coverage: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Success Criteria, Acceptance evidence",
+    "Technical Design coverage: Architecture, Components, Interfaces, Data Models, Data Flow, Test Plans, Risks",
+    "Material assumptions have been pressure-tested",
+    "A dimension is not covered by one answer by default",
+    "Planned questions, unanswered questions, and hypothetical answers do not reduce coverage",
+    "Do not use confidence alone as exit evidence",
+    "Do not use round count as completion evidence",
+    "Do not propose implementation, code edits, or `$control-loop` handoff while any blocking goal or design gap remains",
+    "Clarification",
+    "Record inspection results",
     "Discovery notes",
-    "Phase 2: Clarify",
-    "Loop Q&A until clarity score >= `0.92` and solution clarity >= `0.95` and readiness gates pass",
-    "Readiness gates = Goal Gates, Authority Gates, Context Gates, Repair Gate",
-    "Q&A Loop",
+    "Loop Q&A",
     "Anti-Pattern",
     "Every project MUST go through the workflow below",
-    "must get approval",
-    "Write Contract",
+    "user-confirmed",
+    "Write Artifacts",
     "one high-leverage question",
     "one decision variable",
     "Do not ask for discoverable facts",
+    "Revisit the same dimension",
+    "Ask one round, wait for the answer",
+    "Do not pre-generate a complete questionnaire",
     "Cross-check user claims against code/docs",
     "Current-state facts cannot define desired behavior",
     "actuator boundary -> `Decision boundary`",
     "sensor/observer boundary -> `Claim boundary`",
-    "Technical Solution",
-    "solution_clarity",
+    "Follow-up policy",
+    "coverage chain",
+    "Prefer depth over breadth",
+    "technical_design.md",
+    "coverage matrix gaps",
+    "blocking",
+    "non-material",
+    "deferred non-goal",
     "Assumption Stress Test",
     "Contract status",
+    "Issued by = alpha-goal",
+    "references/technical-design-book.md",
+    "Write artifacts only from answered, auto-confirmed, or cited facts",
+    "Keep unresolved required fields as `[blocking]`",
+    "Self-check the Goal Contract and Technical Design",
+    "Run independent review",
+    "raw artifacts and the user request",
+    "visible Review Record",
+    "approval request message must include, in order",
+    "Do not call `request_user_input` before showing the summary and Review Record",
+    "Key design decisions",
+    "Validation plan",
     "Discovery notes",
     "Interview ledger",
     "goal-contract.md",
@@ -156,12 +182,27 @@ const SEMANTIC_CHECKS: Array<[string, string, string[]]> = [
     "Intent",
     "Outcome",
     "Scope",
+    "Success Criteria",
     "Acceptance evidence",
     "Non-goals",
+    "Execution boundary",
     "Decision boundary",
     "Claim boundary",
-    "Authorization Source",
-    "Technical Solution"
+    "Authorization Source"
+  ]],
+  ["technical design book defines required content", "skills/alpha-goal/references/technical-design-book.md", [
+    "state-root `technical_design.md` is canonical",
+    "Required Content",
+    "Goal Contract link",
+    "Design status",
+    "Architecture",
+    "Components",
+    "Data Flow",
+    "Interfaces",
+    "Data Models",
+    "Test Plans",
+    "Risks",
+    "Acceptance evidence mapping"
   ]],
   ["execution has hard safety gates", "skills/control-loop/SKILL.md", [
     "Goal Contract is authority",
@@ -385,66 +426,128 @@ function validateSemanticChecks(root: string, errors: string[]): void {
 
 function validateAlphaGoalStructure(root: string, errors: string[]): void {
   const text = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
-  requireOrderedTerms("alpha-goal hard gates", markdownSection(text, "Hard Gates"), [
-    "PASS only if:",
-    "All explicit: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Acceptance evidence",
-    "Clarity score > 0.92",
-    "Solution clarity > 0.95",
-    "A pressure pass is complete",
-    "revisited with evidence, assumption, or tradeoff follow-up",
+  requireOrderedTerms("alpha-goal top-level order", text, [
+    "## Entry Gate",
+    "## Clarification Gate",
+    "## Clarification",
+    "## Confirmation Gate",
   ], errors);
-  requireOrderedTerms("alpha-goal boundaries", markdownSection(text, "Boundaries"), [
-    "alpha-goal does not implement, verify completion, make final-ready or complete claims",
-    "Only an accepted Goal Contract may be handed to `$control-loop`",
-    "Quick Path",
-    "Skip only for concrete read-only fact lookup",
+  requireOrderedTerms("alpha-goal review-to-confirmation handoff", text, [
+    "### Review Gate",
+    "## Confirmation Gate",
+    "After Review Gate completes, present the Goal Contract Summary first",
+    "Do not call `request_user_input` before showing the summary and Review Record",
+  ], errors);
+  requireOrderedTerms("alpha-goal entry gate", markdownSection(text, "Entry Gate"), [
+    "Enter `alpha-goal`",
+    "Skip only for concrete read-only work",
     "Anti-Pattern",
     "Every project MUST go through the workflow below",
-    "must get approval",
+    "user-confirmed",
+    "Check Point:",
+    "Inspect the relevant files, docs, recent commits, and existing patterns",
+    "Identify facts, conflicts, unknowns, dependencies, and source-of-truth conflicts",
+    "Record inspection results",
+    "Inspection is entry evidence, not permission to modify",
   ], errors);
-  requireOrderedTerms("alpha-goal workflow", text, [
-    "Phase 1: Discovery",
-    "Phase 2: Clarify",
-    "Phase 3: Assumption Stress Test",
-    "Phase 4: Write Contract",
-    "Phase 5: Review",
-    "Phase 6: Ask for Confirmation",
+  const entryGate = markdownSection(text, "Entry Gate").toLowerCase();
+  for (const forbidden of ["after you have inspected", "after inspecting", "after inspection"]) {
+    if (entryGate.includes(forbidden)) errors.push(`alpha-goal entry gate must not use inspect-after trigger wording: ${forbidden}`);
+  }
+  requireOrderedTerms("alpha-goal clarification gate", markdownSection(text, "Clarification Gate"), [
+    "Do not leave `Clarification`",
+    "coverage matrix has no blocking gap",
+    "Goal Contract coverage: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Success Criteria, Acceptance evidence",
+    "Technical Design coverage: Architecture, Components, Interfaces, Data Models, Data Flow, Test Plans, Risks",
+    "Every unresolved unknown is classified",
+    "At least one design-detail probe and one acceptance-evidence probe are complete",
+    "Material assumptions have been pressure-tested",
+    "A dimension is not covered by one answer by default",
+    "The highest-risk goal dimension and highest-risk design dimension each receive follow-up",
+    "Planned questions, unanswered questions, and hypothetical answers do not reduce coverage",
+    "Do not use confidence alone as exit evidence",
+    "Do not use round count as completion evidence",
+    "Do not propose implementation, code edits, or `$control-loop` handoff while any blocking goal or design gap remains",
   ], errors);
-  requireOrderedTerms("alpha-goal discovery phase", markdownSection(text, "Phase 1: Discovery"), [
-    "Inspect applicable",
+  requireOrderedTerms("alpha-goal clarification", markdownSection(text, "Clarification"), [
     "Evaluate:",
-    "Identify:",
-    "Discovery notes",
-    "Contract status: draft",
-    "Issued by: alpha-goal",
-  ], errors);
-  requireOrderedTerms("alpha-goal clarify phase", markdownSection(text, "Phase 2: Clarify"), [
-    "Loop Q&A until clarity score >= `0.92` and solution clarity >= `0.95` and readiness gates pass",
-    "Readiness gates = Goal Gates, Authority Gates, Context Gates, Repair Gate",
-    "exclude review, final user confirmation, accepted contract status, and the Before Handoff Checklist",
-    "Q&A Loop",
+    "Problem validity",
+    "Context sufficiency",
+    "Hidden issues",
+    "Loop Q&A until the user-owned decisions and technical design are explicit enough",
+    "Loop Q&A",
     "one high-leverage question",
     "one decision variable",
     "Do not ask for discoverable facts",
     "request_user_input",
-    "Challenge answer and update Goal Contract",
+    "Update `goal-contract.md` and `technical_design.md` after each answer",
+    "Interview ledger",
+    "Revisit the same dimension",
+    "Ask one round, wait for the answer",
+    "Do not pre-generate a complete questionnaire",
+    "Original request and probable intent",
+    "Current coverage matrix gaps",
+    "Target dimensions step by step",
+    "intent, outcome, scope, execution boundary, non-goals",
+    "Design Priority",
+    "architecture, components, data flow, interfaces, data models",
+    "test plans, scalability, risks, rollback",
+    "Round {n} | Target: {dimension} | Gap: {blocking|non-material|deferred}",
+    "Classify each answer before updating artifacts",
     "Cross-check user claims against code/docs",
     "Current-state facts cannot define desired behavior",
     "Boundary mapping",
     "actuator boundary -> `Decision boundary`",
     "sensor/observer boundary -> `Claim boundary`",
-    "Technical Solution",
-    "solution_clarity",
-  ], errors);
-  requireOrderedTerms("alpha-goal contract/review phases", markdownSection(text, "Phase 4: Write Contract") + markdownSection(text, "Phase 5: Review"), [
+    "Pressure-test the answer",
+    "architecture, component, interface, data model, data flow, test, or risk decision follows",
+    "Follow-up policy",
+    "Do not mark a dimension `covered` after the first answer",
+    "Do not rotate to the next dimension",
+    "Record the coverage chain",
+    "Prefer depth over breadth",
+    "Evaluate coverage",
+    "`covered`",
+    "`blocking`",
+    "`non-material`",
+    "`deferred non-goal`",
+    "If any blocking gap remains, continue Loop Q&A",
+    "Round count never closes Clarification",
+    "Assumption Stress Test",
+    "Write Artifacts",
     "references/goal-contract-book.md",
-    "Self-review the Goal Contract",
-    "Review",
+    "Issued by = alpha-goal",
+    "references/technical-design-book.md",
+    "Link the Goal Contract and Technical Design to each other",
+    "Write artifacts only from answered, auto-confirmed, or cited facts",
+    "Keep unresolved required fields as `[blocking]`",
+    "Review Gate",
+    "Self-check the Goal Contract and Technical Design",
+    "No required field relies on current-state facts as desired behavior",
+    "No blocking goal or design gap remains",
+    "Each success criterion maps to acceptance evidence and a validation observer",
+    "Key design decisions cover architecture, components, interfaces, data models, data flow, tests, and risks",
+    "Run independent review",
+    "Pass raw artifacts and the user request",
+    "Require the reviewer to check shallow Q&A, missing design detail, missing acceptance evidence, and premature implementation risk",
+    "Record self-check and independent review results",
+    "Produce a visible Review Record",
   ], errors);
-  requireOrderedTerms("alpha-goal confirmation phase", markdownSection(text, "Phase 6: Ask for Confirmation"), [
+  requireOrderedTerms("alpha-goal confirmation gate", markdownSection(text, "Confirmation Gate"), [
+    "After Review Gate completes, present the Goal Contract Summary first",
+    "The approval request message must include, in order: Goal Contract Summary, Review Record, then approve/refine/reject prompt",
+    "Do not call `request_user_input` before showing the summary and Review Record",
+    "If the summary or Review Record is missing or incomplete, stay in Review Gate",
     "Goal Contract Summary",
     "Design Summary",
     "| Field | Value |",
+    "| Goal | ... |",
+    "| Non-goals | ... |",
+    "| Execution boundary | ... |",
+    "| Key design decisions | ... |",
+    "| Acceptance evidence | ... |",
+    "| Risks / non-material uncertainties | ... |",
+    "| Validation plan | ... |",
     "Use `request_user_input`",
     "hand off to `$control-loop`",
   ], errors);
@@ -549,11 +652,13 @@ function validateControlLoopStructure(root: string, errors: string[]): void {
 }
 
 function markdownSection(text: string, heading: string): string {
+  const lines = text.split(/\r?\n/);
   const marker = `## ${heading}`;
-  const start = text.indexOf(marker);
+  const start = lines.findIndex(line => line.trim() === marker);
   if (start < 0) return "";
-  const next = text.indexOf("\n## ", start + marker.length);
-  return text.slice(start, next < 0 ? undefined : next);
+  const next = lines.slice(start + 1).findIndex(line => /^##\s+/.test(line));
+  const end = next < 0 ? lines.length : start + 1 + next;
+  return lines.slice(start, end).join("\n");
 }
 
 function markdownSubsection(text: string, heading: string): string {
@@ -581,15 +686,22 @@ function requireOrderedTerms(label: string, text: string, terms: string[], error
 function validateSchemaConsistency(root: string, errors: string[]): void {
   const alpha = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
   const goalContractBook = readIfFile(path.join(root, "skills/alpha-goal/references/goal-contract-book.md"));
+  const technicalDesignBook = readIfFile(path.join(root, "skills/alpha-goal/references/technical-design-book.md"));
   const goalContractSpec = `${alpha}\n${goalContractBook}`;
-  const goalContractFields = ["Contract status", "Issued by", "Technical Context", "Intent", "Outcome", "Scope", "Constraints", "Acceptance evidence", "Non-goals", "Decision boundary", "Claim boundary", "Authorization Source"];
+  const goalContractFields = ["Contract status", "Issued by", "Technical Context", "Intent", "Outcome", "Scope", "Constraints", "Success Criteria", "Acceptance evidence", "Non-goals", "Execution boundary", "Decision boundary", "Claim boundary", "Authorization Source"];
   for (const term of goalContractFields) if (!goalContractSpec.includes(term)) errors.push(`alpha Goal Contract content missing field: ${term}`);
-  const confirmation = markdownSection(alpha, "Phase 6: Ask for Confirmation");
+  for (const term of ["Goal Contract link", "Design status", "Architecture", "Components", "Data Flow", "Interfaces", "Data Models", "Test Plans", "Risks", "Acceptance evidence mapping"]) {
+    if (!technicalDesignBook.includes(term)) errors.push(`alpha Technical Design content missing field: ${term}`);
+  }
+  const confirmation = markdownSection(alpha, "Confirmation Gate");
   requireOrderedTerms("alpha design summary presentation", confirmation, [
+    "After Review Gate completes, present the Goal Contract Summary first",
+    "Do not call `request_user_input` before showing the summary and Review Record",
     "Goal Contract Summary",
     "Design Summary",
     "| Field | Value |",
     "| --- | --- |",
+    "Use `request_user_input`",
   ], errors);
   const evSkill = readIfFile(path.join(root, "skills/goal-verify/SKILL.md"));
   for (const term of ["PASS_TO_FINAL", "NEXT_ITERATION", "BLOCKED", "RETURN_TO_ALPHA_GOAL"]) if (!evSkill.includes(term)) errors.push(`goal verification verdict enum mismatch: ${term}`);
@@ -633,13 +745,13 @@ function validateInstallDocumentation(root: string, errors: string[]): void {
   if (!readme.includes("当前代码事实只描述现状")) errors.push("README.md missing current-state-not-desired-state principle");
   if (!readme.includes("执行或加固已授权 slice")) errors.push("README.md must describe control-loop as execution-first");
   if (!readme.includes("Act -> Evidence -> $goal-verify -> Gap?")) errors.push("README.md workflow must include evidence and goal-verify");
-  for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "失效条件", "显式确认门", "Technical Solution", "草稿或已接受"]) if (!readme.includes(term)) errors.push(`README.md missing persistent-loop term: ${term}`);
+  for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "失效条件", "显式确认门", "Technical Design", "草稿或已接受"]) if (!readme.includes(term)) errors.push(`README.md missing persistent-loop term: ${term}`);
   const readmeEn = readIfFile(path.join(root, "README.en.md"));
   for (const name of REQUIRED_SKILL_NAMES) if (!readmeEn.includes(`skills/${name}/`) || !readmeEn.includes(`\`${name}\``)) errors.push(`README.en.md missing public skill entry: ${name}`);
   if (!readmeEn.includes("Current code facts describe current state")) errors.push("README.en.md missing current-state-not-desired-state principle");
   if (!readmeEn.includes("Execute or harden an authorized slice")) errors.push("README.en.md must describe control-loop as execution-first");
   if (!readmeEn.includes("Act -> Evidence -> $goal-verify -> Gap?")) errors.push("README.en.md workflow must include evidence and goal-verify");
-  for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "discovery notes", "interview ledger", "15,000 word+punctuation units", "invalidation", "user confirmation gates", "Technical Solution", "draft or accepted"]) if (!readmeEn.includes(term)) errors.push(`README.en.md missing persistent-loop term: ${term}`);
+  for (const term of ["goal-contract.md", "checkpoint.md", "control-state/latest.md", "discovery notes", "interview ledger", "15,000 word+punctuation units", "invalidation", "user confirmation gates", "Technical Design", "draft or accepted"]) if (!readmeEn.includes(term)) errors.push(`README.en.md missing persistent-loop term: ${term}`);
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
   for (const name of REQUIRED_SKILL_NAMES) if (!installDoc.includes(name)) errors.push(`INSTALL.md missing public skill: ${name}`);
   if (!installDoc.includes("--no-sync-user-hooks")) errors.push("INSTALL.md missing --no-sync-user-hooks option");

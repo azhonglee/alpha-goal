@@ -14,8 +14,10 @@ Required Content:
 - Outcome [outcome]
 - Scope [scope]
 - Constraints [constraints]
+- Success Criteria [success_criteria]
 - Acceptance evidence [acceptance_evidence]
 - Non-goals [non_goal]
+- Execution boundary [execution_boundary]
 - Decision boundary [decision_boundary]
 - Claim boundary [claim_boundary]
 - Authorization Source [authorization_source]
@@ -25,8 +27,6 @@ Optional Content:
 - Discovery notes [discovery_notes]
 - Interview ledger [interview_ledger]
 - Repo surfaces [repo_surfaces]
+- Technical Design link [technical_design]
 - Assumptions + resolutions [assumptions_resolutions]
 - Dependency/integration order [repo_integration_order]
-
-Required Specification when cross-file predictive operation is required:
-- Technical Solution [technical_solution]: architecture, components, data flow, solution, interface, protocol, testing strategy, scalability, and risk
