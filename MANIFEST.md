@@ -14,14 +14,20 @@ Former public framing/modeling/synthesis stages are folded into `skills/alpha-go
 
 | Path | Mutates state? | Purpose |
 |---|---:|---|
-| `scripts/install.sh` | Yes | Installs the three public skills as direct symlinks, cleans same-repo old skill links, syncs optional user templates, and syncs `templates/hooks.json` without running skill validation. |
+| `scripts/install.sh` | Yes | Installs the three public skills as direct symlinks under `$HOME/.agents/skills`, cleans same-repo old skill links including migrated Codex skill symlinks during install, syncs target-specific Codex/Claude user configuration, and uninstalls managed target-specific artifacts without running skill validation. |
 | `tools/validate_skills.js` | No | Validates the shared contract, public-skill structure, references, word+punctuation budget, scripts, docs, fixtures, and schemas. |
 
 ## User Hooks
 
-`templates/hooks.json` defines one user-level `SessionStart` / `^compact$` hook, marked by `codex-alpha-goal-compact-recovery:v1`. `scripts/install.sh` merges that template into `${CODEX_HOME:-$HOME/.codex}/hooks.json`. The hook prints a static compact recovery policy that asks Codex to re-check `alpha-goal`, `control-loop`, and `goal-verify` after compaction and load the applicable skill. It restores draft or accepted `goal-contract.md` for Alpha Goal framing, reads `technical_design.md` with the Goal Contract when it exists, requires accepted status only for `control-loop` execution handoff, and covers goal verification, claim-boundary checks, and defect/risk sweep when needed.
+`templates/hooks.json` defines one Codex user-level `SessionStart` / `^compact$` hook, marked by `codex-alpha-goal-compact-recovery:v1`. `scripts/install.sh --target global` and `scripts/install.sh --target codex` merge that template into `${CODEX_HOME:-$HOME/.codex}/hooks.json`. The hook prints a static compact recovery policy that asks Codex to re-check `alpha-goal`, `control-loop`, and `goal-verify` after compaction and load the applicable skill. It restores draft or accepted `goal-contract.md` for Alpha Goal framing, reads `technical_design.md` with the Goal Contract when it exists, requires accepted status only for `control-loop` execution handoff, and covers goal verification, claim-boundary checks, and defect/risk sweep when needed.
 
 Hook replacement is by marker family, not exact version, so later `:v2` template markers replace existing `:v1` hooks. The installer also migrates the earlier experimental `codex-compact-skill-recovery` family.
+
+## User Templates
+
+`templates/AGENTS.md` and `templates/config.toml` are Codex user-level templates. `templates/CLAUDE.md` is the Claude user-level template written to `$HOME/.claude/CLAUDE.md`. `--target global` syncs both Codex and Claude configuration, `--target codex` syncs only Codex configuration, and `--target claude` syncs only Claude configuration. `--no-sync-user-templates` skips both Codex and Claude templates for the selected target; `--no-sync-user-hooks` skips only Codex hooks.
+
+`scripts/install.sh --uninstall` removes only managed artifacts for the selected target. `--target codex` removes managed Codex `AGENTS.md`, `config.toml` that byte-for-byte matches `templates/config.toml`, and managed hooks while preserving shared skills. `--target claude` removes managed Claude `CLAUDE.md` while preserving shared skills. `--target global` removes both Codex and Claude managed configuration plus this repository's skill symlinks under `$HOME/.agents/skills`. Uninstall preserves configuration symlinks, real skill directories, external symlinks, mixed user files, unmanaged hooks, and legacy Codex skills paths.
 
 ## Runtime Artifacts
 

@@ -85,6 +85,7 @@ function validateRoot(root) {
   validateEvidenceAliasMappings(root, contract, errors);
   validateCrossFileContract(root, contract, errors);
   validateInstallSurface(root, contract, errors);
+  validateClaudeTemplateParity(root, errors);
   validateDocs(root, contract, errors);
   validateNoAutoDownloadRunner(root, files, errors);
 
@@ -276,8 +277,11 @@ function countMatches(text, pattern) {
 function validateStateRootGuidance(root, contract, errors) {
   const required = [
     "Alpha Goal state root",
-    "${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/",
     "slug(repo_root or Goal Contract target workspace)",
+  ];
+  const stateRootForms = [
+    "${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/",
+    "$HOME/.alpha-goal/<workspace-slug>/",
   ];
   for (const rel of ["AGENTS.md", "MANIFEST.md", "skills/control-loop/SKILL.md", "skills/goal-verify/SKILL.md", "templates/AGENTS.md"]) {
     const text = readIfFile(path.join(root, rel));
@@ -287,6 +291,9 @@ function validateStateRootGuidance(root, contract, errors) {
     }
     for (const term of required) {
       if (!text.includes(term)) errors.push(`${rel}: missing state-root guidance: ${term}`);
+    }
+    if (!stateRootForms.some(term => text.includes(term))) {
+      errors.push(`${rel}: missing state-root guidance: ${stateRootForms.join(" or ")}`);
     }
   }
   const alpha = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
@@ -319,6 +326,7 @@ function validateLegacyReferences(root, contract, skillFiles, errors) {
     "INSTALL.md",
     "MANIFEST.md",
     "templates/AGENTS.md",
+    "templates/CLAUDE.md",
     "templates/hooks.json",
     "scripts/install.sh",
     ...skillFiles.map(file => relative(root, file)),
@@ -501,11 +509,54 @@ function validateInstallSurface(root, contract, errors) {
     if (!install.includes(term)) errors.push(`scripts/install.sh missing install hardening term: ${term}`);
   }
   if (!install.includes("--no-sync-user-hooks")) errors.push("scripts/install.sh missing --no-sync-user-hooks option");
+  if (!isFile(path.join(root, "templates/CLAUDE.md"))) errors.push("templates/CLAUDE.md: missing");
+  for (const term of ["--target", "global", "codex", "claude", "$HOME/.agents/skills", "templates/CLAUDE.md", "CLAUDE.md"]) {
+    if (!install.includes(term)) errors.push(`scripts/install.sh missing multi-target install term: ${term}`);
+  }
+  for (const term of [
+    "--uninstall",
+    "Uninstall target",
+    "remove_markdown_template",
+    "remove_config_template",
+    "remove_hooks_template",
+    "preflight_hooks_template",
+    "remove_installed_skill_link",
+    "Preserved symlinked",
+    "cmp -s",
+    "removeManagedHooks(data",
+    "uninstall_skill_removed_count",
+    "not-found",
+  ]) {
+    if (!install.includes(term)) errors.push(`scripts/install.sh missing uninstall safety term: ${term}`);
+  }
   if (install.includes("json.dumps(group") || install.includes("marker_family in group_text")) {
     errors.push("scripts/install.sh must not detect managed hooks via serialized JSON substring");
   }
   if (install.includes("tmp_path.replace(hooks_path)")) {
     errors.push("scripts/install.sh must not replace symlinked hooks_path directly");
+  }
+}
+
+function validateClaudeTemplateParity(root, errors) {
+  const agentsRel = "templates/AGENTS.md";
+  const claudeRel = "templates/CLAUDE.md";
+  const agents = readIfFile(path.join(root, agentsRel));
+  const claude = readIfFile(path.join(root, claudeRel));
+  if (!agents) {
+    errors.push(`${agentsRel}: missing`);
+    return;
+  }
+  if (!claude) {
+    errors.push(`${claudeRel}: missing`);
+    return;
+  }
+
+  const normalizedClaude = claude
+    .replaceAll("CLAUDE.md", "AGENTS.md")
+    .replaceAll("`AskUserQuestion`", "`request_user_input`")
+    .replaceAll("generate-with-template:claude-md", "generate-with-template:agents-md");
+  if (normalizedClaude !== agents) {
+    errors.push(`${claudeRel}: must match ${agentsRel} except Claude file/tool semantics`);
   }
 }
 
@@ -530,11 +581,40 @@ function validateDocs(root, contract, errors) {
     if (!text.includes(contract.nodeRequirement)) errors.push(`${rel}: missing node requirement ${contract.nodeRequirement}`);
   }
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
-  for (const term of ["--no-sync-user-hooks", "templates/hooks.json", LEGACY_HOOK_MARKER, "temporary CODEX_HOME", FIXTURE_COMMAND]) {
+  for (const term of ["--target", "$HOME/.agents/skills", "templates/CLAUDE.md", "--no-sync-user-hooks", "templates/hooks.json", LEGACY_HOOK_MARKER, "temporary CODEX_HOME", FIXTURE_COMMAND]) {
     if (!installDoc.includes(term)) errors.push(`INSTALL.md missing install term: ${term}`);
+  }
+  for (const term of [
+    "scripts/install.sh --uninstall --target global",
+    "scripts/install.sh --uninstall --target codex",
+    "scripts/install.sh --uninstall --target claude",
+    "configuration symlinks are not followed",
+    "byte-for-byte matches `templates/config.toml`",
+    "tmp_uninstall_global",
+    "tmp_uninstall_target",
+    "tmp_uninstall_noninteractive",
+    "tmp_uninstall_toml",
+    "tmp_uninstall_blank_toml",
+    "tmp_uninstall_safety",
+    "tmp_uninstall_skip",
+    "tmp_uninstall_invalid_hooks",
+    "config.toml preserved",
+    "--no-sync-user-templates",
+    "--no-sync-user-hooks",
+  ]) {
+    if (!installDoc.includes(term)) errors.push(`INSTALL.md missing uninstall term: ${term}`);
   }
   const readme = readIfFile(path.join(root, "README.md"));
   const readmeEn = readIfFile(path.join(root, "README.en.md"));
+  const manifest = readIfFile(path.join(root, "MANIFEST.md"));
+  for (const term of ["--uninstall", "$HOME/.agents/skills", "配置 symlink", "legacy Codex skills"]) {
+    if (!readme.includes(term)) errors.push(`README.md missing uninstall boundary term: ${term}`);
+  }
+  for (const [rel, text] of [["README.en.md", readmeEn], ["MANIFEST.md", manifest]]) {
+    for (const term of ["--uninstall", "$HOME/.agents/skills", "configuration symlinks", "legacy Codex skills"]) {
+      if (!text.includes(term)) errors.push(`${rel} missing uninstall boundary term: ${term}`);
+    }
+  }
   for (const skill of contract.skills) {
     if (!readme.includes(`skills/${skill}/`)) errors.push(`README.md missing skill path: ${skill}`);
     if (!readmeEn.includes(`skills/${skill}/`)) errors.push(`README.en.md missing skill path: ${skill}`);
