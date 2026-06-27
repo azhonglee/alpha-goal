@@ -514,6 +514,18 @@ function validateInstallSurface(root, contract, errors) {
     if (!install.includes(term)) errors.push(`scripts/install.sh missing multi-target install term: ${term}`);
   }
   for (const term of [
+    "render_install_target_menu",
+    "Use Up/Down and Enter",
+    "read -rsn1",
+    "git_common_dir_for_path",
+    "git_worktree_root_for_path",
+    "same_git_worktree_skill_link",
+    "rev-parse --git-common-dir",
+    "skills/$skill_name",
+  ]) {
+    if (!install.includes(term)) errors.push(`scripts/install.sh missing interactive/adoption term: ${term}`);
+  }
+  for (const term of [
     "--uninstall",
     "Uninstall target",
     "remove_markdown_template",
@@ -534,6 +546,9 @@ function validateInstallSurface(root, contract, errors) {
   }
   if (install.includes("tmp_path.replace(hooks_path)")) {
     errors.push("scripts/install.sh must not replace symlinked hooks_path directly");
+  }
+  if (install.includes("read -rsn2 -t 0.")) {
+    errors.push("scripts/install.sh must not use fractional read timeouts; macOS bash 3.2 rejects them");
   }
 }
 
@@ -585,6 +600,16 @@ function validateDocs(root, contract, errors) {
     if (!installDoc.includes(term)) errors.push(`INSTALL.md missing install term: ${term}`);
   }
   for (const term of [
+    "arrow-key menu",
+    "`codex` is selected by default",
+    "number keys do not select",
+    "same Git common directory",
+    "git worktree add --detach",
+    "tmp_worktree_link",
+    "tmp_external_link",
+    "tmp_wrong_path_link",
+    "tmp_real_dir",
+    "target menu timed out",
     "scripts/install.sh --uninstall --target global",
     "scripts/install.sh --uninstall --target codex",
     "scripts/install.sh --uninstall --target claude",
