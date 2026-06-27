@@ -524,6 +524,9 @@ function validateDocs(root, contract, errors) {
   for (const rel of ["AGENTS.md", "README.md", "README.en.md", "INSTALL.md"]) {
     const text = readIfFile(path.join(root, rel));
     if (!text.includes(VALIDATOR_COMMAND)) errors.push(`${rel}: missing validator command ${VALIDATOR_COMMAND}`);
+  }
+  for (const rel of ["AGENTS.md", "README.en.md", "INSTALL.md"]) {
+    const text = readIfFile(path.join(root, rel));
     if (!text.includes(contract.nodeRequirement)) errors.push(`${rel}: missing node requirement ${contract.nodeRequirement}`);
   }
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
