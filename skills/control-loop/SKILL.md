@@ -9,7 +9,7 @@ description: "Goal-contract-driven bounded executor and hardener. Use only after
 1. Goal Contract is authority.
 2. Execution is actuator output.
 3. Evidence is sensor input.
-4. `$goal-verify` is comparator.
+4. `goal-verify` skill is comparator.
 5. Route decision is control output.
 
 Execution results are evidence, not automatic completion.  
@@ -98,7 +98,7 @@ Do not infer completion from partial success.
 Do not infer safety from absence of failure.
 Do not infer acceptance from passing unrelated tests.
 Do not infer authority from implementation convenience.
-Only `$goal-verify` may support final-ready, safe, complete, fixed, hardened, shipped, or MR-ready claims.
+Only `goal-verify` skill may support final-ready, safe, complete, fixed, hardened, shipped, or MR-ready claims.
 
 ## Slice Boundary Gates
 Before executing a slice, all must pass:
@@ -172,7 +172,7 @@ Finish only when:
 
 ## Checkpoint Policy
 `<Alpha Goal state root>/YYYYMMDD-<TaskName>/checkpoint.md` is recovery support, not progress.
-Resolve Alpha Goal state root as `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`, where `<workspace-slug>` is `slug(repo_root or Goal Contract target workspace)`.
+Resolve Alpha Goal state root as `$HOME/.alpha-goal/<workspace-slug>/`, where `<workspace-slug>` is `slug(repo_root or Goal Contract target workspace)`.
 
 Create or update checkpoint only when it helps:
 - Recovery

@@ -6,7 +6,7 @@ description: "Must use to gate engineering/design/implementation requests before
 # Alpha Goal
 
 `alpha-goal` owns goal definition and design clarification.
-Implementation starts only after a user-accepted Goal Contract hands off to `$control-loop`.
+Implementation starts only after a user-accepted Goal Contract hands off to `control-loop` skill.
 
 ## Entry Gate
 
