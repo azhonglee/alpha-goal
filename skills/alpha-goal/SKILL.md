@@ -168,11 +168,6 @@ Write artifacts only from answered, auto-confirmed, or cited facts. Keep unresol
 - Produce a visible Review Record with self-check result, independent review result or skipped reason, findings fixed, and remaining non-material uncertainties.
 
 After Review Gate completes, present the Goal Contract Summary first.
-- Before calling `request_user_input`, present:
-  1. Goal Contract Summary
-  2. Review Record
-  3. Approval choices: approve / refine / reject
-- Do not call `request_user_input` before showing the summary and Review Record.
 - The approval request message must include, in order: Goal Contract Summary, Review Record
 - If the summary or Review Record is missing or incomplete, stay in Review Gate.
 - TUI Presentation Style:
