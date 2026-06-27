@@ -1432,6 +1432,8 @@ JS
 
 print_summary() {
   local status="ready"
+  local show_codex_config=false
+  local show_claude_config=false
   if [[ "$linked_count" -gt 0 || "$replaced_count" -gt 0 || "$legacy_removed_count" -gt 0 ]]; then
     status="installed"
   fi
@@ -1445,50 +1447,47 @@ print_summary() {
     status="installed"
   fi
 
+  if [[ "$sync_codex_config" == true && ( "$sync_user_templates" == true || "$sync_user_hooks" == true ) ]]; then
+    show_codex_config=true
+  fi
+  if [[ "$sync_claude_config" == true && "$sync_user_templates" == true ]]; then
+    show_claude_config=true
+  fi
+
   echo "╭─ Alpha Goal install summary"
   echo "│ Result: $status"
   echo "│ Skills: $installed linked"
   echo "│ Skills root: $target_root"
   echo "│ Install target: $install_target"
-  echo "├─ Configuration"
-  if [[ "$sync_codex_config" == true ]]; then
+  if [[ "$show_codex_config" == true || "$show_claude_config" == true ]]; then
+    echo "├─ Configuration"
+  fi
+  if [[ "$show_codex_config" == true ]]; then
     echo "│ Codex home: $codex_home"
-  else
-    echo "│ Codex config: skipped (--target $install_target)"
   fi
-  if [[ "$sync_claude_config" == true ]]; then
+  if [[ "$show_claude_config" == true ]]; then
     echo "│ Claude home: $claude_home"
-  else
-    echo "│ Claude config: skipped (--target $install_target)"
   fi
-  echo "├─ Templates"
-  if [[ "$sync_user_templates" == true ]]; then
+  if [[ "$sync_user_templates" == true && ( "$sync_codex_config" == true || "$sync_claude_config" == true ) ]]; then
+    echo "├─ Templates"
     if [[ "$sync_codex_config" == true ]]; then
       echo "│ Codex templates: AGENTS.md $agents_action, config.toml $config_action"
-    else
-      echo "│ Codex templates: skipped (--target $install_target)"
     fi
     if [[ "$sync_claude_config" == true ]]; then
       echo "│ Claude templates: CLAUDE.md $claude_action"
-    else
-      echo "│ Claude templates: skipped (--target $install_target)"
     fi
-  else
-    echo "│ User templates: skipped (--no-sync-user-templates)"
   fi
-  echo "├─ Hooks"
   if [[ "$sync_codex_config" == true && "$sync_user_hooks" == true ]]; then
+    echo "├─ Hooks"
     echo "│ User hooks: hooks.json $hooks_action"
-  elif [[ "$sync_codex_config" == true ]]; then
-    echo "│ User hooks: skipped (--no-sync-user-hooks)"
-  else
-    echo "│ User hooks: skipped (--target $install_target)"
   fi
   echo "╰─ done"
 }
 
 print_uninstall_summary() {
   local status="ready"
+  local show_codex_config=false
+  local show_claude_config=false
   if [[ "$uninstall_skill_removed_count" -gt 0 ]]; then
     status="uninstalled"
   fi
@@ -1498,49 +1497,42 @@ print_uninstall_summary() {
     fi
   done
 
+  if [[ "$sync_codex_config" == true && ( "$sync_user_templates" == true || "$sync_user_hooks" == true ) ]]; then
+    show_codex_config=true
+  fi
+  if [[ "$sync_claude_config" == true && "$sync_user_templates" == true ]]; then
+    show_claude_config=true
+  fi
+
   echo "╭─ Alpha Goal uninstall summary"
   echo "│ Result: $status"
   echo "│ Uninstall target: $install_target"
-  echo "│ Skills root: $target_root"
-  echo "├─ Shared skills"
   if [[ "$install_target" == "global" ]]; then
+    echo "├─ Shared skills"
+    echo "│ Skills root: $target_root"
     echo "│ Skills: removed $uninstall_skill_removed_count, preserved $uninstall_skill_preserved_count, not-found $uninstall_skill_missing_count"
-  else
-    echo "│ Skills: skipped (--target $install_target)"
   fi
-  echo "├─ Configuration"
-  if [[ "$sync_codex_config" == true ]]; then
+  if [[ "$show_codex_config" == true || "$show_claude_config" == true ]]; then
+    echo "├─ Configuration"
+  fi
+  if [[ "$show_codex_config" == true ]]; then
     echo "│ Codex home: $codex_home"
-  else
-    echo "│ Codex config: skipped (--target $install_target)"
   fi
-  if [[ "$sync_claude_config" == true ]]; then
+  if [[ "$show_claude_config" == true ]]; then
     echo "│ Claude home: $claude_home"
-  else
-    echo "│ Claude config: skipped (--target $install_target)"
   fi
-  echo "├─ Templates"
-  if [[ "$sync_user_templates" == true ]]; then
+  if [[ "$sync_user_templates" == true && ( "$sync_codex_config" == true || "$sync_claude_config" == true ) ]]; then
+    echo "├─ Templates"
     if [[ "$sync_codex_config" == true ]]; then
       echo "│ Codex templates: AGENTS.md $agents_action, config.toml $config_action"
-    else
-      echo "│ Codex templates: skipped (--target $install_target)"
     fi
     if [[ "$sync_claude_config" == true ]]; then
       echo "│ Claude templates: CLAUDE.md $claude_action"
-    else
-      echo "│ Claude templates: skipped (--target $install_target)"
     fi
-  else
-    echo "│ User templates: skipped (--no-sync-user-templates)"
   fi
-  echo "├─ Hooks"
   if [[ "$sync_codex_config" == true && "$sync_user_hooks" == true ]]; then
+    echo "├─ Hooks"
     echo "│ User hooks: hooks.json $hooks_action"
-  elif [[ "$sync_codex_config" == true ]]; then
-    echo "│ User hooks: skipped (--no-sync-user-hooks)"
-  else
-    echo "│ User hooks: skipped (--target $install_target)"
   fi
   echo "╰─ done"
 }

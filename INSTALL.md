@@ -41,7 +41,7 @@ The script creates `$HOME/.agents/skills/<skill-name>` links for required public
 - `codex`: sync Codex config only.
 - `claude`: sync Claude `CLAUDE.md` only.
 
-Without `--target`, an interactive terminal shows a color+Unicode arrow-key menu for `global`, `codex`, or `claude`; `codex` is selected by default and Enter confirms the highlighted target. The menu states that skills always install to `$HOME/.agents/skills`, explains that the target only controls configuration, and uses Up/Down plus Enter only; number keys do not select a target. The installer prints a grouped summary after install or uninstall. Non-interactive runs still default to `codex`. Codex config uses `${CODEX_HOME:-$HOME/.codex}` or `--codex-home`. Claude config uses `$HOME/.claude/CLAUDE.md` from `templates/CLAUDE.md`.
+Without `--target`, an interactive terminal shows a color+Unicode arrow-key menu for `global`, `codex`, or `claude`; `codex` is selected by default and Enter confirms the highlighted target. The menu states that skills always install to `$HOME/.agents/skills`, explains that the target only controls configuration, and uses Up/Down plus Enter only; number keys do not select a target. The installer prints a grouped summary after install or uninstall; the summary shows only active effects for the selected target and omits skipped lines. Non-interactive runs still default to `codex`. Codex config uses `${CODEX_HOME:-$HOME/.codex}` or `--codex-home`. Claude config uses `$HOME/.claude/CLAUDE.md` from `templates/CLAUDE.md`.
 
 When installing skill links, an existing `$HOME/.agents/skills/<skill-name>` symlink is adopted without `--force` only when it points to `skills/<skill-name>` in another worktree with the same Git common directory. Git detection failures, external symlinks, symlinks to other repo-relative paths, and real directories still require the existing `--force` or refusal behavior.
 
@@ -57,7 +57,7 @@ Codex may require reviewing and trusting the changed hook with `/hooks` before i
 
 ## Smoke test
 
-The smoke test checks installed skill links, target-specific config sync, hook recovery text, and state fixture shape with a temporary HOME and temporary CODEX_HOME, without requiring runtime skill scripts or touching real user configuration. The PTY portion also asserts the target menu structure, ANSI color, Unicode selected state, and grouped summary output.
+The smoke test checks installed skill links, target-specific config sync, hook recovery text, and state fixture shape with a temporary HOME and temporary CODEX_HOME, without requiring runtime skill scripts or touching real user configuration. The PTY portion also asserts the target menu structure, ANSI color, Unicode selected state, grouped summary output, and that summary output omits skipped lines.
 
 ```bash
 set -euo pipefail
@@ -140,7 +140,13 @@ test -f "$tmp_noninteractive/.codex/AGENTS.md"
 test ! -e "$tmp_noninteractive/.claude/CLAUDE.md"
 
 tmp_skip="$(mktemp -d)"
-HOME="$tmp_skip" CODEX_HOME="$tmp_skip/.codex" scripts/install.sh --target global --no-sync-user-templates --no-sync-user-hooks
+HOME="$tmp_skip" CODEX_HOME="$tmp_skip/.codex" scripts/install.sh --target global --no-sync-user-templates --no-sync-user-hooks >"$tmp_skip/install.out"
+grep -q "│ Install target: global" "$tmp_skip/install.out"
+grep -q "│ Skills root:" "$tmp_skip/install.out"
+! grep -q "skipped" "$tmp_skip/install.out"
+! grep -q "Configuration" "$tmp_skip/install.out"
+! grep -q "Templates" "$tmp_skip/install.out"
+! grep -q "Hooks" "$tmp_skip/install.out"
 test -f "$tmp_skip/.agents/skills/alpha-goal/SKILL.md"
 test ! -e "$tmp_skip/.codex/AGENTS.md"
 test ! -e "$tmp_skip/.codex/config.toml"
@@ -259,7 +265,13 @@ test -L "$tmp_uninstall_safety/.agents/skills/goal-verify"
 
 tmp_uninstall_skip="$(mktemp -d)"
 HOME="$tmp_uninstall_skip" CODEX_HOME="$tmp_uninstall_skip/.codex" scripts/install.sh --target global
-HOME="$tmp_uninstall_skip" CODEX_HOME="$tmp_uninstall_skip/.codex" scripts/install.sh --uninstall --target global --no-sync-user-templates --no-sync-user-hooks
+HOME="$tmp_uninstall_skip" CODEX_HOME="$tmp_uninstall_skip/.codex" scripts/install.sh --uninstall --target global --no-sync-user-templates --no-sync-user-hooks >"$tmp_uninstall_skip/uninstall.out"
+grep -q "│ Uninstall target: global" "$tmp_uninstall_skip/uninstall.out"
+grep -q "├─ Shared skills" "$tmp_uninstall_skip/uninstall.out"
+! grep -q "skipped" "$tmp_uninstall_skip/uninstall.out"
+! grep -q "Configuration" "$tmp_uninstall_skip/uninstall.out"
+! grep -q "Templates" "$tmp_uninstall_skip/uninstall.out"
+! grep -q "Hooks" "$tmp_uninstall_skip/uninstall.out"
 test -f "$tmp_uninstall_skip/.codex/AGENTS.md"
 test -f "$tmp_uninstall_skip/.codex/config.toml"
 test -f "$tmp_uninstall_skip/.codex/hooks.json"
@@ -361,17 +373,21 @@ assert "Use ↑/↓ and Enter:" in out
 assert "╭─ Alpha Goal install summary" in out
 assert "│ Install target: codex" in out
 assert "├─ Configuration" in out
+assert "skipped" not in out
 assert (tmp / ".codex/AGENTS.md").is_file()
 assert not (tmp / ".claude/CLAUDE.md").exists()
 shutil.rmtree(tmp)
 
 out, tmp = run_menu(b"\x1b[A\n")
 assert "│ Install target: global" in out
+assert "skipped" not in out
 assert (tmp / ".claude/CLAUDE.md").is_file()
 shutil.rmtree(tmp)
 
 out, tmp = run_menu(b"\x1b[B\n")
 assert "│ Install target: claude" in out
+assert "│ Claude home:" in out
+assert "skipped" not in out
 assert (tmp / ".claude/CLAUDE.md").is_file()
 assert not (tmp / ".codex/AGENTS.md").exists()
 shutil.rmtree(tmp)
@@ -392,7 +408,9 @@ out, tmp = run_menu(b"\x1b[B\n", uninstall=True)
 assert "◆ Alpha Goal Uninstall" in out
 assert "╭─ Alpha Goal uninstall summary" in out
 assert "│ Uninstall target: claude" in out
-assert "│ Skills: skipped (--target claude)" in out
+assert "│ Claude home:" in out
+assert "│ Claude templates: CLAUDE.md removed" in out
+assert "skipped" not in out
 assert (tmp / ".agents/skills/alpha-goal/SKILL.md").is_file()
 assert (tmp / ".codex/AGENTS.md").is_file()
 assert not (tmp / ".claude/CLAUDE.md").exists()

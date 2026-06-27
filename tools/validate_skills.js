@@ -615,6 +615,7 @@ function validateDocs(root, contract, errors) {
     "ANSI color",
     "Unicode selected state",
     "grouped summary",
+    "omits skipped lines",
     "same Git common directory",
     "git worktree add --detach",
     "tmp_worktree_link",

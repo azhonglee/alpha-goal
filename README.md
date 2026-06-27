@@ -73,7 +73,7 @@ bash ./scripts/install.sh
 node tools/validate_skills.js .
 ```
 
-安装脚本会在 `$HOME/.agents/skills/` 下为三个公开技能创建直接软链接，并清理指向本仓库旧公开技能的软链接。`--target global|codex|claude` 只控制 Codex/Claude 配置同步范围；不传 `--target` 时，交互终端用 color+Unicode 上下键菜单选择，默认高亮 `codex`，菜单会说明 skills 固定安装到 `$HOME/.agents/skills`，非交互调用默认使用 `codex` 配置同步范围。安装和卸载完成后会输出 grouped summary。安装会自动接管同一 Git common-dir 其他 worktree 中 `skills/<skill>` 的 symlink；外部 symlink 和真实目录仍需 `--force` 或拒绝。`--uninstall` 按 target 清理托管配置；只有 `--uninstall --target global` 会移除 `$HOME/.agents/skills` 下指向本仓库的共享 skill 软链接。卸载不会跟随配置 symlink，不会删除真实 skill 目录、外部 symlink、混合用户配置或 legacy Codex skills 路径。
+安装脚本会在 `$HOME/.agents/skills/` 下为三个公开技能创建直接软链接，并清理指向本仓库旧公开技能的软链接。`--target global|codex|claude` 只控制 Codex/Claude 配置同步范围；不传 `--target` 时，交互终端用 color+Unicode 上下键菜单选择，默认高亮 `codex`，菜单会说明 skills 固定安装到 `$HOME/.agents/skills`，非交互调用默认使用 `codex` 配置同步范围。安装和卸载完成后会输出 grouped summary，且只展示当前选择的实际影响，省略 skipped 行。安装会自动接管同一 Git common-dir 其他 worktree 中 `skills/<skill>` 的 symlink；外部 symlink 和真实目录仍需 `--force` 或拒绝。`--uninstall` 按 target 清理托管配置；只有 `--uninstall --target global` 会移除 `$HOME/.agents/skills` 下指向本仓库的共享 skill 软链接。卸载不会跟随配置 symlink，不会删除真实 skill 目录、外部 symlink、混合用户配置或 legacy Codex skills 路径。
 
 ## 使用示例
 
