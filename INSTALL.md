@@ -41,7 +41,9 @@ The script creates `$HOME/.agents/skills/<skill-name>` links for required public
 - `codex`: sync Codex config only.
 - `claude`: sync Claude `CLAUDE.md` only.
 
-Without `--target`, an interactive terminal prompts for `global`, `codex`, or `claude`; non-interactive runs default to `codex`. Codex config uses `${CODEX_HOME:-$HOME/.codex}` or `--codex-home`. Claude config uses `$HOME/.claude/CLAUDE.md` from `templates/CLAUDE.md`.
+Without `--target`, an interactive terminal shows an arrow-key menu for `global`, `codex`, or `claude`; `codex` is selected by default and Enter confirms the highlighted target. The menu uses Up/Down plus Enter only; number keys do not select a target. Non-interactive runs still default to `codex`. Codex config uses `${CODEX_HOME:-$HOME/.codex}` or `--codex-home`. Claude config uses `$HOME/.claude/CLAUDE.md` from `templates/CLAUDE.md`.
+
+When installing skill links, an existing `$HOME/.agents/skills/<skill-name>` symlink is adopted without `--force` only when it points to `skills/<skill-name>` in another worktree with the same Git common directory. Git detection failures, external symlinks, symlinks to other repo-relative paths, and real directories still require the existing `--force` or refusal behavior.
 
 Use `--uninstall` to remove managed install artifacts for the selected target. `--uninstall --target codex` removes only managed Codex configuration and keeps shared `$HOME/.agents/skills` links. `--uninstall --target claude` removes only managed Claude `CLAUDE.md` content and keeps shared skills. `--uninstall --target global` removes managed Codex and Claude configuration plus this repository's skill symlinks under `$HOME/.agents/skills`. Uninstall does not remove legacy `${CODEX_HOME:-$HOME/.codex}/skills` paths.
 
@@ -156,6 +158,39 @@ test ! -e "$tmp_migration/.codex/skills/alpha-goal"
 test ! -e "$tmp_migration/.codex/skills/control-loop"
 test -L "$tmp_migration/.codex/skills/external-skill"
 
+tmp_worktree_link="$(mktemp -d)"
+tmp_other_worktree="$(mktemp -d)"
+rm -rf "$tmp_other_worktree"
+git worktree add --detach "$tmp_other_worktree" HEAD >/dev/null
+mkdir -p "$tmp_worktree_link/.agents/skills"
+ln -s "$tmp_other_worktree/skills/alpha-goal" "$tmp_worktree_link/.agents/skills/alpha-goal"
+HOME="$tmp_worktree_link" CODEX_HOME="$tmp_worktree_link/.codex" scripts/install.sh --target codex
+test "$(readlink "$tmp_worktree_link/.agents/skills/alpha-goal")" = "$(pwd -P)/skills/alpha-goal"
+git worktree remove --force "$tmp_other_worktree" >/dev/null
+
+tmp_external_link="$(mktemp -d)"
+mkdir -p "$tmp_external_link/.agents/skills" "$tmp_external_link/external/alpha-goal"
+ln -s "$tmp_external_link/external/alpha-goal" "$tmp_external_link/.agents/skills/alpha-goal"
+if HOME="$tmp_external_link" CODEX_HOME="$tmp_external_link/.codex" scripts/install.sh --target codex; then
+  echo "expected external skill symlink install to fail without --force" >&2
+  exit 1
+fi
+
+tmp_wrong_path_link="$(mktemp -d)"
+mkdir -p "$tmp_wrong_path_link/.agents/skills"
+ln -s "$repo_root/templates" "$tmp_wrong_path_link/.agents/skills/alpha-goal"
+if HOME="$tmp_wrong_path_link" CODEX_HOME="$tmp_wrong_path_link/.codex" scripts/install.sh --target codex; then
+  echo "expected non-skill same-repo symlink install to fail without --force" >&2
+  exit 1
+fi
+
+tmp_real_dir="$(mktemp -d)"
+mkdir -p "$tmp_real_dir/.agents/skills/alpha-goal"
+if HOME="$tmp_real_dir" CODEX_HOME="$tmp_real_dir/.codex" scripts/install.sh --target codex; then
+  echo "expected real skill directory install to fail without --force" >&2
+  exit 1
+fi
+
 tmp_uninstall_global="$(mktemp -d)"
 HOME="$tmp_uninstall_global" CODEX_HOME="$tmp_uninstall_global/.codex" scripts/install.sh --target global
 HOME="$tmp_uninstall_global" CODEX_HOME="$tmp_uninstall_global/.codex" scripts/install.sh --uninstall --target global
@@ -243,9 +278,115 @@ test -f "$tmp_uninstall_invalid_hooks/.codex/config.toml"
 
 HOME="$tmp_uninstall_global" CODEX_HOME="$tmp_uninstall_global/.codex" scripts/install.sh --uninstall --target global
 
+python3 - <<'PY'
+import os
+import pty
+import select
+import shutil
+import subprocess
+import tempfile
+import time
+from pathlib import Path
+
+repo = Path.cwd()
+
+
+def run_menu(keys, uninstall=False):
+    tmp = Path(tempfile.mkdtemp())
+    try:
+        env = os.environ.copy()
+        env["HOME"] = str(tmp)
+        env["CODEX_HOME"] = str(tmp / ".codex")
+        if uninstall:
+            subprocess.run(["scripts/install.sh", "--target", "global"], cwd=repo, env=env, check=True, stdout=subprocess.DEVNULL)
+            cmd = ["scripts/install.sh", "--uninstall"]
+        else:
+            cmd = ["scripts/install.sh"]
+
+        master, slave = pty.openpty()
+        proc = subprocess.Popen(cmd, cwd=repo, env=env, stdin=slave, stdout=slave, stderr=slave, close_fds=True)
+        os.close(slave)
+        output = b""
+        sent = False
+        deadline = time.time() + 15
+        while True:
+            if time.time() > deadline:
+                proc.kill()
+                raise RuntimeError("target menu timed out")
+            r, _, _ = select.select([master], [], [], 0.1)
+            if master in r:
+                try:
+                    chunk = os.read(master, 4096)
+                except OSError:
+                    chunk = b""
+                if not chunk:
+                    break
+                output += chunk
+                if not sent and b"Use" in output and b"Enter" in output:
+                    os.write(master, keys)
+                    sent = True
+            if proc.poll() is not None:
+                while True:
+                    r, _, _ = select.select([master], [], [], 0)
+                    if master not in r:
+                        break
+                    try:
+                        chunk = os.read(master, 4096)
+                    except OSError:
+                        break
+                    if not chunk:
+                        break
+                    output += chunk
+                break
+        os.close(master)
+        if proc.wait() != 0:
+            raise RuntimeError(output.decode("utf-8", errors="replace"))
+        return output.decode("utf-8", errors="replace"), tmp
+    except Exception:
+        shutil.rmtree(tmp, ignore_errors=True)
+        raise
+
+
+out, tmp = run_menu(b"\n")
+assert "> codex" in out
+assert (tmp / ".codex/AGENTS.md").is_file()
+assert not (tmp / ".claude/CLAUDE.md").exists()
+shutil.rmtree(tmp)
+
+out, tmp = run_menu(b"\x1b[A\n")
+assert "Install target: global" in out
+assert (tmp / ".claude/CLAUDE.md").is_file()
+shutil.rmtree(tmp)
+
+out, tmp = run_menu(b"\x1b[B\n")
+assert "Install target: claude" in out
+assert (tmp / ".claude/CLAUDE.md").is_file()
+assert not (tmp / ".codex/AGENTS.md").exists()
+shutil.rmtree(tmp)
+
+out, tmp = run_menu(b"\x1b[B\x1b[B\n")
+assert "Install target: global" in out
+shutil.rmtree(tmp)
+
+out, tmp = run_menu(b"2\n")
+assert "Install target: codex" in out
+shutil.rmtree(tmp)
+
+out, tmp = run_menu(b"\x1b\n")
+assert "Install target: codex" in out
+shutil.rmtree(tmp)
+
+out, tmp = run_menu(b"\x1b[B\n", uninstall=True)
+assert "Uninstall target: claude" in out
+assert (tmp / ".agents/skills/alpha-goal/SKILL.md").is_file()
+assert (tmp / ".codex/AGENTS.md").is_file()
+assert not (tmp / ".claude/CLAUDE.md").exists()
+shutil.rmtree(tmp)
+PY
+
 node tools/validate_skills.js .
 node tools/validate_skills.js --fixtures
-rm -rf "$tmp_home" "$tmp_codex_only" "$tmp_claude_only" "$tmp_noninteractive" "$tmp_skip" "$tmp_migration" "$tmp_uninstall_global" "$tmp_uninstall_target" "$tmp_uninstall_noninteractive" "$tmp_uninstall_toml" "$tmp_uninstall_blank_toml" "$tmp_uninstall_safety" "$tmp_uninstall_skip" "$tmp_uninstall_invalid_hooks"
+rm -rf "$tmp_home" "$tmp_codex_only" "$tmp_claude_only" "$tmp_noninteractive" "$tmp_skip" "$tmp_migration" "$tmp_worktree_link" "$tmp_external_link" "$tmp_wrong_path_link" "$tmp_real_dir" "$tmp_uninstall_global" "$tmp_uninstall_target" "$tmp_uninstall_noninteractive" "$tmp_uninstall_toml" "$tmp_uninstall_blank_toml" "$tmp_uninstall_safety" "$tmp_uninstall_skip" "$tmp_uninstall_invalid_hooks"
 ```
 
 ## Prompts
