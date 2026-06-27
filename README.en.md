@@ -72,7 +72,7 @@ node tools/validate_skills.js .
 
 Requires Node.js 18+. The validator and installer TOML merge use repository-local JavaScript and vendored dependencies; `tsx` is not required.
 
-The installer creates direct symlinks for the three public skills under `$HOME/.agents/skills/` and cleans same-repo links for merged old public skills. `--target global|codex|claude` only controls Codex/Claude configuration sync; without `--target`, interactive terminals prompt for a target and non-interactive runs default to the `codex` config target.
+The installer creates direct symlinks for the three public skills under `$HOME/.agents/skills/` and cleans same-repo links for merged old public skills. `--target global|codex|claude` only controls Codex/Claude configuration sync; without `--target`, interactive terminals prompt for a target and non-interactive runs default to the `codex` config target. `--uninstall` removes managed configuration for the selected target; only `--uninstall --target global` removes shared skill symlinks under `$HOME/.agents/skills` that point to this repository. Uninstall does not follow configuration symlinks and does not remove real skill directories, external symlinks, mixed user configuration, or legacy Codex skills paths.
 
 ## Usage examples
 

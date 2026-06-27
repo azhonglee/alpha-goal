@@ -513,6 +513,22 @@ function validateInstallSurface(root, contract, errors) {
   for (const term of ["--target", "global", "codex", "claude", "$HOME/.agents/skills", "templates/CLAUDE.md", "CLAUDE.md"]) {
     if (!install.includes(term)) errors.push(`scripts/install.sh missing multi-target install term: ${term}`);
   }
+  for (const term of [
+    "--uninstall",
+    "Uninstall target",
+    "remove_markdown_template",
+    "remove_config_template",
+    "remove_hooks_template",
+    "preflight_hooks_template",
+    "remove_installed_skill_link",
+    "Preserved symlinked",
+    "cmp -s",
+    "removeManagedHooks(data",
+    "uninstall_skill_removed_count",
+    "not-found",
+  ]) {
+    if (!install.includes(term)) errors.push(`scripts/install.sh missing uninstall safety term: ${term}`);
+  }
   if (install.includes("json.dumps(group") || install.includes("marker_family in group_text")) {
     errors.push("scripts/install.sh must not detect managed hooks via serialized JSON substring");
   }
@@ -568,8 +584,37 @@ function validateDocs(root, contract, errors) {
   for (const term of ["--target", "$HOME/.agents/skills", "templates/CLAUDE.md", "--no-sync-user-hooks", "templates/hooks.json", LEGACY_HOOK_MARKER, "temporary CODEX_HOME", FIXTURE_COMMAND]) {
     if (!installDoc.includes(term)) errors.push(`INSTALL.md missing install term: ${term}`);
   }
+  for (const term of [
+    "scripts/install.sh --uninstall --target global",
+    "scripts/install.sh --uninstall --target codex",
+    "scripts/install.sh --uninstall --target claude",
+    "configuration symlinks are not followed",
+    "byte-for-byte matches `templates/config.toml`",
+    "tmp_uninstall_global",
+    "tmp_uninstall_target",
+    "tmp_uninstall_noninteractive",
+    "tmp_uninstall_toml",
+    "tmp_uninstall_blank_toml",
+    "tmp_uninstall_safety",
+    "tmp_uninstall_skip",
+    "tmp_uninstall_invalid_hooks",
+    "config.toml preserved",
+    "--no-sync-user-templates",
+    "--no-sync-user-hooks",
+  ]) {
+    if (!installDoc.includes(term)) errors.push(`INSTALL.md missing uninstall term: ${term}`);
+  }
   const readme = readIfFile(path.join(root, "README.md"));
   const readmeEn = readIfFile(path.join(root, "README.en.md"));
+  const manifest = readIfFile(path.join(root, "MANIFEST.md"));
+  for (const term of ["--uninstall", "$HOME/.agents/skills", "配置 symlink", "legacy Codex skills"]) {
+    if (!readme.includes(term)) errors.push(`README.md missing uninstall boundary term: ${term}`);
+  }
+  for (const [rel, text] of [["README.en.md", readmeEn], ["MANIFEST.md", manifest]]) {
+    for (const term of ["--uninstall", "$HOME/.agents/skills", "configuration symlinks", "legacy Codex skills"]) {
+      if (!text.includes(term)) errors.push(`${rel} missing uninstall boundary term: ${term}`);
+    }
+  }
   for (const skill of contract.skills) {
     if (!readme.includes(`skills/${skill}/`)) errors.push(`README.md missing skill path: ${skill}`);
     if (!readmeEn.includes(`skills/${skill}/`)) errors.push(`README.en.md missing skill path: ${skill}`);

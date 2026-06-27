@@ -14,7 +14,7 @@ Former public framing/modeling/synthesis stages are folded into `skills/alpha-go
 
 | Path | Mutates state? | Purpose |
 |---|---:|---|
-| `scripts/install.sh` | Yes | Installs the three public skills as direct symlinks under `$HOME/.agents/skills`, cleans same-repo old skill links including migrated Codex skill symlinks, and syncs target-specific Codex/Claude user configuration without running skill validation. |
+| `scripts/install.sh` | Yes | Installs the three public skills as direct symlinks under `$HOME/.agents/skills`, cleans same-repo old skill links including migrated Codex skill symlinks during install, syncs target-specific Codex/Claude user configuration, and uninstalls managed target-specific artifacts without running skill validation. |
 | `tools/validate_skills.js` | No | Validates the shared contract, public-skill structure, references, word+punctuation budget, scripts, docs, fixtures, and schemas. |
 
 ## User Hooks
@@ -26,6 +26,8 @@ Hook replacement is by marker family, not exact version, so later `:v2` template
 ## User Templates
 
 `templates/AGENTS.md` and `templates/config.toml` are Codex user-level templates. `templates/CLAUDE.md` is the Claude user-level template written to `$HOME/.claude/CLAUDE.md`. `--target global` syncs both Codex and Claude configuration, `--target codex` syncs only Codex configuration, and `--target claude` syncs only Claude configuration. `--no-sync-user-templates` skips both Codex and Claude templates for the selected target; `--no-sync-user-hooks` skips only Codex hooks.
+
+`scripts/install.sh --uninstall` removes only managed artifacts for the selected target. `--target codex` removes managed Codex `AGENTS.md`, `config.toml` that byte-for-byte matches `templates/config.toml`, and managed hooks while preserving shared skills. `--target claude` removes managed Claude `CLAUDE.md` while preserving shared skills. `--target global` removes both Codex and Claude managed configuration plus this repository's skill symlinks under `$HOME/.agents/skills`. Uninstall preserves configuration symlinks, real skill directories, external symlinks, mixed user files, unmanaged hooks, and legacy Codex skills paths.
 
 ## Runtime Artifacts
 

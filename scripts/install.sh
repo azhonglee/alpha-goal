@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: scripts/install.sh [--target global|codex|claude] [--codex-home PATH] [--force] [--no-sync-user-templates] [--no-sync-user-hooks] [--verbose]
+Usage: scripts/install.sh [--uninstall] [--target global|codex|claude] [--codex-home PATH] [--force] [--no-sync-user-templates] [--no-sync-user-hooks] [--verbose]
 
 Install this repository's public skill directories as direct symlinks
 under $HOME/.agents/skills.
@@ -14,10 +14,15 @@ configuration target. Non-interactive runs default to the codex target.
 The global target syncs Codex and Claude configuration. The codex target syncs
 Codex AGENTS.md, config.toml, and hooks.json. The claude target syncs Claude
 CLAUDE.md. All targets install skills into $HOME/.agents/skills.
+With --uninstall, codex and claude targets remove only their managed
+configuration, while global also removes this repository's skill symlinks from
+$HOME/.agents/skills.
 Use --no-sync-user-templates to skip user-level template updates.
 Use --no-sync-user-hooks to skip Codex hook updates.
 
 Options:
+  --uninstall
+            Remove managed Alpha Goal install artifacts for the selected target.
   --target TARGET
             Select configuration target: global, codex, or claude.
   --codex-home PATH
@@ -45,6 +50,7 @@ die() {
 }
 
 force=false
+uninstall=false
 verbose=false
 sync_user_templates=true
 sync_user_hooks=true
@@ -85,6 +91,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --force)
       force=true
+      shift
+      ;;
+    --uninstall)
+      uninstall=true
       shift
       ;;
     --sync-user-templates)
@@ -227,7 +237,9 @@ Select configuration target:
   3. claude
 EOF
     printf 'Enter choice [1-3]: ' >&2
-    IFS= read -r choice
+    if ! IFS= read -r choice; then
+      die "No target selected"
+    fi
     case "$choice" in
       1|global)
         printf '%s\n' "global"
@@ -301,9 +313,18 @@ agents_action="skipped"
 claude_action="skipped"
 config_action="skipped"
 hooks_action="skipped"
+uninstall_skill_removed_count=0
+uninstall_skill_preserved_count=0
+uninstall_skill_missing_count=0
 
-if [[ "$sync_codex_config" == true && ( "$sync_user_templates" == true || "$sync_user_hooks" == true ) ]]; then
-  require_node_runtime
+if [[ "$sync_codex_config" == true ]]; then
+  if [[ "$uninstall" == true ]]; then
+    if [[ "$sync_user_hooks" == true ]]; then
+      require_node_runtime
+    fi
+  elif [[ "$sync_user_templates" == true || "$sync_user_hooks" == true ]]; then
+    require_node_runtime
+  fi
 fi
 
 resolve_link_target() {
@@ -414,6 +435,38 @@ remove_same_repo_skill_link_from_root() {
 
 remove_obsolete_skill_link() {
   remove_same_repo_skill_link_from_root "$target_root" "$1"
+}
+
+remove_installed_skill_link() {
+  local skill_name="$1"
+  local target="$target_root/$skill_name"
+
+  if [[ ! -e "$target" && ! -L "$target" ]]; then
+    uninstall_skill_missing_count=$((uninstall_skill_missing_count + 1))
+    log "Skill is not installed: $target"
+    return
+  fi
+
+  if [[ ! -L "$target" ]]; then
+    uninstall_skill_preserved_count=$((uninstall_skill_preserved_count + 1))
+    log "Preserved non-symlink skill path during uninstall: $target"
+    return
+  fi
+
+  local current_target
+  current_target="$(resolve_link_target "$target")"
+  local legacy_skillset_source=""
+  if [[ "$skill_name" == "alpha-goal" ]]; then
+    legacy_skillset_source="$source_skill_root"
+  fi
+  if [[ "$current_target" == "$source_skill_root/$skill_name" || "$current_target" == "$repo_root/$skill_name" || ( -n "$legacy_skillset_source" && "$current_target" == "$legacy_skillset_source" ) ]]; then
+    rm "$target"
+    uninstall_skill_removed_count=$((uninstall_skill_removed_count + 1))
+    log "Removed installed skill link: $target"
+  else
+    uninstall_skill_preserved_count=$((uninstall_skill_preserved_count + 1))
+    log "Preserved external skill symlink during uninstall: $target"
+  fi
 }
 
 remove_legacy_codex_skill_links() {
@@ -570,6 +623,119 @@ inject_agents_template() {
 
 inject_claude_template() {
   sync_markdown_template "$claude_template" "$claude_target" "$claude_template_marker" "CLAUDE.md"
+  claude_action="$markdown_template_action"
+}
+
+remove_markdown_template() {
+  local template_path="$1"
+  local target_path="$2"
+  local marker="$3"
+  local label="$4"
+  markdown_template_action=""
+
+  if [[ -L "$target_path" ]]; then
+    markdown_template_action="preserved"
+    log "Preserved symlinked $label during uninstall: $target_path"
+    return
+  fi
+
+  if [[ ! -e "$target_path" ]]; then
+    markdown_template_action="not-found"
+    log "$label is not installed: $target_path"
+    return
+  fi
+
+  if [[ ! -f "$target_path" ]]; then
+    markdown_template_action="preserved"
+    log "Preserved non-file $label during uninstall: $target_path"
+    return
+  fi
+
+  local result
+  result="$(python3 - "$template_path" "$target_path" "$marker" <<'PY'
+import sys
+from pathlib import Path
+
+template_path = Path(sys.argv[1])
+target_path = Path(sys.argv[2])
+marker = sys.argv[3]
+
+template = template_path.read_text()
+template_lines = template.splitlines()
+if not template_lines or marker not in template_lines:
+    print(f"Invalid managed template: {template_path}", file=sys.stderr)
+    raise SystemExit(1)
+
+block_start = template_lines[0]
+target = target_path.read_text()
+target_lines = target.splitlines(keepends=True)
+
+
+def logical(line: str) -> str:
+    return line.rstrip("\r\n")
+
+
+blocks = []
+index = 0
+while index < len(target_lines):
+    if logical(target_lines[index]) != block_start:
+        index += 1
+        continue
+
+    end = index
+    while end < len(target_lines):
+        if logical(target_lines[end]) == marker:
+            blocks.append((index, end + 1))
+            index = end + 1
+            break
+        end += 1
+    else:
+        index += 1
+
+if not blocks:
+    if marker in target:
+        print("preserved")
+    else:
+        print("current")
+    raise SystemExit(0)
+
+pieces = []
+cursor = 0
+for start, end in blocks:
+    pieces.extend(target_lines[cursor:start])
+    cursor = end
+pieces.extend(target_lines[cursor:])
+
+updated = "".join(pieces)
+if not updated.strip():
+    target_path.unlink()
+    print("removed")
+elif updated != target:
+    target_path.write_text(updated)
+    print("updated")
+else:
+    print("current")
+PY
+)"
+
+  case "$result" in
+    current|removed|updated|preserved)
+      markdown_template_action="$result"
+      log "Uninstall $label action: $result"
+      ;;
+    *)
+      die "Unexpected $label template uninstall result: $result"
+      ;;
+  esac
+}
+
+remove_agents_template() {
+  remove_markdown_template "$agents_template" "$agents_target" "$agents_template_marker" "AGENTS.md"
+  agents_action="$markdown_template_action"
+}
+
+remove_claude_template() {
+  remove_markdown_template "$claude_template" "$claude_target" "$claude_template_marker" "CLAUDE.md"
   claude_action="$markdown_template_action"
 }
 
@@ -732,6 +898,35 @@ JS
       die "Unexpected config template merge result: $result"
       ;;
   esac
+}
+
+remove_config_template() {
+  if [[ -L "$config_target" ]]; then
+    config_action="preserved"
+    log "Preserved symlinked config.toml during uninstall: $config_target"
+    return
+  fi
+
+  if [[ ! -e "$config_target" ]]; then
+    config_action="not-found"
+    log "config.toml is not installed: $config_target"
+    return
+  fi
+
+  if [[ ! -f "$config_target" ]]; then
+    config_action="preserved"
+    log "Preserved non-file config.toml during uninstall: $config_target"
+    return
+  fi
+
+  if cmp -s "$config_template" "$config_target"; then
+    rm "$config_target"
+    config_action="removed"
+    log "Removed template-only config.toml: $config_target"
+  else
+    config_action="preserved"
+    log "Preserved modified or mixed config.toml: $config_target"
+  fi
 }
 
 sync_hooks_template() {
@@ -920,6 +1115,179 @@ JS
   esac
 }
 
+remove_hooks_template() {
+  if [[ -L "$hooks_target" ]]; then
+    hooks_action="preserved"
+    log "Preserved symlinked hooks.json during uninstall: $hooks_target"
+    return
+  fi
+
+  if [[ ! -e "$hooks_target" ]]; then
+    hooks_action="not-found"
+    log "hooks.json is not installed: $hooks_target"
+    return
+  fi
+
+  if [[ ! -f "$hooks_target" ]]; then
+    hooks_action="preserved"
+    log "Preserved non-file hooks.json during uninstall: $hooks_target"
+    return
+  fi
+
+  local result
+  result="$(node - "$hooks_target" <<'JS'
+const fs = require("node:fs");
+const path = require("node:path");
+
+const [hooksArg] = process.argv.slice(2);
+const MANAGED_MARKER_RE = /^: 'codex-alpha-goal-compact-recovery:v[0-9]+';/;
+const LEGACY_MANAGED_MARKER_RE = /(^|[\s;'"])codex-compact-skill-recovery(?::v[0-9]+)?($|[\s;'"])/;
+
+function loadJson(file) {
+  try {
+    const data = JSON.parse(fs.readFileSync(file, "utf8"));
+    if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("top-level value must be an object");
+    return data;
+  } catch (error) {
+    console.error(`Invalid JSON in ${file}: ${error.message}`);
+    process.exit(1);
+  }
+}
+
+function managedHook(hook) {
+  if (!hook || typeof hook !== "object" || hook.type !== "command" || typeof hook.command !== "string") return false;
+  const command = hook.command.trimStart();
+  return MANAGED_MARKER_RE.test(command) || LEGACY_MANAGED_MARKER_RE.test(command);
+}
+
+function removeManagedHooks(data, hooksPath) {
+  if (!("hooks" in data)) return 0;
+  if (!data.hooks || typeof data.hooks !== "object" || Array.isArray(data.hooks)) {
+    console.error(`${hooksPath}: top-level hooks field must be a JSON object`);
+    process.exit(1);
+  }
+
+  let removed = 0;
+  for (const [event, groups] of Object.entries(data.hooks)) {
+    if (!Array.isArray(groups)) {
+      console.error(`${hooksPath}: hooks.${event} must be a JSON array`);
+      process.exit(1);
+    }
+
+    const nextGroups = [];
+    for (const group of groups) {
+      if (!group || typeof group !== "object" || !Array.isArray(group.hooks)) {
+        nextGroups.push(group);
+        continue;
+      }
+
+      const nextHooks = [];
+      for (const hook of group.hooks) {
+        if (managedHook(hook)) {
+          removed += 1;
+        } else {
+          nextHooks.push(hook);
+        }
+      }
+      if (nextHooks.length) nextGroups.push({ ...group, hooks: nextHooks });
+    }
+
+    if (nextGroups.length) {
+      data.hooks[event] = nextGroups;
+    } else {
+      delete data.hooks[event];
+    }
+  }
+  return removed;
+}
+
+function hasNonManagedContent(data) {
+  const keys = Object.keys(data);
+  const nonHookKeys = keys.filter(key => key !== "hooks");
+  if (nonHookKeys.length) return true;
+  if (!("hooks" in data)) return false;
+  if (!data.hooks || typeof data.hooks !== "object" || Array.isArray(data.hooks)) return true;
+  return Object.values(data.hooks).some(groups => Array.isArray(groups) && groups.length > 0);
+}
+
+const hooksPath = path.resolve(hooksArg);
+const original = fs.readFileSync(hooksPath, "utf8");
+const data = loadJson(hooksPath);
+const removed = removeManagedHooks(data, hooksPath);
+
+if (!removed) {
+  console.log("current");
+  process.exit(0);
+}
+
+if (!hasNonManagedContent(data)) {
+  fs.unlinkSync(hooksPath);
+  console.log("removed");
+  process.exit(0);
+}
+
+const nextText = `${JSON.stringify(data, null, 2)}\n`;
+if (nextText === original) {
+  console.log("current");
+  process.exit(0);
+}
+
+const tmpPath = `${hooksPath}.tmp`;
+fs.writeFileSync(tmpPath, nextText);
+fs.renameSync(tmpPath, hooksPath);
+console.log("updated");
+JS
+)"
+
+  case "$result" in
+    current|removed|updated)
+      hooks_action="$result"
+      log "Uninstall hooks.json action: $result"
+      ;;
+    *)
+      die "Unexpected hook template uninstall result: $result"
+      ;;
+  esac
+}
+
+preflight_hooks_template() {
+  if [[ -L "$hooks_target" || ! -e "$hooks_target" || ! -f "$hooks_target" ]]; then
+    return
+  fi
+
+  node - "$hooks_target" <<'JS' >/dev/null
+const fs = require("node:fs");
+const path = require("node:path");
+
+const [hooksArg] = process.argv.slice(2);
+
+function loadJson(file) {
+  try {
+    const data = JSON.parse(fs.readFileSync(file, "utf8"));
+    if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("top-level value must be an object");
+    return data;
+  } catch (error) {
+    console.error(`Invalid JSON in ${file}: ${error.message}`);
+    process.exit(1);
+  }
+}
+
+const hooksPath = path.resolve(hooksArg);
+const data = loadJson(hooksPath);
+if (!("hooks" in data)) process.exit(0);
+if (!data.hooks || typeof data.hooks !== "object" || Array.isArray(data.hooks)) {
+  console.error(`${hooksPath}: top-level hooks field must be a JSON object`);
+  process.exit(1);
+}
+for (const [event, groups] of Object.entries(data.hooks)) {
+  if (!Array.isArray(groups)) {
+    console.error(`${hooksPath}: hooks.${event} must be a JSON array`);
+    process.exit(1);
+  }
+}
+JS
+}
+
 print_summary() {
   local status="ready"
   if [[ "$linked_count" -gt 0 || "$replaced_count" -gt 0 || "$legacy_removed_count" -gt 0 ]]; then
@@ -938,6 +1306,58 @@ print_summary() {
   echo "Alpha Goal skills $status: $installed -> $target_root"
   echo "Install target: $install_target"
   echo "Skills root: $target_root"
+  if [[ "$sync_codex_config" == true ]]; then
+    echo "Codex home: $codex_home"
+  else
+    echo "Codex config: skipped (--target $install_target)"
+  fi
+  if [[ "$sync_claude_config" == true ]]; then
+    echo "Claude home: $claude_home"
+  else
+    echo "Claude config: skipped (--target $install_target)"
+  fi
+  if [[ "$sync_user_templates" == true ]]; then
+    if [[ "$sync_codex_config" == true ]]; then
+      echo "Codex templates: AGENTS.md $agents_action, config.toml $config_action"
+    else
+      echo "Codex templates: skipped (--target $install_target)"
+    fi
+    if [[ "$sync_claude_config" == true ]]; then
+      echo "Claude templates: CLAUDE.md $claude_action"
+    else
+      echo "Claude templates: skipped (--target $install_target)"
+    fi
+  else
+    echo "User templates: skipped (--no-sync-user-templates)"
+  fi
+  if [[ "$sync_codex_config" == true && "$sync_user_hooks" == true ]]; then
+    echo "User hooks: hooks.json $hooks_action"
+  elif [[ "$sync_codex_config" == true ]]; then
+    echo "User hooks: skipped (--no-sync-user-hooks)"
+  else
+    echo "User hooks: skipped (--target $install_target)"
+  fi
+}
+
+print_uninstall_summary() {
+  local status="ready"
+  if [[ "$uninstall_skill_removed_count" -gt 0 ]]; then
+    status="uninstalled"
+  fi
+  for action in "$agents_action" "$claude_action" "$config_action" "$hooks_action"; do
+    if [[ "$action" == "removed" || "$action" == "updated" ]]; then
+      status="uninstalled"
+    fi
+  done
+
+  echo "Alpha Goal uninstall $status"
+  echo "Uninstall target: $install_target"
+  echo "Skills root: $target_root"
+  if [[ "$install_target" == "global" ]]; then
+    echo "Skills: removed $uninstall_skill_removed_count, preserved $uninstall_skill_preserved_count, not-found $uninstall_skill_missing_count"
+  else
+    echo "Skills: skipped (--target $install_target)"
+  fi
   if [[ "$sync_codex_config" == true ]]; then
     echo "Codex home: $codex_home"
   else
@@ -1000,6 +1420,48 @@ for skill_name in "${required_skills[@]}"; do
   fi
   skill_files+=("$skill_file")
 done
+
+if [[ "$uninstall" == true ]]; then
+  if [[ "$sync_codex_config" == true && "$sync_user_hooks" == true ]]; then
+    preflight_hooks_template
+  fi
+
+  if [[ "$sync_codex_config" == true && "$sync_user_templates" == true ]]; then
+    remove_agents_template
+    remove_config_template
+  elif [[ "$sync_codex_config" == true ]]; then
+    log "Skipped Codex user template cleanup due to --no-sync-user-templates"
+  else
+    log "Skipped Codex user template cleanup due to --target $install_target"
+  fi
+
+  if [[ "$sync_codex_config" == true && "$sync_user_hooks" == true ]]; then
+    remove_hooks_template
+  elif [[ "$sync_codex_config" == true ]]; then
+    log "Skipped user hook cleanup due to --no-sync-user-hooks"
+  else
+    log "Skipped user hook cleanup due to --target $install_target"
+  fi
+
+  if [[ "$sync_claude_config" == true && "$sync_user_templates" == true ]]; then
+    remove_claude_template
+  elif [[ "$sync_claude_config" == true ]]; then
+    log "Skipped Claude user template cleanup due to --no-sync-user-templates"
+  else
+    log "Skipped Claude user template cleanup due to --target $install_target"
+  fi
+
+  if [[ "$install_target" == "global" ]]; then
+    for skill_name in "${required_skills[@]}"; do
+      remove_installed_skill_link "$skill_name"
+    done
+  else
+    log "Skipped shared skill cleanup due to --target $install_target"
+  fi
+
+  print_uninstall_summary
+  exit 0
+fi
 
 mkdir -p "$target_root"
 

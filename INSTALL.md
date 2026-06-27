@@ -24,6 +24,9 @@ CODEX_HOME=/path/to/codex-home scripts/install.sh
 scripts/install.sh --target global
 scripts/install.sh --target codex
 scripts/install.sh --target claude
+scripts/install.sh --uninstall --target global
+scripts/install.sh --uninstall --target codex
+scripts/install.sh --uninstall --target claude
 scripts/install.sh --force
 scripts/install.sh --no-sync-user-templates
 scripts/install.sh --no-sync-user-hooks
@@ -39,6 +42,10 @@ The script creates `$HOME/.agents/skills/<skill-name>` links for required public
 - `claude`: sync Claude `CLAUDE.md` only.
 
 Without `--target`, an interactive terminal prompts for `global`, `codex`, or `claude`; non-interactive runs default to `codex`. Codex config uses `${CODEX_HOME:-$HOME/.codex}` or `--codex-home`. Claude config uses `$HOME/.claude/CLAUDE.md` from `templates/CLAUDE.md`.
+
+Use `--uninstall` to remove managed install artifacts for the selected target. `--uninstall --target codex` removes only managed Codex configuration and keeps shared `$HOME/.agents/skills` links. `--uninstall --target claude` removes only managed Claude `CLAUDE.md` content and keeps shared skills. `--uninstall --target global` removes managed Codex and Claude configuration plus this repository's skill symlinks under `$HOME/.agents/skills`. Uninstall does not remove legacy `${CODEX_HOME:-$HOME/.codex}/skills` paths.
+
+Uninstall is conservative. It removes only managed Markdown blocks, managed hooks, `config.toml` that byte-for-byte matches `templates/config.toml`, and skill symlinks that resolve to this repository. Mixed user Markdown keeps user content, mixed or modified `config.toml` is preserved, unmanaged hooks are preserved, configuration symlinks are not followed or deleted, and real skill directories or external symlinks are preserved. `--no-sync-user-templates` skips Markdown and `config.toml` cleanup; `--no-sync-user-hooks` skips hooks cleanup.
 
 The compact recovery hook definition lives in `templates/hooks.json`. It is a `SessionStart` hook for `compact` starts and prints a static policy telling Codex to decide whether `alpha-goal`, `control-loop`, or `goal-verify` applies after compaction, and to load the matching skill before continuing. For active Alpha Goal tasks, it resumes from draft or accepted `goal-contract.md` first and reads `technical_design.md` with the Goal Contract when it exists; accepted status gates only `control-loop` execution handoff. `goal-verify` covers evidence, claim boundary, defect/risk sweep, and material unclaimed issues. Use `--no-sync-user-templates` to skip Codex AGENTS/config and Claude CLAUDE template updates. Use `--no-sync-user-hooks` to skip Codex hook template updates.
 
@@ -149,9 +156,96 @@ test ! -e "$tmp_migration/.codex/skills/alpha-goal"
 test ! -e "$tmp_migration/.codex/skills/control-loop"
 test -L "$tmp_migration/.codex/skills/external-skill"
 
+tmp_uninstall_global="$(mktemp -d)"
+HOME="$tmp_uninstall_global" CODEX_HOME="$tmp_uninstall_global/.codex" scripts/install.sh --target global
+HOME="$tmp_uninstall_global" CODEX_HOME="$tmp_uninstall_global/.codex" scripts/install.sh --uninstall --target global
+for skill in alpha-goal control-loop goal-verify; do
+  test ! -e "$tmp_uninstall_global/.agents/skills/$skill"
+done
+test ! -e "$tmp_uninstall_global/.codex/AGENTS.md"
+test ! -e "$tmp_uninstall_global/.codex/config.toml"
+test ! -e "$tmp_uninstall_global/.codex/hooks.json"
+test ! -e "$tmp_uninstall_global/.claude/CLAUDE.md"
+
+tmp_uninstall_target="$(mktemp -d)"
+HOME="$tmp_uninstall_target" CODEX_HOME="$tmp_uninstall_target/.codex" scripts/install.sh --target global
+HOME="$tmp_uninstall_target" CODEX_HOME="$tmp_uninstall_target/.codex" scripts/install.sh --uninstall --target codex
+test -f "$tmp_uninstall_target/.agents/skills/alpha-goal/SKILL.md"
+test -f "$tmp_uninstall_target/.claude/CLAUDE.md"
+test ! -e "$tmp_uninstall_target/.codex/AGENTS.md"
+test ! -e "$tmp_uninstall_target/.codex/config.toml"
+test ! -e "$tmp_uninstall_target/.codex/hooks.json"
+HOME="$tmp_uninstall_target" CODEX_HOME="$tmp_uninstall_target/.codex" scripts/install.sh --uninstall --target claude
+test -f "$tmp_uninstall_target/.agents/skills/alpha-goal/SKILL.md"
+test ! -e "$tmp_uninstall_target/.claude/CLAUDE.md"
+
+tmp_uninstall_noninteractive="$(mktemp -d)"
+HOME="$tmp_uninstall_noninteractive" CODEX_HOME="$tmp_uninstall_noninteractive/.codex" scripts/install.sh --target global
+HOME="$tmp_uninstall_noninteractive" CODEX_HOME="$tmp_uninstall_noninteractive/.codex" scripts/install.sh --uninstall </dev/null
+test -f "$tmp_uninstall_noninteractive/.agents/skills/alpha-goal/SKILL.md"
+test -f "$tmp_uninstall_noninteractive/.claude/CLAUDE.md"
+test ! -e "$tmp_uninstall_noninteractive/.codex/AGENTS.md"
+
+tmp_uninstall_toml="$(mktemp -d)"
+HOME="$tmp_uninstall_toml" CODEX_HOME="$tmp_uninstall_toml/.codex" scripts/install.sh --target codex
+printf '\n# user edit\n' >>"$tmp_uninstall_toml/.codex/config.toml"
+out="$(HOME="$tmp_uninstall_toml" CODEX_HOME="$tmp_uninstall_toml/.codex" scripts/install.sh --uninstall --target codex)"
+grep -q "config.toml preserved" <<<"$out"
+test -f "$tmp_uninstall_toml/.codex/config.toml"
+
+tmp_uninstall_blank_toml="$(mktemp -d)"
+mkdir -p "$tmp_uninstall_blank_toml/.codex"
+: >"$tmp_uninstall_blank_toml/.codex/config.toml"
+HOME="$tmp_uninstall_blank_toml" CODEX_HOME="$tmp_uninstall_blank_toml/.codex" scripts/install.sh --target codex
+out="$(HOME="$tmp_uninstall_blank_toml" CODEX_HOME="$tmp_uninstall_blank_toml/.codex" scripts/install.sh --uninstall --target codex)"
+grep -q "config.toml preserved" <<<"$out"
+test -f "$tmp_uninstall_blank_toml/.codex/config.toml"
+
+tmp_uninstall_safety="$(mktemp -d)"
+mkdir -p "$tmp_uninstall_safety/external"
+HOME="$tmp_uninstall_safety" CODEX_HOME="$tmp_uninstall_safety/.codex" scripts/install.sh --target global
+rm "$tmp_uninstall_safety/.agents/skills/control-loop"
+mkdir -p "$tmp_uninstall_safety/.agents/skills/control-loop"
+rm "$tmp_uninstall_safety/.agents/skills/goal-verify"
+ln -s "$tmp_uninstall_safety/external" "$tmp_uninstall_safety/.agents/skills/goal-verify"
+mv "$tmp_uninstall_safety/.codex/config.toml" "$tmp_uninstall_safety/external/config.toml"
+ln -s "$tmp_uninstall_safety/external/config.toml" "$tmp_uninstall_safety/.codex/config.toml"
+ln -sf "$tmp_uninstall_safety/external/AGENTS.md" "$tmp_uninstall_safety/.codex/AGENTS.md"
+ln -sf "$tmp_uninstall_safety/external/hooks.json" "$tmp_uninstall_safety/.codex/hooks.json"
+ln -sf "$tmp_uninstall_safety/external/CLAUDE.md" "$tmp_uninstall_safety/.claude/CLAUDE.md"
+out="$(HOME="$tmp_uninstall_safety" CODEX_HOME="$tmp_uninstall_safety/.codex" scripts/install.sh --uninstall --target global)"
+grep -q "config.toml preserved" <<<"$out"
+test -L "$tmp_uninstall_safety/.codex/AGENTS.md"
+test -L "$tmp_uninstall_safety/.codex/config.toml"
+test -L "$tmp_uninstall_safety/.codex/hooks.json"
+test -L "$tmp_uninstall_safety/.claude/CLAUDE.md"
+test -d "$tmp_uninstall_safety/.agents/skills/control-loop"
+test -L "$tmp_uninstall_safety/.agents/skills/goal-verify"
+
+tmp_uninstall_skip="$(mktemp -d)"
+HOME="$tmp_uninstall_skip" CODEX_HOME="$tmp_uninstall_skip/.codex" scripts/install.sh --target global
+HOME="$tmp_uninstall_skip" CODEX_HOME="$tmp_uninstall_skip/.codex" scripts/install.sh --uninstall --target global --no-sync-user-templates --no-sync-user-hooks
+test -f "$tmp_uninstall_skip/.codex/AGENTS.md"
+test -f "$tmp_uninstall_skip/.codex/config.toml"
+test -f "$tmp_uninstall_skip/.codex/hooks.json"
+test -f "$tmp_uninstall_skip/.claude/CLAUDE.md"
+
+tmp_uninstall_invalid_hooks="$(mktemp -d)"
+HOME="$tmp_uninstall_invalid_hooks" CODEX_HOME="$tmp_uninstall_invalid_hooks/.codex" scripts/install.sh --target codex
+printf '{invalid' >"$tmp_uninstall_invalid_hooks/.codex/hooks.json"
+if HOME="$tmp_uninstall_invalid_hooks" CODEX_HOME="$tmp_uninstall_invalid_hooks/.codex" scripts/install.sh --uninstall --target codex; then
+  echo "expected invalid hooks uninstall to fail" >&2
+  exit 1
+fi
+grep -q '{invalid' "$tmp_uninstall_invalid_hooks/.codex/hooks.json"
+test -f "$tmp_uninstall_invalid_hooks/.codex/AGENTS.md"
+test -f "$tmp_uninstall_invalid_hooks/.codex/config.toml"
+
+HOME="$tmp_uninstall_global" CODEX_HOME="$tmp_uninstall_global/.codex" scripts/install.sh --uninstall --target global
+
 node tools/validate_skills.js .
 node tools/validate_skills.js --fixtures
-rm -rf "$tmp_home" "$tmp_codex_only" "$tmp_claude_only" "$tmp_noninteractive" "$tmp_skip" "$tmp_migration"
+rm -rf "$tmp_home" "$tmp_codex_only" "$tmp_claude_only" "$tmp_noninteractive" "$tmp_skip" "$tmp_migration" "$tmp_uninstall_global" "$tmp_uninstall_target" "$tmp_uninstall_noninteractive" "$tmp_uninstall_toml" "$tmp_uninstall_blank_toml" "$tmp_uninstall_safety" "$tmp_uninstall_skip" "$tmp_uninstall_invalid_hooks"
 ```
 
 ## Prompts
