@@ -73,7 +73,7 @@ bash ./scripts/install.sh
 node tools/validate_skills.js .
 ```
 
-安装脚本会在 `$HOME/.codex/skills/` 下为三个公开技能创建直接软链接，并清理指向本仓库旧公开技能的软链接。
+安装脚本会在 `$HOME/.agents/skills/` 下为三个公开技能创建直接软链接，并清理指向本仓库旧公开技能的软链接。`--target global|codex|claude` 只控制 Codex/Claude 配置同步范围；不传 `--target` 时，交互终端会提示选择，非交互调用默认使用 `codex` 配置同步范围。
 
 ## 使用示例
 

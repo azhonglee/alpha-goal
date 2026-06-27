@@ -3,24 +3,32 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: scripts/install.sh [--codex-home PATH] [--force] [--no-sync-user-templates] [--no-sync-user-hooks] [--verbose]
+Usage: scripts/install.sh [--target global|codex|claude] [--codex-home PATH] [--force] [--no-sync-user-templates] [--no-sync-user-hooks] [--verbose]
 
 Install this repository's public skill directories as direct symlinks
-under ${CODEX_HOME:-$HOME/.codex}/skills.
+under $HOME/.agents/skills.
 
-By default, this script merges templates/AGENTS.md into user-level AGENTS.md,
-fills missing config.toml settings from templates/config.toml, and syncs
-templates/hooks.json into user-level hooks.json.
+When no target is passed, interactive terminals are prompted to choose a
+configuration target. Non-interactive runs default to the codex target.
+
+The global target syncs Codex and Claude configuration. The codex target syncs
+Codex AGENTS.md, config.toml, and hooks.json. The claude target syncs Claude
+CLAUDE.md. All targets install skills into $HOME/.agents/skills.
 Use --no-sync-user-templates to skip user-level template updates.
-Use --no-sync-user-hooks to skip hook updates.
+Use --no-sync-user-hooks to skip Codex hook updates.
 
 Options:
+  --target TARGET
+            Select configuration target: global, codex, or claude.
   --codex-home PATH
-            Install into PATH instead of ${CODEX_HOME:-$HOME/.codex}.
+            Sync Codex configuration into PATH instead of
+            ${CODEX_HOME:-$HOME/.codex}. Skills still install into
+            $HOME/.agents/skills.
   --force   Replace existing symlinks that point elsewhere. Real files or
             directories are never removed.
   --no-sync-user-templates
-            Skip updating Codex home AGENTS.md and config.toml from templates/.
+            Skip updating Codex AGENTS.md/config.toml and Claude CLAUDE.md
+            from templates/.
   --sync-user-templates
             Compatibility no-op; user templates are synced by default.
   --no-sync-user-hooks
@@ -41,6 +49,7 @@ verbose=false
 sync_user_templates=true
 sync_user_hooks=true
 codex_home_arg=""
+install_target_arg=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -50,6 +59,21 @@ while [[ $# -gt 0 ]]; do
         die "Missing value for --codex-home"
       fi
       codex_home_arg="$1"
+      shift
+      ;;
+    --target)
+      shift
+      if [[ $# -eq 0 ]]; then
+        die "Missing value for --target"
+      fi
+      install_target_arg="$1"
+      shift
+      ;;
+    --target=*)
+      install_target_arg="${1#*=}"
+      if [[ -z "$install_target_arg" ]]; then
+        die "Missing value for --target"
+      fi
       shift
       ;;
     --codex-home=*)
@@ -167,24 +191,118 @@ default_codex_home() {
   printf '%s\n' "$HOME/.codex"
 }
 
+default_skills_root() {
+  if [[ -z "${HOME:-}" ]]; then
+    die "HOME is unavailable; cannot resolve \$HOME/.agents/skills"
+  fi
+
+  printf '%s\n' "$HOME/.agents/skills"
+}
+
+default_claude_home() {
+  if [[ -z "${HOME:-}" ]]; then
+    die "HOME is unavailable; cannot resolve \$HOME/.claude"
+  fi
+
+  printf '%s\n' "$HOME/.claude"
+}
+
+validate_install_target() {
+  case "$1" in
+    global|codex|claude)
+      ;;
+    *)
+      die "Invalid --target value: $1 (expected global, codex, or claude)"
+      ;;
+  esac
+}
+
+prompt_install_target() {
+  local choice
+  while true; do
+    cat >&2 <<'EOF'
+Select configuration target:
+  1. global (Codex + Claude)
+  2. codex
+  3. claude
+EOF
+    printf 'Enter choice [1-3]: ' >&2
+    IFS= read -r choice
+    case "$choice" in
+      1|global)
+        printf '%s\n' "global"
+        return
+        ;;
+      2|codex)
+        printf '%s\n' "codex"
+        return
+        ;;
+      3|claude)
+        printf '%s\n' "claude"
+        return
+        ;;
+      *)
+        echo "Invalid choice: $choice" >&2
+        ;;
+    esac
+  done
+}
+
+resolve_install_target() {
+  if [[ -n "$install_target_arg" ]]; then
+    validate_install_target "$install_target_arg"
+    printf '%s\n' "$install_target_arg"
+    return
+  fi
+
+  if [[ -t 0 ]]; then
+    prompt_install_target
+    return
+  fi
+
+  printf '%s\n' "codex"
+}
+
+install_target="$(resolve_install_target)"
+sync_codex_config=false
+sync_claude_config=false
+case "$install_target" in
+  global)
+    sync_codex_config=true
+    sync_claude_config=true
+    ;;
+  codex)
+    sync_codex_config=true
+    ;;
+  claude)
+    sync_claude_config=true
+    ;;
+esac
+
 codex_home="$(absolute_path "$(default_codex_home)")"
-target_root="$codex_home/skills"
+target_root="$(absolute_path "$(default_skills_root)")"
+claude_home="$(absolute_path "$(default_claude_home)")"
 agents_template="$repo_root/templates/AGENTS.md"
+claude_template="$repo_root/templates/CLAUDE.md"
 config_template="$repo_root/templates/config.toml"
 hooks_template="$repo_root/templates/hooks.json"
 agents_target="$codex_home/AGENTS.md"
+claude_target="$claude_home/CLAUDE.md"
 config_target="$codex_home/config.toml"
 hooks_target="$codex_home/hooks.json"
+legacy_codex_skill_root="$codex_home/skills"
 agents_template_marker="<!-- generate-with-template:agents-md -->"
+claude_template_marker="<!-- generate-with-template:claude-md -->"
 linked_count=0
 replaced_count=0
 already_count=0
 legacy_removed_count=0
 agents_action="skipped"
+claude_action="skipped"
 config_action="skipped"
 hooks_action="skipped"
 
-if [[ "$sync_user_templates" == true || "$sync_user_hooks" == true ]]; then
+if [[ "$sync_codex_config" == true && ( "$sync_user_templates" == true || "$sync_user_hooks" == true ) ]]; then
   require_node_runtime
 fi
 
@@ -249,10 +367,11 @@ link_path() {
   fi
 }
 
-remove_legacy_support_link() {
-  local support_name="$1"
+remove_legacy_support_link_from_root() {
+  local root="$1"
+  local support_name="$2"
   local legacy_source="$repo_root/$support_name"
-  local target="$target_root/$support_name"
+  local target="$root/$support_name"
 
   if [[ ! -L "$target" ]]; then
     return
@@ -267,9 +386,14 @@ remove_legacy_support_link() {
   fi
 }
 
-remove_obsolete_skill_link() {
-  local skill_name="$1"
-  local target="$target_root/$skill_name"
+remove_legacy_support_link() {
+  remove_legacy_support_link_from_root "$target_root" "$1"
+}
+
+remove_same_repo_skill_link_from_root() {
+  local root="$1"
+  local skill_name="$2"
+  local target="$root/$skill_name"
 
   if [[ ! -L "$target" ]]; then
     return
@@ -277,51 +401,86 @@ remove_obsolete_skill_link() {
 
   local current_target
   current_target="$(resolve_link_target "$target")"
-  if [[ "$current_target" == "$source_skill_root/$skill_name" || "$current_target" == "$repo_root/$skill_name" ]]; then
+  local legacy_skillset_source=""
+  if [[ "$skill_name" == "alpha-goal" ]]; then
+    legacy_skillset_source="$source_skill_root"
+  fi
+  if [[ "$current_target" == "$source_skill_root/$skill_name" || "$current_target" == "$repo_root/$skill_name" || ( -n "$legacy_skillset_source" && "$current_target" == "$legacy_skillset_source" ) ]]; then
     rm "$target"
     legacy_removed_count=$((legacy_removed_count + 1))
     log "Removed obsolete skill link: $target"
   fi
 }
 
-inject_agents_template() {
+remove_obsolete_skill_link() {
+  remove_same_repo_skill_link_from_root "$target_root" "$1"
+}
+
+remove_legacy_codex_skill_links() {
+  if [[ "$legacy_codex_skill_root" == "$target_root" || ! -d "$legacy_codex_skill_root" ]]; then
+    return
+  fi
+
+  for skill_name in "${required_skills[@]}"; do
+    remove_same_repo_skill_link_from_root "$legacy_codex_skill_root" "$skill_name"
+  done
+
+  for support_name in adapters tools templates scripts; do
+    remove_legacy_support_link_from_root "$legacy_codex_skill_root" "$support_name"
+  done
+
+  for obsolete_skill in evidence-verify goal-contract system-model decision-synthesis control-kernel loop verify meta-synthesis goal-frame goal-loop goal-iterate goal-review; do
+    remove_same_repo_skill_link_from_root "$legacy_codex_skill_root" "$obsolete_skill"
+  done
+}
+
+markdown_template_action=""
+
+sync_markdown_template() {
+  local template_path="$1"
+  local target_path="$2"
+  local marker="$3"
+  local label="$4"
   local template_content
-  template_content="$(<"$agents_template")"
+  template_content="$(<"$template_path")"
+  markdown_template_action=""
 
-  if [[ -e "$agents_target" && ! -f "$agents_target" ]]; then
-    echo "Refusing to write AGENTS template into non-file path: $agents_target" >&2
+  if [[ -e "$target_path" && ! -f "$target_path" ]]; then
+    echo "Refusing to write $label template into non-file path: $target_path" >&2
     exit 1
   fi
 
-  if [[ "$template_content" != *"$agents_template_marker"* ]]; then
-    echo "AGENTS template is missing required marker: $agents_template_marker" >&2
+  if [[ "$template_content" != *"$marker"* ]]; then
+    echo "$label template is missing required marker: $marker" >&2
     exit 1
   fi
 
-  if [[ ! -f "$agents_target" ]]; then
-    cp "$agents_template" "$agents_target"
-    agents_action="created"
-    log "Created AGENTS.md from template: $agents_target"
+  mkdir -p "$(dirname "$target_path")"
+
+  if [[ ! -f "$target_path" ]]; then
+    cp "$template_path" "$target_path"
+    markdown_template_action="created"
+    log "Created $label from template: $target_path"
     return
   fi
 
   local existing_content
-  existing_content="$(<"$agents_target")"
+  existing_content="$(<"$target_path")"
 
-  if [[ "$existing_content" != *"$agents_template_marker"* ]]; then
+  if [[ "$existing_content" != *"$marker"* ]]; then
     {
-      if [[ -s "$agents_target" ]]; then
+      if [[ -s "$target_path" ]]; then
         printf '\n\n'
       fi
-      cat "$agents_template"
-    } >>"$agents_target"
-    agents_action="updated"
-    log "Injected AGENTS template into $agents_target"
+      cat "$template_path"
+    } >>"$target_path"
+    markdown_template_action="updated"
+    log "Injected $label template into $target_path"
     return
   fi
 
   local result
-  result="$(python3 - "$agents_template" "$agents_target" "$agents_template_marker" <<'PY'
+  result="$(python3 - "$template_path" "$target_path" "$marker" <<'PY'
 import sys
 from pathlib import Path
 
@@ -391,17 +550,27 @@ PY
 
   case "$result" in
     current)
-      agents_action="current"
-      log "AGENTS.md already has current managed template content: $agents_target"
+      markdown_template_action="current"
+      log "$label already has current managed template content: $target_path"
       ;;
     updated)
-      agents_action="updated"
-      log "Updated managed AGENTS template content in $agents_target"
+      markdown_template_action="updated"
+      log "Updated managed $label template content in $target_path"
       ;;
     *)
-      die "Unexpected AGENTS template merge result: $result"
+      die "Unexpected $label template merge result: $result"
       ;;
   esac
+}
+
+inject_agents_template() {
+  sync_markdown_template "$agents_template" "$agents_target" "$agents_template_marker" "AGENTS.md"
+  agents_action="$markdown_template_action"
+}
+
+inject_claude_template() {
+  sync_markdown_template "$claude_template" "$claude_target" "$claude_template_marker" "CLAUDE.md"
+  claude_action="$markdown_template_action"
 }
 
 sync_config_template() {
@@ -756,28 +925,53 @@ print_summary() {
   if [[ "$linked_count" -gt 0 || "$replaced_count" -gt 0 || "$legacy_removed_count" -gt 0 ]]; then
     status="installed"
   fi
-  if [[ "$sync_user_templates" == true && ( "$agents_action" != "current" || "$config_action" != "current" ) ]]; then
+  if [[ "$sync_codex_config" == true && "$sync_user_templates" == true && ( "$agents_action" != "current" || "$config_action" != "current" ) ]]; then
     status="installed"
   fi
-  if [[ "$sync_user_hooks" == true && "$hooks_action" != "current" ]]; then
+  if [[ "$sync_claude_config" == true && "$sync_user_templates" == true && "$claude_action" != "current" ]]; then
+    status="installed"
+  fi
+  if [[ "$sync_codex_config" == true && "$sync_user_hooks" == true && "$hooks_action" != "current" ]]; then
     status="installed"
   fi
 
   echo "Alpha Goal skills $status: $installed -> $target_root"
-  echo "Codex home: $codex_home"
+  echo "Install target: $install_target"
+  echo "Skills root: $target_root"
+  if [[ "$sync_codex_config" == true ]]; then
+    echo "Codex home: $codex_home"
+  else
+    echo "Codex config: skipped (--target $install_target)"
+  fi
+  if [[ "$sync_claude_config" == true ]]; then
+    echo "Claude home: $claude_home"
+  else
+    echo "Claude config: skipped (--target $install_target)"
+  fi
   if [[ "$sync_user_templates" == true ]]; then
-    echo "User templates: AGENTS.md $agents_action, config.toml $config_action"
+    if [[ "$sync_codex_config" == true ]]; then
+      echo "Codex templates: AGENTS.md $agents_action, config.toml $config_action"
+    else
+      echo "Codex templates: skipped (--target $install_target)"
+    fi
+    if [[ "$sync_claude_config" == true ]]; then
+      echo "Claude templates: CLAUDE.md $claude_action"
+    else
+      echo "Claude templates: skipped (--target $install_target)"
+    fi
   else
     echo "User templates: skipped (--no-sync-user-templates)"
   fi
-  if [[ "$sync_user_hooks" == true ]]; then
+  if [[ "$sync_codex_config" == true && "$sync_user_hooks" == true ]]; then
     echo "User hooks: hooks.json $hooks_action"
-  else
+  elif [[ "$sync_codex_config" == true ]]; then
     echo "User hooks: skipped (--no-sync-user-hooks)"
+  else
+    echo "User hooks: skipped (--target $install_target)"
   fi
 }
 
-if [[ "$sync_user_templates" == true ]]; then
+if [[ "$sync_codex_config" == true && "$sync_user_templates" == true ]]; then
   if [[ ! -f "$agents_template" ]]; then
     echo "No AGENTS template found at $agents_template" >&2
     exit 1
@@ -785,6 +979,13 @@ if [[ "$sync_user_templates" == true ]]; then
 
   if [[ ! -f "$config_template" ]]; then
     echo "No config template found at $config_template" >&2
+    exit 1
+  fi
+fi
+
+if [[ "$sync_claude_config" == true && "$sync_user_templates" == true ]]; then
+  if [[ ! -f "$claude_template" ]]; then
+    echo "No CLAUDE template found at $claude_template" >&2
     exit 1
   fi
 fi
@@ -800,13 +1001,25 @@ for skill_name in "${required_skills[@]}"; do
   skill_files+=("$skill_file")
 done
 
-mkdir -p "$codex_home" "$target_root"
+mkdir -p "$target_root"
 
-if [[ "$sync_user_templates" == true ]]; then
+if [[ "$sync_codex_config" == true && "$sync_user_templates" == true ]]; then
+  mkdir -p "$codex_home"
   inject_agents_template
   sync_config_template
+elif [[ "$sync_codex_config" == true ]]; then
+  log "Skipped Codex user template sync due to --no-sync-user-templates"
 else
-  log "Skipped user template sync due to --no-sync-user-templates"
+  log "Skipped Codex user template sync due to --target $install_target"
+fi
+
+if [[ "$sync_claude_config" == true && "$sync_user_templates" == true ]]; then
+  mkdir -p "$claude_home"
+  inject_claude_template
+elif [[ "$sync_claude_config" == true ]]; then
+  log "Skipped Claude user template sync due to --no-sync-user-templates"
+else
+  log "Skipped Claude user template sync due to --target $install_target"
 fi
 
 installed=0
@@ -825,10 +1038,14 @@ for obsolete_skill in evidence-verify goal-contract system-model decision-synthe
   remove_obsolete_skill_link "$obsolete_skill"
 done
 
-if [[ "$sync_user_hooks" == true ]]; then
+remove_legacy_codex_skill_links
+
+if [[ "$sync_codex_config" == true && "$sync_user_hooks" == true ]]; then
   sync_hooks_template
-else
+elif [[ "$sync_codex_config" == true ]]; then
   log "Skipped user hook sync due to --no-sync-user-hooks"
+else
+  log "Skipped user hook sync due to --target $install_target"
 fi
 
 print_summary
