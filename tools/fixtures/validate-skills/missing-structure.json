@@ -4,7 +4,7 @@
   "replacements": [
     {
       "file": "skills/alpha-goal/SKILL.md",
-      "search": "| Validation plan | ... |\n",
+      "search": "| Key design decisions | ... |\n",
       "replace": ""
     }
   ]

@@ -116,10 +116,7 @@
     "Goal",
     "Non-goals",
     "Execution boundary",
-    "Key design decisions",
-    "Acceptance evidence",
-    "Risks / non-material uncertainties",
-    "Validation plan"
+    "Key design decisions"
   ],
   "checkedFiles": [
     "skills/alpha-goal/SKILL.md",

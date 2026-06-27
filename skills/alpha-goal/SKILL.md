@@ -173,7 +173,7 @@ After Review Gate completes, present the Goal Contract Summary first.
   2. Review Record
   3. Approval choices: approve / refine / reject
 - Do not call `request_user_input` before showing the summary and Review Record.
-- The approval request message must include, in order: Goal Contract Summary, Review Record, then approve/refine/reject prompt.
+- The approval request message must include, in order: Goal Contract Summary, Review Record
 - If the summary or Review Record is missing or incomplete, stay in Review Gate.
 - TUI Presentation Style:
 ```markdown
@@ -184,9 +184,6 @@ Goal Contract Summary (Design Summary)
 | Non-goals | ... |
 | Execution boundary | ... |
 | Key design decisions | ... |
-| Acceptance evidence | ... |
-| Risks / non-material uncertainties | ... |
-| Validation plan | ... |
 ```
 
 ## Confirmation Gate
