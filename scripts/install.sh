@@ -227,28 +227,86 @@ validate_install_target() {
   esac
 }
 
+menu_rendered_rows=0
+
+menu_supports_color() {
+  [[ -t 2 && -z "${NO_COLOR:-}" && "${TERM:-}" != "dumb" ]]
+}
+
 render_install_target_menu() {
   local selected="$1"
-  local labels=("global (Codex + Claude)" "codex" "claude")
-  local index
+  local skills_root="$2"
+  local operation="Install"
+  local reset="" bold="" dim="" cyan="" green="" yellow=""
+  local marker label summary index
+  local labels=("global" "codex" "claude")
+  local summaries=("Codex + Claude" "Codex only (recommended)" "Claude only")
+  local details=(
+    "Updates Codex AGENTS.md/config.toml/hooks.json and Claude CLAUDE.md"
+    "Updates Codex AGENTS.md/config.toml/hooks.json"
+    "Updates Claude CLAUDE.md"
+  )
 
-  printf '\r\033[KSelect configuration target:\n' >&2
+  if [[ "$uninstall" == true ]]; then
+    operation="Uninstall"
+    details=(
+      "Removes managed Codex + Claude config and this repo's shared skill links"
+      "Removes managed Codex config; shared skills stay installed"
+      "Removes managed Claude config; shared skills stay installed"
+    )
+  fi
+
+  if menu_supports_color; then
+    reset=$'\033[0m'
+    bold=$'\033[1m'
+    dim=$'\033[2m'
+    cyan=$'\033[36m'
+    green=$'\033[32m'
+    yellow=$'\033[33m'
+  fi
+
+  menu_rendered_rows=0
+  printf '\r' >&2
+
+  printf '\033[K%s◆ Alpha Goal %s%s\n' "$cyan$bold" "$operation" "$reset" >&2
+  menu_rendered_rows=$((menu_rendered_rows + 1))
+  printf '\033[K%sSkills install to:%s %s\n' "$dim" "$reset" "$skills_root" >&2
+  menu_rendered_rows=$((menu_rendered_rows + 1))
+  printf '\033[K%sChoose which app configuration to update.%s\n' "$dim" "$reset" >&2
+  menu_rendered_rows=$((menu_rendered_rows + 1))
+  printf '\033[K\n' >&2
+  menu_rendered_rows=$((menu_rendered_rows + 1))
+
   for index in "${!labels[@]}"; do
     if [[ "$index" -eq "$selected" ]]; then
-      printf '\033[K> %s\n' "${labels[$index]}" >&2
+      marker="${green}●${reset}"
+      label="${bold}${labels[$index]}${reset}"
+      summary="${yellow}${summaries[$index]}${reset}"
     else
-      printf '\033[K  %s\n' "${labels[$index]}" >&2
+      marker="${dim}○${reset}"
+      label="${labels[$index]}"
+      summary="${summaries[$index]}"
     fi
+
+    printf '\033[K  %s %s  %s\n' "$marker" "$label" "$summary" >&2
+    menu_rendered_rows=$((menu_rendered_rows + 1))
+    printf '\033[K    %s%s%s\n' "$dim" "${details[$index]}" "$reset" >&2
+    menu_rendered_rows=$((menu_rendered_rows + 1))
   done
-  printf '\033[KUse Up/Down and Enter: ' >&2
+
+  printf '\033[K\n' >&2
+  menu_rendered_rows=$((menu_rendered_rows + 1))
+  printf '\033[K%sUse ↑/↓ and Enter:%s ' "$cyan" "$reset" >&2
 }
 
 prompt_install_target() {
   local targets=(global codex claude)
   local selected=1
   local key rest
+  local prompt_skills_root
 
-  render_install_target_menu "$selected"
+  prompt_skills_root="$(absolute_path "$(default_skills_root)")"
+  render_install_target_menu "$selected" "$prompt_skills_root"
   while true; do
     if ! IFS= read -rsn1 key; then
       printf '\n' >&2
@@ -271,13 +329,13 @@ prompt_install_target() {
               ;;
             "[A")
               selected=$(( (selected + ${#targets[@]} - 1) % ${#targets[@]} ))
-              printf '\033[%sA' "$((${#targets[@]} + 1))" >&2
-              render_install_target_menu "$selected"
+              printf '\033[%sA' "$menu_rendered_rows" >&2
+              render_install_target_menu "$selected" "$prompt_skills_root"
               ;;
             "[B")
               selected=$(( (selected + 1) % ${#targets[@]} ))
-              printf '\033[%sA' "$((${#targets[@]} + 1))" >&2
-              render_install_target_menu "$selected"
+              printf '\033[%sA' "$menu_rendered_rows" >&2
+              render_install_target_menu "$selected" "$prompt_skills_root"
               ;;
           esac
         fi
@@ -1387,40 +1445,46 @@ print_summary() {
     status="installed"
   fi
 
-  echo "Alpha Goal skills $status: $installed -> $target_root"
-  echo "Install target: $install_target"
-  echo "Skills root: $target_root"
+  echo "╭─ Alpha Goal install summary"
+  echo "│ Result: $status"
+  echo "│ Skills: $installed linked"
+  echo "│ Skills root: $target_root"
+  echo "│ Install target: $install_target"
+  echo "├─ Configuration"
   if [[ "$sync_codex_config" == true ]]; then
-    echo "Codex home: $codex_home"
+    echo "│ Codex home: $codex_home"
   else
-    echo "Codex config: skipped (--target $install_target)"
+    echo "│ Codex config: skipped (--target $install_target)"
   fi
   if [[ "$sync_claude_config" == true ]]; then
-    echo "Claude home: $claude_home"
+    echo "│ Claude home: $claude_home"
   else
-    echo "Claude config: skipped (--target $install_target)"
+    echo "│ Claude config: skipped (--target $install_target)"
   fi
+  echo "├─ Templates"
   if [[ "$sync_user_templates" == true ]]; then
     if [[ "$sync_codex_config" == true ]]; then
-      echo "Codex templates: AGENTS.md $agents_action, config.toml $config_action"
+      echo "│ Codex templates: AGENTS.md $agents_action, config.toml $config_action"
     else
-      echo "Codex templates: skipped (--target $install_target)"
+      echo "│ Codex templates: skipped (--target $install_target)"
     fi
     if [[ "$sync_claude_config" == true ]]; then
-      echo "Claude templates: CLAUDE.md $claude_action"
+      echo "│ Claude templates: CLAUDE.md $claude_action"
     else
-      echo "Claude templates: skipped (--target $install_target)"
+      echo "│ Claude templates: skipped (--target $install_target)"
     fi
   else
-    echo "User templates: skipped (--no-sync-user-templates)"
+    echo "│ User templates: skipped (--no-sync-user-templates)"
   fi
+  echo "├─ Hooks"
   if [[ "$sync_codex_config" == true && "$sync_user_hooks" == true ]]; then
-    echo "User hooks: hooks.json $hooks_action"
+    echo "│ User hooks: hooks.json $hooks_action"
   elif [[ "$sync_codex_config" == true ]]; then
-    echo "User hooks: skipped (--no-sync-user-hooks)"
+    echo "│ User hooks: skipped (--no-sync-user-hooks)"
   else
-    echo "User hooks: skipped (--target $install_target)"
+    echo "│ User hooks: skipped (--target $install_target)"
   fi
+  echo "╰─ done"
 }
 
 print_uninstall_summary() {
@@ -1434,45 +1498,51 @@ print_uninstall_summary() {
     fi
   done
 
-  echo "Alpha Goal uninstall $status"
-  echo "Uninstall target: $install_target"
-  echo "Skills root: $target_root"
+  echo "╭─ Alpha Goal uninstall summary"
+  echo "│ Result: $status"
+  echo "│ Uninstall target: $install_target"
+  echo "│ Skills root: $target_root"
+  echo "├─ Shared skills"
   if [[ "$install_target" == "global" ]]; then
-    echo "Skills: removed $uninstall_skill_removed_count, preserved $uninstall_skill_preserved_count, not-found $uninstall_skill_missing_count"
+    echo "│ Skills: removed $uninstall_skill_removed_count, preserved $uninstall_skill_preserved_count, not-found $uninstall_skill_missing_count"
   else
-    echo "Skills: skipped (--target $install_target)"
+    echo "│ Skills: skipped (--target $install_target)"
   fi
+  echo "├─ Configuration"
   if [[ "$sync_codex_config" == true ]]; then
-    echo "Codex home: $codex_home"
+    echo "│ Codex home: $codex_home"
   else
-    echo "Codex config: skipped (--target $install_target)"
+    echo "│ Codex config: skipped (--target $install_target)"
   fi
   if [[ "$sync_claude_config" == true ]]; then
-    echo "Claude home: $claude_home"
+    echo "│ Claude home: $claude_home"
   else
-    echo "Claude config: skipped (--target $install_target)"
+    echo "│ Claude config: skipped (--target $install_target)"
   fi
+  echo "├─ Templates"
   if [[ "$sync_user_templates" == true ]]; then
     if [[ "$sync_codex_config" == true ]]; then
-      echo "Codex templates: AGENTS.md $agents_action, config.toml $config_action"
+      echo "│ Codex templates: AGENTS.md $agents_action, config.toml $config_action"
     else
-      echo "Codex templates: skipped (--target $install_target)"
+      echo "│ Codex templates: skipped (--target $install_target)"
     fi
     if [[ "$sync_claude_config" == true ]]; then
-      echo "Claude templates: CLAUDE.md $claude_action"
+      echo "│ Claude templates: CLAUDE.md $claude_action"
     else
-      echo "Claude templates: skipped (--target $install_target)"
+      echo "│ Claude templates: skipped (--target $install_target)"
     fi
   else
-    echo "User templates: skipped (--no-sync-user-templates)"
+    echo "│ User templates: skipped (--no-sync-user-templates)"
   fi
+  echo "├─ Hooks"
   if [[ "$sync_codex_config" == true && "$sync_user_hooks" == true ]]; then
-    echo "User hooks: hooks.json $hooks_action"
+    echo "│ User hooks: hooks.json $hooks_action"
   elif [[ "$sync_codex_config" == true ]]; then
-    echo "User hooks: skipped (--no-sync-user-hooks)"
+    echo "│ User hooks: skipped (--no-sync-user-hooks)"
   else
-    echo "User hooks: skipped (--target $install_target)"
+    echo "│ User hooks: skipped (--target $install_target)"
   fi
+  echo "╰─ done"
 }
 
 if [[ "$sync_codex_config" == true && "$sync_user_templates" == true ]]; then
