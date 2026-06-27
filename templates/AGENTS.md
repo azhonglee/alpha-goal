@@ -44,6 +44,6 @@ Use subagents for independent parallel subtasks when that improves throughput. B
 ## Interaction Agreement
 
 - Use `request_user_input` or equivalent structured input, backed by presenting the necessary clear context. Do not use it for purely open-ended questions or mere data entry.
-- 输出和写作默认使用中文，包括产物，要求言简意赅、逻辑清晰、排版规范。专业术语可根据上下文选择性使用英文。
+- 输出和写作默认使用中文，包括产物文件，要求言简意赅、逻辑清晰、排版规范。专业术语可根据上下文选择性使用英文。
 
 <!-- generate-with-template:agents-md -->

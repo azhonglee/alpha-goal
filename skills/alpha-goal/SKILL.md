@@ -54,7 +54,7 @@ Loop Q&A until the user-owned decisions and technical design are explicit enough
 - One question means one decision variable: confirm a conflict, request a decision, choose a solution, demand an example, expose an assumption, force a tradeoff, or test a boundary-stressing case.
 - Do not ask for discoverable facts.
 - Present options conversationally with recommendation and reasoning.
-- Use `request_user_input` or equivalent structured input when available.
+- Use `request_user_input` or equivalent structured input.
 - Update `goal-contract.md` and `technical_design.md` after each answer.
 - Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps in `goal-contract.md` under `Interview ledger`.
 - Revisit the same dimension when the first answer lacks an example, boundary, tradeoff, design consequence, or acceptance signal.
