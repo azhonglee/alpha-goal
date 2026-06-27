@@ -227,34 +227,62 @@ validate_install_target() {
   esac
 }
 
+render_install_target_menu() {
+  local selected="$1"
+  local labels=("global (Codex + Claude)" "codex" "claude")
+  local index
+
+  printf '\r\033[KSelect configuration target:\n' >&2
+  for index in "${!labels[@]}"; do
+    if [[ "$index" -eq "$selected" ]]; then
+      printf '\033[K> %s\n' "${labels[$index]}" >&2
+    else
+      printf '\033[K  %s\n' "${labels[$index]}" >&2
+    fi
+  done
+  printf '\033[KUse Up/Down and Enter: ' >&2
+}
+
 prompt_install_target() {
-  local choice
+  local targets=(global codex claude)
+  local selected=1
+  local key rest
+
+  render_install_target_menu "$selected"
   while true; do
-    cat >&2 <<'EOF'
-Select configuration target:
-  1. global (Codex + Claude)
-  2. codex
-  3. claude
-EOF
-    printf 'Enter choice [1-3]: ' >&2
-    if ! IFS= read -r choice; then
+    if ! IFS= read -rsn1 key; then
+      printf '\n' >&2
       die "No target selected"
     fi
-    case "$choice" in
-      1|global)
-        printf '%s\n' "global"
+
+    case "$key" in
+      "")
+        printf '\n' >&2
+        printf '%s\n' "${targets[$selected]}"
         return
         ;;
-      2|codex)
-        printf '%s\n' "codex"
-        return
-        ;;
-      3|claude)
-        printf '%s\n' "claude"
-        return
+      $'\033')
+        if IFS= read -rsn2 -t 1 rest; then
+          case "$rest" in
+            "")
+              printf '\n' >&2
+              printf '%s\n' "${targets[$selected]}"
+              return
+              ;;
+            "[A")
+              selected=$(( (selected + ${#targets[@]} - 1) % ${#targets[@]} ))
+              printf '\033[%sA' "$((${#targets[@]} + 1))" >&2
+              render_install_target_menu "$selected"
+              ;;
+            "[B")
+              selected=$(( (selected + 1) % ${#targets[@]} ))
+              printf '\033[%sA' "$((${#targets[@]} + 1))" >&2
+              render_install_target_menu "$selected"
+              ;;
+          esac
+        fi
         ;;
       *)
-        echo "Invalid choice: $choice" >&2
         ;;
     esac
   done
@@ -339,6 +367,59 @@ resolve_link_target() {
   fi
 }
 
+git_common_dir_for_path() {
+  local path="$1"
+  local common_dir
+  common_dir="$(git -C "$path" rev-parse --git-common-dir 2>/dev/null)" || return 1
+
+  if [[ "$common_dir" == /* ]]; then
+    normalize_path "$common_dir"
+  else
+    normalize_path "$path/$common_dir"
+  fi
+}
+
+git_worktree_root_for_path() {
+  local root
+  root="$(git -C "$1" rev-parse --show-toplevel 2>/dev/null)" || return 1
+  normalize_path "$root"
+}
+
+same_git_worktree_skill_link() {
+  local source="$1"
+  local current_target="$2"
+  local skill_name="$3"
+  local source_real
+  local target_real
+  local source_root
+  local target_root_path
+  local source_common_dir
+  local target_common_dir
+  local target_rel
+
+  source_real="$(normalize_path "$source" 2>/dev/null)" || return 1
+  target_real="$(normalize_path "$current_target" 2>/dev/null)" || return 1
+  source_root="$(git_worktree_root_for_path "$source_real")" || return 1
+  target_root_path="$(git_worktree_root_for_path "$target_real")" || return 1
+  source_common_dir="$(git_common_dir_for_path "$source_real")" || return 1
+  target_common_dir="$(git_common_dir_for_path "$target_real")" || return 1
+
+  if [[ "$source_common_dir" != "$target_common_dir" ]]; then
+    return 1
+  fi
+
+  case "$target_real" in
+    "$target_root_path"/*)
+      target_rel="${target_real#"$target_root_path"/}"
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+
+  [[ "$target_rel" == "skills/$skill_name" ]]
+}
+
 link_path() {
   local source="$1"
   local target="$2"
@@ -363,6 +444,9 @@ link_path() {
       legacy_skillset_source="$source_skill_root"
     fi
     if [[ "$current_target" == "$legacy_top_level_source" || "$current_target" == "$legacy_skill_dir_source" || ( -n "$legacy_skillset_source" && "$current_target" == "$legacy_skillset_source" ) ]]; then
+      rm "$target"
+      replaced=true
+    elif same_git_worktree_skill_link "$source" "$current_target" "$label"; then
       rm "$target"
       replaced=true
     elif [[ "$force" == true ]]; then
