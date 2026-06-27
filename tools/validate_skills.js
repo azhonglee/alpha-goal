@@ -1,0 +1,761 @@
+#!/usr/bin/env node
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
+
+const FRONTMATTER_RE = /^---\n(.*?)\n---\n/s;
+const FIELD_RE = /^([A-Za-z0-9_-]+):\s*(.*?)\s*$/;
+const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
+const SKILLS_COUNT_BUDGET = 15_000;
+const CONTRACT_PATH = "contracts/alpha-goal.json";
+const HOOK_MARKER = "codex-alpha-goal-compact-recovery:v1";
+const LEGACY_HOOK_MARKER = "codex-compact-skill-recovery";
+const VALIDATOR_COMMAND = "node tools/validate_skills.js .";
+const FIXTURE_COMMAND = "node tools/validate_skills.js --fixtures";
+
+const LEGACY_SKILL_REFERENCES = [
+  "goal-contract",
+  "system-model",
+  "decision-synthesis",
+  "evidence-verify",
+  "control-kernel",
+  "loop",
+  "verify",
+  "meta-synthesis",
+  "goal-frame",
+  "goal-loop",
+  "goal-iterate",
+  "goal-review",
+];
+const LEGACY_SCRIPT_REFERENCES = [
+  "tools/validate_skills.ts",
+  "tools/validate_skills.py",
+  "tools/validate_skillset.py",
+  "tools/validate_skillset.ts",
+  "scripts/mutation-preflight.sh",
+  "mutation-preflight.sh",
+  "scripts/repo-sensor-snapshot.sh",
+  "repo-sensor-snapshot.sh",
+  "scripts/evidence-summary.ts",
+  "evidence-summary.ts",
+  "scripts/evidence-summary.sh",
+  "evidence-summary.sh",
+  "scripts/goal-verification-summary.ts",
+  "goal-verification-summary.ts",
+  "scripts/goal-verification-summary.sh",
+  "goal-verification-summary.sh",
+];
+const LEGACY_RUN_MODE_REFERENCES = ["automation-triggered", "from-verification", "Run mode: manual | automation"];
+const LEGACY_RUNTIME_ARTIFACT_REFERENCES = [
+  "context.md",
+  "interview.md",
+  "run-profile.md",
+  "loop-state.md",
+  "memory.md",
+  "iteration.md",
+  "evidence.md",
+  "verification.md",
+];
+
+function main(args = process.argv.slice(2)) {
+  if (args[0] === "--fixtures") return runFixtures(args.slice(1));
+
+  const root = path.resolve(args[0] || path.join(__dirname, ".."));
+  const { errors, warnings } = validateRoot(root);
+  printReport(root, errors, warnings);
+  return errors.length ? 1 : 0;
+}
+
+function validateRoot(root) {
+  const errors = [];
+  const warnings = [];
+  const contract = readContract(root, errors);
+  const files = walk(root).filter(isFile);
+  const skillFiles = files.filter(file => relative(root, file).startsWith("skills/"));
+
+  validateContract(contract, errors);
+  validateSkillDirs(root, contract, errors, warnings);
+  validateSkillsCountBudget(skillFiles, errors);
+  validateStateRootGuidance(root, contract, errors);
+  validateScriptSurface(root, files, errors, warnings);
+  validateLegacyReferences(root, contract, skillFiles, errors);
+  validateAlphaGoal(root, contract, errors);
+  validateControlLoop(root, contract, errors);
+  validateGoalVerify(root, contract, errors);
+  validateEvidenceAliasMappings(root, contract, errors);
+  validateCrossFileContract(root, contract, errors);
+  validateInstallSurface(root, contract, errors);
+  validateDocs(root, contract, errors);
+  validateNoAutoDownloadRunner(root, files, errors);
+
+  return { errors, warnings };
+}
+
+function readContract(root, errors) {
+  const file = path.join(root, CONTRACT_PATH);
+  if (!isFile(file)) {
+    errors.push(`missing shared contract: ${CONTRACT_PATH}`);
+    return emptyContract();
+  }
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf8"));
+  } catch (error) {
+    errors.push(`${CONTRACT_PATH}: invalid JSON: ${errorMessage(error)}`);
+    return emptyContract();
+  }
+}
+
+function emptyContract() {
+  return {
+    schemaVersion: 0,
+    skills: [],
+    artifacts: [],
+    routes: [],
+    gapKinds: [],
+    evidenceTypes: [],
+    requiredGates: [],
+    clarificationExitRules: [],
+    summaryFields: [],
+    checkedFiles: [],
+    nodeRequirement: "",
+  };
+}
+
+function validateContract(contract, errors) {
+  if (contract.schemaVersion !== 1) errors.push(`${CONTRACT_PATH}: schemaVersion must be 1`);
+  requireArray(contract, "skills", errors);
+  requireArray(contract, "artifacts", errors);
+  requireArray(contract, "routes", errors);
+  requireArray(contract, "gapKinds", errors);
+  requireArray(contract, "evidenceTypes", errors);
+  requireArray(contract, "requiredGates", errors);
+  requireArray(contract, "clarificationExitRules", errors);
+  requireArray(contract, "summaryFields", errors);
+  requireArray(contract, "checkedFiles", errors);
+  if (typeof contract.nodeRequirement !== "string" || !contract.nodeRequirement) {
+    errors.push(`${CONTRACT_PATH}: nodeRequirement must be a non-empty string`);
+  }
+
+  for (const artifact of contract.artifacts || []) {
+    for (const key of ["path", "kind", "requirement", "condition"]) {
+      if (typeof artifact?.[key] !== "string" || !artifact[key]) errors.push(`${CONTRACT_PATH}: artifact missing ${key}`);
+    }
+    if (!["required", "conditional"].includes(artifact?.requirement)) {
+      errors.push(`${CONTRACT_PATH}: artifact ${artifact?.path || "<unknown>"} has invalid requirement`);
+    }
+  }
+  for (const route of contract.routes || []) {
+    if (typeof route?.name !== "string" || !route.name) errors.push(`${CONTRACT_PATH}: route missing name`);
+    if (typeof route?.condition !== "string" || !route.condition) errors.push(`${CONTRACT_PATH}: route ${route?.name || "<unknown>"} missing condition`);
+  }
+  for (const evidence of contract.evidenceTypes || []) {
+    if (typeof evidence?.name !== "string" || !evidence.name) errors.push(`${CONTRACT_PATH}: evidence type missing name`);
+    requireArray(evidence, "results", errors, `evidence ${evidence?.name || "<unknown>"}`);
+    requireArray(evidence, "aliases", errors, `evidence ${evidence?.name || "<unknown>"}`);
+    for (const alias of evidence?.aliases || []) {
+      if (typeof alias?.label !== "string" || typeof alias?.result !== "string") {
+        errors.push(`${CONTRACT_PATH}: evidence ${evidence.name} alias must map label to result`);
+      } else if (!evidence.results.includes(alias.result)) {
+        errors.push(`${CONTRACT_PATH}: evidence alias ${alias.label} maps to unsupported result ${alias.result}`);
+      }
+    }
+  }
+  for (const gate of contract.requiredGates || []) {
+    if (typeof gate !== "string" || !gate) errors.push(`${CONTRACT_PATH}: requiredGates entries must be non-empty strings`);
+  }
+  for (const rule of contract.clarificationExitRules || []) {
+    if (typeof rule !== "string" || !rule) errors.push(`${CONTRACT_PATH}: clarificationExitRules entries must be non-empty strings`);
+  }
+}
+
+function requireArray(object, key, errors, prefix = CONTRACT_PATH) {
+  if (!Array.isArray(object?.[key])) errors.push(`${prefix}: ${key} must be an array`);
+}
+
+function validateSkillDirs(root, contract, errors, warnings) {
+  const skillsRoot = path.join(root, "skills");
+  if (!isDirectory(skillsRoot)) {
+    errors.push(`missing skills directory: ${skillsRoot}`);
+    return;
+  }
+  const skillDirs = fs.readdirSync(skillsRoot, { withFileTypes: true })
+    .filter(entry => entry.isDirectory())
+    .map(entry => entry.name)
+    .sort();
+
+  for (const name of contract.skills) {
+    if (!skillDirs.includes(name)) errors.push(`missing required skill directory: skills/${name}`);
+  }
+  for (const name of skillDirs) {
+    if (!contract.skills.includes(name)) errors.push(`unexpected skill directory: skills/${name}`);
+    validateSkillDir(root, path.join(skillsRoot, name), errors, warnings);
+  }
+}
+
+function validateSkillDir(root, dir, errors, warnings) {
+  const skillName = path.basename(dir);
+  const md = path.join(dir, "SKILL.md");
+  if (!isFile(md)) {
+    errors.push(`${skillName}: missing SKILL.md`);
+    return;
+  }
+  if (skillName === "goal-verify" && isDirectory(path.join(dir, "scripts"))) {
+    errors.push("goal-verify must not depend on runtime scripts");
+  }
+  const text = fs.readFileSync(md, "utf8");
+  try {
+    const fm = parseFrontmatter(text);
+    if (fm.name !== skillName) errors.push(`${skillName}: frontmatter name ${JSON.stringify(fm.name)} does not match directory`);
+    if (!fm.description) errors.push(`${skillName}: SKILL.md frontmatter missing description`);
+    if (fm.description && fm.description.length > 500) warnings.push(`${skillName}: description is long (${fm.description.length} chars)`);
+    validateDescriptionBoundary(skillName, fm.description, errors);
+  } catch (error) {
+    errors.push(`${skillName}: invalid SKILL.md frontmatter: ${errorMessage(error)}`);
+  }
+  const refs = path.join(dir, "references");
+  if (isDirectory(refs)) {
+    for (const ref of fs.readdirSync(refs).filter(file => isFile(path.join(refs, file))).sort()) {
+      const rel = `references/${ref}`;
+      if (!text.includes(rel)) errors.push(`${skillName}: reference is not discoverable from SKILL.md: ${rel}`);
+    }
+  }
+}
+
+function parseFrontmatter(text) {
+  const match = text.match(FRONTMATTER_RE);
+  if (!match) throw new Error("missing YAML frontmatter block");
+  const data = {};
+  for (const [offset, line] of match[1].split(/\r?\n/).entries()) {
+    const stripped = line.trim();
+    if (!stripped || stripped.startsWith("#")) continue;
+    const field = line.match(FIELD_RE);
+    if (!field) throw new Error(`line ${offset + 2}: unsupported frontmatter syntax`);
+    const [, key, rawValue] = field;
+    const value = rawValue.trim();
+    if (!ALLOWED_FRONTMATTER_KEYS.has(key)) throw new Error(`line ${offset + 2}: unsupported frontmatter key ${key}`);
+    if (Object.hasOwn(data, key)) throw new Error(`line ${offset + 2}: duplicate frontmatter key ${key}`);
+    if (!value) throw new Error(`line ${offset + 2}: empty frontmatter value for ${key}`);
+    const quoted = value.length >= 2 && value[0] === value[value.length - 1] && (value[0] === "\"" || value[0] === "'");
+    if (!quoted && /:\s/.test(value)) throw new Error(`line ${offset + 2}: quote frontmatter value containing ': ' `);
+    data[key] = quoted ? value.slice(1, -1) : value;
+  }
+  return data;
+}
+
+function validateDescriptionBoundary(skillName, description, errors) {
+  const required = {
+    "alpha-goal": ["engineering", "design", "implementation"],
+    "control-loop": ["accepted Goal Contract", "implementation", "hardening"],
+    "goal-verify": ["Compare execution evidence", "accepted Goal Contract", "routing verdict"],
+  };
+  for (const term of required[skillName] || []) {
+    if (!description.toLowerCase().includes(term.toLowerCase())) {
+      errors.push(`${skillName}: description missing boundary term: ${term}`);
+    }
+  }
+}
+
+function validateSkillsCountBudget(skillFiles, errors) {
+  let words = 0;
+  let punctuation = 0;
+  for (const file of skillFiles) {
+    const text = fs.readFileSync(file, "utf8");
+    words += countMatches(text, /[\p{L}\p{N}\p{M}]+/gu);
+    punctuation += countMatches(text, /[\p{P}\p{S}]/gu);
+  }
+  const total = words + punctuation;
+  if (total > SKILLS_COUNT_BUDGET) {
+    errors.push(`skills word+punctuation budget exceeded: ${total} > ${SKILLS_COUNT_BUDGET} (words=${words}, punctuation=${punctuation})`);
+  }
+}
+
+function countMatches(text, pattern) {
+  return text.match(pattern)?.length || 0;
+}
+
+function validateStateRootGuidance(root, contract, errors) {
+  const required = [
+    "Alpha Goal state root",
+    "${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/",
+    "slug(repo_root or Goal Contract target workspace)",
+  ];
+  for (const rel of ["AGENTS.md", "MANIFEST.md", "skills/control-loop/SKILL.md", "skills/goal-verify/SKILL.md", "templates/AGENTS.md"]) {
+    const text = readIfFile(path.join(root, rel));
+    if (!text) {
+      errors.push(`${rel}: missing state-root guidance file`);
+      continue;
+    }
+    for (const term of required) {
+      if (!text.includes(term)) errors.push(`${rel}: missing state-root guidance: ${term}`);
+    }
+  }
+  const alpha = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
+  if (!alpha.includes("Alpha Goal state root")) errors.push("skills/alpha-goal/SKILL.md: missing Alpha Goal state root guidance");
+  for (const artifact of contract.artifacts) {
+    if (artifact.path === "control-state/latest.md") continue;
+    if (!allProjectText(root).includes(artifact.path)) errors.push(`runtime artifact is not referenced: ${artifact.path}`);
+  }
+}
+
+function validateScriptSurface(root, files, errors, warnings) {
+  for (const file of files.filter(candidate => relative(root, candidate).startsWith("tools/"))) {
+    const rel = relative(root, file);
+    const allowedFixture = /^tools\/fixtures\/validate-skills\/[a-z0-9-]+\.json$/.test(rel);
+    if (rel !== "tools/validate_skills.js" && !allowedFixture) {
+      errors.push(`unexpected tools surface: ${rel}`);
+    }
+    if (fs.readFileSync(file, "utf8").startsWith("#!") && (fs.statSync(file).mode & 0o100) === 0) {
+      warnings.push(`${rel} has a shebang but is not user-executable`);
+    }
+  }
+}
+
+function validateLegacyReferences(root, contract, skillFiles, errors) {
+  const files = new Set([
+    "AGENTS.md",
+    "README.md",
+    "README.en.md",
+    "README.zh-CN.md",
+    "INSTALL.md",
+    "MANIFEST.md",
+    "templates/AGENTS.md",
+    "templates/hooks.json",
+    "scripts/install.sh",
+    ...skillFiles.map(file => relative(root, file)),
+  ]);
+  for (const rel of files) {
+    const file = path.join(root, rel);
+    if (!isFile(file)) continue;
+    const text = fs.readFileSync(file, "utf8");
+    for (const legacy of LEGACY_SCRIPT_REFERENCES) {
+      if (text.includes(legacy)) errors.push(`${rel}: legacy script reference remains: ${legacy}`);
+    }
+    for (const legacy of LEGACY_RUN_MODE_REFERENCES) {
+      if (text.includes(legacy)) errors.push(`${rel}: legacy run-mode reference remains: ${legacy}`);
+    }
+    for (const legacy of LEGACY_RUNTIME_ARTIFACT_REFERENCES) {
+      if (text.includes(legacy)) errors.push(`${rel}: split runtime artifact reference remains: ${legacy}`);
+    }
+    if (rel !== "scripts/install.sh" && /evidence[- ]verify/i.test(text)) errors.push(`${rel}: legacy evidence-verify prose remains`);
+    for (const legacy of LEGACY_SKILL_REFERENCES) {
+      const patterns = [`$${legacy}`, `skills/${legacy}`, `\`${legacy}\``];
+      if (patterns.some(pattern => text.includes(pattern))) errors.push(`${rel}: legacy skill reference remains: ${legacy}`);
+    }
+  }
+}
+
+function validateAlphaGoal(root, contract, errors) {
+  const rel = "skills/alpha-goal/SKILL.md";
+  const text = readIfFile(path.join(root, rel));
+  if (!text) {
+    errors.push(`${rel}: missing`);
+    return;
+  }
+  requireGateHeadings(rel, text, contract.requiredGates, errors);
+  requireHeadings(rel, text, ["Clarification"], errors);
+  const clarificationGate = markdownSection(text, "Clarification Gate");
+  for (const rule of contract.clarificationExitRules) {
+    if (!clarificationGate.includes(`\`${rule}\``)) errors.push(`${rel}: Clarification Gate missing exit rule ${rule}`);
+  }
+  const summaryBlock = fencedBlockAfter(text, "TUI Presentation Style:");
+  if (!summaryBlock) errors.push(`${rel}: missing TUI Presentation Style fenced summary`);
+  for (const field of contract.summaryFields) {
+    if (!summaryBlock.includes(`| ${field} |`)) errors.push(`${rel}: summary table missing field: ${field}`);
+  }
+  const reviewIndex = headingOffset(text, "Review Gate");
+  const summaryIndex = text.indexOf("Goal Contract Summary", reviewIndex);
+  const confirmationIndex = headingOffset(text, "Confirmation Gate");
+  const inputIndex = text.indexOf("request_user_input", confirmationIndex);
+  if (!(reviewIndex >= 0 && summaryIndex > reviewIndex && confirmationIndex > summaryIndex && inputIndex > confirmationIndex)) {
+    errors.push(`${rel}: Review summary must appear before Confirmation Gate request_user_input`);
+  }
+  for (const term of ["approve/launch", "refine", "reject", "Contract status: accepted", "$control-loop"]) {
+    if (!markdownSection(text, "Confirmation Gate").includes(term)) errors.push(`${rel}: Confirmation Gate missing ${term}`);
+  }
+}
+
+function validateControlLoop(root, contract, errors) {
+  const rel = "skills/control-loop/SKILL.md";
+  const text = readIfFile(path.join(root, rel));
+  if (!text) {
+    errors.push(`${rel}: missing`);
+    return;
+  }
+  requireHeadings(rel, text, ["Core Principle", "Runtime Flow", "Authority", "Evidence Classification", "Slice Boundary Gates", "Execution Gates", "Completion Gate", "Stop / Return Rules", "Checkpoint Policy"], errors);
+  for (const route of contract.routes) {
+    if (!text.includes(route.name)) errors.push(`${rel}: missing route ${route.name}`);
+  }
+  const evidenceSection = markdownSection(text, "Evidence Classification");
+  requireCanonicalEvidence(rel, evidenceSection, contract, errors);
+  for (const forbidden of ["run-profile.md", "loop-state.md", "memory.md", "iteration.md", "evidence.md", "verification.md"]) {
+    if (text.includes(forbidden)) errors.push(`${rel}: split runtime artifact remains: ${forbidden}`);
+  }
+}
+
+function validateGoalVerify(root, contract, errors) {
+  const rel = "skills/goal-verify/SKILL.md";
+  const text = readIfFile(path.join(root, rel));
+  if (!text) {
+    errors.push(`${rel}: missing`);
+    return;
+  }
+  requireHeadings(rel, text, ["Mission", "Verification Model", "Core Principle", "Evidence Classification", "Gap Analysis", "Verification Gates", "Verification Algorithm", "Route Contract", "Before Final Verdict Checklist"], errors);
+  for (const route of contract.routes) {
+    if (!text.includes(route.name)) errors.push(`${rel}: missing route ${route.name}`);
+  }
+  for (const kind of contract.gapKinds) {
+    if (!text.includes(kind)) errors.push(`${rel}: missing gap kind ${kind}`);
+  }
+  const evidenceSection = markdownSection(text, "Evidence Classification");
+  requireCanonicalEvidence(rel, evidenceSection, contract, errors);
+}
+
+function requireCanonicalEvidence(rel, text, contract, errors) {
+  const lines = text.split(/\r?\n/);
+  for (const evidence of contract.evidenceTypes) {
+    const evidenceBullet = new RegExp(`^\\s*-\\s+\\[${escapeRegExp(evidence.name)}\\](?:\\s|;|$)`);
+    const line = lines.find(candidate => evidenceBullet.test(candidate));
+    if (!line) {
+      errors.push(`${rel}: missing evidence type [${evidence.name}]`);
+      continue;
+    }
+    const result = line.match(/\bresult=([A-Za-z0-9_|-]+)/);
+    if (!result) {
+      errors.push(`${rel}: evidence type [${evidence.name}] missing result enum`);
+      continue;
+    }
+    const actualResults = result[1].split("|").filter(Boolean);
+    if (!sameStringSet(actualResults, evidence.results)) {
+      errors.push(`${rel}: evidence type [${evidence.name}] result enum ${result[1]} does not match contract ${evidence.results.join("|")}`);
+    }
+  }
+  for (const evidence of contract.evidenceTypes) {
+    for (const alias of evidence.aliases) {
+      if (text.includes(`[${alias.label}]`)) {
+        errors.push(`${rel}: legacy evidence alias should map to [${evidence.name}] result=${alias.result}: [${alias.label}]`);
+      }
+    }
+  }
+}
+
+function validateEvidenceAliasMappings(root, contract, errors) {
+  const sections = [
+    markdownSection(readIfFile(path.join(root, "skills/control-loop/SKILL.md")), "Evidence Classification"),
+    markdownSection(readIfFile(path.join(root, "skills/goal-verify/SKILL.md")), "Evidence Classification"),
+  ].join("\n");
+  for (const evidence of contract.evidenceTypes) {
+    for (const alias of evidence.aliases || []) {
+      const aliasLine = new RegExp(
+        `^.*\`${escapeRegExp(alias.label)}\`\\s*->\\s*\\[${escapeRegExp(evidence.name)}\\]\\s+result=${escapeRegExp(alias.result)}(?:\\s|$)`,
+        "m",
+      );
+      if (!aliasLine.test(sections)) {
+        errors.push(`evidence alias ${alias.label} must map to [${evidence.name}] result=${alias.result}`);
+      }
+    }
+  }
+}
+
+function sameStringSet(actual, expected) {
+  if (actual.length !== expected.length) return false;
+  const actualSet = new Set(actual);
+  if (actualSet.size !== actual.length) return false;
+  return expected.every(value => actualSet.has(value));
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function validateCrossFileContract(root, contract, errors) {
+  const combined = allProjectText(root);
+  for (const artifact of contract.artifacts) {
+    if (!combined.includes(artifact.path)) errors.push(`contract artifact not referenced across repo: ${artifact.path}`);
+  }
+  const manifest = readIfFile(path.join(root, "MANIFEST.md"));
+  for (const artifact of contract.artifacts) {
+    if (!manifest.includes(artifact.path)) errors.push(`MANIFEST.md missing runtime artifact: ${artifact.path}`);
+  }
+  const hooks = readIfFile(path.join(root, "templates/hooks.json"));
+  for (const artifact of contract.artifacts) {
+    if (!hooks.includes(artifact.path)) errors.push(`templates/hooks.json missing recovery artifact: ${artifact.path}`);
+  }
+  for (const file of contract.checkedFiles) {
+    if (!isFile(path.join(root, file))) errors.push(`${CONTRACT_PATH}: checked file is missing: ${file}`);
+  }
+}
+
+function validateInstallSurface(root, contract, errors) {
+  const install = readIfFile(path.join(root, "scripts/install.sh"));
+  if (!install) {
+    errors.push("scripts/install.sh: missing");
+    return;
+  }
+  for (const skill of contract.skills) {
+    if (!install.includes(skill)) errors.push(`scripts/install.sh missing required skill: ${skill}`);
+  }
+  for (const forbidden of ["tomllib", "tools/validate_skills.ts", "run_skillset_validation", "resolve_tsx_runner", "Validation: passed"]) {
+    if (install.includes(forbidden)) errors.push(`scripts/install.sh contains forbidden install surface: ${forbidden}`);
+  }
+  for (const term of ["node", "vendor/smol-toml", "is_symlink", "resolve", "LEGACY_MANAGED_MARKER_RE", "MANAGED_MARKER_RE"]) {
+    if (!install.includes(term)) errors.push(`scripts/install.sh missing install hardening term: ${term}`);
+  }
+  if (!install.includes("--no-sync-user-hooks")) errors.push("scripts/install.sh missing --no-sync-user-hooks option");
+  if (install.includes("json.dumps(group") || install.includes("marker_family in group_text")) {
+    errors.push("scripts/install.sh must not detect managed hooks via serialized JSON substring");
+  }
+  if (install.includes("tmp_path.replace(hooks_path)")) {
+    errors.push("scripts/install.sh must not replace symlinked hooks_path directly");
+  }
+}
+
+function validateDocs(root, contract, errors) {
+  const docs = ["AGENTS.md", "README.md", "README.en.md", "INSTALL.md", "MANIFEST.md"];
+  for (const rel of docs) {
+    const text = readIfFile(path.join(root, rel));
+    if (!text) {
+      errors.push(`${rel}: missing`);
+      continue;
+    }
+    if (text.includes("npx --no-install tsx") || text.includes("tools/validate_skills.ts")) {
+      errors.push(`${rel}: stale validator command remains`);
+    }
+  }
+  for (const rel of ["AGENTS.md", "README.md", "README.en.md", "INSTALL.md"]) {
+    const text = readIfFile(path.join(root, rel));
+    if (!text.includes(VALIDATOR_COMMAND)) errors.push(`${rel}: missing validator command ${VALIDATOR_COMMAND}`);
+  }
+  for (const rel of ["AGENTS.md", "README.en.md", "INSTALL.md"]) {
+    const text = readIfFile(path.join(root, rel));
+    if (!text.includes(contract.nodeRequirement)) errors.push(`${rel}: missing node requirement ${contract.nodeRequirement}`);
+  }
+  const installDoc = readIfFile(path.join(root, "INSTALL.md"));
+  for (const term of ["--no-sync-user-hooks", "templates/hooks.json", LEGACY_HOOK_MARKER, "temporary CODEX_HOME", FIXTURE_COMMAND]) {
+    if (!installDoc.includes(term)) errors.push(`INSTALL.md missing install term: ${term}`);
+  }
+  const readme = readIfFile(path.join(root, "README.md"));
+  const readmeEn = readIfFile(path.join(root, "README.en.md"));
+  for (const skill of contract.skills) {
+    if (!readme.includes(`skills/${skill}/`)) errors.push(`README.md missing skill path: ${skill}`);
+    if (!readmeEn.includes(`skills/${skill}/`)) errors.push(`README.en.md missing skill path: ${skill}`);
+  }
+  if (!readme.includes("当前代码事实只描述现状")) errors.push("README.md missing current-state-not-desired-state principle");
+  if (!readmeEn.includes("Current code facts describe current state")) errors.push("README.en.md missing current-state-not-desired-state principle");
+}
+
+function validateNoAutoDownloadRunner(root, files, errors) {
+  const autoDownloadTsx = /npx\s+--yes\s+tsx/;
+  for (const file of files) {
+    const rel = relative(root, file);
+    if (rel.startsWith(".git/")) continue;
+    if (!/\.(md|js|sh|toml|json)$/.test(rel) && rel !== "AGENTS.md") continue;
+    if (autoDownloadTsx.test(fs.readFileSync(file, "utf8"))) errors.push(`${rel}: must not auto-download tsx with npx --yes`);
+  }
+}
+
+function runFixtures() {
+  const fixturesRoot = path.join(__dirname, "fixtures", "validate-skills");
+  const projectRoot = path.resolve(path.join(__dirname, ".."));
+  const errors = [];
+  const warnings = [];
+  if (!isDirectory(fixturesRoot)) {
+    errors.push(`missing fixtures directory: ${relative(process.cwd(), fixturesRoot)}`);
+    printFixtureReport(errors, warnings);
+    return 1;
+  }
+  for (const fixtureFile of fs.readdirSync(fixturesRoot).filter(file => file.endsWith(".json")).sort()) {
+    const fixturePath = path.join(fixturesRoot, fixtureFile);
+    let fixture;
+    try {
+      fixture = JSON.parse(fs.readFileSync(fixturePath, "utf8"));
+    } catch (error) {
+      errors.push(`${fixtureFile}: invalid fixture JSON: ${errorMessage(error)}`);
+      continue;
+    }
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "alpha-goal-validator-"));
+    try {
+      if (fixture.inheritRoot) copyTree(projectRoot, tempRoot);
+      for (const rel of fixture.removeFiles || []) {
+        fs.rmSync(path.join(tempRoot, rel), { recursive: true, force: true });
+      }
+      for (const replacement of fixture.replacements || []) {
+        const target = path.join(tempRoot, replacement.file);
+        const original = fs.readFileSync(target, "utf8");
+        if (!original.includes(replacement.search)) {
+          errors.push(`${fixtureFile}: replacement target not found in ${replacement.file}: ${replacement.search}`);
+          continue;
+        }
+        fs.writeFileSync(target, original.replace(replacement.search, replacement.replace));
+      }
+      for (const [rel, text] of Object.entries(fixture.files || {})) {
+        const target = path.join(tempRoot, rel);
+        fs.mkdirSync(path.dirname(target), { recursive: true });
+        fs.writeFileSync(target, text);
+      }
+      const result = validateRoot(tempRoot);
+      const passed = result.errors.length === 0;
+      if (Boolean(fixture.shouldPass) !== passed) {
+        errors.push(`${fixtureFile}: expected shouldPass=${fixture.shouldPass}, got errors: ${result.errors.join("; ")}`);
+      }
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  }
+  printFixtureReport(errors, warnings);
+  return errors.length ? 1 : 0;
+}
+
+function copyTree(source, target) {
+  const skipped = new Set([".git", ".worktrees", "node_modules", "dist", "build", ".venv", "__pycache__"]);
+  fs.mkdirSync(target, { recursive: true });
+  for (const entry of fs.readdirSync(source, { withFileTypes: true })) {
+    if (skipped.has(entry.name)) continue;
+    const from = path.join(source, entry.name);
+    const to = path.join(target, entry.name);
+    if (entry.isDirectory()) {
+      copyTree(from, to);
+    } else if (entry.isFile()) {
+      fs.copyFileSync(from, to);
+    }
+  }
+}
+
+function printFixtureReport(errors, warnings) {
+  console.log("Skill validator fixtures");
+  if (warnings.length) {
+    console.log("\nWARNINGS:");
+    for (const warning of warnings) console.log(`- ${warning}`);
+  }
+  if (errors.length) {
+    console.log("\nERRORS:");
+    for (const error of errors) console.log(`- ${error}`);
+  } else {
+    console.log("PASS: all fixtures behaved as expected");
+  }
+}
+
+function requireHeadings(rel, text, headings, errors) {
+  const present = extractHeadings(text, 2);
+  for (const heading of headings) {
+    if (!present.includes(heading)) errors.push(`${rel}: missing section heading: ${heading}`);
+  }
+}
+
+function requireGateHeadings(rel, text, gates, errors) {
+  for (const gate of gates) {
+    if (headingOffset(text, gate) < 0) errors.push(`${rel}: missing gate heading: ${gate}`);
+  }
+}
+
+function requireSubheading(rel, text, heading, errors) {
+  if (!extractHeadings(text, 3).includes(heading)) errors.push(`${rel}: missing subsection heading: ${heading}`);
+}
+
+function extractHeadings(text, level) {
+  const marker = "#".repeat(level);
+  return text.split(/\r?\n/)
+    .filter(line => line.startsWith(`${marker} `))
+    .map(line => line.slice(level + 1).trim());
+}
+
+function headingOffset(text, heading) {
+  const pattern = /^(#{2,6})\s+(.+)$/gm;
+  let match;
+  while ((match = pattern.exec(text)) !== null) {
+    const title = match[2].trim();
+    if (title === heading || title.startsWith(`${heading} `)) return match.index;
+  }
+  return -1;
+}
+
+function markdownSection(text, heading) {
+  const lines = text.split(/\r?\n/);
+  const marker = `## ${heading}`;
+  const start = lines.findIndex(line => line.trim() === marker);
+  if (start < 0) return "";
+  const next = lines.slice(start + 1).findIndex(line => /^##\s+/.test(line));
+  const end = next < 0 ? lines.length : start + 1 + next;
+  return lines.slice(start, end).join("\n");
+}
+
+function fencedBlockAfter(text, marker) {
+  const markerIndex = text.indexOf(marker);
+  if (markerIndex < 0) return "";
+  const firstFence = text.indexOf("```", markerIndex);
+  if (firstFence < 0) return "";
+  const firstFenceEnd = text.indexOf("\n", firstFence);
+  if (firstFenceEnd < 0) return "";
+  const secondFence = text.indexOf("```", firstFenceEnd + 1);
+  if (secondFence < 0) return "";
+  return text.slice(firstFenceEnd + 1, secondFence);
+}
+
+function allProjectText(root) {
+  return walk(root)
+    .filter(isFile)
+    .filter(file => !relative(root, file).startsWith(".git/"))
+    .map(file => fs.readFileSync(file, "utf8"))
+    .join("\n");
+}
+
+function readIfFile(file) {
+  return isFile(file) ? fs.readFileSync(file, "utf8") : "";
+}
+
+function isFile(file) {
+  try {
+    return fs.statSync(file).isFile();
+  } catch {
+    return false;
+  }
+}
+
+function isDirectory(file) {
+  try {
+    return fs.statSync(file).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
+function walk(root) {
+  const result = [];
+  if (!fs.existsSync(root)) return result;
+  const skipped = new Set([".git", ".worktrees", "node_modules", "dist", "build", ".venv", "__pycache__"]);
+  function visit(dir) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.isDirectory() && skipped.has(entry.name)) continue;
+      const full = path.join(dir, entry.name);
+      result.push(full);
+      if (entry.isDirectory()) visit(full);
+    }
+  }
+  visit(root);
+  return result.sort();
+}
+
+function relative(root, file) {
+  return path.relative(root, file).split(path.sep).join("/");
+}
+
+function errorMessage(error) {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function printReport(root, errors, warnings) {
+  console.log("Skill suite validation");
+  console.log(`root: ${root}`);
+  if (warnings.length) {
+    console.log("\nWARNINGS:");
+    for (const warning of warnings) console.log(`- ${warning}`);
+  }
+  if (errors.length) {
+    console.log("\nERRORS:");
+    for (const error of errors) console.log(`- ${error}`);
+  } else {
+    console.log("PASS: all checks passed");
+  }
+}
+
+if (require.main === module) process.exit(main(process.argv.slice(2)));
+module.exports = { main, validateRoot };

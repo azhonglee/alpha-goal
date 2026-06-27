@@ -2,6 +2,8 @@
 
 ## Install
 
+Requires Node.js 18+. The installer uses repository-local JavaScript and vendored `smol-toml` for config TOML merge; Python 3.11 `tomllib` is not required.
+
 ```bash
 scripts/install.sh
 ```
@@ -29,7 +31,7 @@ scripts/install.sh --verbose
 
 The script creates `${CODEX_HOME:-$HOME/.codex}/skills/<skill-name>` links for required public skills and cleans same-repo links for merged old public skills. By default it also syncs user-level templates, including `templates/hooks.json` into `${CODEX_HOME:-$HOME/.codex}/hooks.json`.
 
-The compact recovery hook definition lives in `templates/hooks.json`. It is a `SessionStart` hook for `compact` starts and prints a static policy telling Codex to decide whether `alpha-goal`, `control-loop`, or `goal-verify` applies after compaction, and to load the matching skill before continuing. For active Alpha Goal tasks, it resumes from draft or accepted `goal-contract.md` first; accepted status gates only `control-loop` execution handoff. `goal-verify` covers evidence, claim boundary, defect/risk sweep, and material unclaimed issues. Use `--no-sync-user-templates` to skip AGENTS/config template updates and `--no-sync-user-hooks` to skip hook template updates.
+The compact recovery hook definition lives in `templates/hooks.json`. It is a `SessionStart` hook for `compact` starts and prints a static policy telling Codex to decide whether `alpha-goal`, `control-loop`, or `goal-verify` applies after compaction, and to load the matching skill before continuing. For active Alpha Goal tasks, it resumes from draft or accepted `goal-contract.md` first and reads `technical_design.md` with the Goal Contract when it exists; accepted status gates only `control-loop` execution handoff. `goal-verify` covers evidence, claim boundary, defect/risk sweep, and material unclaimed issues. Use `--no-sync-user-templates` to skip AGENTS/config template updates and `--no-sync-user-hooks` to skip hook template updates.
 
 Hook upgrades are keyed by marker family. If the template marker changes from `...:v1` to `...:v2`, the installer removes older hooks from the same family before adding the template hook. It also removes the earlier experimental `codex-compact-skill-recovery` hook family.
 
@@ -37,7 +39,7 @@ Codex may require reviewing and trusting the changed hook with `/hooks` before i
 
 ## Smoke test
 
-The smoke test separately checks installed skill links, hook recovery text, and state fixture shape without requiring runtime skill scripts.
+The smoke test separately checks installed skill links, hook recovery text, and state fixture shape with a temporary CODEX_HOME, without requiring runtime skill scripts or touching real user configuration.
 
 ```bash
 set -euo pipefail
@@ -88,13 +90,15 @@ grep -q "draft or accepted goal-contract.md first" "$tmp_codex_home/hooks.json"
 grep -q "accepted status gates only control-loop execution handoff" "$tmp_codex_home/hooks.json"
 grep -q "control-state/latest.md" "$tmp_codex_home/hooks.json"
 grep -q "goal-contract.md" "$tmp_codex_home/hooks.json"
+grep -q "technical_design.md" "$tmp_codex_home/hooks.json"
 grep -q "checkpoint.md" "$tmp_codex_home/hooks.json"
 grep -q "verification-triggered recovery" "$tmp_codex_home/hooks.json"
 grep -q "Run Profile, Loop State, Verification, and Evidence" "$tmp_codex_home/hooks.json"
 grep -q '\$alpha-goal' "$tmp_codex_home/hooks.json"
 grep -q '\$control-loop' "$tmp_codex_home/hooks.json"
 grep -q '\$goal-verify' "$tmp_codex_home/hooks.json"
-npx --no-install tsx tools/validate_skills.ts .
+node tools/validate_skills.js .
+node tools/validate_skills.js --fixtures
 rm -rf "$tmp_codex_home"
 ```
 

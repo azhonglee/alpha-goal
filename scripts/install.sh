@@ -101,6 +101,22 @@ log() {
   fi
 }
 
+require_node_runtime() {
+  if ! command -v node >/dev/null 2>&1; then
+    die "Node.js 18+ is required to sync config.toml or hooks.json; rerun with --no-sync-user-templates --no-sync-user-hooks to skip those updates."
+  fi
+
+  local major
+  major="$(node -p 'Number(process.versions.node.split(".")[0])')"
+  if [[ "$major" -lt 18 ]]; then
+    die "Node.js 18+ is required to sync config.toml or hooks.json; found $(node -v)."
+  fi
+
+  if [[ ! -f "$repo_root/vendor/smol-toml/dist/index.cjs" ]]; then
+    die "Missing vendored TOML parser: $repo_root/vendor/smol-toml/dist/index.cjs"
+  fi
+}
+
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd "$script_dir/.." && pwd -P)"
 source_skill_root="$repo_root/skills"
@@ -167,6 +183,10 @@ legacy_removed_count=0
 agents_action="skipped"
 config_action="skipped"
 hooks_action="skipped"
+
+if [[ "$sync_user_templates" == true || "$sync_user_hooks" == true ]]; then
+  require_node_runtime
+fi
 
 resolve_link_target() {
   local link_path="$1"
@@ -398,164 +418,136 @@ sync_config_template() {
   fi
 
   local result
-  result="$(python3 - "$config_template" "$config_target" <<'PY'
-from __future__ import annotations
+  result="$(node - "$repo_root/vendor/smol-toml/dist/index.cjs" "$config_template" "$config_target" <<'JS'
+const fs = require("node:fs");
+const path = require("node:path");
 
-import json
-import re
-import sys
-from pathlib import Path
+const [tomlPath, templateArg, targetArg] = process.argv.slice(2);
+const toml = require(tomlPath);
+const HEADER_RE = /^\s*\[([A-Za-z0-9_.-]+)\]\s*(?:#.*)?$/;
 
-try:
-    import tomllib
-except ModuleNotFoundError:
-    print("python3 with tomllib support is required to merge config.toml", file=sys.stderr)
-    raise SystemExit(1)
+function loadToml(file) {
+  const text = fs.readFileSync(file, "utf8");
+  if (!text.trim()) return {};
+  try {
+    return toml.parse(text);
+  } catch (error) {
+    console.error(`Invalid TOML in ${file}: ${error.message}`);
+    process.exit(1);
+  }
+}
 
-HEADER_RE = re.compile(r"^\s*\[([A-Za-z0-9_.-]+)\]\s*(?:#.*)?$")
+function flatten(value, prefix = []) {
+  if (value && typeof value === "object" && !Array.isArray(value) && !(value instanceof Date)) {
+    return Object.entries(value).flatMap(([key, child]) => flatten(child, [...prefix, key]));
+  }
+  return [[prefix, value]];
+}
 
+function hasPath(data, keys) {
+  let current = data;
+  for (const key of keys) {
+    if (!current || typeof current !== "object" || !(key in current)) return false;
+    current = current[key];
+  }
+  return true;
+}
 
-def load_toml(path: Path) -> dict:
-    text = path.read_text()
-    if not text.strip():
-        return {}
-    try:
-        return tomllib.loads(text)
-    except tomllib.TOMLDecodeError as exc:
-        print(f"Invalid TOML in {path}: {exc}", file=sys.stderr)
-        raise SystemExit(1)
+function parentConflict(data, keys) {
+  let current = data;
+  const checked = [];
+  for (const key of keys.slice(0, -1)) {
+    if (!current || typeof current !== "object") return checked;
+    if (!(key in current)) return null;
+    current = current[key];
+    checked.push(key);
+    if (!current || typeof current !== "object" || Array.isArray(current)) return checked;
+  }
+  return null;
+}
 
+function tomlValue(value) {
+  const rendered = toml.stringify({ value }).trim();
+  return rendered.replace(/^value\s*=\s*/, "");
+}
 
-def flatten(value, prefix=()):
-    if isinstance(value, dict):
-        for key, child in value.items():
-            yield from flatten(child, prefix + (key,))
-        return
-    yield prefix, value
+function collectTables(lines) {
+  const headers = [];
+  lines.forEach((line, index) => {
+    const match = line.match(HEADER_RE);
+    if (match) headers.push([index, match[1].split(".")]);
+  });
+  const blocks = new Map();
+  headers.forEach(([index, tablePath], offset) => {
+    const end = offset + 1 < headers.length ? headers[offset + 1][0] : lines.length;
+    blocks.set(tablePath.join("."), [index, end]);
+  });
+  return { blocks, firstTable: headers.length ? headers[0][0] : lines.length };
+}
 
+const templateData = loadToml(templateArg);
+const targetData = loadToml(targetArg);
+const missing = [];
+for (const [keys, value] of flatten(templateData)) {
+  if (hasPath(targetData, keys)) continue;
+  const conflict = parentConflict(targetData, keys);
+  if (conflict) {
+    console.error(`Cannot add ${keys.join(".")}: non-table value exists at ${conflict.join(".")}`);
+    process.exit(1);
+  }
+  missing.push([keys, value]);
+}
 
-def has_path(data: dict, path: tuple[str, ...]) -> bool:
-    current = data
-    for key in path:
-        if not isinstance(current, dict) or key not in current:
-            return False
-        current = current[key]
-    return True
+if (!missing.length) {
+  console.log("current");
+  process.exit(0);
+}
 
+const groups = new Map();
+for (const [keys, value] of missing) {
+  const parent = keys.slice(0, -1).join(".");
+  const items = groups.get(parent) || [];
+  items.push([keys[keys.length - 1], value]);
+  groups.set(parent, items);
+}
 
-def parent_conflict(data: dict, path: tuple[str, ...]) -> tuple[str, ...] | None:
-    current = data
-    checked = []
-    for key in path[:-1]:
-        if not isinstance(current, dict):
-            return tuple(checked)
-        if key not in current:
-            return None
-        current = current[key]
-        checked.append(key)
-        if not isinstance(current, dict):
-            return tuple(checked)
-    return None
+let lines = fs.readFileSync(targetArg, "utf8").split(/(?<=\n)/);
+lines = lines.map(line => line && !line.endsWith("\n") ? `${line}\n` : line);
+const { blocks, firstTable } = collectTables(lines);
+const insertions = [];
+const appends = [];
 
+for (const [parent, items] of groups) {
+  const additions = items.map(([key, value]) => `${key} = ${tomlValue(value)}\n`);
+  if (!parent) {
+    if (firstTable < lines.length) additions.push("\n");
+    insertions.push([firstTable, additions]);
+  } else if (blocks.has(parent)) {
+    insertions.push([blocks.get(parent)[1], additions]);
+  } else {
+    appends.push([parent, additions]);
+  }
+}
 
-def toml_value(value) -> str:
-    if isinstance(value, bool):
-        return "true" if value else "false"
-    if isinstance(value, str):
-        return json.dumps(value)
-    if isinstance(value, int):
-        return str(value)
-    if isinstance(value, float):
-        return repr(value)
-    if isinstance(value, list):
-        return "[" + ", ".join(toml_value(item) for item in value) + "]"
-    print(f"Unsupported TOML value type in template: {type(value).__name__}", file=sys.stderr)
-    raise SystemExit(1)
+for (const [index, additions] of insertions.sort((a, b) => b[0] - a[0])) {
+  lines.splice(index, 0, ...additions);
+}
+for (const [parent, additions] of appends) {
+  if (lines.length && lines[lines.length - 1].trim()) lines.push("\n");
+  lines.push(`[${parent}]\n`, ...additions);
+}
 
+const newText = lines.join("");
+try {
+  if (newText.trim()) toml.parse(newText);
+} catch (error) {
+  console.error(`Refusing to write invalid merged TOML for ${targetArg}: ${error.message}`);
+  process.exit(1);
+}
 
-def collect_tables(lines: list[str]) -> tuple[dict[tuple[str, ...], tuple[int, int]], int]:
-    headers = []
-    for index, line in enumerate(lines):
-        match = HEADER_RE.match(line)
-        if match:
-            headers.append((index, tuple(match.group(1).split("."))))
-
-    blocks = {}
-    for offset, (index, path) in enumerate(headers):
-        end = headers[offset + 1][0] if offset + 1 < len(headers) else len(lines)
-        blocks[path] = (index, end)
-
-    first_table = headers[0][0] if headers else len(lines)
-    return blocks, first_table
-
-
-template_path = Path(sys.argv[1])
-target_path = Path(sys.argv[2])
-template_data = load_toml(template_path)
-target_data = load_toml(target_path)
-
-missing = []
-for path, value in flatten(template_data):
-    if has_path(target_data, path):
-        continue
-    conflict = parent_conflict(target_data, path)
-    if conflict:
-        print(
-            f"Cannot add {'.'.join(path)}: non-table value exists at {'.'.join(conflict)}",
-            file=sys.stderr,
-        )
-        raise SystemExit(1)
-    missing.append((path, value))
-
-if not missing:
-    print("current")
-    raise SystemExit(0)
-
-groups: dict[tuple[str, ...], list[tuple[str, object]]] = {}
-for path, value in missing:
-    groups.setdefault(path[:-1], []).append((path[-1], value))
-
-text = target_path.read_text()
-lines = text.splitlines(keepends=True)
-for index, line in enumerate(lines):
-    if line and not line.endswith("\n"):
-        lines[index] = line + "\n"
-
-blocks, first_table = collect_tables(lines)
-insertions = []
-appends = []
-
-for parent, items in groups.items():
-    additions = [f"{key} = {toml_value(value)}\n" for key, value in items]
-    if not parent:
-        if first_table < len(lines):
-            additions.append("\n")
-        insertions.append((first_table, additions))
-    elif parent in blocks:
-        _start, end = blocks[parent]
-        insertions.append((end, additions))
-    else:
-        appends.append((parent, additions))
-
-for index, additions in sorted(insertions, key=lambda item: item[0], reverse=True):
-    lines[index:index] = additions
-
-for parent, additions in appends:
-    if lines and lines[-1].strip():
-        lines.append("\n")
-    lines.append(f"[{'.'.join(parent)}]\n")
-    lines.extend(additions)
-
-new_text = "".join(lines)
-try:
-    tomllib.loads(new_text) if new_text.strip() else {}
-except tomllib.TOMLDecodeError as exc:
-    print(f"Refusing to write invalid merged TOML for {target_path}: {exc}", file=sys.stderr)
-    raise SystemExit(1)
-
-target_path.write_text(new_text)
-print(f"updated:{len(missing)}")
-PY
+fs.writeFileSync(targetArg, newText);
+console.log(`updated:${missing.length}`);
+JS
 )"
 
   case "$result" in
@@ -585,157 +577,156 @@ sync_hooks_template() {
   fi
 
   local result
-  result="$(python3 - "$hooks_target" "$hooks_template" "$config_target" <<'PY'
-from __future__ import annotations
+  result="$(node - "$hooks_target" "$hooks_template" "$config_target" "$repo_root/vendor/smol-toml/dist/index.cjs" <<'JS'
+const fs = require("node:fs");
+const path = require("node:path");
 
-import json
-import re
-import shutil
-import sys
-import tomllib
-from datetime import datetime
-from pathlib import Path
+const [hooksArg, templateArg, configArg, tomlPath] = process.argv.slice(2);
+const toml = require(tomlPath);
+const MANAGED_MARKER_RE = /^: 'codex-alpha-goal-compact-recovery:v[0-9]+';/;
+const LEGACY_MANAGED_MARKER_RE = /(^|[\s;'"])codex-compact-skill-recovery(?::v[0-9]+)?($|[\s;'"])/;
 
-hooks_path = Path(sys.argv[1])
-template_path = Path(sys.argv[2])
-config_path = Path(sys.argv[3])
-MARKER_RE = re.compile(r"codex-[A-Za-z0-9_.:-]+:v\d+")
-LEGACY_MANAGED_MARKER_FAMILIES = {"codex-compact-skill-recovery"}
+function loadJson(file, emptyDefault) {
+  if (emptyDefault && (!fs.existsSync(file) || !fs.readFileSync(file, "utf8").trim())) return emptyDefault;
+  try {
+    const data = JSON.parse(fs.readFileSync(file, "utf8"));
+    if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("top-level value must be an object");
+    return data;
+  } catch (error) {
+    console.error(`Invalid JSON in ${file}: ${error.message}`);
+    process.exit(1);
+  }
+}
 
+function validateHooksObject(data, file) {
+  if (!data.hooks) data.hooks = {};
+  if (!data.hooks || typeof data.hooks !== "object" || Array.isArray(data.hooks)) {
+    console.error(`${file}: top-level hooks field must be a JSON object`);
+    process.exit(1);
+  }
+  for (const [event, groups] of Object.entries(data.hooks)) {
+    if (typeof event !== "string" || !Array.isArray(groups)) {
+      console.error(`${file}: hooks.${event} must be a JSON array`);
+      process.exit(1);
+    }
+  }
+  return data.hooks;
+}
 
-def load_json(path: Path, *, empty_default: dict | None = None) -> dict:
-    if empty_default is not None and (not path.exists() or not path.read_text(encoding="utf-8").strip()):
-        return empty_default
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        print(f"Invalid JSON in {path}: {exc}", file=sys.stderr)
-        raise SystemExit(1)
-    if not isinstance(data, dict):
-        print(f"{path} must contain a JSON object", file=sys.stderr)
-        raise SystemExit(1)
-    return data
+function managedHook(hook) {
+  if (!hook || typeof hook !== "object" || hook.type !== "command" || typeof hook.command !== "string") return false;
+  const command = hook.command.trimStart();
+  return MANAGED_MARKER_RE.test(command) || LEGACY_MANAGED_MARKER_RE.test(command);
+}
 
+function requireTemplateMarker(templateHooks) {
+  for (const groups of Object.values(templateHooks)) {
+    for (const group of groups) {
+      for (const hook of group?.hooks || []) {
+        if (hook?.type === "command" && MANAGED_MARKER_RE.test(String(hook.command || "").trimStart())) return;
+      }
+    }
+  }
+  console.error(`${templateArg}: hooks template must include a managed command marker`);
+  process.exit(1);
+}
 
-def validate_hooks_object(data: dict, path: Path) -> dict:
-    hooks = data.setdefault("hooks", {})
-    if not isinstance(hooks, dict):
-        print(f"{path}: top-level hooks field must be a JSON object", file=sys.stderr)
-        raise SystemExit(1)
-    for event, groups in hooks.items():
-        if not isinstance(event, str) or not isinstance(groups, list):
-            print(f"{path}: hooks.{event} must be a JSON array", file=sys.stderr)
-            raise SystemExit(1)
-    return hooks
+function removeManagedHooks(hooks) {
+  let removed = 0;
+  for (const [event, groups] of Object.entries(hooks)) {
+    const nextGroups = [];
+    for (const group of groups) {
+      if (!group || typeof group !== "object" || !Array.isArray(group.hooks)) {
+        nextGroups.push(group);
+        continue;
+      }
+      const nextHooks = [];
+      for (const hook of group.hooks) {
+        if (managedHook(hook)) {
+          removed += 1;
+        } else {
+          nextHooks.push(hook);
+        }
+      }
+      if (nextHooks.length) nextGroups.push({ ...group, hooks: nextHooks });
+    }
+    hooks[event] = nextGroups;
+  }
+  return removed;
+}
 
+function mergeTemplateHooks(targetHooks, templateHooks) {
+  for (const [event, groups] of Object.entries(templateHooks)) {
+    if (!targetHooks[event]) targetHooks[event] = [];
+    if (!Array.isArray(targetHooks[event])) {
+      console.error(`${hooksArg}: hooks.${event} must be a JSON array`);
+      process.exit(1);
+    }
+    targetHooks[event].push(...groups);
+  }
+}
 
-def marker_family(marker: str) -> str:
-    return re.sub(r":v\d+$", "", marker)
+function resolveWritePath(hooksPath) {
+  fs.mkdirSync(path.dirname(hooksPath), { recursive: true });
+  let is_symlink = false;
+  try {
+    is_symlink = fs.lstatSync(hooksPath).isSymbolicLink();
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+  if (!is_symlink) return hooksPath;
+  try {
+    return fs.realpathSync(hooksPath);
+  } catch (error) {
+    console.error(`Refusing to write hooks into broken symlink: ${hooksPath}`);
+    process.exit(1);
+  }
+}
 
+function warnIfHooksDisabled(configPath) {
+  if (!fs.existsSync(configPath) || !fs.readFileSync(configPath, "utf8").trim()) return;
+  try {
+    const data = toml.parse(fs.readFileSync(configPath, "utf8"));
+    if (data?.features?.hooks === false) {
+      console.error(`Warning: installed ${hooksArg}, but [features].hooks is false in ${configPath}; Codex will not run user hooks until hooks are enabled.`);
+    }
+  } catch (error) {
+    console.error(`Warning: cannot inspect hooks feature in ${configPath}: ${error.message}`);
+  }
+}
 
-def collect_template_marker_families(data: dict) -> set[str]:
-    text = json.dumps(data, ensure_ascii=False)
-    markers = set(MARKER_RE.findall(text))
-    if not markers:
-        print(f"{template_path}: hooks template must include at least one codex managed marker", file=sys.stderr)
-        raise SystemExit(1)
-    return {marker_family(marker) for marker in markers} | LEGACY_MANAGED_MARKER_FAMILIES
+const hooksPath = path.resolve(hooksArg);
+const writePath = resolveWritePath(hooksPath);
+const data = loadJson(writePath, { hooks: {} });
+const templateData = loadJson(templateArg);
+const hooks = validateHooksObject(data, writePath);
+const templateHooks = validateHooksObject(templateData, templateArg);
+requireTemplateMarker(templateHooks);
+removeManagedHooks(hooks);
+mergeTemplateHooks(hooks, templateHooks);
 
+const newText = `${JSON.stringify(data, null, 2)}\n`;
+const oldText = fs.existsSync(writePath) ? fs.readFileSync(writePath, "utf8") : "";
+if (oldText === newText) {
+  warnIfHooksDisabled(configArg);
+  console.log("current");
+  process.exit(0);
+}
 
-def warn_if_hooks_disabled(path: Path) -> None:
-    if not path.exists() or not path.read_text(encoding="utf-8").strip():
-        return
-    try:
-        data = tomllib.loads(path.read_text(encoding="utf-8"))
-    except tomllib.TOMLDecodeError as exc:
-        print(f"Warning: cannot inspect hooks feature in {path}: {exc}", file=sys.stderr)
-        return
-    features = data.get("features", {})
-    if isinstance(features, dict) and features.get("hooks") is False:
-        print(
-            f"Warning: installed {hooks_path}, but [features].hooks is false in {path}; Codex will not run user hooks until hooks are enabled.",
-            file=sys.stderr,
-        )
+const existed = fs.existsSync(writePath);
+let backupPath = "";
+if (existed) {
+  const stamp = new Date().toISOString().replace(/[-:TZ.]/g, "").slice(0, 14);
+  backupPath = `${writePath}.bak-${stamp}`;
+  fs.copyFileSync(writePath, backupPath);
+}
 
-
-def group_contains_managed_family(group: object, marker_families: set[str]) -> bool:
-    group_text = json.dumps(group, ensure_ascii=False)
-    return any(marker_family in group_text for marker_family in marker_families)
-
-
-def remove_template_managed_hooks(hooks: dict, marker_families: set[str]) -> int:
-    removed = 0
-    for event, groups in list(hooks.items()):
-        cleaned_groups = []
-        for group in groups:
-            if not isinstance(group, dict) or not group_contains_managed_family(group, marker_families):
-                cleaned_groups.append(group)
-                continue
-
-            group_hooks = group.get("hooks")
-            if not isinstance(group_hooks, list):
-                removed += 1
-                continue
-
-            next_group_hooks = []
-            for hook in group_hooks:
-                if group_contains_managed_family(hook, marker_families):
-                    removed += 1
-                else:
-                    next_group_hooks.append(hook)
-
-            if next_group_hooks:
-                next_group = dict(group)
-                next_group["hooks"] = next_group_hooks
-                cleaned_groups.append(next_group)
-        hooks[event] = cleaned_groups
-    return removed
-
-
-def merge_template_hooks(target_hooks: dict, template_hooks: dict) -> None:
-    for event, groups in template_hooks.items():
-        target_hooks.setdefault(event, [])
-        if not isinstance(target_hooks[event], list):
-            print(f"{hooks_path}: hooks.{event} must be a JSON array", file=sys.stderr)
-            raise SystemExit(1)
-        target_hooks[event].extend(groups)
-
-
-def main() -> None:
-    hooks_path.parent.mkdir(parents=True, exist_ok=True)
-    data = load_json(hooks_path, empty_default={"hooks": {}})
-    template_data = load_json(template_path)
-    hooks = validate_hooks_object(data, hooks_path)
-    template_hooks = validate_hooks_object(template_data, template_path)
-    marker_families = collect_template_marker_families(template_data)
-
-    remove_template_managed_hooks(hooks, marker_families)
-    merge_template_hooks(hooks, template_hooks)
-
-    new_text = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
-    old_text = hooks_path.read_text(encoding="utf-8") if hooks_path.exists() else ""
-    if old_text == new_text:
-        warn_if_hooks_disabled(config_path)
-        print("current")
-        return
-
-    existed = hooks_path.exists()
-    backup_path = ""
-    if existed:
-        stamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        backup = hooks_path.with_name(f"{hooks_path.name}.bak-{stamp}")
-        shutil.copy2(hooks_path, backup)
-        backup_path = str(backup)
-
-    tmp_path = hooks_path.with_name(f"{hooks_path.name}.tmp")
-    tmp_path.write_text(new_text, encoding="utf-8")
-    tmp_path.replace(hooks_path)
-    warn_if_hooks_disabled(config_path)
-    print(f"updated:{backup_path}" if existed else "created")
-
-
-main()
-PY
+const tmpPath = `${writePath}.tmp`;
+fs.writeFileSync(tmpPath, newText);
+fs.renameSync(tmpPath, writePath);
+warnIfHooksDisabled(configArg);
+console.log(existed ? `updated:${backupPath}` : "created");
+JS
 )"
 
   case "$result" in

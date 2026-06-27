@@ -1,0 +1,11 @@
+{
+  "shouldPass": false,
+  "inheritRoot": true,
+  "replacements": [
+    {
+      "file": "templates/hooks.json",
+      "search": "if technical_design.md exists, read it with the Goal Contract before implementation, repair, refactor, hardening, or cross-file behavior changes; ",
+      "replace": ""
+    }
+  ]
+}

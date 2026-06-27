@@ -33,9 +33,10 @@ Do not leave `Clarification` until the coverage matrix has no blocking gap:
 - The highest-risk goal dimension and highest-risk design dimension each receive follow-up until no blocking gap remains.
 - Planned questions, unanswered questions, and hypothetical answers do not reduce coverage.
 
-Do not use confidence alone as exit evidence.
-Do not use round count as completion evidence.
-Do not propose implementation, code edits, or `$control-loop` handoff while any blocking goal or design gap remains.
+Clarification exit invariants:
+- `no_confidence_only`: Do not use confidence alone as exit evidence.
+- `no_round_count`: Do not use round count as completion evidence.
+- `no_blocking_gap_handoff`: Do not propose implementation, code edits, or `$control-loop` handoff while any blocking goal or design gap remains.
 
 ## Clarification
 

@@ -51,14 +51,18 @@ Route Decision
 Classify evidence before comparison.
 
 Evidence Types：
-- [from-test]
-- [from-build]
-- [from-runtime]
-- [from-review]
-- [from-inspection]
-- [from-user-validation]
-- [from-observer]
-- [from-blocker]
+- [from-test] result=pass|fail
+- [from-build] result=pass|fail
+- [from-runtime] result=observed|failed
+- [from-review] result=finding|clear
+- [from-inspection] result=observed
+- [from-environment] result=available|unavailable
+- [from-gap] result=same-goal-fixable|scope-change|authority-change
+- [from-blocker] result=blocked
+
+Legacy evidence aliases map to canonical evidence:
+- `from-user-validation` -> [from-test] result=pass
+- `from-observer` -> [from-runtime] result=observed
 
 Rules:
 - Auto-confirm only observable evidence.

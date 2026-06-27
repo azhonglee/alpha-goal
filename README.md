@@ -66,8 +66,11 @@ Accepted Goal Contract -> $control-loop -> Act -> Evidence -> $goal-verify -> Ga
 ## 快速开始
 
 ```bash
-安装：bash ./scripts/install.sh
-验证：npx --no-install tsx tools/validate_skills.ts .
+# 安装
+bash ./scripts/install.sh
+
+# 验证
+node tools/validate_skills.js .
 ```
 
 安装脚本会在 `$HOME/.codex/skills/` 下为三个公开技能创建直接软链接，并清理指向本仓库旧公开技能的软链接。

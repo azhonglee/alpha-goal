@@ -1,0 +1,11 @@
+{
+  "shouldPass": false,
+  "inheritRoot": true,
+  "replacements": [
+    {
+      "file": "skills/alpha-goal/SKILL.md",
+      "search": "| Key design decisions | ... |\n",
+      "replace": ""
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "shouldPass": false,
+  "inheritRoot": true,
+  "replacements": [
+    {
+      "file": "skills/control-loop/SKILL.md",
+      "search": "- `from-test-pass` -> [from-test] result=pass\n",
+      "replace": ""
+    }
+  ]
+}
