@@ -515,7 +515,15 @@ function validateInstallSurface(root, contract, errors) {
   }
   for (const term of [
     "render_install_target_menu",
-    "Use Up/Down and Enter",
+    "menu_supports_color",
+    "Use ↑/↓ and Enter",
+    "◆ Alpha Goal",
+    "●",
+    "○",
+    "Skills install to:",
+    "Choose which app configuration to update.",
+    "╭─ Alpha Goal install summary",
+    "╭─ Alpha Goal uninstall summary",
     "read -rsn1",
     "git_common_dir_for_path",
     "git_worktree_root_for_path",
@@ -601,8 +609,13 @@ function validateDocs(root, contract, errors) {
   }
   for (const term of [
     "arrow-key menu",
+    "color+Unicode",
     "`codex` is selected by default",
     "number keys do not select",
+    "ANSI color",
+    "Unicode selected state",
+    "grouped summary",
+    "omits skipped lines",
     "same Git common directory",
     "git worktree add --detach",
     "tmp_worktree_link",
