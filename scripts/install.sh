@@ -5,18 +5,20 @@ usage() {
   cat <<'EOF'
 Usage: scripts/install.sh [--uninstall] [--target global|codex|claude] [--codex-home PATH] [--force] [--no-sync-user-templates] [--no-sync-user-hooks] [--verbose]
 
-Install this repository's public skill directories as direct symlinks
-under $HOME/.agents/skills.
+Install this repository's public skill directories as copied directories
+under $HOME/.agents/skills. Claude targets also create symlinks under
+$HOME/.claude/skills pointing at those shared copies.
 
 When no target is passed, interactive terminals are prompted to choose a
 configuration target. Non-interactive runs default to the codex target.
 
 The global target syncs Codex and Claude configuration. The codex target syncs
 Codex AGENTS.md, config.toml, and hooks.json. The claude target syncs Claude
-CLAUDE.md. All targets install skills into $HOME/.agents/skills.
+CLAUDE.md. All targets copy skills into $HOME/.agents/skills; global and
+claude targets also link Claude skills from $HOME/.claude/skills.
 With --uninstall, codex and claude targets remove only their managed
-configuration, while global also removes this repository's skill symlinks from
-$HOME/.agents/skills.
+configuration, while global also removes this repository's copied skills from
+$HOME/.agents/skills and Claude skill symlinks from $HOME/.claude/skills.
 Use --no-sync-user-templates to skip user-level template updates.
 Use --no-sync-user-hooks to skip Codex hook updates.
 
@@ -27,10 +29,10 @@ Options:
             Select configuration target: global, codex, or claude.
   --codex-home PATH
             Sync Codex configuration into PATH instead of
-            ${CODEX_HOME:-$HOME/.codex}. Skills still install into
+            ${CODEX_HOME:-$HOME/.codex}. Shared skills still copy into
             $HOME/.agents/skills.
-  --force   Replace existing symlinks that point elsewhere. Real files or
-            directories are never removed.
+  --force   Replace existing symlinks that point elsewhere. Shared skill
+            directories are recopied; ordinary files are never removed.
   --no-sync-user-templates
             Skip updating Codex AGENTS.md/config.toml and Claude CLAUDE.md
             from templates/.
@@ -242,15 +244,15 @@ render_install_target_menu() {
   local labels=("global" "codex" "claude")
   local summaries=("Codex + Claude" "Codex only (recommended)" "Claude only")
   local details=(
-    "Updates Codex AGENTS.md/config.toml/hooks.json and Claude CLAUDE.md"
+    "Updates Codex AGENTS.md/config.toml/hooks.json, Claude CLAUDE.md, and Claude skill links"
     "Updates Codex AGENTS.md/config.toml/hooks.json"
-    "Updates Claude CLAUDE.md"
+    "Updates Claude CLAUDE.md and skill links"
   )
 
   if [[ "$uninstall" == true ]]; then
     operation="Uninstall"
     details=(
-      "Removes managed Codex + Claude config and this repo's shared skill links"
+      "Removes managed Codex + Claude config, skill copies, and Claude skill links"
       "Removes managed Codex config; shared skills stay installed"
       "Removes managed Claude config; shared skills stay installed"
     )
@@ -380,6 +382,7 @@ esac
 codex_home="$(absolute_path "$(default_codex_home)")"
 target_root="$(absolute_path "$(default_skills_root)")"
 claude_home="$(absolute_path "$(default_claude_home)")"
+claude_skill_root="$claude_home/skills"
 agents_template="$repo_root/templates/AGENTS.md"
 claude_template="$repo_root/templates/CLAUDE.md"
 config_template="$repo_root/templates/config.toml"
@@ -391,6 +394,8 @@ hooks_target="$codex_home/hooks.json"
 legacy_codex_skill_root="$codex_home/skills"
 agents_template_marker="<!-- generate-with-template:agents-md -->"
 claude_template_marker="<!-- generate-with-template:claude-md -->"
+skill_copy_marker=".alpha-goal-skill-copy"
+copied_count=0
 linked_count=0
 replaced_count=0
 already_count=0
@@ -523,14 +528,17 @@ link_path() {
   local source="$1"
   local target="$2"
   local label="$3"
+  local source_real
   local replaced=false
+
+  source_real="$(normalize_path "$source")"
 
   if [[ -L "$target" ]]; then
     local raw_current_target
     local current_target
     raw_current_target="$(readlink "$target")"
     current_target="$(resolve_link_target "$target")"
-    if [[ "$current_target" == "$source" ]]; then
+    if [[ "$current_target" == "$source_real" ]]; then
       already_count=$((already_count + 1))
       log "Already installed: $label -> $source"
       return
@@ -545,7 +553,7 @@ link_path() {
     if [[ "$current_target" == "$legacy_top_level_source" || "$current_target" == "$legacy_skill_dir_source" || ( -n "$legacy_skillset_source" && "$current_target" == "$legacy_skillset_source" ) ]]; then
       rm "$target"
       replaced=true
-    elif same_git_worktree_skill_link "$source" "$current_target" "$label"; then
+    elif same_git_worktree_skill_link "$source" "$current_target" "$label" || same_git_common_dir_skill_path "$current_target" "$label"; then
       rm "$target"
       replaced=true
     elif [[ "$force" == true ]]; then
@@ -568,6 +576,61 @@ link_path() {
   else
     linked_count=$((linked_count + 1))
     log "Installed: $label -> $source"
+  fi
+}
+
+copy_skill_dir() {
+  local source="$1"
+  local target="$2"
+  local label="$3"
+  local source_real
+  local replaced=false
+
+  source_real="$(normalize_path "$source")"
+
+  if [[ -L "$target" ]]; then
+    local raw_current_target
+    local current_target
+    raw_current_target="$(readlink "$target")"
+    current_target="$(resolve_link_target "$target")"
+
+    local legacy_top_level_source="$repo_root/$label"
+    local legacy_skill_dir_source="$source_skill_root/$label"
+    local legacy_skillset_source=""
+    if [[ "$label" == "alpha-goal" ]]; then
+      legacy_skillset_source="$source_skill_root"
+    fi
+
+    if [[ "$current_target" == "$source_real" || "$current_target" == "$legacy_top_level_source" || "$current_target" == "$legacy_skill_dir_source" || ( -n "$legacy_skillset_source" && "$current_target" == "$legacy_skillset_source" ) ]] || same_git_worktree_skill_link "$source" "$current_target" "$label" || same_git_common_dir_skill_path "$current_target" "$label"; then
+      rm "$target"
+      replaced=true
+    elif [[ "$force" == true ]]; then
+      rm "$target"
+      replaced=true
+    else
+      echo "Refusing to replace existing symlink: $target -> $raw_current_target" >&2
+      echo "Re-run with --force to replace symlinks." >&2
+      exit 1
+    fi
+  elif [[ -e "$target" ]]; then
+    if [[ -d "$target" ]]; then
+      rm -rf "$target"
+      replaced=true
+    else
+      echo "Refusing to replace existing non-directory skill path: $target" >&2
+      exit 1
+    fi
+  fi
+
+  mkdir -p "$(dirname "$target")"
+  cp -R "$source" "$target"
+  printf 'source=%s\n' "$source" > "$target/$skill_copy_marker"
+  if [[ "$replaced" == true ]]; then
+    replaced_count=$((replaced_count + 1))
+    log "Replaced skill copy: $label -> $target"
+  else
+    copied_count=$((copied_count + 1))
+    log "Copied skill: $label -> $target"
   fi
 }
 
@@ -630,9 +693,16 @@ remove_installed_skill_link() {
     return
   fi
 
+  if [[ ! -L "$target" && -d "$target" && -f "$target/$skill_copy_marker" ]]; then
+    rm -rf "$target"
+    uninstall_skill_removed_count=$((uninstall_skill_removed_count + 1))
+    log "Removed installed skill copy: $target"
+    return
+  fi
+
   if [[ ! -L "$target" ]]; then
     uninstall_skill_preserved_count=$((uninstall_skill_preserved_count + 1))
-    log "Preserved non-symlink skill path during uninstall: $target"
+    log "Preserved unmanaged skill path during uninstall: $target"
     return
   fi
 
@@ -642,13 +712,42 @@ remove_installed_skill_link() {
   if [[ "$skill_name" == "alpha-goal" ]]; then
     legacy_skillset_source="$source_skill_root"
   fi
-  if [[ "$current_target" == "$source_skill_root/$skill_name" || "$current_target" == "$repo_root/$skill_name" || ( -n "$legacy_skillset_source" && "$current_target" == "$legacy_skillset_source" ) ]]; then
+  if [[ "$current_target" == "$source_skill_root/$skill_name" || "$current_target" == "$repo_root/$skill_name" || ( -n "$legacy_skillset_source" && "$current_target" == "$legacy_skillset_source" ) ]] || same_git_common_dir_skill_path "$current_target" "$skill_name"; then
     rm "$target"
     uninstall_skill_removed_count=$((uninstall_skill_removed_count + 1))
     log "Removed installed skill link: $target"
   else
     uninstall_skill_preserved_count=$((uninstall_skill_preserved_count + 1))
     log "Preserved external skill symlink during uninstall: $target"
+  fi
+}
+
+remove_claude_skill_link() {
+  local skill_name="$1"
+  local target="$claude_skill_root/$skill_name"
+
+  if [[ ! -e "$target" && ! -L "$target" ]]; then
+    uninstall_skill_missing_count=$((uninstall_skill_missing_count + 1))
+    log "Claude skill is not installed: $target"
+    return
+  fi
+
+  if [[ ! -L "$target" ]]; then
+    uninstall_skill_preserved_count=$((uninstall_skill_preserved_count + 1))
+    log "Preserved unmanaged Claude skill path during uninstall: $target"
+    return
+  fi
+
+  local current_target
+  current_target="$(resolve_link_target "$target")"
+  local shared_target="$target_root/$skill_name"
+  if [[ "$current_target" == "$shared_target" || "$current_target" == "$source_skill_root/$skill_name" || "$current_target" == "$repo_root/$skill_name" ]] || same_git_common_dir_skill_path "$current_target" "$skill_name"; then
+    rm "$target"
+    uninstall_skill_removed_count=$((uninstall_skill_removed_count + 1))
+    log "Removed Claude skill link: $target"
+  else
+    uninstall_skill_preserved_count=$((uninstall_skill_preserved_count + 1))
+    log "Preserved external Claude skill symlink during uninstall: $target"
   fi
 }
 
@@ -1479,7 +1578,7 @@ print_summary() {
   local status="ready"
   local show_codex_config=false
   local show_claude_config=false
-  if [[ "$linked_count" -gt 0 || "$replaced_count" -gt 0 || "$legacy_removed_count" -gt 0 ]]; then
+  if [[ "$copied_count" -gt 0 || "$linked_count" -gt 0 || "$replaced_count" -gt 0 || "$legacy_removed_count" -gt 0 ]]; then
     status="installed"
   fi
   if [[ "$sync_codex_config" == true && "$sync_user_templates" == true && ( "$agents_action" != "current" || "$config_action" != "current" ) ]]; then
@@ -1500,10 +1599,7 @@ print_summary() {
   fi
 
   echo "╭─ Alpha Goal install summary"
-  echo "│ Result: $status"
-  echo "│ Skills: $installed linked"
   echo "│ Skills root: $target_root"
-  echo "│ Install target: $install_target"
   if [[ "$show_codex_config" == true || "$show_claude_config" == true ]]; then
     echo "├─ Configuration"
   fi
@@ -1555,6 +1651,7 @@ print_uninstall_summary() {
   if [[ "$install_target" == "global" ]]; then
     echo "├─ Shared skills"
     echo "│ Skills root: $target_root"
+    echo "│ Claude skills root: $claude_skill_root"
     echo "│ Skills: removed $uninstall_skill_removed_count, preserved $uninstall_skill_preserved_count, not-found $uninstall_skill_missing_count"
   fi
   if [[ "$show_codex_config" == true || "$show_claude_config" == true ]]; then
@@ -1645,6 +1742,9 @@ if [[ "$uninstall" == true ]]; then
 
   if [[ "$install_target" == "global" ]]; then
     for skill_name in "${required_skills[@]}"; do
+      remove_claude_skill_link "$skill_name"
+    done
+    for skill_name in "${required_skills[@]}"; do
       remove_installed_skill_link "$skill_name"
     done
   else
@@ -1680,7 +1780,11 @@ installed=0
 for skill_file in "${skill_files[@]}"; do
   skill_dir="$(cd "$(dirname "$skill_file")" && pwd -P)"
   skill_name="$(basename "$skill_dir")"
-  link_path "$skill_dir" "$target_root/$skill_name" "$skill_name"
+  copy_skill_dir "$skill_dir" "$target_root/$skill_name" "$skill_name"
+  if [[ "$sync_claude_config" == true ]]; then
+    mkdir -p "$claude_skill_root"
+    link_path "$target_root/$skill_name" "$claude_skill_root/$skill_name" "$skill_name"
+  fi
   installed=$((installed + 1))
 done
 
