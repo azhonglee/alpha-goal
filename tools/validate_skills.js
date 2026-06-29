@@ -403,8 +403,12 @@ function validateAlphaGoal(root, contract, errors) {
   if (!(reviewIndex >= 0 && summaryIndex > reviewIndex && confirmationIndex > summaryIndex && inputIndex > confirmationIndex)) {
     errors.push(`${rel}: Review summary must appear before Confirmation Gate request_user_input`);
   }
-  for (const term of ["approve/launch", "refine", "reject", "Contract status: accepted", "$executor"]) {
-    if (!markdownSection(text, "Confirmation Gate").includes(term)) errors.push(`${rel}: Confirmation Gate missing ${term}`);
+  const confirmationGate = markdownSection(text, "Confirmation Gate");
+  for (const term of ["approve/launch", "refine", "reject", "Contract status: accepted"]) {
+    if (!confirmationGate.includes(term)) errors.push(`${rel}: Confirmation Gate missing ${term}`);
+  }
+  if (!confirmationGate.includes("$executor") && !confirmationGate.includes("executor` skill") && !confirmationGate.includes("executor skill")) {
+    errors.push(`${rel}: Confirmation Gate missing executor handoff`);
   }
 }
 
@@ -541,8 +545,11 @@ function validateInstallSurface(root, contract, errors) {
   }
   if (!install.includes("--no-sync-user-hooks")) errors.push("scripts/install.sh missing --no-sync-user-hooks option");
   if (!isFile(path.join(root, "templates/CLAUDE.md"))) errors.push("templates/CLAUDE.md: missing");
-  for (const term of ["--target", "global", "codex", "claude", "$HOME/.agents/skills", "templates/CLAUDE.md", "CLAUDE.md"]) {
+  for (const term of ["--target", "global", "codex", "claude", "$HOME/.agents/skills", "$HOME/.claude/skills", "templates/CLAUDE.md", "CLAUDE.md"]) {
     if (!install.includes(term)) errors.push(`scripts/install.sh missing multi-target install term: ${term}`);
+  }
+  for (const term of ["copy_skill_dir", "claude_skill_root", ".alpha-goal-skill-copy", "Copied skill", "Removed installed skill copy", "Removed Claude skill link"]) {
+    if (!install.includes(term)) errors.push(`scripts/install.sh missing copied/Claude skill install term: ${term}`);
   }
   for (const term of [
     "render_install_target_menu",
@@ -635,7 +642,7 @@ function validateDocs(root, contract, errors) {
     if (!text.includes(contract.nodeRequirement)) errors.push(`${rel}: missing node requirement ${contract.nodeRequirement}`);
   }
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
-  for (const term of ["--target", "$HOME/.agents/skills", "templates/CLAUDE.md", "--no-sync-user-hooks", "templates/hooks.json", LEGACY_HOOK_MARKER, "temporary CODEX_HOME", FIXTURE_COMMAND]) {
+  for (const term of ["--target", "$HOME/.agents/skills", "$HOME/.claude/skills", "templates/CLAUDE.md", "--no-sync-user-hooks", "templates/hooks.json", LEGACY_HOOK_MARKER, "temporary CODEX_HOME", FIXTURE_COMMAND]) {
     if (!installDoc.includes(term)) errors.push(`INSTALL.md missing install term: ${term}`);
   }
   for (const term of [
@@ -653,6 +660,7 @@ function validateDocs(root, contract, errors) {
     "tmp_external_link",
     "tmp_wrong_path_link",
     "tmp_real_dir",
+    "tmp_file_path",
     "target menu timed out",
     "scripts/install.sh --uninstall --target global",
     "scripts/install.sh --uninstall --target codex",
@@ -676,11 +684,11 @@ function validateDocs(root, contract, errors) {
   const readme = readIfFile(path.join(root, "README.md"));
   const readmeEn = readIfFile(path.join(root, "README.en.md"));
   const manifest = readIfFile(path.join(root, "MANIFEST.md"));
-  for (const term of ["--uninstall", "$HOME/.agents/skills", "配置 symlink", "legacy Codex skills"]) {
+  for (const term of ["--uninstall", "$HOME/.agents/skills", "$HOME/.claude/skills", "配置 symlink", "legacy Codex skills"]) {
     if (!readme.includes(term)) errors.push(`README.md missing uninstall boundary term: ${term}`);
   }
   for (const [rel, text] of [["README.en.md", readmeEn], ["MANIFEST.md", manifest]]) {
-    for (const term of ["--uninstall", "$HOME/.agents/skills", "configuration symlinks", "legacy Codex skills"]) {
+    for (const term of ["--uninstall", "$HOME/.agents/skills", "$HOME/.claude/skills", "configuration symlinks", "legacy Codex skills"]) {
       if (!text.includes(term)) errors.push(`${rel} missing uninstall boundary term: ${term}`);
     }
   }

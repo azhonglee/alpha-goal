@@ -8,7 +8,7 @@ Requires Node.js 18+ when syncing Codex config or hooks. The installer uses repo
 scripts/install.sh
 ```
 
-The script installs three public skills as direct symlinks under `$HOME/.agents/skills`:
+The script copies three public skills under `$HOME/.agents/skills`:
 
 ```text
 alpha-goal
@@ -35,19 +35,19 @@ scripts/install.sh --verbose
 
 ## Behavior
 
-The script creates `$HOME/.agents/skills/<skill-name>` links for required public skills and cleans same-repo links for merged old public skills. During migration, it also removes same-repo skill symlinks left under `${CODEX_HOME:-$HOME/.codex}/skills`; real files, directories, and symlinks to other locations are preserved. The selected `--target` controls configuration sync only:
+The script creates copied directories at `$HOME/.agents/skills/<skill-name>` for required public skills and cleans same-repo links for merged old public skills. `global` and `claude` targets also create `$HOME/.claude/skills/<skill-name>` symlinks pointing at the shared copies. During migration, it also removes same-repo skill symlinks left under `${CODEX_HOME:-$HOME/.codex}/skills`; real files, directories, and symlinks to other locations are preserved there. The selected `--target` controls configuration sync and whether Claude skill links are created:
 
-- `global`: sync Codex config plus Claude `CLAUDE.md`.
+- `global`: sync Codex config plus Claude `CLAUDE.md`, and link Claude skills.
 - `codex`: sync Codex config only.
-- `claude`: sync Claude `CLAUDE.md` only.
+- `claude`: sync Claude `CLAUDE.md` and link Claude skills.
 
-Without `--target`, an interactive terminal shows a color+Unicode arrow-key menu for `global`, `codex`, or `claude`; `codex` is selected by default and Enter confirms the highlighted target. The menu states that skills always install to `$HOME/.agents/skills`, explains that the target only controls configuration, and uses Up/Down plus Enter only; number keys do not select a target. The installer prints a grouped summary after install or uninstall; the summary shows only active effects for the selected target and omits skipped lines. Non-interactive runs still default to `codex`. Codex config uses `${CODEX_HOME:-$HOME/.codex}` or `--codex-home`. Claude config uses `$HOME/.claude/CLAUDE.md` from `templates/CLAUDE.md`.
+Without `--target`, an interactive terminal shows a color+Unicode arrow-key menu for `global`, `codex`, or `claude`; `codex` is selected by default and Enter confirms the highlighted target. The menu states that shared skills install to `$HOME/.agents/skills`, and uses Up/Down plus Enter only; number keys do not select a target. The installer prints a grouped summary after install or uninstall; the summary shows only active effects for the selected target and omits skipped lines. Install summaries omit `Result`, `Skills ... linked`, and `Install target` lines. Non-interactive runs still default to `codex`. Codex config uses `${CODEX_HOME:-$HOME/.codex}` or `--codex-home`. Claude config uses `$HOME/.claude/CLAUDE.md` from `templates/CLAUDE.md`, and Claude skill links use `$HOME/.claude/skills`.
 
-When installing skill links, an existing `$HOME/.agents/skills/<skill-name>` symlink is adopted without `--force` only when it points to `skills/<skill-name>` in another worktree with the same Git common directory. Git detection failures, external symlinks, symlinks to other repo-relative paths, and real directories still require the existing `--force` or refusal behavior.
+When installing skill copies, an existing `$HOME/.agents/skills/<skill-name>` symlink is migrated without `--force` only when it points to `skills/<skill-name>` in this repository or another worktree with the same Git common directory. Existing real directories at `$HOME/.agents/skills/<skill-name>` are removed and recopied. Git detection failures, external symlinks, and symlinks to other repo-relative paths still require `--force` or are refused; ordinary files are always refused. Claude skill symlinks follow the same same-repo adoption rule, but existing non-symlink Claude skill paths are preserved.
 
-Use `--uninstall` to remove managed install artifacts for the selected target. `--uninstall --target codex` removes only managed Codex configuration and keeps shared `$HOME/.agents/skills` links. `--uninstall --target claude` removes only managed Claude `CLAUDE.md` content and keeps shared skills. `--uninstall --target global` removes managed Codex and Claude configuration plus this repository's skill symlinks under `$HOME/.agents/skills`. Uninstall does not remove legacy `${CODEX_HOME:-$HOME/.codex}/skills` paths.
+Use `--uninstall` to remove managed install artifacts for the selected target. `--uninstall --target codex` removes only managed Codex configuration and keeps shared `$HOME/.agents/skills` copies plus Claude skill links. `--uninstall --target claude` removes only managed Claude `CLAUDE.md` content and keeps shared skills plus Claude skill links. `--uninstall --target global` removes managed Codex and Claude configuration plus this repository's copied skills under `$HOME/.agents/skills` and Claude skill links under `$HOME/.claude/skills`. Uninstall does not remove legacy `${CODEX_HOME:-$HOME/.codex}/skills` paths.
 
-Uninstall is conservative. It removes only managed Markdown blocks, managed hooks, `config.toml` that byte-for-byte matches `templates/config.toml`, and skill symlinks that resolve to this repository. Mixed user Markdown keeps user content, mixed or modified `config.toml` is preserved, unmanaged hooks are preserved, configuration symlinks are not followed or deleted, and real skill directories or external symlinks are preserved. `--no-sync-user-templates` skips Markdown and `config.toml` cleanup; `--no-sync-user-hooks` skips hooks cleanup.
+Uninstall is conservative outside the managed copied-skill path. It removes only managed Markdown blocks, managed hooks, `config.toml` that byte-for-byte matches `templates/config.toml`, skill copies with the install marker, and skill symlinks that resolve to this repository or the shared skill copy. Mixed user Markdown keeps user content, mixed or modified `config.toml` is preserved, unmanaged hooks are preserved, configuration symlinks are not followed or deleted, and unmanaged skill directories or external symlinks are preserved. `--no-sync-user-templates` skips Markdown and `config.toml` cleanup; `--no-sync-user-hooks` skips hooks cleanup.
 
 The compact recovery hook definition lives in `templates/hooks.json`. It is a `SessionStart` hook for `compact` starts and prints a static policy telling Codex to decide whether `alpha-goal`, `executor`, or `verifier` applies after compaction, and to load the matching skill before continuing. For active Alpha Goal tasks, it resumes from draft or accepted `goal-contract.md` first and reads `technical_design.md` with the Goal Contract when it exists; accepted status gates only `executor` execution handoff. `verifier` covers evidence, claim boundary, defect/risk sweep, and material unclaimed issues. Use `--no-sync-user-templates` to skip Codex AGENTS/config and Claude CLAUDE template updates. Use `--no-sync-user-hooks` to skip Codex hook template updates.
 
@@ -57,7 +57,7 @@ Codex may require reviewing and trusting the changed hook with `/hooks` before i
 
 ## Smoke test
 
-The smoke test checks installed skill links, target-specific config sync, hook recovery text, and state fixture shape with a temporary HOME and temporary CODEX_HOME, without requiring runtime skill scripts or touching real user configuration. The PTY portion also asserts the target menu structure, ANSI color, Unicode selected state, grouped summary output, and that summary output omits skipped lines.
+The smoke test checks installed skill copies, Claude skill links, target-specific config sync, hook recovery text, and state fixture shape with a temporary HOME and temporary CODEX_HOME, without requiring runtime skill scripts or touching real user configuration. The PTY portion also asserts the target menu structure, ANSI color, Unicode selected state, grouped summary output, and that summary output omits skipped lines and the removed install summary lines.
 
 ```bash
 set -euo pipefail
@@ -67,7 +67,11 @@ HOME="$tmp_home" CODEX_HOME="$tmp_codex_home" scripts/install.sh --target global
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 workspace_slug="$(basename "$repo_root")"
 for skill in alpha-goal executor verifier; do
+  test -d "$tmp_home/.agents/skills/$skill"
+  test ! -L "$tmp_home/.agents/skills/$skill"
   test -f "$tmp_home/.agents/skills/$skill/SKILL.md"
+  test -L "$tmp_home/.claude/skills/$skill"
+  test "$(readlink "$tmp_home/.claude/skills/$skill")" = "$tmp_home/.agents/skills/$skill"
 done
 test -f "$tmp_codex_home/AGENTS.md"
 test -f "$tmp_codex_home/config.toml"
@@ -123,31 +127,46 @@ grep -q '\$verifier' "$tmp_codex_home/hooks.json"
 
 tmp_codex_only="$(mktemp -d)"
 HOME="$tmp_codex_only" CODEX_HOME="$tmp_codex_only/.codex" scripts/install.sh --target codex
+test -d "$tmp_codex_only/.agents/skills/alpha-goal"
+test ! -L "$tmp_codex_only/.agents/skills/alpha-goal"
 test -f "$tmp_codex_only/.agents/skills/alpha-goal/SKILL.md"
 test -f "$tmp_codex_only/.codex/AGENTS.md"
 test ! -e "$tmp_codex_only/.claude/CLAUDE.md"
+test ! -e "$tmp_codex_only/.claude/skills/alpha-goal"
 
 tmp_claude_only="$(mktemp -d)"
 HOME="$tmp_claude_only" CODEX_HOME="$tmp_claude_only/.codex" scripts/install.sh --target claude
+test -d "$tmp_claude_only/.agents/skills/alpha-goal"
+test ! -L "$tmp_claude_only/.agents/skills/alpha-goal"
 test -f "$tmp_claude_only/.agents/skills/alpha-goal/SKILL.md"
+test -L "$tmp_claude_only/.claude/skills/alpha-goal"
+test "$(readlink "$tmp_claude_only/.claude/skills/alpha-goal")" = "$tmp_claude_only/.agents/skills/alpha-goal"
 test -f "$tmp_claude_only/.claude/CLAUDE.md"
 test ! -e "$tmp_claude_only/.codex/AGENTS.md"
 
 tmp_noninteractive="$(mktemp -d)"
 HOME="$tmp_noninteractive" CODEX_HOME="$tmp_noninteractive/.codex" scripts/install.sh </dev/null
+test -d "$tmp_noninteractive/.agents/skills/alpha-goal"
+test ! -L "$tmp_noninteractive/.agents/skills/alpha-goal"
 test -f "$tmp_noninteractive/.agents/skills/alpha-goal/SKILL.md"
 test -f "$tmp_noninteractive/.codex/AGENTS.md"
 test ! -e "$tmp_noninteractive/.claude/CLAUDE.md"
+test ! -e "$tmp_noninteractive/.claude/skills/alpha-goal"
 
 tmp_skip="$(mktemp -d)"
 HOME="$tmp_skip" CODEX_HOME="$tmp_skip/.codex" scripts/install.sh --target global --no-sync-user-templates --no-sync-user-hooks >"$tmp_skip/install.out"
-grep -q "│ Install target: global" "$tmp_skip/install.out"
 grep -q "│ Skills root:" "$tmp_skip/install.out"
+! grep -q "│ Install target:" "$tmp_skip/install.out"
+! grep -q "│ Result:" "$tmp_skip/install.out"
+! grep -Eq "│ Skills: .* linked" "$tmp_skip/install.out"
 ! grep -q "skipped" "$tmp_skip/install.out"
 ! grep -q "Configuration" "$tmp_skip/install.out"
 ! grep -q "Templates" "$tmp_skip/install.out"
 ! grep -q "Hooks" "$tmp_skip/install.out"
+test -d "$tmp_skip/.agents/skills/alpha-goal"
+test ! -L "$tmp_skip/.agents/skills/alpha-goal"
 test -f "$tmp_skip/.agents/skills/alpha-goal/SKILL.md"
+test -L "$tmp_skip/.claude/skills/alpha-goal"
 test ! -e "$tmp_skip/.codex/AGENTS.md"
 test ! -e "$tmp_skip/.codex/config.toml"
 test ! -e "$tmp_skip/.codex/hooks.json"
@@ -155,6 +174,7 @@ test ! -e "$tmp_skip/.claude/CLAUDE.md"
 
 tmp_migration="$(mktemp -d)"
 mkdir -p "$tmp_migration/.agents/skills" "$tmp_migration/.codex/skills" "$tmp_migration/external"
+ln -s "$repo_root/skills/alpha-goal" "$tmp_migration/.agents/skills/alpha-goal"
 ln -s "$repo_root/skills/control-loop" "$tmp_migration/.agents/skills/control-loop"
 ln -s "$repo_root/skills/goal-verify" "$tmp_migration/.agents/skills/goal-verify"
 ln -s "$repo_root/skills/alpha-goal" "$tmp_migration/.codex/skills/alpha-goal"
@@ -163,9 +183,12 @@ ln -s "$repo_root/skills/control-loop" "$tmp_migration/.codex/skills/control-loo
 ln -s "$repo_root/skills/goal-verify" "$tmp_migration/.codex/skills/goal-verify"
 ln -s "$tmp_migration/external" "$tmp_migration/.codex/skills/external-skill"
 HOME="$tmp_migration" CODEX_HOME="$tmp_migration/.codex" scripts/install.sh --target claude
+test -d "$tmp_migration/.agents/skills/alpha-goal"
+test ! -L "$tmp_migration/.agents/skills/alpha-goal"
 test -f "$tmp_migration/.agents/skills/alpha-goal/SKILL.md"
 test -f "$tmp_migration/.agents/skills/executor/SKILL.md"
 test -f "$tmp_migration/.agents/skills/verifier/SKILL.md"
+test -L "$tmp_migration/.claude/skills/alpha-goal"
 test ! -L "$tmp_migration/.agents/skills/control-loop"
 test ! -L "$tmp_migration/.agents/skills/goal-verify"
 test ! -e "$tmp_migration/.codex/skills/alpha-goal"
@@ -191,7 +214,9 @@ git worktree add --detach "$tmp_other_worktree" HEAD >/dev/null
 mkdir -p "$tmp_worktree_link/.agents/skills"
 ln -s "$tmp_other_worktree/skills/alpha-goal" "$tmp_worktree_link/.agents/skills/alpha-goal"
 HOME="$tmp_worktree_link" CODEX_HOME="$tmp_worktree_link/.codex" scripts/install.sh --target codex
-test "$(readlink "$tmp_worktree_link/.agents/skills/alpha-goal")" = "$(pwd -P)/skills/alpha-goal"
+test -d "$tmp_worktree_link/.agents/skills/alpha-goal"
+test ! -L "$tmp_worktree_link/.agents/skills/alpha-goal"
+test -f "$tmp_worktree_link/.agents/skills/alpha-goal/SKILL.md"
 git worktree remove --force "$tmp_other_worktree" >/dev/null
 
 tmp_external_link="$(mktemp -d)"
@@ -212,8 +237,18 @@ fi
 
 tmp_real_dir="$(mktemp -d)"
 mkdir -p "$tmp_real_dir/.agents/skills/alpha-goal"
-if HOME="$tmp_real_dir" CODEX_HOME="$tmp_real_dir/.codex" scripts/install.sh --target codex; then
-  echo "expected real skill directory install to fail without --force" >&2
+printf 'stale\n' >"$tmp_real_dir/.agents/skills/alpha-goal/stale"
+HOME="$tmp_real_dir" CODEX_HOME="$tmp_real_dir/.codex" scripts/install.sh --target codex
+test -d "$tmp_real_dir/.agents/skills/alpha-goal"
+test ! -L "$tmp_real_dir/.agents/skills/alpha-goal"
+test -f "$tmp_real_dir/.agents/skills/alpha-goal/SKILL.md"
+test ! -e "$tmp_real_dir/.agents/skills/alpha-goal/stale"
+
+tmp_file_path="$(mktemp -d)"
+mkdir -p "$tmp_file_path/.agents/skills"
+printf 'not a directory\n' >"$tmp_file_path/.agents/skills/alpha-goal"
+if HOME="$tmp_file_path" CODEX_HOME="$tmp_file_path/.codex" scripts/install.sh --target codex; then
+  echo "expected ordinary skill file install to fail" >&2
   exit 1
 fi
 
@@ -222,6 +257,7 @@ HOME="$tmp_uninstall_global" CODEX_HOME="$tmp_uninstall_global/.codex" scripts/i
 HOME="$tmp_uninstall_global" CODEX_HOME="$tmp_uninstall_global/.codex" scripts/install.sh --uninstall --target global
 for skill in alpha-goal executor verifier; do
   test ! -e "$tmp_uninstall_global/.agents/skills/$skill"
+  test ! -e "$tmp_uninstall_global/.claude/skills/$skill"
 done
 test ! -e "$tmp_uninstall_global/.codex/AGENTS.md"
 test ! -e "$tmp_uninstall_global/.codex/config.toml"
@@ -232,18 +268,21 @@ tmp_uninstall_target="$(mktemp -d)"
 HOME="$tmp_uninstall_target" CODEX_HOME="$tmp_uninstall_target/.codex" scripts/install.sh --target global
 HOME="$tmp_uninstall_target" CODEX_HOME="$tmp_uninstall_target/.codex" scripts/install.sh --uninstall --target codex
 test -f "$tmp_uninstall_target/.agents/skills/alpha-goal/SKILL.md"
+test -L "$tmp_uninstall_target/.claude/skills/alpha-goal"
 test -f "$tmp_uninstall_target/.claude/CLAUDE.md"
 test ! -e "$tmp_uninstall_target/.codex/AGENTS.md"
 test ! -e "$tmp_uninstall_target/.codex/config.toml"
 test ! -e "$tmp_uninstall_target/.codex/hooks.json"
 HOME="$tmp_uninstall_target" CODEX_HOME="$tmp_uninstall_target/.codex" scripts/install.sh --uninstall --target claude
 test -f "$tmp_uninstall_target/.agents/skills/alpha-goal/SKILL.md"
+test -L "$tmp_uninstall_target/.claude/skills/alpha-goal"
 test ! -e "$tmp_uninstall_target/.claude/CLAUDE.md"
 
 tmp_uninstall_noninteractive="$(mktemp -d)"
 HOME="$tmp_uninstall_noninteractive" CODEX_HOME="$tmp_uninstall_noninteractive/.codex" scripts/install.sh --target global
 HOME="$tmp_uninstall_noninteractive" CODEX_HOME="$tmp_uninstall_noninteractive/.codex" scripts/install.sh --uninstall </dev/null
 test -f "$tmp_uninstall_noninteractive/.agents/skills/alpha-goal/SKILL.md"
+test -L "$tmp_uninstall_noninteractive/.claude/skills/alpha-goal"
 test -f "$tmp_uninstall_noninteractive/.claude/CLAUDE.md"
 test ! -e "$tmp_uninstall_noninteractive/.codex/AGENTS.md"
 
@@ -296,6 +335,8 @@ test -f "$tmp_uninstall_skip/.codex/AGENTS.md"
 test -f "$tmp_uninstall_skip/.codex/config.toml"
 test -f "$tmp_uninstall_skip/.codex/hooks.json"
 test -f "$tmp_uninstall_skip/.claude/CLAUDE.md"
+test ! -e "$tmp_uninstall_skip/.agents/skills/alpha-goal"
+test ! -e "$tmp_uninstall_skip/.claude/skills/alpha-goal"
 
 tmp_uninstall_invalid_hooks="$(mktemp -d)"
 HOME="$tmp_uninstall_invalid_hooks" CODEX_HOME="$tmp_uninstall_invalid_hooks/.codex" scripts/install.sh --target codex
@@ -391,37 +432,55 @@ assert "Choose which app configuration to update." in out
 assert "○" in out and "global" in out
 assert "Use ↑/↓ and Enter:" in out
 assert "╭─ Alpha Goal install summary" in out
-assert "│ Install target: codex" in out
+assert "│ Install target:" not in out
+assert "│ Result:" not in out
+assert " linked" not in out
 assert "├─ Configuration" in out
 assert "skipped" not in out
+assert (tmp / ".agents/skills/alpha-goal").is_dir()
+assert not (tmp / ".agents/skills/alpha-goal").is_symlink()
 assert (tmp / ".codex/AGENTS.md").is_file()
 assert not (tmp / ".claude/CLAUDE.md").exists()
+assert not (tmp / ".claude/skills/alpha-goal").exists()
 shutil.rmtree(tmp)
 
 out, tmp = run_menu(b"\x1b[A\n")
-assert "│ Install target: global" in out
+assert "│ Install target:" not in out
+assert "│ Result:" not in out
+assert " linked" not in out
 assert "skipped" not in out
+assert (tmp / ".agents/skills/alpha-goal").is_dir()
+assert not (tmp / ".agents/skills/alpha-goal").is_symlink()
+assert (tmp / ".claude/skills/alpha-goal").is_symlink()
 assert (tmp / ".claude/CLAUDE.md").is_file()
 shutil.rmtree(tmp)
 
 out, tmp = run_menu(b"\x1b[B\n")
-assert "│ Install target: claude" in out
+assert "│ Install target:" not in out
+assert "│ Result:" not in out
+assert " linked" not in out
 assert "│ Claude home:" in out
 assert "skipped" not in out
+assert (tmp / ".agents/skills/alpha-goal").is_dir()
+assert not (tmp / ".agents/skills/alpha-goal").is_symlink()
+assert (tmp / ".claude/skills/alpha-goal").is_symlink()
 assert (tmp / ".claude/CLAUDE.md").is_file()
 assert not (tmp / ".codex/AGENTS.md").exists()
 shutil.rmtree(tmp)
 
 out, tmp = run_menu(b"\x1b[B\x1b[B\n")
-assert "│ Install target: global" in out
+assert "│ Install target:" not in out
+assert (tmp / ".claude/skills/alpha-goal").is_symlink()
 shutil.rmtree(tmp)
 
 out, tmp = run_menu(b"2\n")
-assert "│ Install target: codex" in out
+assert "│ Install target:" not in out
+assert (tmp / ".codex/AGENTS.md").is_file()
 shutil.rmtree(tmp)
 
 out, tmp = run_menu(b"\x1b\n")
-assert "│ Install target: codex" in out
+assert "│ Install target:" not in out
+assert (tmp / ".codex/AGENTS.md").is_file()
 shutil.rmtree(tmp)
 
 out, tmp = run_menu(b"\x1b[B\n", uninstall=True)
@@ -432,6 +491,7 @@ assert "│ Claude home:" in out
 assert "│ Claude templates: CLAUDE.md removed" in out
 assert "skipped" not in out
 assert (tmp / ".agents/skills/alpha-goal/SKILL.md").is_file()
+assert (tmp / ".claude/skills/alpha-goal").is_symlink()
 assert (tmp / ".codex/AGENTS.md").is_file()
 assert not (tmp / ".claude/CLAUDE.md").exists()
 shutil.rmtree(tmp)
@@ -439,7 +499,7 @@ PY
 
 node tools/validate_skills.js .
 node tools/validate_skills.js --fixtures
-rm -rf "$tmp_home" "$tmp_codex_only" "$tmp_claude_only" "$tmp_noninteractive" "$tmp_skip" "$tmp_migration" "$tmp_legacy_external" "$tmp_worktree_link" "$tmp_external_link" "$tmp_wrong_path_link" "$tmp_real_dir" "$tmp_uninstall_global" "$tmp_uninstall_target" "$tmp_uninstall_noninteractive" "$tmp_uninstall_toml" "$tmp_uninstall_blank_toml" "$tmp_uninstall_safety" "$tmp_uninstall_skip" "$tmp_uninstall_invalid_hooks"
+rm -rf "$tmp_home" "$tmp_codex_only" "$tmp_claude_only" "$tmp_noninteractive" "$tmp_skip" "$tmp_migration" "$tmp_legacy_external" "$tmp_worktree_link" "$tmp_external_link" "$tmp_wrong_path_link" "$tmp_real_dir" "$tmp_file_path" "$tmp_uninstall_global" "$tmp_uninstall_target" "$tmp_uninstall_noninteractive" "$tmp_uninstall_toml" "$tmp_uninstall_blank_toml" "$tmp_uninstall_safety" "$tmp_uninstall_skip" "$tmp_uninstall_invalid_hooks"
 ```
 
 ## Prompts
