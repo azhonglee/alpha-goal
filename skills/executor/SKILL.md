@@ -133,12 +133,12 @@ Before returning final success:
 [ ] No unresolved blocker remains
 [ ] No source-of-truth conflict remains
 [ ] No scope/authority/claim-boundary change occurred
-[ ] `$verifier` verdict allows final route
+[ ] `verifier` skill verdict allows final route
 
 If any item is unchecked, DO NOT claim complete.
 
 ## Stop / Return Rules
-Return to $alpha-goal when:
+Return to `alpha-goal` skill when:
 - Target changes
 - Scope changes
 - Acceptance evidence changes

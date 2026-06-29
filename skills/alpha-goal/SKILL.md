@@ -36,7 +36,7 @@ Do not leave `Clarification` until the coverage matrix has no blocking gap:
 Clarification exit invariants:
 - `no_confidence_only`: Do not use confidence alone as exit evidence.
 - `no_round_count`: Do not use round count as completion evidence.
-- `no_blocking_gap_handoff`: Do not propose implementation, code edits, or `$executor` handoff while any blocking goal or design gap remains.
+- `no_blocking_gap_handoff`: Do not propose implementation, code edits, or `executor` skill handoff while any blocking goal or design gap remains.
 
 ## Clarification
 
@@ -184,6 +184,6 @@ Goal Contract Summary (Design Summary)
 ## Confirmation Gate
 
 Use `request_user_input` to ask for approve/launch, refine, or reject.
-- On approval: set `Contract status: accepted`; hand off to `$executor`.
+- On approval: set `Contract status: accepted`; hand off to `executor` skill.
 - On rejection: keep `Contract status: draft`.
 - On refine: keep `Contract status: draft`; return to `Clarification` with user feedback.
