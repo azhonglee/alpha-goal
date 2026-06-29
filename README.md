@@ -73,8 +73,6 @@ bash ./scripts/install.sh
 node tools/validate_skills.js .
 ```
 
-安装脚本会把三个公开技能复制到 `$HOME/.agents/skills/`，并按 `--target` 写入对应配置；不传 `--target` 时默认使用 `codex`。`global` 和 `claude` target 会额外在 `$HOME/.claude/skills/` 下创建 Claude skill 链接。`--uninstall` 只清理所选 target 的托管配置，不跟随配置 symlink，也不处理 legacy Codex skills；只有 `--uninstall --target global` 会同时移除共享技能副本和 Claude skill 链接。
-
 ## 使用示例
 
 ```text

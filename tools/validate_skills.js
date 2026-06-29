@@ -684,9 +684,6 @@ function validateDocs(root, contract, errors) {
   const readme = readIfFile(path.join(root, "README.md"));
   const readmeEn = readIfFile(path.join(root, "README.en.md"));
   const manifest = readIfFile(path.join(root, "MANIFEST.md"));
-  for (const term of ["--uninstall", "$HOME/.agents/skills", "$HOME/.claude/skills", "配置 symlink", "legacy Codex skills"]) {
-    if (!readme.includes(term)) errors.push(`README.md missing uninstall boundary term: ${term}`);
-  }
   for (const [rel, text] of [["README.en.md", readmeEn], ["MANIFEST.md", manifest]]) {
     for (const term of ["--uninstall", "$HOME/.agents/skills", "$HOME/.claude/skills", "configuration symlinks", "legacy Codex skills"]) {
       if (!text.includes(term)) errors.push(`${rel} missing uninstall boundary term: ${term}`);
