@@ -5,8 +5,8 @@
 | Directory | Purpose |
 |---|---|
 | `skills/alpha-goal/` | Front-end controller: fact discovery, clarification, Goal Contract, trigger contract, authority boundary, route. |
-| `skills/control-loop/` | Goal-contract-driven bounded actuator/controller: act or harden authorized slices; use Goal Contract as the required input and one conditional checkpoint for recovery, trigger handling, durable evidence, or verification. |
-| `skills/goal-verify/` | Independent goal verifier for evidence coverage, claim boundaries, defect/risk sweep, and verification gaps. |
+| `skills/executor/` | Goal-contract-driven bounded actuator/controller: act or harden authorized slices; use Goal Contract as the required input and one conditional checkpoint for recovery, trigger handling, durable evidence, or verification. |
+| `skills/verifier/` | Independent goal verifier for evidence coverage, claim boundaries, defect/risk sweep, and verification gaps. |
 
 Former public framing/modeling/synthesis stages are folded into `skills/alpha-goal/SKILL.md`.
 
@@ -19,7 +19,7 @@ Former public framing/modeling/synthesis stages are folded into `skills/alpha-go
 
 ## User Hooks
 
-`templates/hooks.json` defines one Codex user-level `SessionStart` / `^compact$` hook, marked by `codex-alpha-goal-compact-recovery:v1`. `scripts/install.sh --target global` and `scripts/install.sh --target codex` merge that template into `${CODEX_HOME:-$HOME/.codex}/hooks.json`. The hook prints a static compact recovery policy that asks Codex to re-check `alpha-goal`, `control-loop`, and `goal-verify` after compaction and load the applicable skill. It restores draft or accepted `goal-contract.md` for Alpha Goal framing, reads `technical_design.md` with the Goal Contract when it exists, requires accepted status only for `control-loop` execution handoff, and covers goal verification, claim-boundary checks, and defect/risk sweep when needed.
+`templates/hooks.json` defines one Codex user-level `SessionStart` / `^compact$` hook, marked by `codex-alpha-goal-compact-recovery:v1`. `scripts/install.sh --target global` and `scripts/install.sh --target codex` merge that template into `${CODEX_HOME:-$HOME/.codex}/hooks.json`. The hook prints a static compact recovery policy that asks Codex to re-check `alpha-goal`, `executor`, and `verifier` after compaction and load the applicable skill. It restores draft or accepted `goal-contract.md` for Alpha Goal framing, reads `technical_design.md` with the Goal Contract when it exists, requires accepted status only for `executor` execution handoff, and covers goal verification, claim-boundary checks, and defect/risk sweep when needed.
 
 Hook replacement is by marker family, not exact version, so later `:v2` template markers replace existing `:v1` hooks. The installer also migrates the earlier experimental `codex-compact-skill-recovery` family.
 
@@ -44,4 +44,4 @@ Default runtime artifacts live under the user-level Alpha Goal state root: `${CO
 
 ## Count Budget
 
-The enforced count budget is the whole `skills/` tree, capped at 15,000 word+punctuation units. Counted units are words plus punctuation/symbol marks. The cap preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, authority gates, behavior-level gates, and evaluator feedback without over-compressing their meaning.
+The enforced count budget is the whole `skills/` tree, capped at 15,000 word+punctuation units. Counted units are words plus punctuation/symbol marks. The cap preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, authority gates, behavior-level gates, and verifier feedback without over-compressing their meaning.

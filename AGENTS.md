@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-本仓库维护 `alpha-goal` Codex 技能包。公开技能位于 `skills/alpha-goal/`、`skills/control-loop/`、`skills/goal-verify/`；目标成帧、系统建模和综合研判已折叠进 `alpha-goal` 主技能。`contracts/alpha-goal.json` 是共享契约，`templates/` 是可选用户配置模板，`scripts/install.sh` 负责软链接安装，`tools/validate_skills.js` 用于本地布局校验。`README.md`、`INSTALL.md`、`MANIFEST.md` 应与这些路径和命令保持一致。
+本仓库维护 `alpha-goal` Codex 技能包。公开技能位于 `skills/alpha-goal/`、`skills/executor/`、`skills/verifier/`；目标成帧、系统建模和综合研判已折叠进 `alpha-goal` 主技能。`contracts/alpha-goal.json` 是共享契约，`templates/` 是可选用户配置模板，`scripts/install.sh` 负责软链接安装，`tools/validate_skills.js` 用于本地布局校验。`README.md`、`INSTALL.md`、`MANIFEST.md` 应与这些路径和命令保持一致。
 
 ## Build, Test, and Development Commands
 
@@ -26,7 +26,7 @@
 
 ## Testing Guidelines
 
-当前没有独立测试框架。修改技能布局、front matter、安装文档、模板或阶段输出契约后，至少运行 `node tools/validate_skills.js .` 和 `node tools/validate_skills.js --fixtures`。修改 JavaScript 校验脚本时运行对应命令。修改安装脚本时运行 `bash -n scripts/install.sh`。修改 `templates/config.toml` 时用临时 `CODEX_HOME` 安装 smoke 验证 vendored TOML merge。修改安装说明时必须用临时 `CODEX_HOME` 验证 `scripts/install.sh`，不要污染真实用户配置。默认运行态记录只写入用户级 Alpha Goal state root：`${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`，其中 `<workspace-slug>` 来自稳定 workspace identity：`slug(repo_root or Goal Contract target workspace)`；默认入口是当前任务的 `goal-contract.md`，任务身份不明时可用 `<state-root>/control-state/latest.md` 找到最新已接受任务，条件状态统一写入同任务目录下的 `checkpoint.md`。
+当前没有独立测试框架。修改技能布局、front matter、安装文档、模板或阶段输出契约后，至少运行 `node tools/validate_skills.js .` 和 `node tools/validate_skills.js --fixtures`。修改 JavaScript 校验脚本时运行对应命令。修改安装脚本时运行 `bash -n scripts/install.sh`。修改 `templates/config.toml` 时用临时 `HOME` 和临时 `CODEX_HOME` 安装 smoke 验证 vendored TOML merge。修改安装说明时必须用临时 `HOME` 和临时 `CODEX_HOME` 验证 `scripts/install.sh`，不要污染真实用户配置。默认运行态记录只写入用户级 Alpha Goal state root：`${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`，其中 `<workspace-slug>` 来自稳定 workspace identity：`slug(repo_root or Goal Contract target workspace)`；默认入口是当前任务的 `goal-contract.md`，任务身份不明时可用 `<state-root>/control-state/latest.md` 找到最新已接受任务，条件状态统一写入同任务目录下的 `checkpoint.md`。
 
 ## Commit & Pull Request Guidelines
 

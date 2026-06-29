@@ -12,8 +12,8 @@ The script installs three public skills as direct symlinks under `$HOME/.agents/
 
 ```text
 alpha-goal
-control-loop
-goal-verify
+executor
+verifier
 ```
 
 ## Options
@@ -49,7 +49,7 @@ Use `--uninstall` to remove managed install artifacts for the selected target. `
 
 Uninstall is conservative. It removes only managed Markdown blocks, managed hooks, `config.toml` that byte-for-byte matches `templates/config.toml`, and skill symlinks that resolve to this repository. Mixed user Markdown keeps user content, mixed or modified `config.toml` is preserved, unmanaged hooks are preserved, configuration symlinks are not followed or deleted, and real skill directories or external symlinks are preserved. `--no-sync-user-templates` skips Markdown and `config.toml` cleanup; `--no-sync-user-hooks` skips hooks cleanup.
 
-The compact recovery hook definition lives in `templates/hooks.json`. It is a `SessionStart` hook for `compact` starts and prints a static policy telling Codex to decide whether `alpha-goal`, `control-loop`, or `goal-verify` applies after compaction, and to load the matching skill before continuing. For active Alpha Goal tasks, it resumes from draft or accepted `goal-contract.md` first and reads `technical_design.md` with the Goal Contract when it exists; accepted status gates only `control-loop` execution handoff. `goal-verify` covers evidence, claim boundary, defect/risk sweep, and material unclaimed issues. Use `--no-sync-user-templates` to skip Codex AGENTS/config and Claude CLAUDE template updates. Use `--no-sync-user-hooks` to skip Codex hook template updates.
+The compact recovery hook definition lives in `templates/hooks.json`. It is a `SessionStart` hook for `compact` starts and prints a static policy telling Codex to decide whether `alpha-goal`, `executor`, or `verifier` applies after compaction, and to load the matching skill before continuing. For active Alpha Goal tasks, it resumes from draft or accepted `goal-contract.md` first and reads `technical_design.md` with the Goal Contract when it exists; accepted status gates only `executor` execution handoff. `verifier` covers evidence, claim boundary, defect/risk sweep, and material unclaimed issues. Use `--no-sync-user-templates` to skip Codex AGENTS/config and Claude CLAUDE template updates. Use `--no-sync-user-hooks` to skip Codex hook template updates.
 
 Hook upgrades are keyed by marker family. If the template marker changes from `...:v1` to `...:v2`, the installer removes older hooks from the same family before adding the template hook. It also removes the earlier experimental `codex-compact-skill-recovery` hook family.
 
@@ -66,7 +66,7 @@ tmp_codex_home="$tmp_home/.codex"
 HOME="$tmp_home" CODEX_HOME="$tmp_codex_home" scripts/install.sh --target global
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 workspace_slug="$(basename "$repo_root")"
-for skill in alpha-goal control-loop goal-verify; do
+for skill in alpha-goal executor verifier; do
   test -f "$tmp_home/.agents/skills/$skill/SKILL.md"
 done
 test -f "$tmp_codex_home/AGENTS.md"
@@ -110,7 +110,7 @@ python3 -m json.tool "$tmp_codex_home/hooks.json" >/dev/null
 grep -q "codex-alpha-goal-compact-recovery:v1" "$tmp_codex_home/hooks.json"
 grep -q "treat pre-compaction remembered skill text as stale" "$tmp_codex_home/hooks.json"
 grep -q "draft or accepted goal-contract.md first" "$tmp_codex_home/hooks.json"
-grep -q "accepted status gates only control-loop execution handoff" "$tmp_codex_home/hooks.json"
+grep -q "accepted status gates only executor execution handoff" "$tmp_codex_home/hooks.json"
 grep -q "control-state/latest.md" "$tmp_codex_home/hooks.json"
 grep -q "goal-contract.md" "$tmp_codex_home/hooks.json"
 grep -q "technical_design.md" "$tmp_codex_home/hooks.json"
@@ -118,8 +118,8 @@ grep -q "checkpoint.md" "$tmp_codex_home/hooks.json"
 grep -q "verification-triggered recovery" "$tmp_codex_home/hooks.json"
 grep -q "Run Profile, Loop State, Verification, and Evidence" "$tmp_codex_home/hooks.json"
 grep -q '\$alpha-goal' "$tmp_codex_home/hooks.json"
-grep -q '\$control-loop' "$tmp_codex_home/hooks.json"
-grep -q '\$goal-verify' "$tmp_codex_home/hooks.json"
+grep -q '\$executor' "$tmp_codex_home/hooks.json"
+grep -q '\$verifier' "$tmp_codex_home/hooks.json"
 
 tmp_codex_only="$(mktemp -d)"
 HOME="$tmp_codex_only" CODEX_HOME="$tmp_codex_only/.codex" scripts/install.sh --target codex
@@ -154,15 +154,35 @@ test ! -e "$tmp_skip/.codex/hooks.json"
 test ! -e "$tmp_skip/.claude/CLAUDE.md"
 
 tmp_migration="$(mktemp -d)"
-mkdir -p "$tmp_migration/.codex/skills" "$tmp_migration/external"
+mkdir -p "$tmp_migration/.agents/skills" "$tmp_migration/.codex/skills" "$tmp_migration/external"
+ln -s "$repo_root/skills/control-loop" "$tmp_migration/.agents/skills/control-loop"
+ln -s "$repo_root/skills/goal-verify" "$tmp_migration/.agents/skills/goal-verify"
 ln -s "$repo_root/skills/alpha-goal" "$tmp_migration/.codex/skills/alpha-goal"
+ln -s "$repo_root/skills/executor" "$tmp_migration/.codex/skills/executor"
 ln -s "$repo_root/skills/control-loop" "$tmp_migration/.codex/skills/control-loop"
+ln -s "$repo_root/skills/goal-verify" "$tmp_migration/.codex/skills/goal-verify"
 ln -s "$tmp_migration/external" "$tmp_migration/.codex/skills/external-skill"
 HOME="$tmp_migration" CODEX_HOME="$tmp_migration/.codex" scripts/install.sh --target claude
 test -f "$tmp_migration/.agents/skills/alpha-goal/SKILL.md"
+test -f "$tmp_migration/.agents/skills/executor/SKILL.md"
+test -f "$tmp_migration/.agents/skills/verifier/SKILL.md"
+test ! -L "$tmp_migration/.agents/skills/control-loop"
+test ! -L "$tmp_migration/.agents/skills/goal-verify"
 test ! -e "$tmp_migration/.codex/skills/alpha-goal"
-test ! -e "$tmp_migration/.codex/skills/control-loop"
+test ! -e "$tmp_migration/.codex/skills/executor"
+test ! -L "$tmp_migration/.codex/skills/control-loop"
+test ! -L "$tmp_migration/.codex/skills/goal-verify"
 test -L "$tmp_migration/.codex/skills/external-skill"
+
+tmp_legacy_external="$(mktemp -d)"
+mkdir -p "$tmp_legacy_external/.agents/skills" "$tmp_legacy_external/.codex/skills" "$tmp_legacy_external/external-control-loop" "$tmp_legacy_external/external-goal-verify"
+ln -s "$tmp_legacy_external/external-control-loop" "$tmp_legacy_external/.agents/skills/control-loop"
+ln -s "$tmp_legacy_external/external-goal-verify" "$tmp_legacy_external/.codex/skills/goal-verify"
+HOME="$tmp_legacy_external" CODEX_HOME="$tmp_legacy_external/.codex" scripts/install.sh --target codex
+test -L "$tmp_legacy_external/.agents/skills/control-loop"
+test -L "$tmp_legacy_external/.codex/skills/goal-verify"
+test -f "$tmp_legacy_external/.agents/skills/executor/SKILL.md"
+test -f "$tmp_legacy_external/.agents/skills/verifier/SKILL.md"
 
 tmp_worktree_link="$(mktemp -d)"
 tmp_other_worktree="$(mktemp -d)"
@@ -200,7 +220,7 @@ fi
 tmp_uninstall_global="$(mktemp -d)"
 HOME="$tmp_uninstall_global" CODEX_HOME="$tmp_uninstall_global/.codex" scripts/install.sh --target global
 HOME="$tmp_uninstall_global" CODEX_HOME="$tmp_uninstall_global/.codex" scripts/install.sh --uninstall --target global
-for skill in alpha-goal control-loop goal-verify; do
+for skill in alpha-goal executor verifier; do
   test ! -e "$tmp_uninstall_global/.agents/skills/$skill"
 done
 test ! -e "$tmp_uninstall_global/.codex/AGENTS.md"
@@ -245,10 +265,10 @@ test -f "$tmp_uninstall_blank_toml/.codex/config.toml"
 tmp_uninstall_safety="$(mktemp -d)"
 mkdir -p "$tmp_uninstall_safety/external"
 HOME="$tmp_uninstall_safety" CODEX_HOME="$tmp_uninstall_safety/.codex" scripts/install.sh --target global
-rm "$tmp_uninstall_safety/.agents/skills/control-loop"
-mkdir -p "$tmp_uninstall_safety/.agents/skills/control-loop"
-rm "$tmp_uninstall_safety/.agents/skills/goal-verify"
-ln -s "$tmp_uninstall_safety/external" "$tmp_uninstall_safety/.agents/skills/goal-verify"
+rm "$tmp_uninstall_safety/.agents/skills/executor"
+mkdir -p "$tmp_uninstall_safety/.agents/skills/executor"
+rm "$tmp_uninstall_safety/.agents/skills/verifier"
+ln -s "$tmp_uninstall_safety/external" "$tmp_uninstall_safety/.agents/skills/verifier"
 mv "$tmp_uninstall_safety/.codex/config.toml" "$tmp_uninstall_safety/external/config.toml"
 ln -s "$tmp_uninstall_safety/external/config.toml" "$tmp_uninstall_safety/.codex/config.toml"
 ln -sf "$tmp_uninstall_safety/external/AGENTS.md" "$tmp_uninstall_safety/.codex/AGENTS.md"
@@ -260,8 +280,8 @@ test -L "$tmp_uninstall_safety/.codex/AGENTS.md"
 test -L "$tmp_uninstall_safety/.codex/config.toml"
 test -L "$tmp_uninstall_safety/.codex/hooks.json"
 test -L "$tmp_uninstall_safety/.claude/CLAUDE.md"
-test -d "$tmp_uninstall_safety/.agents/skills/control-loop"
-test -L "$tmp_uninstall_safety/.agents/skills/goal-verify"
+test -d "$tmp_uninstall_safety/.agents/skills/executor"
+test -L "$tmp_uninstall_safety/.agents/skills/verifier"
 
 tmp_uninstall_skip="$(mktemp -d)"
 HOME="$tmp_uninstall_skip" CODEX_HOME="$tmp_uninstall_skip/.codex" scripts/install.sh --target global
@@ -419,18 +439,18 @@ PY
 
 node tools/validate_skills.js .
 node tools/validate_skills.js --fixtures
-rm -rf "$tmp_home" "$tmp_codex_only" "$tmp_claude_only" "$tmp_noninteractive" "$tmp_skip" "$tmp_migration" "$tmp_worktree_link" "$tmp_external_link" "$tmp_wrong_path_link" "$tmp_real_dir" "$tmp_uninstall_global" "$tmp_uninstall_target" "$tmp_uninstall_noninteractive" "$tmp_uninstall_toml" "$tmp_uninstall_blank_toml" "$tmp_uninstall_safety" "$tmp_uninstall_skip" "$tmp_uninstall_invalid_hooks"
+rm -rf "$tmp_home" "$tmp_codex_only" "$tmp_claude_only" "$tmp_noninteractive" "$tmp_skip" "$tmp_migration" "$tmp_legacy_external" "$tmp_worktree_link" "$tmp_external_link" "$tmp_wrong_path_link" "$tmp_real_dir" "$tmp_uninstall_global" "$tmp_uninstall_target" "$tmp_uninstall_noninteractive" "$tmp_uninstall_toml" "$tmp_uninstall_blank_toml" "$tmp_uninstall_safety" "$tmp_uninstall_skip" "$tmp_uninstall_invalid_hooks"
 ```
 
 ## Prompts
 
 ```text
 $alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继续闭环。
-$control-loop 根据 Goal Contract 和已有条件检查点做下一轮最有用且可验证的有界 slice。
-$goal-verify 验证目标完成、证据覆盖、声明边界和 material 未声明缺陷/风险，并返回可继续 harden 的 Gap。
+$executor 根据 Goal Contract 和已有条件检查点做下一轮最有用且可验证的有界 slice。
+$verifier 验证目标完成、证据覆盖、声明边界和 material 未声明缺陷/风险，并返回可继续 harden 的 Gap。
 ```
 
 ## Count budget
 
 The validator enforces the whole `skills/` tree under 15,000 word+punctuation units, counted as words plus punctuation/symbol marks.
-This budget preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, authority gates, behavior-level gates, and evaluator feedback without over-compressing their meaning.
+This budget preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, authority gates, behavior-level gates, and verifier feedback without over-compressing their meaning.

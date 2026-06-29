@@ -56,6 +56,15 @@ const LEGACY_RUNTIME_ARTIFACT_REFERENCES = [
   "evidence.md",
   "verification.md",
 ];
+const RENAMED_LEGACY_SKILLS = [
+  { kebab: "control-loop", title: "Control Loop" },
+  { kebab: "goal-verify", title: "Goal Verify" },
+];
+const RENAMED_LEGACY_ALLOWED_FILES = new Set([
+  "INSTALL.md",
+  "scripts/install.sh",
+  "tools/validate_skills.js",
+]);
 
 function main(args = process.argv.slice(2)) {
   if (args[0] === "--fixtures") return runFixtures(args.slice(1));
@@ -79,9 +88,10 @@ function validateRoot(root) {
   validateStateRootGuidance(root, contract, errors);
   validateScriptSurface(root, files, errors, warnings);
   validateLegacyReferences(root, contract, skillFiles, errors);
+  validateRenamedLegacyReferences(root, files, errors);
   validateAlphaGoal(root, contract, errors);
-  validateControlLoop(root, contract, errors);
-  validateGoalVerify(root, contract, errors);
+  validateExecutor(root, contract, errors);
+  validateVerifier(root, contract, errors);
   validateEvidenceAliasMappings(root, contract, errors);
   validateCrossFileContract(root, contract, errors);
   validateInstallSurface(root, contract, errors);
@@ -200,8 +210,8 @@ function validateSkillDir(root, dir, errors, warnings) {
     errors.push(`${skillName}: missing SKILL.md`);
     return;
   }
-  if (skillName === "goal-verify" && isDirectory(path.join(dir, "scripts"))) {
-    errors.push("goal-verify must not depend on runtime scripts");
+  if (skillName === "verifier" && isDirectory(path.join(dir, "scripts"))) {
+    errors.push("verifier must not depend on runtime scripts");
   }
   const text = fs.readFileSync(md, "utf8");
   try {
@@ -246,8 +256,8 @@ function parseFrontmatter(text) {
 function validateDescriptionBoundary(skillName, description, errors) {
   const required = {
     "alpha-goal": ["engineering", "design", "implementation"],
-    "control-loop": ["accepted Goal Contract", "implementation", "hardening"],
-    "goal-verify": ["Compare execution evidence", "accepted Goal Contract", "routing verdict"],
+    "executor": ["accepted Goal Contract", "implementation", "hardening"],
+    "verifier": ["Compare execution evidence", "accepted Goal Contract", "routing verdict"],
   };
   for (const term of required[skillName] || []) {
     if (!description.toLowerCase().includes(term.toLowerCase())) {
@@ -283,7 +293,7 @@ function validateStateRootGuidance(root, contract, errors) {
     "${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/",
     "$HOME/.alpha-goal/<workspace-slug>/",
   ];
-  for (const rel of ["AGENTS.md", "MANIFEST.md", "skills/control-loop/SKILL.md", "skills/goal-verify/SKILL.md", "templates/AGENTS.md"]) {
+  for (const rel of ["AGENTS.md", "MANIFEST.md", "skills/executor/SKILL.md", "skills/verifier/SKILL.md", "templates/AGENTS.md"]) {
     const text = readIfFile(path.join(root, rel));
     if (!text) {
       errors.push(`${rel}: missing state-root guidance file`);
@@ -352,6 +362,22 @@ function validateLegacyReferences(root, contract, skillFiles, errors) {
   }
 }
 
+function validateRenamedLegacyReferences(root, files, errors) {
+  for (const file of files) {
+    const rel = relative(root, file);
+    if (rel.startsWith(".git/")) continue;
+    if (RENAMED_LEGACY_ALLOWED_FILES.has(rel)) continue;
+    if (!/\.(md|js|sh|toml|json)$/.test(rel) && rel !== "AGENTS.md") continue;
+
+    const text = fs.readFileSync(file, "utf8");
+    for (const legacy of RENAMED_LEGACY_SKILLS) {
+      if (text.includes(legacy.kebab) || text.includes(legacy.title)) {
+        errors.push(`${rel}: renamed legacy skill reference remains: ${legacy.kebab}`);
+      }
+    }
+  }
+}
+
 function validateAlphaGoal(root, contract, errors) {
   const rel = "skills/alpha-goal/SKILL.md";
   const text = readIfFile(path.join(root, rel));
@@ -377,13 +403,13 @@ function validateAlphaGoal(root, contract, errors) {
   if (!(reviewIndex >= 0 && summaryIndex > reviewIndex && confirmationIndex > summaryIndex && inputIndex > confirmationIndex)) {
     errors.push(`${rel}: Review summary must appear before Confirmation Gate request_user_input`);
   }
-  for (const term of ["approve/launch", "refine", "reject", "Contract status: accepted", "$control-loop"]) {
+  for (const term of ["approve/launch", "refine", "reject", "Contract status: accepted", "$executor"]) {
     if (!markdownSection(text, "Confirmation Gate").includes(term)) errors.push(`${rel}: Confirmation Gate missing ${term}`);
   }
 }
 
-function validateControlLoop(root, contract, errors) {
-  const rel = "skills/control-loop/SKILL.md";
+function validateExecutor(root, contract, errors) {
+  const rel = "skills/executor/SKILL.md";
   const text = readIfFile(path.join(root, rel));
   if (!text) {
     errors.push(`${rel}: missing`);
@@ -400,8 +426,8 @@ function validateControlLoop(root, contract, errors) {
   }
 }
 
-function validateGoalVerify(root, contract, errors) {
-  const rel = "skills/goal-verify/SKILL.md";
+function validateVerifier(root, contract, errors) {
+  const rel = "skills/verifier/SKILL.md";
   const text = readIfFile(path.join(root, rel));
   if (!text) {
     errors.push(`${rel}: missing`);
@@ -448,8 +474,8 @@ function requireCanonicalEvidence(rel, text, contract, errors) {
 
 function validateEvidenceAliasMappings(root, contract, errors) {
   const sections = [
-    markdownSection(readIfFile(path.join(root, "skills/control-loop/SKILL.md")), "Evidence Classification"),
-    markdownSection(readIfFile(path.join(root, "skills/goal-verify/SKILL.md")), "Evidence Classification"),
+    markdownSection(readIfFile(path.join(root, "skills/executor/SKILL.md")), "Evidence Classification"),
+    markdownSection(readIfFile(path.join(root, "skills/verifier/SKILL.md")), "Evidence Classification"),
   ].join("\n");
   for (const evidence of contract.evidenceTypes) {
     for (const alias of evidence.aliases || []) {
@@ -502,6 +528,11 @@ function validateInstallSurface(root, contract, errors) {
   for (const skill of contract.skills) {
     if (!install.includes(skill)) errors.push(`scripts/install.sh missing required skill: ${skill}`);
   }
+  for (const legacy of RENAMED_LEGACY_SKILLS) {
+    if (!install.includes(legacy.kebab)) errors.push(`scripts/install.sh missing renamed legacy cleanup: ${legacy.kebab}`);
+  }
+  if (!install.includes("renamed_legacy_skills")) errors.push("scripts/install.sh missing renamed legacy skill list");
+  if (!install.includes("same_git_common_dir_skill_path")) errors.push("scripts/install.sh missing same-common-dir renamed legacy cleanup");
   for (const forbidden of ["tomllib", "tools/validate_skills.ts", "run_skillset_validation", "resolve_tsx_runner", "Validation: passed"]) {
     if (install.includes(forbidden)) errors.push(`scripts/install.sh contains forbidden install surface: ${forbidden}`);
   }

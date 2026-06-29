@@ -3,7 +3,7 @@
   "inheritRoot": true,
   "replacements": [
     {
-      "file": "skills/control-loop/SKILL.md",
+      "file": "skills/executor/SKILL.md",
       "search": "- [from-test] result=pass|fail; test or check evidence.\n",
       "replace": "- [from-test] result=maybe; test or check evidence.\n"
     }

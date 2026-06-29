@@ -25,12 +25,12 @@ Alpha Goal 给 AI Agent 一套 Goal Engineering 控制闭环，重点约束三�
     <tr>
       <td width="100" align="left"><strong>行动越界</strong></td>
       <td align="left">没有授权边界，越过 scope、改错分支，或把当前实现当成期望行为。</td>
-      <td align="left"><code>control-loop</code> 只执行已接受契约内的有界 slice，变更前检查 worktree/branch、scope、non-goals 和 claim boundary。</td>
+      <td align="left"><code>executor</code> 只执行已接受契约内的有界 slice，变更前检查 worktree/branch、scope、non-goals 和 claim boundary。</td>
     </tr>
     <tr>
       <td width="100" align="left"><strong>完成无据</strong></td>
       <td align="left">测试过了就说完成，或把局部成功当成目标达成。</td>
-      <td align="left"><code>goal-verify</code> 对照 acceptance evidence 做证据分类、Gap 分析和路由裁决。</td>
+      <td align="left"><code>verifier</code> 对照 acceptance evidence 做证据分类、Gap 分析和路由裁决。</td>
     </tr>
   </tbody>
 </table>
@@ -43,8 +43,8 @@ Alpha Goal 给 AI Agent 一套 Goal Engineering 控制闭环，重点约束三�
 %%{init: {"theme":"base","flowchart":{"wrappingWidth":500,"nodeSpacing":80,"rankSpacing":70,"htmlLabels":true},"markdownAutoWrap":false,"themeVariables":{"background":"#364150","primaryColor":"#364150","primaryTextColor":"#f8fafc","primaryBorderColor":"#f8fafc","lineColor":"#f8fafc","edgeLabelBackground":"#364150","fontFamily":"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"}}}%%
 flowchart TD
   AG["<div align='center'><strong>alpha-goal（入口）</strong></div><div align='left' style='width:550px'><br/>发现事实 → 澄清需求 → 压力测试 → 写 Goal Contract → 用户确认<br/>产出：goal-contract.md（权威契约）</div>"]
-  CL["<div align='center'><strong>control-loop（执行）</strong></div><div align='left' style='width:550px'><br/>按契约切 slice → 执行 → 收集证据 → 分类证据 → 判断路由<br/>产出：checkpoint.md（按需恢复 / 证据交接）</div>"]
-  GV["<div align='center'><strong>goal-verify（验证）</strong></div><div align='left' style='width:550px'><br/>证据 vs 验收标准 → Gap 分析 → 给出路由裁决<br/>裁决：PASS_TO_FINAL / NEXT_ITERATION / BLOCKED / RETURN...</div>"]
+  CL["<div align='center'><strong>executor（执行）</strong></div><div align='left' style='width:550px'><br/>按契约切 slice → 执行 → 收集证据 → 分类证据 → 判断路由<br/>产出：checkpoint.md（按需恢复 / 证据交接）</div>"]
+  GV["<div align='center'><strong>verifier（验证）</strong></div><div align='left' style='width:550px'><br/>证据 vs 验收标准 → Gap 分析 → 给出路由裁决<br/>裁决：PASS_TO_FINAL / NEXT_ITERATION / BLOCKED / RETURN...</div>"]
 
   AG -->|"契约被 accept 之后"| CL
   CL --> GV
@@ -60,7 +60,7 @@ flowchart TD
 
 ```text
 Trigger -> Preflight/Discovery -> Clarify -> Write Contract -> Technical Design? -> Review -> Confirm
-Accepted Goal Contract -> $control-loop -> Act -> Evidence -> $goal-verify -> Gap? -> Harden or Final Claim
+Accepted Goal Contract -> $executor -> Act -> Evidence -> $verifier -> Gap? -> Harden or Final Claim
 ```
 
 ## 快速开始
@@ -79,7 +79,7 @@ node tools/validate_skills.js .
 
 ```text
 $alpha-goal 判断这个任务下一步应发现事实、澄清、写契约、补技术方案、确认，还是交给闭环执行/验证。
-$control-loop 根据已接受 Goal Contract 执行或加固下一轮最有用且可验证的有界 slice。
+$executor 根据已接受 Goal Contract 执行或加固下一轮最有用且可验证的有界 slice。
 ```
 
 通常不需要显式写出 skill 名称。正常描述你的需求即可；Alpha Goal 会隐式触发。
@@ -99,11 +99,11 @@ $control-loop 根据已接受 Goal Contract 执行或加固下一轮最有用且
       <td align="left">在开始工作前澄清意图、边界、验收证据，产出待确认 Goal Contract；跨文件变更按需补 Technical Design。</td>
     </tr>
     <tr>
-      <td width="180" align="left"><a href="skills/control-loop/"><code>control-loop</code></a></td>
+      <td width="180" align="left"><a href="skills/executor/"><code>executor</code></a></td>
       <td align="left">执行或加固已授权 slice；<code>goal-contract.md</code> 是必需输入，<code>checkpoint.md</code> 仅作为条件检查点。</td>
     </tr>
     <tr>
-      <td width="180" align="left"><a href="skills/goal-verify/"><code>goal-verify</code></a></td>
+      <td width="180" align="left"><a href="skills/verifier/"><code>verifier</code></a></td>
       <td align="left">验证目标完成、声明边界、证据覆盖和重要但未声明的缺陷/风险，并输出下一轮 Gap。</td>
     </tr>
   </tbody>
@@ -118,4 +118,4 @@ Alpha Goal 让 agent 工作保持目标明确、行动有界、声明受证据�
 - 持久状态：`goal-contract.md` 是 `alpha-goal` 的默认产物，包含发现记录、访谈记录和最终契约；`checkpoint.md` 按需承载运行档案。
 - 有界执行：优先选择可取证的有界动作或定向变更，而非宽泛重构和猜测式清理。
 - 独立验证：最终、就绪、安全、完成、修复或评审等声明需要新鲜证据和缺陷/风险扫描，并且要与执行过程分离检查。
-- 诚实路由：目标不清回到 `alpha-goal`，同一目标内可修复的执行缺口回到 `control-loop`。
+- 诚实路由：目标不清回到 `alpha-goal`，同一目标内可修复的执行缺口回到 `executor`。

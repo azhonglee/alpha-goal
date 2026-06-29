@@ -3,7 +3,7 @@
   "inheritRoot": true,
   "replacements": [
     {
-      "file": "skills/goal-verify/SKILL.md",
+      "file": "skills/verifier/SKILL.md",
       "search": "- [from-runtime] result=observed|failed\n",
       "replace": ""
     }

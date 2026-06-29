@@ -1,28 +1,28 @@
 ---
-name: control-loop
+name: executor
 description: "Goal-contract-driven bounded executor and hardener. Use only after an accepted Goal Contract authorizes implementation, repair, or hardening. Do not use for ambiguous planning."
 ---
 
-# Control Loop
+# Executor
 
 ## Core Principle
 1. Goal Contract is authority.
 2. Execution is actuator output.
 3. Evidence is sensor input.
-4. `goal-verify` skill is comparator.
+4. `verifier` skill is comparator.
 5. Route decision is control output.
 
 Execution results are evidence, not automatic completion.  
 Passing tests, changed files, clean builds, or successful commands may support a claim, but they do not by themselves authorize final-ready, safe, complete, fixed, shipped, or MR-ready claims.
 
-`control-loop` may implement, repair, harden, and collect evidence inside the approved boundaries. It may not redefine target, scope, acceptance evidence, non-goals, decision boundaries, claim boundary, trigger contract, or authority.
+`executor` may implement, repair, harden, and collect evidence inside the approved boundaries. It may not redefine target, scope, acceptance evidence, non-goals, decision boundaries, claim boundary, trigger contract, or authority.
 
 ## Runtime Flow
 
 **Run the loop as behavior, not paperwork:**
 
 ```pseudo
-function control_loop(goal_contract):
+function executor(goal_contract):
   goal = read_accepted_goal_contract(goal_contract)
   checkpoint = read_checkpoint_if_present_or_needed(goal)
 
@@ -48,7 +48,7 @@ function control_loop(goal_contract):
     if classified.same_goal_fixable_gap:
       continue
 
-    verification = run_goal_verify_before_completion_claim(classified, goal)
+    verification = run_verifier_before_completion_claim(classified, goal)
     route = route_after_verification(verification, goal)
 
     if route == NEXT_ITERATION:
@@ -68,7 +68,7 @@ The Goal Contract defines:
 - claim boundary
 - authorization source
 
-control-loop may not change any of them.
+executor may not change any of them.
 If any of these need to change, RETURN_TO_ALPHA_GOAL
 
 ## Evidence Classification
@@ -98,7 +98,7 @@ Do not infer completion from partial success.
 Do not infer safety from absence of failure.
 Do not infer acceptance from passing unrelated tests.
 Do not infer authority from implementation convenience.
-Only `goal-verify` skill may support final-ready, safe, complete, fixed, hardened, shipped, or MR-ready claims.
+Only `verifier` skill may support final-ready, safe, complete, fixed, hardened, shipped, or MR-ready claims.
 
 ## Slice Boundary Gates
 Before executing a slice, all must pass:
@@ -133,7 +133,7 @@ Before returning final success:
 [ ] No unresolved blocker remains
 [ ] No source-of-truth conflict remains
 [ ] No scope/authority/claim-boundary change occurred
-[ ] `$goal-verify` verdict allows final route
+[ ] `$verifier` verdict allows final route
 
 If any item is unchecked, DO NOT claim complete.
 
@@ -166,7 +166,7 @@ Continue next iteration when:
 
 Finish only when:
 - Goal Contract acceptance evidence is satisfied
-- goal-verify passes
+- verifier passes
 - route is PASS_TO_FINAL
 - No required work remains
 
