@@ -73,7 +73,7 @@ bash ./scripts/install.sh
 node tools/validate_skills.js .
 ```
 
-安装脚本会把三个公开技能复制到 `$HOME/.agents/skills/`，并清理指向本仓库旧公开技能的软链接；`global` 和 `claude` target 还会在 `$HOME/.claude/skills/` 下创建指向共享副本的 Claude skill 软链接。不传 `--target` 时，交互终端用 color+Unicode 上下键菜单选择，默认高亮 `codex`；非交互调用默认使用 `codex`。安装和卸载完成后会输出 grouped summary，且只展示当前选择的实际影响，省略 skipped 行；安装 summary 不展示 `Result`、`Skills ... linked` 或 `Install target`。安装会把同一 Git common-dir 其他 worktree 中 `skills/<skill>` 的旧 symlink 迁移为复制目录；外部 symlink 仍需 `--force` 或拒绝，同名真实目录会被重拷覆盖，普通文件会拒绝。`--uninstall` 按 target 清理托管配置；只有 `--uninstall --target global` 会移除 `$HOME/.agents/skills` 下的托管 skill 副本和 `$HOME/.claude/skills` 下的 Claude skill 软链接。卸载不会跟随配置 symlink，不会删除外部 symlink、混合用户配置或 legacy Codex skills 路径。
+安装脚本会把三个公开技能复制到 `$HOME/.agents/skills/`，并按 `--target` 写入对应配置；不传 `--target` 时默认使用 `codex`。`global` 和 `claude` target 会额外在 `$HOME/.claude/skills/` 下创建 Claude skill 链接。`--uninstall` 只清理所选 target 的托管配置，不跟随配置 symlink，也不处理 legacy Codex skills；只有 `--uninstall --target global` 会同时移除共享技能副本和 Claude skill 链接。
 
 ## 使用示例
 
