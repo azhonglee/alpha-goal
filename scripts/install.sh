@@ -443,6 +443,47 @@ git_worktree_root_for_path() {
   normalize_path "$root"
 }
 
+existing_ancestor_for_path() {
+  local candidate="$1"
+  while [[ ! -e "$candidate" && "$candidate" != "/" ]]; do
+    candidate="$(dirname "$candidate")"
+  done
+  [[ "$candidate" != "/" && -e "$candidate" ]] || return 1
+  printf '%s\n' "$candidate"
+}
+
+same_git_common_dir_skill_path() {
+  local current_target="$1"
+  local skill_name="$2"
+  local target_real
+  local target_probe
+  local repo_common_dir
+  local target_common_dir
+  local target_root_path
+  local target_rel
+
+  target_real="$(normalize_path "$current_target" 2>/dev/null)" || return 1
+  target_probe="$(existing_ancestor_for_path "$target_real")" || return 1
+  repo_common_dir="$(git_common_dir_for_path "$repo_root")" || return 1
+  target_common_dir="$(git_common_dir_for_path "$target_probe")" || return 1
+  target_root_path="$(git_worktree_root_for_path "$target_probe")" || return 1
+
+  if [[ "$repo_common_dir" != "$target_common_dir" ]]; then
+    return 1
+  fi
+
+  case "$target_real" in
+    "$target_root_path"/*)
+      target_rel="${target_real#"$target_root_path"/}"
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+
+  [[ "$target_rel" == "skills/$skill_name" ]]
+}
+
 same_git_worktree_skill_link() {
   local source="$1"
   local current_target="$2"
@@ -568,7 +609,7 @@ remove_same_repo_skill_link_from_root() {
   if [[ "$skill_name" == "alpha-goal" ]]; then
     legacy_skillset_source="$source_skill_root"
   fi
-  if [[ "$current_target" == "$source_skill_root/$skill_name" || "$current_target" == "$repo_root/$skill_name" || ( -n "$legacy_skillset_source" && "$current_target" == "$legacy_skillset_source" ) ]]; then
+  if [[ "$current_target" == "$source_skill_root/$skill_name" || "$current_target" == "$repo_root/$skill_name" || ( -n "$legacy_skillset_source" && "$current_target" == "$legacy_skillset_source" ) ]] || same_git_common_dir_skill_path "$current_target" "$skill_name"; then
     rm "$target"
     legacy_removed_count=$((legacy_removed_count + 1))
     log "Removed obsolete skill link: $target"
@@ -618,6 +659,10 @@ remove_legacy_codex_skill_links() {
 
   for skill_name in "${required_skills[@]}"; do
     remove_same_repo_skill_link_from_root "$legacy_codex_skill_root" "$skill_name"
+  done
+
+  for obsolete_skill in "${renamed_legacy_skills[@]}"; do
+    remove_same_repo_skill_link_from_root "$legacy_codex_skill_root" "$obsolete_skill"
   done
 
   for support_name in adapters tools templates scripts; do
@@ -1556,7 +1601,8 @@ if [[ "$sync_claude_config" == true && "$sync_user_templates" == true ]]; then
   fi
 fi
 
-required_skills=(alpha-goal control-loop goal-verify)
+required_skills=(alpha-goal executor verifier)
+renamed_legacy_skills=(control-loop goal-verify)
 skill_files=()
 for skill_name in "${required_skills[@]}"; do
   skill_file="$source_skill_root/$skill_name/SKILL.md"
@@ -1640,6 +1686,10 @@ done
 
 for support_name in adapters tools templates scripts; do
   remove_legacy_support_link "$support_name"
+done
+
+for obsolete_skill in "${renamed_legacy_skills[@]}"; do
+  remove_obsolete_skill_link "$obsolete_skill"
 done
 
 for obsolete_skill in evidence-verify goal-contract system-model decision-synthesis control-kernel loop verify meta-synthesis goal-frame goal-loop goal-iterate goal-review; do

@@ -1,24 +1,24 @@
 ---
-name: goal-verify
+name: verifier
 description: "Compare execution evidence against an accepted Goal Contract and produce a routing verdict. Never redefine authority, scope, or acceptance."
 ---
 
-# Goal Verify
+# Verifier
 
 ## Mission
-goal-verify owns verification authority.
+verifier owns verification authority.
 
-goal-verify compares collected evidence against an accepted Goal Contract.
+verifier compares collected evidence against an accepted Goal Contract.
 When reading task evidence, resolve Alpha Goal state root as `$HOME/.alpha-goal/<workspace-slug>/`, where `<workspace-slug>` is `slug(repo_root or Goal Contract target workspace)`.
 
-goal-verify does not:
+verifier does not:
 - redefine target
 - redefine scope
 - redefine acceptance evidence
 - redefine non-goals
 - redefine authority
 
-goal-verify produces only:
+verifier produces only:
 - PASS_TO_FINAL
 - NEXT_ITERATION
 - BLOCKED
@@ -120,7 +120,7 @@ Fail: BLOCKED
 ## Verification Algorithm
 **Run the algorithm as behavior, not paperwork:**
 ```pseudo
-function goal_verify(goal, evidence):
+function verifier(goal, evidence):
   assert_goal_contract_valid(goal)
   classified = classify_evidence(evidence)
 

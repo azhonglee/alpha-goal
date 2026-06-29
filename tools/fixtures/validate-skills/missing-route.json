@@ -3,7 +3,7 @@
   "inheritRoot": true,
   "replacements": [
     {
-      "file": "skills/control-loop/SKILL.md",
+      "file": "skills/executor/SKILL.md",
       "search": "- route is PASS_TO_FINAL\n",
       "replace": ""
     }

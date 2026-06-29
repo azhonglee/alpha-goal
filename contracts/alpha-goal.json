@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skills": ["alpha-goal", "control-loop", "goal-verify"],
+  "skills": ["alpha-goal", "executor", "verifier"],
   "artifacts": [
     {
       "path": "goal-contract.md",
@@ -120,8 +120,8 @@
   ],
   "checkedFiles": [
     "skills/alpha-goal/SKILL.md",
-    "skills/control-loop/SKILL.md",
-    "skills/goal-verify/SKILL.md",
+    "skills/executor/SKILL.md",
+    "skills/verifier/SKILL.md",
     "MANIFEST.md",
     "templates/hooks.json",
     "README.md",

@@ -25,12 +25,12 @@ Alpha Goal gives AI agents a Goal Engineering control loop for three common fail
     <tr>
       <td width="260" align="left"><strong>Action&nbsp;overreach</strong></td>
       <td align="left">There is no explicit authority boundary, so work can exceed scope, touch the wrong branch, or treat current implementation as desired behavior.</td>
-      <td align="left"><code>control-loop</code> executes only bounded slices inside an accepted contract, with worktree/branch, scope, non-goals, and claim-boundary checks before mutation.</td>
+      <td align="left"><code>executor</code> executes only bounded slices inside an accepted contract, with worktree/branch, scope, non-goals, and claim-boundary checks before mutation.</td>
     </tr>
     <tr>
       <td width="260" align="left"><strong>Evidence&#8209;free&nbsp;completion</strong></td>
       <td align="left">A passing test or partial success is treated as proof that the goal is complete.</td>
-      <td align="left"><code>goal-verify</code> compares evidence against acceptance evidence, classifies gaps, and returns a route decision.</td>
+      <td align="left"><code>verifier</code> compares evidence against acceptance evidence, classifies gaps, and returns a route decision.</td>
     </tr>
   </tbody>
 </table>
@@ -43,8 +43,8 @@ In practice, it compresses requirement clarification, authority boundaries, iter
 %%{init: {"theme":"base","flowchart":{"wrappingWidth":900,"nodeSpacing":80,"rankSpacing":70,"htmlLabels":true},"markdownAutoWrap":false,"themeVariables":{"background":"#364150","primaryColor":"#364150","primaryTextColor":"#f8fafc","primaryBorderColor":"#f8fafc","lineColor":"#f8fafc","edgeLabelBackground":"#364150","fontFamily":"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"}}}%%
 flowchart TD
   AG["<div align='center'><strong>alpha-goal (entry)</strong></div><div align='left' style='width:900px'><br/>Discover facts → Clarify requirements → Pressure-test → Write Goal Contract → User confirmation<br/>Output: goal-contract.md (authority contract)</div>"]
-  CL["<div align='center'><strong>control-loop (execution)</strong></div><div align='left' style='width:900px'><br/>Slice by contract → Execute → Collect evidence → Classify evidence → Route<br/>Output: checkpoint.md (conditional recovery / evidence handoff)</div>"]
-  GV["<div align='center'><strong>goal-verify (verification)</strong></div><div align='left' style='width:900px'><br/>Evidence vs acceptance evidence → Gap analysis → Route decision<br/>Verdicts: PASS_TO_FINAL / NEXT_ITERATION / BLOCKED / RETURN...</div>"]
+  CL["<div align='center'><strong>executor (execution)</strong></div><div align='left' style='width:900px'><br/>Slice by contract → Execute → Collect evidence → Classify evidence → Route<br/>Output: checkpoint.md (conditional recovery / evidence handoff)</div>"]
+  GV["<div align='center'><strong>verifier (verification)</strong></div><div align='left' style='width:900px'><br/>Evidence vs acceptance evidence → Gap analysis → Route decision<br/>Verdicts: PASS_TO_FINAL / NEXT_ITERATION / BLOCKED / RETURN...</div>"]
 
   AG -->|"after contract is accepted"| CL
   CL --> GV
@@ -60,7 +60,7 @@ flowchart TD
 
 ```text
 Trigger -> Preflight/Discovery -> Clarify -> Write Contract -> Technical Design? -> Review -> Confirm
-Accepted Goal Contract -> $control-loop -> Act -> Evidence -> $goal-verify -> Gap? -> Harden or Final Claim
+Accepted Goal Contract -> $executor -> Act -> Evidence -> $verifier -> Gap? -> Harden or Final Claim
 ```
 
 ## Quick start
@@ -78,7 +78,7 @@ The installer creates direct symlinks for the three public skills under `$HOME/.
 
 ```text
 $alpha-goal Decide whether this task should discover facts, clarify, write a contract, add a technical design, confirm, or hand off to execution/verification.
-$control-loop Execute or harden the next most useful verifiable bounded slice from an accepted Goal Contract.
+$executor Execute or harden the next most useful verifiable bounded slice from an accepted Goal Contract.
 ```
 
 You usually do not need to name a skill. Describe the work normally; Alpha Goal activates implicitly.
@@ -98,11 +98,11 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
       <td align="left">Clarify intent, boundaries, and acceptance evidence, produce a Goal Contract for confirmation, and add a Technical Design when cross-file changes need one.</td>
     </tr>
     <tr>
-      <td width="180" align="left"><a href="skills/control-loop/"><code>control-loop</code></a></td>
+      <td width="180" align="left"><a href="skills/executor/"><code>executor</code></a></td>
       <td align="left">Execute or harden an authorized slice, with <code>goal-contract.md</code> required and <code>checkpoint.md</code> used only as a conditional checkpoint.</td>
     </tr>
     <tr>
-      <td width="180" align="left"><a href="skills/goal-verify/"><code>goal-verify</code></a></td>
+      <td width="180" align="left"><a href="skills/verifier/"><code>verifier</code></a></td>
       <td align="left">Verify goal completion, claim boundary, evidence coverage, and material unclaimed defects/risks, then return the next Gap.</td>
     </tr>
   </tbody>
@@ -117,4 +117,4 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 - Persistent state: `goal-contract.md` is the default `alpha-goal` output; `technical_design.md` is the first-class Technical Design artifact for implementation, repair, refactor, hardening, or cross-file changes; `checkpoint.md` conditionally carries recovery and evidence handoff.
 - Bounded execution: prefer bounded evidence-producing actions or targeted changes over broad refactors and speculative cleanup.
 - Independent verification: final/ready/safe/complete/repair/review claims require fresh evidence and defect/risk scanning, checked separately from execution.
-- Honest routing: unclear goals return to `alpha-goal`; same-goal fixable execution gaps return to `control-loop`.
+- Honest routing: unclear goals return to `alpha-goal`; same-goal fixable execution gaps return to `executor`.
