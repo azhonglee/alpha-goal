@@ -1234,7 +1234,7 @@ const path = require("node:path");
 const [hooksArg, templateArg, configArg, tomlPath] = process.argv.slice(2);
 const toml = require(tomlPath);
 const MANAGED_MARKER_RE = /^: 'codex-alpha-goal-compact-recovery:v[0-9]+';/;
-const LEGACY_MANAGED_MARKER_RE = /(^|[\s;'"])codex-compact-skill-recovery(?::v[0-9]+)?($|[\s;'"])/;
+const LEGACY_MANAGED_MARKER_RE = /(^|[\s;'\x22])codex-compact-skill-recovery(?::v[0-9]+)?($|[\s;'\x22])/;
 
 function loadJson(file, emptyDefault) {
   if (emptyDefault && (!fs.existsSync(file) || !fs.readFileSync(file, "utf8").trim())) return emptyDefault;
@@ -1427,7 +1427,7 @@ const path = require("node:path");
 
 const [hooksArg] = process.argv.slice(2);
 const MANAGED_MARKER_RE = /^: 'codex-alpha-goal-compact-recovery:v[0-9]+';/;
-const LEGACY_MANAGED_MARKER_RE = /(^|[\s;'"])codex-compact-skill-recovery(?::v[0-9]+)?($|[\s;'"])/;
+const LEGACY_MANAGED_MARKER_RE = /(^|[\s;'\x22])codex-compact-skill-recovery(?::v[0-9]+)?($|[\s;'\x22])/;
 
 function loadJson(file) {
   try {
