@@ -76,8 +76,7 @@ node tools/validate_skills.js .
 ## 使用示例
 
 ```text
-$alpha-goal 判断这个任务下一步应发现事实、澄清、写契约、补技术方案、确认，还是交给闭环执行/验证。
-$executor 根据已接受 Goal Contract 执行或加固下一轮最有用且可验证的有界 slice。
+$alpha-goal 实现一下这个需求:<YOUR-PRD> or <YOUR-DESCRIPTION>，<YOUR-UX> or <YOUR-DESIGN> 。
 ```
 
 通常不需要显式写出 skill 名称。正常描述你的需求即可；Alpha Goal 会隐式触发。
