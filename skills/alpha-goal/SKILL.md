@@ -80,8 +80,9 @@ Target dimensions step by step. Do not skip the Design table for implementation,
 
 | Design Priority | Dimension |
 | --- | --- |
-| 1 | architecture, components, data flow, interfaces, data models |
-| 2 | test plans, scalability, risks, rollback |
+| 1 | Architecture, components, data flow, interfaces/API, data models |
+| 2 | Persistence, middleware, infrastructure, external dependencies |
+| 3 | Test strategy, scalability, risks, rollback |
 
 **Step 2: Ask and record**
 
