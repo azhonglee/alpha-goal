@@ -49,7 +49,7 @@ Use `--uninstall` to remove managed install artifacts for the selected target. `
 
 Uninstall is conservative outside the managed copied-skill path. It removes only managed Markdown blocks, managed hooks, `config.toml` that byte-for-byte matches `templates/config.toml`, skill copies with the install marker, and skill symlinks that resolve to this repository or the shared skill copy. Mixed user Markdown keeps user content, mixed or modified `config.toml` is preserved, unmanaged hooks are preserved, configuration symlinks are not followed or deleted, and unmanaged skill directories or external symlinks are preserved. `--no-sync-user-templates` skips Markdown and `config.toml` cleanup; `--no-sync-user-hooks` skips hooks cleanup.
 
-The compact recovery hook definition lives in `templates/hooks.json`. It is a `SessionStart` hook for `compact` starts and prints a static policy telling Codex to decide whether `alpha-goal`, `executor`, or `verifier` applies after compaction, and to load the matching skill before continuing. For active Alpha Goal tasks, it resumes from draft or accepted `goal-contract.md` first and reads `technical_design.md` with the Goal Contract when it exists; accepted status gates only `executor` execution handoff. `verifier` covers evidence, claim boundary, defect/risk sweep, and material unclaimed issues. Use `--no-sync-user-templates` to skip Codex AGENTS/config and Claude CLAUDE template updates. Use `--no-sync-user-hooks` to skip Codex hook template updates.
+The compact recovery hook definition lives in `templates/hooks.json`. It is a `PostCompact` hook with matcher `^(manual|auto)$` and prints a static policy telling Codex to decide whether `alpha-goal`, `executor`, or `verifier` applies after manual or automatic compaction, and to load the matching skill before continuing. For active Alpha Goal tasks, it resumes from draft or accepted `goal-contract.md` first and reads `technical_design.md` with the Goal Contract when it exists; accepted status gates only `executor` execution handoff. `verifier` covers evidence, claim boundary, defect/risk sweep, and material unclaimed issues. Use `--no-sync-user-templates` to skip Codex AGENTS/config and Claude CLAUDE template updates. Use `--no-sync-user-hooks` to skip Codex hook template updates.
 
 Hook upgrades are keyed by marker family. If the template marker changes from `...:v1` to `...:v2`, the installer removes older hooks from the same family before adding the template hook. It also removes the earlier experimental `codex-compact-skill-recovery` hook family.
 
@@ -63,6 +63,24 @@ The smoke test checks installed skill copies, Claude skill links, target-specifi
 set -euo pipefail
 tmp_home="$(mktemp -d)"
 tmp_codex_home="$tmp_home/.codex"
+mkdir -p "$tmp_codex_home"
+cat >"$tmp_codex_home/hooks.json" <<'EOF'
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "^compact$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ": 'codex-alpha-goal-compact-recovery:v1'; printf '%s\\n' 'old managed hook'"
+          }
+        ]
+      }
+    ]
+  }
+}
+EOF
 HOME="$tmp_home" CODEX_HOME="$tmp_codex_home" scripts/install.sh --target global
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 workspace_slug="$(basename "$repo_root")"
@@ -112,6 +130,20 @@ Updated at: 2026-06-23T00:00:00Z
 EOF
 python3 -m json.tool "$tmp_codex_home/hooks.json" >/dev/null
 grep -q "codex-alpha-goal-compact-recovery:v1" "$tmp_codex_home/hooks.json"
+node - "$tmp_codex_home/hooks.json" <<'JS'
+const fs = require("node:fs");
+const hooksPath = process.argv[2];
+const data = JSON.parse(fs.readFileSync(hooksPath, "utf8"));
+const groups = data?.hooks?.PostCompact || [];
+const managed = groups.flatMap(group => (group.hooks || []).map(hook => ({ group, hook })))
+  .filter(entry => String(entry.hook.command || "").includes("codex-alpha-goal-compact-recovery:v1"));
+if (managed.length !== 1) throw new Error(`expected one managed PostCompact hook, found ${managed.length}`);
+if (managed[0].group.matcher !== "^(manual|auto)$") throw new Error("managed PostCompact matcher mismatch");
+const sessionStart = data?.hooks?.SessionStart || [];
+const oldManaged = sessionStart.flatMap(group => group.hooks || [])
+  .filter(hook => /codex-alpha-goal-compact-recovery:v[0-9]+/.test(String(hook.command || "")));
+if (oldManaged.length) throw new Error("managed compact recovery hook remained under SessionStart");
+JS
 grep -q "treat pre-compaction remembered skill text as stale" "$tmp_codex_home/hooks.json"
 grep -q "draft or accepted goal-contract.md first" "$tmp_codex_home/hooks.json"
 grep -q "accepted status gates only executor execution handoff" "$tmp_codex_home/hooks.json"

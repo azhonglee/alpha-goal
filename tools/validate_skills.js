@@ -9,6 +9,8 @@ const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
 const SKILLS_COUNT_BUDGET = 15_000;
 const CONTRACT_PATH = "contracts/alpha-goal.json";
 const HOOK_MARKER = "codex-alpha-goal-compact-recovery:v1";
+const HOOK_MARKER_FAMILY_RE = /codex-alpha-goal-compact-recovery:v[0-9]+/;
+const COMPACT_RECOVERY_HOOK_MATCHER = "^(manual|auto)$";
 const LEGACY_HOOK_MARKER = "codex-compact-skill-recovery";
 const VALIDATOR_COMMAND = "node tools/validate_skills.js .";
 const FIXTURE_COMMAND = "node tools/validate_skills.js --fixtures";
@@ -94,6 +96,7 @@ function validateRoot(root) {
   validateVerifier(root, contract, errors);
   validateEvidenceAliasMappings(root, contract, errors);
   validateCrossFileContract(root, contract, errors);
+  validateHookTemplate(root, errors);
   validateInstallSurface(root, contract, errors);
   validateClaudeTemplateParity(root, errors);
   validateDocs(root, contract, errors);
@@ -523,6 +526,65 @@ function validateCrossFileContract(root, contract, errors) {
   }
 }
 
+function validateHookTemplate(root, errors) {
+  const rel = "templates/hooks.json";
+  const file = path.join(root, rel);
+  const text = readIfFile(file);
+  if (!text) {
+    errors.push(`${rel}: missing`);
+    return;
+  }
+
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (error) {
+    errors.push(`${rel}: invalid JSON: ${errorMessage(error)}`);
+    return;
+  }
+
+  if (!data || typeof data !== "object" || Array.isArray(data) || !data.hooks || typeof data.hooks !== "object" || Array.isArray(data.hooks)) {
+    errors.push(`${rel}: top-level hooks field must be a JSON object`);
+    return;
+  }
+
+  const managedHooks = [];
+  for (const [event, groups] of Object.entries(data.hooks)) {
+    if (!Array.isArray(groups)) {
+      errors.push(`${rel}: hooks.${event} must be a JSON array`);
+      continue;
+    }
+    for (const group of groups) {
+      if (!group || typeof group !== "object" || !Array.isArray(group.hooks)) continue;
+      for (const hook of group.hooks) {
+        const command = typeof hook?.command === "string" ? hook.command : "";
+        if (HOOK_MARKER_FAMILY_RE.test(command)) managedHooks.push({ event, group, hook, command });
+      }
+    }
+  }
+
+  const managedSessionStart = managedHooks.filter(entry => entry.event === "SessionStart");
+  if (managedSessionStart.length) errors.push(`${rel}: managed compact recovery hook must not remain under SessionStart`);
+
+  const managedPostCompact = managedHooks.filter(entry => entry.event === "PostCompact");
+  if (managedPostCompact.length !== 1) {
+    errors.push(`${rel}: expected exactly one managed PostCompact compact recovery hook, found ${managedPostCompact.length}`);
+    return;
+  }
+
+  const [{ group, hook, command }] = managedPostCompact;
+  if (group.matcher !== COMPACT_RECOVERY_HOOK_MATCHER) {
+    errors.push(`${rel}: managed PostCompact matcher must be ${COMPACT_RECOVERY_HOOK_MATCHER}`);
+  }
+  if (hook.type !== "command") errors.push(`${rel}: managed PostCompact hook type must be command`);
+  if (!command.trimStart().startsWith(`: '${HOOK_MARKER}';`)) {
+    errors.push(`${rel}: managed PostCompact hook command must start with marker ${HOOK_MARKER}`);
+  }
+  if (!command.includes("Compact recovery policy:")) {
+    errors.push(`${rel}: managed PostCompact hook command must print Compact recovery policy`);
+  }
+}
+
 function validateInstallSurface(root, contract, errors) {
   const install = readIfFile(path.join(root, "scripts/install.sh"));
   if (!install) {
@@ -642,7 +704,7 @@ function validateDocs(root, contract, errors) {
     if (!text.includes(contract.nodeRequirement)) errors.push(`${rel}: missing node requirement ${contract.nodeRequirement}`);
   }
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
-  for (const term of ["--target", "$HOME/.agents/skills", "$HOME/.claude/skills", "templates/CLAUDE.md", "--no-sync-user-hooks", "templates/hooks.json", LEGACY_HOOK_MARKER, "temporary CODEX_HOME", FIXTURE_COMMAND]) {
+  for (const term of ["--target", "$HOME/.agents/skills", "$HOME/.claude/skills", "templates/CLAUDE.md", "--no-sync-user-hooks", "templates/hooks.json", "PostCompact", COMPACT_RECOVERY_HOOK_MATCHER, LEGACY_HOOK_MARKER, "temporary CODEX_HOME", FIXTURE_COMMAND]) {
     if (!installDoc.includes(term)) errors.push(`INSTALL.md missing install term: ${term}`);
   }
   for (const term of [

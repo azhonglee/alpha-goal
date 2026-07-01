@@ -1,8 +1,8 @@
 {
   "hooks": {
-    "SessionStart": [
+    "PostCompact": [
       {
-        "matcher": "^compact$",
+        "matcher": "^(manual|auto)$",
         "hooks": [
           {
             "type": "command",
