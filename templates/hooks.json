@@ -2,7 +2,6 @@
   "hooks": {
     "PostCompact": [
       {
-        "matcher": "^(manual|auto)$",
         "hooks": [
           {
             "type": "command",

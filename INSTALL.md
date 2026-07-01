@@ -49,7 +49,7 @@ Use `--uninstall` to remove managed install artifacts for the selected target. `
 
 Uninstall is conservative outside the managed copied-skill path. It removes only managed Markdown blocks, managed hooks, `config.toml` that byte-for-byte matches `templates/config.toml`, skill copies with the install marker, and skill symlinks that resolve to this repository or the shared skill copy. Mixed user Markdown keeps user content, mixed or modified `config.toml` is preserved, unmanaged hooks are preserved, configuration symlinks are not followed or deleted, and unmanaged skill directories or external symlinks are preserved. `--no-sync-user-templates` skips Markdown and `config.toml` cleanup; `--no-sync-user-hooks` skips hooks cleanup.
 
-The compact recovery hook definition lives in `templates/hooks.json`. It is a `PostCompact` hook with matcher `^(manual|auto)$` and prints a static policy telling Codex to decide whether `alpha-goal`, `executor`, or `verifier` applies after manual or automatic compaction, and to load the matching skill before continuing. For active Alpha Goal tasks, it resumes from draft or accepted `goal-contract.md` first and reads `technical_design.md` with the Goal Contract when it exists; accepted status gates only `executor` execution handoff. `verifier` covers evidence, claim boundary, defect/risk sweep, and material unclaimed issues. Use `--no-sync-user-templates` to skip Codex AGENTS/config and Claude CLAUDE template updates. Use `--no-sync-user-hooks` to skip Codex hook template updates.
+The compact recovery hook definition lives in `templates/hooks.json`. It is a `PostCompact` hook without a matcher and prints a static policy telling Codex to decide whether `alpha-goal`, `executor`, or `verifier` applies after compaction, and to load the matching skill before continuing. For active Alpha Goal tasks, it resumes from draft or accepted `goal-contract.md` first and reads `technical_design.md` with the Goal Contract when it exists; accepted status gates only `executor` execution handoff. `verifier` covers evidence, claim boundary, defect/risk sweep, and material unclaimed issues. Use `--no-sync-user-templates` to skip Codex AGENTS/config and Claude CLAUDE template updates. Use `--no-sync-user-hooks` to skip Codex hook template updates.
 
 Hook upgrades are keyed by marker family. If the template marker changes from `...:v1` to `...:v2`, the installer removes older hooks from the same family before adding the template hook. It also removes the earlier experimental `codex-compact-skill-recovery` hook family.
 
@@ -138,7 +138,7 @@ const groups = data?.hooks?.PostCompact || [];
 const managed = groups.flatMap(group => (group.hooks || []).map(hook => ({ group, hook })))
   .filter(entry => String(entry.hook.command || "").includes("codex-alpha-goal-compact-recovery:v1"));
 if (managed.length !== 1) throw new Error(`expected one managed PostCompact hook, found ${managed.length}`);
-if (managed[0].group.matcher !== "^(manual|auto)$") throw new Error("managed PostCompact matcher mismatch");
+if ("matcher" in managed[0].group) throw new Error("managed PostCompact hook must not set matcher");
 const sessionStart = data?.hooks?.SessionStart || [];
 const oldManaged = sessionStart.flatMap(group => group.hooks || [])
   .filter(hook => /codex-alpha-goal-compact-recovery:v[0-9]+/.test(String(hook.command || "")));

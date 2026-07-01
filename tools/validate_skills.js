@@ -10,7 +10,6 @@ const SKILLS_COUNT_BUDGET = 15_000;
 const CONTRACT_PATH = "contracts/alpha-goal.json";
 const HOOK_MARKER = "codex-alpha-goal-compact-recovery:v1";
 const HOOK_MARKER_FAMILY_RE = /codex-alpha-goal-compact-recovery:v[0-9]+/;
-const COMPACT_RECOVERY_HOOK_MATCHER = "^(manual|auto)$";
 const LEGACY_HOOK_MARKER = "codex-compact-skill-recovery";
 const VALIDATOR_COMMAND = "node tools/validate_skills.js .";
 const FIXTURE_COMMAND = "node tools/validate_skills.js --fixtures";
@@ -573,8 +572,8 @@ function validateHookTemplate(root, errors) {
   }
 
   const [{ group, hook, command }] = managedPostCompact;
-  if (group.matcher !== COMPACT_RECOVERY_HOOK_MATCHER) {
-    errors.push(`${rel}: managed PostCompact matcher must be ${COMPACT_RECOVERY_HOOK_MATCHER}`);
+  if ("matcher" in group) {
+    errors.push(`${rel}: managed PostCompact compact recovery hook must not set matcher`);
   }
   if (hook.type !== "command") errors.push(`${rel}: managed PostCompact hook type must be command`);
   if (!command.trimStart().startsWith(`: '${HOOK_MARKER}';`)) {
@@ -704,7 +703,7 @@ function validateDocs(root, contract, errors) {
     if (!text.includes(contract.nodeRequirement)) errors.push(`${rel}: missing node requirement ${contract.nodeRequirement}`);
   }
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
-  for (const term of ["--target", "$HOME/.agents/skills", "$HOME/.claude/skills", "templates/CLAUDE.md", "--no-sync-user-hooks", "templates/hooks.json", "PostCompact", COMPACT_RECOVERY_HOOK_MATCHER, LEGACY_HOOK_MARKER, "temporary CODEX_HOME", FIXTURE_COMMAND]) {
+  for (const term of ["--target", "$HOME/.agents/skills", "$HOME/.claude/skills", "templates/CLAUDE.md", "--no-sync-user-hooks", "templates/hooks.json", "PostCompact", "must not set matcher", LEGACY_HOOK_MARKER, "temporary CODEX_HOME", FIXTURE_COMMAND]) {
     if (!installDoc.includes(term)) errors.push(`INSTALL.md missing install term: ${term}`);
   }
   for (const term of [
