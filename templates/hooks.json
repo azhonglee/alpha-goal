@@ -1,8 +1,7 @@
 {
   "hooks": {
-    "SessionStart": [
+    "PostCompact": [
       {
-        "matcher": "^compact$",
         "hooks": [
           {
             "type": "command",
