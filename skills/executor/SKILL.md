@@ -169,6 +169,7 @@ Finish only when:
 - verifier passes
 - route is PASS_TO_FINAL
 - No required work remains
+- No loopholes remain
 
 ## Checkpoint Policy
 `<Alpha Goal state root>/YYYYMMDD-<TaskName>/checkpoint.md` is recovery support, not progress.
@@ -188,6 +189,7 @@ Checkpoint may record:
 - Raw evidence
 - Known gaps
 - Blockers
+- Loopholes
 - Next route
 
 Checkpoint may not redefine:
