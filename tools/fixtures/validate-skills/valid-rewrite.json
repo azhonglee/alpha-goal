@@ -4,8 +4,8 @@
   "replacements": [
     {
       "file": "skills/alpha-goal/SKILL.md",
-      "search": "After Review Gate completes, present the Goal Contract Summary first.",
-      "replace": "Before asking for approval, show the Goal Contract Summary first."
+      "search": "The approval request message must include the Goal Contract Summary.",
+      "replace": "The approval prompt must show the Goal Contract Summary before requesting user confirmation."
     }
   ]
 }
