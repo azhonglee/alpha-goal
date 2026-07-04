@@ -32,6 +32,13 @@ Do not leave `Clarification` until the coverage matrix has no blocking gap:
 - A dimension is not covered by one answer by default. Coverage requires a pressure-tested decision, boundary, implementation impact, and evidence signal.
 - The highest-risk goal dimension and highest-risk design dimension each receive follow-up until no blocking gap remains.
 - Planned questions, unanswered questions, and hypothetical answers do not reduce coverage.
+- Every required dimension has a coverage record with: `decision`, `boundary`, `implementation impact`, `acceptance/observer`, and `status`.
+- A missing material coverage cell keeps the dimension `blocking`.
+- Mark uncertainty `non-material` only when the record explains why it cannot change implementation, tests, acceptance, or risk handling.
+
+Blocking gap classifier:
+- A gap is `blocking` when a different answer could change behavior, touched files/components, interfaces/API, data model, persistence, migration, external dependency, permission, environment, test strategy, validation observer, rollout, rollback, security, privacy, performance, or risk handling.
+- A gap is `deferred non-goal` only when the user or authoritative source explicitly excludes it from this goal.
 
 Clarification exit invariants:
 - `no_confidence_only`: Do not use confidence alone as exit evidence.
@@ -70,7 +77,10 @@ Use current task state:
 - Current coverage matrix gaps.
 - Brownfield context and active Assumption Stress Test mode.
 
-Target dimensions step by step. Do not skip the Design table for implementation, repair, refactor, hardening, or cross-file behavior changes.
+Rank open gaps before choosing the next target:
+- Prefer the gap with the highest blast radius, irreversibility, external dependency, user-owned semantics, data/API contract impact, validation ambiguity, or rollback risk.
+- Do not move to a lower-risk dimension while a higher-risk blocking design or goal gap remains.
+- Do not skip the Design table for implementation, repair, refactor, hardening, or cross-file behavior changes.
 
 | Goal Priority | Dimension |
 | --- | --- |
@@ -90,7 +100,11 @@ Prompt format:
 
 ```text
 Round {n} | Target: {dimension} | Gap: {blocking|non-material|deferred}
-{question}
+Why this blocks: ...
+Decision needed: ...
+Recommended option: ...
+Question: ...
+Coverage cells affected: decision / boundary / implementation impact / acceptance observer
 ```
 
 Classify each answer before updating artifacts:
@@ -124,6 +138,11 @@ Follow-up policy:
 - Do not rotate to the next dimension when the current answer creates a blocking design, boundary, or evidence gap.
 - Record the coverage chain for each required dimension: first question, answer source, pressure-test result, coverage status.
 - Prefer depth over breadth: fewer well-tested dimensions are better than many shallow checkmarks.
+
+Closure test:
+- Before marking a dimension `covered`, ask: if this answer were wrong, what code, test, data, interface, dependency, risk treatment, or acceptance evidence would change?
+- If any material item would change, keep the dimension `blocking`.
+- If nothing material would change, record why it is `non-material` or `deferred non-goal`.
 
 **Step 4: Evaluate coverage**
 
@@ -160,6 +179,9 @@ Write artifacts only from answered, auto-confirmed, or cited facts. Keep unresol
   - Each success criterion maps to acceptance evidence and a validation observer.
   - Key design decisions cover architecture, components, interfaces, data models, data flow, tests, and risks.
   - Non-goals, execution boundary, decision boundary, and claim boundary are explicit.
+  - Coverage records include decision, boundary, implementation impact, acceptance/observer, and status for every required dimension.
+  - No `covered` dimension relies only on confidence, round count, planned questions, or an untested assumption.
+  - Review the highest-risk covered dimension and confirm its closure test would not change implementation or validation.
 - Run independent review for non-trivial implementation, repair, refactor, hardening, or cross-file behavior changes:
   - Prefer a subagent review when available; if skipped, record the reason.
   - Pass raw artifacts and the user request, not your intended answer.
