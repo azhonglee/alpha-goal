@@ -403,7 +403,15 @@ function validateAlphaGoal(root, contract, errors) {
   const confirmationIndex = headingOffset(text, "Confirmation Gate");
   const inputIndex = text.indexOf("request_user_input", confirmationIndex);
   if (!(reviewIndex >= 0 && summaryIndex > reviewIndex && confirmationIndex > summaryIndex && inputIndex > confirmationIndex)) {
-    errors.push(`${rel}: Review summary must appear before Confirmation Gate request_user_input`);
+    errors.push(`${rel}: Goal Contract Summary must appear before Confirmation Gate request_user_input`);
+  }
+  const reviewSection = text.slice(reviewIndex, confirmationIndex >= 0 ? confirmationIndex : undefined);
+  for (const forbidden of [
+    "Produce a visible Review Record",
+    "Goal Contract Summary, Review Record",
+    "summary or Review Record is missing or incomplete",
+  ]) {
+    if (reviewSection.includes(forbidden)) errors.push(`${rel}: visible review result display requirement remains: ${forbidden}`);
   }
   const confirmationGate = markdownSection(text, "Confirmation Gate");
   for (const term of ["approve/launch", "refine", "reject", "Contract status: accepted"]) {

@@ -188,11 +188,10 @@ Write artifacts only from answered, auto-confirmed, or cited facts. Keep unresol
   - Require the reviewer to check shallow Q&A, missing design detail, missing acceptance evidence, and premature implementation risk.
 - Fix accepted findings.
 - Record self-check and independent review results in the task artifacts or checkpoint.
-- Produce a visible Review Record with self-check result, independent review result or skipped reason, findings fixed, and remaining non-material uncertainties.
 
 After Review Gate completes, present the Goal Contract Summary first.
-- The approval request message must include, in order: Goal Contract Summary, Review Record
-- If the summary or Review Record is missing or incomplete, stay in Review Gate.
+- The approval request message must include the Goal Contract Summary.
+- If the Goal Contract Summary is missing or incomplete, stay in Review Gate.
 - TUI Presentation Style:
 ```markdown
 Goal Contract Summary (Design Summary)
