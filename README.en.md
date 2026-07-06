@@ -114,7 +114,7 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 
 - Evidence before authority: Current code facts describe current state; desired behavior comes from user intent, specs, issues, or accepted contracts.
 - Goals before action: expected outcome, scope, non-goals, acceptance evidence, decision owner, and claim boundary define what may change.
-- Persistent state: `goal-contract.md` is the default `alpha-goal` output; `technical_design.md` is required only for implementation, repair, refactor, hardening, cross-file behavior, interface/data-model changes, or material risk; `checkpoint.md` conditionally carries evidence, checklist state, blockers, and the next route.
+- Persistent state: `goal-contract.md` is the default `alpha-goal` output; `technical_design.md` is the first-class Technical Design artifact for implementation, repair, refactor, hardening, or cross-file changes; `checkpoint.md` conditionally carries recovery and evidence handoff.
 - Bounded execution: prefer bounded evidence-producing actions or targeted changes over broad refactors and speculative cleanup.
 - Independent verification: final/ready/safe/complete/repair/review claims require fresh evidence, hard-blocking checklist coverage, and blocker checks, reviewed separately from execution.
 - Honest routing: unclear goals return to `alpha-goal`; same-goal fixable execution gaps return to `executor`.
