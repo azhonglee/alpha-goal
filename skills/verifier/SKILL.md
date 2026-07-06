@@ -9,13 +9,13 @@ description: "Compare execution evidence against an accepted Goal Contract and p
 
 verifier owns verification authority.
 
-It compares collected evidence against an accepted Goal Contract and returns only:
+It compares evidence against an accepted Goal Contract and returns only:
 - PASS_TO_FINAL
 - NEXT_ITERATION
 - BLOCKED
 - RETURN_TO_ALPHA_GOAL
 
-When reading task evidence, resolve Alpha Goal state root as `$HOME/.alpha-goal/<workspace-slug>/`, where `<workspace-slug>` is `slug(repo_root or Goal Contract target workspace)`.
+Resolve Alpha Goal state root as `$HOME/.alpha-goal/<workspace-slug>/`, where `<workspace-slug>` is `slug(repo_root or Goal Contract target workspace)`.
 
 verifier never redefines target, scope, acceptance evidence, non-goals, authority, or claim boundary.
 
@@ -25,12 +25,12 @@ verifier never redefines target, scope, acceptance evidence, non-goals, authorit
 Accepted Goal Contract
 Evidence + Acceptance Checklist
 Authority / blocker scan
-Route verdict
+Route
 ```
 
 ## Core Principle
 
-Verification compares evidence, not effort, intent, implementation size, or plausibility.
+Verification compares evidence, not effort, intent, or implementation size.
 
 ## Evidence Classification
 
@@ -51,16 +51,16 @@ Rules:
 
 ## Gap Analysis
 
-Compare Goal Contract acceptance evidence and the hard-blocking acceptance checklist against collected evidence.
+Compare Goal Contract acceptance evidence and the hard-blocking checklist against evidence.
 
 Gap kinds:
 
 | Gap Kind | Meaning | Route |
 | --- | --- | --- |
-| `same_goal_fixable` | Acceptance is not satisfied, and the same Goal Contract still authorizes more work. | NEXT_ITERATION |
+| `same_goal_fixable` | Acceptance is not satisfied, and the same Goal Contract still authorizes work. | NEXT_ITERATION |
 | `scope_change` | Scope no longer matches the Goal Contract. | RETURN_TO_ALPHA_GOAL |
 | `authority_change` | New authorization is required. | RETURN_TO_ALPHA_GOAL |
-| `external_blocker` | Missing external dependency prevents progress. | BLOCKED |
+| `external_blocker` | Missing dependency prevents progress. | BLOCKED |
 
 No gap plus satisfied acceptance evidence routes to PASS_TO_FINAL.
 
@@ -94,6 +94,8 @@ Blocker Gate:
 - Failure route: BLOCKED.
 
 ## Verification Algorithm
+
+**Run the algorithm as behavior, not paperwork:**
 
 ```pseudo
 assert_goal_contract_valid(goal)
