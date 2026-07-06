@@ -66,6 +66,18 @@ const RENAMED_LEGACY_ALLOWED_FILES = new Set([
   "scripts/install.sh",
   "tools/validate_skills.js",
 ]);
+const FORBIDDEN_EVIDENCE_TYPES = ["from-environment", "from-gap"];
+const FORBIDDEN_GAP_KINDS = ["verification_complete"];
+const LEGACY_EVIDENCE_ALIASES = [
+  "from-test-pass",
+  "from-test-fail",
+  "from-build-pass",
+  "from-build-fail",
+  "from-runtime-observation",
+  "from-code-change",
+  "from-user-validation",
+  "from-observer",
+];
 
 function main(args = process.argv.slice(2)) {
   if (args[0] === "--fixtures") return runFixtures(args.slice(1));
@@ -93,7 +105,7 @@ function validateRoot(root) {
   validateAlphaGoal(root, contract, errors);
   validateExecutor(root, contract, errors);
   validateVerifier(root, contract, errors);
-  validateEvidenceAliasMappings(root, contract, errors);
+  validateNoLegacyEvidenceConcepts(root, errors);
   validateCrossFileContract(root, contract, errors);
   validateHookTemplate(root, errors);
   validateInstallSurface(root, contract, errors);
@@ -160,18 +172,20 @@ function validateContract(contract, errors) {
   for (const route of contract.routes || []) {
     if (typeof route?.name !== "string" || !route.name) errors.push(`${CONTRACT_PATH}: route missing name`);
     if (typeof route?.condition !== "string" || !route.condition) errors.push(`${CONTRACT_PATH}: route ${route?.name || "<unknown>"} missing condition`);
+    if (route?.name === "PASS_TO_FINAL") {
+      for (const term of ["zero unmet required acceptance items", "no unresolved blocker", "no authority drift"]) {
+        if (!route.condition.includes(term)) errors.push(`${CONTRACT_PATH}: PASS_TO_FINAL route condition missing ${term}`);
+      }
+    }
+  }
+  for (const kind of contract.gapKinds || []) {
+    if (FORBIDDEN_GAP_KINDS.includes(kind)) errors.push(`${CONTRACT_PATH}: forbidden gap kind remains: ${kind}`);
   }
   for (const evidence of contract.evidenceTypes || []) {
     if (typeof evidence?.name !== "string" || !evidence.name) errors.push(`${CONTRACT_PATH}: evidence type missing name`);
+    if (FORBIDDEN_EVIDENCE_TYPES.includes(evidence?.name)) errors.push(`${CONTRACT_PATH}: forbidden evidence type remains: ${evidence.name}`);
     requireArray(evidence, "results", errors, `evidence ${evidence?.name || "<unknown>"}`);
-    requireArray(evidence, "aliases", errors, `evidence ${evidence?.name || "<unknown>"}`);
-    for (const alias of evidence?.aliases || []) {
-      if (typeof alias?.label !== "string" || typeof alias?.result !== "string") {
-        errors.push(`${CONTRACT_PATH}: evidence ${evidence.name} alias must map label to result`);
-      } else if (!evidence.results.includes(alias.result)) {
-        errors.push(`${CONTRACT_PATH}: evidence alias ${alias.label} maps to unsupported result ${alias.result}`);
-      }
-    }
+    if ("aliases" in evidence) errors.push(`${CONTRACT_PATH}: evidence ${evidence.name} must not define legacy aliases`);
   }
   for (const gate of contract.requiredGates || []) {
     if (typeof gate !== "string" || !gate) errors.push(`${CONTRACT_PATH}: requiredGates entries must be non-empty strings`);
@@ -393,8 +407,8 @@ function validateAlphaGoal(root, contract, errors) {
   for (const rule of contract.clarificationExitRules) {
     if (!clarificationGate.includes(`\`${rule}\``)) errors.push(`${rel}: Clarification Gate missing exit rule ${rule}`);
   }
-  const summaryBlock = fencedBlockAfter(text, "TUI Presentation Style:");
-  if (!summaryBlock) errors.push(`${rel}: missing TUI Presentation Style fenced summary`);
+  const summaryBlock = fencedBlockAfter(text, "Present this summary before asking for approval:");
+  if (!summaryBlock) errors.push(`${rel}: missing Goal Contract Summary fenced summary`);
   for (const field of contract.summaryFields) {
     if (!summaryBlock.includes(`| ${field} |`)) errors.push(`${rel}: summary table missing field: ${field}`);
   }
@@ -429,8 +443,8 @@ function validateExecutor(root, contract, errors) {
     errors.push(`${rel}: missing`);
     return;
   }
-  requireHeadings(rel, text, ["Core Principle", "Acceptance Coverage Matrix", "Runtime Flow", "Authority", "Evidence Classification", "Partial Delivery Rule", "Slice Boundary Gates", "Execution Gates", "Completion Gate", "Stop / Return Rules", "Checkpoint Policy"], errors);
-  requireTerms(rel, text, ["technical_design.md", "pending", "failed", "blocked", "deferred-non-goal", "zero unmet required acceptance items", "- route is PASS_TO_FINAL"], errors);
+  requireHeadings(rel, text, ["Core Principle", "Acceptance Checklist", "Runtime Flow", "Authority", "Evidence Classification", "Route Rules", "Slice Boundary Gates", "Execution Gates", "Completion Gate", "Checkpoint Policy"], errors);
+  requireTerms(rel, text, ["technical_design.md", "hard-blocking", "pending", "failed", "blocked", "deferred-non-goal", "PASS_TO_FINAL", "route is PASS_TO_FINAL"], errors);
   for (const route of contract.routes) {
     if (!text.includes(route.name)) errors.push(`${rel}: missing route ${route.name}`);
   }
@@ -455,7 +469,7 @@ function validateVerifier(root, contract, errors) {
   for (const kind of contract.gapKinds) {
     if (!text.includes(kind)) errors.push(`${rel}: missing gap kind ${kind}`);
   }
-  requireTerms(rel, text, ["Acceptance Matrix Gate", "zero unmet required acceptance items", "technical_design.md"], errors);
+  requireTerms(rel, text, ["Acceptance Checklist Gate", "zero unmet required acceptance items", "technical_design.md"], errors);
   const evidenceSection = markdownSection(text, "Evidence Classification");
   requireCanonicalEvidence(rel, evidenceSection, contract, errors);
 }
@@ -468,6 +482,7 @@ function requireTerms(rel, text, terms, errors) {
 
 function requireCanonicalEvidence(rel, text, contract, errors) {
   const lines = text.split(/\r?\n/);
+  const expectedNames = new Set(contract.evidenceTypes.map(evidence => evidence.name));
   for (const evidence of contract.evidenceTypes) {
     const evidenceBullet = new RegExp(`^\\s*-\\s+\\[${escapeRegExp(evidence.name)}\\](?:\\s|;|$)`);
     const line = lines.find(candidate => evidenceBullet.test(candidate));
@@ -485,29 +500,35 @@ function requireCanonicalEvidence(rel, text, contract, errors) {
       errors.push(`${rel}: evidence type [${evidence.name}] result enum ${result[1]} does not match contract ${evidence.results.join("|")}`);
     }
   }
-  for (const evidence of contract.evidenceTypes) {
-    for (const alias of evidence.aliases) {
-      if (text.includes(`[${alias.label}]`)) {
-        errors.push(`${rel}: legacy evidence alias should map to [${evidence.name}] result=${alias.result}: [${alias.label}]`);
-      }
+  for (const line of lines) {
+    const candidate = line.match(/^\s*-\s+\[([a-z0-9-]+)\]\s+result=/);
+    if (candidate && !expectedNames.has(candidate[1])) {
+      errors.push(`${rel}: unexpected evidence type [${candidate[1]}]`);
     }
   }
 }
 
-function validateEvidenceAliasMappings(root, contract, errors) {
-  const sections = [
-    markdownSection(readIfFile(path.join(root, "skills/executor/SKILL.md")), "Evidence Classification"),
-    markdownSection(readIfFile(path.join(root, "skills/verifier/SKILL.md")), "Evidence Classification"),
-  ].join("\n");
-  for (const evidence of contract.evidenceTypes) {
-    for (const alias of evidence.aliases || []) {
-      const aliasLine = new RegExp(
-        `^.*\`${escapeRegExp(alias.label)}\`\\s*->\\s*\\[${escapeRegExp(evidence.name)}\\]\\s+result=${escapeRegExp(alias.result)}(?:\\s|$)`,
-        "m",
-      );
-      if (!aliasLine.test(sections)) {
-        errors.push(`evidence alias ${alias.label} must map to [${evidence.name}] result=${alias.result}`);
-      }
+function validateNoLegacyEvidenceConcepts(root, errors) {
+  const allowedFixtures = new Set([
+    "tools/fixtures/validate-skills/forbidden-evidence-type.json",
+    "tools/fixtures/validate-skills/forbidden-evidence-prose.json",
+    "tools/fixtures/validate-skills/forbidden-gap-kind.json",
+    "tools/fixtures/validate-skills/legacy-alias-rejected.json",
+  ]);
+  for (const file of walk(root).filter(isFile)) {
+    const rel = relative(root, file);
+    if (rel.startsWith(".git/")) continue;
+    if (rel === "tools/validate_skills.js") continue;
+    if (allowedFixtures.has(rel)) continue;
+    if (!/\.(md|js|sh|toml|json)$/.test(rel) && rel !== "AGENTS.md") continue;
+
+    const text = fs.readFileSync(file, "utf8");
+    for (const term of [...FORBIDDEN_EVIDENCE_TYPES, ...FORBIDDEN_GAP_KINDS]) {
+      if (text.includes(term)) errors.push(`${rel}: forbidden legacy evidence/gap concept remains: ${term}`);
+    }
+    if (text.includes("Legacy evidence aliases")) errors.push(`${rel}: legacy evidence alias prose remains`);
+    for (const term of LEGACY_EVIDENCE_ALIASES) {
+      if (text.includes(term)) errors.push(`${rel}: legacy evidence alias remains: ${term}`);
     }
   }
 }
@@ -597,6 +618,9 @@ function validateHookTemplate(root, errors) {
   }
   if (!command.includes("Compact recovery policy:")) {
     errors.push(`${rel}: managed PostCompact hook command must print Compact recovery policy`);
+  }
+  for (const term of ["interface/data-model changes", "material risk", "verification handoff", "acceptance checklist"]) {
+    if (!command.includes(term)) errors.push(`${rel}: managed PostCompact hook command missing ${term}`);
   }
 }
 
@@ -719,7 +743,7 @@ function validateDocs(root, contract, errors) {
     if (!text.includes(contract.nodeRequirement)) errors.push(`${rel}: missing node requirement ${contract.nodeRequirement}`);
   }
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
-  for (const term of ["--target", "$HOME/.agents/skills", "$HOME/.claude/skills", "templates/CLAUDE.md", "--no-sync-user-hooks", "templates/hooks.json", "PostCompact", "must not set matcher", LEGACY_HOOK_MARKER, "temporary CODEX_HOME", FIXTURE_COMMAND]) {
+  for (const term of ["--target", "$HOME/.agents/skills", "$HOME/.claude/skills", "templates/CLAUDE.md", "--no-sync-user-hooks", "templates/hooks.json", "PostCompact", "must not set matcher", LEGACY_HOOK_MARKER, "temporary CODEX_HOME", FIXTURE_COMMAND, "interface/data-model changes", "material risk", "verification handoff", "acceptance checklist"]) {
     if (!installDoc.includes(term)) errors.push(`INSTALL.md missing install term: ${term}`);
   }
   for (const term of [

@@ -1,0 +1,11 @@
+{
+  "shouldPass": false,
+  "inheritRoot": true,
+  "replacements": [
+    {
+      "file": "skills/executor/SKILL.md",
+      "search": "- [from-blocker] result=blocked; missing permission, credential, tool, data, environment, external system, or user decision.\n",
+      "replace": "- [from-blocker] result=blocked; missing permission, credential, tool, data, environment, external system, or user decision.\n- [from-gap] result=same-goal-fixable|scope-change|authority-change; legacy gap-as-evidence entry.\n"
+    }
+  ]
+}

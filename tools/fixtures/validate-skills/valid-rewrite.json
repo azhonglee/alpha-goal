@@ -4,8 +4,8 @@
   "replacements": [
     {
       "file": "skills/alpha-goal/SKILL.md",
-      "search": "The approval request message must include the Goal Contract Summary.",
-      "replace": "The approval prompt must show the Goal Contract Summary before requesting user confirmation."
+      "search": "Implementation starts only after an accepted Goal Contract hands off to `executor` skill.",
+      "replace": "Execution starts only after an accepted Goal Contract hands off to `executor` skill."
     }
   ]
 }

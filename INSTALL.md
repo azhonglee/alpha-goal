@@ -49,7 +49,7 @@ Use `--uninstall` to remove managed install artifacts for the selected target. `
 
 Uninstall is conservative outside the managed copied-skill path. It removes only managed Markdown blocks, managed hooks, `config.toml` that byte-for-byte matches `templates/config.toml`, skill copies with the install marker, and skill symlinks that resolve to this repository or the shared skill copy. Mixed user Markdown keeps user content, mixed or modified `config.toml` is preserved, unmanaged hooks are preserved, configuration symlinks are not followed or deleted, and unmanaged skill directories or external symlinks are preserved. `--no-sync-user-templates` skips Markdown and `config.toml` cleanup; `--no-sync-user-hooks` skips hooks cleanup.
 
-The compact recovery hook definition lives in `templates/hooks.json`. It is a `PostCompact` hook without a matcher and prints a static policy telling Codex to decide whether `alpha-goal`, `executor`, or `verifier` applies after compaction, and to load the matching skill before continuing. For active Alpha Goal tasks, it resumes from draft or accepted `goal-contract.md` first and reads `technical_design.md` with the Goal Contract when it exists; accepted status gates only `executor` execution handoff. `verifier` covers evidence, claim boundary, defect/risk sweep, and material unclaimed issues. Use `--no-sync-user-templates` to skip Codex AGENTS/config and Claude CLAUDE template updates. Use `--no-sync-user-hooks` to skip Codex hook template updates.
+The compact recovery hook definition lives in `templates/hooks.json`. It is a `PostCompact` hook without a matcher and prints a static policy telling Codex to reload `alpha-goal`, `executor`, or `verifier` when applicable after compaction. For active Alpha Goal work, it resumes from `goal-contract.md`, reads `technical_design.md` when present for implementation, repair, refactor, hardening, cross-file behavior, interface/data-model changes, or material risk, uses `control-state/latest.md` only when task identity is ambiguous, and uses `checkpoint.md` for recovery, evidence handoff, or verification handoff. `executor` still requires an accepted Goal Contract, and `verifier` compares evidence with the hard-blocking acceptance checklist before returning a route. Use `--no-sync-user-templates` to skip Codex AGENTS/config and Claude CLAUDE template updates. Use `--no-sync-user-hooks` to skip Codex hook template updates.
 
 Hook upgrades are keyed by marker family. If the template marker changes from `...:v1` to `...:v2`, the installer removes older hooks from the same family before adding the template hook. It also removes the earlier experimental `codex-compact-skill-recovery` hook family.
 
@@ -144,15 +144,18 @@ const oldManaged = sessionStart.flatMap(group => group.hooks || [])
   .filter(hook => /codex-alpha-goal-compact-recovery:v[0-9]+/.test(String(hook.command || "")));
 if (oldManaged.length) throw new Error("managed compact recovery hook remained under SessionStart");
 JS
-grep -q "treat pre-compaction remembered skill text as stale" "$tmp_codex_home/hooks.json"
-grep -q "draft or accepted goal-contract.md first" "$tmp_codex_home/hooks.json"
-grep -q "accepted status gates only executor execution handoff" "$tmp_codex_home/hooks.json"
+grep -q "treat remembered skill text as stale" "$tmp_codex_home/hooks.json"
+grep -q "read goal-contract.md first" "$tmp_codex_home/hooks.json"
+grep -q "accepted Goal Contract" "$tmp_codex_home/hooks.json"
 grep -q "control-state/latest.md" "$tmp_codex_home/hooks.json"
 grep -q "goal-contract.md" "$tmp_codex_home/hooks.json"
 grep -q "technical_design.md" "$tmp_codex_home/hooks.json"
+grep -q "interface/data-model changes" "$tmp_codex_home/hooks.json"
+grep -q "material risk" "$tmp_codex_home/hooks.json"
 grep -q "checkpoint.md" "$tmp_codex_home/hooks.json"
-grep -q "verification-triggered recovery" "$tmp_codex_home/hooks.json"
-grep -q "Run Profile, Loop State, Verification, and Evidence" "$tmp_codex_home/hooks.json"
+grep -q "verification handoff" "$tmp_codex_home/hooks.json"
+grep -q "acceptance checklist" "$tmp_codex_home/hooks.json"
+grep -q "PASS_TO_FINAL, NEXT_ITERATION, BLOCKED, or RETURN_TO_ALPHA_GOAL" "$tmp_codex_home/hooks.json"
 grep -q '\$alpha-goal' "$tmp_codex_home/hooks.json"
 grep -q '\$executor' "$tmp_codex_home/hooks.json"
 grep -q '\$verifier' "$tmp_codex_home/hooks.json"
@@ -539,10 +542,10 @@ rm -rf "$tmp_home" "$tmp_codex_only" "$tmp_claude_only" "$tmp_noninteractive" "$
 ```text
 $alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继续闭环。
 $executor 根据 Goal Contract 和已有条件检查点做下一轮最有用且可验证的有界 slice。
-$verifier 验证目标完成、证据覆盖、声明边界和 material 未声明缺陷/风险，并返回可继续 harden 的 Gap。
+$verifier 对照验收证据和 hard-blocking checklist 验证完成、声明边界和 blocker，并返回下一步 route。
 ```
 
 ## Count budget
 
 The validator enforces the whole `skills/` tree under 15,000 word+punctuation units, counted as words plus punctuation/symbol marks.
-This budget preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, authority gates, behavior-level gates, and verifier feedback without over-compressing their meaning.
+This budget preserves trigger behavior, durable state, authority gates, hard-blocking acceptance checks, route decisions, and verifier feedback without over-compressing their meaning.

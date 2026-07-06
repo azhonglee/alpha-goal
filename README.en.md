@@ -30,7 +30,7 @@ Alpha Goal gives AI agents a Goal Engineering control loop for three common fail
     <tr>
       <td width="260" align="left"><strong>Evidence&#8209;free&nbsp;completion</strong></td>
       <td align="left">A passing test or partial success is treated as proof that the goal is complete.</td>
-      <td align="left"><code>verifier</code> compares evidence against acceptance evidence, classifies gaps, and returns a route decision.</td>
+      <td align="left"><code>verifier</code> compares evidence against acceptance evidence and the hard-blocking checklist, then returns a route decision.</td>
     </tr>
   </tbody>
 </table>
@@ -43,8 +43,8 @@ In practice, it compresses requirement clarification, authority boundaries, iter
 %%{init: {"theme":"base","flowchart":{"wrappingWidth":900,"nodeSpacing":80,"rankSpacing":70,"htmlLabels":true},"markdownAutoWrap":false,"themeVariables":{"background":"#364150","primaryColor":"#364150","primaryTextColor":"#f8fafc","primaryBorderColor":"#f8fafc","lineColor":"#f8fafc","edgeLabelBackground":"#364150","fontFamily":"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"}}}%%
 flowchart TD
   AG["<div align='center'><strong>alpha-goal (entry)</strong></div><div align='left' style='width:900px'><br/>Discover facts → Clarify requirements → Pressure-test → Write Goal Contract → User confirmation<br/>Output: goal-contract.md (authority contract)</div>"]
-  CL["<div align='center'><strong>executor (execution)</strong></div><div align='left' style='width:900px'><br/>Slice by contract → Execute → Collect evidence → Classify evidence → Route<br/>Output: checkpoint.md (conditional recovery / evidence handoff)</div>"]
-  GV["<div align='center'><strong>verifier (verification)</strong></div><div align='left' style='width:900px'><br/>Evidence vs acceptance evidence → Gap analysis → Route decision<br/>Verdicts: PASS_TO_FINAL / NEXT_ITERATION / BLOCKED / RETURN...</div>"]
+  CL["<div align='center'><strong>executor (execution)</strong></div><div align='left' style='width:900px'><br/>Slice by contract → Execute → Collect evidence → Update hard-blocking checklist<br/>Output: checkpoint.md (conditional recovery / evidence handoff)</div>"]
+  GV["<div align='center'><strong>verifier (verification)</strong></div><div align='left' style='width:900px'><br/>Evidence + checklist vs acceptance evidence → Route decision<br/>Verdicts: PASS_TO_FINAL / NEXT_ITERATION / BLOCKED / RETURN...</div>"]
 
   AG -->|"after contract is accepted"| CL
   CL --> GV
@@ -60,7 +60,7 @@ flowchart TD
 
 ```text
 Trigger -> Preflight/Discovery -> Clarify -> Write Contract -> Technical Design? -> Review -> Confirm
-Accepted Goal Contract -> $executor -> Act -> Evidence -> $verifier -> Gap? -> Harden or Final Claim
+Accepted Goal Contract -> $executor -> Act -> Evidence + Checklist -> $verifier -> Route -> Next Slice or Final Claim
 ```
 
 ## Quick start
@@ -103,7 +103,7 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/verifier/"><code>verifier</code></a></td>
-      <td align="left">Verify goal completion, claim boundary, evidence coverage, and material unclaimed defects/risks, then return the next Gap.</td>
+      <td align="left">Verify goal completion, claim boundary, evidence coverage, blockers, and checklist coverage, then return the next route.</td>
     </tr>
   </tbody>
 </table>
@@ -114,7 +114,7 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 
 - Evidence before authority: Current code facts describe current state; desired behavior comes from user intent, specs, issues, or accepted contracts.
 - Goals before action: expected outcome, scope, non-goals, acceptance evidence, decision owner, and claim boundary define what may change.
-- Persistent state: `goal-contract.md` is the default `alpha-goal` output; `technical_design.md` is the first-class Technical Design artifact for implementation, repair, refactor, hardening, or cross-file changes; `checkpoint.md` conditionally carries recovery and evidence handoff.
+- Persistent state: `goal-contract.md` is the default `alpha-goal` output; `technical_design.md` is required only for implementation, repair, refactor, hardening, cross-file behavior, interface/data-model changes, or material risk; `checkpoint.md` conditionally carries evidence, checklist state, blockers, and the next route.
 - Bounded execution: prefer bounded evidence-producing actions or targeted changes over broad refactors and speculative cleanup.
-- Independent verification: final/ready/safe/complete/repair/review claims require fresh evidence and defect/risk scanning, checked separately from execution.
+- Independent verification: final/ready/safe/complete/repair/review claims require fresh evidence, hard-blocking checklist coverage, and blocker checks, reviewed separately from execution.
 - Honest routing: unclear goals return to `alpha-goal`; same-goal fixable execution gaps return to `executor`.
