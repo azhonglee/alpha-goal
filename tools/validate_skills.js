@@ -429,7 +429,8 @@ function validateExecutor(root, contract, errors) {
     errors.push(`${rel}: missing`);
     return;
   }
-  requireHeadings(rel, text, ["Core Principle", "Runtime Flow", "Authority", "Evidence Classification", "Slice Boundary Gates", "Execution Gates", "Completion Gate", "Stop / Return Rules", "Checkpoint Policy"], errors);
+  requireHeadings(rel, text, ["Core Principle", "Acceptance Coverage Matrix", "Runtime Flow", "Authority", "Evidence Classification", "Partial Delivery Rule", "Slice Boundary Gates", "Execution Gates", "Completion Gate", "Stop / Return Rules", "Checkpoint Policy"], errors);
+  requireTerms(rel, text, ["technical_design.md", "pending", "failed", "blocked", "deferred-non-goal", "zero unmet required acceptance items", "- route is PASS_TO_FINAL"], errors);
   for (const route of contract.routes) {
     if (!text.includes(route.name)) errors.push(`${rel}: missing route ${route.name}`);
   }
@@ -454,8 +455,15 @@ function validateVerifier(root, contract, errors) {
   for (const kind of contract.gapKinds) {
     if (!text.includes(kind)) errors.push(`${rel}: missing gap kind ${kind}`);
   }
+  requireTerms(rel, text, ["Acceptance Matrix Gate", "zero unmet required acceptance items", "technical_design.md"], errors);
   const evidenceSection = markdownSection(text, "Evidence Classification");
   requireCanonicalEvidence(rel, evidenceSection, contract, errors);
+}
+
+function requireTerms(rel, text, terms, errors) {
+  for (const term of terms) {
+    if (!text.includes(term)) errors.push(`${rel}: missing required term: ${term}`);
+  }
 }
 
 function requireCanonicalEvidence(rel, text, contract, errors) {
