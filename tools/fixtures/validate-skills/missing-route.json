@@ -4,7 +4,7 @@
   "replacements": [
     {
       "file": "skills/executor/SKILL.md",
-      "search": "- route is PASS_TO_FINAL\n",
+      "search": "[ ] route is PASS_TO_FINAL.\n",
       "replace": ""
     }
   ]

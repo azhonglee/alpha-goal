@@ -5,7 +5,7 @@
     {
       "file": "skills/executor/SKILL.md",
       "search": "- [from-test] result=pass|fail; test/check evidence.\n",
-      "replace": "- [from-test] result=maybe; test/check evidence.\n"
+      "replace": "- [from-test] result=pass|fail; test/check evidence.\n- `from-test-pass` -> [from-test] result=pass\n"
     }
   ]
 }

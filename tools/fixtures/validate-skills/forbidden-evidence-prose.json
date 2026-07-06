@@ -1,0 +1,11 @@
+{
+  "shouldPass": false,
+  "inheritRoot": true,
+  "replacements": [
+    {
+      "file": "README.md",
+      "search": "Alpha Goal 是用于 Goal Engineering 的最小持久闭环技能集。",
+      "replace": "Alpha Goal 是用于 Goal Engineering 的最小持久闭环技能集。from-environment"
+    }
+  ]
+}

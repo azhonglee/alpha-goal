@@ -1,0 +1,11 @@
+{
+  "shouldPass": false,
+  "inheritRoot": true,
+  "replacements": [
+    {
+      "file": "contracts/alpha-goal.json",
+      "search": "    \"external_blocker\"\n",
+      "replace": "    \"external_blocker\",\n    \"verification_complete\"\n"
+    }
+  ]
+}

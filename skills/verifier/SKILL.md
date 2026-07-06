@@ -6,63 +6,41 @@ description: "Compare execution evidence against an accepted Goal Contract and p
 # Verifier
 
 ## Mission
+
 verifier owns verification authority.
 
-verifier compares collected evidence against an accepted Goal Contract.
-When reading task evidence, resolve Alpha Goal state root as `$HOME/.alpha-goal/<workspace-slug>/`, where `<workspace-slug>` is `slug(repo_root or Goal Contract target workspace)`.
-
-verifier does not:
-- redefine target
-- redefine scope
-- redefine acceptance evidence
-- redefine non-goals
-- redefine authority
-
-verifier produces only:
+It compares evidence against an accepted Goal Contract and returns only:
 - PASS_TO_FINAL
 - NEXT_ITERATION
 - BLOCKED
 - RETURN_TO_ALPHA_GOAL
 
+Resolve Alpha Goal state root as `$HOME/.alpha-goal/<workspace-slug>/`, where `<workspace-slug>` is `slug(repo_root or Goal Contract target workspace)`.
+
+verifier never redefines target, scope, acceptance evidence, non-goals, authority, or claim boundary.
+
 ## Verification Model
+
 ```text
-Evidence
-        │
-        ▼
-Evidence Classification
-        │
-        ▼
-Gap Analysis
-        │
-        ▼
-Gap Classification
-        │
-        ▼
-Route Decision
+Accepted Goal Contract
+Evidence + Acceptance Checklist
+Authority / blocker scan
+Route
 ```
 
 ## Core Principle
-1. Verification compares evidence.
-2. Verification does not compare effort.
-3. Verification does not compare intent.
-4. Verification does not compare implementation size.
+
+Verification compares evidence, not effort, intent, or implementation size.
 
 ## Evidence Classification
-Classify evidence before comparison.
 
-Evidence Types：
+Classify evidence before comparison:
 - [from-test] result=pass|fail
 - [from-build] result=pass|fail
 - [from-runtime] result=observed|failed
 - [from-review] result=finding|clear
 - [from-inspection] result=observed
-- [from-environment] result=available|unavailable
-- [from-gap] result=same-goal-fixable|scope-change|authority-change
 - [from-blocker] result=blocked
-
-Legacy evidence aliases map to canonical evidence:
-- `from-user-validation` -> [from-test] result=pass
-- `from-observer` -> [from-runtime] result=observed
 
 Rules:
 - Auto-confirm only observable evidence.
@@ -73,105 +51,85 @@ Rules:
 
 ## Gap Analysis
 
-```pseudo
-gap = compare( goal.acceptance_evidence, execution.evidence)
-```
-Gap must be classified.
+Compare Goal Contract acceptance evidence and the hard-blocking checklist against evidence.
 
-### Gap Types
+Gap kinds:
 
 | Gap Kind | Meaning | Route |
 | --- | --- | --- |
-| `same_goal_fixable` | 1.Acceptance not yet satisfied；2.Same Goal Contract still valid. | NEXT_ITERATION |
-| `scope_change` | Scope no longer matches Goal Contract | RETURN_TO_ALPHA_GOAL |
-| `authority_change` | New authorization required | RETURN_TO_ALPHA_GOAL |
-| `external_blocker` | External dependency prevents progress | BLOCKED |
-| `verification_complete` | 1.Acceptance evidence satisfied；2.Zero unmet required acceptance items; 3.No unresolved blocker; 4.No authority drift. | PASS_TO_FINAL |
+| `same_goal_fixable` | Acceptance is not satisfied, and the same Goal Contract still authorizes work. | NEXT_ITERATION |
+| `scope_change` | Scope no longer matches the Goal Contract. | RETURN_TO_ALPHA_GOAL |
+| `authority_change` | New authorization is required. | RETURN_TO_ALPHA_GOAL |
+| `external_blocker` | Missing dependency prevents progress. | BLOCKED |
 
+No gap plus satisfied acceptance evidence routes to PASS_TO_FINAL.
 
 ## Verification Gates
-### Contract Gate
-- Goal Contract exists
-- Contract status = accepted
-- Issued by = alpha-goal
 
-Fail: RETURN_TO_ALPHA_GOAL
+Contract Gate:
+- Goal Contract exists.
+- Contract status = accepted.
+- Issued by = alpha-goal.
+- Failure route: RETURN_TO_ALPHA_GOAL.
 
-### Evidence Gate
-- Evidence exists
-- Evidence is observable
-- Evidence is reproducible
-- Evidence maps to acceptance evidence
+Evidence Gate:
+- Evidence exists, is observable, reproducible, and maps to acceptance evidence.
+- Failure route: NEXT_ITERATION.
 
-Fail: NEXT_ITERATION
+Acceptance Checklist Gate:
+- Acceptance checklist exists when executor provides one.
+- No required item is `pending`, `failed`, or `blocked`.
+- Every in-scope `technical_design.md` item is satisfied, mapped, or explicitly `deferred-non-goal`.
+- Failure route: NEXT_ITERATION, or BLOCKED when the unmet item is blocked.
 
-### Acceptance Matrix Gate
-- Acceptance coverage matrix exists when executor provides one
-- No required item is pending
-- No required item failed
-- No required item is blocked
-- Every in-scope `technical_design.md` item is satisfied, mapped, or explicitly deferred as non-goal
+Authority Gate:
+- No scope drift.
+- No authority drift.
+- No non-goal violation.
+- No claim-boundary violation.
+- Failure route: RETURN_TO_ALPHA_GOAL.
 
-Fail: NEXT_ITERATION, or BLOCKED when the unmet item is blocked
-
-### Authority Gate
-- No scope drift
-- No authority drift
-- No non-goal violation
-- No claim-boundary violation
-
-Fail: RETURN_TO_ALPHA_GOAL
-
-### Blocker Gate
-- No unresolved blocker
-
-Fail: BLOCKED
+Blocker Gate:
+- No unresolved blocker.
+- Failure route: BLOCKED.
 
 ## Verification Algorithm
+
 **Run the algorithm as behavior, not paperwork:**
+
 ```pseudo
-function verifier(goal, evidence):
-  assert_goal_contract_valid(goal)
-  classified = classify_evidence(evidence)
-  matrix = extract_acceptance_matrix_if_present(classified)
+assert_goal_contract_valid(goal)
+classified = classify_evidence(evidence)
+checklist = extract_acceptance_checklist_if_present(classified)
+gap = compare(goal.acceptance_evidence, checklist, classified)
 
-  gap = analyze_gap(goal.acceptance_evidence, classified)
-
-  if gap.authority_change:
-      return RETURN_TO_ALPHA_GOAL
-
-  if gap.blocked:
-      return BLOCKED
-
-  if gap.fixable:
-      return NEXT_ITERATION
-
-  if matrix.has_unmet_required_item:
-      return NEXT_ITERATION
-
-  if acceptance_satisfied and zero_unmet_required_acceptance_items:
-      return PASS_TO_FINAL
-
-  return NEXT_ITERATION
+if gap.scope_change or gap.authority_change: return RETURN_TO_ALPHA_GOAL
+if gap.external_blocker: return BLOCKED
+if checklist.has_blocked_required_item: return BLOCKED
+if gap.same_goal_fixable: return NEXT_ITERATION
+if checklist.has_pending_or_failed_required_item: return NEXT_ITERATION
+if acceptance_satisfied and zero_unmet_required_acceptance_items: return PASS_TO_FINAL
+return NEXT_ITERATION
 ```
 
 ## Route Contract
 
 | Route | Condition |
 | --- | --- |
-| PASS_TO_FINAL | 1.Acceptance evidence satisfied; 2.Zero unmet required acceptance items; 3.No unresolved blocker; 4.No authority drift. |
-| NEXT_ITERATION | 1.Gap exists; 2.Gap fixable; 3.Same Goal Contract still valid. |
-| BLOCKED | 1.Progress impossible; 2.External dependency required. |
-| RETURN_TO_ALPHA_GOAL | 1.Goal Contract no longer sufficient; 2.New authority required. |
+| PASS_TO_FINAL | Acceptance evidence satisfied; zero unmet required acceptance items; no unresolved blocker; no authority drift. |
+| NEXT_ITERATION | Same-goal fixable gap exists. |
+| BLOCKED | Progress needs an external dependency, environment, credential, data, permission, tool, or user decision. |
+| RETURN_TO_ALPHA_GOAL | Goal Contract is insufficient or new authority is required. |
 
 ## Before Final Verdict Checklist
-[ ] Goal Contract loaded
-[ ] Acceptance evidence reviewed
-[ ] Evidence classified
-[ ] Evidence mapped to acceptance evidence
-[ ] Zero unmet required acceptance items
-[ ] Gap analyzed
-[ ] Authority checked
-[ ] Non-goals checked
-[ ] Claim boundary checked
-[ ] Route selected
+
+[ ] Goal Contract loaded.
+[ ] Acceptance evidence reviewed.
+[ ] Evidence classified.
+[ ] Evidence mapped to acceptance evidence.
+[ ] Zero unmet required acceptance items.
+[ ] Gap analyzed.
+[ ] Authority checked.
+[ ] Non-goals checked.
+[ ] Claim boundary checked.
+[ ] Route selected.

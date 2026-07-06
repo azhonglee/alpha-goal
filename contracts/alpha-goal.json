@@ -12,7 +12,7 @@
       "path": "technical_design.md",
       "kind": "task",
       "requirement": "conditional",
-      "condition": "implementation, repair, refactor, hardening, or cross-file behavior changes"
+      "condition": "implementation, repair, refactor, hardening, cross-file behavior changes, interface/data-model changes, or material risk"
     },
     {
       "path": "checkpoint.md",
@@ -42,68 +42,39 @@
     },
     {
       "name": "PASS_TO_FINAL",
-      "condition": "acceptance evidence satisfied"
+      "condition": "acceptance evidence satisfied, zero unmet required acceptance items, no unresolved blocker, no authority drift"
     }
   ],
   "gapKinds": [
     "same_goal_fixable",
     "scope_change",
     "authority_change",
-    "external_blocker",
-    "verification_complete"
+    "external_blocker"
   ],
   "evidenceTypes": [
     {
       "name": "from-test",
-      "results": ["pass", "fail"],
-      "aliases": [
-        { "label": "from-test-pass", "result": "pass" },
-        { "label": "from-test-fail", "result": "fail" },
-        { "label": "from-user-validation", "result": "pass" }
-      ]
+      "results": ["pass", "fail"]
     },
     {
       "name": "from-build",
-      "results": ["pass", "fail"],
-      "aliases": [
-        { "label": "from-build-pass", "result": "pass" },
-        { "label": "from-build-fail", "result": "fail" }
-      ]
+      "results": ["pass", "fail"]
     },
     {
       "name": "from-runtime",
-      "results": ["observed", "failed"],
-      "aliases": [
-        { "label": "from-runtime-observation", "result": "observed" },
-        { "label": "from-observer", "result": "observed" }
-      ]
+      "results": ["observed", "failed"]
     },
     {
       "name": "from-review",
-      "results": ["finding", "clear"],
-      "aliases": []
+      "results": ["finding", "clear"]
     },
     {
       "name": "from-inspection",
-      "results": ["observed"],
-      "aliases": [
-        { "label": "from-code-change", "result": "observed" }
-      ]
-    },
-    {
-      "name": "from-environment",
-      "results": ["available", "unavailable"],
-      "aliases": []
-    },
-    {
-      "name": "from-gap",
-      "results": ["same-goal-fixable", "scope-change", "authority-change"],
-      "aliases": []
+      "results": ["observed"]
     },
     {
       "name": "from-blocker",
-      "results": ["blocked"],
-      "aliases": []
+      "results": ["blocked"]
     }
   ],
   "requiredGates": ["Entry Gate", "Clarification Gate", "Review Gate", "Confirmation Gate"],

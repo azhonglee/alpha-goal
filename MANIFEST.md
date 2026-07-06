@@ -4,9 +4,9 @@
 
 | Directory | Purpose |
 |---|---|
-| `skills/alpha-goal/` | Front-end controller: fact discovery, clarification, Goal Contract, trigger contract, authority boundary, route. |
-| `skills/executor/` | Goal-contract-driven bounded actuator/controller: act or harden authorized slices; use Goal Contract as the required input and one conditional checkpoint for recovery, trigger handling, durable evidence, or verification. |
-| `skills/verifier/` | Independent goal verifier for evidence coverage, claim boundaries, defect/risk sweep, and verification gaps. |
+| `skills/alpha-goal/` | Front-end controller: fact discovery, blocking-gap clarification, Goal Contract, design boundary, and confirmation. |
+| `skills/executor/` | Goal-contract-driven bounded actuator/controller: act or harden authorized slices; use Goal Contract as required input and a conditional checkpoint for recovery or evidence handoff. |
+| `skills/verifier/` | Independent verifier for acceptance evidence, hard-blocking checklist coverage, claim boundaries, blockers, and route decisions. |
 
 Former public framing/modeling/synthesis stages are folded into `skills/alpha-goal/SKILL.md`.
 
@@ -19,7 +19,7 @@ Former public framing/modeling/synthesis stages are folded into `skills/alpha-go
 
 ## User Hooks
 
-`templates/hooks.json` defines one Codex user-level `PostCompact` hook, marked by `codex-alpha-goal-compact-recovery:v1`, without a matcher so all post-compaction triggers are covered. `scripts/install.sh --target global` and `scripts/install.sh --target codex` merge that template into `${CODEX_HOME:-$HOME/.codex}/hooks.json`. The hook prints a static compact recovery policy after compaction, asking Codex to re-check `alpha-goal`, `executor`, and `verifier` and load the applicable skill. It restores draft or accepted `goal-contract.md` for Alpha Goal framing, reads `technical_design.md` with the Goal Contract when it exists, requires accepted status only for `executor` execution handoff, and covers goal verification, claim-boundary checks, and defect/risk sweep when needed.
+`templates/hooks.json` defines one Codex user-level `PostCompact` hook, marked by `codex-alpha-goal-compact-recovery:v1`, without a matcher so all post-compaction triggers are covered. `scripts/install.sh --target global` and `scripts/install.sh --target codex` merge that template into `${CODEX_HOME:-$HOME/.codex}/hooks.json`. The hook prints a compact recovery policy that reloads the applicable `alpha-goal`, `executor`, or `verifier` skill, resumes from `goal-contract.md`, reads `technical_design.md` when present for implementation, repair, refactor, hardening, cross-file behavior, interface/data-model changes, or material risk, uses `control-state/latest.md` only when task identity is ambiguous, and uses `checkpoint.md` for recovery, evidence handoff, or verification handoff. `executor` still requires an accepted Goal Contract; `verifier` compares evidence with the hard-blocking acceptance checklist before returning a route.
 
 Hook replacement is by marker family, not exact version, so later `:v2` template markers replace existing `:v1` hooks. The installer also migrates the earlier experimental `codex-compact-skill-recovery` family.
 
@@ -38,10 +38,10 @@ Default runtime artifacts live under the user-level Alpha Goal state root: `${CO
 | Path | Purpose |
 |---|---|
 | `<state-root>/YYYYMMDD-<TaskName>/goal-contract.md` | Default `alpha-goal` artifact and canonical draft or accepted contract, including contract status, discovery notes, interview ledger, authorization source, and handoff context. |
-| `<state-root>/YYYYMMDD-<TaskName>/technical_design.md` | Conditional canonical Technical Design for implementation, repair, refactor, hardening, or cross-file behavior changes, including architecture, interfaces, data flow, tests, risks, and acceptance evidence mapping. |
-| `<state-root>/YYYYMMDD-<TaskName>/checkpoint.md` | Conditional task checkpoint containing only needed sections: run profile, loop state, memory, iteration, evidence, and verification; memory entries keep evidence, confidence, and invalidation. |
+| `<state-root>/YYYYMMDD-<TaskName>/technical_design.md` | Conditional canonical Technical Design for implementation, repair, refactor, hardening, cross-file behavior changes, interface/data-model changes, or material risk. |
+| `<state-root>/YYYYMMDD-<TaskName>/checkpoint.md` | Conditional task checkpoint for current slice, completed actions, raw evidence, acceptance checklist, known gaps, blockers, and next route. |
 | `<state-root>/control-state/latest.md` | Optional global recovery index pointing to the latest accepted task state, Goal Contract, optional checkpoint, phase, route, and update time; not a stage artifact. |
 
 ## Count Budget
 
-The enforced count budget is the whole `skills/` tree, capped at 15,000 word+punctuation units. Counted units are words plus punctuation/symbol marks. The cap preserves the Persistent Goal Loop contracts for trigger behavior, durable state, memory, authority gates, behavior-level gates, and verifier feedback without over-compressing their meaning.
+The enforced count budget is the whole `skills/` tree, capped at 15,000 word+punctuation units. Counted units are words plus punctuation/symbol marks. The cap preserves trigger behavior, durable state, authority gates, hard-blocking acceptance checks, route decisions, and verifier feedback without over-compressing their meaning.

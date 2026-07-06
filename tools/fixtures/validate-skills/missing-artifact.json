@@ -4,7 +4,7 @@
   "replacements": [
     {
       "file": "templates/hooks.json",
-      "search": "if technical_design.md exists, read it with the Goal Contract before implementation, repair, refactor, hardening, or cross-file behavior changes; ",
+      "search": "read technical_design.md when present for implementation, repair, refactor, hardening, cross-file behavior, interface/data-model changes, or material risk; ",
       "replace": ""
     }
   ]

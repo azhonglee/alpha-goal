@@ -144,16 +144,10 @@ Closure test:
 - If any material item would change, keep the dimension `blocking`.
 - If nothing material would change, record why it is `non-material` or `deferred non-goal`.
 
-**Step 4: Evaluate coverage**
+**Step 4: Update coverage state**
 
-For each dimension, record:
-- `covered`: explicit enough to drive execution and verification.
-- `blocking`: missing decision or design detail would change implementation.
-- `non-material`: uncertainty remains, but would not change execution.
-- `deferred non-goal`: intentionally excluded from this goal.
-
-If any blocking gap remains, continue Loop Q&A.
-Round count never closes Clarification.
+After the closure test, set the dimension status to `covered`, `blocking`, `non-material`, or `deferred non-goal` using the Clarification Gate classifier.
+If any blocking gap remains, continue Loop Q&A; round count never closes Clarification.
 
 ### Assumption Stress Test
 
@@ -173,15 +167,10 @@ Write artifacts only from answered, auto-confirmed, or cited facts. Keep unresol
 ### Review Gate And Show Summary
 
 - Self-check the Goal Contract and Technical Design before asking for approval:
-  - All required Goal Contract and Technical Design fields are present.
-  - No required field relies on current-state facts as desired behavior.
-  - No blocking goal or design gap remains in the coverage matrix.
-  - Each success criterion maps to acceptance evidence and a validation observer.
-  - Key design decisions cover architecture, components, interfaces, data models, data flow, tests, and risks.
-  - Non-goals, execution boundary, decision boundary, and claim boundary are explicit.
-  - Coverage records include decision, boundary, implementation impact, acceptance/observer, and status for every required dimension.
-  - No `covered` dimension relies only on confidence, round count, planned questions, or an untested assumption.
-  - Review the highest-risk covered dimension and confirm its closure test would not change implementation or validation.
+  - Coverage check: required fields exist, no blocking gap remains, and every covered dimension has decision, boundary, implementation impact, acceptance/observer, and status.
+  - Authority check: current-state facts do not define desired behavior; non-goals, execution boundary, decision boundary, and claim boundary are explicit.
+  - Acceptance check: success criteria map to acceptance evidence and validation observers; key design decisions cover architecture, components, interfaces, data models, data flow, tests, and risks.
+  - Closure check: no covered dimension relies only on confidence, round count, planned questions, or an untested assumption; recheck the highest-risk covered dimension.
 - Run independent review for non-trivial implementation, repair, refactor, hardening, or cross-file behavior changes:
   - Prefer a subagent review when available; if skipped, record the reason.
   - Pass raw artifacts and the user request, not your intended answer.
