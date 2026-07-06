@@ -407,7 +407,7 @@ function validateAlphaGoal(root, contract, errors) {
   for (const rule of contract.clarificationExitRules) {
     if (!clarificationGate.includes(`\`${rule}\``)) errors.push(`${rel}: Clarification Gate missing exit rule ${rule}`);
   }
-  const summaryBlock = fencedBlockAfter(text, "Present this summary before asking for approval:");
+  const summaryBlock = fencedBlockAfter(text, "TUI Presentation Style:") || fencedBlockAfter(text, "Present this summary before asking for approval:");
   if (!summaryBlock) errors.push(`${rel}: missing Goal Contract Summary fenced summary`);
   for (const field of contract.summaryFields) {
     if (!summaryBlock.includes(`| ${field} |`)) errors.push(`${rel}: summary table missing field: ${field}`);

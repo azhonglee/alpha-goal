@@ -4,8 +4,8 @@
   "replacements": [
     {
       "file": "skills/alpha-goal/SKILL.md",
-      "search": "Implementation starts only after an accepted Goal Contract hands off to `executor` skill.",
-      "replace": "Execution starts only after an accepted Goal Contract hands off to `executor` skill."
+      "search": "Implementation starts only after a user-accepted Goal Contract hands off to `executor` skill.",
+      "replace": "Execution starts only after a user-accepted Goal Contract hands off to `executor` skill."
     }
   ]
 }
