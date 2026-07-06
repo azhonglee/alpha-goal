@@ -3,7 +3,7 @@
   "inheritRoot": true,
   "replacements": [
     {
-      "file": "contracts/alpha-goal.json",
+      "file": "tools/validation/alpha-goal.json",
       "search": "  \"requiredGates\": [\"Entry Gate\", \"Clarification Gate\", \"Review Gate\", \"Confirmation Gate\"],\n",
       "replace": "  \"requiredGates\": [\"Nonexistent Gate\"],\n"
     }

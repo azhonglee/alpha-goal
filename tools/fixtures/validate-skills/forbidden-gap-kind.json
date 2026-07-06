@@ -3,7 +3,7 @@
   "inheritRoot": true,
   "replacements": [
     {
-      "file": "contracts/alpha-goal.json",
+      "file": "tools/validation/alpha-goal.json",
       "search": "    \"external_blocker\"\n",
       "replace": "    \"external_blocker\",\n    \"verification_complete\"\n"
     }

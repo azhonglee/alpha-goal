@@ -7,7 +7,7 @@ const FRONTMATTER_RE = /^---\n(.*?)\n---\n/s;
 const FIELD_RE = /^([A-Za-z0-9_-]+):\s*(.*?)\s*$/;
 const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
 const SKILLS_COUNT_BUDGET = 15_000;
-const CONTRACT_PATH = "contracts/alpha-goal.json";
+const CONTRACT_PATH = "tools/validation/alpha-goal.json";
 const HOOK_MARKER = "codex-alpha-goal-compact-recovery:v1";
 const HOOK_MARKER_FAMILY_RE = /codex-alpha-goal-compact-recovery:v[0-9]+/;
 const LEGACY_HOOK_MARKER = "codex-compact-skill-recovery";
@@ -334,7 +334,8 @@ function validateScriptSurface(root, files, errors, warnings) {
   for (const file of files.filter(candidate => relative(root, candidate).startsWith("tools/"))) {
     const rel = relative(root, file);
     const allowedFixture = /^tools\/fixtures\/validate-skills\/[a-z0-9-]+\.json$/.test(rel);
-    if (rel !== "tools/validate_skills.js" && !allowedFixture) {
+    const allowedValidation = rel === CONTRACT_PATH;
+    if (rel !== "tools/validate_skills.js" && !allowedFixture && !allowedValidation) {
       errors.push(`unexpected tools surface: ${rel}`);
     }
     if (fs.readFileSync(file, "utf8").startsWith("#!") && (fs.statSync(file).mode & 0o100) === 0) {
