@@ -1,0 +1,11 @@
+{
+  "shouldPass": false,
+  "inheritRoot": true,
+  "replacements": [
+    {
+      "file": "skills/executor/SKILL.md",
+      "search": "## Acceptance Coverage Matrix",
+      "replace": "## Acceptance Notes"
+    }
+  ]
+}

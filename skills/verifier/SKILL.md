@@ -69,6 +69,7 @@ Rules:
 - Do not infer completion from partial success.
 - Do not infer authority from implementation.
 - Compare only against Goal Contract acceptance evidence.
+- PASS_TO_FINAL requires zero unmet required acceptance items.
 
 ## Gap Analysis
 
@@ -85,7 +86,7 @@ Gap must be classified.
 | `scope_change` | Scope no longer matches Goal Contract | RETURN_TO_ALPHA_GOAL |
 | `authority_change` | New authorization required | RETURN_TO_ALPHA_GOAL |
 | `external_blocker` | External dependency prevents progress | BLOCKED |
-| `verification_complete` | 1.Acceptance evidence satisfied；2.No unresolved blocker; 3.No authority drift. | PASS_TO_FINAL |
+| `verification_complete` | 1.Acceptance evidence satisfied；2.Zero unmet required acceptance items; 3.No unresolved blocker; 4.No authority drift. | PASS_TO_FINAL |
 
 
 ## Verification Gates
@@ -103,6 +104,15 @@ Fail: RETURN_TO_ALPHA_GOAL
 - Evidence maps to acceptance evidence
 
 Fail: NEXT_ITERATION
+
+### Acceptance Matrix Gate
+- Acceptance coverage matrix exists when executor provides one
+- No required item is pending
+- No required item failed
+- No required item is blocked
+- Every in-scope `technical_design.md` item is satisfied, mapped, or explicitly deferred as non-goal
+
+Fail: NEXT_ITERATION, or BLOCKED when the unmet item is blocked
 
 ### Authority Gate
 - No scope drift
@@ -123,6 +133,7 @@ Fail: BLOCKED
 function verifier(goal, evidence):
   assert_goal_contract_valid(goal)
   classified = classify_evidence(evidence)
+  matrix = extract_acceptance_matrix_if_present(classified)
 
   gap = analyze_gap(goal.acceptance_evidence, classified)
 
@@ -135,7 +146,10 @@ function verifier(goal, evidence):
   if gap.fixable:
       return NEXT_ITERATION
 
-  if acceptance_satisfied:
+  if matrix.has_unmet_required_item:
+      return NEXT_ITERATION
+
+  if acceptance_satisfied and zero_unmet_required_acceptance_items:
       return PASS_TO_FINAL
 
   return NEXT_ITERATION
@@ -145,7 +159,7 @@ function verifier(goal, evidence):
 
 | Route | Condition |
 | --- | --- |
-| PASS_TO_FINAL | 1.Acceptance evidence satisfied; 2.No unresolved blocker; 3.No authority drift. |
+| PASS_TO_FINAL | 1.Acceptance evidence satisfied; 2.Zero unmet required acceptance items; 3.No unresolved blocker; 4.No authority drift. |
 | NEXT_ITERATION | 1.Gap exists; 2.Gap fixable; 3.Same Goal Contract still valid. |
 | BLOCKED | 1.Progress impossible; 2.External dependency required. |
 | RETURN_TO_ALPHA_GOAL | 1.Goal Contract no longer sufficient; 2.New authority required. |
@@ -155,6 +169,7 @@ function verifier(goal, evidence):
 [ ] Acceptance evidence reviewed
 [ ] Evidence classified
 [ ] Evidence mapped to acceptance evidence
+[ ] Zero unmet required acceptance items
 [ ] Gap analyzed
 [ ] Authority checked
 [ ] Non-goals checked
