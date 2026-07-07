@@ -89,6 +89,30 @@
     "Execution boundary",
     "Key design decisions"
   ],
+  "codexGoalSync": {
+    "alphaGoalRequiredTerms": [
+      "Codex Goal Sync",
+      "create_goal",
+      "get_goal",
+      "Goal Contract Summary",
+      "Technical Design link",
+      "token_budget",
+      "active Codex goal",
+      "do not overwrite",
+      "do not hand off to `executor`",
+      "blocking sync conflict"
+    ],
+    "executorRequiredTerms": [
+      "Codex Goal Boundary",
+      "must not create Codex goals",
+      "must not call `create_goal`",
+      "update_goal",
+      "PASS_TO_FINAL",
+      "status: complete",
+      "status: blocked",
+      "at least three consecutive goal turns"
+    ]
+  },
   "checkedFiles": [
     "skills/alpha-goal/SKILL.md",
     "skills/executor/SKILL.md",

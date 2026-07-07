@@ -192,9 +192,20 @@ Goal Contract Summary (Design Summary)
 | Key design decisions | ... |
 ```
 
+## Codex Goal Sync
+
+Codex goal sync is a confirmation side effect, not authority.
+- Before approval, do not invoke `create_goal`.
+- On approval, call `get_goal` when available before creating a new Codex goal.
+- If no unfinished active Codex goal exists, invoke `create_goal` with an objective built from the Goal Contract Summary and Technical Design link.
+- Omit `token_budget` unless the user explicitly requested a token budget.
+- If an unfinished active Codex goal already represents the same accepted contract, continue to `executor` skill.
+- If an unfinished active Codex goal conflicts with the accepted contract, do not overwrite, clear, pause, replace, or repurpose it; do not hand off to `executor` as synced. Return to Confirmation with a blocking sync conflict for user decision.
+- If Codex goal sync fails, record the gap or blocker in the task artifact or checkpoint; do not treat sync failure as permission to redefine scope, acceptance, authority, or hand off as synced.
+
 ## Confirmation Gate
 
 Use `request_user_input` or equivalent structured input to ask for approve/launch, refine, or reject.
-- On approval: set `Contract status: accepted`; hand off to `executor` skill.
+- On approval: set `Contract status: accepted`; perform Codex Goal Sync; hand off to `executor` skill.
 - On rejection: keep `Contract status: draft`.
 - On refine: keep `Contract status: draft`; return to `Clarification` with user feedback.

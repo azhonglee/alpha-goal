@@ -119,6 +119,16 @@ Before landing slice:
 [ ] Evidence covers touched risk, not only happy path.
 [ ] New defects/conflicts/regressions become `failed` checklist items.
 
+## Codex Goal Boundary
+
+`executor` must not create Codex goals, must not call `create_goal`, and must not clear, replace, or repurpose an active Codex goal.
+
+Codex goal status updates are bookkeeping, not acceptance evidence:
+- If a synced Codex goal exists and `verifier` returns PASS_TO_FINAL, `executor` may call `update_goal` with `status: complete`.
+- If the same blocker repeats for at least three consecutive goal turns, including the original/user-triggered turn, `executor` may call `update_goal` with `status: blocked`.
+- `executor` must not use `update_goal` to pause, resume, budget-limit, usage-limit, or redefine the objective.
+- A failed or unavailable Codex goal update becomes evidence or blocker context; it does not change the Goal Contract route.
+
 ## Completion Gate
 
 Before returning final success:
@@ -132,6 +142,7 @@ Before returning final success:
 [ ] No scope/authority/claim-boundary change occurred.
 [ ] No loopholes remain.
 [ ] `verifier` skill verdict allows final route.
+[ ] Any Codex goal update follows the Codex Goal Boundary and is not used as completion evidence.
 [ ] route is PASS_TO_FINAL.
 
 If any item is unchecked, do not claim complete.

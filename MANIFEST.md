@@ -10,6 +10,8 @@
 
 Former public framing/modeling/synthesis stages are folded into `skills/alpha-goal/SKILL.md`.
 
+`alpha-goal` also owns Codex goal sync: after user approval, it may create the current thread's Codex goal from the accepted Goal Contract summary and Technical Design link. `executor` must not create, overwrite, clear, or repurpose Codex goals; it may only update an already-synced goal to complete or blocked when the verifier and blocker gates allow it.
+
 ## Scripts
 
 | Path | Mutates state? | Purpose |

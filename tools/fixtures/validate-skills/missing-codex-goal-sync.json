@@ -1,0 +1,11 @@
+{
+  "shouldPass": false,
+  "inheritRoot": true,
+  "replacements": [
+    {
+      "file": "tools/validation/alpha-goal.json",
+      "search": "  \"codexGoalSync\": {\n    \"alphaGoalRequiredTerms\": [\n      \"Codex Goal Sync\",\n      \"create_goal\",\n      \"get_goal\",\n      \"Goal Contract Summary\",\n      \"Technical Design link\",\n      \"token_budget\",\n      \"active Codex goal\",\n      \"do not overwrite\",\n      \"do not hand off to `executor`\",\n      \"blocking sync conflict\"\n    ],\n    \"executorRequiredTerms\": [\n      \"Codex Goal Boundary\",\n      \"must not create Codex goals\",\n      \"must not call `create_goal`\",\n      \"update_goal\",\n      \"PASS_TO_FINAL\",\n      \"status: complete\",\n      \"status: blocked\",\n      \"at least three consecutive goal turns\"\n    ]\n  },\n",
+      "replace": ""
+    }
+  ]
+}
