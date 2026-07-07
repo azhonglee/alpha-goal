@@ -30,6 +30,8 @@ Hard-blocking rules:
 
 ## Runtime Flow
 
+**Run the algorithm as behavior, not paperwork:**
+
 ```pseudo
 goal = read_accepted_goal_contract()
 design = read_technical_design_if_present_and_applicable(goal)
@@ -39,16 +41,20 @@ assert_execution_environment_safe(goal)
 if checklist.has_blocked_required_item:
   return BLOCKED
 
-while checklist_has_unmet_required_items:
+while True:
   slice = plan_highest_value_unmet_item(goal, checklist)
   assert_slice_inside_goal_contract(slice, goal)
-  outcome = execute_slice(slice)
-  evidence = classify_execution_evidence(outcome)
+  outcome = execute_slice(slice, best_practice=TDD)
+  review_notes = review_execution_results(outcome)
+  evidence = classify_execution_evidence(outcome, review_notes)
   update_checklist(checklist, evidence)
 
   if authority_or_scope_changed: return RETURN_TO_ALPHA_GOAL
   if blocker_exists or checklist.has_blocked_required_item: return BLOCKED
   if same_goal_gap_exists: continue
+  if checklist_has_unmet_required_items: continue
+  if same_goal_review_gap_exists: continue
+  if pass_to_final_ready: break
 
 return run_verifier(goal, checklist, evidence)
 ```
@@ -78,7 +84,7 @@ Rules:
 ## Route Rules
 
 - PASS_TO_FINAL: acceptance evidence satisfied, checklist has zero unmet required items, no unresolved blocker, no authority drift.
-- NEXT_ITERATION: same-goal fixable `pending` or `failed` gap remains and required action is authorized.
+- NEXT_ITERATION: same-goal fixable `pending`, `failed`, or review problem remains. Continue execution with a new slice.
 - BLOCKED: progress needs missing permission, credential, tool, data, environment, system, or user decision.
 - RETURN_TO_ALPHA_GOAL: Goal Contract is no longer sufficient or new authority is required.
 
@@ -124,6 +130,7 @@ Before returning final success:
 [ ] No unresolved blocker remains.
 [ ] No source-of-truth conflict remains.
 [ ] No scope/authority/claim-boundary change occurred.
+[ ] No loopholes remain.
 [ ] `verifier` skill verdict allows final route.
 [ ] route is PASS_TO_FINAL.
 

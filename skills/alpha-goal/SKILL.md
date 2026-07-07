@@ -194,7 +194,7 @@ Goal Contract Summary (Design Summary)
 
 ## Confirmation Gate
 
-Use `request_user_input` to ask for approve/launch, refine, or reject.
+Use `request_user_input` or equivalent structured input to ask for approve/launch, refine, or reject.
 - On approval: set `Contract status: accepted`; hand off to `executor` skill.
 - On rejection: keep `Contract status: draft`.
 - On refine: keep `Contract status: draft`; return to `Clarification` with user feedback.
