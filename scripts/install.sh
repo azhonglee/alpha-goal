@@ -274,7 +274,7 @@ render_install_target_menu() {
   menu_rendered_rows=$((menu_rendered_rows + 1))
   printf '\033[K%sSkills install to:%s %s\n' "$dim" "$reset" "$skills_root" >&2
   menu_rendered_rows=$((menu_rendered_rows + 1))
-  printf '\033[K%sChoose which app configuration to update.%s\n' "$dim" "$reset" >&2
+  printf '\033[K%sChoose which app configuration to update. Use ↑/↓ and Enter to confirm.%s\n' "$dim" "$reset" >&2
   menu_rendered_rows=$((menu_rendered_rows + 1))
   printf '\033[K\n' >&2
   menu_rendered_rows=$((menu_rendered_rows + 1))
@@ -298,7 +298,7 @@ render_install_target_menu() {
 
   printf '\033[K\n' >&2
   menu_rendered_rows=$((menu_rendered_rows + 1))
-  printf '\033[K%sUse ↑/↓ and Enter to confirm%s ' "$cyan" "$reset" >&2
+  # printf '\033[K%sUse ↑/↓ and Enter to confirm%s' "$cyan" "$reset" >&2
 }
 
 prompt_install_target() {
