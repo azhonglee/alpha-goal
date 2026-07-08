@@ -1,0 +1,11 @@
+{
+  "shouldPass": false,
+  "inheritRoot": true,
+  "replacements": [
+    {
+      "file": "skills/alpha-goal/references/technical-design-runbook.md",
+      "search": "## Technical Review Gate\n",
+      "replace": "## Review Gate\n"
+    }
+  ]
+}

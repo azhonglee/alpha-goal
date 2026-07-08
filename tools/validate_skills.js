@@ -142,6 +142,7 @@ function emptyContract() {
     clarificationExitRules: [],
     summaryFields: [],
     nativeGoalSync: {},
+    technicalDesignRunbook: {},
     checkedFiles: [],
     nodeRequirement: "",
   };
@@ -163,6 +164,15 @@ function validateContract(contract, errors) {
     errors.push(`${CONTRACT_PATH}: nativeGoalSync must be an object`);
   } else {
     requireArray(contract.nativeGoalSync, "alphaGoalRequiredTerms", errors, `${CONTRACT_PATH}: nativeGoalSync`);
+  }
+  if (!contract.technicalDesignRunbook || typeof contract.technicalDesignRunbook !== "object" || Array.isArray(contract.technicalDesignRunbook)) {
+    errors.push(`${CONTRACT_PATH}: technicalDesignRunbook must be an object`);
+  } else {
+    if (typeof contract.technicalDesignRunbook.path !== "string" || !contract.technicalDesignRunbook.path) {
+      errors.push(`${CONTRACT_PATH}: technicalDesignRunbook.path must be a non-empty string`);
+    }
+    requireArray(contract.technicalDesignRunbook, "confirmationTerms", errors, `${CONTRACT_PATH}: technicalDesignRunbook`);
+    requireArray(contract.technicalDesignRunbook, "requiredTerms", errors, `${CONTRACT_PATH}: technicalDesignRunbook`);
   }
   const contractText = JSON.stringify(contract);
   for (const legacy of ["\u0043odex Goal Sync", "token_\u0062udget", "active \u0043odex goal"]) {
@@ -210,6 +220,12 @@ function validateContract(contract, errors) {
     for (const value of values) {
       if (typeof value !== "string" || !value) errors.push(`${CONTRACT_PATH}: nativeGoalSync.${name} entries must be non-empty strings`);
     }
+  }
+  for (const value of contract.technicalDesignRunbook?.requiredTerms || []) {
+    if (typeof value !== "string" || !value) errors.push(`${CONTRACT_PATH}: technicalDesignRunbook.requiredTerms entries must be non-empty strings`);
+  }
+  for (const value of contract.technicalDesignRunbook?.confirmationTerms || []) {
+    if (typeof value !== "string" || !value) errors.push(`${CONTRACT_PATH}: technicalDesignRunbook.confirmationTerms entries must be non-empty strings`);
   }
 }
 
@@ -451,6 +467,22 @@ function validateAlphaGoal(root, contract, errors) {
   if (!confirmationGate.includes("perform Native Goal Sync")) errors.push(`${rel}: Confirmation Gate missing Native Goal Sync handoff`);
   for (const forbidden of ["after each answer", "after every answer", "Update `goal-contract.md` and `technical_design.md` after each answer"]) {
     if (text.includes(forbidden)) errors.push(`${rel}: stale per-answer artifact write rule remains: ${forbidden}`);
+  }
+  const runbookRef = contract.technicalDesignRunbook?.path;
+  if (runbookRef && !text.includes(runbookRef)) errors.push(`${rel}: missing technical design runbook routing: ${runbookRef}`);
+  requireTerms(`${rel} Confirmation Gate`, confirmationGate, contract.technicalDesignRunbook?.confirmationTerms || [], errors);
+  if (runbookRef && !confirmationGate.includes(runbookRef)) errors.push(`${rel}: technical design runbook must be routed from Confirmation Gate`);
+  const standaloneDesignGate = ["## Design", "Choice Gate"].join(" ");
+  if (text.includes(standaloneDesignGate)) errors.push(`${rel}: standalone design gate must be folded into Confirmation Gate`);
+  if (text.includes("| Design Priority |")) errors.push(`${rel}: design priority table belongs in technical design runbook`);
+  const runbookPath = runbookRef ? path.join(root, "skills", "alpha-goal", runbookRef) : "";
+  if (runbookRef) {
+    const runbook = readIfFile(runbookPath);
+    if (!runbook) {
+      errors.push(`skills/alpha-goal/${runbookRef}: missing`);
+    } else {
+      requireTerms(`skills/alpha-goal/${runbookRef}`, runbook, contract.technicalDesignRunbook?.requiredTerms || [], errors);
+    }
   }
   requireTerms(`${rel} Native Goal Sync`, markdownSection(text, "Native Goal Sync"), contract.nativeGoalSync?.alphaGoalRequiredTerms || [], errors);
 }

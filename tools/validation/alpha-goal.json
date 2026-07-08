@@ -12,7 +12,7 @@
       "path": "technical_design.md",
       "kind": "task",
       "requirement": "conditional",
-      "condition": "implementation, repair, refactor, hardening, cross-file behavior changes, interface/data-model changes, or material risk"
+      "condition": "Goal Contract Confirmation Gate selects run technical design"
     },
     {
       "path": "checkpoint.md",
@@ -87,7 +87,8 @@
     "Goal",
     "Non-goals",
     "Execution boundary",
-    "Key design decisions"
+    "Acceptance evidence",
+    "Recommended next step"
   ],
   "nativeGoalSync": {
     "alphaGoalRequiredTerms": [
@@ -100,6 +101,29 @@
       "do not overwrite",
       "do not hand off to `executor`",
       "blocking sync conflict"
+    ]
+  },
+  "technicalDesignRunbook": {
+    "path": "references/technical-design-runbook.md",
+    "confirmationTerms": [
+      "run technical design",
+      "Contract status: design-authorized",
+      "do not return to `SKILL.md`"
+    ],
+    "requiredTerms": [
+      "Technical Design Runbook",
+      "Technical Design coverage",
+      "Design Priority",
+      "Architecture",
+      "Components",
+      "Interfaces/API",
+      "Data Models",
+      "Data Flow",
+      "Test Plans",
+      "Risks",
+      "Technical Review Gate",
+      "Technical Design Confirmation Gate",
+      "Native Goal Sync"
     ]
   },
   "checkedFiles": [
