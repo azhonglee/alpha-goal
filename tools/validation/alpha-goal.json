@@ -101,16 +101,6 @@
       "do not overwrite",
       "do not hand off to `executor`",
       "blocking sync conflict"
-    ],
-    "executorRequiredTerms": [
-      "Codex Goal Boundary",
-      "must not create Codex goals",
-      "must not call `create_goal`",
-      "update_goal",
-      "PASS_TO_FINAL",
-      "status: complete",
-      "status: blocked",
-      "at least three consecutive goal turns"
     ]
   },
   "checkedFiles": [

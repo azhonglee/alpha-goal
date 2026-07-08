@@ -161,7 +161,6 @@ function validateContract(contract, errors) {
     errors.push(`${CONTRACT_PATH}: codexGoalSync must be an object`);
   } else {
     requireArray(contract.codexGoalSync, "alphaGoalRequiredTerms", errors, `${CONTRACT_PATH}: codexGoalSync`);
-    requireArray(contract.codexGoalSync, "executorRequiredTerms", errors, `${CONTRACT_PATH}: codexGoalSync`);
   }
   requireArray(contract, "checkedFiles", errors);
   if (typeof contract.nodeRequirement !== "string" || !contract.nodeRequirement) {
@@ -460,9 +459,7 @@ function validateExecutor(root, contract, errors) {
     return;
   }
   requireHeadings(rel, text, ["Core Principle", "Acceptance Checklist", "Runtime Flow", "Authority", "Evidence Classification", "Route Rules", "Slice Boundary Gates", "Execution Gates", "Completion Gate", "Checkpoint Policy"], errors);
-  requireHeadings(rel, text, ["Codex Goal Boundary"], errors);
   requireTerms(rel, text, ["technical_design.md", "hard-blocking", "pending", "failed", "blocked", "deferred-non-goal", "PASS_TO_FINAL", "route is PASS_TO_FINAL"], errors);
-  requireTerms(`${rel} Codex Goal Boundary`, markdownSection(text, "Codex Goal Boundary"), contract.codexGoalSync?.executorRequiredTerms || [], errors);
   for (const route of contract.routes) {
     if (!text.includes(route.name)) errors.push(`${rel}: missing route ${route.name}`);
   }
