@@ -14,8 +14,10 @@ This runbook owns Technical Design clarification, review, confirmation, Native G
 ## Technical Clarification Gate
 
 Do not leave Technical Clarification while any material design gap remains:
-- Technical Design coverage: Architecture, Components, Data Flow, Interfaces/API, Data Models, Test Plans, Risks.
-- Optional coverage when material: Persistence, Middleware, Infrastructure, External Dependencies, Scalability, Rollback.
+- Technical Design coverage is material-first, not fixed-template-first.
+- Always cover: acceptance evidence mapping, and Risks or a non-material risk note.
+- Cover Architecture, Components, Data Flow, Interfaces/API, Data Models, and Test Plans only when touched or material.
+- Cover Persistence, Middleware, Infrastructure, External Dependencies, Scalability, and Rollback only when touched or material.
 - Every unresolved unknown is classified as `blocking`, `non-material`, or `deferred non-goal`.
 - A design dimension is covered only when it records decision, boundary, implementation impact, acceptance/observer, and status.
 
@@ -65,13 +67,14 @@ Follow `technical-design-book.md` to write `<Alpha Goal state root>/YYYYMMDD-<Ta
 Link the Goal Contract and Technical Design to each other.
 Keep `Design status: draft` until Technical Design Confirmation Gate approves it.
 Write only from answered, auto-confirmed, or cited facts. Keep unresolved required fields as `[blocking]`.
+Omit untouched dimensions, or record `not touched` only when omission would create ambiguity.
 
 ## Technical Review Gate
 
 Self-check before confirmation:
 - Goal Contract fields still bound the design; no scope, authority, or claim boundary drift.
-- Required design dimensions have no blocking gap.
-- Architecture, Components, Interfaces/API, Data Models, Data Flow, Test Plans, and Risks are explicit when touched.
+- Required, touched, or material design dimensions have no blocking gap.
+- Architecture, Components, Interfaces/API, Data Models, Data Flow, and Test Plans are explicit when touched.
 - Goal Contract success criteria map to Technical Design acceptance evidence.
 - Tests cover touched risk, not only happy path.
 - Risks and rollback are either handled or explicitly non-material/deferred non-goal.
@@ -89,8 +92,8 @@ Technical Design Summary
 | Field | Value |
 | --- | --- |
 | Goal Contract | ... |
-| Architecture | ... |
-| Interfaces/Data | ... |
+| Touched design dimensions | ... |
+| Interfaces/Data | changed / not touched |
 | Test evidence | ... |
 | Risks/Rollback | ... |
 ```
