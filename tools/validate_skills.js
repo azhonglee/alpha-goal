@@ -454,7 +454,7 @@ function validateAlphaGoal(root, contract, errors) {
   const summaryBlock = fencedBlockAfter(text, "TUI Presentation Style:") || fencedBlockAfter(text, "Present this summary before asking for approval:");
   if (!summaryBlock) errors.push(`${rel}: missing Goal Contract Summary fenced summary`);
   for (const field of contract.summaryFields) {
-    if (!summaryBlock.includes(`| ${field} |`)) errors.push(`${rel}: summary table missing field: ${field}`);
+    if (!summaryBlockHasField(summaryBlock, field)) errors.push(`${rel}: summary missing field: ${field}`);
   }
   const reviewIndex = headingOffset(text, "Review Gate");
   const summaryIndex = text.indexOf("Goal Contract Summary", reviewIndex);
@@ -987,11 +987,42 @@ function headingOffset(text, heading) {
 function markdownSection(text, heading) {
   const lines = text.split(/\r?\n/);
   const marker = `## ${heading}`;
-  const start = lines.findIndex(line => line.trim() === marker);
+  let inFence = false;
+  let start = -1;
+  for (const [index, line] of lines.entries()) {
+    if (isFenceLine(line)) inFence = !inFence;
+    if (!inFence && line.trim() === marker) {
+      start = index;
+      break;
+    }
+  }
   if (start < 0) return "";
-  const next = lines.slice(start + 1).findIndex(line => /^##\s+/.test(line));
-  const end = next < 0 ? lines.length : start + 1 + next;
+  inFence = false;
+  let end = lines.length;
+  for (let index = start + 1; index < lines.length; index += 1) {
+    const line = lines[index];
+    if (isFenceLine(line)) {
+      inFence = !inFence;
+      continue;
+    }
+    if (!inFence && /^##\s+/.test(line)) {
+      end = index;
+      break;
+    }
+  }
   return lines.slice(start, end).join("\n");
+}
+
+function summaryBlockHasField(summaryBlock, field) {
+  const headingPattern = new RegExp(`^#{1,6}\\s+${escapeRegExp(field)}\\s*$`, "i");
+  return summaryBlock.split(/\r?\n/).some(line => {
+    const trimmed = line.trim();
+    return trimmed.includes(`| ${field} |`) || headingPattern.test(trimmed);
+  });
+}
+
+function isFenceLine(line) {
+  return /^\s*```/.test(line);
 }
 
 function fencedBlockAfter(text, marker) {

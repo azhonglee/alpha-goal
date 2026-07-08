@@ -36,3 +36,7 @@
 ## Agent-Specific Instructions
 
 不要直接在 `main` 或 `master` 上修改；为每批任务使用独立 worktree。完成后提交变更，并在最终说明中列出验证证据和剩余风险。
+
+## Readme Guidelines
+不随便修改 README，除非SKILL中的改动与README描述不一致。
+README保持简洁，避免包含详细说明。
