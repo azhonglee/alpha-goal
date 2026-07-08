@@ -4,7 +4,7 @@
   "replacements": [
     {
       "file": "skills/alpha-goal/SKILL.md",
-      "search": "- On run technical design: set `Contract status: design-authorized`; load `references/technical-design-runbook.md`; from that point follow the runbook and do not return to `SKILL.md`.\n",
+      "search": "- On run technical design: set `Contract status: design-authorized`; load `references/technical-design-runbook.md`; that runbook uses `references/technical-design-book.md`; from that point follow the runbook and do not return to `SKILL.md`.\n",
       "replace": ""
     }
   ]

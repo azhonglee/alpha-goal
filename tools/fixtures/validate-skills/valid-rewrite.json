@@ -4,8 +4,8 @@
   "replacements": [
     {
       "file": "skills/alpha-goal/SKILL.md",
-      "search": "Do not run technical design inside this `SKILL.md`.",
-      "replace": "Do not conduct technical design inside this `SKILL.md`."
+      "search": "Inspect relevant files, docs, recent commits, and existing patterns.",
+      "replace": "Inspect the relevant files, docs, recent commits, and existing patterns."
     }
   ]
 }
