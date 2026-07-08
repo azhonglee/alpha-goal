@@ -13,7 +13,8 @@ When no target is passed, interactive terminals are prompted to choose a
 configuration target. Non-interactive runs default to the codex target.
 
 The codex target syncs Codex AGENTS.md, config.toml, hooks.json, and Codex
-skills. The claude target syncs Claude CLAUDE.md and Claude skills.
+skills. The claude target syncs Claude CLAUDE.md and Claude skills. The
+interactive all menu option syncs both targets.
 With --uninstall, each target removes only its managed configuration and skill
 copies.
 Use --no-sync-user-templates to skip user-level template updates.
@@ -233,11 +234,12 @@ render_install_target_menu() {
   local operation="Install"
   local reset="" bold="" dim="" cyan="" green="" yellow=""
   local marker label summary index
-  local labels=("codex" "claude")
-  local summaries=("Codex only (recommended)" "Claude only")
+  local labels=("codex" "claude" "all")
+  local summaries=("Codex only (recommended)" "Claude only" "Codex and Claude")
   local details=(
     "Updates Codex AGENTS.md/config.toml/hooks.json and Codex skills"
     "Updates Claude CLAUDE.md and Claude skills"
+    "Updates both Codex and Claude configuration and skills"
   )
 
   if [[ "$uninstall" == true ]]; then
@@ -245,6 +247,7 @@ render_install_target_menu() {
     details=(
       "Removes managed Codex config and Codex skills"
       "Removes managed Claude config and Claude skills"
+      "Removes managed Codex and Claude config and skills"
     )
   fi
 
@@ -292,7 +295,7 @@ render_install_target_menu() {
 }
 
 prompt_install_target() {
-  local targets=(codex claude)
+  local targets=(codex claude all)
   local selected=0
   local key rest
   local prompt_skills_root
@@ -363,6 +366,10 @@ case "$install_target" in
   claude)
     sync_claude_config=true
     ;;
+  all)
+    sync_codex_config=true
+    sync_claude_config=true
+    ;;
 esac
 
 codex_home="$(absolute_path "$(default_codex_home)")"
@@ -370,8 +377,15 @@ target_root="$(absolute_path "$(default_skills_root)")"
 claude_home="$(absolute_path "$(default_claude_home)")"
 claude_skill_root="$claude_home/skills"
 skill_install_root="$target_root"
-if [[ "$sync_claude_config" == true ]]; then
+if [[ "$sync_claude_config" == true && "$sync_codex_config" != true ]]; then
   skill_install_root="$claude_skill_root"
+fi
+if [[ "$install_target" == "all" ]]; then
+  codex_skill_root_real="$(normalize_path "$target_root")"
+  claude_skill_root_real="$(normalize_path "$claude_skill_root")"
+  if [[ "$codex_skill_root_real" == "$claude_skill_root_real" ]]; then
+    die "The interactive all target requires distinct Codex and Claude skill roots; both resolved to $codex_skill_root_real"
+  fi
 fi
 agents_template="$repo_root/templates/AGENTS.md"
 claude_template="$repo_root/templates/CLAUDE.md"
@@ -1556,6 +1570,15 @@ for (const [event, groups] of Object.entries(data.hooks)) {
 JS
 }
 
+print_skill_roots() {
+  if [[ "$sync_codex_config" == true && "$sync_claude_config" == true ]]; then
+    echo "│ Codex skills root: $target_root"
+    echo "│ Claude skills root: $claude_skill_root"
+  else
+    echo "│ Skills root: $skill_install_root"
+  fi
+}
+
 print_summary() {
   local status="ready"
   local show_codex_config=false
@@ -1581,7 +1604,7 @@ print_summary() {
   fi
 
   echo "╭─ Alpha Goal install summary"
-  echo "│ Skills root: $skill_install_root"
+  print_skill_roots
   if [[ "$show_codex_config" == true || "$show_claude_config" == true ]]; then
     echo "├─ Configuration"
   fi
@@ -1631,7 +1654,7 @@ print_uninstall_summary() {
   echo "│ Result: $status"
   echo "│ Uninstall target: $install_target"
   echo "├─ Skills"
-  echo "│ Skills root: $skill_install_root"
+  print_skill_roots
   echo "│ Skills: removed $uninstall_skill_removed_count, preserved $uninstall_skill_preserved_count, not-found $uninstall_skill_missing_count"
   if [[ "$show_codex_config" == true || "$show_claude_config" == true ]]; then
     echo "├─ Configuration"
@@ -1734,7 +1757,12 @@ if [[ "$uninstall" == true ]]; then
   exit 0
 fi
 
-mkdir -p "$skill_install_root"
+if [[ "$sync_codex_config" == true ]]; then
+  mkdir -p "$target_root"
+fi
+if [[ "$sync_claude_config" == true ]]; then
+  mkdir -p "$claude_skill_root"
+fi
 
 if [[ "$sync_codex_config" == true && "$sync_user_templates" == true ]]; then
   mkdir -p "$codex_home"
@@ -1756,15 +1784,29 @@ else
 fi
 
 installed=0
-for skill_file in "${skill_files[@]}"; do
-  skill_dir="$(cd "$(dirname "$skill_file")" && pwd -P)"
-  skill_name="$(basename "$skill_dir")"
-  copy_skill_dir "$skill_dir" "$skill_install_root/$skill_name" "$skill_name"
-  if [[ "$sync_claude_config" == true && "$skill_name" == "alpha-goal" ]]; then
-    inject_claude_adapter_into_alpha_goal "$skill_install_root/$skill_name"
-  fi
-  installed=$((installed + 1))
-done
+install_skill_copies_to_root() {
+  local root="$1"
+  local inject_claude_adapter="$2"
+  local skill_dir
+  local skill_name
+
+  for skill_file in "${skill_files[@]}"; do
+    skill_dir="$(cd "$(dirname "$skill_file")" && pwd -P)"
+    skill_name="$(basename "$skill_dir")"
+    copy_skill_dir "$skill_dir" "$root/$skill_name" "$skill_name"
+    if [[ "$inject_claude_adapter" == true && "$skill_name" == "alpha-goal" ]]; then
+      inject_claude_adapter_into_alpha_goal "$root/$skill_name"
+    fi
+    installed=$((installed + 1))
+  done
+}
+
+if [[ "$sync_codex_config" == true ]]; then
+  install_skill_copies_to_root "$target_root" false
+fi
+if [[ "$sync_claude_config" == true ]]; then
+  install_skill_copies_to_root "$claude_skill_root" true
+fi
 
 if [[ "$sync_codex_config" == true ]]; then
   for support_name in adapters tools templates scripts; do

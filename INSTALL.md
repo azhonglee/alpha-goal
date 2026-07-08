@@ -37,7 +37,7 @@ The script creates copied skill directories under target-specific independent ro
 - `codex`: sync Codex config and Codex skill copies.
 - `claude`: sync Claude `CLAUDE.md` and Claude skill copies.
 
-Without `--target`, an interactive terminal shows a color+Unicode arrow-key menu for `codex` or `claude`; `codex` is selected by default and Enter confirms the highlighted target. The menu uses Up/Down plus Enter only; number keys do not select a target. The installer prints a grouped summary after install or uninstall; the summary shows only active effects for the selected target and omits skipped lines. Install summaries omit `Result`, `Skills ... linked`, and `Install target` lines. Non-interactive runs still default to `codex`. Codex config uses `${CODEX_HOME:-$HOME/.codex}` or `--codex-home`. Claude config uses `$HOME/.claude/CLAUDE.md` from `templates/CLAUDE.md`.
+Without `--target`, an interactive terminal shows a color+Unicode arrow-key menu for `codex`, `claude`, or `all`; `codex` is selected by default and Enter confirms the highlighted target. The `all` menu option syncs or uninstalls both Codex and Claude in one run, and summaries show both skill roots. `all` is interactive-only: non-interactive runs still default to `codex`, and `--target all` is rejected. If Codex and Claude skill roots resolve to the same path, `all` is rejected to avoid overwriting one target with the other target's skill copy. The menu uses Up/Down plus Enter only; number keys do not select a target. The installer prints a grouped summary after install or uninstall; the summary shows only active effects for the selected target and omits skipped lines. Install summaries omit `Result`, `Skills ... linked`, and `Install target` lines. Codex config uses `${CODEX_HOME:-$HOME/.codex}` or `--codex-home`. Claude config uses `$HOME/.claude/CLAUDE.md` from `templates/CLAUDE.md`.
 
 When installing skill copies, an existing target skill symlink is migrated without `--force` only when it points to `skills/<skill-name>` in this repository or another worktree with the same Git common directory. Existing managed real directories are removed and recopied. Git detection failures, external symlinks, and symlinks to other repo-relative paths still require `--force` or are refused; ordinary files are always refused. For `claude`, the installer injects a ClaudeAdapter Entry Gate reminder into the installed Alpha Goal copy; `codex` and default non-interactive installs leave that reminder out.
 
@@ -92,6 +92,127 @@ test -d "$tmp_default/.codex/skills/alpha-goal"
 test -f "$tmp_default/.codex/AGENTS.md"
 test ! -e "$tmp_default/.claude/skills/alpha-goal"
 
+run_interactive_all() {
+  local home_dir="$1"
+  local codex_home="$2"
+  shift 2
+  HOME="$home_dir" CODEX_HOME="$codex_home" python3 - "$repo_root/scripts/install.sh" "$@" <<'PY'
+import os
+import pty
+import select
+import subprocess
+import sys
+import time
+
+script = sys.argv[1]
+args = sys.argv[2:]
+master, slave = pty.openpty()
+proc = subprocess.Popen(
+    ["bash", script, *args],
+    stdin=slave,
+    stdout=slave,
+    stderr=slave,
+    close_fds=True,
+)
+os.close(slave)
+
+output = bytearray()
+sent = False
+deadline = time.time() + 30
+while True:
+    if time.time() > deadline:
+        proc.kill()
+        raise SystemExit("interactive installer timed out")
+    ready, _, _ = select.select([master], [], [], 0.1)
+    if ready:
+        try:
+            chunk = os.read(master, 4096)
+        except OSError:
+            chunk = b""
+        if not chunk:
+            break
+        output.extend(chunk)
+        if not sent and b"Choose which app configuration" in output:
+            os.write(master, b"\x1b[B")
+            time.sleep(0.05)
+            os.write(master, b"\x1b[B")
+            time.sleep(0.05)
+            os.write(master, b"\r")
+            sent = True
+    if proc.poll() is not None:
+        while True:
+            ready, _, _ = select.select([master], [], [], 0)
+            if not ready:
+                break
+            try:
+                chunk = os.read(master, 4096)
+            except OSError:
+                break
+            if not chunk:
+                break
+            output.extend(chunk)
+        break
+
+os.close(master)
+sys.stdout.buffer.write(output)
+if proc.returncode is None:
+    returncode = proc.wait(timeout=5)
+else:
+    returncode = proc.returncode
+raise SystemExit(returncode)
+PY
+}
+
+tmp_all="$(mktemp -d)"
+all_install_output="$(run_interactive_all "$tmp_all" "$tmp_all/.codex")"
+grep -q "Codex skills root: $tmp_all/.codex/skills" <<<"$all_install_output"
+grep -q "Claude skills root: $tmp_all/.claude/skills" <<<"$all_install_output"
+for skill in alpha-goal executor verifier; do
+  test -d "$tmp_all/.codex/skills/$skill"
+  test -d "$tmp_all/.claude/skills/$skill"
+done
+test -f "$tmp_all/.codex/AGENTS.md"
+test -f "$tmp_all/.codex/config.toml"
+test -f "$tmp_all/.codex/hooks.json"
+test -f "$tmp_all/.claude/CLAUDE.md"
+! grep -q "references/claude-adapter.md" "$tmp_all/.codex/skills/alpha-goal/SKILL.md"
+grep -q "references/claude-adapter.md" "$tmp_all/.claude/skills/alpha-goal/SKILL.md"
+
+all_uninstall_output="$(run_interactive_all "$tmp_all" "$tmp_all/.codex" --uninstall)"
+grep -q "Uninstall target: all" <<<"$all_uninstall_output"
+grep -q "Codex skills root: $tmp_all/.codex/skills" <<<"$all_uninstall_output"
+grep -q "Claude skills root: $tmp_all/.claude/skills" <<<"$all_uninstall_output"
+for skill in alpha-goal executor verifier; do
+  test ! -e "$tmp_all/.codex/skills/$skill"
+  test ! -e "$tmp_all/.claude/skills/$skill"
+done
+test ! -e "$tmp_all/.codex/AGENTS.md"
+test ! -e "$tmp_all/.codex/config.toml"
+test ! -e "$tmp_all/.codex/hooks.json"
+test ! -e "$tmp_all/.claude/CLAUDE.md"
+
+tmp_invalid="$(mktemp -d)"
+if HOME="$tmp_invalid" CODEX_HOME="$tmp_invalid/.codex" scripts/install.sh --target all; then
+  echo "--target all should fail" >&2
+  exit 1
+fi
+
+tmp_conflict="$(mktemp -d)"
+if conflict_output="$(run_interactive_all "$tmp_conflict" "$tmp_conflict/.claude" 2>&1)"; then
+  echo "interactive all should reject identical skill roots" >&2
+  exit 1
+fi
+grep -q "requires distinct Codex and Claude skill roots" <<<"$conflict_output"
+
+tmp_link_conflict="$(mktemp -d)"
+mkdir -p "$tmp_link_conflict/.claude"
+ln -s "$tmp_link_conflict/.claude" "$tmp_link_conflict/.codexlink"
+if link_conflict_output="$(run_interactive_all "$tmp_link_conflict" "$tmp_link_conflict/.codexlink" 2>&1)"; then
+  echo "interactive all should reject symlinked identical skill roots" >&2
+  exit 1
+fi
+grep -q "requires distinct Codex and Claude skill roots" <<<"$link_conflict_output"
+
 HOME="$tmp_codex" CODEX_HOME="$tmp_codex/.codex" scripts/install.sh --uninstall --target codex
 for skill in alpha-goal executor verifier; do
   test ! -e "$tmp_codex/.codex/skills/$skill"
@@ -115,7 +236,7 @@ grep -q "checkpoint.md" "$tmp_default/.codex/hooks.json"
 bash -n scripts/install.sh
 node tools/validate_skills.js .
 node tools/validate_skills.js --fixtures
-rm -rf "$tmp_codex" "$tmp_claude" "$tmp_default"
+rm -rf "$tmp_codex" "$tmp_claude" "$tmp_default" "$tmp_all" "$tmp_invalid" "$tmp_conflict" "$tmp_link_conflict"
 ```
 
 ## Prompts
