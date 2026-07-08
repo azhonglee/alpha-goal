@@ -87,28 +87,44 @@
     "Goal",
     "Non-goals",
     "Execution boundary",
-    "Acceptance evidence",
-    "Recommended next step"
+    "Acceptance evidence"
   ],
   "nativeGoalSync": {
     "alphaGoalRequiredTerms": [
       "Native Goal Sync",
       "create_goal",
       "get_goal",
-      "Goal Contract Summary",
-      "Technical Design link when present",
       "active native goal",
       "do not overwrite",
       "do not hand off to `executor`",
       "blocking sync conflict"
     ]
   },
+  "claudeAdapter": {
+    "path": "references/claude-adapter.md",
+    "requiredTerms": [
+      "ClaudeAdapter",
+      "Claude runtime",
+      "request_user_input",
+      "AskUserQuestion",
+      "create_goal",
+      "get_goal",
+      "update_goal",
+      "/goal",
+      "TaskCreate",
+      "TaskUpdate",
+      "TaskGet",
+      "TaskList",
+      "TodoWrite",
+      "Native Goal Sync",
+      "not equivalent"
+    ]
+  },
   "technicalDesignRunbook": {
     "path": "references/technical-design-runbook.md",
     "confirmationTerms": [
       "run technical design",
-      "Contract status: design-authorized",
-      "do not return to `SKILL.md`"
+      "Contract status: design-authorized"
     ],
     "requiredTerms": [
       "Technical Design Runbook",
