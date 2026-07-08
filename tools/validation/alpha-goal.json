@@ -103,6 +103,26 @@
       "blocking sync conflict"
     ]
   },
+  "claudeAdapter": {
+    "path": "references/claude-adapter.md",
+    "requiredTerms": [
+      "ClaudeAdapter",
+      "Claude runtime",
+      "request_user_input",
+      "AskUserQuestion",
+      "create_goal",
+      "get_goal",
+      "update_goal",
+      "/goal",
+      "TaskCreate",
+      "TaskUpdate",
+      "TaskGet",
+      "TaskList",
+      "TodoWrite",
+      "Native Goal Sync",
+      "not equivalent"
+    ]
+  },
   "technicalDesignRunbook": {
     "path": "references/technical-design-runbook.md",
     "confirmationTerms": [

@@ -14,6 +14,8 @@ Former public framing/modeling/synthesis stages are folded into `skills/alpha-go
 
 Technical Design flow is progressively disclosed through `skills/alpha-goal/references/technical-design-runbook.md` only after Goal Contract Confirmation Gate selects `run technical design`; `skills/alpha-goal/SKILL.md` keeps Goal Contract clarification and confirmation control flow.
 
+Claude runtime tool-name adaptation is progressively disclosed through `skills/alpha-goal/references/claude-adapter.md` from the Alpha Goal Entry Gate. It maps Alpha Goal tool terms to Claude surfaces without changing Goal Contract authority, route semantics, or evidence rules.
+
 ## Scripts
 
 | Path | Mutates state? | Purpose |

@@ -142,6 +142,7 @@ function emptyContract() {
     clarificationExitRules: [],
     summaryFields: [],
     nativeGoalSync: {},
+    claudeAdapter: {},
     technicalDesignRunbook: {},
     checkedFiles: [],
     nodeRequirement: "",
@@ -164,6 +165,14 @@ function validateContract(contract, errors) {
     errors.push(`${CONTRACT_PATH}: nativeGoalSync must be an object`);
   } else {
     requireArray(contract.nativeGoalSync, "alphaGoalRequiredTerms", errors, `${CONTRACT_PATH}: nativeGoalSync`);
+  }
+  if (!contract.claudeAdapter || typeof contract.claudeAdapter !== "object" || Array.isArray(contract.claudeAdapter)) {
+    errors.push(`${CONTRACT_PATH}: claudeAdapter must be an object`);
+  } else {
+    if (typeof contract.claudeAdapter.path !== "string" || !contract.claudeAdapter.path) {
+      errors.push(`${CONTRACT_PATH}: claudeAdapter.path must be a non-empty string`);
+    }
+    requireArray(contract.claudeAdapter, "requiredTerms", errors, `${CONTRACT_PATH}: claudeAdapter`);
   }
   if (!contract.technicalDesignRunbook || typeof contract.technicalDesignRunbook !== "object" || Array.isArray(contract.technicalDesignRunbook)) {
     errors.push(`${CONTRACT_PATH}: technicalDesignRunbook must be an object`);
@@ -433,6 +442,11 @@ function validateAlphaGoal(root, contract, errors) {
   }
   requireGateHeadings(rel, text, contract.requiredGates, errors);
   requireHeadings(rel, text, ["Clarification", "Native Goal Sync"], errors);
+  const entryGate = markdownSection(text, "Entry Gate");
+  const claudeAdapterRef = contract.claudeAdapter?.path;
+  if (claudeAdapterRef && !entryGate.includes(claudeAdapterRef)) {
+    errors.push(`${rel}: Entry Gate missing Claude adapter routing: ${claudeAdapterRef}`);
+  }
   const clarificationGate = markdownSection(text, "Clarification Gate");
   for (const rule of contract.clarificationExitRules) {
     if (!clarificationGate.includes(`\`${rule}\``)) errors.push(`${rel}: Clarification Gate missing exit rule ${rule}`);
@@ -485,6 +499,15 @@ function validateAlphaGoal(root, contract, errors) {
     }
   }
   requireTerms(`${rel} Native Goal Sync`, markdownSection(text, "Native Goal Sync"), contract.nativeGoalSync?.alphaGoalRequiredTerms || [], errors);
+  if (claudeAdapterRef) {
+    const adapterRel = `skills/alpha-goal/${claudeAdapterRef}`;
+    const adapter = readIfFile(path.join(root, adapterRel));
+    if (!adapter) {
+      errors.push(`${adapterRel}: missing`);
+    } else {
+      requireTerms(adapterRel, adapter, contract.claudeAdapter?.requiredTerms || [], errors);
+    }
+  }
 }
 
 function validateExecutor(root, contract, errors) {
