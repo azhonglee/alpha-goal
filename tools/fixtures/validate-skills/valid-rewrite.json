@@ -4,8 +4,8 @@
   "replacements": [
     {
       "file": "skills/alpha-goal/SKILL.md",
-      "search": "Implementation starts only after a user-accepted Goal Contract hands off to `executor` skill.",
-      "replace": "Execution starts only after a user-accepted Goal Contract hands off to `executor` skill."
+      "search": "Do not run technical design inside this `SKILL.md`.",
+      "replace": "Do not conduct technical design inside this `SKILL.md`."
     }
   ]
 }

@@ -4,7 +4,7 @@
   "replacements": [
     {
       "file": "skills/alpha-goal/SKILL.md",
-      "search": "| Design choice | skipped / technical_design.md link |\n",
+      "search": "| Recommended next step | approve/launch / run technical design |\n",
       "replace": ""
     }
   ]

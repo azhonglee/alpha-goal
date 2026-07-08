@@ -142,7 +142,7 @@ function emptyContract() {
     clarificationExitRules: [],
     summaryFields: [],
     nativeGoalSync: {},
-    designClarification: {},
+    technicalDesignRunbook: {},
     checkedFiles: [],
     nodeRequirement: "",
   };
@@ -165,14 +165,14 @@ function validateContract(contract, errors) {
   } else {
     requireArray(contract.nativeGoalSync, "alphaGoalRequiredTerms", errors, `${CONTRACT_PATH}: nativeGoalSync`);
   }
-  if (!contract.designClarification || typeof contract.designClarification !== "object" || Array.isArray(contract.designClarification)) {
-    errors.push(`${CONTRACT_PATH}: designClarification must be an object`);
+  if (!contract.technicalDesignRunbook || typeof contract.technicalDesignRunbook !== "object" || Array.isArray(contract.technicalDesignRunbook)) {
+    errors.push(`${CONTRACT_PATH}: technicalDesignRunbook must be an object`);
   } else {
-    if (typeof contract.designClarification.path !== "string" || !contract.designClarification.path) {
-      errors.push(`${CONTRACT_PATH}: designClarification.path must be a non-empty string`);
+    if (typeof contract.technicalDesignRunbook.path !== "string" || !contract.technicalDesignRunbook.path) {
+      errors.push(`${CONTRACT_PATH}: technicalDesignRunbook.path must be a non-empty string`);
     }
-    requireArray(contract.designClarification, "gateTerms", errors, `${CONTRACT_PATH}: designClarification`);
-    requireArray(contract.designClarification, "requiredTerms", errors, `${CONTRACT_PATH}: designClarification`);
+    requireArray(contract.technicalDesignRunbook, "confirmationTerms", errors, `${CONTRACT_PATH}: technicalDesignRunbook`);
+    requireArray(contract.technicalDesignRunbook, "requiredTerms", errors, `${CONTRACT_PATH}: technicalDesignRunbook`);
   }
   const contractText = JSON.stringify(contract);
   for (const legacy of ["\u0043odex Goal Sync", "token_\u0062udget", "active \u0043odex goal"]) {
@@ -221,11 +221,11 @@ function validateContract(contract, errors) {
       if (typeof value !== "string" || !value) errors.push(`${CONTRACT_PATH}: nativeGoalSync.${name} entries must be non-empty strings`);
     }
   }
-  for (const value of contract.designClarification?.requiredTerms || []) {
-    if (typeof value !== "string" || !value) errors.push(`${CONTRACT_PATH}: designClarification.requiredTerms entries must be non-empty strings`);
+  for (const value of contract.technicalDesignRunbook?.requiredTerms || []) {
+    if (typeof value !== "string" || !value) errors.push(`${CONTRACT_PATH}: technicalDesignRunbook.requiredTerms entries must be non-empty strings`);
   }
-  for (const value of contract.designClarification?.gateTerms || []) {
-    if (typeof value !== "string" || !value) errors.push(`${CONTRACT_PATH}: designClarification.gateTerms entries must be non-empty strings`);
+  for (const value of contract.technicalDesignRunbook?.confirmationTerms || []) {
+    if (typeof value !== "string" || !value) errors.push(`${CONTRACT_PATH}: technicalDesignRunbook.confirmationTerms entries must be non-empty strings`);
   }
 }
 
@@ -468,19 +468,20 @@ function validateAlphaGoal(root, contract, errors) {
   for (const forbidden of ["after each answer", "after every answer", "Update `goal-contract.md` and `technical_design.md` after each answer"]) {
     if (text.includes(forbidden)) errors.push(`${rel}: stale per-answer artifact write rule remains: ${forbidden}`);
   }
-  const designRef = contract.designClarification?.path;
-  if (designRef && !text.includes(designRef)) errors.push(`${rel}: missing design clarification reference routing: ${designRef}`);
-  const designChoiceGate = markdownSection(text, "Design Choice Gate");
-  requireTerms(`${rel} Design Choice Gate`, designChoiceGate, contract.designClarification?.gateTerms || [], errors);
-  if (designRef && !designChoiceGate.includes(designRef)) errors.push(`${rel}: design clarification reference must be routed from Design Choice Gate`);
-  if (text.includes("| Design Priority |")) errors.push(`${rel}: design priority table belongs in design clarification reference`);
-  const designReferencePath = designRef ? path.join(root, "skills", "alpha-goal", designRef) : "";
-  if (designRef) {
-    const designReference = readIfFile(designReferencePath);
-    if (!designReference) {
-      errors.push(`skills/alpha-goal/${designRef}: missing`);
+  const runbookRef = contract.technicalDesignRunbook?.path;
+  if (runbookRef && !text.includes(runbookRef)) errors.push(`${rel}: missing technical design runbook routing: ${runbookRef}`);
+  requireTerms(`${rel} Confirmation Gate`, confirmationGate, contract.technicalDesignRunbook?.confirmationTerms || [], errors);
+  if (runbookRef && !confirmationGate.includes(runbookRef)) errors.push(`${rel}: technical design runbook must be routed from Confirmation Gate`);
+  const standaloneDesignGate = ["## Design", "Choice Gate"].join(" ");
+  if (text.includes(standaloneDesignGate)) errors.push(`${rel}: standalone design gate must be folded into Confirmation Gate`);
+  if (text.includes("| Design Priority |")) errors.push(`${rel}: design priority table belongs in technical design runbook`);
+  const runbookPath = runbookRef ? path.join(root, "skills", "alpha-goal", runbookRef) : "";
+  if (runbookRef) {
+    const runbook = readIfFile(runbookPath);
+    if (!runbook) {
+      errors.push(`skills/alpha-goal/${runbookRef}: missing`);
     } else {
-      requireTerms(`skills/alpha-goal/${designRef}`, designReference, contract.designClarification?.requiredTerms || [], errors);
+      requireTerms(`skills/alpha-goal/${runbookRef}`, runbook, contract.technicalDesignRunbook?.requiredTerms || [], errors);
     }
   }
   requireTerms(`${rel} Native Goal Sync`, markdownSection(text, "Native Goal Sync"), contract.nativeGoalSync?.alphaGoalRequiredTerms || [], errors);

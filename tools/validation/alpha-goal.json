@@ -12,7 +12,7 @@
       "path": "technical_design.md",
       "kind": "task",
       "requirement": "conditional",
-      "condition": "Design Choice Gate selects Technical Design clarification"
+      "condition": "Goal Contract Confirmation Gate selects run technical design"
     },
     {
       "path": "checkpoint.md",
@@ -77,7 +77,7 @@
       "results": ["blocked"]
     }
   ],
-  "requiredGates": ["Entry Gate", "Clarification Gate", "Design Choice Gate", "Review Gate", "Confirmation Gate"],
+  "requiredGates": ["Entry Gate", "Clarification Gate", "Review Gate", "Confirmation Gate"],
   "clarificationExitRules": [
     "no_confidence_only",
     "no_round_count",
@@ -87,7 +87,8 @@
     "Goal",
     "Non-goals",
     "Execution boundary",
-    "Design choice"
+    "Acceptance evidence",
+    "Recommended next step"
   ],
   "nativeGoalSync": {
     "alphaGoalRequiredTerms": [
@@ -102,16 +103,15 @@
       "blocking sync conflict"
     ]
   },
-  "designClarification": {
-    "path": "references/design-clarification-book.md",
-    "gateTerms": [
-      "Design Choice Gate",
-      "Run Technical Design clarification",
-      "Skip Technical Design",
-      "Design status: skipped by user",
-      "do not create `technical_design.md`"
+  "technicalDesignRunbook": {
+    "path": "references/technical-design-runbook.md",
+    "confirmationTerms": [
+      "run technical design",
+      "Contract status: design-authorized",
+      "do not return to `SKILL.md`"
     ],
     "requiredTerms": [
+      "Technical Design Runbook",
       "Technical Design coverage",
       "Design Priority",
       "Architecture",
@@ -121,7 +121,9 @@
       "Data Flow",
       "Test Plans",
       "Risks",
-      "Review Self-Check"
+      "Technical Review Gate",
+      "Technical Design Confirmation Gate",
+      "Native Goal Sync"
     ]
   },
   "checkedFiles": [
