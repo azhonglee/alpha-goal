@@ -1,6 +1,6 @@
 ---
 name: alpha-goal
-description: "Use to gate engineering/design/implementation requests before modification, implementation, repair, refactor, or hardening. Use inspection facts as entry evidence; run Loop Q&A to clarify intent, outcome, boundaries, non-goals, success criteria, and acceptance evidence; at confirmation, choose approve/launch, run technical design, refine, or reject."
+description: "Use to gate engineering/design/implementation requests before modification, implementation, repair, refactor, or hardening. Use inspection facts as entry evidence; run Loop Q&A to clarify intent, outcome, boundaries, non-goals, success criteria, and acceptance evidence."
 ---
 
 # Alpha Goal
@@ -15,7 +15,6 @@ Enter `alpha-goal` for engineering, design, implementation, repair, refactor, or
 - Every project MUST produce an explicit user-confirmed Goal Contract before implementation or hardening.
 
 **Check Point:**
-- Resolve Alpha Goal state root as `$HOME/.alpha-goal/<workspace-slug>/`, where `<workspace-slug>` is `slug(repo_root or Goal Contract target workspace)`.
 - Inspect relevant files, docs, recent commits, and existing patterns.
 - Identify facts, conflicts, unknowns, dependencies, and source-of-truth conflicts.
 - Record inspection results in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Discovery notes`.
@@ -63,14 +62,12 @@ Loop Q&A until the user-owned Goal Contract decisions are explicit enough to wri
 **Step 1: Pick the next question target**
 
 Use current task state:
-- Original request and probable intent.
-- Prior Q&A.
-- Known facts, conflicts, unknowns, dependencies, and source-of-truth conflicts.
-- Current coverage matrix gaps.
-- Brownfield context and active Assumption Stress Test mode.
+- Original request, probable intent, prior Q&A.
+- Known facts, conflicts, unknowns, dependencies, source-of-truth conflicts.
+- Current coverage gaps, brownfield context, active Assumption Stress Test mode.
 
 Rank open gaps before choosing the next target:
-- Prefer the gap with the highest blast radius, irreversibility, external dependency, user-owned semantics, data/API contract impact, validation ambiguity, or rollback risk.
+- Prefer the gap with highest blast radius, irreversibility, external dependency, user-owned semantics, data/API contract impact, validation ambiguity, or rollback risk.
 - Do not move to a lower-risk dimension while a higher-risk blocking Goal Contract gap remains.
 
 | Goal Priority | Dimension |
@@ -181,7 +178,7 @@ Goal Contract Summary
 
 Use `request_user_input` or equivalent structured input to ask for approve/launch, run technical design, refine, or reject.
 - On approve/launch: set `Contract status: accepted`; record `Technical Design: skipped by user`; perform Native Goal Sync; hand off to `executor` skill.
-- On run technical design: set `Contract status: design-authorized`; load `references/technical-design-runbook.md`; that runbook uses `references/technical-design-book.md`; from that point follow the runbook and do not return to `SKILL.md`.
+- On run technical design: set `Contract status: design-authorized`; load `references/technical-design-runbook.md`; that runbook uses `references/technical-design-book.md`; from that point follow the runbook.
 - On refine: keep `Contract status: draft`; return to `Clarification` with user feedback.
 - On reject: keep `Contract status: draft`; do not create or change native goals.
 
@@ -190,7 +187,7 @@ Use `request_user_input` or equivalent structured input to ask for approve/launc
 Native Goal Sync is a lifecycle side effect, not authority.
 - Before approval, do not invoke `create_goal`.
 - On approval, call `get_goal` before creating a new native goal.
-- If no unfinished active native goal exists, invoke `create_goal` with an objective built from the Goal Contract Summary and Technical Design link when present.
+- If no unfinished active native goal exists, invoke `create_goal` with an objective built from the Goal Contract artifact.
 - If an unfinished active native goal already represents the same accepted contract, continue to `executor` skill.
 - If an unfinished active native goal conflicts with the accepted contract, do not overwrite, clear, pause, replace, or repurpose it; do not hand off to `executor` as synced. Return to Confirmation with a blocking sync conflict for user decision.
 - If Native Goal Sync fails, record the gap or blocker in the task artifact or checkpoint; do not treat sync failure as permission to redefine scope, acceptance, authority, or hand off as synced.
