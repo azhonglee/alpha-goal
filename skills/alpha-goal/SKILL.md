@@ -12,7 +12,7 @@ description: "Use to gate engineering/design/implementation requests before modi
 Enter `alpha-goal` for engineering, design, implementation, repair, refactor, or hardening request. Skip only for concrete read-only work.
 
 **Anti-Pattern:** "Too Clear to Need clarification"
-- Every project MUST produce an explicit user-confirmed Goal Contract before implementation or hardening.
+- Every project MUST produce an explicit user-confirmed Goal Contract before execution.
 
 **Check Point:**
 - Inspect relevant files, docs, recent commits, and existing patterns.
@@ -171,7 +171,6 @@ Goal Contract Summary
 | Non-goals | ... |
 | Execution boundary | ... |
 | Acceptance evidence | ... |
-| Recommended next step | approve/launch / run technical design |
 ```
 
 ## Confirmation Gate
