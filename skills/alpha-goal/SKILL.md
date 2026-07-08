@@ -16,8 +16,6 @@ Enter `alpha-goal` for engineering, design, implementation, repair, refactor, or
 
 **Check Point:**
 - Inspect relevant files, docs, recent commits, and existing patterns.
-- Resolve Alpha Goal state root as `$HOME/.alpha-goal/<workspace-slug>/`, where `<workspace-slug>` is `slug(repo_root or Goal Contract target workspace)`.
-- In Claude runtime or Claude-installed skill context, read `references/claude-adapter.md` before interpreting tool names.
 - Identify facts, conflicts, unknowns, dependencies, and source-of-truth conflicts.
 - Record inspection results in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Discovery notes`.
 
@@ -161,6 +159,8 @@ Run independent review for non-trivial implementation, repair, refactor, hardeni
 - Require the reviewer to check shallow Q&A, missing acceptance evidence, and premature implementation risk.
 - Fix accepted findings.
 
+## Confirmation Gate
+
 Before asking for confirmation, present the Goal Contract Summary first.
 - The approval request message must include the Goal Contract Summary.
 - If the Goal Contract Summary is missing or incomplete, stay in Review Gate.
@@ -173,14 +173,11 @@ Goal Contract Summary
 | Non-goals | ... |
 | Execution boundary | ... |
 | Acceptance evidence | ... |
-| Recommended next step | ... |
 ```
-
-## Confirmation Gate
 
 Use `request_user_input` or equivalent structured input to ask for approve/launch, run technical design, refine, or reject.
 - On approve/launch: set `Contract status: accepted`; record `Technical Design: skipped by user`; perform Native Goal Sync; hand off to `executor` skill.
-- On run technical design: set `Contract status: design-authorized`; load `references/technical-design-runbook.md`; that runbook uses `references/technical-design-book.md`; from that point follow the runbook and do not return to `SKILL.md`.
+- On run technical design: set `Contract status: design-authorized`; load `references/technical-design-runbook.md`; that runbook uses `references/technical-design-book.md`; from that point follow the runbook.
 - On refine: keep `Contract status: draft`; return to `Clarification` with user feedback.
 - On reject: keep `Contract status: draft`; do not create or change native goals.
 
@@ -189,7 +186,7 @@ Use `request_user_input` or equivalent structured input to ask for approve/launc
 Native Goal Sync is a lifecycle side effect, not authority.
 - Before approval, do not invoke `create_goal`.
 - On approval, call `get_goal` before creating a new native goal.
-- If no unfinished active native goal exists, invoke `create_goal` with an objective built from the Goal Contract Summary and Technical Design link when present.
+- If no unfinished active native goal exists, invoke `create_goal` with an objective built from the Goal Contract artifact.
 - If an unfinished active native goal already represents the same accepted contract, continue to `executor` skill.
 - If an unfinished active native goal conflicts with the accepted contract, do not overwrite, clear, pause, replace, or repurpose it; do not hand off to `executor` as synced. Return to Confirmation with a blocking sync conflict for user decision.
 - If Native Goal Sync fails, record the gap or blocker in the task artifact or checkpoint; do not treat sync failure as permission to redefine scope, acceptance, authority, or hand off as synced.

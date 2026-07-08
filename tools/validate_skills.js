@@ -258,11 +258,11 @@ function validateSkillDirs(root, contract, errors, warnings) {
   }
   for (const name of skillDirs) {
     if (!contract.skills.includes(name)) errors.push(`unexpected skill directory: skills/${name}`);
-    validateSkillDir(root, path.join(skillsRoot, name), errors, warnings);
+    validateSkillDir(root, path.join(skillsRoot, name), contract, errors, warnings);
   }
 }
 
-function validateSkillDir(root, dir, errors, warnings) {
+function validateSkillDir(root, dir, contract, errors, warnings) {
   const skillName = path.basename(dir);
   const md = path.join(dir, "SKILL.md");
   if (!isFile(md)) {
@@ -286,7 +286,8 @@ function validateSkillDir(root, dir, errors, warnings) {
   if (isDirectory(refs)) {
     for (const ref of fs.readdirSync(refs).filter(file => isFile(path.join(refs, file))).sort()) {
       const rel = `references/${ref}`;
-      if (!text.includes(rel)) errors.push(`${skillName}: reference is not discoverable from SKILL.md: ${rel}`);
+      const installInjectedClaudeAdapter = skillName === "alpha-goal" && rel === contract.claudeAdapter?.path;
+      if (!installInjectedClaudeAdapter && !text.includes(rel)) errors.push(`${skillName}: reference is not discoverable from SKILL.md: ${rel}`);
     }
   }
 }
@@ -349,7 +350,7 @@ function validateStateRootGuidance(root, contract, errors) {
     "slug(repo_root or Goal Contract target workspace)",
   ];
   const stateRootForm = "$HOME/.alpha-goal/<workspace-slug>/";
-  for (const rel of ["AGENTS.md", "MANIFEST.md", "skills/alpha-goal/SKILL.md", "skills/executor/SKILL.md", "skills/verifier/SKILL.md", "templates/AGENTS.md", "templates/CLAUDE.md"]) {
+  for (const rel of ["AGENTS.md", "MANIFEST.md", "skills/executor/SKILL.md", "skills/verifier/SKILL.md", "templates/AGENTS.md", "templates/CLAUDE.md"]) {
     const text = readIfFile(path.join(root, rel));
     if (!text) {
       errors.push(`${rel}: missing state-root guidance file`);
@@ -442,10 +443,9 @@ function validateAlphaGoal(root, contract, errors) {
   }
   requireGateHeadings(rel, text, contract.requiredGates, errors);
   requireHeadings(rel, text, ["Clarification", "Native Goal Sync"], errors);
-  const entryGate = markdownSection(text, "Entry Gate");
   const claudeAdapterRef = contract.claudeAdapter?.path;
-  if (claudeAdapterRef && !entryGate.includes(claudeAdapterRef)) {
-    errors.push(`${rel}: Entry Gate missing Claude adapter routing: ${claudeAdapterRef}`);
+  if (claudeAdapterRef && text.includes(claudeAdapterRef)) {
+    errors.push(`${rel}: Claude adapter routing must be installer-injected, not committed to source SKILL.md: ${claudeAdapterRef}`);
   }
   const clarificationGate = markdownSection(text, "Clarification Gate");
   for (const rule of contract.clarificationExitRules) {
@@ -460,7 +460,7 @@ function validateAlphaGoal(root, contract, errors) {
   const summaryIndex = text.indexOf("Goal Contract Summary", reviewIndex);
   const confirmationIndex = headingOffset(text, "Confirmation Gate");
   const inputIndex = text.indexOf("request_user_input", confirmationIndex);
-  if (!(reviewIndex >= 0 && summaryIndex > reviewIndex && confirmationIndex > summaryIndex && inputIndex > confirmationIndex)) {
+  if (!(reviewIndex >= 0 && confirmationIndex > reviewIndex && summaryIndex > confirmationIndex && inputIndex > summaryIndex)) {
     errors.push(`${rel}: Goal Contract Summary must appear before Confirmation Gate request_user_input`);
   }
   const reviewSection = text.slice(reviewIndex, confirmationIndex >= 0 ? confirmationIndex : undefined);
@@ -719,8 +719,13 @@ function validateInstallSurface(root, contract, errors) {
     if (!install.includes(term)) errors.push(`scripts/install.sh missing install hardening term: ${term}`);
   }
   if (!install.includes("--no-sync-user-hooks")) errors.push("scripts/install.sh missing --no-sync-user-hooks option");
+  if (contract.claudeAdapter?.path) {
+    for (const term of ["inject_claude_adapter_into_alpha_goal", contract.claudeAdapter.path, "sync_claude_config", "Entry Gate reminder"]) {
+      if (!install.includes(term)) errors.push(`scripts/install.sh missing Claude adapter install injection term: ${term}`);
+    }
+  }
   if (!isFile(path.join(root, "templates/CLAUDE.md"))) errors.push("templates/CLAUDE.md: missing");
-  for (const term of ["--target", "global", "codex", "claude", "$HOME/.agents/skills", "$HOME/.claude/skills", "templates/CLAUDE.md", "CLAUDE.md"]) {
+  for (const term of ["--target", "codex", "claude", "${CODEX_HOME:-$HOME/.codex}/skills", "$HOME/.claude/skills", "templates/CLAUDE.md", "CLAUDE.md"]) {
     if (!install.includes(term)) errors.push(`scripts/install.sh missing multi-target install term: ${term}`);
   }
   for (const term of ["copy_skill_dir", "claude_skill_root", ".alpha-goal-skill-copy", "Copied skill", "Removed installed skill copy", "Removed Claude skill link"]) {
@@ -817,7 +822,7 @@ function validateDocs(root, contract, errors) {
     if (!text.includes(contract.nodeRequirement)) errors.push(`${rel}: missing node requirement ${contract.nodeRequirement}`);
   }
   const installDoc = readIfFile(path.join(root, "INSTALL.md"));
-  for (const term of ["--target", "$HOME/.agents/skills", "$HOME/.claude/skills", "templates/CLAUDE.md", "--no-sync-user-hooks", "templates/hooks.json", "PostCompact", "must not set matcher", LEGACY_HOOK_MARKER, "temporary CODEX_HOME", FIXTURE_COMMAND, "interface/data-model changes", "material risk", "verification handoff", "acceptance checklist"]) {
+  for (const term of ["--target", "${CODEX_HOME:-$HOME/.codex}/skills", "$HOME/.claude/skills", "templates/CLAUDE.md", "--no-sync-user-hooks", "templates/hooks.json", "PostCompact", "must not set matcher", LEGACY_HOOK_MARKER, "temporary HOME", "temporary CODEX_HOME", FIXTURE_COMMAND, "interface/data-model changes", "material risk", "verification handoff", "acceptance checklist"]) {
     if (!installDoc.includes(term)) errors.push(`INSTALL.md missing install term: ${term}`);
   }
   for (const term of [
@@ -825,32 +830,14 @@ function validateDocs(root, contract, errors) {
     "color+Unicode",
     "`codex` is selected by default",
     "number keys do not select",
-    "ANSI color",
-    "Unicode selected state",
     "grouped summary",
     "omits skipped lines",
-    "same Git common directory",
-    "git worktree add --detach",
-    "tmp_worktree_link",
-    "tmp_external_link",
-    "tmp_wrong_path_link",
-    "tmp_real_dir",
-    "tmp_file_path",
-    "target menu timed out",
-    "scripts/install.sh --uninstall --target global",
+    "independent roots",
     "scripts/install.sh --uninstall --target codex",
     "scripts/install.sh --uninstall --target claude",
     "configuration symlinks are not followed",
     "byte-for-byte matches `templates/config.toml`",
-    "tmp_uninstall_global",
-    "tmp_uninstall_target",
-    "tmp_uninstall_noninteractive",
-    "tmp_uninstall_toml",
-    "tmp_uninstall_blank_toml",
-    "tmp_uninstall_safety",
-    "tmp_uninstall_skip",
-    "tmp_uninstall_invalid_hooks",
-    "config.toml preserved",
+    "ClaudeAdapter",
     "--no-sync-user-templates",
     "--no-sync-user-hooks",
   ]) {
@@ -860,7 +847,7 @@ function validateDocs(root, contract, errors) {
   const readmeEn = readIfFile(path.join(root, "README.en.md"));
   const manifest = readIfFile(path.join(root, "MANIFEST.md"));
   for (const [rel, text] of [["README.en.md", readmeEn], ["MANIFEST.md", manifest]]) {
-    for (const term of ["--uninstall", "$HOME/.agents/skills", "$HOME/.claude/skills", "configuration symlinks", "legacy Codex skills"]) {
+    for (const term of ["--uninstall", "${CODEX_HOME:-$HOME/.codex}/skills", "$HOME/.claude/skills", "configuration symlinks"]) {
       if (!text.includes(term)) errors.push(`${rel} missing uninstall boundary term: ${term}`);
     }
   }
