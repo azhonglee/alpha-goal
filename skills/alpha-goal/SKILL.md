@@ -159,7 +159,9 @@ Run independent review for non-trivial implementation, repair, refactor, hardeni
 - Require the reviewer to check shallow Q&A, missing acceptance evidence, and premature implementation risk.
 - Fix accepted findings.
 
-After Review Gate completes, present the Goal Contract Summary first.
+## Confirmation Gate
+
+Before asking for confirmation, present the Goal Contract Summary first.
 - The approval request message must include the Goal Contract Summary.
 - If the Goal Contract Summary is missing or incomplete, stay in Review Gate.
 - TUI Presentation Style:
@@ -172,8 +174,6 @@ Goal Contract Summary
 | Execution boundary | ... |
 | Acceptance evidence | ... |
 ```
-
-## Confirmation Gate
 
 Use `request_user_input` or equivalent structured input to ask for approve/launch, run technical design, refine, or reject.
 - On approve/launch: set `Contract status: accepted`; record `Technical Design: skipped by user`; perform Native Goal Sync; hand off to `executor` skill.
