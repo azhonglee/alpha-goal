@@ -1,0 +1,11 @@
+{
+  "shouldPass": false,
+  "inheritRoot": true,
+  "replacements": [
+    {
+      "file": "tools/validation/alpha-goal.json",
+      "search": "  \"nativeGoalSync\": {\n    \"alphaGoalRequiredTerms\": [\n      \"Native Goal Sync\",\n      \"create_goal\",\n      \"get_goal\",\n      \"Goal Contract Summary\",\n      \"Technical Design link when present\",\n      \"active native goal\",\n      \"do not overwrite\",\n      \"do not hand off to `executor`\",\n      \"blocking sync conflict\"\n    ]\n  },\n",
+      "replace": ""
+    }
+  ]
+}

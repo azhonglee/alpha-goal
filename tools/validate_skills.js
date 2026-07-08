@@ -141,6 +141,7 @@ function emptyContract() {
     requiredGates: [],
     clarificationExitRules: [],
     summaryFields: [],
+    nativeGoalSync: {},
     checkedFiles: [],
     nodeRequirement: "",
   };
@@ -156,6 +157,17 @@ function validateContract(contract, errors) {
   requireArray(contract, "requiredGates", errors);
   requireArray(contract, "clarificationExitRules", errors);
   requireArray(contract, "summaryFields", errors);
+  const legacyGoalSyncKey = ["codex", "Goal", "Sync"].join("");
+  if (legacyGoalSyncKey in contract) errors.push(`${CONTRACT_PATH}: legacy goal-sync field must not be present`);
+  if (!contract.nativeGoalSync || typeof contract.nativeGoalSync !== "object" || Array.isArray(contract.nativeGoalSync)) {
+    errors.push(`${CONTRACT_PATH}: nativeGoalSync must be an object`);
+  } else {
+    requireArray(contract.nativeGoalSync, "alphaGoalRequiredTerms", errors, `${CONTRACT_PATH}: nativeGoalSync`);
+  }
+  const contractText = JSON.stringify(contract);
+  for (const legacy of ["\u0043odex Goal Sync", "token_\u0062udget", "active \u0043odex goal"]) {
+    if (contractText.includes(legacy)) errors.push(`${CONTRACT_PATH}: legacy native goal sync term remains: ${legacy}`);
+  }
   requireArray(contract, "checkedFiles", errors);
   if (typeof contract.nodeRequirement !== "string" || !contract.nodeRequirement) {
     errors.push(`${CONTRACT_PATH}: nodeRequirement must be a non-empty string`);
@@ -192,6 +204,12 @@ function validateContract(contract, errors) {
   }
   for (const rule of contract.clarificationExitRules || []) {
     if (typeof rule !== "string" || !rule) errors.push(`${CONTRACT_PATH}: clarificationExitRules entries must be non-empty strings`);
+  }
+  for (const [name, values] of Object.entries(contract.nativeGoalSync || {})) {
+    if (!Array.isArray(values)) continue;
+    for (const value of values) {
+      if (typeof value !== "string" || !value) errors.push(`${CONTRACT_PATH}: nativeGoalSync.${name} entries must be non-empty strings`);
+    }
   }
 }
 
@@ -305,11 +323,8 @@ function validateStateRootGuidance(root, contract, errors) {
     "Alpha Goal state root",
     "slug(repo_root or Goal Contract target workspace)",
   ];
-  const stateRootForms = [
-    "${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/",
-    "$HOME/.alpha-goal/<workspace-slug>/",
-  ];
-  for (const rel of ["AGENTS.md", "MANIFEST.md", "skills/executor/SKILL.md", "skills/verifier/SKILL.md", "templates/AGENTS.md"]) {
+  const stateRootForm = "$HOME/.alpha-goal/<workspace-slug>/";
+  for (const rel of ["AGENTS.md", "MANIFEST.md", "skills/alpha-goal/SKILL.md", "skills/executor/SKILL.md", "skills/verifier/SKILL.md", "templates/AGENTS.md", "templates/CLAUDE.md"]) {
     const text = readIfFile(path.join(root, rel));
     if (!text) {
       errors.push(`${rel}: missing state-root guidance file`);
@@ -318,12 +333,10 @@ function validateStateRootGuidance(root, contract, errors) {
     for (const term of required) {
       if (!text.includes(term)) errors.push(`${rel}: missing state-root guidance: ${term}`);
     }
-    if (!stateRootForms.some(term => text.includes(term))) {
-      errors.push(`${rel}: missing state-root guidance: ${stateRootForms.join(" or ")}`);
+    if (!text.includes(stateRootForm)) {
+      errors.push(`${rel}: missing state-root guidance: ${stateRootForm}`);
     }
   }
-  const alpha = readIfFile(path.join(root, "skills/alpha-goal/SKILL.md"));
-  if (!alpha.includes("Alpha Goal state root")) errors.push("skills/alpha-goal/SKILL.md: missing Alpha Goal state root guidance");
   for (const artifact of contract.artifacts) {
     if (artifact.path === "control-state/latest.md") continue;
     if (!allProjectText(root).includes(artifact.path)) errors.push(`runtime artifact is not referenced: ${artifact.path}`);
@@ -403,7 +416,7 @@ function validateAlphaGoal(root, contract, errors) {
     return;
   }
   requireGateHeadings(rel, text, contract.requiredGates, errors);
-  requireHeadings(rel, text, ["Clarification"], errors);
+  requireHeadings(rel, text, ["Clarification", "Native Goal Sync"], errors);
   const clarificationGate = markdownSection(text, "Clarification Gate");
   for (const rule of contract.clarificationExitRules) {
     if (!clarificationGate.includes(`\`${rule}\``)) errors.push(`${rel}: Clarification Gate missing exit rule ${rule}`);
@@ -435,6 +448,11 @@ function validateAlphaGoal(root, contract, errors) {
   if (!confirmationGate.includes("$executor") && !confirmationGate.includes("executor` skill") && !confirmationGate.includes("executor skill")) {
     errors.push(`${rel}: Confirmation Gate missing executor handoff`);
   }
+  if (!confirmationGate.includes("perform Native Goal Sync")) errors.push(`${rel}: Confirmation Gate missing Native Goal Sync handoff`);
+  for (const forbidden of ["after each answer", "after every answer", "Update `goal-contract.md` and `technical_design.md` after each answer"]) {
+    if (text.includes(forbidden)) errors.push(`${rel}: stale per-answer artifact write rule remains: ${forbidden}`);
+  }
+  requireTerms(`${rel} Native Goal Sync`, markdownSection(text, "Native Goal Sync"), contract.nativeGoalSync?.alphaGoalRequiredTerms || [], errors);
 }
 
 function validateExecutor(root, contract, errors) {

@@ -89,6 +89,19 @@
     "Execution boundary",
     "Key design decisions"
   ],
+  "nativeGoalSync": {
+    "alphaGoalRequiredTerms": [
+      "Native Goal Sync",
+      "create_goal",
+      "get_goal",
+      "Goal Contract Summary",
+      "Technical Design link when present",
+      "active native goal",
+      "do not overwrite",
+      "do not hand off to `executor`",
+      "blocking sync conflict"
+    ]
+  },
   "checkedFiles": [
     "skills/alpha-goal/SKILL.md",
     "skills/executor/SKILL.md",

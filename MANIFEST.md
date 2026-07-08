@@ -10,6 +10,8 @@
 
 Former public framing/modeling/synthesis stages are folded into `skills/alpha-goal/SKILL.md`.
 
+`alpha-goal` also owns Native Goal Sync: after user approval, it may create or reuse the current thread's native goal from the accepted Goal Contract summary and Technical Design link when present. Execution handoff and verification routing remain otherwise unchanged; `executor` and `verifier` do not control native goal status.
+
 ## Scripts
 
 | Path | Mutates state? | Purpose |
@@ -33,7 +35,7 @@ Without `--target`, TTY installs use a color+Unicode Up/Down + Enter menu with `
 
 ## Runtime Artifacts
 
-Default runtime artifacts live under the user-level Alpha Goal state root: `${CODEX_HOME:-$HOME/.alpha-goal}/<workspace-slug>/`, where `<workspace-slug>` comes from stable workspace identity: `slug(repo_root or Goal Contract target workspace)`.
+Default runtime artifacts live under the user-level Alpha Goal state root: `$HOME/.alpha-goal/<workspace-slug>/`, where `<workspace-slug>` comes from stable workspace identity: `slug(repo_root or Goal Contract target workspace)`.
 
 | Path | Purpose |
 |---|---|
