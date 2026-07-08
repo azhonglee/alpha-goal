@@ -74,7 +74,7 @@ Rank open gaps before choosing the next target:
 | --- | --- |
 | 1 | intent, outcome, scope, execution boundary, non-goals |
 | 2 | constraints, success criteria, acceptance evidence, claim boundary |
-| 3 | context/current facts, actuator boundary, sensor/observer, external/current facts |
+| 3 | context/current facts, actuator boundary, external/current facts |
 
 **Step 2: Ask and record**
 
@@ -86,7 +86,7 @@ Why this blocks: ...
 Decision needed: ...
 Recommended option: ...
 Question: ...
-Coverage cells affected: decision / boundary / execution impact / acceptance observer
+Coverage cells affected: decision / boundary / execution impact / acceptance evidence
 ```
 
 Classify each answer before updating artifacts:
