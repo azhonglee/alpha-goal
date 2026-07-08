@@ -3,43 +3,24 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: scripts/install.sh [--uninstall] [--target codex|claude] [--codex-home PATH] [--force] [--no-sync-user-templates] [--no-sync-user-hooks] [--verbose]
+Usage: scripts/install.sh [--uninstall]
 
 Install this repository's public skill directories as copied directories.
-The codex target installs skills under ${CODEX_HOME:-$HOME/.codex}/skills. The claude target
-installs independent Claude skill copies under $HOME/.claude/skills.
+The codex target installs skills under $HOME/.codex/skills by default. The claude
+target installs independent Claude skill copies under $HOME/.claude/skills.
 
-When no target is passed, interactive terminals are prompted to choose a
-configuration target. Non-interactive runs default to the codex target.
+All configuration except --uninstall is completed interactively. Non-interactive
+runs are refused.
 
 The codex target syncs Codex AGENTS.md, config.toml, hooks.json, and Codex
 skills. The claude target syncs Claude CLAUDE.md and Claude skills. The
 interactive all menu option syncs both targets.
 With --uninstall, each target removes only its managed configuration and skill
 copies.
-Use --no-sync-user-templates to skip user-level template updates.
-Use --no-sync-user-hooks to skip Codex hook updates.
 
 Options:
   --uninstall
-            Remove managed Alpha Goal install artifacts for the selected target.
-  --target TARGET
-            Select configuration target: codex or claude.
-  --codex-home PATH
-            Sync Codex configuration into PATH instead of
-            ${CODEX_HOME:-$HOME/.codex}. Codex skills copy into PATH/skills.
-  --force   Replace existing symlinks that point elsewhere. Managed skill
-            directories are recopied; ordinary files are never removed.
-  --no-sync-user-templates
-            Skip updating Codex AGENTS.md/config.toml and Claude CLAUDE.md
-            from templates/.
-  --sync-user-templates
-            Compatibility no-op; user templates are synced by default.
-  --no-sync-user-hooks
-            Skip updating Codex home hooks.json.
-  --sync-user-hooks
-            Compatibility no-op; user hooks are synced by default.
-  --verbose Print detailed install output.
+            Run the interactive uninstall flow.
 EOF
 }
 
@@ -53,77 +34,15 @@ uninstall=false
 verbose=false
 sync_user_templates=true
 sync_user_hooks=true
-codex_home_arg=""
-install_target_arg=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --codex-home)
-      shift
-      if [[ $# -eq 0 ]]; then
-        die "Missing value for --codex-home"
-      fi
-      codex_home_arg="$1"
-      shift
-      ;;
-    --target)
-      shift
-      if [[ $# -eq 0 ]]; then
-        die "Missing value for --target"
-      fi
-      install_target_arg="$1"
-      shift
-      ;;
-    --target=*)
-      install_target_arg="${1#*=}"
-      if [[ -z "$install_target_arg" ]]; then
-        die "Missing value for --target"
-      fi
-      shift
-      ;;
-    --codex-home=*)
-      codex_home_arg="${1#*=}"
-      if [[ -z "$codex_home_arg" ]]; then
-        die "Missing value for --codex-home"
-      fi
-      shift
-      ;;
-    --force)
-      force=true
-      shift
-      ;;
     --uninstall)
       uninstall=true
       shift
       ;;
-    --sync-user-templates)
-      sync_user_templates=true
-      shift
-      ;;
-    --no-sync-user-templates)
-      sync_user_templates=false
-      shift
-      ;;
-    --sync-user-hooks)
-      sync_user_hooks=true
-      shift
-      ;;
-    --no-sync-user-hooks)
-      sync_user_hooks=false
-      shift
-      ;;
-    --verbose)
-      verbose=true
-      shift
-      ;;
-    -h|--help)
-      usage
-      exit 0
-      ;;
     *)
-      echo "Unknown option: $1" >&2
-      usage >&2
-      exit 2
+      die "Unknown option: $1 (only --uninstall is supported; run scripts/install.sh in an interactive terminal for configuration)"
       ;;
   esac
 done
@@ -136,7 +55,7 @@ log() {
 
 require_node_runtime() {
   if ! command -v node >/dev/null 2>&1; then
-    die "Node.js 18+ is required to sync config.toml or hooks.json; rerun with --no-sync-user-templates --no-sync-user-hooks to skip those updates."
+    die "Node.js 18+ is required to sync config.toml or hooks.json; rerun and answer no to the template or hook prompts to skip those updates."
   fi
 
   local major
@@ -183,18 +102,8 @@ PY
 }
 
 default_codex_home() {
-  if [[ -n "$codex_home_arg" ]]; then
-    printf '%s\n' "$codex_home_arg"
-    return
-  fi
-
-  if [[ -n "${CODEX_HOME:-}" ]]; then
-    printf '%s\n' "$CODEX_HOME"
-    return
-  fi
-
   if [[ -z "${HOME:-}" ]]; then
-    die "CODEX_HOME is not set and HOME is unavailable; pass --codex-home PATH"
+    die "HOME is unavailable; cannot resolve \$HOME/.codex"
   fi
 
   printf '%s\n' "$HOME/.codex"
@@ -214,10 +123,10 @@ default_claude_home() {
 
 validate_install_target() {
   case "$1" in
-    codex|claude)
+    codex|claude|all)
       ;;
     *)
-      die "Invalid --target value: $1 (expected codex or claude)"
+      die "Invalid install target: $1 (expected codex, claude, or all)"
       ;;
   esac
 }
@@ -341,21 +250,78 @@ prompt_install_target() {
   done
 }
 
-resolve_install_target() {
-  if [[ -n "$install_target_arg" ]]; then
-    validate_install_target "$install_target_arg"
-    printf '%s\n' "$install_target_arg"
-    return
+prompt_text() {
+  local label="$1"
+  local default_value="$2"
+  local answer
+
+  printf '%s [%s]: ' "$label" "$default_value" >&2
+  if ! IFS= read -r answer; then
+    printf '\n' >&2
+    die "No value entered for $label"
   fi
 
+  if [[ -z "$answer" ]]; then
+    printf '%s\n' "$default_value"
+  else
+    printf '%s\n' "$answer"
+  fi
+}
+
+prompt_yes_no() {
+  local label="$1"
+  local default_value="$2"
+  local answer prompt
+
+  if [[ "$default_value" == true ]]; then
+    prompt="Y/n"
+  else
+    prompt="y/N"
+  fi
+
+  while true; do
+    printf '%s [%s]: ' "$label" "$prompt" >&2
+    if ! IFS= read -r answer; then
+      printf '\n' >&2
+      die "No value entered for $label"
+    fi
+
+    case "$answer" in
+      "")
+        printf '%s\n' "$default_value"
+        return
+        ;;
+      y|Y|yes|YES|Yes)
+        printf '%s\n' "true"
+        return
+        ;;
+      n|N|no|NO|No)
+        printf '%s\n' "false"
+        return
+        ;;
+      *)
+        echo "Please answer yes or no." >&2
+        ;;
+    esac
+  done
+}
+
+require_interactive_terminal() {
+  if [[ ! -t 0 ]]; then
+    die "Interactive terminal required; only --uninstall may be passed as a CLI option"
+  fi
+}
+
+resolve_install_target() {
   if [[ -t 0 ]]; then
     prompt_install_target
     return
   fi
 
-  printf '%s\n' "codex"
+  die "Interactive terminal required; cannot choose install target"
 }
 
+require_interactive_terminal
 install_target="$(resolve_install_target)"
 sync_codex_config=false
 sync_claude_config=false
@@ -373,7 +339,27 @@ case "$install_target" in
 esac
 
 codex_home="$(absolute_path "$(default_codex_home)")"
-target_root="$(absolute_path "$(default_skills_root)")"
+if [[ "$sync_codex_config" == true ]]; then
+  codex_home="$(absolute_path "$(prompt_text "Codex home" "$(default_codex_home)")")"
+fi
+if [[ "$uninstall" == true ]]; then
+  force=false
+  sync_user_templates="$(prompt_yes_no "Clean up user templates" true)"
+else
+  force="$(prompt_yes_no "Replace external skill symlinks with managed copies" false)"
+  sync_user_templates="$(prompt_yes_no "Sync user templates" true)"
+fi
+if [[ "$sync_codex_config" == true ]]; then
+  if [[ "$uninstall" == true ]]; then
+    sync_user_hooks="$(prompt_yes_no "Clean up Codex user hooks" true)"
+  else
+    sync_user_hooks="$(prompt_yes_no "Sync Codex user hooks" true)"
+  fi
+else
+  sync_user_hooks=false
+fi
+verbose="$(prompt_yes_no "Print detailed install output" false)"
+target_root="$(absolute_path "$codex_home/skills")"
 claude_home="$(absolute_path "$(default_claude_home)")"
 claude_skill_root="$claude_home/skills"
 skill_install_root="$target_root"
@@ -557,7 +543,7 @@ copy_skill_dir() {
       replaced=true
     else
       echo "Refusing to replace existing symlink: $target -> $raw_current_target" >&2
-      echo "Re-run with --force to replace symlinks." >&2
+      echo "Enable force in the interactive prompt to replace symlinks." >&2
       exit 1
     fi
   elif [[ -e "$target" ]]; then
@@ -1721,25 +1707,25 @@ if [[ "$uninstall" == true ]]; then
     remove_agents_template
     remove_config_template
   elif [[ "$sync_codex_config" == true ]]; then
-    log "Skipped Codex user template cleanup due to --no-sync-user-templates"
+    log "Skipped Codex user template cleanup by interactive choice"
   else
-    log "Skipped Codex user template cleanup due to --target $install_target"
+    log "Skipped Codex user template cleanup for selected target: $install_target"
   fi
 
   if [[ "$sync_codex_config" == true && "$sync_user_hooks" == true ]]; then
     remove_hooks_template
   elif [[ "$sync_codex_config" == true ]]; then
-    log "Skipped user hook cleanup due to --no-sync-user-hooks"
+    log "Skipped user hook cleanup by interactive choice"
   else
-    log "Skipped user hook cleanup due to --target $install_target"
+    log "Skipped user hook cleanup for selected target: $install_target"
   fi
 
   if [[ "$sync_claude_config" == true && "$sync_user_templates" == true ]]; then
     remove_claude_template
   elif [[ "$sync_claude_config" == true ]]; then
-    log "Skipped Claude user template cleanup due to --no-sync-user-templates"
+    log "Skipped Claude user template cleanup by interactive choice"
   else
-    log "Skipped Claude user template cleanup due to --target $install_target"
+    log "Skipped Claude user template cleanup for selected target: $install_target"
   fi
 
   if [[ "$sync_codex_config" == true ]]; then
@@ -1769,18 +1755,18 @@ if [[ "$sync_codex_config" == true && "$sync_user_templates" == true ]]; then
   inject_agents_template
   sync_config_template
 elif [[ "$sync_codex_config" == true ]]; then
-  log "Skipped Codex user template sync due to --no-sync-user-templates"
+  log "Skipped Codex user template sync by interactive choice"
 else
-  log "Skipped Codex user template sync due to --target $install_target"
+  log "Skipped Codex user template sync for selected target: $install_target"
 fi
 
 if [[ "$sync_claude_config" == true && "$sync_user_templates" == true ]]; then
   mkdir -p "$claude_home"
   inject_claude_template
 elif [[ "$sync_claude_config" == true ]]; then
-  log "Skipped Claude user template sync due to --no-sync-user-templates"
+  log "Skipped Claude user template sync by interactive choice"
 else
-  log "Skipped Claude user template sync due to --target $install_target"
+  log "Skipped Claude user template sync for selected target: $install_target"
 fi
 
 installed=0
@@ -1827,9 +1813,9 @@ fi
 if [[ "$sync_codex_config" == true && "$sync_user_hooks" == true ]]; then
   sync_hooks_template
 elif [[ "$sync_codex_config" == true ]]; then
-  log "Skipped user hook sync due to --no-sync-user-hooks"
+  log "Skipped user hook sync by interactive choice"
 else
-  log "Skipped user hook sync due to --target $install_target"
+  log "Skipped user hook sync for selected target: $install_target"
 fi
 
 print_summary
