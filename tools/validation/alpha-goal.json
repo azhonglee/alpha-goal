@@ -102,6 +102,21 @@
       "blocking sync conflict"
     ]
   },
+  "designClarification": {
+    "path": "references/design-clarification-book.md",
+    "requiredTerms": [
+      "Technical Design coverage",
+      "Design Priority",
+      "Architecture",
+      "Components",
+      "Interfaces/API",
+      "Data Models",
+      "Data Flow",
+      "Test Plans",
+      "Risks",
+      "Review Self-Check"
+    ]
+  },
   "checkedFiles": [
     "skills/alpha-goal/SKILL.md",
     "skills/executor/SKILL.md",

@@ -95,7 +95,7 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
   <tbody>
     <tr>
       <td width="180" align="left"><a href="skills/alpha-goal/"><code>alpha-goal</code></a></td>
-      <td align="left">Clarify intent, boundaries, and acceptance evidence, produce a Goal Contract for confirmation, and add a Technical Design for cross-file behavior, interface/data-model changes, or material risk.</td>
+      <td align="left">Clarify intent, boundaries, and acceptance evidence, produce a Goal Contract for confirmation, and load design clarification details from references only when needed.</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/executor/"><code>executor</code></a></td>
@@ -115,6 +115,7 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 - Evidence before authority: Current code facts describe current state; desired behavior comes from user intent, specs, issues, or accepted contracts.
 - Goals before action: expected outcome, scope, non-goals, acceptance evidence, decision owner, and claim boundary define what may change.
 - Persistent state: `goal-contract.md` is the default `alpha-goal` output; `technical_design.md` is created only for implementation, repair, refactor, hardening, cross-file behavior, interface/data-model changes, or material risk; `checkpoint.md` conditionally carries recovery and evidence handoff.
+- Progressive disclosure: `alpha-goal` keeps goal-clarification control flow in `SKILL.md`; Technical Design priorities, probes, and review checks live in `references/design-clarification-book.md`.
 - Native Goal Sync: after the user accepts the contract, `alpha-goal` may create or reuse the current thread's native goal; execution and verification do not control native goal status.
 - Bounded execution: prefer bounded evidence-producing actions or targeted changes over broad refactors and speculative cleanup.
 - Independent verification: final/ready/safe/complete/repair/review claims require fresh evidence, hard-blocking checklist coverage, and blocker checks, reviewed separately from execution.

@@ -1,0 +1,11 @@
+{
+  "shouldPass": false,
+  "inheritRoot": true,
+  "replacements": [
+    {
+      "file": "skills/alpha-goal/SKILL.md",
+      "search": "- If Technical Design coverage is required, read `references/design-clarification-book.md` before selecting design questions and before Review Gate.\n",
+      "replace": ""
+    }
+  ]
+}

@@ -4,13 +4,15 @@
 
 | Directory | Purpose |
 |---|---|
-| `skills/alpha-goal/` | Front-end controller: fact discovery, blocking-gap clarification, Goal Contract, design boundary, and confirmation. |
+| `skills/alpha-goal/` | Front-end controller: fact discovery, blocking-gap clarification, Goal Contract, conditional design-reference routing, and confirmation. |
 | `skills/executor/` | Goal-contract-driven bounded actuator/controller: act or harden authorized slices; use Goal Contract as required input and a conditional checkpoint for recovery or evidence handoff. |
 | `skills/verifier/` | Independent verifier for acceptance evidence, hard-blocking checklist coverage, claim boundaries, blockers, and route decisions. |
 
 Former public framing/modeling/synthesis stages are folded into `skills/alpha-goal/SKILL.md`.
 
 `alpha-goal` also owns Native Goal Sync: after user approval, it may create or reuse the current thread's native goal from the accepted Goal Contract summary and Technical Design link when present. Execution handoff and verification routing remain otherwise unchanged; `executor` and `verifier` do not control native goal status.
+
+Design clarification details are progressively disclosed through `skills/alpha-goal/references/design-clarification-book.md`; `skills/alpha-goal/SKILL.md` keeps only the trigger and routing rules.
 
 ## Scripts
 

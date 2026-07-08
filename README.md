@@ -93,7 +93,7 @@ $alpha-goal 实现一下这个需求:<YOUR-PRD> or <YOUR-DESCRIPTION>，<YOUR-UX
   <tbody>
     <tr>
       <td width="180" align="left"><a href="skills/alpha-goal/"><code>alpha-goal</code></a></td>
-      <td align="left">在开始工作前澄清意图、边界、验收证据，产出待确认 Goal Contract；跨文件、接口/数据模型或实质风险变更按需补 Technical Design。</td>
+      <td align="left">在开始工作前聚焦澄清意图、边界、验收证据，产出待确认 Goal Contract；设计澄清细节按需从 reference 加载。</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/executor/"><code>executor</code></a></td>
@@ -113,6 +113,7 @@ Alpha Goal 让 agent 工作保持目标明确、行动有界、声明受证据�
 - 证据先于授权：当前代码事实只描述现状；期望行为来自用户意图、规格、issue 或已接受契约。
 - 目标先于行动：预期结果、范围、非目标、验收证据、决策负责人和声明边界共同限定什么可以被改变。
 - 持久状态：`goal-contract.md` 是 `alpha-goal` 的默认产物；`technical_design.md` 仅在实现、修复、重构、加固、跨文件行为、接口/数据模型或实质风险变更时创建；`checkpoint.md` 按需承载运行档案。
+- 渐进披露：`alpha-goal` 主体保留 goal 澄清控制流，Technical Design 的优先级、探针和 review 自检放在 `references/design-clarification-book.md`。
 - Native Goal Sync：用户确认契约后，`alpha-goal` 才能创建或复用当前线程的 native goal；后续执行和验证不控制原生 goal 状态。
 - 有界执行：优先选择可取证的有界动作或定向变更，而非宽泛重构和猜测式清理。
 - 独立验证：最终、就绪、安全、完成、修复或评审等声明需要新鲜证据、hard-blocking checklist 和 blocker 检查，并且要与执行过程分离检查。

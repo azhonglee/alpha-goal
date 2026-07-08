@@ -70,23 +70,18 @@ Use current task state:
 - Known facts, conflicts, unknowns, dependencies, and source-of-truth conflicts.
 - Current coverage matrix gaps.
 - Brownfield context and active Assumption Stress Test mode.
+- If Technical Design coverage is required, read `references/design-clarification-book.md` before selecting design questions and before Review Gate.
 
 Rank open gaps before choosing the next target:
 - Prefer the gap with the highest blast radius, irreversibility, external dependency, user-owned semantics, data/API contract impact, validation ambiguity, or rollback risk.
 - Do not move to a lower-risk dimension while a higher-risk blocking design or goal gap remains.
-- Use the Design table only when Technical Design coverage is required.
+- Use the design clarification reference for design-specific priorities and probes.
 
 | Goal Priority | Dimension |
 | --- | --- |
 | 1 | intent, outcome, scope, execution boundary, non-goals |
 | 2 | constraints, success criteria, acceptance evidence, claim boundary |
 | 3 | context/current facts, actuator boundary, sensor/observer, external/current facts |
-
-| Design Priority | Dimension |
-| --- | --- |
-| 1 | Architecture, components, data flow, interfaces/API, data models |
-| 2 | Persistence, middleware, infrastructure, external dependencies |
-| 3 | Test strategy, scalability, risks, rollback |
 
 **Step 2: Ask and record**
 
@@ -123,7 +118,7 @@ Use the pressure ladder before treating a dimension as covered:
 1. Ask for concrete example, counterexample, or evidence signal.
 2. Probe hidden assumption or dependency.
 3. Force a boundary/tradeoff: what to reject, defer, or not do.
-4. Ask what architecture, component, interface, data model, data flow, test, or risk decision follows.
+4. Ask what implementation, evidence, or design consequence follows.
 5. If the answer stays symptom-level, reframe toward essence/root cause.
 
 Follow-up policy:
@@ -163,7 +158,7 @@ Write artifacts only from answered, auto-confirmed, or cited facts. Keep unresol
 - Self-check the Goal Contract and any required Technical Design before asking for approval:
   - Coverage check: required fields exist, no blocking gap remains, and every covered dimension has decision, boundary, implementation impact, acceptance/observer, and status.
   - Authority check: current-state facts do not define desired behavior; non-goals, execution boundary, decision boundary, and claim boundary are explicit.
-  - Acceptance check: success criteria map to acceptance evidence and validation observers; when Technical Design is required, key design decisions cover architecture, components, interfaces, data models, data flow, tests, and risks.
+  - Acceptance check: success criteria map to acceptance evidence and validation observers; when Technical Design is required, design coverage is checked against `references/design-clarification-book.md`.
   - Closure check: no covered dimension relies only on confidence, round count, planned questions, or an untested assumption; recheck the highest-risk covered dimension.
 - Run independent review for non-trivial implementation, repair, refactor, hardening, or cross-file behavior changes:
   - Prefer a subagent review when available; if skipped, record the reason.

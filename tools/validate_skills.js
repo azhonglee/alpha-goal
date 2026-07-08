@@ -142,6 +142,7 @@ function emptyContract() {
     clarificationExitRules: [],
     summaryFields: [],
     nativeGoalSync: {},
+    designClarification: {},
     checkedFiles: [],
     nodeRequirement: "",
   };
@@ -163,6 +164,14 @@ function validateContract(contract, errors) {
     errors.push(`${CONTRACT_PATH}: nativeGoalSync must be an object`);
   } else {
     requireArray(contract.nativeGoalSync, "alphaGoalRequiredTerms", errors, `${CONTRACT_PATH}: nativeGoalSync`);
+  }
+  if (!contract.designClarification || typeof contract.designClarification !== "object" || Array.isArray(contract.designClarification)) {
+    errors.push(`${CONTRACT_PATH}: designClarification must be an object`);
+  } else {
+    if (typeof contract.designClarification.path !== "string" || !contract.designClarification.path) {
+      errors.push(`${CONTRACT_PATH}: designClarification.path must be a non-empty string`);
+    }
+    requireArray(contract.designClarification, "requiredTerms", errors, `${CONTRACT_PATH}: designClarification`);
   }
   const contractText = JSON.stringify(contract);
   for (const legacy of ["\u0043odex Goal Sync", "token_\u0062udget", "active \u0043odex goal"]) {
@@ -210,6 +219,9 @@ function validateContract(contract, errors) {
     for (const value of values) {
       if (typeof value !== "string" || !value) errors.push(`${CONTRACT_PATH}: nativeGoalSync.${name} entries must be non-empty strings`);
     }
+  }
+  for (const value of contract.designClarification?.requiredTerms || []) {
+    if (typeof value !== "string" || !value) errors.push(`${CONTRACT_PATH}: designClarification.requiredTerms entries must be non-empty strings`);
   }
 }
 
@@ -451,6 +463,21 @@ function validateAlphaGoal(root, contract, errors) {
   if (!confirmationGate.includes("perform Native Goal Sync")) errors.push(`${rel}: Confirmation Gate missing Native Goal Sync handoff`);
   for (const forbidden of ["after each answer", "after every answer", "Update `goal-contract.md` and `technical_design.md` after each answer"]) {
     if (text.includes(forbidden)) errors.push(`${rel}: stale per-answer artifact write rule remains: ${forbidden}`);
+  }
+  const designRef = contract.designClarification?.path;
+  if (designRef && !text.includes(designRef)) errors.push(`${rel}: missing design clarification reference routing: ${designRef}`);
+  if (designRef && !text.includes("before selecting design questions")) {
+    errors.push(`${rel}: design clarification reference must be loaded before selecting design questions`);
+  }
+  if (text.includes("| Design Priority |")) errors.push(`${rel}: design priority table belongs in design clarification reference`);
+  const designReferencePath = designRef ? path.join(root, "skills", "alpha-goal", designRef) : "";
+  if (designRef) {
+    const designReference = readIfFile(designReferencePath);
+    if (!designReference) {
+      errors.push(`skills/alpha-goal/${designRef}: missing`);
+    } else {
+      requireTerms(`skills/alpha-goal/${designRef}`, designReference, contract.designClarification?.requiredTerms || [], errors);
+    }
   }
   requireTerms(`${rel} Native Goal Sync`, markdownSection(text, "Native Goal Sync"), contract.nativeGoalSync?.alphaGoalRequiredTerms || [], errors);
 }
