@@ -3,8 +3,8 @@
   "inheritRoot": true,
   "replacements": [
     {
-      "file": "skills/verifier/SKILL.md",
-      "search": "- [from-runtime] result=observed|failed\n",
+      "file": "tools/validation/alpha-goal.json",
+      "search": "      \"name\": \"from-runtime\",\n",
       "replace": ""
     }
   ]
