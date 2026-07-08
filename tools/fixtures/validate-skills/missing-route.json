@@ -3,8 +3,8 @@
   "inheritRoot": true,
   "replacements": [
     {
-      "file": "skills/executor/SKILL.md",
-      "search": "[ ] route is PASS_TO_FINAL.\n",
+      "file": "tools/validation/alpha-goal.json",
+      "search": "      \"name\": \"NEXT_ITERATION\",\n",
       "replace": ""
     }
   ]

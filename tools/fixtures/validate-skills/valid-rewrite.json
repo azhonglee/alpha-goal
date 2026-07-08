@@ -1,11 +1,7 @@
 {
   "shouldPass": true,
   "inheritRoot": true,
-  "replacements": [
-    {
-      "file": "skills/alpha-goal/SKILL.md",
-      "search": "Inspect relevant files, docs, recent commits, and existing patterns.",
-      "replace": "Inspect the relevant files, docs, recent commits, and existing patterns."
-    }
-  ]
+  "files": {
+    "NOTES.md": "Text-only changes outside validated structure are ignored.\n"
+  }
 }

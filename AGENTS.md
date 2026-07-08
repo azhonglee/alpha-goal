@@ -6,8 +6,9 @@
 
 ## Build, Test, and Development Commands
 
-- `node tools/validate_skills.js .`：验证共享契约、公开技能结构、front matter、引用可发现性、闭环结构、安装口径、文档命令和 15K skills word+punctuation 预算；需要 Node.js 18+。
+- `node tools/validate_skills.js .`：验证共享契约、公开技能结构、front matter、引用可发现性、标题结构、工具/模板/文档文件存在性和 15K skills word+punctuation 预算；需要 Node.js 18+。
 - `node tools/validate_skills.js --fixtures`：验证 validator fixtures，确保自然语言改写可通过、结构缺失会失败。
+- 不许添加任何 skill 文本的校验规则。
 - `bash -n scripts/install.sh`：检查安装脚本语法。
 - 使用临时 `CODEX_HOME` 执行 `scripts/install.sh`，并从源码仓库运行 `node tools/validate_skills.js .`，验证安装说明可执行。
 
@@ -36,3 +37,7 @@
 ## Agent-Specific Instructions
 
 不要直接在 `main` 或 `master` 上修改；为每批任务使用独立 worktree。完成后提交变更，并在最终说明中列出验证证据和剩余风险。
+
+## Readme Guidelines
+不随便修改 README，除非SKILL中的改动与README描述不一致。
+README保持简洁，避免包含详细说明。

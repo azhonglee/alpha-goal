@@ -3,9 +3,9 @@
   "inheritRoot": true,
   "replacements": [
     {
-      "file": "skills/alpha-goal/SKILL.md",
-      "search": "| Acceptance evidence | ... |\n",
-      "replace": ""
+      "file": "templates/hooks.json",
+      "search": "  \"hooks\": {",
+      "replace": "  \"hooks\": []"
     }
   ]
 }

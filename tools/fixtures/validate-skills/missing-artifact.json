@@ -3,8 +3,8 @@
   "inheritRoot": true,
   "replacements": [
     {
-      "file": "templates/hooks.json",
-      "search": "read technical_design.md when present for implementation, repair, refactor, hardening, cross-file behavior, interface/data-model changes, or material risk after Goal Contract Confirmation Gate selects technical design; ",
+      "file": "tools/validation/alpha-goal.json",
+      "search": "      \"path\": \"goal-contract.md\",\n",
       "replace": ""
     }
   ]

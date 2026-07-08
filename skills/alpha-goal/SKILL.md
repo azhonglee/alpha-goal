@@ -166,13 +166,17 @@ Before asking for confirmation, present the Goal Contract Summary first.
 - If the Goal Contract Summary is missing or incomplete, stay in Review Gate.
 - TUI Presentation Style:
 ```markdown
-Goal Contract Summary
-| Field | Value |
-| --- | --- |
-| Goal | ... |
-| Non-goals | ... |
-| Execution boundary | ... |
-| Acceptance evidence | ... |
+## Goal Contract Summary
+### Goal
+...
+### Non-goals
+...
+### Execution boundary
+...
+### Acceptance evidence
+...
+### Recommended Next Step
+...
 ```
 
 Use `request_user_input` or equivalent structured input to ask for approve/launch, run technical design, refine, or reject.
