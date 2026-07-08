@@ -4,7 +4,7 @@
 
 | Directory | Purpose |
 |---|---|
-| `skills/alpha-goal/` | Front-end controller: fact discovery, blocking-gap clarification, Goal Contract, conditional design-reference routing, and confirmation. |
+| `skills/alpha-goal/` | Front-end controller: fact discovery, Goal Contract clarification, Design Choice Gate, confirmation, and Native Goal Sync. |
 | `skills/executor/` | Goal-contract-driven bounded actuator/controller: act or harden authorized slices; use Goal Contract as required input and a conditional checkpoint for recovery or evidence handoff. |
 | `skills/verifier/` | Independent verifier for acceptance evidence, hard-blocking checklist coverage, claim boundaries, blockers, and route decisions. |
 
@@ -12,7 +12,7 @@ Former public framing/modeling/synthesis stages are folded into `skills/alpha-go
 
 `alpha-goal` also owns Native Goal Sync: after user approval, it may create or reuse the current thread's native goal from the accepted Goal Contract summary and Technical Design link when present. Execution handoff and verification routing remain otherwise unchanged; `executor` and `verifier` do not control native goal status.
 
-Design clarification details are progressively disclosed through `skills/alpha-goal/references/design-clarification-book.md`; `skills/alpha-goal/SKILL.md` keeps only the trigger and routing rules.
+Design clarification details are progressively disclosed through `skills/alpha-goal/references/design-clarification-book.md` only after Design Choice Gate selects Technical Design; `skills/alpha-goal/SKILL.md` keeps Goal Contract clarification and confirmation control flow.
 
 ## Scripts
 
@@ -23,7 +23,7 @@ Design clarification details are progressively disclosed through `skills/alpha-g
 
 ## User Hooks
 
-`templates/hooks.json` defines one Codex user-level `PostCompact` hook, marked by `codex-alpha-goal-compact-recovery:v1`, without a matcher so all post-compaction triggers are covered. `scripts/install.sh --target global` and `scripts/install.sh --target codex` merge that template into `${CODEX_HOME:-$HOME/.codex}/hooks.json`. The hook prints a compact recovery policy that reloads the applicable `alpha-goal`, `executor`, or `verifier` skill, resumes from `goal-contract.md`, reads `technical_design.md` when present for implementation, repair, refactor, hardening, cross-file behavior, interface/data-model changes, or material risk, uses `control-state/latest.md` only when task identity is ambiguous, and uses `checkpoint.md` for recovery, evidence handoff, or verification handoff. `executor` still requires an accepted Goal Contract; `verifier` compares evidence with the hard-blocking acceptance checklist before returning a route.
+`templates/hooks.json` defines one Codex user-level `PostCompact` hook, marked by `codex-alpha-goal-compact-recovery:v1`, without a matcher so all post-compaction triggers are covered. `scripts/install.sh --target global` and `scripts/install.sh --target codex` merge that template into `${CODEX_HOME:-$HOME/.codex}/hooks.json`. The hook prints a compact recovery policy that reloads the applicable `alpha-goal`, `executor`, or `verifier` skill, resumes from `goal-contract.md`, reads `technical_design.md` when present for implementation, repair, refactor, hardening, cross-file behavior, interface/data-model changes, or material risk after Design Choice Gate, uses `control-state/latest.md` only when task identity is ambiguous, and uses `checkpoint.md` for recovery, evidence handoff, or verification handoff. `executor` still requires an accepted Goal Contract; `verifier` compares evidence with the hard-blocking acceptance checklist before returning a route.
 
 Hook replacement is by marker family, not exact version, so later `:v2` template markers replace existing `:v1` hooks. The installer also migrates the earlier experimental `codex-compact-skill-recovery` family.
 
@@ -42,7 +42,7 @@ Default runtime artifacts live under the user-level Alpha Goal state root: `$HOM
 | Path | Purpose |
 |---|---|
 | `<state-root>/YYYYMMDD-<TaskName>/goal-contract.md` | Default `alpha-goal` artifact and canonical draft or accepted contract, including contract status, discovery notes, interview ledger, authorization source, and handoff context. |
-| `<state-root>/YYYYMMDD-<TaskName>/technical_design.md` | Conditional canonical Technical Design for implementation, repair, refactor, hardening, cross-file behavior changes, interface/data-model changes, or material risk. |
+| `<state-root>/YYYYMMDD-<TaskName>/technical_design.md` | Conditional canonical Technical Design created only after Design Choice Gate selects Technical Design clarification. |
 | `<state-root>/YYYYMMDD-<TaskName>/checkpoint.md` | Conditional task checkpoint for current slice, completed actions, raw evidence, acceptance checklist, known gaps, blockers, and next route. |
 | `<state-root>/control-state/latest.md` | Optional global recovery index pointing to the latest accepted task state, Goal Contract, optional checkpoint, phase, route, and update time; not a stage artifact. |
 

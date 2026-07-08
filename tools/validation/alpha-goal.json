@@ -12,7 +12,7 @@
       "path": "technical_design.md",
       "kind": "task",
       "requirement": "conditional",
-      "condition": "implementation, repair, refactor, hardening, cross-file behavior changes, interface/data-model changes, or material risk"
+      "condition": "Design Choice Gate selects Technical Design clarification"
     },
     {
       "path": "checkpoint.md",
@@ -77,7 +77,7 @@
       "results": ["blocked"]
     }
   ],
-  "requiredGates": ["Entry Gate", "Clarification Gate", "Review Gate", "Confirmation Gate"],
+  "requiredGates": ["Entry Gate", "Clarification Gate", "Design Choice Gate", "Review Gate", "Confirmation Gate"],
   "clarificationExitRules": [
     "no_confidence_only",
     "no_round_count",
@@ -87,7 +87,7 @@
     "Goal",
     "Non-goals",
     "Execution boundary",
-    "Key design decisions"
+    "Design choice"
   ],
   "nativeGoalSync": {
     "alphaGoalRequiredTerms": [
@@ -104,6 +104,13 @@
   },
   "designClarification": {
     "path": "references/design-clarification-book.md",
+    "gateTerms": [
+      "Design Choice Gate",
+      "Run Technical Design clarification",
+      "Skip Technical Design",
+      "Design status: skipped by user",
+      "do not create `technical_design.md`"
+    ],
     "requiredTerms": [
       "Technical Design coverage",
       "Design Priority",

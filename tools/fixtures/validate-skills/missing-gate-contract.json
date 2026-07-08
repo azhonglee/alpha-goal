@@ -4,7 +4,7 @@
   "replacements": [
     {
       "file": "tools/validation/alpha-goal.json",
-      "search": "  \"requiredGates\": [\"Entry Gate\", \"Clarification Gate\", \"Review Gate\", \"Confirmation Gate\"],\n",
+      "search": "  \"requiredGates\": [\"Entry Gate\", \"Clarification Gate\", \"Design Choice Gate\", \"Review Gate\", \"Confirmation Gate\"],\n",
       "replace": "  \"requiredGates\": [\"Nonexistent Gate\"],\n"
     }
   ]

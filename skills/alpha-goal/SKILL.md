@@ -1,11 +1,12 @@
 ---
 name: alpha-goal
-description: "Use to gate engineering/design/implementation requests before modification, implementation, repair, refactor, or hardening. Use inspection facts as entry evidence; run Loop Q&A to clarify intent, outcome, boundaries, non-goals, success criteria, acceptance evidence, and material technical design before producing user-confirmed artifacts."
+description: "Use to gate engineering/design/implementation requests before modification, implementation, repair, refactor, or hardening. Use inspection facts as entry evidence; run Loop Q&A to clarify intent, outcome, boundaries, non-goals, success criteria, and acceptance evidence; then ask whether to run Technical Design clarification before producing user-confirmed artifacts."
 ---
 
 # Alpha Goal
 
-`alpha-goal` owns goal definition and design clarification.
+`alpha-goal` owns Goal Contract clarification, Design Choice, confirmation, and Native Goal Sync.
+Design clarification is optional and loaded only after the user chooses it.
 Implementation starts only after a user-accepted Goal Contract hands off to `executor` skill.
 
 ## Entry Gate
@@ -23,11 +24,10 @@ Enter `alpha-goal` for engineering, design, implementation, repair, refactor, or
 
 ## Clarification Gate
 
-Do not leave `Clarification` while any material blocking gap remains:
+Do not leave `Clarification` while any material Goal Contract blocking gap remains:
 - Goal Contract coverage: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Success Criteria, Acceptance evidence.
-- Technical Design coverage is required only for implementation, repair, refactor, hardening, cross-file behavior changes, interface/data-model changes, or material risk.
 - Every unresolved unknown is classified as `blocking`, `non-material`, or `deferred non-goal`.
-- Required coverage means: decision, boundary, implementation impact, acceptance/observer, and status.
+- Required Goal Contract coverage means: decision, boundary, execution impact, acceptance/observer, and status.
 - Planned questions, unanswered questions, hypothetical answers, confidence, and round count do not reduce coverage.
 - Mark uncertainty `non-material` only when it cannot change implementation, tests, acceptance, or risk handling.
 
@@ -38,7 +38,7 @@ Blocking gap classifier:
 Clarification exit invariants:
 - `no_confidence_only`: Do not use confidence alone as exit evidence.
 - `no_round_count`: Do not use round count as completion evidence.
-- `no_blocking_gap_handoff`: Do not propose implementation, code edits, or `executor` skill handoff while any blocking goal or design gap remains.
+- `no_blocking_gap_handoff`: Do not propose implementation, code edits, or `executor` skill handoff while any blocking Goal Contract gap remains.
 
 ## Clarification
 
@@ -47,7 +47,7 @@ Clarification exit invariants:
 - Context sufficiency: what is known, missing, must-have, or merely ideal.
 - Hidden issues: deeper root cause, adjacent issue, or dependency risk.
 
-Loop Q&A until the user-owned decisions and any required technical design are explicit enough to write the artifacts.
+Loop Q&A until the user-owned Goal Contract decisions are explicit enough to write the Goal Contract.
 
 ### Loop Q&A
 
@@ -70,12 +70,10 @@ Use current task state:
 - Known facts, conflicts, unknowns, dependencies, and source-of-truth conflicts.
 - Current coverage matrix gaps.
 - Brownfield context and active Assumption Stress Test mode.
-- If Technical Design coverage is required, read `references/design-clarification-book.md` before selecting design questions and before Review Gate.
 
 Rank open gaps before choosing the next target:
 - Prefer the gap with the highest blast radius, irreversibility, external dependency, user-owned semantics, data/API contract impact, validation ambiguity, or rollback risk.
-- Do not move to a lower-risk dimension while a higher-risk blocking design or goal gap remains.
-- Use the design clarification reference for design-specific priorities and probes.
+- Do not move to a lower-risk dimension while a higher-risk blocking Goal Contract gap remains.
 
 | Goal Priority | Dimension |
 | --- | --- |
@@ -93,7 +91,7 @@ Why this blocks: ...
 Decision needed: ...
 Recommended option: ...
 Question: ...
-Coverage cells affected: decision / boundary / implementation impact / acceptance observer
+Coverage cells affected: decision / boundary / execution impact / acceptance observer
 ```
 
 Classify each answer before updating artifacts:
@@ -118,13 +116,13 @@ Use the pressure ladder before treating a dimension as covered:
 1. Ask for concrete example, counterexample, or evidence signal.
 2. Probe hidden assumption or dependency.
 3. Force a boundary/tradeoff: what to reject, defer, or not do.
-4. Ask what implementation, evidence, or design consequence follows.
+4. Ask what execution or evidence consequence follows.
 5. If the answer stays symptom-level, reframe toward essence/root cause.
 
 Follow-up policy:
-- Do not mark a dimension `covered` after the first answer unless that answer already includes decision, boundary, design consequence, and acceptance evidence.
+- Do not mark a dimension `covered` after the first answer unless that answer already includes decision, boundary, execution consequence, and acceptance evidence.
 - Ask another round for the same dimension when the pressure ladder exposes any blocking gap.
-- Do not rotate to the next dimension when the current answer creates a blocking design, boundary, or evidence gap.
+- Do not rotate to the next dimension when the current answer creates a blocking boundary or evidence gap.
 - Record the coverage chain for each required dimension: first question, answer source, pressure-test result, coverage status.
 - Prefer depth over breadth: fewer well-tested dimensions are better than many shallow checkmarks.
 
@@ -150,15 +148,29 @@ Track used modes in state to prevent repetition.
 ### Write Artifacts
 
 Follow `references/goal-contract-book.md` to write the Goal Contract. Set `Issued by = alpha-goal`.
-Follow `references/technical-design-book.md` to write the Technical Design only when its coverage is required. Link the Goal Contract and Technical Design when both exist.
 Write artifacts only from answered, auto-confirmed, or cited facts. Keep unresolved required fields as `[blocking]`; do not fill them from hypothetical answers.
 
-### Review Gate And Show Summary
+## Design Choice Gate
 
-- Self-check the Goal Contract and any required Technical Design before asking for approval:
-  - Coverage check: required fields exist, no blocking gap remains, and every covered dimension has decision, boundary, implementation impact, acceptance/observer, and status.
+After the draft Goal Contract has no blocking gaps, ask whether to run Technical Design clarification before confirmation.
+
+Use `request_user_input` or equivalent structured input:
+- Run Technical Design clarification: recommend this for implementation, repair, refactor, hardening, cross-file behavior changes, interface/data-model changes, or material risk.
+- Skip Technical Design: use this when the Goal Contract is enough to authorize the next step.
+
+Rules:
+- Do not infer consent to design from task type; ask this gate unless the user already explicitly requested or rejected design in the current task.
+- If user selects design, read `references/design-clarification-book.md`, run design-specific Loop Q&A from that reference, then follow `references/technical-design-book.md` to write `technical_design.md`.
+- If user skips design, do not read `references/design-clarification-book.md`, do not create `technical_design.md`, and record `Design status: skipped by user` in the Goal Contract.
+- If skipping design makes execution boundary, acceptance evidence, or claim boundary unsafe, return to `Clarification` to narrow the Goal Contract; do not smuggle design questions into the main Loop Q&A.
+- Link the Goal Contract and Technical Design only when both exist.
+
+## Review Gate And Show Summary
+
+- Self-check the Goal Contract and any Technical Design created by Design Choice Gate before asking for approval:
+  - Coverage check: required fields exist, no blocking gap remains, and every covered dimension has decision, boundary, execution impact, acceptance/observer, and status.
   - Authority check: current-state facts do not define desired behavior; non-goals, execution boundary, decision boundary, and claim boundary are explicit.
-  - Acceptance check: success criteria map to acceptance evidence and validation observers; when Technical Design is required, design coverage is checked against `references/design-clarification-book.md`.
+  - Acceptance check: success criteria map to acceptance evidence and validation observers; if Technical Design exists, design coverage is checked against `references/design-clarification-book.md`.
   - Closure check: no covered dimension relies only on confidence, round count, planned questions, or an untested assumption; recheck the highest-risk covered dimension.
 - Run independent review for non-trivial implementation, repair, refactor, hardening, or cross-file behavior changes:
   - Prefer a subagent review when available; if skipped, record the reason.
@@ -172,19 +184,19 @@ After Review Gate completes, present the Goal Contract Summary first.
 - If the Goal Contract Summary is missing or incomplete, stay in Review Gate.
 - TUI Presentation Style:
 ```markdown
-Goal Contract Summary (Design Summary)
+Goal Contract Summary
 | Field | Value |
 | --- | --- |
 | Goal | ... |
 | Non-goals | ... |
 | Execution boundary | ... |
-| Key design decisions | ... |
+| Design choice | skipped / technical_design.md link |
 ```
 
 ## Confirmation Gate
 
 Use `request_user_input` or equivalent structured input to ask for approve/launch, refine, or reject.
-- On approval: set `Contract status: accepted`; perform Native Goal Sync; hand off to `executor` skill.
+- On approval: set `Contract status: accepted`; if Technical Design exists, set `Design status: accepted`; perform Native Goal Sync; hand off to `executor` skill.
 - On rejection: keep `Contract status: draft`.
 - On refine: keep `Contract status: draft`; return to `Clarification` with user feedback.
 

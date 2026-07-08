@@ -171,6 +171,7 @@ function validateContract(contract, errors) {
     if (typeof contract.designClarification.path !== "string" || !contract.designClarification.path) {
       errors.push(`${CONTRACT_PATH}: designClarification.path must be a non-empty string`);
     }
+    requireArray(contract.designClarification, "gateTerms", errors, `${CONTRACT_PATH}: designClarification`);
     requireArray(contract.designClarification, "requiredTerms", errors, `${CONTRACT_PATH}: designClarification`);
   }
   const contractText = JSON.stringify(contract);
@@ -222,6 +223,9 @@ function validateContract(contract, errors) {
   }
   for (const value of contract.designClarification?.requiredTerms || []) {
     if (typeof value !== "string" || !value) errors.push(`${CONTRACT_PATH}: designClarification.requiredTerms entries must be non-empty strings`);
+  }
+  for (const value of contract.designClarification?.gateTerms || []) {
+    if (typeof value !== "string" || !value) errors.push(`${CONTRACT_PATH}: designClarification.gateTerms entries must be non-empty strings`);
   }
 }
 
@@ -466,9 +470,9 @@ function validateAlphaGoal(root, contract, errors) {
   }
   const designRef = contract.designClarification?.path;
   if (designRef && !text.includes(designRef)) errors.push(`${rel}: missing design clarification reference routing: ${designRef}`);
-  if (designRef && !text.includes("before selecting design questions")) {
-    errors.push(`${rel}: design clarification reference must be loaded before selecting design questions`);
-  }
+  const designChoiceGate = markdownSection(text, "Design Choice Gate");
+  requireTerms(`${rel} Design Choice Gate`, designChoiceGate, contract.designClarification?.gateTerms || [], errors);
+  if (designRef && !designChoiceGate.includes(designRef)) errors.push(`${rel}: design clarification reference must be routed from Design Choice Gate`);
   if (text.includes("| Design Priority |")) errors.push(`${rel}: design priority table belongs in design clarification reference`);
   const designReferencePath = designRef ? path.join(root, "skills", "alpha-goal", designRef) : "";
   if (designRef) {

@@ -1,10 +1,15 @@
-Read this only when Technical Design coverage is required: implementation, repair, refactor, hardening, cross-file behavior changes, interface/data-model changes, or material risk.
+Read this only after Design Choice Gate selects Technical Design clarification.
+Use implementation, repair, refactor, hardening, cross-file behavior changes, interface/data-model changes, or material risk to recommend design, not to auto-enter it.
 
 # Design Clarification Book
 
 ## Purpose
 
-Keep `SKILL.md` focused on goal clarification. Use this reference for design-specific question targeting, coverage, and Review Gate checks.
+Keep `SKILL.md` focused on Goal Contract clarification and confirmation. Use this reference only for design-specific question targeting, coverage, and Review Gate checks.
+
+## Technical Design coverage
+
+Cover only dimensions whose answer can change implementation, interfaces, data, dependencies, tests, rollout, rollback, security, privacy, performance, or risk handling.
 
 ## Design Priority
 

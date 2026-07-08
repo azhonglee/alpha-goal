@@ -4,7 +4,7 @@
   "replacements": [
     {
       "file": "templates/hooks.json",
-      "search": "read technical_design.md when present for implementation, repair, refactor, hardening, cross-file behavior, interface/data-model changes, or material risk; ",
+      "search": "read technical_design.md when present for implementation, repair, refactor, hardening, cross-file behavior, interface/data-model changes, or material risk after Design Choice Gate; ",
       "replace": ""
     }
   ]

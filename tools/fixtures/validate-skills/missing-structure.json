@@ -4,7 +4,7 @@
   "replacements": [
     {
       "file": "skills/alpha-goal/SKILL.md",
-      "search": "| Key design decisions | ... |\n",
+      "search": "| Design choice | skipped / technical_design.md link |\n",
       "replace": ""
     }
   ]

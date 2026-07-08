@@ -1,9 +1,9 @@
-Write the Technical Design to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/technical_design.md` only for implementation, repair, refactor, hardening, cross-file behavior changes, interface/data-model changes, or material risk.
+Write the Technical Design to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/technical_design.md` only after Design Choice Gate selects Technical Design clarification.
 Link the Goal Contract and Technical Design to each other when both exist.
 
 The state-root `technical_design.md` is canonical.
 Repo specs are mirrors or references only; conflicts route back to `alpha-goal`.
-Keep `Design status: draft` until user confirmation.
+Keep `Design status: draft` until user confirmation. Set it to `accepted` only when the Goal Contract is approved.
 
 Required Content when Technical Design is created:
 - Goal Contract link [goal_contract]

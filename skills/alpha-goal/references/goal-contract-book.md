@@ -27,6 +27,7 @@ Optional Content:
 - Discovery notes [discovery_notes]
 - Interview ledger [interview_ledger]
 - Repo surfaces [repo_surfaces]
+- Design choice [design_choice]
 - Technical Design link [technical_design]
 - Assumptions + resolutions [assumptions_resolutions]
 - Dependency/integration order [repo_integration_order]
