@@ -152,5 +152,4 @@ Checkpoint may record current slice, completed actions, raw evidence, acceptance
 [ ] State verification result.
 [ ] State remaining gaps, if any.
 [ ] Avoid claims beyond Goal Contract claim boundary.
-[ ] If route is PASS_TO_FINAL and the current thread has an active native goal for the same accepted contract, call `update_goal` with `status: complete`; do not create, overwrite, clear, or repurpose native goals.
 [ ] If incomplete, route clearly: NEXT_ITERATION / BLOCKED / RETURN_TO_ALPHA_GOAL.

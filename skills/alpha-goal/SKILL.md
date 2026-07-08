@@ -145,10 +145,12 @@ If any blocking gap remains, continue Loop Q&A; round count never closes Clarifi
 
 ### Assumption Stress Test
 
-Use when a high-risk assumption or symptom-level goal would otherwise pass untested:
+Use each applicable mode once; if none applies, record why:
 - **Contrarian:** challenge a core assumption.
 - **Simplifier:** probe minimum viable scope.
-- **Ontologist:** ask for essence-level reframing when needed.
+- **Ontologist:** ask for essence-level reframing when the user keeps describing symptoms.
+
+Track used modes in state to prevent repetition.
 
 ### Write Artifacts
 
@@ -200,5 +202,3 @@ Native Goal Sync is a lifecycle side effect, not authority.
 - If an unfinished active native goal already represents the same accepted contract, continue to `executor` skill.
 - If an unfinished active native goal conflicts with the accepted contract, do not overwrite, clear, pause, replace, or repurpose it; do not hand off to `executor` as synced. Return to Confirmation with a blocking sync conflict for user decision.
 - If Native Goal Sync fails, record the gap or blocker in the task artifact or checkpoint; do not treat sync failure as permission to redefine scope, acceptance, authority, or hand off as synced.
-- After `verifier` returns `PASS_TO_FINAL`, if an active native goal exists for the same accepted contract, call `update_goal` with `status: complete` before final response.
-- Do not use native blocked status as a shortcut for Alpha Goal `BLOCKED`; only call `update_goal` with `status: blocked` when the platform blocked-goal rule is independently satisfied.

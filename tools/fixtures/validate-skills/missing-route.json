@@ -6,11 +6,6 @@
       "file": "skills/executor/SKILL.md",
       "search": "[ ] route is PASS_TO_FINAL.\n",
       "replace": ""
-    },
-    {
-      "file": "skills/executor/SKILL.md",
-      "search": "[ ] If route is PASS_TO_FINAL and the current thread has an active native goal for the same accepted contract, call `update_goal` with `status: complete`; do not create, overwrite, clear, or repurpose native goals.\n",
-      "replace": "[ ] If verifier allows final route and the current thread has an active native goal for the same accepted contract, call `update_goal` with `status: complete`; do not create, overwrite, clear, or repurpose native goals.\n"
     }
   ]
 }

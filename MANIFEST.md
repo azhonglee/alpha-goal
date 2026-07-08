@@ -10,7 +10,7 @@
 
 Former public framing/modeling/synthesis stages are folded into `skills/alpha-goal/SKILL.md`.
 
-`alpha-goal` also owns Native Goal Sync: after user approval, it may create or reuse the current thread's native goal from the accepted Goal Contract summary and Technical Design link when present. Completion sync happens only after verification returns `PASS_TO_FINAL`; execution handoff and verification routing remain otherwise unchanged.
+`alpha-goal` also owns Native Goal Sync: after user approval, it may create or reuse the current thread's native goal from the accepted Goal Contract summary and Technical Design link when present. Execution handoff and verification routing remain otherwise unchanged; `executor` and `verifier` do not control native goal status.
 
 ## Scripts
 

@@ -60,7 +60,7 @@ flowchart TD
 
 ```text
 Trigger -> Preflight/Discovery -> Clarify -> Write Contract -> Technical Design? -> Review -> Confirm
-Accepted Goal Contract -> Native Goal Sync -> $executor -> Act -> Evidence + Checklist -> $verifier -> Route -> Complete native goal or Next Slice
+Accepted Goal Contract -> Native Goal Sync -> $executor -> Act -> Evidence + Checklist -> $verifier -> Route -> Next Slice or Final Claim
 ```
 
 ## Quick start
@@ -115,7 +115,7 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 - Evidence before authority: Current code facts describe current state; desired behavior comes from user intent, specs, issues, or accepted contracts.
 - Goals before action: expected outcome, scope, non-goals, acceptance evidence, decision owner, and claim boundary define what may change.
 - Persistent state: `goal-contract.md` is the default `alpha-goal` output; `technical_design.md` is created only for implementation, repair, refactor, hardening, cross-file behavior, interface/data-model changes, or material risk; `checkpoint.md` conditionally carries recovery and evidence handoff.
-- Native Goal Sync: after the user accepts the contract, `alpha-goal` may create or reuse the current thread's native goal; completion sync happens only after verification passes.
+- Native Goal Sync: after the user accepts the contract, `alpha-goal` may create or reuse the current thread's native goal; execution and verification do not control native goal status.
 - Bounded execution: prefer bounded evidence-producing actions or targeted changes over broad refactors and speculative cleanup.
 - Independent verification: final/ready/safe/complete/repair/review claims require fresh evidence, hard-blocking checklist coverage, and blocker checks, reviewed separately from execution.
 - Honest routing: unclear goals return to `alpha-goal`; same-goal fixable execution gaps return to `executor`.
