@@ -88,16 +88,16 @@ Run independent review for non-trivial implementation, repair, refactor, hardeni
 Present this summary before asking for approval:
 
 ```markdown
-## Technical Design Summary
-### Goal Contract
+### Technical Design Summary
+**Goal Contract**
 ...
-### Touched design dimensions
+**Touched design dimensions**
 ...
-### Interfaces/Data changed / not touched
+**Interfaces/Data changed / not touched**
 ...
-### Test evidence
+**Test evidence**
 ...
-### Risks/Rollback
+**Risks/Rollback**
 ...
 ```
 

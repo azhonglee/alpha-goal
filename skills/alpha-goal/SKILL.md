@@ -166,16 +166,16 @@ Before asking for confirmation, present the Goal Contract Summary first.
 - If the Goal Contract Summary is missing or incomplete, stay in Review Gate.
 - TUI Presentation Style:
 ```markdown
-## Goal Contract Summary
-### Goal
+### Goal Contract Summary
+**Goal**
 ...
-### Non-goals
+**Non-goals**
 ...
-### Execution boundary
+**Execution boundary**
 ...
-### Acceptance evidence
+**Acceptance evidence**
 ...
-### Recommended Next Step
+**Recommended Next Step**
 ...
 ```
 
