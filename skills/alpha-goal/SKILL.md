@@ -1,6 +1,6 @@
 ---
 name: alpha-goal
-description: "Must use to gate engineering/design/implementation requests before modification, implementation, repair, refactor, or hardening. Use inspection facts as entry evidence; run Loop Q&A to clarify intent, outcome, boundaries, non-goals, success criteria, acceptance evidence, and key technical design before producing a Goal Contract and Technical Design for user confirmation."
+description: "Use to gate engineering/design/implementation requests before modification, implementation, repair, refactor, or hardening. Use inspection facts as entry evidence; run Loop Q&A to clarify intent, outcome, boundaries, non-goals, success criteria, acceptance evidence, and material technical design before producing user-confirmed artifacts."
 ---
 
 # Alpha Goal
@@ -10,31 +10,26 @@ Implementation starts only after a user-accepted Goal Contract hands off to `exe
 
 ## Entry Gate
 
-Enter `alpha-goal` for any engineering, design, implementation, repair, refactor, or hardening request. Skip only for concrete read-only work.
+Enter `alpha-goal` for engineering, design, implementation, repair, refactor, or hardening request. Skip only for concrete read-only work.
 
 **Anti-Pattern:** "Too Clear to Need clarification" or "Too Simple to Need design"
 - Every project MUST go through the workflow below; the contract or design may be short, but it must be explicit and user-confirmed.
 
 **Check Point:**
+- Resolve Alpha Goal state root as `$HOME/.alpha-goal/<workspace-slug>/`, where `<workspace-slug>` is `slug(repo_root or Goal Contract target workspace)`.
 - Inspect the relevant files, docs, recent commits, and existing patterns.
 - Identify facts, conflicts, unknowns, dependencies, and source-of-truth conflicts.
 - Record inspection results in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Discovery notes`.
-- Inspection is entry evidence, not permission to modify.
 
 ## Clarification Gate
 
-Do not leave `Clarification` until the coverage matrix has no blocking gap:
+Do not leave `Clarification` while any material blocking gap remains:
 - Goal Contract coverage: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Success Criteria, Acceptance evidence.
-- Technical Design coverage: Architecture, Components, Interfaces, Data Models, Data Flow, Test Plans, Risks.
+- Technical Design coverage is required only for implementation, repair, refactor, hardening, cross-file behavior changes, interface/data-model changes, or material risk.
 - Every unresolved unknown is classified as `blocking`, `non-material`, or `deferred non-goal`.
-- At least one design-detail probe and one acceptance-evidence probe are complete.
-- Material assumptions have been pressure-tested, or the remaining uncertainty is documented as non-material.
-- A dimension is not covered by one answer by default. Coverage requires a pressure-tested decision, boundary, implementation impact, and evidence signal.
-- The highest-risk goal dimension and highest-risk design dimension each receive follow-up until no blocking gap remains.
-- Planned questions, unanswered questions, and hypothetical answers do not reduce coverage.
-- Every required dimension has a coverage record with: `decision`, `boundary`, `implementation impact`, `acceptance/observer`, and `status`.
-- A missing material coverage cell keeps the dimension `blocking`.
-- Mark uncertainty `non-material` only when the record explains why it cannot change implementation, tests, acceptance, or risk handling.
+- Required coverage means: decision, boundary, implementation impact, acceptance/observer, and status.
+- Planned questions, unanswered questions, hypothetical answers, confidence, and round count do not reduce coverage.
+- Mark uncertainty `non-material` only when it cannot change implementation, tests, acceptance, or risk handling.
 
 Blocking gap classifier:
 - A gap is `blocking` when a different answer could change behavior, touched files/components, interfaces/API, data model, persistence, migration, external dependency, permission, environment, test strategy, validation observer, rollout, rollback, security, privacy, performance, or risk handling.
@@ -52,7 +47,7 @@ Clarification exit invariants:
 - Context sufficiency: what is known, missing, must-have, or merely ideal.
 - Hidden issues: deeper root cause, adjacent issue, or dependency risk.
 
-Loop Q&A until the user-owned decisions and technical design are explicit enough to write the artifacts.
+Loop Q&A until the user-owned decisions and any required technical design are explicit enough to write the artifacts.
 
 ### Loop Q&A
 
@@ -62,8 +57,7 @@ Loop Q&A until the user-owned decisions and technical design are explicit enough
 - Do not ask for discoverable facts.
 - Present options conversationally with recommendation and reasoning.
 - Use `request_user_input` or equivalent structured input.
-- Update `goal-contract.md` and `technical_design.md` after each answer.
-- Record task, probable intent, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps in `goal-contract.md` under `Interview ledger`.
+- Record material decisions, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps in task artifacts.
 - Revisit the same dimension when the first answer lacks an example, boundary, tradeoff, design consequence, or acceptance signal.
 - Ask one round, wait for the answer, then decide whether to follow up on the same dimension or move to the next one.
 - Do not pre-generate a complete questionnaire and then proceed as if the questions were answered.
@@ -80,7 +74,7 @@ Use current task state:
 Rank open gaps before choosing the next target:
 - Prefer the gap with the highest blast radius, irreversibility, external dependency, user-owned semantics, data/API contract impact, validation ambiguity, or rollback risk.
 - Do not move to a lower-risk dimension while a higher-risk blocking design or goal gap remains.
-- Do not skip the Design table for implementation, repair, refactor, hardening, or cross-file behavior changes.
+- Use the Design table only when Technical Design coverage is required.
 
 | Goal Priority | Dimension |
 | --- | --- |
@@ -151,25 +145,23 @@ If any blocking gap remains, continue Loop Q&A; round count never closes Clarifi
 
 ### Assumption Stress Test
 
-Use each applicable mode once; if none applies, record why:
+Use when a high-risk assumption or symptom-level goal would otherwise pass untested:
 - **Contrarian:** challenge a core assumption.
 - **Simplifier:** probe minimum viable scope.
-- **Ontologist:** ask for essence-level reframing when the user keeps describing symptoms.
-
-Track used modes in state to prevent repetition.
+- **Ontologist:** ask for essence-level reframing when needed.
 
 ### Write Artifacts
 
 Follow `references/goal-contract-book.md` to write the Goal Contract. Set `Issued by = alpha-goal`.
-Follow `references/technical-design-book.md` to write the Technical Design. Link the Goal Contract and Technical Design to each other.
+Follow `references/technical-design-book.md` to write the Technical Design only when its coverage is required. Link the Goal Contract and Technical Design when both exist.
 Write artifacts only from answered, auto-confirmed, or cited facts. Keep unresolved required fields as `[blocking]`; do not fill them from hypothetical answers.
 
 ### Review Gate And Show Summary
 
-- Self-check the Goal Contract and Technical Design before asking for approval:
+- Self-check the Goal Contract and any required Technical Design before asking for approval:
   - Coverage check: required fields exist, no blocking gap remains, and every covered dimension has decision, boundary, implementation impact, acceptance/observer, and status.
   - Authority check: current-state facts do not define desired behavior; non-goals, execution boundary, decision boundary, and claim boundary are explicit.
-  - Acceptance check: success criteria map to acceptance evidence and validation observers; key design decisions cover architecture, components, interfaces, data models, data flow, tests, and risks.
+  - Acceptance check: success criteria map to acceptance evidence and validation observers; when Technical Design is required, key design decisions cover architecture, components, interfaces, data models, data flow, tests, and risks.
   - Closure check: no covered dimension relies only on confidence, round count, planned questions, or an untested assumption; recheck the highest-risk covered dimension.
 - Run independent review for non-trivial implementation, repair, refactor, hardening, or cross-file behavior changes:
   - Prefer a subagent review when available; if skipped, record the reason.
@@ -192,20 +184,21 @@ Goal Contract Summary (Design Summary)
 | Key design decisions | ... |
 ```
 
-## Codex Goal Sync
-
-Codex goal sync is a confirmation side effect, not authority.
-- Before approval, do not invoke `create_goal`.
-- On approval, call `get_goal` when available before creating a new Codex goal.
-- If no unfinished active Codex goal exists, invoke `create_goal` with an objective built from the Goal Contract Summary and Technical Design link.
-- Omit `token_budget` unless the user explicitly requested a token budget.
-- If an unfinished active Codex goal already represents the same accepted contract, continue to `executor` skill.
-- If an unfinished active Codex goal conflicts with the accepted contract, do not overwrite, clear, pause, replace, or repurpose it; do not hand off to `executor` as synced. Return to Confirmation with a blocking sync conflict for user decision.
-- If Codex goal sync fails, record the gap or blocker in the task artifact or checkpoint; do not treat sync failure as permission to redefine scope, acceptance, authority, or hand off as synced.
-
 ## Confirmation Gate
 
 Use `request_user_input` or equivalent structured input to ask for approve/launch, refine, or reject.
-- On approval: set `Contract status: accepted`; perform Codex Goal Sync; hand off to `executor` skill.
+- On approval: set `Contract status: accepted`; perform Native Goal Sync; hand off to `executor` skill.
 - On rejection: keep `Contract status: draft`.
 - On refine: keep `Contract status: draft`; return to `Clarification` with user feedback.
+
+## Native Goal Sync
+
+Native Goal Sync is a lifecycle side effect, not authority.
+- Before approval, do not invoke `create_goal`.
+- On approval, call `get_goal` before creating a new native goal.
+- If no unfinished active native goal exists, invoke `create_goal` with an objective built from the Goal Contract Summary and Technical Design link when present.
+- If an unfinished active native goal already represents the same accepted contract, continue to `executor` skill.
+- If an unfinished active native goal conflicts with the accepted contract, do not overwrite, clear, pause, replace, or repurpose it; do not hand off to `executor` as synced. Return to Confirmation with a blocking sync conflict for user decision.
+- If Native Goal Sync fails, record the gap or blocker in the task artifact or checkpoint; do not treat sync failure as permission to redefine scope, acceptance, authority, or hand off as synced.
+- After `verifier` returns `PASS_TO_FINAL`, if an active native goal exists for the same accepted contract, call `update_goal` with `status: complete` before final response.
+- Do not use native blocked status as a shortcut for Alpha Goal `BLOCKED`; only call `update_goal` with `status: blocked` when the platform blocked-goal rule is independently satisfied.

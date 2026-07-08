@@ -89,15 +89,19 @@
     "Execution boundary",
     "Key design decisions"
   ],
-  "codexGoalSync": {
+  "nativeGoalSync": {
     "alphaGoalRequiredTerms": [
-      "Codex Goal Sync",
+      "Native Goal Sync",
       "create_goal",
       "get_goal",
+      "update_goal",
       "Goal Contract Summary",
-      "Technical Design link",
-      "token_budget",
-      "active Codex goal",
+      "Technical Design link when present",
+      "active native goal",
+      "PASS_TO_FINAL",
+      "status: complete",
+      "status: blocked",
+      "platform blocked-goal rule",
       "do not overwrite",
       "do not hand off to `executor`",
       "blocking sync conflict"
