@@ -141,6 +141,7 @@ function emptyContract() {
     requiredGates: [],
     clarificationExitRules: [],
     summaryFields: [],
+    codexGoalSync: {},
     checkedFiles: [],
     nodeRequirement: "",
   };
@@ -156,6 +157,11 @@ function validateContract(contract, errors) {
   requireArray(contract, "requiredGates", errors);
   requireArray(contract, "clarificationExitRules", errors);
   requireArray(contract, "summaryFields", errors);
+  if (!contract.codexGoalSync || typeof contract.codexGoalSync !== "object" || Array.isArray(contract.codexGoalSync)) {
+    errors.push(`${CONTRACT_PATH}: codexGoalSync must be an object`);
+  } else {
+    requireArray(contract.codexGoalSync, "alphaGoalRequiredTerms", errors, `${CONTRACT_PATH}: codexGoalSync`);
+  }
   requireArray(contract, "checkedFiles", errors);
   if (typeof contract.nodeRequirement !== "string" || !contract.nodeRequirement) {
     errors.push(`${CONTRACT_PATH}: nodeRequirement must be a non-empty string`);
@@ -192,6 +198,12 @@ function validateContract(contract, errors) {
   }
   for (const rule of contract.clarificationExitRules || []) {
     if (typeof rule !== "string" || !rule) errors.push(`${CONTRACT_PATH}: clarificationExitRules entries must be non-empty strings`);
+  }
+  for (const [name, values] of Object.entries(contract.codexGoalSync || {})) {
+    if (!Array.isArray(values)) continue;
+    for (const value of values) {
+      if (typeof value !== "string" || !value) errors.push(`${CONTRACT_PATH}: codexGoalSync.${name} entries must be non-empty strings`);
+    }
   }
 }
 
@@ -403,7 +415,7 @@ function validateAlphaGoal(root, contract, errors) {
     return;
   }
   requireGateHeadings(rel, text, contract.requiredGates, errors);
-  requireHeadings(rel, text, ["Clarification"], errors);
+  requireHeadings(rel, text, ["Clarification", "Codex Goal Sync"], errors);
   const clarificationGate = markdownSection(text, "Clarification Gate");
   for (const rule of contract.clarificationExitRules) {
     if (!clarificationGate.includes(`\`${rule}\``)) errors.push(`${rel}: Clarification Gate missing exit rule ${rule}`);
@@ -435,6 +447,8 @@ function validateAlphaGoal(root, contract, errors) {
   if (!confirmationGate.includes("$executor") && !confirmationGate.includes("executor` skill") && !confirmationGate.includes("executor skill")) {
     errors.push(`${rel}: Confirmation Gate missing executor handoff`);
   }
+  if (!confirmationGate.includes("perform Codex Goal Sync")) errors.push(`${rel}: Confirmation Gate missing Codex Goal Sync handoff`);
+  requireTerms(`${rel} Codex Goal Sync`, markdownSection(text, "Codex Goal Sync"), contract.codexGoalSync?.alphaGoalRequiredTerms || [], errors);
 }
 
 function validateExecutor(root, contract, errors) {
