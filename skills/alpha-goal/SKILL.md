@@ -70,11 +70,11 @@ Rank open gaps before choosing the next target:
 - Prefer the gap with highest blast radius, irreversibility, external dependency, user-owned semantics, data/API contract impact, validation ambiguity, or rollback risk.
 - Do not move to a lower-risk dimension while a higher-risk blocking Goal Contract gap remains.
 
-| Goal Priority | Dimension |
-| --- | --- |
-| 1 | intent, outcome, scope, execution boundary, non-goals |
-| 2 | constraints, success criteria, acceptance evidence, claim boundary |
-| 3 | context/current facts, actuator boundary, external/current facts |
+| Goal Priority | Dimension | Purpose |
+| --- | --- --- | --- |
+| 1 | intent, outcome, scope, non-goals, success criteria | Define what the goal is, and the success criteria. |
+| 2 | constraints, execution boundary, acceptance evidence, claim boundary, decision boundary | Define how the goal is achieved. |
+| 3 | context/current facts, external/current facts, dependencies, assumptions | Define what is known, missing, must-have, or merely ideal. |
 
 **Step 2: Ask and record**
 
@@ -167,13 +167,13 @@ Before asking for confirmation, present the Goal Contract Summary first.
 - TUI Presentation Style:
 ```markdown
 ### Goal Contract Summary
-**Goal**
+**Intent**
 ...
-**Non-goals**
-...
-**Execution boundary**
+**Success criteria**
 ...
 **Acceptance evidence**
+...
+**Execution boundary**
 ...
 **Recommended Next Step**
 Implementation / Design / ...

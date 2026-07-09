@@ -113,7 +113,7 @@ Use `request_user_input` or equivalent structured input to ask for approve/launc
 Native Goal Sync is a lifecycle side effect, not design authority.
 - Before approve/launch, do not invoke `create_goal`.
 - On approve/launch, call `get_goal` before creating a new native goal.
-- If no unfinished active native goal exists, invoke `create_goal` with an objective built from the Goal Contract Summary and Technical Design link.
+- If no unfinished active native goal exists, invoke `create_goal` with an objective built from the Goal Contract artifact and Technical Design linked.
 - If an unfinished active native goal already represents the same accepted contract and design, continue to `executor` skill.
 - If an unfinished active native goal conflicts with the accepted contract or design, do not overwrite, clear, pause, replace, or repurpose it; do not hand off to `executor` as synced. Record a blocking sync conflict for user decision.
 - If Native Goal Sync fails, record the gap or blocker in the task artifact or checkpoint; do not treat sync failure as permission to redefine scope, acceptance, authority, design, or hand off as synced.
