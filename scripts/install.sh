@@ -1554,115 +1554,12 @@ for (const [event, groups] of Object.entries(data.hooks)) {
 JS
 }
 
-print_skill_roots() {
-  if [[ "$sync_codex_config" == true && "$sync_claude_config" == true ]]; then
-    echo "│ Codex skills root: $target_root"
-    echo "│ Claude skills root: $claude_skill_root"
-  else
-    echo "│ Skills root: $skill_install_root"
-  fi
-}
-
 print_summary() {
-  local status="ready"
-  local show_codex_config=false
-  local show_claude_config=false
-  if [[ "$copied_count" -gt 0 || "$replaced_count" -gt 0 || "$legacy_removed_count" -gt 0 ]]; then
-    status="installed"
-  fi
-  if [[ "$sync_codex_config" == true && "$sync_user_templates" == true && ( "$agents_action" != "current" || "$config_action" != "current" ) ]]; then
-    status="installed"
-  fi
-  if [[ "$sync_claude_config" == true && "$sync_user_templates" == true && "$claude_action" != "current" ]]; then
-    status="installed"
-  fi
-  if [[ "$sync_codex_config" == true && "$sync_user_hooks" == true && "$hooks_action" != "current" ]]; then
-    status="installed"
-  fi
-
-  if [[ "$sync_codex_config" == true && ( "$sync_user_templates" == true || "$sync_user_hooks" == true ) ]]; then
-    show_codex_config=true
-  fi
-  if [[ "$sync_claude_config" == true && "$sync_user_templates" == true ]]; then
-    show_claude_config=true
-  fi
-
-  echo "╭─ Alpha Goal install summary"
-  print_skill_roots
-  if [[ "$show_codex_config" == true || "$show_claude_config" == true ]]; then
-    echo "├─ Configuration"
-  fi
-  if [[ "$show_codex_config" == true ]]; then
-    echo "│ Codex home: $codex_home"
-  fi
-  if [[ "$show_claude_config" == true ]]; then
-    echo "│ Claude home: $claude_home"
-  fi
-  if [[ "$sync_user_templates" == true && ( "$sync_codex_config" == true || "$sync_claude_config" == true ) ]]; then
-    echo "├─ Templates"
-    if [[ "$sync_codex_config" == true ]]; then
-      echo "│ Codex templates: AGENTS.md $agents_action, config.toml $config_action"
-    fi
-    if [[ "$sync_claude_config" == true ]]; then
-      echo "│ Claude templates: CLAUDE.md $claude_action"
-    fi
-  fi
-  if [[ "$sync_codex_config" == true && "$sync_user_hooks" == true ]]; then
-    echo "├─ Hooks"
-    echo "│ User hooks: hooks.json $hooks_action"
-  fi
-  echo "╰─ done"
+  echo "Alpha Goal install completed."
 }
 
 print_uninstall_summary() {
-  local status="ready"
-  local show_codex_config=false
-  local show_claude_config=false
-  if [[ "$uninstall_skill_removed_count" -gt 0 ]]; then
-    status="uninstalled"
-  fi
-  for action in "$agents_action" "$claude_action" "$config_action" "$hooks_action"; do
-    if [[ "$action" == "removed" || "$action" == "updated" ]]; then
-      status="uninstalled"
-    fi
-  done
-
-  if [[ "$sync_codex_config" == true && ( "$sync_user_templates" == true || "$sync_user_hooks" == true ) ]]; then
-    show_codex_config=true
-  fi
-  if [[ "$sync_claude_config" == true && "$sync_user_templates" == true ]]; then
-    show_claude_config=true
-  fi
-
-  echo "╭─ Alpha Goal uninstall summary"
-  echo "│ Result: $status"
-  echo "│ Uninstall target: $install_target"
-  echo "├─ Skills"
-  print_skill_roots
-  echo "│ Skills: removed $uninstall_skill_removed_count, preserved $uninstall_skill_preserved_count, not-found $uninstall_skill_missing_count"
-  if [[ "$show_codex_config" == true || "$show_claude_config" == true ]]; then
-    echo "├─ Configuration"
-  fi
-  if [[ "$show_codex_config" == true ]]; then
-    echo "│ Codex home: $codex_home"
-  fi
-  if [[ "$show_claude_config" == true ]]; then
-    echo "│ Claude home: $claude_home"
-  fi
-  if [[ "$sync_user_templates" == true && ( "$sync_codex_config" == true || "$sync_claude_config" == true ) ]]; then
-    echo "├─ Templates"
-    if [[ "$sync_codex_config" == true ]]; then
-      echo "│ Codex templates: AGENTS.md $agents_action, config.toml $config_action"
-    fi
-    if [[ "$sync_claude_config" == true ]]; then
-      echo "│ Claude templates: CLAUDE.md $claude_action"
-    fi
-  fi
-  if [[ "$sync_codex_config" == true && "$sync_user_hooks" == true ]]; then
-    echo "├─ Hooks"
-    echo "│ User hooks: hooks.json $hooks_action"
-  fi
-  echo "╰─ done"
+  echo "Alpha Goal uninstall completed."
 }
 
 if [[ "$sync_codex_config" == true && "$sync_user_templates" == true ]]; then
