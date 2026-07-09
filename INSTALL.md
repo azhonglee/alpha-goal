@@ -34,6 +34,8 @@ The target menu uses Up/Down plus Enter only; `codex` is selected by default. In
 
 Non-interactive runs are refused. Any CLI argument other than `--uninstall`, including `--help`, `--target`, `--codex-home`, `--force`, sync toggles, or `--verbose`, is rejected.
 
+Successful install and uninstall runs print one concise success line. Failures continue to print the specific error and exit non-zero.
+
 When installing skill copies, an existing target skill symlink is migrated only when it points to `skills/<skill-name>` in this repository or another worktree with the same Git common directory. Existing managed real directories are removed and recopied. Git detection failures, external symlinks, symlinks to other repo-relative paths, and ordinary files are refused. For `claude`, the installer injects a ClaudeAdapter Entry Gate reminder into the installed Alpha Goal copy; `codex` installs leave that reminder out.
 
 Use `--uninstall` to enter the interactive uninstall flow. The selected target controls which managed configuration and skill copies are removed.
@@ -48,7 +50,7 @@ Codex may require reviewing and trusting the changed hook with `/hooks` before i
 
 ## Smoke test
 
-The smoke test checks target-specific skill copies, config sync, ClaudeAdapter injection, hook recovery text, install prompt reduction, uninstall cleanup, rejected legacy CLI arguments, refused external symlinks, and ignored `CODEX_HOME` values. It does not touch real user configuration.
+The smoke test checks target-specific skill copies, config sync, ClaudeAdapter injection, hook recovery text, install prompt reduction, concise success output, uninstall cleanup, rejected legacy CLI arguments, refused external symlinks, and ignored `CODEX_HOME` values. It does not touch real user configuration.
 
 ```bash
 set -euo pipefail
@@ -160,9 +162,33 @@ expect_invalid_arg() {
   rm -rf "$tmp_invalid"
 }
 
+assert_simple_success_output() {
+  local output="$1"
+  local message="$2"
+  local message_count
+  local completion_count
+
+  grep -q "$message" <<<"$output"
+  message_count="$(grep -F -o "$message" <<<"$output" | wc -l | tr -d ' ')"
+  test "$message_count" -eq 1
+  completion_count="$(grep -E -o "Alpha Goal [[:alnum:] _-]+ completed\\." <<<"$output" | wc -l | tr -d ' ')"
+  test "$completion_count" -eq 1
+  ! grep -q "Alpha Goal install summary" <<<"$output"
+  ! grep -q "Alpha Goal uninstall summary" <<<"$output"
+  ! grep -q "Codex skills root:" <<<"$output"
+  ! grep -q "Claude skills root:" <<<"$output"
+  ! grep -q "Skills root:" <<<"$output"
+  ! grep -q "Codex home:" <<<"$output"
+  ! grep -q "Claude home:" <<<"$output"
+  ! grep -q "Templates" <<<"$output"
+  ! grep -q "Hooks" <<<"$output"
+  ! grep -q "╭─" <<<"$output"
+  ! grep -q "╰─" <<<"$output"
+}
+
 tmp_codex="$(mktemp -d)"
 codex_output="$(run_installer "$tmp_codex")"
-grep -q "Codex home: $tmp_codex/.codex" <<<"$codex_output"
+assert_simple_success_output "$codex_output" "Alpha Goal install completed."
 ! grep -q "Codex home \\[" <<<"$codex_output"
 ! grep -q "Replace external" <<<"$codex_output"
 ! grep -q "Sync user templates" <<<"$codex_output"
@@ -187,7 +213,8 @@ grep -q "technical_design.md" "$tmp_codex/.codex/hooks.json"
 grep -q "checkpoint.md" "$tmp_codex/.codex/hooks.json"
 
 tmp_claude="$(mktemp -d)"
-TARGET_CHOICE=claude run_installer "$tmp_claude" >/dev/null
+claude_output="$(TARGET_CHOICE=claude run_installer "$tmp_claude")"
+assert_simple_success_output "$claude_output" "Alpha Goal install completed."
 for skill in alpha-goal executor verifier; do
   test -d "$tmp_claude/.claude/skills/$skill"
   test ! -L "$tmp_claude/.claude/skills/$skill"
@@ -200,8 +227,7 @@ grep -q "references/claude-adapter.md" "$tmp_claude/.claude/skills/alpha-goal/SK
 
 tmp_all="$(mktemp -d)"
 all_install_output="$(TARGET_CHOICE=all run_installer "$tmp_all")"
-grep -q "Codex skills root: $tmp_all/.codex/skills" <<<"$all_install_output"
-grep -q "Claude skills root: $tmp_all/.claude/skills" <<<"$all_install_output"
+assert_simple_success_output "$all_install_output" "Alpha Goal install completed."
 ! grep -q "Codex home \\[" <<<"$all_install_output"
 ! grep -q "Replace external" <<<"$all_install_output"
 ! grep -q "Sync user templates" <<<"$all_install_output"
@@ -219,9 +245,7 @@ test -f "$tmp_all/.claude/CLAUDE.md"
 grep -q "references/claude-adapter.md" "$tmp_all/.claude/skills/alpha-goal/SKILL.md"
 
 all_uninstall_output="$(TARGET_CHOICE=all run_installer "$tmp_all" --uninstall)"
-grep -q "Uninstall target: all" <<<"$all_uninstall_output"
-grep -q "Codex skills root: $tmp_all/.codex/skills" <<<"$all_uninstall_output"
-grep -q "Claude skills root: $tmp_all/.claude/skills" <<<"$all_uninstall_output"
+assert_simple_success_output "$all_uninstall_output" "Alpha Goal uninstall completed."
 for skill in alpha-goal executor verifier; do
   test ! -e "$tmp_all/.codex/skills/$skill"
   test ! -e "$tmp_all/.claude/skills/$skill"
@@ -266,7 +290,8 @@ fi
 grep -q "External skill symlinks are not replaced during install" <<<"$external_output"
 test -L "$tmp_external/.codex/skills/alpha-goal"
 
-run_installer "$tmp_codex" --uninstall >/dev/null
+codex_uninstall_output="$(run_installer "$tmp_codex" --uninstall)"
+assert_simple_success_output "$codex_uninstall_output" "Alpha Goal uninstall completed."
 for skill in alpha-goal executor verifier; do
   test ! -e "$tmp_codex/.codex/skills/$skill"
 done
@@ -274,7 +299,8 @@ test ! -e "$tmp_codex/.codex/AGENTS.md"
 test ! -e "$tmp_codex/.codex/config.toml"
 test ! -e "$tmp_codex/.codex/hooks.json"
 
-TARGET_CHOICE=claude run_installer "$tmp_claude" --uninstall >/dev/null
+claude_uninstall_output="$(TARGET_CHOICE=claude run_installer "$tmp_claude" --uninstall)"
+assert_simple_success_output "$claude_uninstall_output" "Alpha Goal uninstall completed."
 for skill in alpha-goal executor verifier; do
   test ! -e "$tmp_claude/.claude/skills/$skill"
 done
