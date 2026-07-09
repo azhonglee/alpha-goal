@@ -30,11 +30,11 @@ The script creates copied skill directories under target-specific independent ro
 - `claude`: sync Claude `CLAUDE.md` and Claude skill copies.
 - `all`: sync or uninstall both Codex and Claude in one run.
 
-The target menu uses Up/Down plus Enter only; `codex` is selected by default. The Codex home prompt defaults to `$HOME/.codex` and ignores `CODEX_HOME`; press Enter to accept the default or type another path. Interactive yes/no prompts default to `force=false`, `template sync=true`, `Codex hook sync=true`, and `verbose=false`. For uninstall, the flow asks for the target, Codex home when relevant, template cleanup, hook cleanup when relevant, and verbose output.
+The target menu uses Up/Down plus Enter only; `codex` is selected by default. Install asks only for that target menu, ignores `CODEX_HOME`, and then uses fixed defaults: Codex home `$HOME/.codex`, `force=false`, template sync enabled, Codex hook sync enabled, and verbose output disabled. For uninstall, the flow asks for the target, Codex home when relevant, template cleanup, hook cleanup when relevant, and verbose output.
 
 Non-interactive runs are refused. Any CLI argument other than `--uninstall`, including `--help`, `--target`, `--codex-home`, `--force`, sync toggles, or `--verbose`, is rejected.
 
-When installing skill copies, an existing target skill symlink is migrated without force only when it points to `skills/<skill-name>` in this repository or another worktree with the same Git common directory. Existing managed real directories are removed and recopied. Git detection failures, external symlinks, and symlinks to other repo-relative paths require enabling force in the interactive prompt or are refused; ordinary files are always refused. For `claude`, the installer injects a ClaudeAdapter Entry Gate reminder into the installed Alpha Goal copy; `codex` installs leave that reminder out.
+When installing skill copies, an existing target skill symlink is migrated only when it points to `skills/<skill-name>` in this repository or another worktree with the same Git common directory. Existing managed real directories are removed and recopied. Git detection failures, external symlinks, symlinks to other repo-relative paths, and ordinary files are refused. For `claude`, the installer injects a ClaudeAdapter Entry Gate reminder into the installed Alpha Goal copy; `codex` installs leave that reminder out.
 
 Use `--uninstall` to enter the interactive uninstall flow. The selected target controls which managed configuration and skill copies are removed.
 
@@ -48,7 +48,7 @@ Codex may require reviewing and trusting the changed hook with `/hooks` before i
 
 ## Smoke test
 
-The smoke test checks target-specific skill copies, config sync, ClaudeAdapter injection, hook recovery text, uninstall cleanup, rejected legacy CLI arguments, and ignored `CODEX_HOME` values. It does not touch real user configuration.
+The smoke test checks target-specific skill copies, config sync, ClaudeAdapter injection, hook recovery text, install prompt reduction, uninstall cleanup, rejected legacy CLI arguments, refused external symlinks, and ignored `CODEX_HOME` values. It does not touch real user configuration.
 
 ```bash
 set -euo pipefail
@@ -69,8 +69,8 @@ import time
 script = sys.argv[1]
 args = sys.argv[2:]
 target = os.environ.get("TARGET_CHOICE", "codex")
+is_uninstall = "--uninstall" in args
 codex_home_input = os.environ.get("CODEX_HOME_INPUT", "")
-force_input = os.environ.get("FORCE_INPUT", "")
 template_input = os.environ.get("TEMPLATE_INPUT", "")
 hook_input = os.environ.get("HOOK_INPUT", "")
 verbose_input = os.environ.get("VERBOSE_INPUT", "")
@@ -84,16 +84,14 @@ elif target == "all":
 else:
     raise SystemExit(f"unknown TARGET_CHOICE: {target}")
 
-actions = [
-    (b"Choose which app configuration", target_action),
-    (b"Codex home", [codex_home_input.encode(), b"\r"]),
-    (b"Replace external", [force_input.encode(), b"\r"]),
-    (b"Sync user templates", [template_input.encode(), b"\r"]),
-    (b"Clean up user templates", [template_input.encode(), b"\r"]),
-    (b"Sync Codex user hooks", [hook_input.encode(), b"\r"]),
-    (b"Clean up Codex user hooks", [hook_input.encode(), b"\r"]),
-    (b"Print detailed", [verbose_input.encode(), b"\r"]),
-]
+actions = [(b"Choose which app configuration", target_action)]
+if is_uninstall:
+    actions.extend([
+        (b"Codex home", [codex_home_input.encode(), b"\r"]),
+        (b"Clean up user templates", [template_input.encode(), b"\r"]),
+        (b"Clean up Codex user hooks", [hook_input.encode(), b"\r"]),
+        (b"Print detailed", [verbose_input.encode(), b"\r"]),
+    ])
 
 master, slave = pty.openpty()
 proc = subprocess.Popen(
@@ -165,6 +163,11 @@ expect_invalid_arg() {
 tmp_codex="$(mktemp -d)"
 codex_output="$(run_installer "$tmp_codex")"
 grep -q "Codex home: $tmp_codex/.codex" <<<"$codex_output"
+! grep -q "Codex home \\[" <<<"$codex_output"
+! grep -q "Replace external" <<<"$codex_output"
+! grep -q "Sync user templates" <<<"$codex_output"
+! grep -q "Sync Codex user hooks" <<<"$codex_output"
+! grep -q "Print detailed" <<<"$codex_output"
 for skill in alpha-goal executor verifier; do
   test -d "$tmp_codex/.codex/skills/$skill"
   test ! -L "$tmp_codex/.codex/skills/$skill"
@@ -199,6 +202,11 @@ tmp_all="$(mktemp -d)"
 all_install_output="$(TARGET_CHOICE=all run_installer "$tmp_all")"
 grep -q "Codex skills root: $tmp_all/.codex/skills" <<<"$all_install_output"
 grep -q "Claude skills root: $tmp_all/.claude/skills" <<<"$all_install_output"
+! grep -q "Codex home \\[" <<<"$all_install_output"
+! grep -q "Replace external" <<<"$all_install_output"
+! grep -q "Sync user templates" <<<"$all_install_output"
+! grep -q "Sync Codex user hooks" <<<"$all_install_output"
+! grep -q "Print detailed" <<<"$all_install_output"
 for skill in alpha-goal executor verifier; do
   test -d "$tmp_all/.codex/skills/$skill"
   test -d "$tmp_all/.claude/skills/$skill"
@@ -233,20 +241,30 @@ if HOME="$(mktemp -d)" "$repo_root/scripts/install.sh" --uninstall </dev/null; t
 fi
 
 tmp_conflict="$(mktemp -d)"
-if conflict_output="$(TARGET_CHOICE=all CODEX_HOME_INPUT="$tmp_conflict/.claude" run_installer "$tmp_conflict" 2>&1)"; then
-  echo "interactive all should reject identical skill roots" >&2
+if conflict_output="$(TARGET_CHOICE=all CODEX_HOME_INPUT="$tmp_conflict/.claude" run_installer "$tmp_conflict" --uninstall 2>&1)"; then
+  echo "interactive all uninstall should reject identical skill roots" >&2
   exit 1
 fi
 grep -q "requires distinct Codex and Claude skill roots" <<<"$conflict_output"
 
 tmp_link_conflict="$(mktemp -d)"
 mkdir -p "$tmp_link_conflict/.claude"
-ln -s "$tmp_link_conflict/.claude" "$tmp_link_conflict/.codexlink"
-if link_conflict_output="$(TARGET_CHOICE=all CODEX_HOME_INPUT="$tmp_link_conflict/.codexlink" run_installer "$tmp_link_conflict" 2>&1)"; then
+ln -s "$tmp_link_conflict/.claude" "$tmp_link_conflict/.codex"
+if link_conflict_output="$(TARGET_CHOICE=all run_installer "$tmp_link_conflict" 2>&1)"; then
   echo "interactive all should reject symlinked identical skill roots" >&2
   exit 1
 fi
 grep -q "requires distinct Codex and Claude skill roots" <<<"$link_conflict_output"
+
+tmp_external="$(mktemp -d)"
+mkdir -p "$tmp_external/.codex/skills" "$tmp_external/external-alpha-goal"
+ln -s "$tmp_external/external-alpha-goal" "$tmp_external/.codex/skills/alpha-goal"
+if external_output="$(run_installer "$tmp_external" 2>&1)"; then
+  echo "install should refuse external skill symlinks with force=false" >&2
+  exit 1
+fi
+grep -q "External skill symlinks are not replaced during install" <<<"$external_output"
+test -L "$tmp_external/.codex/skills/alpha-goal"
 
 run_installer "$tmp_codex" --uninstall >/dev/null
 for skill in alpha-goal executor verifier; do
@@ -265,8 +283,10 @@ test ! -e "$tmp_claude/.claude/CLAUDE.md"
 expect_invalid_arg --target
 expect_invalid_arg --target codex
 expect_invalid_arg --target claude
+expect_invalid_arg --target all
 expect_invalid_arg --target=codex
 expect_invalid_arg --target=claude
+expect_invalid_arg --target=all
 expect_invalid_arg --codex-home
 expect_invalid_arg --codex-home /tmp/x
 expect_invalid_arg --codex-home=/tmp/x
@@ -285,7 +305,7 @@ expect_invalid_arg positional
 bash -n scripts/install.sh
 node tools/validate_skills.js .
 node tools/validate_skills.js --fixtures
-rm -rf "$tmp_codex" "$tmp_claude" "$tmp_all" "$tmp_conflict" "$tmp_link_conflict"
+rm -rf "$tmp_codex" "$tmp_claude" "$tmp_all" "$tmp_conflict" "$tmp_link_conflict" "$tmp_external"
 rm -f /tmp/alpha-goal-invalid.out /tmp/alpha-goal-invalid.err
 ```
 

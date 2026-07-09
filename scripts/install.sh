@@ -9,8 +9,8 @@ Install this repository's public skill directories as copied directories.
 The codex target installs skills under $HOME/.codex/skills by default. The claude
 target installs independent Claude skill copies under $HOME/.claude/skills.
 
-All configuration except --uninstall is completed interactively. Non-interactive
-runs are refused.
+Install runs ask only for the target app configuration. Uninstall runs ask for
+cleanup choices. Non-interactive runs are refused.
 
 The codex target syncs Codex AGENTS.md, config.toml, hooks.json, and Codex
 skills. The claude target syncs Claude CLAUDE.md and Claude skills. The
@@ -29,7 +29,6 @@ die() {
   exit 1
 }
 
-force=false
 uninstall=false
 verbose=false
 sync_user_templates=true
@@ -55,7 +54,7 @@ log() {
 
 require_node_runtime() {
   if ! command -v node >/dev/null 2>&1; then
-    die "Node.js 18+ is required to sync config.toml or hooks.json; rerun and answer no to the template or hook prompts to skip those updates."
+    die "Node.js 18+ is required to sync config.toml or hooks.json."
   fi
 
   local major
@@ -339,26 +338,28 @@ case "$install_target" in
 esac
 
 codex_home="$(absolute_path "$(default_codex_home)")"
-if [[ "$sync_codex_config" == true ]]; then
+if [[ "$uninstall" == true && "$sync_codex_config" == true ]]; then
   codex_home="$(absolute_path "$(prompt_text "Codex home" "$(default_codex_home)")")"
 fi
 if [[ "$uninstall" == true ]]; then
-  force=false
   sync_user_templates="$(prompt_yes_no "Clean up user templates" true)"
 else
-  force="$(prompt_yes_no "Replace external skill symlinks with managed copies" false)"
-  sync_user_templates="$(prompt_yes_no "Sync user templates" true)"
+  sync_user_templates=true
 fi
 if [[ "$sync_codex_config" == true ]]; then
   if [[ "$uninstall" == true ]]; then
     sync_user_hooks="$(prompt_yes_no "Clean up Codex user hooks" true)"
   else
-    sync_user_hooks="$(prompt_yes_no "Sync Codex user hooks" true)"
+    sync_user_hooks=true
   fi
 else
   sync_user_hooks=false
 fi
-verbose="$(prompt_yes_no "Print detailed install output" false)"
+if [[ "$uninstall" == true ]]; then
+  verbose="$(prompt_yes_no "Print detailed uninstall output" false)"
+else
+  verbose=false
+fi
 target_root="$(absolute_path "$codex_home/skills")"
 claude_home="$(absolute_path "$(default_claude_home)")"
 claude_skill_root="$claude_home/skills"
@@ -538,12 +539,9 @@ copy_skill_dir() {
     if [[ "$current_target" == "$source_real" || "$current_target" == "$legacy_top_level_source" || "$current_target" == "$legacy_skill_dir_source" || ( -n "$legacy_skillset_source" && "$current_target" == "$legacy_skillset_source" ) ]] || same_git_worktree_skill_link "$source" "$current_target" "$label" || same_git_common_dir_skill_path "$current_target" "$label"; then
       rm "$target"
       replaced=true
-    elif [[ "$force" == true ]]; then
-      rm "$target"
-      replaced=true
     else
       echo "Refusing to replace existing symlink: $target -> $raw_current_target" >&2
-      echo "Enable force in the interactive prompt to replace symlinks." >&2
+      echo "External skill symlinks are not replaced during install." >&2
       exit 1
     fi
   elif [[ -e "$target" ]]; then
