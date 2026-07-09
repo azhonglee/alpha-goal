@@ -74,7 +74,7 @@ Rank open gaps before choosing the next target:
 | --- | --- --- | --- |
 | 1 | intent, outcome, scope, non-goals, success criteria | Define what the goal is, and the success criteria. |
 | 2 | constraints, execution boundary, acceptance evidence, claim boundary, decision boundary | Define how the goal is achieved. |
-| 3 | context/current facts, external/current facts, dependencies, assumptions | Define what is known, missing, must-have, or merely ideal. |
+| 3 | context/current facts, external/current facts, dependencies, assumptions | Define context, conditions, dependencies, and assumptions. |
 
 **Step 2: Ask and record**
 

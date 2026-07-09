@@ -23,15 +23,15 @@ Keep `Contract status: draft` until user confirmation.
 
 # Optional Content:
 Use optional fields when they improve execution safety, auditability, or implementation order.
-- Root Cause [root_cause], only for repair design
-- Issued by [issued_by]
-- Discovery notes [discovery_notes]
-- Interview ledger [interview_ledger]
-- Repo surfaces [repo_surfaces]
-- Confirmation route [confirmation_route]
-- Technical Design link [technical_design]
-- Assumptions + resolutions [assumptions_resolutions]
-- Dependency/integration order [repo_integration_order]
+- Root Cause, only for repair design
+- Issued by
+- Discovery notes
+- Interview ledger 
+- Repo surfaces
+- Confirmation route
+- Technical Design link
+- Assumptions + resolutions
+- Dependency/integration order
 
 ## Required Field Definitions
 
