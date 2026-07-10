@@ -44,8 +44,8 @@ if checklist.has_blocked_required_item:
 while True:
   slice = plan_highest_value_unmet_item(goal, checklist)
   assert_slice_inside_goal_contract(slice, goal)
-  outcome = execute_slice(slice, best_practice=TDD)
-  review_notes = review_execution_results(outcome)
+  outcome = execute_slice(slice, best_practice=TDD, principles=[OOD, KISS, YAGNI])
+  review_notes = review_execution_results(outcome, dimensions=[safety, security, performance, maintainability, observability, testability])
   evidence = classify_execution_evidence(outcome, review_notes)
   update_checklist(checklist, evidence)
 
@@ -110,15 +110,6 @@ Before mutation:
 [ ] Required dependencies/tools available.
 [ ] Rollback/recovery path understood.
 
-## Implementation Quality Gate
-
-Before landing slice:
-[ ] Minimal accepted-slice change; follows repo patterns.
-[ ] No unrelated refactor, formatting churn, dependency change, or silent fallback.
-[ ] `technical_design.md` API/data/test implications are implemented or recorded as same-goal gaps.
-[ ] Evidence covers touched risk, not only happy path.
-[ ] New defects/conflicts/regressions become `failed` checklist items.
-
 ## Completion Gate
 
 Before returning final success:
@@ -139,7 +130,6 @@ If any item is unchecked, do not claim complete.
 ## Checkpoint Policy
 
 `<Alpha Goal state root>/YYYYMMDD-<TaskName>/checkpoint.md` is recovery support, not progress.
-Resolve Alpha Goal state root as `$HOME/.alpha-goal/<workspace-slug>/`, where `<workspace-slug>` is `slug(repo_root or Goal Contract target workspace)`.
 
 Create or update checkpoint only for recovery, evidence handoff, verification handoff, long-running execution, interrupted execution, or multi-step repair.
 

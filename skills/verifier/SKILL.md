@@ -15,8 +15,6 @@ It compares evidence against an accepted Goal Contract and returns only:
 - BLOCKED
 - RETURN_TO_ALPHA_GOAL
 
-Resolve Alpha Goal state root as `$HOME/.alpha-goal/<workspace-slug>/`, where `<workspace-slug>` is `slug(repo_root or Goal Contract target workspace)`.
-
 verifier never redefines target, scope, acceptance evidence, non-goals, authority, or claim boundary.
 
 ## Verification Model
