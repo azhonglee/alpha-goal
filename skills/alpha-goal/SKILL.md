@@ -71,7 +71,7 @@ Rank open gaps before choosing the next target:
 - Do not move to a lower-risk dimension while a higher-risk blocking Goal Contract gap remains.
 
 | Goal Priority | Dimension | Purpose |
-| --- | --- --- | --- |
+| --- | --- | --- | --- |
 | 1 | intent, outcome, scope, non-goals, success criteria | Define what the goal is, and the success criteria. |
 | 2 | constraints, execution boundary, acceptance evidence, claim boundary, decision boundary | Define how the goal is achieved. |
 | 3 | context/current facts, external/current facts, dependencies, assumptions | Define context, conditions, dependencies, and assumptions. |
