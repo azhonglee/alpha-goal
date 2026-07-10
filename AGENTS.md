@@ -27,7 +27,7 @@
 
 ## Testing Guidelines
 
-当前没有独立测试框架。修改技能布局、front matter、安装文档、模板或阶段输出契约后，至少运行 `node tools/validate_skills.js .` 和 `node tools/validate_skills.js --fixtures`。修改 JavaScript 校验脚本时运行对应命令。修改安装脚本时运行 `bash -n scripts/install.sh`。修改 `templates/config.toml` 时用临时 `HOME` 和临时 `CODEX_HOME` 安装 smoke 验证 vendored TOML merge。修改安装说明时必须用临时 `HOME` 和临时 `CODEX_HOME` 验证 `scripts/install.sh`，不要污染真实用户配置。默认运行态记录只写入用户级 Alpha Goal state root：`$HOME/.alpha-goal/<workspace-slug>/`，其中 `<workspace-slug>` 来自稳定 workspace identity：`slug(repo_root or Goal Contract target workspace)`；默认入口是当前任务的 `goal-contract.md`，任务身份不明时可用 `<state-root>/control-state/latest.md` 找到最新已接受任务，条件状态统一写入同任务目录下的 `checkpoint.md`。
+当前没有独立测试框架。修改技能布局、front matter、安装文档、模板或阶段输出契约后，至少运行 `node tools/validate_skills.js .` 和 `node tools/validate_skills.js --fixtures`。修改 JavaScript 校验脚本时运行对应命令。修改安装脚本时运行 `bash -n scripts/install.sh`。修改 `templates/config.toml` 时用临时 `HOME` 和临时 `CODEX_HOME` 安装 smoke 验证 vendored TOML merge。修改安装说明时必须用临时 `HOME` 和临时 `CODEX_HOME` 验证 `scripts/install.sh`，不要污染真实用户配置。默认运行态记录只写入用户级 Alpha Goal state root：`$HOME/.alpha-goal/<workspace-slug>/`，其中 `<workspace-slug>` 来自稳定 workspace identity：`slug(repo_root or Goal Contract target workspace)`；默认入口是当前任务的显式 `goal-contract.md` 路径；路径不可用时扫描任务目录，若有多个候选则停止而不猜测；executor checklist、slice 证据和 verifier route 统一写入同任务目录下的 `checkpoint.md`。
 
 ## Commit & Pull Request Guidelines
 

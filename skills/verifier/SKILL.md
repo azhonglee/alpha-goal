@@ -1,38 +1,38 @@
 ---
 name: verifier
-description: "Compare execution evidence against an accepted Goal Contract and produce a routing verdict. Never redefine authority, scope, or acceptance."
+description: "Compare execution evidence and the required acceptance checklist against an accepted Goal Contract after each important execution slice, then produce a routing verdict. Never redefine authority, scope, or acceptance."
 ---
 
 # Verifier
 
 ## Mission
 
-verifier owns verification authority.
+`verifier` owns evidence classification and routing semantics.
 
-It compares evidence against an accepted Goal Contract and returns only:
+After every important execution slice, it compares raw evidence and the persisted acceptance checklist against an accepted Goal Contract and returns only:
 - PASS_TO_FINAL
 - NEXT_ITERATION
 - BLOCKED
 - RETURN_TO_ALPHA_GOAL
 
-verifier never redefines target, scope, acceptance evidence, non-goals, authority, or claim boundary.
+`verifier` never redefines target, scope, acceptance evidence, non-goals, authority, or claim boundary. It returns a route; the calling Agent owns native Goal lifecycle updates.
 
 ## Verification Model
 
 ```text
 Accepted Goal Contract
-Evidence + Acceptance Checklist
-Authority / blocker scan
+Required checkpoint checklist + raw slice evidence
+Evidence classification + authority / blocker scan
 Route
 ```
 
 ## Core Principle
 
-Verification compares evidence, not effort, intent, or implementation size.
+Verification compares evidence, not effort, intent, or implementation size. Run it after every important slice, not only after executor believes all work is complete.
 
 ## Evidence Classification
 
-Classify evidence before comparison:
+Classify raw evidence before comparison:
 - [from-test] result=pass|fail
 - [from-build] result=pass|fail
 - [from-runtime] result=observed|failed
@@ -43,15 +43,15 @@ Classify evidence before comparison:
 Rules:
 - Auto-confirm only observable evidence.
 - Do not infer completion from partial success.
-- Do not infer authority from implementation.
+- Do not infer safety from absence of failure.
+- Do not infer acceptance from unrelated tests.
+- Do not infer authority from implementation convenience.
 - Compare only against Goal Contract acceptance evidence.
 - PASS_TO_FINAL requires zero unmet required acceptance items.
 
 ## Gap Analysis
 
-Compare Goal Contract acceptance evidence and the hard-blocking checklist against evidence.
-
-Gap kinds:
+Compare Goal Contract acceptance evidence and the required checkpoint checklist against classified evidence.
 
 | Gap Kind | Meaning | Route |
 | --- | --- | --- |
@@ -67,18 +67,21 @@ No gap plus satisfied acceptance evidence routes to PASS_TO_FINAL.
 Contract Gate:
 - Goal Contract exists.
 - Contract status = accepted.
-- Issued by = alpha-goal.
+- Authorization Source exists.
 - Failure route: RETURN_TO_ALPHA_GOAL.
 
 Evidence Gate:
-- Evidence exists, is observable, reproducible, and maps to acceptance evidence.
+- Raw evidence exists, is observable, and maps to acceptance evidence.
+- Reproducibility is required only when the Goal Contract acceptance evidence requires it.
 - Failure route: NEXT_ITERATION.
 
 Acceptance Checklist Gate:
-- Acceptance checklist exists when executor provides one.
-- No required item is `pending`, `failed`, or `blocked`.
-- Every in-scope `technical_design.md` item is satisfied, mapped, or explicitly `deferred-non-goal`.
-- Failure route: NEXT_ITERATION, or BLOCKED when the unmet item is blocked.
+- `checkpoint.md` exists and contains the current acceptance checklist.
+- The checklist reflects the latest important slice.
+- Only verifier changes checklist item status from `pending` based on classified evidence or gaps.
+- Every in-scope `technical_design.md` item is satisfied, mapped, or explicitly `deferred-non-goal` before PASS_TO_FINAL.
+- Missing or stale checklist route: NEXT_ITERATION.
+- A `pending` or `failed` item routes to NEXT_ITERATION; a `blocked` item routes to BLOCKED.
 
 Authority Gate:
 - No scope drift.
@@ -97,13 +100,14 @@ Blocker Gate:
 
 ```pseudo
 assert_goal_contract_valid(goal)
-classified = classify_evidence(evidence)
-checklist = extract_acceptance_checklist_if_present(classified)
+checklist = read_required_checkpoint_checklist(checkpoint)
+classified = classify_raw_evidence(raw_evidence)
 gap = compare(goal.acceptance_evidence, checklist, classified)
+update_checklist_statuses(checklist, classified, gap)
+record_verification_result(checkpoint, checklist, classified, gap)
 
 if gap.scope_change or gap.authority_change: return RETURN_TO_ALPHA_GOAL
-if gap.external_blocker: return BLOCKED
-if checklist.has_blocked_required_item: return BLOCKED
+if gap.external_blocker or checklist.has_blocked_required_item: return BLOCKED
 if gap.same_goal_fixable: return NEXT_ITERATION
 if checklist.has_pending_or_failed_required_item: return NEXT_ITERATION
 if acceptance_satisfied and zero_unmet_required_acceptance_items: return PASS_TO_FINAL
@@ -112,22 +116,24 @@ return NEXT_ITERATION
 
 ## Route Contract
 
-| Route | Condition |
-| --- | --- |
-| PASS_TO_FINAL | Acceptance evidence satisfied; zero unmet required acceptance items; no unresolved blocker; no authority drift. |
-| NEXT_ITERATION | Same-goal fixable gap exists. |
-| BLOCKED | Progress needs an external dependency, environment, credential, data, permission, tool, or user decision. |
-| RETURN_TO_ALPHA_GOAL | Goal Contract is insufficient or new authority is required. |
+| Route | Condition | Calling Agent action |
+| --- | --- | --- |
+| PASS_TO_FINAL | Acceptance evidence satisfied; zero unmet required acceptance items; no unresolved blocker; no authority drift. | If the native Goal represents this contract and no required work remains, call `update_goal(status=complete)`, then give the final response. |
+| NEXT_ITERATION | Same-goal fixable gap exists. | Return control to `executor` for the next slice; do not terminally update the native Goal. |
+| BLOCKED | Progress needs an external dependency, environment, credential, data, permission, tool, or user decision. | Report the blocker; call `update_goal(status=blocked)` only when the native Goal blocked threshold is satisfied. |
+| RETURN_TO_ALPHA_GOAL | Goal Contract is insufficient or new authority is required. | Return to `alpha-goal`; do not terminally update the native Goal. |
+
+The calling Agent, not `verifier`, controls the native Goal lifecycle. A route is evidence for that Agent's lifecycle decision, not a lifecycle side effect.
 
 ## Before Final Verdict Checklist
 
 [ ] Goal Contract loaded.
-[ ] Acceptance evidence reviewed.
-[ ] Evidence classified.
+[ ] Authorization Source reviewed.
+[ ] Current checkpoint checklist loaded.
+[ ] Raw evidence classified.
 [ ] Evidence mapped to acceptance evidence.
-[ ] Zero unmet required acceptance items.
 [ ] Gap analyzed.
 [ ] Authority checked.
 [ ] Non-goals checked.
 [ ] Claim boundary checked.
-[ ] Route selected.
+[ ] Checklist statuses and route recorded in checkpoint.
