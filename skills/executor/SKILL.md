@@ -44,7 +44,7 @@ if checklist.has_blocked_required_item:
 while True:
   slice = plan_highest_value_unmet_item(goal, checklist)
   assert_slice_inside_goal_contract(slice, goal)
-  outcome = execute_slice(slice, best_practice=TDD, principles=[OOD, KISS, YAGNI])
+  outcome = execute_slice(slice, best_practice=TDD, principles=[SOLID, DRY, KISS, YAGNI, SoC])
   review_notes = review_execution_results(outcome, dimensions=[safety, security, performance, maintainability, observability, testability])
   evidence = classify_execution_evidence(outcome, review_notes)
   update_checklist(checklist, evidence)

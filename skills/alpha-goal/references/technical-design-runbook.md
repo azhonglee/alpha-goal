@@ -25,6 +25,9 @@ Keep a gap `blocking` when a different answer could change code, interfaces, dat
 
 ## Technical Clarification
 
+Best practice you need to follow:
+- SOLID, DRY, KISS, YAGNI, SoC
+
 Ask one high-leverage technical question per round.
 - Do not ask for discoverable facts.
 - Present options conversationally with recommendation and reasoning.
