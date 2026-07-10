@@ -33,7 +33,7 @@ Use subagents for independent parallel subtasks when that improves throughput. B
 
 ## Isolation Principles
 
-- Resolve the Alpha Goal state root before writing runtime evidence, review notes, scratch artifacts, interview records, iteration records, or verification records. Always use `$HOME/.alpha-goal/<workspace-slug>/`. Derive `<workspace-slug>` from stable workspace identity: `slug(repo_root or Goal Contract target workspace)`, never from the session directory.
+- Resolve the Alpha Goal state root before writing runtime evidence, review notes, scratch artifacts, interview records, iteration records, or verification records. Always use `$HOME/.alpha-goal/<workspace-slug>/`. Derive `<workspace-slug>` from stable workspace identity: `slug(basename(repo_root or Goal Contract target workspace))`, never from the full absolute path or session directory.
 - Ensure `.worktrees/` is ignored before placing repository-local worktrees there.
 - Use repository-local worktrees to isolate changes per goal/task batch. Create them under `<repo>/.worktrees/codex/<goal-slug>/` unless the repository already defines a stricter convention or the path is not technically usable.
 - In monorepos, create the worktree under the owning subrepo's `.worktrees/codex/<goal-slug>/`.
