@@ -68,7 +68,7 @@ function emptyContract() {
 }
 
 function validateContract(contract, errors) {
-  if (contract.schemaVersion !== 2) errors.push(`${CONTRACT_PATH}: schemaVersion must be 2`);
+  if (contract.schemaVersion !== 3) errors.push(`${CONTRACT_PATH}: schemaVersion must be 3`);
   requireArray(contract, "skills", errors);
   requireArray(contract, "artifacts", errors);
   requireArray(contract, "requiredGates", errors);

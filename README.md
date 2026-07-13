@@ -113,11 +113,11 @@ Alpha Goal 让 agent 工作保持目标明确、行动有界、声明受证据�
 
 - 证据先于授权：当前代码事实只描述现状；期望行为来自用户意图、规格、issue 或已接受契约。
 - 目标先于行动：预期结果、范围、非目标、验收证据、决策负责人和声明边界共同限定什么可以被改变。
-- 持久状态：`goal-contract.md` 是 `alpha-goal` 的默认产物；`technical_design.md` 仅在 Goal Contract Confirmation Gate 选择 `run technical design` 后由 `references/technical-design-runbook.md` 创建；`checkpoint.md` 是 executor 到 verifier 的必需交接，绑定 artifact revisions、每个 in-scope repo 的执行身份与 target fingerprint、序列、checklist 和证据。
-- 恢复身份：优先使用显式任务产物路径；否则只接受唯一且匹配 workspace、accepted active 状态和 artifact revisions 的候选，零个、多个、已结束、陈旧或不匹配时停止。
+- 持久状态：`goal-contract.md` 是 `alpha-goal` 的默认产物；`technical_design.md` 仅在 Goal Contract Confirmation Gate 选择 `run technical design` 后由 `references/technical-design-runbook.md` 创建；`checkpoint.md` 是 executor 到 verifier 的必需交接，记录 canonical artifact path、每个 in-scope repo 的执行上下文和序列、checklist 和证据。
+- 恢复身份：优先使用显式任务产物路径；否则只接受唯一且匹配 workspace、accepted active 状态的候选，零个、多个、已结束或上下文不匹配时停止。
 - 渐进披露：`alpha-goal` 主体只保留 Goal Contract 澄清、review、confirm 和 Native Goal Sync；Technical Design 的澄清、review 和 confirm 放在 `references/technical-design-runbook.md`。
 - Native Goal Sync：用户确认契约后，`alpha-goal` 才能创建或复用当前线程的 native goal；verifier 提供 route；外层 Agent 根据终态 route 管理原生 goal 更新。
 - 有界执行：优先选择可取证的有界动作或定向变更，而非宽泛重构和猜测式清理。
 - 迭代验证：每个重要 slice 后由 `verifier` 对新鲜证据、hard-blocking checklist、blocker 和 authority 进行独立检查。
 - 诚实路由：目标不清回到 `alpha-goal`，同一目标内可修复的执行缺口回到 `executor`。
-- 策略场景：`node tools/verify_strategy_scenarios.js` 覆盖 revision、stale evidence、post-PASS mutation、恢复歧义、并发写入和 stagnation route。
+- 策略场景：`node tools/verify_strategy_scenarios.js` 覆盖 stale evidence、post-PASS mutation、恢复歧义、并发执行和 stagnation route。

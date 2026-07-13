@@ -4,8 +4,6 @@ Write the canonical Goal Contract to `<Alpha Goal state root>/YYYYMMDD-<TaskName
 
 ## Required Content
 
-- Task identity
-- Contract revision
 - Contract status
 - Authorization Source
 - Technical Context
@@ -28,8 +26,6 @@ Use optional sections only when they improve execution safety or auditability: R
 ```md
 # Goal Contract
 
-Task identity: YYYYMMDD-TaskName
-Contract revision: 1
 Contract status: draft
 
 ## Authorization Source
@@ -71,18 +67,11 @@ Contract status: draft
 - Claims available evidence may support and claims that must remain caveated.
 ```
 
-## Identity and Revision Rules
-
-- `Task identity` is stable for the lifetime of one Goal Contract and matches its task directory.
-- `Contract revision` is a monotonically increasing integer. Increment it whenever accepted intent, outcome, scope, constraints, non-goals, authority, acceptance, decision boundary, or claim boundary changes.
-- Never edit an accepted contract materially without incrementing the revision and returning through confirmation.
-- Checkpoint and Technical Design must bind to the exact task identity and accepted contract revision they implement.
-
 ## Field Rules
 
 ### Authorization Source
 
-Record the current user request, explicit answers, accepted revision, and any authoritative issue or spec. Name the winning source when code, docs, tests, and user instructions conflict. Code state alone cannot authorize desired behavior.
+Record the current user request, explicit answers, accepted clarification, and any authoritative issue or spec. Name the winning source when code, docs, tests, and user instructions conflict. Code state alone cannot authorize desired behavior.
 
 ### Technical Context
 
@@ -128,7 +117,6 @@ Define what final evidence permits the Agent to claim. Keep production safety, p
 Before confirmation, verify:
 
 - Every required field is present and has no blocking gap.
-- Task identity is stable, and Contract revision reflects the accepted content.
 - Authorization Source resolves material source conflicts.
 - Each covered dimension records its decision, boundary, execution impact, acceptance observer, and status.
 - Every success criterion maps to acceptance evidence.

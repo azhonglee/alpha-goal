@@ -9,7 +9,7 @@ description: "Compare bound execution evidence and the required acceptance check
 
 `verifier` owns evidence classification, checklist status changes, gap classification, and routing semantics.
 
-After every important execution slice, it compares raw evidence and the persisted acceptance checklist against the exact accepted Goal Contract and applicable Technical Design revisions, then returns only:
+After every important execution slice, it compares raw evidence and the persisted acceptance checklist against the current accepted Goal Contract and applicable Technical Design, then returns only:
 - PASS_TO_FINAL
 - NEXT_ITERATION
 - BLOCKED
@@ -20,17 +20,17 @@ After every important execution slice, it compares raw evidence and the persiste
 ## Verification Model
 
 ```text
-Accepted Goal Contract revision + applicable Technical Design revision
-Bound checkpoint checklist + raw slice evidence + final target fingerprint
-Evidence classification + freshness/binding/authority/blocker scan
-Bound route verdict + verification sequence
+Current accepted Goal Contract + applicable Technical Design
+Bound checkpoint checklist + raw slice evidence + final target state
+Evidence classification + freshness/context/authority/blocker scan
+Context-scoped route verdict
 ```
 
 ## Core Principle
 
 Verification compares evidence, not effort, intent, or implementation size. Run it after every important slice and again after any target-state or delivery-content mutation that follows a previous PASS verdict.
 
-A verdict applies only to its recorded task identity, artifact revisions, workspace and every in-scope repository worktree, branch, HEAD, target fingerprint, slice sequence, and verification sequence.
+A verdict applies to the current execution context observed during that verifier run. Final completion requires the verifier to run immediately after the latest target/delivery mutation.
 
 ## Evidence Classification
 
@@ -44,7 +44,7 @@ Classify raw evidence before comparison:
 
 Rules:
 - Auto-confirm only observable evidence.
-- Require observer/command, result or exit code, observation time, target fingerprint, and raw output/artifact location.
+- Require observer/command, result or exit code, observation time, and raw output/artifact location.
 - Do not infer completion from partial success or safety from absence of failure.
 - Do not infer acceptance from unrelated tests or authority from implementation convenience.
 - Compare only against Goal Contract acceptance evidence.
@@ -55,10 +55,10 @@ Rules:
 
 | Gap Kind | Meaning | Route |
 | --- | --- | --- |
-| `same_goal_fixable` | Acceptance is not satisfied, and the same revisions still authorize materially different work. | NEXT_ITERATION |
+| `same_goal_fixable` | Acceptance is not satisfied, and the current accepted contract still authorizes materially different work. | NEXT_ITERATION |
 | `scope_change` | Scope or claim boundary no longer matches the Goal Contract. | RETURN_TO_ALPHA_GOAL |
-| `authority_change` | New authorization or Contract/Design revision is required. | RETURN_TO_ALPHA_GOAL |
-| `binding_mismatch` | Task, revision, workspace, worktree, sequence, or target fingerprint is stale/mismatched. | RETURN_TO_ALPHA_GOAL |
+| `authority_change` | New authorization or Goal Contract or Technical Design change is required. | RETURN_TO_ALPHA_GOAL |
+| `context_mismatch` | Artifact path, workspace, worktree, branch, or repository context does not match the current execution context. | RETURN_TO_ALPHA_GOAL |
 | `external_blocker` | Missing dependency prevents progress. | BLOCKED |
 | `stagnation` | The same gap repeats without new evidence, target change, gap reduction, or authorized alternative. | BLOCKED or RETURN_TO_ALPHA_GOAL according to cause |
 
@@ -67,15 +67,14 @@ No gap plus satisfied acceptance evidence routes to PASS_TO_FINAL.
 ## Verification Gates
 
 Contract Gate:
-- Goal Contract exists, status = accepted, Task identity and Contract revision exist, and Authorization Source exists.
-- Applicable Technical Design binds to the same task and Contract revision and has an accepted Design revision.
+- Goal Contract exists, status = accepted, Authorization Source exists.
+- Applicable Technical Design is the applicable accepted design for the current Goal Contract.
 - Failure route: RETURN_TO_ALPHA_GOAL.
 
-Binding Gate:
-- Checkpoint task/revisions/workspace, every in-scope repo-manifest binding, and recorded native Goal identity/sync state match current inputs.
-- Slice and verification sequences are monotonic; verifier updates only the sequence it loaded.
-- Current target fingerprint matches the handoff and evidence.
-- Stale write, concurrent change, or mismatch route: RETURN_TO_ALPHA_GOAL.
+Context Gate:
+- Checkpoint artifact paths, workspace, every in-scope repo-manifest context, and recorded native Goal identity/sync state match current inputs.
+- Inspect current repository state and collect or rerun the evidence required for the final claim after the latest target/delivery edit.
+- Unexpected checkpoint change, concurrent execution, or execution-context mismatch routes to RETURN_TO_ALPHA_GOAL.
 
 Evidence Gate:
 - Raw evidence is observable, attributable, current, and maps to acceptance evidence.
@@ -89,11 +88,11 @@ Acceptance Checklist Gate:
 - A `pending` or `failed` item routes to NEXT_ITERATION only when an authorized materially different next slice exists; otherwise route by blocker or missing authority. A `blocked` item routes to BLOCKED.
 
 Authority Gate:
-- No scope, authority, non-goal, claim-boundary, or artifact-revision drift.
+- Current semantic inspection finds no scope, authority, non-goal, claim-boundary, or material Goal Contract/Technical Design drift.
 - Failure route: RETURN_TO_ALPHA_GOAL.
 
 Stagnation Gate:
-- A repeated gap fingerprint shows progress or an authorized materially different next slice.
+- A repeated gap key shows progress or an authorized materially different next slice.
 - If no authorized alternative remains, route by cause instead of NEXT_ITERATION.
 
 Blocker Gate:
@@ -103,21 +102,21 @@ Blocker Gate:
 ## Verification Algorithm
 
 ```pseudo
-goal = load_exact_accepted_contract(task_identity, contract_revision)
-design = load_exact_applicable_design(task_identity, contract_revision, design_revision)
-checkpoint = compare_and_load_checkpoint(expected_slice_sequence, expected_verification_sequence)
-assert_binding_current(goal, design, checkpoint, current_repo_manifest_bindings, current_target_fingerprints)
+goal = load_current_accepted_contract(canonical_goal_contract_path)
+design = load_current_applicable_design(canonical_technical_design_path_or_none)
+checkpoint = load_current_checkpoint_single_writer()
+assert_context_current(goal, design, checkpoint, current_repo_manifest_context, current_repository_states)
 classified = classify_current_raw_evidence(raw_evidence)
 gap = compare(goal.acceptance_evidence, design, checkpoint.checklist, classified)
 gap = apply_stagnation_policy(gap, checkpoint.stagnation_ledger)
 update_checklist_statuses(checkpoint.checklist, classified, gap)
 verdict = select_route(gap, checkpoint.checklist)
-record_verdict_compare_and_swap(checkpoint, classified, gap, verdict, next_verification_sequence)
-return verdict_bound_to_current_state
+record_verdict(checkpoint, classified, gap, verdict)
+return verdict_for_current_context
 ```
 
 Route precedence:
-1. Binding, scope, authority, claim-boundary, or revision mismatch → RETURN_TO_ALPHA_GOAL.
+1. Artifact-path, execution-context, scope, authority, claim-boundary, or material contract/design mismatch → RETURN_TO_ALPHA_GOAL.
 2. External blocker or terminal stagnation caused by dependency → BLOCKED.
 3. Same-goal fixable gap with an authorized materially different next slice → NEXT_ITERATION.
 4. Pending/failed checklist item with current authority and an authorized materially different next slice → NEXT_ITERATION.
@@ -129,21 +128,21 @@ Route precedence:
 
 | Route | Condition | Calling Agent action |
 | --- | --- | --- |
-| PASS_TO_FINAL | Current final-state evidence satisfies all required items for the exact bound state; no blocker, drift, stale evidence, or stagnation. | Recheck that no target-state or delivery-content mutation occurred, then update the matching native Goal and persist the lifecycle update result in checkpoint. If `update_goal(status=complete)` fails, do not claim lifecycle completion; report the sync failure while preserving verified implementation facts. |
+| PASS_TO_FINAL | Current final-state evidence satisfies all required items for the exact bound state; no blocker, drift, stale evidence, or stagnation. | Recheck that no target-state or delivery-content mutation occurred, then apply the current runtime adapter lifecycle rule and persist its result in checkpoint. In Codex, update the matching native Goal and do not claim lifecycle completion if `update_goal(status=complete)` fails. In evaluator-driven adapters without an update tool, the adapter-defined evaluator result is the lifecycle outcome; do not invent a tool call. |
 | NEXT_ITERATION | Same-goal fixable gap exists with an authorized materially different next slice. | Return to `executor`; do not terminally update the native Goal. |
 | BLOCKED | An external dependency or terminal dependency-caused stagnation prevents progress. | Report the blocker; call `update_goal(status=blocked)` only when the native Goal blocked threshold is satisfied. |
-| RETURN_TO_ALPHA_GOAL | Contract/design/binding/authority is insufficient, stale, mismatched, or changed. | Return to `alpha-goal`; do not terminally update the native Goal. |
+| RETURN_TO_ALPHA_GOAL | Contract/design/execution context/authority is insufficient, stale, mismatched, or changed materially. | Return to `alpha-goal`; do not terminally update the native Goal. |
 
-The calling Agent controls native Goal lifecycle. Any target-state or delivery-content mutation after PASS_TO_FINAL invalidates the verdict and requires another verifier run before final completion claims. Native Goal lifecycle and checkpoint metadata synchronization do not invalidate PASS when they only record the bound verdict and do not alter the verified target or delivery content.
+The calling Agent controls native Goal lifecycle through the current runtime adapter. Any target-state or delivery-content mutation after PASS_TO_FINAL invalidates the verdict and requires another verifier run before final completion claims. Native Goal lifecycle and checkpoint metadata synchronization do not invalidate PASS when they only record the bound verdict and do not alter the verified target or delivery content.
 
 ## Before Final Verdict Checklist
 
-[ ] Exact Goal Contract and Technical Design revisions loaded.
-[ ] Current bound checkpoint loaded with monotonic sequences.
-[ ] Every in-scope repository worktree/branch/HEAD/target fingerprint and repo-manifest boundary matches.
+[ ] Current accepted Goal Contract and applicable Technical Design loaded from their canonical paths.
+[ ] Current checkpoint loaded under the single-writer rule.
+[ ] Every in-scope repository worktree/branch and repo-manifest boundary matches; current repository state was inspected directly.
 [ ] Raw evidence is current and classified.
 [ ] Evidence maps to acceptance evidence.
 [ ] Checklist statuses updated only by verifier.
 [ ] Gap, stagnation, authority, non-goals, and claim boundary checked.
-[ ] Bound route and next verification sequence recorded atomically.
+[ ] Route recorded in checkpoint.
 [ ] Native Goal identity and latest lifecycle sync result are preserved for recovery.

@@ -66,7 +66,7 @@ Coverage cells affected: decision / boundary / implementation impact / acceptanc
 
 ## Write Technical Design
 
-Follow `technical-design-book.md` to write `<Alpha Goal state root>/YYYYMMDD-<TaskName>/technical_design.md`. Bind it to the Goal Contract task identity and revision, and assign a monotonically increasing Design revision.
+Follow `technical-design-book.md` to write `<Alpha Goal state root>/YYYYMMDD-<TaskName>/technical_design.md`.
 Link the Goal Contract and Technical Design to each other.
 Keep `Design status: draft` until Technical Design Confirmation Gate approves it.
 Write only from answered, auto-confirmed, or cited facts. Keep unresolved required fields as `[blocking]`.
@@ -107,7 +107,7 @@ Present this summary before asking for approval:
 ## Technical Design Confirmation Gate
 
 Use `request_user_input` or equivalent structured input to ask for approve/launch, refine technical design, or reject.
-- On approve/launch: verify Task identity and Contract revision still match; set `Contract status: accepted`; set `Design status: accepted`; perform Native Goal Sync; hand off to `executor` skill.
+- On approve/launch: semantically confirm the Technical Design still implements the current Goal Contract; if the contract changed materially, return to Technical Clarification. Otherwise set `Contract status: accepted`; set `Design status: accepted`; perform Native Goal Sync; record its target and result in checkpoint; hand off to `executor` skill.
 - On refine technical design: keep `Design status: draft`; continue Technical Clarification.
 - On reject: keep `Contract status: design-authorized`, set `Design status: rejected`, and do not create or change native goals.
 

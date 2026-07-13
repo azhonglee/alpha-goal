@@ -25,7 +25,7 @@ Claude runtime tool-name adaptation lives in `skills/alpha-goal/references/claud
 
 ## User Hooks
 
-`templates/hooks.json` defines one Codex user-level `PostCompact` hook, marked by `codex-alpha-goal-compact-recovery:v1`, without a matcher so all post-compaction triggers are covered. A Codex install merges that template into `$HOME/.codex/hooks.json`. The hook prints a compact recovery policy that reloads the applicable `alpha-goal`, `executor`, or `verifier` skill, resumes from `goal-contract.md`, reads `technical_design.md` when present for implementation, repair, refactor, hardening, cross-file behavior, interface/data-model changes, or material risk after Goal Contract Confirmation Gate selects technical design, resolves an explicit artifact path or the sole accepted active candidate matching workspace identity and artifact revisions; it stops on zero, multiple, rejected, completed, stale, or mismatched candidates. `checkpoint.md` binds revisions, per-repository execution identity and target fingerprint, monotonic sequences, checklist, slice evidence, and verification handoff. `executor` still requires an accepted Goal Contract; `verifier` compares evidence with the hard-blocking acceptance checklist before returning a route.
+`templates/hooks.json` defines one Codex user-level `PostCompact` hook, marked by `codex-alpha-goal-compact-recovery:v1`, without a matcher so all post-compaction triggers are covered. A Codex install merges that template into `$HOME/.codex/hooks.json`. The hook prints a compact recovery policy that reloads the applicable `alpha-goal`, `executor`, or `verifier` skill, resumes from `goal-contract.md`, reads `technical_design.md` when present for implementation, repair, refactor, hardening, cross-file behavior, interface/data-model changes, or material risk after Goal Contract Confirmation Gate selects technical design, resolves an explicit artifact path or the sole accepted active candidate matching workspace identity; it stops on zero, multiple, rejected, completed, or context-mismatched candidates. `checkpoint.md` records canonical artifact paths, per-repository execution context, checklist, slice evidence, and verification handoff. `executor` still requires an accepted Goal Contract; `verifier` compares evidence with the hard-blocking acceptance checklist before returning a route.
 
 Hook replacement is by marker family, not exact version, so later `:v2` template markers replace existing `:v1` hooks. The installer also migrates the earlier experimental `codex-compact-skill-recovery` family.
 
@@ -43,9 +43,9 @@ Default runtime artifacts live under the user-level Alpha Goal state root: `$HOM
 
 | Path | Purpose |
 |---|---|
-| `<state-root>/YYYYMMDD-<TaskName>/goal-contract.md` | Default `alpha-goal` artifact and canonical draft or accepted contract, including stable Task identity, monotonic Contract revision, status, authorization source, discovery, and handoff context. |
-| `<state-root>/YYYYMMDD-<TaskName>/technical_design.md` | Conditional canonical Technical Design bound to Task identity and Contract revision, with monotonic Design revision. |
-| `<state-root>/YYYYMMDD-<TaskName>/checkpoint.md` | Required during executor runs; binds artifact revisions, workspace and every in-scope repo worktree/branch/HEAD/target fingerprint, slice/verification sequences, evidence, checklist, stagnation, and route. |
+| `<state-root>/YYYYMMDD-<TaskName>/goal-contract.md` | Default `alpha-goal` artifact and canonical draft or accepted contract, including status, authorization source, discovery, and handoff context. |
+| `<state-root>/YYYYMMDD-<TaskName>/technical_design.md` | Conditional canonical Technical Design for the current Goal Contract, with draft, accepted, or rejected status. |
+| `<state-root>/YYYYMMDD-<TaskName>/checkpoint.md` | Required during executor runs; records canonical artifact paths, workspace, every in-scope repo worktree/branch, single-writer context, evidence, checklist, stagnation, and route. |
 
 ## Count Budget
 

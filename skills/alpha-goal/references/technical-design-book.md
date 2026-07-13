@@ -1,7 +1,7 @@
 Write the Technical Design to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/technical_design.md` only from `technical-design-runbook.md`, after Goal Contract Confirmation Gate selects `run technical design`.
 Link the Goal Contract and Technical Design to each other when both exist.
 
-The state-root `technical_design.md` is canonical. It must record `Task identity`, `Contract revision`, and a monotonically increasing `Design revision`; any material design change increments `Design revision` and requires renewed design confirmation.
+The state-root `technical_design.md` is canonical. Material design changes require renewed design confirmation before execution continues.
 Repo specs are mirrors or references only; conflicts route back to `alpha-goal`.
 Keep `Design status: draft` until Technical Design Confirmation Gate approves it. Set it to `accepted` only when the Goal Contract and Technical Design are approved together.
 
