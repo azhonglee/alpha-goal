@@ -43,7 +43,7 @@ In practice, it compresses requirement clarification, authority boundaries, iter
 %%{init: {"theme":"base","flowchart":{"wrappingWidth":900,"nodeSpacing":80,"rankSpacing":70,"htmlLabels":true},"markdownAutoWrap":false,"themeVariables":{"background":"#364150","primaryColor":"#364150","primaryTextColor":"#f8fafc","primaryBorderColor":"#f8fafc","lineColor":"#f8fafc","edgeLabelBackground":"#364150","fontFamily":"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"}}}%%
 flowchart TD
   AG["<div align='center'><strong>alpha-goal (entry)</strong></div><div align='left' style='width:900px'><br/>Discover facts → Clarify requirements → Pressure-test → Write Goal Contract → User confirmation<br/>Output: goal-contract.md (authority contract)</div>"]
-  CL["<div align='center'><strong>executor (execution)</strong></div><div align='left' style='width:900px'><br/>Slice by contract → Execute → Collect evidence → Update hard-blocking checklist<br/>Output: checkpoint.md (conditional recovery / evidence handoff)</div>"]
+  CL["<div align='center'><strong>executor (execution)</strong></div><div align='left' style='width:900px'><br/>Slice by contract → Execute → Collect evidence → Update hard-blocking checklist<br/>Output: checkpoint.md (required checklist / evidence handoff)</div>"]
   GV["<div align='center'><strong>verifier (verification)</strong></div><div align='left' style='width:900px'><br/>Evidence + checklist vs acceptance evidence → Route decision<br/>Verdicts: PASS_TO_FINAL / NEXT_ITERATION / BLOCKED / RETURN...</div>"]
 
   AG -->|"after contract is accepted"| CL
@@ -100,7 +100,7 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/executor/"><code>executor</code></a></td>
-      <td align="left">Execute or harden an authorized slice, with <code>goal-contract.md</code> required and <code>checkpoint.md</code> used only as a conditional checkpoint.</td>
+      <td align="left">Execute or harden an authorized slice; <code>goal-contract.md</code> is authoritative and <code>checkpoint.md</code> must persist the checklist, slice evidence, and verifier route.</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/verifier/"><code>verifier</code></a></td>
@@ -115,9 +115,8 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 
 - Evidence before authority: Current code facts describe current state; desired behavior comes from user intent, specs, issues, or accepted contracts.
 - Goals before action: expected outcome, scope, non-goals, acceptance evidence, decision owner, and claim boundary define what may change.
-- Persistent state: `goal-contract.md` is the default `alpha-goal` output; `technical_design.md` is created only by `references/technical-design-runbook.md` after Goal Contract Confirmation Gate selects `run technical design`; `checkpoint.md` conditionally carries recovery and evidence handoff.
 - Progressive disclosure: `alpha-goal` keeps only Goal Contract clarification, review, confirmation, and Native Goal Sync in `SKILL.md`; Technical Design clarification, review, and confirmation live in `references/technical-design-runbook.md`.
-- Native Goal Sync: after the user accepts the contract, `alpha-goal` may create or reuse the current thread's native goal; execution and verification do not control native goal status.
+- Native Goal Sync: after the user accepts the contract, `alpha-goal` may create or reuse the current thread's native goal; the verifier supplies routes and the calling Agent manages native Goal updates from terminal routes.
 - Bounded execution: prefer bounded evidence-producing actions or targeted changes over broad refactors and speculative cleanup.
-- Independent verification: final/ready/safe/complete/repair/review claims require fresh evidence, hard-blocking checklist coverage, and blocker checks, reviewed separately from execution.
+- Iterative verification: after every important slice, `verifier` independently checks fresh evidence, hard-blocking checklist coverage, blockers, and authority.
 - Honest routing: unclear goals return to `alpha-goal`; same-goal fixable execution gaps return to `executor`.

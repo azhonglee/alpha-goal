@@ -22,7 +22,7 @@ Enter `alpha-goal` for engineering, design, implementation, repair, refactor, or
 ## Clarification Gate
 
 Do not leave `Clarification` while any material Goal Contract blocking gap remains:
-- Goal Contract coverage: Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Authorization source, Success Criteria, Acceptance evidence.
+- Goal Contract coverage: Authorization Source, Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Success Criteria, Acceptance evidence.
 - Every unresolved unknown is classified as `blocking`, `non-material`, or `deferred non-goal`.
 - Required Goal Contract coverage means: decision, boundary, execution impact, acceptance/observer, and status.
 - Planned questions, unanswered questions, hypothetical answers, confidence, and round count do not reduce coverage.
@@ -142,14 +142,14 @@ Track used modes in state to prevent repetition.
 
 ### Write Goal Contract
 
-Follow `references/goal-contract-book.md` to write the Goal Contract. Set `Issued by = alpha-goal`.
+Follow `references/goal-contract-book.md` to write the Goal Contract.
 Write artifacts only from answered, auto-confirmed, or cited facts. Keep unresolved required fields as `[blocking]`; do not fill them from hypothetical answers.
 
 ## Review Gate
 
 Self-check the Goal Contract before asking for confirmation:
 - Coverage check: required fields exist, no blocking gap remains, and every covered dimension has decision, boundary, execution impact, acceptance/observer, and status.
-- Authority check: current-state facts do not define desired behavior; non-goals, execution boundary, decision boundary, and claim boundary are explicit.
+- Authority check: Authorization Source is present; current-state facts do not define desired behavior; non-goals, execution boundary, decision boundary, and claim boundary are explicit.
 - Acceptance check: success criteria map to acceptance evidence and validation observers.
 - Closure check: no covered dimension relies only on confidence, round count, planned questions, or an untested assumption; recheck the highest-risk covered dimension.
 
@@ -193,4 +193,5 @@ Native Goal Sync is a lifecycle side effect, not authority.
 - If no unfinished active native goal exists, invoke `create_goal` with an objective built from the Goal Contract artifact.
 - If an unfinished active native goal already represents the same accepted contract, continue to `executor` skill.
 - If an unfinished active native goal conflicts with the accepted contract, do not overwrite, clear, pause, replace, or repurpose it; do not hand off to `executor` as synced. Return to Confirmation with a blocking sync conflict for user decision.
-- If Native Goal Sync fails, record the gap or blocker in the task artifact or checkpoint; do not treat sync failure as permission to redefine scope, acceptance, authority, or hand off as synced.
+- Record the Native Goal Sync target and result in the current task artifact before handoff.
+- If Native Goal Sync fails, record the gap or blocker there; do not treat sync failure as permission to redefine scope, acceptance, authority, or hand off as synced.

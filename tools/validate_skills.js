@@ -59,9 +59,6 @@ function emptyContract() {
     schemaVersion: 0,
     skills: [],
     artifacts: [],
-    routes: [],
-    gapKinds: [],
-    evidenceTypes: [],
     requiredGates: [],
     claudeAdapter: {},
     technicalDesignRunbook: {},
@@ -70,12 +67,9 @@ function emptyContract() {
 }
 
 function validateContract(contract, errors) {
-  if (contract.schemaVersion !== 1) errors.push(`${CONTRACT_PATH}: schemaVersion must be 1`);
+  if (contract.schemaVersion !== 3) errors.push(`${CONTRACT_PATH}: schemaVersion must be 3`);
   requireArray(contract, "skills", errors);
   requireArray(contract, "artifacts", errors);
-  requireArray(contract, "routes", errors);
-  requireArray(contract, "gapKinds", errors);
-  requireArray(contract, "evidenceTypes", errors);
   requireArray(contract, "requiredGates", errors);
   if (!contract.claudeAdapter || typeof contract.claudeAdapter !== "object" || Array.isArray(contract.claudeAdapter)) {
     errors.push(`${CONTRACT_PATH}: claudeAdapter must be an object`);
@@ -100,17 +94,6 @@ function validateContract(contract, errors) {
     if (!["required", "conditional"].includes(artifact?.requirement)) {
       errors.push(`${CONTRACT_PATH}: artifact ${artifact?.path || "<unknown>"} has invalid requirement`);
     }
-  }
-  for (const route of contract.routes || []) {
-    if (typeof route?.name !== "string" || !route.name) errors.push(`${CONTRACT_PATH}: route missing name`);
-    if (typeof route?.condition !== "string" || !route.condition) errors.push(`${CONTRACT_PATH}: route ${route?.name || "<unknown>"} missing condition`);
-  }
-  for (const kind of contract.gapKinds || []) {
-    if (typeof kind !== "string" || !kind) errors.push(`${CONTRACT_PATH}: gapKinds entries must be non-empty strings`);
-  }
-  for (const evidence of contract.evidenceTypes || []) {
-    if (typeof evidence?.name !== "string" || !evidence.name) errors.push(`${CONTRACT_PATH}: evidence type missing name`);
-    requireArray(evidence, "results", errors, `evidence ${evidence?.name || "<unknown>"}`);
   }
   for (const gate of contract.requiredGates || []) {
     if (typeof gate !== "string" || !gate) errors.push(`${CONTRACT_PATH}: requiredGates entries must be non-empty strings`);
@@ -256,7 +239,7 @@ function validateExecutor(root, contract, errors) {
     errors.push(`${rel}: missing`);
     return;
   }
-  requireHeadings(rel, text, ["Core Principle", "Acceptance Checklist", "Runtime Flow", "Authority", "Evidence Classification", "Route Rules", "Slice Boundary Gates", "Execution Gates", "Completion Gate", "Checkpoint Policy"], errors);
+  requireHeadings(rel, text, ["Core Principle", "Acceptance Checklist", "Runtime Flow", "Authority", "Slice Boundary Gates", "Execution Gates", "Completion Gate", "Checkpoint Policy"], errors);
 }
 
 function validateVerifier(root, contract, errors) {

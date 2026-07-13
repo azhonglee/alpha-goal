@@ -1,6 +1,10 @@
 {
-  "schemaVersion": 1,
-  "skills": ["alpha-goal", "executor", "verifier"],
+  "schemaVersion": 3,
+  "skills": [
+    "alpha-goal",
+    "executor",
+    "verifier"
+  ],
   "artifacts": [
     {
       "path": "goal-contract.md",
@@ -18,66 +22,16 @@
       "path": "checkpoint.md",
       "kind": "task",
       "requirement": "conditional",
-      "condition": "recovery, long-running execution, evidence handoff, or verification handoff"
-    },
-    {
-      "path": "control-state/latest.md",
-      "kind": "global",
-      "requirement": "conditional",
-      "condition": "task identity is ambiguous during recovery"
+      "condition": "all executor runs; update after every important slice and before verifier handoff",
+      "context": "Canonical artifact paths + workspace identity + every in-scope repo manifest/worktree/branch + single-writer execution context"
     }
   ],
-  "routes": [
-    {
-      "name": "NEXT_ITERATION",
-      "condition": "same-goal fixable gap"
-    },
-    {
-      "name": "RETURN_TO_ALPHA_GOAL",
-      "condition": "scope, authority, or claim-boundary change"
-    },
-    {
-      "name": "BLOCKED",
-      "condition": "external blocker"
-    },
-    {
-      "name": "PASS_TO_FINAL",
-      "condition": "acceptance evidence satisfied, zero unmet required acceptance items, no unresolved blocker, no authority drift"
-    }
+  "requiredGates": [
+    "Entry Gate",
+    "Clarification Gate",
+    "Review Gate",
+    "Confirmation Gate"
   ],
-  "gapKinds": [
-    "same_goal_fixable",
-    "scope_change",
-    "authority_change",
-    "external_blocker"
-  ],
-  "evidenceTypes": [
-    {
-      "name": "from-test",
-      "results": ["pass", "fail"]
-    },
-    {
-      "name": "from-build",
-      "results": ["pass", "fail"]
-    },
-    {
-      "name": "from-runtime",
-      "results": ["observed", "failed"]
-    },
-    {
-      "name": "from-review",
-      "results": ["finding", "clear"]
-    },
-    {
-      "name": "from-inspection",
-      "results": ["observed"]
-    },
-    {
-      "name": "from-blocker",
-      "results": ["blocked"]
-    }
-  ],
-  "requiredGates": ["Entry Gate", "Clarification Gate", "Review Gate", "Confirmation Gate"],
   "claudeAdapter": {
     "path": "references/claude-adapter.md"
   },

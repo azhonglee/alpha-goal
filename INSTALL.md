@@ -42,7 +42,7 @@ Use `--uninstall` to enter the interactive uninstall flow. The selected target c
 
 Uninstall is conservative outside the managed copied-skill path. It removes only managed Markdown blocks, managed hooks, `config.toml` that byte-for-byte matches `templates/config.toml`, skill copies with the install marker, and skill symlinks that resolve to this repository. Mixed user Markdown keeps user content, mixed or modified `config.toml` is preserved, unmanaged hooks are preserved, configuration symlinks are not followed or deleted, and unmanaged skill directories or external symlinks are preserved. The interactive cleanup prompts control whether Markdown/config and hook cleanup run.
 
-The compact recovery hook definition lives in `templates/hooks.json`. It is a `PostCompact` hook without a matcher and must not set matcher; it prints a static policy telling Codex to reload `alpha-goal`, `executor`, or `verifier` when applicable after compaction. For active Alpha Goal work, it resumes from `goal-contract.md`, reads `technical_design.md` when present for implementation, repair, refactor, hardening, cross-file behavior, interface/data-model changes, or material risk after Goal Contract Confirmation Gate selects technical design, uses `control-state/latest.md` only when task identity is ambiguous, and uses `checkpoint.md` for recovery, evidence handoff, or verification handoff. `executor` still requires an accepted Goal Contract, and `verifier` compares evidence with the hard-blocking acceptance checklist before returning a route. Native Goal Sync is not hook-driven: `alpha-goal` may create or reuse the current thread's native goal only after user approval of the Goal Contract.
+The compact recovery hook definition lives in `templates/hooks.json`. It is a `PostCompact` hook without a matcher and must not set matcher. It tells Codex to reload the applicable Alpha Goal skill and resume from an explicit current artifact path already present in task context.
 
 Hook upgrades are keyed by marker family. If the template marker changes from `...:v1` to `...:v2`, the installer removes older hooks from the same family before adding the template hook. It also removes the earlier experimental `codex-compact-skill-recovery` hook family.
 
@@ -208,7 +208,7 @@ test ! -e "$tmp_codex/.claude/skills/alpha-goal"
 ! grep -q "references/claude-adapter.md" "$tmp_codex/.codex/skills/alpha-goal/SKILL.md"
 python3 -m json.tool "$tmp_codex/.codex/hooks.json" >/dev/null
 grep -q "codex-alpha-goal-compact-recovery:v1" "$tmp_codex/.codex/hooks.json"
-grep -q "read goal-contract.md first" "$tmp_codex/.codex/hooks.json"
+grep -q "resume from the explicit current goal-contract.md or checkpoint.md path" "$tmp_codex/.codex/hooks.json"
 grep -q "technical_design.md" "$tmp_codex/.codex/hooks.json"
 grep -q "checkpoint.md" "$tmp_codex/.codex/hooks.json"
 
