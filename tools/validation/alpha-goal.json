@@ -47,10 +47,6 @@
     "README.md",
     "README.en.md",
     "INSTALL.md",
-    "AGENTS.md",
-    "tools/verify_strategy_scenarios.js"
-  ],
-  "strategyScenarioTest": {
-    "path": "tools/verify_strategy_scenarios.js"
-  }
+    "AGENTS.md"
+  ]
 }

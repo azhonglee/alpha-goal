@@ -28,7 +28,7 @@ function validateRoot(root) {
   validateContract(contract, errors);
   validateSkillDirs(root, contract, errors, warnings);
   validateSkillsCountBudget(skillFiles, errors);
-  validateScriptSurface(root, files, contract, errors, warnings);
+  validateScriptSurface(root, files, errors, warnings);
   validateAlphaGoal(root, contract, errors);
   validateExecutor(root, contract, errors);
   validateVerifier(root, contract, errors);
@@ -62,7 +62,6 @@ function emptyContract() {
     requiredGates: [],
     claudeAdapter: {},
     technicalDesignRunbook: {},
-    strategyScenarioTest: {},
     checkedFiles: [],
   };
 }
@@ -193,11 +192,11 @@ function countMatches(text, pattern) {
   return text.match(pattern)?.length || 0;
 }
 
-function validateScriptSurface(root, files, contract, errors, warnings) {
+function validateScriptSurface(root, files, errors, warnings) {
   for (const file of files.filter(candidate => relative(root, candidate).startsWith("tools/"))) {
     const rel = relative(root, file);
     const allowedFixture = /^tools\/fixtures\/validate-skills\/[a-z0-9-]+\.json$/.test(rel);
-    const allowedValidation = rel === CONTRACT_PATH || rel === contract.strategyScenarioTest?.path;
+    const allowedValidation = rel === CONTRACT_PATH;
     if (rel !== "tools/validate_skills.js" && !allowedFixture && !allowedValidation) {
       errors.push(`unexpected tools surface: ${rel}`);
     }
