@@ -197,8 +197,8 @@ render_install_target_menu() {
     menu_rendered_rows=$((menu_rendered_rows + 1))
   done
 
-  printf '\033[K\n' >&2
-  menu_rendered_rows=$((menu_rendered_rows + 1))
+  # printf '\033[K\n' >&2
+  # menu_rendered_rows=$((menu_rendered_rows + 1))
   # printf '\033[K%sUse ↑/↓ and Enter to confirm%s' "$cyan" "$reset" >&2
 }
 
