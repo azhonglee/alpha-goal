@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "skills": [
     "alpha-goal",
     "executor",
@@ -10,19 +10,22 @@
       "path": "goal-contract.md",
       "kind": "task",
       "requirement": "required",
-      "condition": "all alpha-goal tasks"
+      "condition": "all alpha-goal tasks",
+      "binding": "Task identity + Contract revision"
     },
     {
       "path": "technical_design.md",
       "kind": "task",
       "requirement": "conditional",
-      "condition": "Goal Contract Confirmation Gate selects run technical design"
+      "condition": "Goal Contract Confirmation Gate selects run technical design",
+      "binding": "Task identity + Contract revision + Design revision"
     },
     {
       "path": "checkpoint.md",
       "kind": "task",
       "requirement": "conditional",
-      "condition": "all executor runs; update after every important slice and before verifier handoff"
+      "condition": "all executor runs; update after every important slice and before verifier handoff",
+      "binding": "Task identity + Contract revision + applicable Design revision + workspace identity + every in-scope repo manifest/worktree/branch/HEAD/target fingerprint + monotonic slice/verification sequences"
     }
   ],
   "requiredGates": [
@@ -46,6 +49,10 @@
     "README.md",
     "README.en.md",
     "INSTALL.md",
-    "AGENTS.md"
-  ]
+    "AGENTS.md",
+    "tools/verify_strategy_scenarios.js"
+  ],
+  "strategyScenarioTest": {
+    "path": "tools/verify_strategy_scenarios.js"
+  }
 }

@@ -28,7 +28,7 @@ function validateRoot(root) {
   validateContract(contract, errors);
   validateSkillDirs(root, contract, errors, warnings);
   validateSkillsCountBudget(skillFiles, errors);
-  validateScriptSurface(root, files, errors, warnings);
+  validateScriptSurface(root, files, contract, errors, warnings);
   validateAlphaGoal(root, contract, errors);
   validateExecutor(root, contract, errors);
   validateVerifier(root, contract, errors);
@@ -62,12 +62,13 @@ function emptyContract() {
     requiredGates: [],
     claudeAdapter: {},
     technicalDesignRunbook: {},
+    strategyScenarioTest: {},
     checkedFiles: [],
   };
 }
 
 function validateContract(contract, errors) {
-  if (contract.schemaVersion !== 1) errors.push(`${CONTRACT_PATH}: schemaVersion must be 1`);
+  if (contract.schemaVersion !== 2) errors.push(`${CONTRACT_PATH}: schemaVersion must be 2`);
   requireArray(contract, "skills", errors);
   requireArray(contract, "artifacts", errors);
   requireArray(contract, "requiredGates", errors);
@@ -192,11 +193,11 @@ function countMatches(text, pattern) {
   return text.match(pattern)?.length || 0;
 }
 
-function validateScriptSurface(root, files, errors, warnings) {
+function validateScriptSurface(root, files, contract, errors, warnings) {
   for (const file of files.filter(candidate => relative(root, candidate).startsWith("tools/"))) {
     const rel = relative(root, file);
     const allowedFixture = /^tools\/fixtures\/validate-skills\/[a-z0-9-]+\.json$/.test(rel);
-    const allowedValidation = rel === CONTRACT_PATH;
+    const allowedValidation = rel === CONTRACT_PATH || rel === contract.strategyScenarioTest?.path;
     if (rel !== "tools/validate_skills.js" && !allowedFixture && !allowedValidation) {
       errors.push(`unexpected tools surface: ${rel}`);
     }

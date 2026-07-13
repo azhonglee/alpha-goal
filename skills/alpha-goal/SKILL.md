@@ -22,7 +22,7 @@ Enter `alpha-goal` for engineering, design, implementation, repair, refactor, or
 ## Clarification Gate
 
 Do not leave `Clarification` while any material Goal Contract blocking gap remains:
-- Goal Contract coverage: Authorization Source, Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Success Criteria, Acceptance evidence.
+- Goal Contract coverage: Task identity, Contract revision, Authorization Source, Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Success Criteria, Acceptance evidence.
 - Every unresolved unknown is classified as `blocking`, `non-material`, or `deferred non-goal`.
 - Required Goal Contract coverage means: decision, boundary, execution impact, acceptance/observer, and status.
 - Planned questions, unanswered questions, hypothetical answers, confidence, and round count do not reduce coverage.
@@ -180,8 +180,8 @@ Implementation / Design / ...
 ```
 
 Use `request_user_input` or equivalent structured input to ask for approve/launch, run technical design, refine, or reject.
-- On approve/launch: set `Contract status: accepted`; record `Technical Design: skipped by user`; perform Native Goal Sync; hand off to `executor` skill.
-- On run technical design: set `Contract status: design-authorized`; load `references/technical-design-runbook.md`; that runbook uses `references/technical-design-book.md`; from that point follow the runbook.
+- On approve/launch: confirm stable `Task identity`, set or increment `Contract revision`, set `Contract status: accepted`; record `Technical Design: skipped by user`; perform Native Goal Sync; hand off to `executor` skill.
+- On run technical design: confirm stable `Task identity`, set or increment `Contract revision`, set `Contract status: design-authorized`; load `references/technical-design-runbook.md`; that runbook uses `references/technical-design-book.md`; from that point follow the runbook.
 - On refine: keep `Contract status: draft`; return to `Clarification` with user feedback.
 - On reject: keep `Contract status: draft`; do not create or change native goals.
 
@@ -191,7 +191,7 @@ Native Goal Sync is a lifecycle side effect, not authority.
 - Before approval, do not invoke `create_goal`.
 - On approval, call `get_goal` before creating a new native goal.
 - If no unfinished active native goal exists, invoke `create_goal` with an objective built from the Goal Contract artifact.
-- If an unfinished active native goal already represents the same accepted contract, continue to `executor` skill.
+- If an unfinished active native goal already represents the same task identity and accepted contract revision, continue to `executor` skill.
 - If an unfinished active native goal conflicts with the accepted contract, do not overwrite, clear, pause, replace, or repurpose it; do not hand off to `executor` as synced. Return to Confirmation with a blocking sync conflict for user decision.
 - If Native Goal Sync fails, record the gap or blocker in the task artifact or checkpoint; do not treat sync failure as permission to redefine scope, acceptance, authority, or hand off as synced.
-- After handoff, `verifier` supplies route semantics. The calling Agent owns native Goal lifecycle updates: `PASS_TO_FINAL` may support `update_goal(status=complete)` only when no required work remains; other routes follow the verifier Route Contract.
+- Record Native Goal Sync target and result in checkpoint before handoff. After handoff, `verifier` supplies route semantics. The calling Agent owns native Goal lifecycle updates: `PASS_TO_FINAL` may support `update_goal(status=complete)` only when no required work remains and the verified target state is still current. If that update fails, do not claim lifecycle completion; report the sync failure and keep the native Goal unfinished. Other routes follow the verifier Route Contract.

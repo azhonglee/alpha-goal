@@ -115,10 +115,11 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 
 - Evidence before authority: Current code facts describe current state; desired behavior comes from user intent, specs, issues, or accepted contracts.
 - Goals before action: expected outcome, scope, non-goals, acceptance evidence, decision owner, and claim boundary define what may change.
-- Persistent state: `goal-contract.md` is the default `alpha-goal` output; `technical_design.md` is created only by `references/technical-design-runbook.md` after Goal Contract Confirmation Gate selects `run technical design`; `checkpoint.md` is the required executor-to-verifier checklist and evidence handoff.
-- Recovery identity: use an explicit task artifact path; otherwise scan task directories and stop on ambiguity rather than selecting the newest task.
+- Persistent state: `goal-contract.md` is the default `alpha-goal` output; `technical_design.md` is created only by `references/technical-design-runbook.md` after Goal Contract Confirmation Gate selects `run technical design`; `checkpoint.md` is the required executor-to-verifier handoff, binding artifact revisions, per-repository execution identity and target fingerprint, sequences, checklist, and evidence.
+- Recovery identity: use an explicit artifact path; otherwise accept only the sole active accepted candidate matching workspace and artifact revisions, and stop on zero, multiple, terminal, stale, or mismatched candidates.
 - Progressive disclosure: `alpha-goal` keeps only Goal Contract clarification, review, confirmation, and Native Goal Sync in `SKILL.md`; Technical Design clarification, review, and confirmation live in `references/technical-design-runbook.md`.
 - Native Goal Sync: after the user accepts the contract, `alpha-goal` may create or reuse the current thread's native goal; the verifier supplies routes and the calling Agent manages native Goal updates from terminal routes.
 - Bounded execution: prefer bounded evidence-producing actions or targeted changes over broad refactors and speculative cleanup.
 - Iterative verification: after every important slice, `verifier` independently checks fresh evidence, hard-blocking checklist coverage, blockers, and authority.
 - Honest routing: unclear goals return to `alpha-goal`; same-goal fixable execution gaps return to `executor`.
+- Strategy scenarios: `node tools/verify_strategy_scenarios.js` covers revisions, stale evidence, post-PASS mutation, recovery ambiguity, concurrent writes, and stagnation routing.
