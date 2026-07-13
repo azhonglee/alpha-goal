@@ -34,7 +34,8 @@ Hard-blocking rules:
 Before the first slice, initialize checkpoint with:
 - Canonical Goal Contract path and applicable Technical Design path or `none`.
 - Workspace identity and, for every repository in scope, repo-manifest role, worktree path, branch, validation observer, integration evidence boundary, and delivery boundary.
-- Acceptance checklist, native Goal identity/latest sync result, and an empty stagnation ledger.
+- Acceptance checklist and an empty stagnation ledger.
+- Native Goal Sync target/result read from the current task artifact; copy that handoff context into checkpoint.
 
 Before every verifier handoff, append without changing checklist status:
 - Slice id.

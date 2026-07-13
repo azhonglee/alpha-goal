@@ -107,7 +107,7 @@ Present this summary before asking for approval:
 ## Technical Design Confirmation Gate
 
 Use `request_user_input` or equivalent structured input to ask for approve/launch, refine technical design, or reject.
-- On approve/launch: semantically confirm the Technical Design still implements the current Goal Contract; if the contract changed materially, return to Technical Clarification. Otherwise set `Contract status: accepted`; set `Design status: accepted`; perform Native Goal Sync; record its target and result in checkpoint; hand off to `executor` skill.
+- On approve/launch: semantically confirm the Technical Design still implements the current Goal Contract; if the contract changed materially, return to Technical Clarification. Otherwise set `Contract status: accepted`; set `Design status: accepted`; perform Native Goal Sync; record its target and result in the current task artifact; hand off to `executor` skill.
 - On refine technical design: keep `Design status: draft`; continue Technical Clarification.
 - On reject: keep `Contract status: design-authorized`, set `Design status: rejected`, and do not create or change native goals.
 
@@ -119,4 +119,4 @@ Native Goal Sync is a lifecycle side effect, not design authority.
 - If no unfinished active native goal exists, invoke `create_goal` with an objective built from the Goal Contract artifact and Technical Design linked.
 - If an unfinished active native goal already represents the same accepted contract and design, continue to `executor` skill.
 - If an unfinished active native goal conflicts with the accepted contract or design, do not overwrite, clear, pause, replace, or repurpose it; do not hand off to `executor` as synced. Record a blocking sync conflict for user decision.
-- If Native Goal Sync fails, record the gap or blocker in the task artifact or checkpoint; do not treat sync failure as permission to redefine scope, acceptance, authority, design, or hand off as synced.
+- If Native Goal Sync fails, record the gap or blocker in the current task artifact; do not treat sync failure as permission to redefine scope, acceptance, authority, design, or hand off as synced.
