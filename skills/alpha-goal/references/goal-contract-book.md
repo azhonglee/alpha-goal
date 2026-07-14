@@ -1,123 +1,80 @@
 # Goal Contract Book
 
-Write the canonical Goal Contract to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md`. Copy it to `docs/specs/` only when useful or required by repository convention. Keep `Contract status: draft` until user confirmation; repository copies are mirrors, and conflicts route back to `alpha-goal`.
+Use only for a `PERSIST` task or an authority return. Write the canonical contract to the resolved Alpha Goal task directory as `goal-contract.md`. `alpha-goal` is its only writer.
 
-## Required Content
+## Lifecycle
 
-- Contract status
-- Authorization Source
-- Technical Context
-- Intent
-- Outcome
-- Success Criteria
-- Acceptance evidence / Verification surface
-- Boundaries
-  - Scope
-  - Non-goals
-  - Constraints
-  - Execution boundary
-  - Decision boundary
-  - Claim boundary
+- `draft`: clarification or confirmation is incomplete; target mutation is unauthorized.
+- `accepted`: the recorded confirmation authorizes execution within the contract boundaries.
+- Increment `contract_revision` for every material authority change. Reopen as `draft`, invalidate prior verdicts, and confirm again.
+- Repository specs may link to the contract, but do not silently replace its authority.
 
-Use optional sections only when they improve execution safety or auditability: Root Cause for repairs, Discovery notes, Interview ledger, Repo surfaces, Confirmation route, Technical Design link, resolved assumptions, and dependency/integration order.
-
-## Compact Template
+## Minimum Contract
 
 ```md
 # Goal Contract
 
-Contract status: draft
+status: draft
+contract_revision: 1
+persistence_trigger: <material ambiguity | risky side effect | recovery | audit requirement>
 
 ## Authorization Source
-- [from-user/spec/issue] Who or what defines desired behavior and which source wins on conflict.
+- Who defines desired behavior and which source wins on conflict.
 
-## Technical Context
-- [from-code][auto-confirmed] Relevant current-state facts, files, tests, dependencies, and conflicts.
-- [blocking] Material unavailable context, if any.
+## Intent and Observable Outcome
+- Why the work matters and the final state an observer can see.
 
-## Intent
-- Why the user wants the work done.
+## Scope / Non-goals / Material Constraints
+- Included behavior, explicit exclusions, and invariants.
 
-## Outcome
-- Observable end state.
+## Execution and Side-effect Boundary
+- Allowed files, commands, systems, credentials, environments, and side effects; crossings that require confirmation.
 
-## Success Criteria
-- Falsifiable completion conditions.
+## Decision Boundary
+- Mechanical choices the executor may make and product/risk choices reserved for authority.
 
-## Acceptance evidence / Verification surface
-- Observer, command, artifact, log, benchmark, diff, or explicit review for each criterion.
+## Claim Boundary
+- Claims the available observers support and claims that remain caveated.
 
-## Boundaries
-### Scope
-- Included behavior or problem.
+## Success Criteria and Acceptance Evidence
+| ID | Falsifiable criterion | Observer / pass condition |
+| --- | --- | --- |
 
-### Non-goals
-- Explicitly excluded adjacent work.
-
-### Constraints
-- Invariants that must remain true.
-
-### Execution boundary
-- Allowed files, commands, tools, systems, credentials, and side effects.
-
-### Decision boundary
-- Decisions the executor may make versus decisions requiring authority.
-
-### Claim boundary
-- Claims available evidence may support and claims that must remain caveated.
+## Confirmation Record
+- Decision, source, date, accepted revision, and any explicit conditions.
 ```
 
-## Field Rules
+Add only when material: current technical context, design decisions, dependencies, rollout/rollback, recovery requirements, discovery notes, or a cross-repository manifest.
 
-### Authorization Source
+## Authority Rules
 
-Record the current user request, explicit answers, accepted clarification, and any authoritative issue or spec. Name the winning source when code, docs, tests, and user instructions conflict. Code state alone cannot authorize desired behavior.
+- Record explicit user decisions, authoritative specs/issues, and source precedence under Authorization Source.
+- Treat code, tests, docs, and repository history as descriptive unless an authority source makes them normative.
+- Inspect current facts before asking; label unavailable material context as blocking.
+- Never promote a proposed answer, implementation convenience, or subagent suggestion into authority.
 
-### Technical Context
+## Boundary Rules
 
-Record only relevant observed behavior, files/components, tests or commands, dependencies, integration points, source conflicts, and material unavailable context. Inspect discoverable facts before asking the user; keep current-state facts descriptive unless Authorization Source gives them normative authority.
+- Outcome describes an observable end state, not an implementation technique.
+- Scope describes included behavior; non-goals require explicit exclusion.
+- Constraints distinguish an acceptable solution from a symptom-only fix.
+- The execution boundary identifies allowed mutations and side effects.
+- The decision boundary separates authorized mechanics from behavior, data, interface, migration, rollout, acceptance, and risk choices.
+- The claim boundary keeps proxy evidence from becoming an absolute safety, performance, compatibility, or deployment claim.
 
-### Intent and Outcome
+## Acceptance Rules
 
-- Intent states the user's purpose and the tradeoff it protects.
-- Outcome states the observable end state, not an implementation technique.
-- Mark a material inferred intent as an assumption or ask for confirmation.
+- Give every success criterion a stable ID and a falsifiable pass condition.
+- Map each criterion to a direct observer: command, test, runtime observation, artifact, diff, benchmark, or explicit review.
+- Name proxy evidence and residual uncertainty when direct proof is unavailable.
+- Do not use confidence, effort, question count, or “looks correct” as evidence.
 
-### Scope and Non-goals
+## Confirmation Readiness
 
-- Scope identifies the included behavior or problem, not merely files to edit.
-- Non-goals protect against adjacent work; `deferred-non-goal` requires explicit user or authoritative exclusion.
-- If an excluded item becomes necessary for success, stop and return for authority.
+Before requesting acceptance, ensure:
 
-### Constraints
-
-Record applicable behavioral, compatibility, data, security/privacy, performance, dependency, style, rollout, or migration invariants. A constraint must distinguish an acceptable solution from one that solves the symptom but violates the contract.
-
-### Success Criteria and Acceptance Evidence
-
-- Make every criterion provable or falsifiable.
-- Map every criterion to inspectable evidence: command output, test, runtime observation, log, benchmark, artifact, diff, or explicit review.
-- Do not use confidence or “seems correct” as evidence.
-- When exact proof is impossible, name proxy evidence and preserve the remaining uncertainty.
-
-### Execution Boundary
-
-State what may be touched or run: files, commands, services, credentials, environments, external systems, and side effects. Crossing this boundary requires confirmation.
-
-### Decision Boundary
-
-Separate local implementation mechanics from product, architecture, behavior, migration, rollout, and acceptance decisions. The executor may decide mechanics only when they do not alter meaning, risk, or public behavior.
-
-### Claim Boundary
-
-Define what final evidence permits the Agent to claim. Keep production safety, performance, compatibility, or deployment claims caveated unless their required observer is available. Never turn proxy evidence into absolute proof.
-
-## Coverage Test
-
-Before confirmation, verify:
-
-- Every required field is present and has no blocking gap.
-- Authorization Source resolves material source conflicts.
-- Each covered dimension records its decision, boundary, execution impact, acceptance observer, and status.
-- Every success criterion maps to acceptance evidence.
-- The executor can identify allowed actions, forbidden work, user-owned decisions, and unsupported claims without reconstructing discovery.
+- no blocking material decision remains;
+- source conflicts and authorization are explicit;
+- executor actions, forbidden work, and confirmation crossings are clear;
+- every criterion maps to an observer;
+- the final claim cannot exceed the defined evidence.

@@ -4,8 +4,8 @@
   "replacements": [
     {
       "file": "tools/validation/alpha-goal.json",
-      "search": "    \"Entry Gate\",\n",
-      "replace": "    \"Nonexistent Gate\",\n"
+      "search": "references/goal-contract-book.md",
+      "replace": "references/not-present.md"
     }
   ]
 }

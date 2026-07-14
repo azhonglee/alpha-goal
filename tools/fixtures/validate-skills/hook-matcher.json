@@ -1,0 +1,11 @@
+{
+  "shouldPass": false,
+  "inheritRoot": true,
+  "replacements": [
+    {
+      "file": "templates/hooks.json",
+      "search": "      {\n        \"hooks\": [",
+      "replace": "      {\n        \"matcher\": \"*\",\n        \"hooks\": ["
+    }
+  ]
+}

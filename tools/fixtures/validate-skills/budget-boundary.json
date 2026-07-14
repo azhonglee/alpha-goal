@@ -1,0 +1,5 @@
+{
+  "shouldPass": false,
+  "inheritRoot": true,
+  "setSkillBudgetToActual": true
+}

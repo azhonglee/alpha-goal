@@ -566,47 +566,6 @@ copy_skill_dir() {
   fi
 }
 
-inject_claude_adapter_into_alpha_goal() {
-  local skill_dir="$1"
-  local skill_md="$skill_dir/SKILL.md"
-
-  if [[ ! -f "$skill_md" ]]; then
-    echo "Cannot inject Claude adapter reminder; missing $skill_md" >&2
-    exit 1
-  fi
-
-  python3 - "$skill_md" <<'PY'
-from pathlib import Path
-import sys
-
-path = Path(sys.argv[1])
-text = path.read_text()
-reminder = "- In Claude runtime or Claude-installed skill context, read `references/claude-adapter.md` before interpreting tool names.\n"
-if reminder in text:
-    sys.exit(0)
-
-entry_start = text.find("## Entry Gate\n")
-if entry_start < 0:
-    print(f"Entry Gate not found in {path}", file=sys.stderr)
-    sys.exit(1)
-
-entry_end = text.find("\n## Clarification Gate", entry_start)
-if entry_end < 0:
-    print(f"Clarification Gate not found after Entry Gate in {path}", file=sys.stderr)
-    sys.exit(1)
-
-entry = text[entry_start:entry_end]
-anchor = "- Inspect relevant files, docs, recent commits, and existing patterns.\n"
-if anchor not in entry:
-    print(f"Entry Gate injection anchor not found in {path}", file=sys.stderr)
-    sys.exit(1)
-
-updated_entry = entry.replace(anchor, anchor + reminder, 1)
-path.write_text(text[:entry_start] + updated_entry + text[entry_end:])
-PY
-  log "Injected Claude adapter Entry Gate reminder: $skill_md"
-}
-
 remove_legacy_support_link_from_root() {
   local root="$1"
   local support_name="$2"
@@ -1667,7 +1626,6 @@ fi
 installed=0
 install_skill_copies_to_root() {
   local root="$1"
-  local inject_claude_adapter="$2"
   local skill_dir
   local skill_name
 
@@ -1675,18 +1633,15 @@ install_skill_copies_to_root() {
     skill_dir="$(cd "$(dirname "$skill_file")" && pwd -P)"
     skill_name="$(basename "$skill_dir")"
     copy_skill_dir "$skill_dir" "$root/$skill_name" "$skill_name"
-    if [[ "$inject_claude_adapter" == true && "$skill_name" == "alpha-goal" ]]; then
-      inject_claude_adapter_into_alpha_goal "$root/$skill_name"
-    fi
     installed=$((installed + 1))
   done
 }
 
 if [[ "$sync_codex_config" == true ]]; then
-  install_skill_copies_to_root "$target_root" false
+  install_skill_copies_to_root "$target_root"
 fi
 if [[ "$sync_claude_config" == true ]]; then
-  install_skill_copies_to_root "$claude_skill_root" true
+  install_skill_copies_to_root "$claude_skill_root"
 fi
 
 if [[ "$sync_codex_config" == true ]]; then

@@ -1,161 +1,81 @@
 ---
 name: executor
-description: "Bounded executor. Use only after an accepted Goal Contract authorizes implementation or hardening. Do not use for ambiguous planning."
+description: "Execute or resume work bound to an accepted persistent Goal Contract. Use after alpha-goal handoff or verifier NEXT_ITERATION to change the target, collect raw execution evidence, and maintain recovery state. Never use for direct-path tasks or to redefine authority or criterion status."
 ---
 
 # Executor
 
-## Core Principle
+Execute the accepted Goal Contract. Own target/delivery mutations, raw execution evidence, and recovery records; never change contract authority, criterion status, or verifier route.
 
-1. Goal Contract is authority.
-2. Execution produces changes and raw evidence.
-3. `verifier` owns evidence classification and routing.
-4. Every important slice is verified before the next slice or final response.
-5. Final completion requires a fresh verifier run immediately after the last target/delivery mutation.
+## Entry Contract
 
-`executor` implements, repairs, hardens, and collects raw evidence inside the accepted Goal Contract. It must not redefine target, scope, constraints, acceptance evidence, non-goals, decision boundary, claim boundary, or authorization source.
+- Require the canonical `goal-contract.md` with `status: accepted` and a revision.
+- Inspect the current workspace, worktree/branch, repository rules, unrelated changes, tools, and rollback path.
+- Reject a checkpoint bound to another contract revision, workspace, worktree, branch, or repository set.
+- Return to `alpha-goal` if contract status/revision, persistence trigger, Authorization Source, Intent and Observable Outcome, Scope, Non-goals, Material Constraints, Execution and Side-effect Boundary, Decision Boundary, Claim Boundary, Success Criteria and Acceptance Evidence, Confirmation Record, or execution context is missing or materially changed.
+- Do not use this skill for a `DIRECT` task.
 
-## Acceptance Checklist
+## Initialize Checkpoint
 
-Before planning, convert acceptance evidence into a hard-blocking checklist and save it to `<Alpha Goal state root>/YYYYMMDD-<TaskName>/checkpoint.md`.
+Create `checkpoint.md` only after contract acceptance. Record:
 
-Each item records acceptance item, source, evidence needed/current evidence, status, and remaining gap.
+- Contract path/revision, workspace identity, worktree/branch, and `state_revision: 0`.
+- A repository manifest only for cross-repository writes.
+- One record per Success Criterion, with its required observer; leave criterion status for verifier to create.
+- Empty execution, stagnation, and verdict records.
 
-Hard-blocking rules:
-- Every required item starts `pending`.
-- Every in-scope `technical_design.md` item is satisfied, mapped, or explicitly `deferred-non-goal`.
-- `deferred-non-goal` requires explicit Goal Contract or user exclusion.
-- Any `pending`, `failed`, or `blocked` required item prohibits final completion.
-- Never store the runtime checklist in `goal-contract.md`.
-- Only `verifier` changes checklist status from raw evidence.
+Checkpoint write ownership is partitioned:
 
-## Checkpoint Context
+| Owner | May write |
+| --- | --- |
+| `executor` | Binding, state revision, execution batches, mutations, raw execution evidence, rollback/recovery facts, attempts and unclassified gaps |
+| `verifier` | Verification observations, evidence mapping/classification, criterion status, gap cause, observed-state identity, and route verdict |
 
-Before the first slice, initialize checkpoint with:
-- Canonical Goal Contract path and applicable Technical Design path or `none`.
-- Workspace identity and, for every repository in scope, repo-manifest role, worktree path, branch, validation observer, integration evidence boundary, and delivery boundary.
-- Acceptance checklist and an empty stagnation ledger.
-- Native Goal Sync target/result read from the current task artifact; copy that handoff context into checkpoint.
+Use one writer at a time. Investigation subagents return observations and never write the checkpoint. A dedicated verifier agent may take exclusive ownership after executor handoff and write only verifier fields. Re-read after each handoff or unexpected change; do not merge by guesswork.
 
-Before every verifier handoff, append without changing checklist status:
-- Slice id.
-- Acceptance items covered.
-- Evidence and rollback boundary.
-- For every repository in scope: worktree, branch, and repo-manifest boundaries.
-- Commands or observers, exit/result, observation time, and raw output/artifact location.
-- Observed mutation summary and known gaps/blockers.
+## Plan an Execution Batch
 
-Do not reuse a checkpoint from another artifact path, workspace, worktree, branch, or repository. If current inspection shows that the accepted Goal Contract or applicable Technical Design changed materially, return to `alpha-goal`. This is a semantic authority check, not a mechanical version or content comparison.
+Choose the highest-value unmet Success Criterion that remains authorized. Combine work only while it shares the same Success Criterion, acceptance observer, rollback boundary, Execution and Side-effect Boundary, and Decision Boundary.
 
-## Runtime Flow
+Run an intermediate verifier only before or after a material risk boundary:
 
-**Run the algorithm as behavior, not paperwork:**
+- the next action is external, destructive, or irreversible;
+- the next stage depends on current evidence already being true;
+- the acceptance observer, rollback boundary, Execution and Side-effect Boundary, or Decision Boundary changes;
+- uncertainty would materially amplify rework or risk;
+- the user requires a stage review.
 
-```pseudo
-goal = read_accepted_goal_contract()
-design = read_bound_technical_design_if_applicable(goal)
-checkpoint = initialize_or_load_bound_checkpoint(goal, design, execution_environment)
-checklist = checkpoint.acceptance_checklist
-assert_execution_environment_safe(goal, checkpoint)
+Do not split work by edit count. Use the repository's own practices and the smallest reliable change that meets the contract; generic methodology slogans are not authority.
 
-while True:
-  slice = plan_highest_value_unmet_item(goal, checklist)
-  assert_slice_inside_goal_contract(slice, goal)
-  assert_single_evidence_and_rollback_boundary(slice)
-  outcome = execute_slice(slice, best_practice=TDD, principles=[SOLID, DRY, KISS, YAGNI, SoC])
-  review_notes = review_execution_results(outcome, dimensions=[safety, security, performance, maintainability, observability, testability])
-  raw_evidence = collect_raw_execution_evidence(outcome, review_notes)
-  append_slice_record(checkpoint, slice, raw_evidence)
+## Execute and Record
 
-  verdict = run_verifier(goal, design, checkpoint, raw_evidence)
-  checkpoint = reload_verifier_updated_checkpoint()
-  checklist = checkpoint.acceptance_checklist
+For each batch:
 
-  if verdict.route == NEXT_ITERATION: continue
-  if verdict.route == RETURN_TO_ALPHA_GOAL: return verdict
-  if verdict.route == BLOCKED: return verdict
-  if verdict.route == PASS_TO_FINAL: return verdict
-```
+1. Recheck authorization, worktree safety, dependencies, unrelated changes, and recovery path.
+2. Perform only in-scope mutations and review the resulting diff/state.
+3. Increment `state_revision` monotonically once for each recorded target/delivery state transition; multiple edits may form one transition only when the batch boundaries remain shared.
+4. Record the batch goal, mutations, commands/observers, raw results, rollback boundary, known gaps, and recovery cursor.
+5. Preserve raw execution output or an attributable artifact reference; do not write criterion status.
+6. At a risk boundary, hand the current state to `verifier`, then reload its checkpoint update before continuing.
 
-## Important Slice Boundary
+Target/delivery mutations are changes to the declared target or delivery state, including code, tracked or delivered generated artifacts, configuration, commits, pushes, and PR content. Ephemeral observer logs, caches, and checkpoint evidence are not target/delivery state unless tracked, published, or themselves required deliverables. Any target/delivery mutation after a verifier PASS invalidates that verdict. Metadata that only records an already observed verdict does not.
 
-A slice is important when it changes behavior, interfaces, data, dependencies, tests, risk handling, delivery state, or an acceptance item.
+## Stagnation
 
-Combine edits only when they share all of these:
-- One acceptance objective.
-- One evidence observer.
-- One rollback boundary.
-- One authority boundary.
+Key a repeated gap by Success Criterion, failure mode, dependency, and relevant context.
 
-If any boundary differs, split the slice. Commit, push, PR content updates, generated target artifacts, configuration changes, or other target/delivery mutations after `PASS_TO_FINAL` invalidate that verdict and require a new slice plus final verification.
+- Progress means new evidence, a changed target state, or a smaller gap.
+- If the contract permits a materially different approach, record the failed attempt and try that approach.
+- Do not repeat the same approach without new evidence.
+- If no authorized alternative remains, hand the facts to `verifier`; it routes by external blocker or missing authority.
 
-## Authority
+## Final Handoff
 
-Return to `alpha-goal` when target, scope, constraints, acceptance evidence, non-goals, decision boundary, claim boundary, authorization source, autonomy level, actuator boundary, accepted Goal Contract or applicable Technical Design changes materially.
+After the last intended target/delivery mutation:
 
-Preserve raw command output, inspection results, runtime observations, review findings, and blockers for `verifier`. Executor appends raw evidence but does not change checklist item status, classify evidence, or select a route. Reload the verifier-updated checkpoint before planning another slice.
+- Collect acceptance evidence against the actual final target and delivery state.
+- Record current repository state and all remaining gaps without changing criterion status.
+- Run `verifier` even if an earlier risk-boundary verdict passed.
+- Claim completion only when the latest verdict is `PASS_TO_FINAL` and no later target/delivery mutation occurred.
 
-## Stagnation Gate
-
-Record a repeated gap key from acceptance item, failure mode, blocker, and relevant acceptance context.
-
-- Progress requires new evidence, a changed target state, or a reduced gap.
-- Repeating the same gap key without progress must not loop silently.
-- If existing authority still permits a different approach, record the failed approach and try one materially different slice.
-- If no authorized material alternative remains, hand off to `verifier`; it routes `BLOCKED` for an external dependency or `RETURN_TO_ALPHA_GOAL` for missing authority/contract change.
-
-## Slice Boundary Gates
-
-Before executing a slice:
-[ ] Target, scope, constraints, non-goals, authorization source, actuator boundary, autonomy level, and claim boundary match the bound Goal Contract.
-[ ] Slice has one acceptance objective, evidence observer, rollback boundary, and authority boundary.
-[ ] Slice has an observable evidence path.
-[ ] No repeated unresolved gap exists without a materially different approach.
-
-If any item fails, append the gap to checkpoint and hand the raw state to `verifier`; do not execute the slice.
-
-## Execution Gates
-
-Before mutation:
-[ ] Accepted Goal Contract and applicable Technical Design loaded.
-[ ] Checkpoint context matches the canonical artifact paths, workspace, worktree, and branch; inspect current repository state before acting.
-[ ] Worktree / branch safety checked.
-[ ] Primary branch mutation denied unless explicitly authorized.
-[ ] Unrelated user changes identified and preserved.
-[ ] Relevant repo rules inspected.
-[ ] Required dependencies/tools available.
-[ ] Rollback/recovery path understood.
-
-## Completion Gate
-
-Before returning final success:
-[ ] Acceptance evidence collected against the final target state.
-[ ] Evidence directly maps to Goal Contract acceptance evidence.
-[ ] Acceptance checklist has no `pending`, `failed`, or `blocked` required item.
-[ ] In-scope Technical Design items are satisfied, mapped, or explicitly `deferred-non-goal`.
-[ ] No unresolved same-goal fixable gap or stagnation remains.
-[ ] No unresolved blocker or source-of-truth conflict remains.
-[ ] No scope, authority, claim-boundary, or material contract/design change occurred.
-[ ] Latest important slice, including delivery mutation, was verified.
-[ ] A final verifier run was performed after the latest target/delivery edit and immediately before the completion claim.
-[ ] `verifier` returned `PASS_TO_FINAL` for the current final state.
-
-If any item is unchecked, do not claim complete.
-
-## Checkpoint Policy
-
-`<Alpha Goal state root>/YYYYMMDD-<TaskName>/checkpoint.md` is the required executor-to-verifier handoff, not Goal Contract authority.
-
-Use one checkpoint writer at a time. If concurrent execution or an unexpected checkpoint change is observed, stop and re-read instead of attempting to merge or overwrite state.
-
-Checkpoint may not redefine goal, scope, acceptance, non-goals, authority, or claim boundary.
-
-## Before Final Response Checklist
-
-[ ] State what changed.
-[ ] State evidence collected against the final target state.
-[ ] State the final verification result.
-[ ] Persist and state native Goal lifecycle update result separately.
-[ ] State remaining gaps, if any.
-[ ] Avoid claims beyond Goal Contract claim boundary.
-[ ] If incomplete, report the verifier route clearly.
+Report native goal lifecycle separately when the current surface exposes it. Native goal state cannot substitute for acceptance evidence.

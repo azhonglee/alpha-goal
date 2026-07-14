@@ -1,40 +1,28 @@
-# ClaudeAdapter
+# Claude Adapter
 
-Read this reference only when Alpha Goal runs in Claude runtime or a Claude-installed skill context.
+Read only in a Claude runtime or Claude-installed skill context. This maps exposed capabilities; it does not change routes, authority, artifacts, evidence, or completion rules.
 
-## Principle
+## Capability Mapping
 
-- Treat this as a tool-name adapter, not a new source of authority.
-- Keep Goal Contract, Technical Design, checkpoint, route, and evidence semantics unchanged.
-- Prefer Claude-native tools when available; otherwise record the adapter gap instead of pretending a Codex tool ran.
+| Skill capability | Claude surface |
+| --- | --- |
+| Structured decision input | `AskUserQuestion` or the available structured question UI; use concise plain text only when unavailable |
+| Shell observation/execution | `Bash` |
+| Narrow file mutation | Available file edit tools |
+| Worktree isolation | `EnterWorktree` or `git worktree` |
+| Independent read/review | `Agent` or agent teams when exposed |
+| Work-item tracking | `TaskCreate`, `TaskUpdate`, `TaskGet`, `TaskList`; not Goal Contract authority |
+| Native completion condition | `/goal` when callable; `TaskCreate` is not equivalent |
 
-## Tool Mapping
+## Native Goal
 
-| Skill term | Claude mapping | Boundary |
-| --- | --- | --- |
-| `request_user_input` | `AskUserQuestion` or equivalent structured question UI | Use only for short decision gates. Plain text is acceptable only when no structured input tool exists. |
-| `get_goal` | `/goal` with no argument | Treat only explicitly active/current output as an unfinished native goal; achieved history is not active. |
-| `create_goal` | `/goal <verifiable condition>` | Sets a Claude session completion condition. `TaskCreate` is not equivalent. |
-| `update_goal` | No direct Claude tool equivalent | Completion is evaluator-driven; use `/goal clear` only to cancel, not to claim success. |
-| `update_plan` | `TaskCreate`, `TaskUpdate`, `TaskGet`, `TaskList`; legacy fallback `TodoWrite` only when task tools are disabled | Tracks work items, not completion-goal evaluation. |
-| `exec_command` | `Bash` | Preserve repository safety gates and validation evidence. |
-| `apply_patch` | Claude file edit tools | Use the narrowest edit tool available; avoid unrelated formatting churn. |
-| subagent review | Claude `Agent`, agent teams, or workflow tools when available | If unavailable, record why the independent review was skipped. |
-| worktree isolation | `EnterWorktree` or `git worktree` | Do not edit `main` or `master` directly. |
+- Query `/goal` before setting a condition; do not replace an unrelated active goal.
+- After contract acceptance, use one verifiable condition only when the user or repository explicitly requires it, the Execution and Side-effect Boundary permits it, and current tool policy allows it.
+- If `/goal` or a completion update is unavailable, record that capability gap. Continue unless the accepted contract or repository explicitly requires native-goal evidence.
+- Never use `/goal clear` to claim success, or invent a Codex-named goal tool call.
 
-## Native Goal Sync In Claude
+## Adapter Checks
 
-When Alpha Goal says to perform Native Goal Sync in Claude:
-- Do not call Codex-named `create_goal`, `get_goal`, or `update_goal`.
-- If `/goal` is available, use it for session-level completion conditions.
-- If `/goal` is not callable from the current Claude surface, record Native Goal Sync as unavailable in the current task artifact.
-- Do not treat `TaskCreate` or `TaskUpdate` as proof that a native goal was created.
-- Do not hand off as synced when the adapter gap changes execution authority; ask the user whether to continue without native goal sync.
-
-## Claude Goal Condition Shape
-
-Use one verifiable condition with evidence the transcript can show:
-
-```text
-/goal Goal Contract <path> is implemented: required files changed, validation commands exit 0, git status shows only in-scope changes, and a commit exists on the task branch.
-```
+- Detect capability availability instead of assuming parity with Codex.
+- Preserve repository safety and artifact paths when mapping tools.
+- When independent agents are unavailable, run the work sequentially and record why independence was not obtained when it is acceptance evidence.

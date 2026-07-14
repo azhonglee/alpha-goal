@@ -4,8 +4,8 @@
   "replacements": [
     {
       "file": "templates/hooks.json",
-      "search": "  \"hooks\": {",
-      "replace": "  \"hooks\": []"
+      "search": "    \"PostCompact\": [",
+      "replace": "    \"RemovedEvent\": ["
     }
   ]
 }

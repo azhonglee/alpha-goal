@@ -1,197 +1,101 @@
 ---
 name: alpha-goal
-description: "Use to gate engineering/design/implementation requests before modification, implementation, repair, refactor, or hardening. Use inspection facts as entry evidence; run Loop Q&A to clarify intent, outcome, boundaries, non-goals, success criteria, and acceptance evidence."
+description: "Route engineering, design, and change work between direct execution and a persistent Goal Contract. Use when material ambiguity, risky side effects, recovery or audit needs, explicit approval boundaries, or a verifier authority return may require clarification. Clear reversible local work and pure read-only work may exit through the direct path without artifacts."
 ---
 
 # Alpha Goal
 
-`alpha-goal` owns Goal Contract clarification.
+Own entry routing and Goal Contract authority. Do not implement target changes or judge completion.
 
-## Entry Gate
+## Inspect Before Routing
 
-Enter `alpha-goal` for engineering, design, implementation, repair, refactor, or hardening request. Skip only for concrete read-only work.
+- Read applicable instructions, relevant files, tests, docs, recent history, and current state.
+- Resolve discoverable facts before asking the user.
+- Separate descriptive facts from desired behavior and authorization.
+- Identify side effects, material unknowns, recovery needs, and the observer for the final claim.
 
-**Anti-Pattern:** "Too Clear to Need clarification"
-- Every project MUST produce an explicit user-confirmed Goal Contract before execution.
+## Route
 
-**Check Point:**
-- Inspect relevant files, docs, recent commits, and existing patterns.
-- Identify facts, conflicts, unknowns, dependencies, and source-of-truth conflicts.
-- Record inspection results in `<Alpha Goal state root>/YYYYMMDD-<TaskName>/goal-contract.md` under `Discovery notes`.
+Choose from the facts, not from task labels.
 
-## Clarification Gate
+### DIRECT
 
-Do not leave `Clarification` while any material Goal Contract blocking gap remains:
-- Goal Contract coverage: Authorization Source, Intent, Outcome, Scope, Constraints, Non-goals, Decision boundary, Claim boundary, Success Criteria, Acceptance evidence.
-- Every unresolved unknown is classified as `blocking`, `non-material`, or `deferred non-goal`.
-- Required Goal Contract coverage means: decision, boundary, execution impact, acceptance/observer, and status.
-- Planned questions, unanswered questions, hypothetical answers, confidence, and round count do not reduce coverage.
-- Mark uncertainty `non-material` only when it cannot change implementation, tests, acceptance, or risk handling.
+Use `DIRECT` for either case:
 
-Blocking gap classifier:
-- A gap is `blocking` when a different answer could change behavior, touched files/components, interfaces/API, data model, persistence, migration, external dependency, permission, environment, test strategy, validation observer, rollout, rollback, security, privacy, performance, or risk handling.
-- A gap is `deferred non-goal` only when the user or authoritative source explicitly excludes it from this goal.
+- Read-only work that does not need recovery across turns, compaction, handoff, or pause, and does not require a persistent audit trail.
+- A local change with one clear outcome, explicit scope, reversible effects, direct final-state observation, no unresolved material authority-owned decision, no external/destructive/cross-repository side effect, and no recovery need.
 
-Clarification exit invariants:
-- `no_confidence_only`: Do not use confidence alone as exit evidence.
-- `no_round_count`: Do not use round count as completion evidence.
-- `no_blocking_gap_handoff`: Do not propose implementation, code edits, Technical Design, or `executor` skill handoff while any blocking Goal Contract gap remains.
+On `DIRECT`:
 
-## Clarification
+- Exit the Alpha Goal lifecycle; do not resolve a state root or create Goal Contract/checkpoint artifacts.
+- Do not invoke `executor` or `verifier`; perform the work normally and validate the final state in proportion to risk.
+- A material ambiguity in read-only work may trigger a targeted question without creating artifacts.
+- If the user asked only for approval before an otherwise direct action, pause before that action without creating a persistent lifecycle.
+- Stop and reroute if execution discovers material ambiguity, material scope expansion, a risky side effect, or a recovery need.
 
-**Evaluate:**
-- Problem validity: whether the phenomenon is real and causal claims are reliable.
-- Context sufficiency: what is known, missing, must-have, or merely ideal.
-- Hidden issues: deeper root cause, adjacent issue, or dependency risk.
+### PERSIST
 
-Loop Q&A until the user-owned Goal Contract decisions are explicit enough to write the Goal Contract.
+Use `PERSIST` when any condition holds:
 
-### Loop Q&A
+- A target or delivery mutation needs an authority-owned decision whose answer could change behavior, interface, data, security/privacy, permission, dependency, acceptance, rollout/rollback, or risk treatment.
+- The work includes external write, purchase, destructive action, cross-repository write, or material scope expansion.
+- Safe completion depends on recovery across turns, compaction, handoff, pause, or multiple independent risk checkpoints.
+- The user or repository requires a Goal Contract or persistent auditable evidence.
 
-**Rules:**
-- Ask one high-leverage question per round.
-- One question means one decision variable: confirm a conflict, request a decision, choose a solution, demand an example, expose an assumption, force a tradeoff, or test a boundary-stressing case.
-- Do not ask for discoverable facts.
-- Present options conversationally with recommendation and reasoning.
-- Use `request_user_input` or equivalent structured input.
-- Record material decisions, known facts, conflicts, unknowns, non-goals, and decision-boundary gaps in task artifacts.
-- Revisit the same dimension when the first answer lacks an example, boundary, tradeoff, execution consequence, or acceptance signal.
-- Ask one round, wait for the answer, then decide whether to follow up on the same dimension or move to the next one.
-- Do not pre-generate a complete questionnaire and then proceed as if the questions were answered.
+Apply read-only precedence: ambiguity or claim risk may strengthen questions, sources, and caveats, but does not by itself create `PERSIST`. Pure read-only work persists only for recovery, an explicit Goal Contract, or a persistent audit requirement.
 
-**Step 1: Pick the next question target**
+Do not route from confidence, file/line/step count, question count, or estimated duration.
 
-Use current task state:
-- Original request, probable intent, prior Q&A.
-- Known facts, conflicts, unknowns, dependencies, source-of-truth conflicts.
-- Current coverage gaps, brownfield context, active Assumption Stress Test mode.
+An authority-owned decision belongs to the user or another source named under Authorization Source. Resolve it during inspection when that source already answers it; otherwise treat it as material ambiguity.
 
-Rank open gaps before choosing the next target:
-- Prefer the gap with highest blast radius, irreversibility, external dependency, user-owned semantics, data/API contract impact, validation ambiguity, or rollback risk.
-- Do not move to a lower-risk dimension while a higher-risk blocking Goal Contract gap remains.
+## Persistent Clarification
 
-| Goal Priority | Dimension | Purpose |
-| --- | --- | --- | --- |
-| 1 | intent, outcome, scope, non-goals, success criteria | Define what the goal is, and the success criteria. |
-| 2 | constraints, execution boundary, acceptance evidence, claim boundary, decision boundary | Define how the goal is achieved. |
-| 3 | context/current facts, external/current facts, dependencies, assumptions | Define context, conditions, dependencies, and assumptions. |
-
-**Step 2: Ask and record**
-
-Prompt format:
+For `PERSIST`, resolve the Alpha Goal state root before writing:
 
 ```text
-Round {n} | Target: {dimension} | Gap: {blocking|non-material|deferred}
-Why this blocks: ...
-Decision needed: ...
-Recommended option: ...
-Question: ...
-Coverage cells affected: decision / boundary / execution impact / acceptance evidence
+$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/
 ```
 
-Classify each answer before updating artifacts:
-- `[from-code][auto-confirmed]` descriptive implementation fact.
-- `[from-code]` inferred implementation fact needing confirmation.
-- `[from-research]` external/current fact.
-- `[from-user]` explicit user decision, constraint, acceptance signal, non-goal, authority, example, or clarification.
+Derive `workspace-slug` from the stable workspace basename, never the full path or session directory.
 
-Authority Contract:
-- Auto-confirm only descriptive facts.
-- Treat repo language as evidence, not authority.
-- Cross-check user claims against code/docs; name competing sources on conflict.
-- Current-state facts cannot define desired behavior, requirements, acceptance evidence, non-goals, tradeoffs, or authority.
-- Only explicit user decisions, explicit authorization, or authoritative specs/issues may update Goal Contract authority fields.
-- If ambiguity depends on current external best practices, standards, APIs, dependency versions, laws, schedules, or prices, gather bounded fresh evidence first; then ask only for the decision boundary.
+- Ask only unresolved material authority-owned decisions; direct questions to the user when the named authoritative source cannot resolve them.
+- Prefer one compact structured prompt; group independent decisions only when their tradeoffs and consequences are clear.
+- For each question, state the discovered facts, why the answer changes execution or evidence, and a recommendation.
+- Do not ask for discoverable facts or use hypothetical answers as authority.
+- Classify unresolved items as `blocking`, `non-material`, or `deferred non-goal`; only explicit authority can defer a goal item.
+- Embed material architecture, interface, data, rollout, rollback, or design decisions in the Goal Contract. Do not create a second design authority.
 
-Boundary mapping: actuator boundary -> `Decision boundary`; sensor/observer boundary -> `Claim boundary`.
+## Goal Contract
 
-**Step 3: Pressure-test the answer**
+Read `references/goal-contract-book.md` only for `PERSIST` or an authority return. Write `goal-contract.md` as `draft` from observed, cited, or explicitly authorized facts.
 
-Use the pressure ladder before treating a dimension as covered:
-1. Ask for concrete example, counterexample, or evidence signal.
-2. Probe hidden assumption or dependency.
-3. Force a boundary/tradeoff: what to reject, defer, or not do.
-4. Ask what execution or evidence consequence follows.
-5. If the answer stays symptom-level, reframe toward essence/root cause.
+Before confirmation:
 
-Follow-up policy:
-- Do not mark a dimension `covered` after the first answer unless that answer already includes decision, boundary, execution consequence, and acceptance evidence.
-- Ask another round for the same dimension when the pressure ladder exposes any blocking gap.
-- Do not rotate to the next dimension when the current answer creates a blocking boundary or evidence gap.
-- Record the coverage chain for each required dimension: first question, answer source, pressure-test result, coverage status.
-- Prefer depth over breadth: fewer well-tested dimensions are better than many shallow checkmarks.
+- Ensure every Success Criterion maps to an acceptance observer.
+- Ensure contract status/revision, persistence trigger, Authorization Source, Intent and Observable Outcome, Scope, Non-goals, Material Constraints, Execution and Side-effect Boundary, Decision Boundary, Claim Boundary, Success Criteria and Acceptance Evidence, and Confirmation Record are usable without reconstructing the interview.
+- Check the highest-impact assumption and any source conflict.
+- For cross-cutting or high-risk work, request an independent read-only review when subagents are available; pass raw artifacts and wait for every requested result.
 
-Closure test:
-- Before marking a dimension `covered`, ask: if this answer were wrong, what code, test, data, interface, dependency, risk treatment, or acceptance evidence would change?
-- If any material item would change, keep the dimension `blocking`.
-- If nothing material would change, record why it is `non-material` or `deferred non-goal`.
+Present a compact summary of outcome, boundaries, success criteria, evidence, and remaining risk. Use structured input when available to ask the user to accept, refine, or reject.
 
-**Step 4: Update coverage state**
+- Accept: set `status: accepted`, record confirmation and revision, then hand off to `executor`.
+- Refine or reject: keep `status: draft`; do not hand off.
+- A material authority change after acceptance reopens the contract as `draft`, increments its revision, and requires confirmation again.
 
-After the closure test, set the dimension status to `covered`, `blocking`, `non-material`, or `deferred non-goal` using the Clarification Gate classifier.
-If any blocking gap remains, continue Loop Q&A; round count never closes Clarification.
+## Capability-Conditional Aids
 
-### Assumption Stress Test
+- Native goal tools are lifecycle aids, not authority. Use them only when the user or repository explicitly requires native goal tracking, the accepted Execution and Side-effect Boundary permits it, the capability is exposed, and current tool policy allows the call. Never replace a conflicting active goal; record the result. Otherwise continue unless native-goal evidence is an acceptance requirement.
+- Use subagents only for cleanly independent read-heavy investigation, review, or evidence reruns. Do not delegate `DIRECT / PERSIST` selection, authority-owned decisions, or contract acceptance.
+- Investigation subagents do not write shared artifacts. A dedicated verifier agent may write only verifier-owned checkpoint fields after an explicit exclusive handoff.
+- Before synthesizing a delegated batch or ending it, wait for every requested result. If a result is no longer needed, explicitly cancel or discard that task and do not treat its absence as evidence. A timeout or missing return is never a finding.
+- In a Claude runtime or Claude-installed context, read `references/claude-adapter.md` for tool-name mapping only.
 
-Use each applicable mode once; if none applies, record why:
-- **Contrarian:** challenge a core assumption.
-- **Simplifier:** probe minimum viable scope.
-- **Ontologist:** ask for essence-level reframing when the user keeps describing symptoms.
+## Authority Return
 
-Track used modes in state to prevent repetition.
+When `verifier` returns `RETURN_TO_ALPHA_GOAL`, inspect the recorded gap:
 
-### Write Goal Contract
+- Missing or changed contract status/revision, persistence trigger, Authorization Source, Intent and Observable Outcome, Scope, Non-goals, Material Constraints, Execution and Side-effect Boundary, Decision Boundary, Claim Boundary, Success Criteria and Acceptance Evidence, or Confirmation Record: reopen and clarify the Goal Contract.
+- A discoverable artifact-binding or execution-context mismatch: establish the facts and return it to the checkpoint field owner for correction; reopen the Goal Contract only if that correction changes an authority field.
+- An external dependency with unchanged authority: return it to verifier for blocker classification; do not rewrite the contract to hide it.
 
-Follow `references/goal-contract-book.md` to write the Goal Contract.
-Write artifacts only from answered, auto-confirmed, or cited facts. Keep unresolved required fields as `[blocking]`; do not fill them from hypothetical answers.
-
-## Review Gate
-
-Self-check the Goal Contract before asking for confirmation:
-- Coverage check: required fields exist, no blocking gap remains, and every covered dimension has decision, boundary, execution impact, acceptance/observer, and status.
-- Authority check: Authorization Source is present; current-state facts do not define desired behavior; non-goals, execution boundary, decision boundary, and claim boundary are explicit.
-- Acceptance check: success criteria map to acceptance evidence and validation observers.
-- Closure check: no covered dimension relies only on confidence, round count, planned questions, or an untested assumption; recheck the highest-risk covered dimension.
-
-Run independent review for non-trivial implementation, repair, refactor, hardening, or cross-file behavior changes:
-- Prefer a subagent review when available; if skipped, record the reason.
-- Pass raw artifacts and the user request, not your intended answer.
-- Require the reviewer to check shallow Q&A, missing acceptance evidence, and premature implementation risk.
-- Fix accepted findings.
-
-## Confirmation Gate
-
-Before asking for confirmation, present the Goal Contract Summary first.
-- The approval request message must include the Goal Contract Summary.
-- If the Goal Contract Summary is missing or incomplete, stay in Review Gate.
-- TUI Presentation Style:
-```markdown
-### Goal Contract Summary
-**Intent**
-...
-**Success criteria**
-...
-**Acceptance evidence**
-...
-**Execution boundary**
-...
-**Recommended Next Step**
-Implementation / Design / ...
-```
-
-Use `request_user_input` or equivalent structured input to ask for approve/launch, run technical design, refine, or reject.
-- On approve/launch: set `Contract status: accepted`; record `Technical Design: skipped by user`; perform Native Goal Sync; hand off to `executor` skill.
-- On run technical design: set `Contract status: design-authorized`; load `references/technical-design-runbook.md`; that runbook uses `references/technical-design-book.md`; from that point follow the runbook.
-- On refine: keep `Contract status: draft`; return to `Clarification` with user feedback.
-- On reject: keep `Contract status: draft`; do not create or change native goals.
-
-## Native Goal Sync
-
-Native Goal Sync is a lifecycle side effect, not authority.
-- Before approval, do not invoke `create_goal`.
-- On approval, call `get_goal` before creating a new native goal.
-- If no unfinished active native goal exists, invoke `create_goal` with an objective built from the Goal Contract artifact.
-- If an unfinished active native goal already represents the same accepted contract, continue to `executor` skill.
-- If an unfinished active native goal conflicts with the accepted contract, do not overwrite, clear, pause, replace, or repurpose it; do not hand off to `executor` as synced. Return to Confirmation with a blocking sync conflict for user decision.
-- Record the Native Goal Sync target and result in the current task artifact before handoff.
-- If Native Goal Sync fails, record the gap or blocker there; do not treat sync failure as permission to redefine scope, acceptance, authority, or hand off as synced.
+Only `alpha-goal` may change Goal Contract authority fields.

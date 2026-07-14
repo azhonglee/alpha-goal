@@ -4,8 +4,8 @@
   "replacements": [
     {
       "file": "skills/executor/SKILL.md",
-      "search": "## Acceptance Checklist",
-      "replace": "## Acceptance Notes"
+      "search": "name: executor",
+      "replace": "name: worker"
     }
   ]
 }

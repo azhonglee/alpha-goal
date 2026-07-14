@@ -2,7 +2,7 @@
 
 ## Install
 
-Requires Node.js 18+ when syncing Codex config or hooks. The installer uses repository-local JavaScript and vendored `smol-toml` for config TOML merge; Python 3.11 `tomllib` is not required.
+Requires Node.js 18+ and Python 3. The installer uses repository-local JavaScript, vendored `smol-toml`, and Python only from the standard library.
 
 ```bash
 scripts/install.sh
@@ -36,7 +36,7 @@ Non-interactive runs are refused. Any CLI argument other than `--uninstall`, inc
 
 Successful install and uninstall runs print one concise success line. Failures continue to print the specific error and exit non-zero.
 
-When installing skill copies, an existing target skill symlink is migrated only when it points to `skills/<skill-name>` in this repository or another worktree with the same Git common directory. Existing managed real directories are removed and recopied. Git detection failures, external symlinks, symlinks to other repo-relative paths, and ordinary files are refused. For `claude`, the installer injects a ClaudeAdapter Entry Gate reminder into the installed Alpha Goal copy; `codex` installs leave that reminder out.
+When installing skill copies, an existing target skill symlink is migrated only when it points to `skills/<skill-name>` in this repository or another worktree with the same Git common directory. Existing managed real directories are removed and recopied. Git detection failures, external symlinks, symlinks to other repo-relative paths, and ordinary files are refused. Codex and Claude receive the same runtime-neutral skill tree; Claude capability mapping is a conditional reference in that tree, not installer-injected prose.
 
 Use `--uninstall` to enter the interactive uninstall flow. The selected target controls which managed configuration and skill copies are removed.
 
@@ -50,7 +50,7 @@ Codex may require reviewing and trusting the changed hook with `/hooks` before i
 
 ## Smoke test
 
-The smoke test checks target-specific skill copies, config sync, ClaudeAdapter injection, hook recovery text, install prompt reduction, concise success output, uninstall cleanup, rejected legacy CLI arguments, refused external symlinks, and ignored `CODEX_HOME` values. It does not touch real user configuration.
+The smoke test checks target-specific source-identical skill copies, config sync, ClaudeAdapter discoverability, v1-to-v2 hook recovery upgrade, idempotence, install prompt reduction, concise success output, uninstall cleanup, rejected legacy CLI arguments, refused external symlinks, and ignored `CODEX_HOME` values. It does not touch real user configuration.
 
 ```bash
 set -euo pipefail
@@ -186,6 +186,21 @@ assert_simple_success_output() {
   ! grep -q "╰─" <<<"$output"
 }
 
+assert_skill_tree_matches() {
+  local source="$1"
+  local target="$2"
+  local source_count
+  local target_count
+
+  source_count="$(find "$source" -type f | wc -l | tr -d ' ')"
+  target_count="$(find "$target" -type f ! -name '.alpha-goal-skill-copy' | wc -l | tr -d ' ')"
+  test "$source_count" -eq "$target_count"
+  while IFS= read -r source_file; do
+    local relative_file="${source_file#"$source"/}"
+    cmp "$source_file" "$target/$relative_file"
+  done < <(find "$source" -type f | sort)
+}
+
 tmp_codex="$(mktemp -d)"
 codex_output="$(run_installer "$tmp_codex")"
 assert_simple_success_output "$codex_output" "Alpha Goal install completed."
@@ -198,6 +213,7 @@ for skill in alpha-goal executor verifier; do
   test -d "$tmp_codex/.codex/skills/$skill"
   test ! -L "$tmp_codex/.codex/skills/$skill"
   test -f "$tmp_codex/.codex/skills/$skill/SKILL.md"
+  assert_skill_tree_matches "$repo_root/skills/$skill" "$tmp_codex/.codex/skills/$skill"
 done
 test -f "$tmp_codex/.codex/AGENTS.md"
 test -f "$tmp_codex/.codex/config.toml"
@@ -205,12 +221,17 @@ test -f "$tmp_codex/.codex/hooks.json"
 test ! -e "$tmp_codex/ignored-codex-home/skills/alpha-goal"
 test ! -e "$tmp_codex/.claude/CLAUDE.md"
 test ! -e "$tmp_codex/.claude/skills/alpha-goal"
-! grep -q "references/claude-adapter.md" "$tmp_codex/.codex/skills/alpha-goal/SKILL.md"
+grep -q "references/claude-adapter.md" "$tmp_codex/.codex/skills/alpha-goal/SKILL.md"
 python3 -m json.tool "$tmp_codex/.codex/hooks.json" >/dev/null
-grep -q "codex-alpha-goal-compact-recovery:v1" "$tmp_codex/.codex/hooks.json"
-grep -q "resume from the explicit current goal-contract.md or checkpoint.md path" "$tmp_codex/.codex/hooks.json"
-grep -q "technical_design.md" "$tmp_codex/.codex/hooks.json"
+grep -q "codex-alpha-goal-compact-recovery:v2" "$tmp_codex/.codex/hooks.json"
+grep -q "explicit checkpoint.md path" "$tmp_codex/.codex/hooks.json"
+grep -q "draft loads alpha-goal" "$tmp_codex/.codex/hooks.json"
+grep -q "accepted loads executor" "$tmp_codex/.codex/hooks.json"
+! grep -q "technical_design.md" "$tmp_codex/.codex/hooks.json"
 grep -q "checkpoint.md" "$tmp_codex/.codex/hooks.json"
+codex_repeat_output="$(run_installer "$tmp_codex")"
+assert_simple_success_output "$codex_repeat_output" "Alpha Goal install completed."
+test "$(grep -o "codex-alpha-goal-compact-recovery:v2" "$tmp_codex/.codex/hooks.json" | wc -l | tr -d ' ')" -eq 1
 
 tmp_claude="$(mktemp -d)"
 claude_output="$(TARGET_CHOICE=claude run_installer "$tmp_claude")"
@@ -219,11 +240,13 @@ for skill in alpha-goal executor verifier; do
   test -d "$tmp_claude/.claude/skills/$skill"
   test ! -L "$tmp_claude/.claude/skills/$skill"
   test -f "$tmp_claude/.claude/skills/$skill/SKILL.md"
+  assert_skill_tree_matches "$repo_root/skills/$skill" "$tmp_claude/.claude/skills/$skill"
 done
 test -f "$tmp_claude/.claude/CLAUDE.md"
 test ! -e "$tmp_claude/.codex/AGENTS.md"
 test ! -e "$tmp_claude/.codex/skills/alpha-goal"
 grep -q "references/claude-adapter.md" "$tmp_claude/.claude/skills/alpha-goal/SKILL.md"
+cmp "$repo_root/skills/alpha-goal/references/claude-adapter.md" "$tmp_claude/.claude/skills/alpha-goal/references/claude-adapter.md"
 
 tmp_all="$(mktemp -d)"
 all_install_output="$(TARGET_CHOICE=all run_installer "$tmp_all")"
@@ -241,8 +264,31 @@ test -f "$tmp_all/.codex/AGENTS.md"
 test -f "$tmp_all/.codex/config.toml"
 test -f "$tmp_all/.codex/hooks.json"
 test -f "$tmp_all/.claude/CLAUDE.md"
-! grep -q "references/claude-adapter.md" "$tmp_all/.codex/skills/alpha-goal/SKILL.md"
+grep -q "references/claude-adapter.md" "$tmp_all/.codex/skills/alpha-goal/SKILL.md"
 grep -q "references/claude-adapter.md" "$tmp_all/.claude/skills/alpha-goal/SKILL.md"
+
+tmp_upgrade="$(mktemp -d)"
+mkdir -p "$tmp_upgrade/.codex"
+python3 - "$tmp_upgrade/.codex/hooks.json" <<'PY'
+import json
+import sys
+
+data = {
+    "hooks": {
+        "PostCompact": [
+            {"hooks": [{"type": "command", "command": ": 'codex-alpha-goal-compact-recovery:v1'; printf old"}]},
+            {"hooks": [{"type": "command", "command": "printf unmanaged"}]},
+        ]
+    }
+}
+with open(sys.argv[1], "w") as handle:
+    json.dump(data, handle)
+PY
+upgrade_output="$(run_installer "$tmp_upgrade")"
+assert_simple_success_output "$upgrade_output" "Alpha Goal install completed."
+! grep -q "codex-alpha-goal-compact-recovery:v1" "$tmp_upgrade/.codex/hooks.json"
+test "$(grep -o "codex-alpha-goal-compact-recovery:v2" "$tmp_upgrade/.codex/hooks.json" | wc -l | tr -d ' ')" -eq 1
+grep -q "printf unmanaged" "$tmp_upgrade/.codex/hooks.json"
 
 all_uninstall_output="$(TARGET_CHOICE=all run_installer "$tmp_all" --uninstall)"
 assert_simple_success_output "$all_uninstall_output" "Alpha Goal uninstall completed."
@@ -331,19 +377,18 @@ expect_invalid_arg positional
 bash -n scripts/install.sh
 node tools/validate_skills.js .
 node tools/validate_skills.js --fixtures
-rm -rf "$tmp_codex" "$tmp_claude" "$tmp_all" "$tmp_conflict" "$tmp_link_conflict" "$tmp_external"
+rm -rf "$tmp_codex" "$tmp_claude" "$tmp_all" "$tmp_upgrade" "$tmp_conflict" "$tmp_link_conflict" "$tmp_external"
 rm -f /tmp/alpha-goal-invalid.out /tmp/alpha-goal-invalid.err
 ```
 
 ## Prompts
 
 ```text
-$alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继续闭环。
-$executor 根据 Goal Contract 和已有条件检查点做下一轮最有用且可验证的有界 slice。
-$verifier 对照验收证据和 hard-blocking checklist 验证完成、声明边界和 blocker，并返回下一步 route。
+$alpha-goal 根据已发现事实判断走 DIRECT 还是 PERSIST。
+$executor 从已接受的 Goal Contract 恢复并执行下一批授权工作。
+$verifier 对当前持久 checkpoint 做风险边界或最终状态验证。
 ```
 
 ## Count budget
 
-The validator enforces the whole `skills/` tree under 15,000 word+punctuation units, counted as words plus punctuation/symbol marks.
-This budget preserves trigger behavior, durable state, authority gates, hard-blocking acceptance checks, route decisions, and verifier feedback without over-compressing their meaning.
+The validator enforces the whole `skills/` tree strictly below 9,301 word+punctuation units and reports total and per-skill counts. Structure validation deliberately ignores skill prose; semantic quality is covered by review and representative forward tests.

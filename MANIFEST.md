@@ -1,52 +1,43 @@
 # Manifest
 
-## Public Skills
+## Public skills
 
-| Directory | Purpose |
-|---|---|
-| `skills/alpha-goal/` | Front-end controller: fact discovery, Goal Contract clarification, Goal Contract review/confirmation, Technical Design runbook routing, and Native Goal Sync. |
-| `skills/executor/` | Goal-contract-driven bounded actuator/controller: act or harden authorized slices; use Goal Contract as authority and a required checkpoint for checklist, slice evidence, and verifier handoff. |
-| `skills/verifier/` | Independent verifier for acceptance evidence, hard-blocking checklist coverage, claim boundaries, blockers, and route decisions. |
+| Directory | Owned semantics |
+| --- | --- |
+| `skills/alpha-goal/` | Entry routing and Goal Contract authority. |
+| `skills/executor/` | Persistent target/delivery mutation, raw execution evidence, and recovery cursor. |
+| `skills/verifier/` | Verification observations, evidence classification, criterion status, and verification route. |
 
-Former public framing/modeling/synthesis stages are folded into `skills/alpha-goal/SKILL.md`.
+The shared structural contract is `tools/validation/alpha-goal.json`. It declares public skills, semantic owners, routes, conditional artifacts, references, distribution files, and the exclusive skill-unit budget. It does not validate skill prose.
 
-`alpha-goal` also owns Native Goal Sync: after user approval, it may create or reuse the current thread's native goal from the accepted Goal Contract summary and Technical Design link when present. `verifier` owns route semantics; the calling Agent uses terminal routes to manage native Goal updates.
-
-Technical Design flow is progressively disclosed through `skills/alpha-goal/references/technical-design-runbook.md` only after Goal Contract Confirmation Gate selects `run technical design`; `skills/alpha-goal/SKILL.md` keeps Goal Contract clarification and confirmation control flow.
-
-Claude runtime tool-name adaptation lives in `skills/alpha-goal/references/claude-adapter.md`. For `claude` installs, `scripts/install.sh` injects the Entry Gate reminder into the installed Alpha Goal skill copy; source `SKILL.md` remains runtime-neutral.
+Claude tool-name adaptation lives in `skills/alpha-goal/references/claude-adapter.md`. Codex and Claude installs receive the same runtime-neutral skill tree; no prose is injected into installed copies.
 
 ## Scripts
 
 | Path | Mutates state? | Purpose |
-|---|---:|---|
-| `scripts/install.sh` | Yes | Copies the three public skills into target-specific independent roots, `$HOME/.codex/skills` for `codex` and `$HOME/.claude/skills` for `claude`, accepts only `--uninstall` as a CLI option, presents a color+Unicode arrow-key target menu for interactive runs with `codex`, `claude`, and `all`, asks only for the target during install, uses fixed install defaults for Codex home, force, template sync, hook sync, and verbose output, prompts interactively for uninstall cleanup choices, rejects non-interactive runs, prints grouped install/uninstall summaries including both skill roots for `all`, migrates same Git common-dir worktree skill symlinks into copied directories, cleans same-repo old Codex skill links during Codex install, injects ClaudeAdapter guidance during Claude install, syncs target-specific Codex/Claude user configuration, and uninstalls managed target-specific artifacts without running skill validation. |
-| `tools/validate_skills.js` | No | Validates the shared contract, public-skill structure, references, word+punctuation budget, scripts, docs, fixtures, and schemas. |
+| --- | ---: | --- |
+| `scripts/install.sh` | Yes | Interactively copies the three skills to the selected Codex/Claude roots, synchronizes managed templates/hooks, migrates managed links, and conservatively uninstalls managed artifacts. |
+| `tools/validate_skills.js` | No | Validates contract/schema structure, public skill/frontmatter/reference layout, distribution files, hooks/TOML, fixtures, tools surface, and the count budget. |
 
-## User Hooks
+## Templates and recovery
 
-`templates/hooks.json` defines one Codex user-level `PostCompact` hook, marked by `codex-alpha-goal-compact-recovery:v1`, without a matcher. A Codex install merges that template into `$HOME/.codex/hooks.json`. The hook reloads the applicable Alpha Goal skill and resumes only from an explicit current artifact path already present in task context.
+- `templates/AGENTS.md` and `templates/CLAUDE.md` carry the materiality-based autonomy boundary.
+- `templates/config.toml` enables available structured input and multi-agent capabilities; skill behavior still detects whether each capability is exposed.
+- `templates/hooks.json` defines one matcher-free `PostCompact` hook with marker `codex-alpha-goal-compact-recovery:v2`.
+- Recovery uses only an explicit artifact path already present in task context: `checkpoint.md` follows its bound route; a lone `goal-contract.md` loads `alpha-goal` when draft and `executor` when accepted. It never guesses the active task from directory recency.
+- Hook replacement uses the marker family, so v2 replaces v1 and the earlier experimental family while preserving unmanaged hooks.
 
-Hook replacement is by marker family, not exact version, so later `:v2` template markers replace existing `:v1` hooks. The installer also migrates the earlier experimental `codex-compact-skill-recovery` family.
+## Runtime artifacts
 
-## User Templates
+Artifacts exist only for `PERSIST`. The state root is `$HOME/.alpha-goal/<workspace-slug>/`, where the slug comes from the stable workspace basename.
 
-`templates/AGENTS.md` and `templates/config.toml` are Codex user-level templates. `templates/CLAUDE.md` is the Claude user-level template written to `$HOME/.claude/CLAUDE.md`. The interactive target selection controls whether Codex, Claude, or both configurations are synced. Install always syncs selected user templates and Codex hooks using fixed defaults; uninstall prompts control whether user templates and Codex hooks are cleaned up.
+| Path | Condition and owner |
+| --- | --- |
+| `<state-root>/YYYYMMDD-<task>/goal-contract.md` | Draft/accepted authority contract; only `alpha-goal` modifies it. |
+| `<state-root>/YYYYMMDD-<task>/checkpoint.md` | Created after acceptance; `executor` and `verifier` own separate sections and write sequentially. |
 
-TTY installs use a color+Unicode Up/Down + Enter menu with `codex` selected by default. The menu includes `codex`, `claude`, and `all`; selecting `all` syncs or uninstalls both Codex and Claude in one run. Install asks only for the target menu, fixes Codex home to `$HOME/.codex`, ignores `CODEX_HOME`, uses `force=false`, syncs selected templates and Codex hooks, and leaves verbose output disabled. Non-TTY runs are refused. `all` is rejected when Codex and Claude skill roots resolve to the same path, preventing one target-specific skill copy from overwriting the other. Install and uninstall success output is one concise completion line; detailed summary blocks are not printed. During install, an existing skill symlink is migrated only when it points to `skills/<skill>` in this repository or another worktree sharing the same Git common-dir. External symlinks, non-skill paths, and ordinary files are refused; real managed skill directories are recopied.
+`DIRECT` does not resolve this state root or create either artifact.
 
-`scripts/install.sh --uninstall` enters the interactive uninstall flow and removes only managed artifacts for the selected target. Codex uninstall removes managed Codex `AGENTS.md`, `config.toml` that byte-for-byte matches `templates/config.toml`, managed hooks, and managed Codex skill copies. Claude uninstall removes managed Claude `CLAUDE.md` and managed Claude skill copies. Uninstall preserves configuration symlinks, unmanaged real skill directories, external symlinks, mixed user files, and unmanaged hooks.
+## Count budget
 
-## Runtime Artifacts
-
-Default runtime artifacts live under the user-level Alpha Goal state root: `$HOME/.alpha-goal/<workspace-slug>/`, where `<workspace-slug>` comes from stable workspace identity: `slug(repo_root or Goal Contract target workspace)`.
-
-| Path | Purpose |
-|---|---|
-| `<state-root>/YYYYMMDD-<TaskName>/goal-contract.md` | Default `alpha-goal` artifact and canonical draft or accepted contract, including status, authorization source, discovery, and handoff context. |
-| `<state-root>/YYYYMMDD-<TaskName>/technical_design.md` | Conditional canonical Technical Design for the current Goal Contract, with draft, accepted, or rejected status. |
-| `<state-root>/YYYYMMDD-<TaskName>/checkpoint.md` | Required during executor runs for the acceptance checklist, current slice, raw evidence, gaps, blockers, and verifier route. |
-
-## Count Budget
-
-The enforced count budget is the whole `skills/` tree, capped at 15,000 word+punctuation units. Counted units are words plus punctuation/symbol marks. The cap preserves trigger behavior, durable state, authority gates, hard-blocking acceptance checks, route decisions, and verifier feedback without over-compressing their meaning.
+The complete `skills/` tree must remain strictly below 9,301 word+punctuation units. The validator reports total and per-skill counts; semantic correctness is covered by independent review and representative forward tests.

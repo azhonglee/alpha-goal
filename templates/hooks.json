@@ -5,8 +5,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": ": 'codex-alpha-goal-compact-recovery:v1'; printf '%s\\n' 'Compact recovery policy:' 'After compaction, decide whether $alpha-goal, $executor, or $verifier applies before acting; load the matching skill and treat remembered skill text as stale.' 'For active Alpha Goal work, resume from the explicit current goal-contract.md or checkpoint.md path already present in task context; read technical_design.md when linked and applicable.' 'If no Alpha Goal skill applies, continue normally.'",
-            "statusMessage": "Refreshing Alpha Goal compact recovery policy"
+            "command": ": 'codex-alpha-goal-compact-recovery:v2'; printf '%s\\n' 'Alpha Goal compact recovery:' 'Treat remembered skill text as stale and reload the applicable installed skill.' 'With an explicit checkpoint.md path, read it, then its bound goal-contract.md and the skill required by the latest route.' 'With only an explicit goal-contract.md path, read its status: draft loads alpha-goal; accepted loads executor to initialize or resume checkpoint.md; missing or mismatched status returns to alpha-goal.' 'Never guess the active task from directory recency. Without an explicit artifact path, continue normal/direct routing.'",
+            "statusMessage": "Refreshing Alpha Goal recovery context"
           }
         ]
       }
