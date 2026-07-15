@@ -50,12 +50,12 @@
     {
       "id": "RB10",
       "scenario": "Authority changes either during an active executor/verifier epoch or after a terminal PASS/BLOCKED epoch, then the same task is accepted at exactly the next revision.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Active work first obtains a named verifier return; terminal work records an explicit revision request. Executor then preserves the old epoch and appends a fresh one." }
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Active work records an explicit REFRAME_REQUESTED lifecycle handoff directly to alpha-goal without a verifier verdict; terminal work records an explicit revision request. Executor preserves the old epoch and appends a fresh one." }
     },
     {
       "id": "RB11",
       "scenario": "A verification observer updates a tracked snapshot.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Verification aborts; executor records the mutation before re-verification." }
+      "expected": { "entryRoute": "N/A", "verificationRoute": "NEXT_ITERATION", "nextOwner": "executor", "invariant": "Verifier does not silently continue against changed state; executor records the observer mutation before re-verification." }
     },
     {
       "id": "RB12",
@@ -70,7 +70,7 @@
     {
       "id": "RB14",
       "scenario": "The accepted outcome is technically infeasible and no authorized approach remains.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "RETURN_TO_ALPHA_GOAL", "nextOwner": "alpha-goal", "invariant": "Return one explicit decision about scope, constraints, acceptance, or stopping; never cycle an unclassified gap." }
+      "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "No authorized path remains, so verification reports BLOCKED without changing the goal; only an explicit later goal change starts a reframe." }
     },
     {
       "id": "RB15",
@@ -94,13 +94,13 @@
     },
     {
       "id": "RB19",
-      "scenario": "Exercise semantic checkpoint init, executor same-owner and verifier handoff writes, verifier routes, and epoch supersession; interrupt before commit, attempt invalid transitions, stale revisions/tokens, and recover only after JSON status inspection.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Semantic commands enforce the transition graph and expected revision; every lock-opening result supplies token/pendingPath, commit publishes and unlocks atomically, abort handles abandoned writes, and status phase/recoverableBy gates exact-owner recovery without lost updates." }
+      "scenario": "Exercise semantic checkpoint init, executor same-owner and verifier handoff writes, the three verifier routes, direct reframe, and epoch supersession; interrupt before commit, attempt invalid transitions, stale revisions/tokens, and recover only after JSON status inspection.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Semantic commands enforce the transition graph, keep reframe separate from verifier verdicts, and check expected revision; every lock-opening result supplies token/pendingPath, commit publishes and unlocks atomically, abort handles abandoned writes, and status phase/recoverableBy gates exact-owner recovery without lost updates." }
     },
     {
       "id": "RB20",
       "scenario": "A Goal Contract claims task authority may override a higher-priority instruction or tool policy.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "RETURN_TO_ALPHA_GOAL", "nextOwner": "alpha-goal", "invariant": "The invalid authority claim is rejected; task authority cannot expand the policy boundary." }
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "The invalid authority claim prevents acceptance and implementation; task authority cannot expand the policy boundary." }
     },
     {
       "id": "RB21",
@@ -120,7 +120,7 @@
     {
       "id": "RB24",
       "scenario": "Modify only Scope inside an accepted contract while preserving revision and status.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "RETURN_TO_ALPHA_GOAL", "nextOwner": "alpha-goal", "invariant": "Recomputed authority digest detects the same-revision tamper." }
+      "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "Recomputed authority digest detects the same-revision tamper and blocks use of the invalid accepted contract." }
     },
     {
       "id": "RB25",
@@ -135,12 +135,12 @@
     {
       "id": "RB27",
       "scenario": "Resume from a checkpoint bound to another task, branch, worktree, or repository set.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "RETURN_TO_ALPHA_GOAL", "nextOwner": "alpha-goal", "invariant": "An unrelated binding is rejected and never enters the same-task epoch-supersession path." }
+      "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "An unrelated binding is rejected as blocked and never enters the same-task epoch-supersession path." }
     },
     {
       "id": "RB28",
       "scenario": "A required observer remains empty after every meaningful safe fallback, and proving the claim now requires a different observer or narrower claim authority.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "RETURN_TO_ALPHA_GOAL", "nextOwner": "alpha-goal", "invariant": "Incomplete is not a fifth route; the verifier names the smallest observer or claim decision needed." }
+      "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "An accepted goal without usable required evidence is BLOCKED; verifier does not redefine its observer or claim boundary." }
     }
   ]
 }

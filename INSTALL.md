@@ -286,24 +286,28 @@ printf 'checkpoint_revision: 4\nactive_owner: verifier\npayload: recoverable-ver
 node "$lock_helper" commit "$lock_checkpoint" "$verify_handoff_token" >/dev/null
 assert_unlocked
 
-recovery_record="$(node "$lock_helper" verify "$lock_checkpoint" 4 RETURN_TO_ALPHA_GOAL)"
+if node "$lock_helper" verify "$lock_checkpoint" 4 RETURN_TO_ALPHA_GOAL >/dev/null 2>&1; then
+  echo "RETURN_TO_ALPHA_GOAL is not a verification route" >&2
+  exit 1
+fi
+recovery_record="$(node "$lock_helper" reframe "$lock_checkpoint" 4)"
 recovery_token="$(node -p 'JSON.parse(process.argv[1]).token' "$recovery_record")"
 recovery_status="$(node "$lock_helper" status "$lock_checkpoint")"
 node -e 'const s=JSON.parse(process.argv[1]); const r=s.recoverableBy; if (s.phase === "unlocked" || !(r === "verifier" || (Array.isArray(r) && r.includes("verifier")))) process.exit(1)' "$recovery_status"
 node "$lock_helper" recover "$lock_checkpoint" "$recovery_token" verifier >/dev/null
 assert_unlocked
 
-return_record="$(node "$lock_helper" verify "$lock_checkpoint" 4 RETURN_TO_ALPHA_GOAL)"
-return_token="$(node -p 'JSON.parse(process.argv[1]).token' "$return_record")"
-return_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$return_record")"
-printf 'checkpoint_revision: 5\nactive_owner: alpha-goal\npayload: authority-return\n' > "$return_pending"
-node "$lock_helper" commit "$lock_checkpoint" "$return_token" >/dev/null
+reframe_record="$(node "$lock_helper" reframe "$lock_checkpoint" 4)"
+reframe_token="$(node -p 'JSON.parse(process.argv[1]).token' "$reframe_record")"
+reframe_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$reframe_record")"
+printf 'checkpoint_revision: 5\nactive_owner: alpha-goal\npayload: reframe-requested\n' > "$reframe_pending"
+node "$lock_helper" commit "$lock_checkpoint" "$reframe_token" >/dev/null
 assert_unlocked
 
 supersede_record="$(node "$lock_helper" supersede "$lock_checkpoint" 5)"
 supersede_token="$(node -p 'JSON.parse(process.argv[1]).token' "$supersede_record")"
 supersede_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$supersede_record")"
-if node "$lock_helper" abort "$lock_checkpoint" "$return_token" >/dev/null 2>&1; then
+if node "$lock_helper" abort "$lock_checkpoint" "$reframe_token" >/dev/null 2>&1; then
   echo "a stale token should not abort a supersession lock" >&2
   exit 1
 fi
@@ -363,6 +367,7 @@ grep -q "codex-alpha-goal-compact-recovery:v3" "$tmp_codex/.codex/hooks.json"
 grep -q "For checkpoint.md" "$tmp_codex/.codex/hooks.json"
 grep -q "Resume only from top-level active_owner" "$tmp_codex/.codex/hooks.json"
 grep -q "guarded exact-next-revision epoch supersession" "$tmp_codex/.codex/hooks.json"
+grep -q "REFRAME_REQUESTED/alpha-goal" "$tmp_codex/.codex/hooks.json"
 grep -q "caller reports BLOCKED or rechecks PASS_TO_FINAL" "$tmp_codex/.codex/hooks.json"
 grep -q "accepted with a valid authority digest loads executor" "$tmp_codex/.codex/hooks.json"
 ! grep -q "technical_design.md" "$tmp_codex/.codex/hooks.json"

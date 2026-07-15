@@ -10,10 +10,10 @@ Deliver the accepted outcome within its authority boundary.
 ## Validate Entry
 
 - Require canonical `goal-contract.md` with `status: accepted`, a Confirmation Record accepting its current revision, and `accepted_authority_sha256`.
-- Resolve `<alpha-goal-root>` from the selected `alpha-goal/SKILL.md`, never CWD. Recompute with `node <alpha-goal-root>/scripts/authority-digest.js <absolute-contract-path>`; return to `alpha-goal` on mismatch.
+- Resolve `<alpha-goal-root>` from the selected `alpha-goal/SKILL.md`, never CWD. Recompute with `node <alpha-goal-root>/scripts/authority-digest.js <absolute-contract-path>`; a mismatch is an invalid binding and blocks execution.
 - Inspect instructions, workspace/repositories, worktree/branch, unrelated changes, tools, dependencies, delivery surfaces, and rollback.
 - Reject another task, workspace, worktree, branch, or repository-set checkpoint. Only the guarded same-task prior-revision path below may advance.
-- If authority change is requested during an active epoch, stop target writes, record the request, and hand to `verifier`; do not edit the contract.
+- If the acceptance authority explicitly changes the goal during an active epoch, stop target writes, record the source/change/current identity, and use the direct `reframe` lifecycle handoff; do not route through `verifier` or edit the contract.
 - Correct only executor-owned clerical metadata when contract identity and execution context already match.
 
 ## Checkpoint and Ownership
@@ -32,9 +32,11 @@ Use JSON `token`/`pendingPath`; never derive the path. Write the initial checkpo
 
 ### Supersede an Epoch
 
-`executor` may append a new current epoch only when task/context match; the prior origin is named `RETURN_TO_ALPHA_GOAL`/`alpha-goal`, or terminal `PASS_TO_FINAL|BLOCKED`/`caller` plus an explicit terminal revision request; and the contract is accepted at exactly the next revision with a valid digest.
+`executor` may append a new current epoch only when task/context match; the prior origin is `REFRAME_REQUESTED`/`alpha-goal`, or terminal `PASS_TO_FINAL|BLOCKED`/`caller` plus an explicit terminal revision request; and the contract is accepted at exactly the next revision with a valid digest.
 
-Open that transition with `supersede <checkpoint> <expected-revision>`. Read its JSON `token` and `pendingPath`, then use the abort/commit protocol below. Under lock, recheck the guards; keep the old epoch unchanged; append the new binding/criteria without verifier verdict; retain `state_revision`; increment `checkpoint_revision`; set owner `executor`. Prior evidence is stale until re-observed. Any mismatch returns to `alpha-goal`.
+Open that transition with `supersede <checkpoint> <expected-revision>`. Read its JSON `token` and `pendingPath`, then use the abort/commit protocol below. Under lock, recheck the guards; keep the old epoch unchanged; append the new binding/criteria without verifier verdict; retain `state_revision`; increment `checkpoint_revision`; set owner `executor`. Prior evidence is stale until re-observed. Any mismatch blocks supersession.
+
+For an explicit goal change, record `REFRAME_REQUESTED`, its authority source, requested delta, current state identity, and unverified mutations, then run `reframe <checkpoint> <expected-revision>`. Commit owner `alpha-goal` and stop; this is a lifecycle handoff, not a verifier verdict.
 
 ### Write Protocol
 
@@ -66,6 +68,6 @@ Untracked/unpublished lifecycle records and ephemeral observer logs are not targ
 
 ## Stagnation and Final Handoff
 
-Key failures by criterion, mode, dependency, and context. Retry only with new evidence, changed state, a smaller gap, or a materially different authorized approach; record failures. When exhausted, hand facts to `verifier` for an external blocker or one authority decision.
+Key failures by criterion, mode, dependency, and context. Retry only with new evidence, changed state, a smaller gap, or a materially different authorized approach; record failures. When exhausted, hand facts to `verifier` for a `BLOCKED` verdict.
 
 After the last mutation, collect final-state acceptance evidence and current delivery identity, record remaining gaps, and hand exclusive ownership to `verifier`. Claim completion only from a current `PASS_TO_FINAL` after the latest mutation.

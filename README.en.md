@@ -14,8 +14,9 @@ flowchart TD
   P --> E["executor: execute at risk boundaries and record checkpoint.md"]
   E --> V["verifier: independently observe current state"]
   V -->|"NEXT_ITERATION"| E
-  V -->|"RETURN_TO_ALPHA_GOAL"| A
-  V -->|"BLOCKED"| B["Report external blocker"]
+  E -. "REFRAME_REQUESTED" .-> A
+  V -. "REFRAME_REQUESTED" .-> A
+  V -->|"BLOCKED"| B["Report blocker"]
   V -->|"PASS_TO_FINAL"| F["Final claim"]
 ```
 

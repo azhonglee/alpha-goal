@@ -14,30 +14,29 @@ Decide whether bound state satisfies the accepted contract.
 - Inspect actual target, delivery, and dependencies.
 - Re-observe evidence; claim separate-agent independence only when an isolated verifier performed it.
 
-For every criterion record source, observer, attributable result/status, state identity, `as_of`, freshness/invalidation, and `passed|failed|pending|blocked`. Criterion-specific identity covers applicable repository/worktree, HEAD, dirty/untracked digest, artifact/delivery/remote identity, dependency version, and observation time. Narrow the claim if a required surface is unidentified.
+For every criterion record source, observer, attributable result/status, state identity, `as_of`, freshness/invalidation, and `passed|failed|pending|blocked`. Criterion-specific identity covers applicable repository/worktree, HEAD, dirty/untracked digest, artifact/delivery/remote identity, dependency version, and observation time. An unidentified required surface is blocked; verifier never narrows the accepted claim.
 
-Accept only observable attributable evidence. Effort, confidence, absence of failure, native lifecycle state, unrelated tests, and stale results prove nothing. Prefer non-mutating observers; if one changes declared target/delivery state, abort without verdict and return executor ownership to record it.
+Accept only observable attributable evidence. Effort, confidence, absence of failure, native lifecycle state, unrelated tests, and stale results prove nothing. Prefer non-mutating observers; if one changes declared target/delivery state, return `NEXT_ITERATION` so executor records the mutation before re-verification.
 
 ## Classify Then Route
 
 | Cause | Required finding | Route / owner |
 | --- | --- | --- |
 | `same_goal_fixable` | A materially different authorized batch can close the gap. | `NEXT_ITERATION` / `executor` |
-| `authority_decision_required` | Approaches are exhausted or behavior/scope/observer/claim authority must change; name the smallest decision. | `RETURN_TO_ALPHA_GOAL` / `alpha-goal` |
-| `external_blocker` | An outside dependency prevents progress and no authorized alternative exists. | `BLOCKED` / `caller` |
+| `blocked` | No authorized approach remains, an outside dependency prevents progress, or the accepted contract/binding is invalid or unverifiable. | `BLOCKED` / `caller` |
 | none | Every criterion passes against current identified state and fresh evidence. | `PASS_TO_FINAL` / `caller` |
 
-For empty/partial/suspicious results, continue safe non-mutating observation while useful. `incomplete` is not a route: map unavailable facts to an authorized batch, external blocker, or observer/claim decision. Never return unchanged state without a new decision, blocker, condition, or materially different batch.
+For empty/partial/suspicious results, continue safe non-mutating observation while useful. `incomplete` is not a route: map unavailable facts to an authorized batch or blocker. Never return unchanged state without a blocker, changed condition, or materially different batch. If the acceptance authority explicitly changes the goal while verifier owns the checkpoint, stop observation; run `reframe <checkpoint> <expected-revision>` through the checkpoint helper, commit owner `alpha-goal`, and return no verification verdict.
 
 ## Verify and Write
 
 1. Re-read contract/checkpoint binding, digest, revision, owner, and actual drift.
 2. Collect required observers after the latest relevant mutation and within freshness.
-3. Classify every criterion/gap; authority drift outranks blocker, which outranks fixable work.
+3. Classify every criterion/gap; invalid binding or contract integrity is blocked, otherwise blocker outranks fixable work.
 4. Resolve `<executor-root>` from selected `executor/SKILL.md`, then open the chosen route:
 
 ```text
-node <executor-root>/scripts/checkpoint-lock.js verify <absolute-checkpoint-path> <expected-revision> <PASS_TO_FINAL|NEXT_ITERATION|BLOCKED|RETURN_TO_ALPHA_GOAL>
+node <executor-root>/scripts/checkpoint-lock.js verify <absolute-checkpoint-path> <expected-revision> <PASS_TO_FINAL|NEXT_ITERATION|BLOCKED>
 ```
 
 5. Parse the returned JSON `token` and `pendingPath`; never construct the pending path. Re-read the pre-write checkpoint. On mismatch or abandonment, run `abort <checkpoint> <token>` and reload. Otherwise write the complete next checkpoint to `pendingPath`, updating only verifier fields, incrementing revision once, recording identity/evidence/gap/route, and setting the route owner last.

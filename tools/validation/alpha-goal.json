@@ -10,7 +10,8 @@
         "entry-route",
         "goal-contract-authority",
         "accepted-authority-digest",
-        "goal-input-projection"
+        "goal-input-projection",
+        "goal-reframing"
       ],
       "references": [
         "references/goal-contract-book.md",
@@ -28,7 +29,8 @@
         "raw-execution-evidence",
         "recovery-cursor",
         "checkpoint-write-protocol",
-        "checkpoint-epoch-supersession"
+        "checkpoint-epoch-supersession",
+        "checkpoint-reframe-handoff"
       ],
       "references": [],
       "scripts": [
@@ -62,8 +64,7 @@
       "values": [
         "PASS_TO_FINAL",
         "NEXT_ITERATION",
-        "BLOCKED",
-        "RETURN_TO_ALPHA_GOAL"
+        "BLOCKED"
       ]
     }
   },

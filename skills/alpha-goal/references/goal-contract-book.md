@@ -1,6 +1,6 @@
 # Goal Contract Book
 
-For `PERSIST` or an authority return, `alpha-goal` alone writes canonical `goal-contract.md` in the resolved task directory. Once accepted, it is structured input to execution, verification, and optional Goal projection.
+For `PERSIST` or an explicit goal reframe, `alpha-goal` alone writes canonical `goal-contract.md` in the resolved task directory. Once accepted, it is structured input to execution, verification, and optional Goal projection.
 
 ## Lifecycle and Integrity
 
@@ -8,7 +8,7 @@ For `PERSIST` or an authority return, `alpha-goal` alone writes canonical `goal-
 - `accepted`: the recorded acceptance authority has confirmed the current revision and authority payload.
 - To change an accepted authority payload, first satisfy the owner handoff in `SKILL.md`; then reopen as `draft`, increment `contract_revision` once, and invalidate prior verdicts. Further edits while that revision remains draft, including its Confirmation Record, do not increment it again.
 - Mark the authority payload with the exact boundary comments in the template. Resolve `<alpha-goal-root>` as the directory containing the selected `alpha-goal/SKILL.md`; never resolve from the workspace or process CWD. On acceptance, run `node <alpha-goal-root>/scripts/authority-digest.js <absolute-goal-contract-path>` and record its SHA-256 as `accepted_authority_sha256`.
-- `executor` and `verifier` recompute that digest on entry. A mismatch or missing digest invalidates acceptance and returns to `alpha-goal`.
+- `executor` and `verifier` recompute that digest on entry. A mismatch or missing digest invalidates acceptance and blocks use of the contract; only an explicit goal change may start a reframe.
 
 ## Minimum Contract
 
@@ -56,7 +56,7 @@ workspace_identity: <canonical workspace identity>
 - Decision: <accepted | refined | rejected>
 - Source and date: <explicit acceptance authority decision>
 - Accepted revision: <revision or none>
-- Supersession basis: <initial | verifier return | explicit terminal revision request>
+- Supersession basis: <initial | explicit reframe | explicit terminal revision request>
 - Conditions: <explicit conditions or none>
 <!-- authority-payload:end -->
 

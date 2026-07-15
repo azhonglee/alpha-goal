@@ -47,8 +47,8 @@ Before confirmation, map criteria to observers; check source conflicts, side-eff
 
 Before editing an accepted payload:
 
-- if its checkpoint is owned by `executor` or `verifier`, stop target writes and require `verifier` to return `RETURN_TO_ALPHA_GOAL` naming the change;
-- reopen directly only with no checkpoint, a returned `alpha-goal` epoch, or terminal `PASS_TO_FINAL`/`BLOCKED` plus an explicit acceptance-authority revision request; record the supersession basis.
+- if its checkpoint is owned by `executor` or `verifier`, edit only after an explicit acceptance-authority goal change makes that owner record `REFRAME_REQUESTED` and hand lifecycle ownership directly to `alpha-goal`;
+- reopen directly only with no checkpoint, a reframed `alpha-goal` epoch, or terminal `PASS_TO_FINAL`/`BLOCKED` plus an explicit acceptance-authority revision request; record the supersession basis.
 
 Present the Goal Frame, boundaries, criteria, evidence, and residual risk. Accept only an explicit decision from the recorded acceptance authority; silence, history, a spec, or desired-behavior authority does not grant side-effect authority or acceptance.
 
@@ -65,6 +65,6 @@ The accepted Goal Contract is canonical input to `executor`, `verifier`, and nat
 - Delegate independent read-heavy investigation, review, or evidence reruns. Parallelize independent reads; sequence dependent decisions; synthesize before acting.
 - Investigation agents never write shared artifacts. A verifier agent writes only verifier-owned checkpoint fields after exclusive handoff.
 
-## Resolve Authority Returns
+## Reframe a Changed Goal
 
-On `RETURN_TO_ALPHA_GOAL`, reopen only for changed/missing authority, observer, claim boundary, or an explicit decision after authorized approaches are exhausted. Leave the returned checkpoint unchanged; after accepting the next revision, `executor` performs guarded epoch supersession. Send clerical binding/context mismatches to their field owner and unchanged external blockers to `verifier`. Never return unchanged state without a new decision, corrected binding, or changed condition.
+Only an explicit acceptance-authority goal change re-enters clarification during an active epoch. The current `executor` or `verifier` owner stops work, records `REFRAME_REQUESTED`, the source/change/current identity and unverified mutations, then hands directly to `alpha-goal`; this is not a verification route. Leave that checkpoint immutable, reopen the contract as `draft`, and after explicit acceptance let `executor` supersede the epoch. Infeasible, invalid, or unverifiable accepted goals are `BLOCKED` to the caller, not automatic reframes.
