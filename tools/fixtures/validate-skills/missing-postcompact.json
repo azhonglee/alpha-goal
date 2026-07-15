@@ -1,5 +1,6 @@
 {
   "shouldPass": false,
+  "expectedErrors": ["hooks.PostCompact must contain at least one group"],
   "inheritRoot": true,
   "replacements": [
     {

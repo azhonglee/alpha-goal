@@ -514,12 +514,26 @@ same_git_worktree_skill_link() {
   [[ "$target_rel" == "skills/$skill_name" ]]
 }
 
+is_managed_skill_copy_dir() {
+  local target="$1"
+  local marker="$target/$skill_copy_marker"
+
+  [[ -d "$target" && ! -L "$target" && -f "$marker" && ! -L "$marker" ]] || return 1
+  [[ "$(wc -l < "$marker" | tr -d '[:space:]')" == "1" ]] || return 1
+  grep -Eq '^source=.+$' "$marker"
+}
+
 copy_skill_dir() {
   local source="$1"
   local target="$2"
   local label="$3"
   local source_real
+  local activation_marker=".alpha-goal-activation-token"
+  local activation_token
   local replaced=false
+  local stage_root
+  local staged
+  local backup
 
   source_real="$(normalize_path "$source")"
 
@@ -537,7 +551,6 @@ copy_skill_dir() {
     fi
 
     if [[ "$current_target" == "$source_real" || "$current_target" == "$legacy_top_level_source" || "$current_target" == "$legacy_skill_dir_source" || ( -n "$legacy_skillset_source" && "$current_target" == "$legacy_skillset_source" ) ]] || same_git_worktree_skill_link "$source" "$current_target" "$label" || same_git_common_dir_skill_path "$current_target" "$label"; then
-      rm "$target"
       replaced=true
     else
       echo "Refusing to replace existing symlink: $target -> $raw_current_target" >&2
@@ -545,18 +558,75 @@ copy_skill_dir() {
       exit 1
     fi
   elif [[ -e "$target" ]]; then
-    if [[ -d "$target" ]]; then
-      rm -rf "$target"
+    if is_managed_skill_copy_dir "$target"; then
       replaced=true
     else
-      echo "Refusing to replace existing non-directory skill path: $target" >&2
+      echo "Refusing to replace unmanaged or malformed skill directory: $target" >&2
+      echo "Only directories with a valid $skill_copy_marker marker are replaced." >&2
       exit 1
     fi
   fi
 
   mkdir -p "$(dirname "$target")"
-  cp -R "$source" "$target"
-  printf 'source=%s\n' "$source" > "$target/$skill_copy_marker"
+  stage_root="$(mktemp -d "$(dirname "$target")/.alpha-goal-skill-stage.XXXXXX")"
+  staged="$stage_root/$label"
+  backup="$stage_root/original"
+  if ! cp -R "$source" "$staged"; then
+    rm -rf "$stage_root"
+    die "Failed to stage skill copy: $label"
+  fi
+  printf 'source=%s\n' "$source_real" > "$staged/$skill_copy_marker"
+  activation_token="$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
+  printf '%s\n' "$activation_token" > "$staged/$activation_marker"
+
+  if [[ "$replaced" == true ]]; then
+    if ! mv "$target" "$backup"; then
+      rm -rf "$stage_root"
+      die "Failed to preserve existing managed skill before replacement: $target"
+    fi
+  fi
+  if ! mv "$staged" "$target"; then
+    if [[ "$replaced" == true ]] && { [[ -e "$backup" ]] || [[ -L "$backup" ]]; }; then
+      if [[ -e "$target" ]] || [[ -L "$target" ]]; then
+        echo "Failed to activate staged skill because the target reappeared: $target" >&2
+        echo "Previous managed copy preserved at: $backup" >&2
+        echo "Staged replacement preserved at: $staged" >&2
+        exit 1
+      fi
+      if ! mv "$backup" "$target"; then
+        echo "Failed to restore the previous managed skill: $target" >&2
+        echo "Previous managed copy preserved at: $backup" >&2
+        echo "Staged replacement preserved at: $staged" >&2
+        exit 1
+      fi
+    fi
+    rm -rf "$stage_root"
+    die "Failed to activate staged skill copy: $target"
+  fi
+  if [[ ! -f "$target/$activation_marker" || -L "$target/$activation_marker" ]] ||
+     [[ "$(cat "$target/$activation_marker" 2>/dev/null || true)" != "$activation_token" ]] ||
+     [[ ! -f "$target/SKILL.md" || -L "$target/SKILL.md" ]] ||
+     [[ -e "$target/$label/$activation_marker" || -L "$target/$label/$activation_marker" ]]; then
+    echo "Staged skill did not become the managed target: $target" >&2
+    if [[ "$replaced" == true ]] && { [[ -e "$backup" ]] || [[ -L "$backup" ]]; }; then
+      echo "Previous managed copy preserved at: $backup" >&2
+    fi
+    if [[ -e "$staged" ]] || [[ -L "$staged" ]]; then
+      echo "Staged replacement preserved at: $staged" >&2
+    elif [[ -e "$target/$label" ]] || [[ -L "$target/$label" ]]; then
+      echo "Staged replacement preserved at: $target/$label" >&2
+    fi
+    exit 1
+  fi
+  if ! rm "$target/$activation_marker" || ! is_managed_skill_copy_dir "$target"; then
+    echo "Activated skill failed managed-target validation: $target" >&2
+    if [[ "$replaced" == true ]] && { [[ -e "$backup" ]] || [[ -L "$backup" ]]; }; then
+      echo "Previous managed copy preserved at: $backup" >&2
+    fi
+    exit 1
+  fi
+  rm -rf "$stage_root"
+
   if [[ "$replaced" == true ]]; then
     replaced_count=$((replaced_count + 1))
     log "Replaced skill copy: $label -> $target"
@@ -625,7 +695,7 @@ remove_installed_skill_link() {
     return
   fi
 
-  if [[ ! -L "$target" && -d "$target" && -f "$target/$skill_copy_marker" ]]; then
+  if is_managed_skill_copy_dir "$target"; then
     rm -rf "$target"
     uninstall_skill_removed_count=$((uninstall_skill_removed_count + 1))
     log "Removed installed skill copy: $target"
@@ -664,7 +734,7 @@ remove_claude_skill_link() {
     return
   fi
 
-  if [[ ! -L "$target" && -d "$target" && -f "$target/$skill_copy_marker" ]]; then
+  if is_managed_skill_copy_dir "$target"; then
     rm -rf "$target"
     uninstall_skill_removed_count=$((uninstall_skill_removed_count + 1))
     log "Removed Claude skill copy: $target"

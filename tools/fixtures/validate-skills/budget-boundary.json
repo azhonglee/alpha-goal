@@ -1,5 +1,6 @@
 {
   "shouldPass": false,
+  "expectedErrors": ["skills word+punctuation budget exceeded"],
   "inheritRoot": true,
   "setSkillBudgetToActual": true
 }

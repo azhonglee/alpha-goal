@@ -20,8 +20,8 @@ flowchart TD
 
 `DIRECT` creates no Alpha Goal state and does not call `executor` or `verifier`. `PERSIST` keeps two runtime artifacts:
 
-- `goal-contract.md`: written only by `alpha-goal`; records authority, boundaries, success criteria, and acceptance observers.
-- `checkpoint.md`: `executor` writes execution and raw execution evidence; `verifier` writes verification observations, criterion status, and routes through sequential handoff.
+- `goal-contract.md`: written only by `alpha-goal`; records separated authority roles, boundaries, success criteria, observers, and the accepted authority digest.
+- `checkpoint.md`: retains immutable contract epochs, binds the current digest and state, and serializes executor/verifier handoff with an atomic lock plus revision/owner control.
 
 Routing uses material impact, side effects, recovery needs, and verifiability. Confidence, file count, step count, question count, and estimated duration are not risk proxies.
 
@@ -57,4 +57,6 @@ $verifier Verify the current persistent checkpoint at a risk boundary or final s
 - Direct work creates no persistent protocol; persistent work uses the minimum artifacts needed for authority, recovery, and audit.
 - Batch work inside one low-risk boundary; invoke verifier only at material risk boundaries and final state.
 - PASS binds to the target and delivery state actually observed; a later mutation invalidates it.
+- Volatile evidence records observation time and invalidation conditions; unidentified mutable surfaces cannot support an exact-binding claim.
 - Native goals, structured input, and subagents are capability-conditional aids, not universal runtime prerequisites.
+- `tools/evals/runtime-boundaries.json` preserves 28 static expected-boundary cases; schema validation is not runtime evidence.

@@ -1,0 +1,8 @@
+{
+  "shouldPass": false,
+  "expectedErrors": ["managed recovery hook must not appear outside hooks.PostCompact"],
+  "inheritRoot": true,
+  "files": {
+    "templates/hooks.json": "{\n  \"hooks\": {\n    \"PostCompact\": [{\"hooks\": [{\"type\": \"command\", \"command\": \"printf ordinary\"}]}],\n    \"OtherEvent\": [{\"hooks\": [{\"type\": \"command\", \"command\": \": 'codex-alpha-goal-compact-recovery:v3'; printf misplaced\"}]}]\n  }\n}\n"
+  }
+}

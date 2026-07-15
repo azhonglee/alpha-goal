@@ -1,0 +1,8 @@
+{
+  "shouldPass": false,
+  "expectedErrors": ["cases must contain exactly 28 entries"],
+  "inheritRoot": true,
+  "files": {
+    "tools/evals/runtime-boundaries.json": "{\n  \"schemaVersion\": 1,\n  \"claimBoundary\": \"fixture\",\n  \"cases\": []\n}\n"
+  }
+}

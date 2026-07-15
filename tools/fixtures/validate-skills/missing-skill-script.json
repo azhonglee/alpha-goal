@@ -1,0 +1,8 @@
+{
+  "shouldPass": false,
+  "expectedErrors": ["script is missing"],
+  "inheritRoot": true,
+  "removeFiles": [
+    "skills/alpha-goal/scripts/authority-digest.js"
+  ]
+}

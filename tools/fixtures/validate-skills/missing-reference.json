@@ -1,5 +1,6 @@
 {
   "shouldPass": false,
+  "expectedErrors": ["reference is missing"],
   "inheritRoot": true,
   "replacements": [
     {

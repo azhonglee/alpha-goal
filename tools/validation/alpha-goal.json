@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "skillBudgetExclusiveMax": 9301,
   "publicSkills": [
     {
@@ -7,11 +7,15 @@
       "entry": true,
       "ownedSemantics": [
         "entry-route",
-        "goal-contract-authority"
+        "goal-contract-authority",
+        "accepted-authority-digest"
       ],
       "references": [
         "references/goal-contract-book.md",
         "references/claude-adapter.md"
+      ],
+      "scripts": [
+        "scripts/authority-digest.js"
       ]
     },
     {
@@ -20,9 +24,14 @@
       "ownedSemantics": [
         "target-delivery-mutation",
         "raw-execution-evidence",
-        "recovery-cursor"
+        "recovery-cursor",
+        "checkpoint-write-protocol",
+        "checkpoint-epoch-supersession"
       ],
-      "references": []
+      "references": [],
+      "scripts": [
+        "scripts/checkpoint-lock.js"
+      ]
     },
     {
       "name": "verifier",
@@ -31,9 +40,11 @@
         "evidence-classification",
         "verification-observations",
         "criterion-status",
+        "evidence-freshness",
         "verification-route"
       ],
-      "references": []
+      "references": [],
+      "scripts": []
     }
   ],
   "routes": {
@@ -68,7 +79,7 @@
           "owner": "alpha-goal"
         },
         {
-          "name": "confirmation-and-revision",
+          "name": "confirmation-revision-and-authority-digest",
           "owner": "alpha-goal"
         }
       ]
@@ -78,7 +89,7 @@
       "condition": "accepted PERSIST contract during execution and verification",
       "sections": [
         {
-          "name": "binding-and-state-revision",
+          "name": "binding-state-revision-write-control-and-contract-epochs",
           "owner": "executor"
         },
         {
@@ -101,6 +112,9 @@
     ],
     "scripts": [
       "scripts/install.sh"
+    ],
+    "evals": [
+      "tools/evals/runtime-boundaries.json"
     ],
     "docs": [
       "AGENTS.md",

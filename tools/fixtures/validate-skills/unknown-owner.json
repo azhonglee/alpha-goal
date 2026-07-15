@@ -1,5 +1,6 @@
 {
   "shouldPass": false,
+  "expectedErrors": ["route verification has unknown owner"],
   "inheritRoot": true,
   "replacements": [
     {

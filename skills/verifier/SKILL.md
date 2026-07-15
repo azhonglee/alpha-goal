@@ -1,77 +1,56 @@
 ---
 name: verifier
-description: "Independently verify a persistent Goal Contract checkpoint at a material risk boundary or final state. Collect verification observations, classify evidence, update criterion status, and return PASS_TO_FINAL, NEXT_ITERATION, BLOCKED, or RETURN_TO_ALPHA_GOAL. Never use for direct-path validation or implementation."
+description: "Verify a persistent Goal Contract checkpoint at a material risk boundary or final state. Use after exclusive executor handoff to collect current evidence, classify criteria, and return one verification route. Do not implement fixes, verify direct work, or change authority."
 ---
 
 # Verifier
 
-Own verification observations, evidence classification, criterion status, gap cause, and the bound route verdict. Do not implement fixes, change the Goal Contract, or expand authority.
+Decide whether bound state satisfies the accepted contract.
 
-## Entry
+## Validate Entry and Evidence
 
-- Require the canonical accepted Goal Contract, its revision, and the bound checkpoint.
-- Run only for a `PERSIST` task at a material risk boundary or final state.
-- Take exclusive checkpoint write ownership only after the executor handoff, including when running as a dedicated verifier agent; reject concurrent or unexpected changes.
-- Inspect the current target and delivery state directly. A revision number is binding metadata, not proof.
+- Require the accepted contract, current revision/digest, bound current checkpoint epoch, and `active_owner: verifier`.
+- Resolve `<alpha-goal-root>` and `<executor-root>` from their selected `SKILL.md` locations, never CWD. Recompute with `node <alpha-goal-root>/scripts/authority-digest.js <absolute-contract-path>`; reject mismatch.
+- Inspect actual target, delivery, and dependencies.
+- Re-observe evidence; claim separate-agent independence only when an isolated verifier performed it.
 
-## Classify Evidence
+For every criterion record source, observer, attributable result/status, state identity, `as_of`, freshness/invalidation, and `passed|failed|pending|blocked`. Criterion-specific identity covers applicable repository/worktree, HEAD, dirty/untracked digest, artifact/delivery/remote identity, dependency version, and observation time. Narrow the claim if a required surface is unidentified.
 
-For every required acceptance observer, collect or rerun and record:
+Accept only observable attributable evidence. Effort, confidence, absence of failure, native lifecycle state, unrelated tests, and stale results prove nothing. Prefer non-mutating observers; if one changes declared target/delivery state, abort without verdict and return executor ownership to record it.
 
-- source: test, build, runtime, review, inspection, or blocker;
-- observer/command and result or exit status;
-- observed state identity and the verifier's raw observation/artifact reference;
-- mapped success criterion;
-- criterion status: `passed`, `failed`, `pending`, or `blocked`.
+## Classify Then Route
 
-Accept only observable, attributable evidence. Do not infer completion from effort, partial success, confidence, absence of failure, unrelated tests, or native goal state. Evidence predating a relevant target/delivery mutation is stale for affected criteria. On the first verification, create criterion status for every bound Success Criterion.
-
-Prefer non-mutating observers. Ephemeral logs, caches, and checkpoint evidence are verification observations, not target/delivery state, unless tracked, published, or required deliverables. If an observer changes declared target/delivery state, abort the verification attempt without a verdict, return control to `executor` to record the mutation and increment `state_revision`, then verify again.
-
-## Analyze Gaps
-
-| Gap cause | Meaning | Route |
+| Cause | Required finding | Route / owner |
 | --- | --- | --- |
-| `same_goal_fixable` | Current authority permits a materially different batch that can close the gap. | `NEXT_ITERATION` |
-| `authority_or_context` | Authorization Source, Scope, contract, Claim Boundary, artifact binding, or execution context is missing, changed, or mismatched. | `RETURN_TO_ALPHA_GOAL` |
-| `external_blocker` | An outside dependency prevents progress and no authorized alternative is available. | `BLOCKED` |
-| none | Every required item passes against the current bound state. | `PASS_TO_FINAL` |
+| `same_goal_fixable` | A materially different authorized batch can close the gap. | `NEXT_ITERATION` / `executor` |
+| `authority_decision_required` | Approaches are exhausted or behavior/scope/observer/claim authority must change; name the smallest decision. | `RETURN_TO_ALPHA_GOAL` / `alpha-goal` |
+| `external_blocker` | An outside dependency prevents progress and no authorized alternative exists. | `BLOCKED` / `caller` |
+| none | Every criterion passes against current identified state and fresh evidence. | `PASS_TO_FINAL` / `caller` |
 
-Route stagnation by its cause. Repetition alone is not an external blocker, and a repeated attempt is not a materially different next batch.
+For empty/partial/suspicious results, continue safe non-mutating observation while useful. `incomplete` is not a route: map unavailable facts to an authorized batch, external blocker, or observer/claim decision. Never return unchanged state without a new decision, blocker, condition, or materially different batch.
 
-## Verify
+## Verify and Write
 
-1. Re-read contract/checkpoint bindings and inspect the actual workspace/repository state.
-2. Check contract status/revision, persistence trigger, Authorization Source, Intent and Observable Outcome, Scope, Non-goals, Material Constraints, Execution and Side-effect Boundary, Decision Boundary, Claim Boundary, Success Criteria and Acceptance Evidence, Confirmation Record, and current execution context for drift.
-3. Rerun or collect the observers required for the current claim after the latest relevant mutation; keep these verification observations separate from executor-owned raw execution evidence.
-4. Classify evidence and update only verifier-owned checkpoint fields.
-5. Select exactly one route using this precedence:
-   - authority/context drift → `RETURN_TO_ALPHA_GOAL`;
-   - external blocker with no authorized alternative → `BLOCKED`;
-   - same-goal fixable gap with a materially different authorized batch → `NEXT_ITERATION`;
-   - all required current-state evidence passes → `PASS_TO_FINAL`;
-   - otherwise → `RETURN_TO_ALPHA_GOAL` with the unclassified authority/evidence gap.
-6. Record the route, contract revision, state revision, observed-state identity, evidence mapping, and remaining gap.
+1. Re-read contract/checkpoint binding, digest, revision, owner, and actual drift.
+2. Collect required observers after the latest relevant mutation and within freshness.
+3. Classify every criterion/gap from verifier observations; authority drift outranks blocker, which outranks fixable work.
+4. Acquire and retain the token:
 
-## Route Contract
+```text
+node <executor-root>/scripts/checkpoint-lock.js acquire <absolute-checkpoint-path> verifier:<operation-id> <expected-revision> verifier <next-revision> <route-owner>
+```
 
-| Route | Calling action |
-| --- | --- |
-| `PASS_TO_FINAL` | Confirm no later target/delivery mutation occurred, then make only claims supported by the observed evidence. |
-| `NEXT_ITERATION` | Return to `executor` with the precise gap and authorized next-batch boundary. |
-| `BLOCKED` | Report the external blocker; update native lifecycle only if the current surface's blocked rule is actually satisfied. |
-| `RETURN_TO_ALPHA_GOAL` | Return to `alpha-goal`; do not repair missing authority inside executor or verifier. |
+5. Re-read the recorded pre-write snapshot; on mismatch release and reload. Otherwise write the complete next checkpoint to `<checkpoint-path>.pending-<token>`, updating only verifier fields, incrementing revision, recording identity/evidence/gap/route, and setting the route owner last. Run `node <executor-root>/scripts/checkpoint-lock.js commit <absolute-checkpoint-path> <token>`.
+6. On every success/abort after acquisition, release:
 
-A PASS is bound to the exact contract revision, state revision, target state, and delivery state observed. Any later target/delivery mutation invalidates it and requires another final verification. Lifecycle/checkpoint metadata that only records the bound verdict does not invalidate it.
+```text
+node <executor-root>/scripts/checkpoint-lock.js release <absolute-checkpoint-path> <token>
+```
 
-## Final Verdict Gate
+If a canonical lock survives, run `node <executor-root>/scripts/checkpoint-lock.js status <absolute-checkpoint-path>`. After proving its writer stopped, the owner of the exact pre-write snapshot or digest-bound successor may run `node <executor-root>/scripts/checkpoint-lock.js recover <absolute-checkpoint-path> <token> <owner>`; otherwise wait/report. Pending records do not block.
 
-Return `PASS_TO_FINAL` only when:
+## Final Gate
 
-- every required criterion has current final-state evidence;
-- no item is pending, failed, or blocked;
-- no drift exists in contract status/revision, persistence trigger, Authorization Source, Intent and Observable Outcome, Scope, Non-goals, Material Constraints, Execution and Side-effect Boundary, Decision Boundary, Claim Boundary, Success Criteria and Acceptance Evidence, Confirmation Record, or execution context;
-- no unresolved blocker or same-goal fixable gap remains;
-- the verdict follows the latest target/delivery mutation.
+Return `PASS_TO_FINAL` only when every criterion is passed by current final-state evidence; contract/digest/checkpoint/execution/dependencies have not drifted; identity covers the claim; volatile evidence is fresh; and the verdict follows the latest target/delivery mutation.
 
-The calling agent, not verifier, owns final reporting and any capability-conditional native goal update.
+Any invalidating binding, identity, dependency, or freshness change requires re-verification. Only untracked, unpublished verdict metadata that changes no claimed surface is exempt. The caller owns final reporting and capability-conditional native lifecycle updates.

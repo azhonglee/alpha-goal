@@ -1,5 +1,6 @@
 {
   "shouldPass": false,
+  "expectedErrors": ["frontmatter name"],
   "inheritRoot": true,
   "replacements": [
     {

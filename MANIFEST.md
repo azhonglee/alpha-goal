@@ -8,7 +8,7 @@
 | `skills/executor/` | Persistent target/delivery mutation, raw execution evidence, and recovery cursor. |
 | `skills/verifier/` | Verification observations, evidence classification, criterion status, and verification route. |
 
-The shared structural contract is `tools/validation/alpha-goal.json`. It declares public skills, semantic owners, routes, conditional artifacts, references, distribution files, and the exclusive skill-unit budget. It does not validate skill prose.
+The shared structural contract is `tools/validation/alpha-goal.json`. It declares public skills, semantic owners, routes, conditional artifacts, references, distribution/eval files, and the exclusive skill-unit budget. It does not validate skill prose.
 
 Claude tool-name adaptation lives in `skills/alpha-goal/references/claude-adapter.md`. Codex and Claude installs receive the same runtime-neutral skill tree; no prose is injected into installed copies.
 
@@ -18,14 +18,18 @@ Claude tool-name adaptation lives in `skills/alpha-goal/references/claude-adapte
 | --- | ---: | --- |
 | `scripts/install.sh` | Yes | Interactively copies the three skills to the selected Codex/Claude roots, synchronizes managed templates/hooks, migrates managed links, and conservatively uninstalls managed artifacts. |
 | `tools/validate_skills.js` | No | Validates contract/schema structure, public skill/frontmatter/reference layout, distribution files, hooks/TOML, fixtures, tools surface, and the count budget. |
+| `tools/evals/runtime-boundaries.json` | No | Declares 28 expected boundary cases for independent static or runtime review; schema validity alone is not behavioral evidence. |
+
+`skills/alpha-goal/scripts/authority-digest.js` deterministically hashes the marked authority payload used by contract acceptance and entry checks.
+`skills/executor/scripts/checkpoint-lock.js` atomically activates locks and digest-validated checkpoint commits, serializes writers, and closes by token-checked release or proof-based recovery.
 
 ## Templates and recovery
 
 - `templates/AGENTS.md` and `templates/CLAUDE.md` carry the materiality-based autonomy boundary.
 - `templates/config.toml` enables available structured input and multi-agent capabilities; skill behavior still detects whether each capability is exposed.
-- `templates/hooks.json` defines one matcher-free `PostCompact` hook with marker `codex-alpha-goal-compact-recovery:v2`.
-- Recovery uses only an explicit artifact path already present in task context: `checkpoint.md` follows its bound route; a lone `goal-contract.md` loads `alpha-goal` when draft and `executor` when accepted. It never guesses the active task from directory recency.
-- Hook replacement uses the marker family, so v2 replaces v1 and the earlier experimental family while preserving unmanaged hooks.
+- `templates/hooks.json` defines one matcher-free `PostCompact` hook with marker `codex-alpha-goal-compact-recovery:v3`.
+- Recovery uses only an explicit artifact path already present in task context. A checkpoint validates its current contract epoch and resumes only from top-level `active_owner`; historical routes never override the current handoff. A same-task accepted next revision uses guarded epoch supersession. Terminal PASS rechecks identity/freshness, and later mutations resume `executor`. A lone accepted contract must have a valid authority digest. Recovery never guesses the active task from directory recency.
+- Hook replacement uses the marker family, so v3 replaces earlier versions and the experimental family while preserving unmanaged hooks.
 
 ## Runtime artifacts
 
@@ -33,11 +37,11 @@ Artifacts exist only for `PERSIST`. The state root is `$HOME/.alpha-goal/<worksp
 
 | Path | Condition and owner |
 | --- | --- |
-| `<state-root>/YYYYMMDD-<task>/goal-contract.md` | Draft/accepted authority contract; only `alpha-goal` modifies it. |
-| `<state-root>/YYYYMMDD-<task>/checkpoint.md` | Created after acceptance; `executor` and `verifier` own separate sections and write sequentially. |
+| `<state-root>/YYYYMMDD-<task>/goal-contract.md` | Draft/accepted authority contract with accepted authority-payload digest; only `alpha-goal` modifies it. |
+| `<state-root>/YYYYMMDD-<task>/checkpoint.md` | Created after acceptance; retains immutable contract epochs, binds the current digest/state, carries atomic write control, and partitions sequential executor/verifier fields. |
 
 `DIRECT` does not resolve this state root or create either artifact.
 
 ## Count budget
 
-The complete `skills/` tree must remain strictly below 9,301 word+punctuation units. The validator reports total and per-skill counts; semantic correctness is covered by independent review and representative forward tests.
+The complete `skills/` tree must remain strictly below 9,301 word+punctuation units. The validator reports total and per-skill counts; `tools/evals/runtime-boundaries.json` is a static expected-behavior corpus, not runtime evidence.

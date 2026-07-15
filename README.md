@@ -20,8 +20,8 @@ flowchart TD
 
 `DIRECT` 不创建 Alpha Goal 状态，也不调用 `executor` 或 `verifier`。`PERSIST` 只保留两个运行时 artifact：
 
-- `goal-contract.md`：由 `alpha-goal` 独占修改，记录权威、边界、成功标准和验收观察者。
-- `checkpoint.md`：`executor` 写执行与原始执行证据，`verifier` 写独立验证观察、验收条目状态与 route；两者顺序交接。
+- `goal-contract.md`：由 `alpha-goal` 独占修改，记录分层权威、边界、成功标准、观察者和 accepted authority digest。
+- `checkpoint.md`：保留不可变契约 epoch，绑定当前 digest 与状态，并用原子锁及 revision/owner 串行化 `executor`、`verifier` 交接。
 
 路由只看材料性影响、副作用、恢复需求和可验证性；不以置信度、文件数、步骤数、问答轮次或预计时长替代风险判断。
 
@@ -57,4 +57,6 @@ $verifier 对当前持久 checkpoint 做风险边界或最终状态验证。
 - 直达任务不制造持久协议；持久任务用最小 artifact 支持授权、恢复和审计。
 - 同一低风险边界内批量执行，只在材料性风险边界和最终状态调用 verifier。
 - PASS 绑定实际观察到的最终目标与交付状态；后续 mutation 会使其失效。
+- 时效性证据记录观察时间与失效条件；无法标识的可变表面不得声称精确绑定。
 - Native Goal、结构化提问和子代理均按当前表面能力条件化使用，不成为通用运行时前提。
+- `tools/evals/runtime-boundaries.json` 固化 28 个静态边界预期；结构校验通过不等于真实运行证据。

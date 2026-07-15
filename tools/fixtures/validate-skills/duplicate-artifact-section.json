@@ -1,5 +1,6 @@
 {
   "shouldPass": false,
+  "expectedErrors": ["section names contains duplicate"],
   "inheritRoot": true,
   "replacements": [
     {

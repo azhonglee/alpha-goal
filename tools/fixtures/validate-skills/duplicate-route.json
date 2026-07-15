@@ -1,5 +1,6 @@
 {
   "shouldPass": false,
+  "expectedErrors": ["route entry values contains duplicate"],
   "inheritRoot": true,
   "replacements": [
     {

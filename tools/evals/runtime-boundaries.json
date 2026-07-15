@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "claimBoundary": "Expected-behavior corpus for static review. Schema validation is not runtime or model-performance evidence.",
+  "cases": [
+    {
+      "id": "RB01",
+      "scenario": "Inspect local files and report findings without recovery or external disclosure.",
+      "expected": { "entryRoute": "DIRECT", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "No lifecycle artifact is created; ordinary read-only work continues." }
+    },
+    {
+      "id": "RB02",
+      "scenario": "Make one clear reversible local change with direct final-state validation.",
+      "expected": { "entryRoute": "DIRECT", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "The routing role ends before the current agent implements and validates." }
+    },
+    {
+      "id": "RB03",
+      "scenario": "Make a local change that requires approval before external push and PR delivery.",
+      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "The external write, not approval alone, controls persistence; delivery authority and acceptance evidence are contracted before mutation." }
+    },
+    {
+      "id": "RB04",
+      "scenario": "Pause for approval before an otherwise direct local action.",
+      "expected": { "entryRoute": "DIRECT", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Approval alone does not create persistent state." }
+    },
+    {
+      "id": "RB05",
+      "scenario": "A managed skill-copy replacement fails during activation and restoration is blocked by a target collision.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "The previous managed copy and staged replacement remain at reported recovery paths; neither is deleted." }
+    },
+    {
+      "id": "RB06",
+      "scenario": "Send private source code to an external read-only scanning service.",
+      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Disclosure, credentials, session, and audit effects are material even without a remote write." }
+    },
+    {
+      "id": "RB07",
+      "scenario": "Perform read-only work that must recover across compaction, while a required independent review agent has not returned.",
+      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Recovery need controls persistence, and a missing requested review must be awaited, retried, or explicitly canceled rather than treated as evidence." }
+    },
+    {
+      "id": "RB08",
+      "scenario": "Perform read-only work with an explicit Goal Contract or audit-record requirement.",
+      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Explicit persistent audit evidence controls the route." }
+    },
+    {
+      "id": "RB09",
+      "scenario": "The acceptance authority confirms the first draft and alpha-goal fills its Confirmation Record.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Confirmation, digest, and accepted status complete one transaction at the current draft revision; no extra revision is created." }
+    },
+    {
+      "id": "RB10",
+      "scenario": "Authority changes either during an active executor/verifier epoch or after a terminal PASS/BLOCKED epoch, then the same task is accepted at exactly the next revision.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Active work first obtains a named verifier return; terminal work records an explicit revision request. Executor then preserves the old epoch and appends a fresh one." }
+    },
+    {
+      "id": "RB11",
+      "scenario": "A verification observer updates a tracked snapshot.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Verification aborts; executor records the mutation before re-verification." }
+    },
+    {
+      "id": "RB12",
+      "scenario": "A failed criterion has a materially different authorized approach, including an available external alternative.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "NEXT_ITERATION", "nextOwner": "executor", "invariant": "The route names the precise gap and different batch boundary." }
+    },
+    {
+      "id": "RB13",
+      "scenario": "An external dependency fails and no authorized alternative remains.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "The blocker is outside the authorized workflow and is reported without changing authority." }
+    },
+    {
+      "id": "RB14",
+      "scenario": "The accepted outcome is technically infeasible and no authorized approach remains.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "RETURN_TO_ALPHA_GOAL", "nextOwner": "alpha-goal", "invariant": "Return one explicit decision about scope, constraints, acceptance, or stopping; never cycle an unclassified gap." }
+    },
+    {
+      "id": "RB15",
+      "scenario": "After PASS, perform a requested edit, commit, push, and PR update sequence.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "PASS is invalidated, each boundary-changing transition is recorded separately, and final verification follows the last delivery mutation." }
+    },
+    {
+      "id": "RB16",
+      "scenario": "Add the verdict to a PR description after PASS.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "PR content is delivered state, not exempt lifecycle metadata." }
+    },
+    {
+      "id": "RB17",
+      "scenario": "A remote or deployed state changes after evidence was collected without a local target mutation.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "Freshness or invalidation conditions make the evidence stale and require re-observation." }
+    },
+    {
+      "id": "RB18",
+      "scenario": "A clear reversible local fix requires ordinary investigation before editing and proportional validation afterward.",
+      "expected": { "entryRoute": "DIRECT", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Necessary investigation and validation stay inside ordinary execution; they do not create separate approval gates." }
+    },
+    {
+      "id": "RB19",
+      "scenario": "Exercise checkpoint initialization (absent/none to executor), a same-owner executor revision, executor-to-verifier handoff, verifier-to-alpha-goal return, and verifier-to-caller terminal handoff; at each applicable transition interrupt before lock activation, before atomic commit, or after commit before release, with competing stale writers/releasers.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Only a fully initialized lock activates; expected-state acquisition and digest-bound atomic commit recover only the exact pre-state owner before publication or exact committed successor owner afterward, without lost update, owner rollback, or successor deletion." }
+    },
+    {
+      "id": "RB20",
+      "scenario": "A Goal Contract claims task authority may override a higher-priority instruction or tool policy.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "RETURN_TO_ALPHA_GOAL", "nextOwner": "alpha-goal", "invariant": "The invalid authority claim is rejected; task authority cannot expand the policy boundary." }
+    },
+    {
+      "id": "RB21",
+      "scenario": "Verifier is loaded alone after compaction, acquires from an arbitrary CWD, detects a revision mismatch, releases, and reloads after either supported copied-skill installation.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "Verifier resolves both helpers from selected SKILL.md roots and has complete acquire, token, abort, release, and recovery instructions without remembered executor text." }
+    },
+    {
+      "id": "RB22",
+      "scenario": "A verifier starts with a vague state label, then identifies every claim-relevant surface and collects fresh passing evidence.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "PASS_TO_FINAL", "nextOwner": "caller", "invariant": "The vague label is insufficient; PASS occurs only after complete attributable identity and fresh evidence." }
+    },
+    {
+      "id": "RB23",
+      "scenario": "Perform an external GET request that sends a secret or creates an authenticated session.",
+      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "HTTP read semantics do not erase credential, disclosure, session, or audit side effects." }
+    },
+    {
+      "id": "RB24",
+      "scenario": "Modify only Scope inside an accepted contract while preserving revision and status.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "RETURN_TO_ALPHA_GOAL", "nextOwner": "alpha-goal", "invariant": "Recomputed authority digest detects the same-revision tamper." }
+    },
+    {
+      "id": "RB25",
+      "scenario": "Verifier returns NEXT_ITERATION; executor completes a new batch, hands back to verifier, and compaction occurs while the old NEXT route remains in history.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "Top-level active_owner is authoritative; a historical route never overrides the current handoff." }
+    },
+    {
+      "id": "RB26",
+      "scenario": "Inspect an already-authorized remote resource with an existing authenticated session, no new disclosure, no session change, and no persistent audit requirement.",
+      "expected": { "entryRoute": "DIRECT", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Incidental authenticated access and ordinary provider logging alone do not force persistent routing." }
+    },
+    {
+      "id": "RB27",
+      "scenario": "Resume from a checkpoint bound to another task, branch, worktree, or repository set.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "RETURN_TO_ALPHA_GOAL", "nextOwner": "alpha-goal", "invariant": "An unrelated binding is rejected and never enters the same-task epoch-supersession path." }
+    },
+    {
+      "id": "RB28",
+      "scenario": "A required observer remains empty after every meaningful safe fallback, and proving the claim now requires a different observer or narrower claim authority.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "RETURN_TO_ALPHA_GOAL", "nextOwner": "alpha-goal", "invariant": "Incomplete is not a fifth route; the verifier names the smallest observer or claim decision needed." }
+    }
+  ]
+}

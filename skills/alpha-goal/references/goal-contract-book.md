@@ -1,13 +1,14 @@
 # Goal Contract Book
 
-Use only for a `PERSIST` task or an authority return. Write the canonical contract to the resolved Alpha Goal task directory as `goal-contract.md`. `alpha-goal` is its only writer.
+Use only for `PERSIST` or an authority return. The canonical `goal-contract.md` lives in the resolved task directory; `alpha-goal` is its only writer.
 
-## Lifecycle
+## Lifecycle and Integrity
 
 - `draft`: clarification or confirmation is incomplete; target mutation is unauthorized.
-- `accepted`: the recorded confirmation authorizes execution within the contract boundaries.
-- Increment `contract_revision` for every material authority change. Reopen as `draft`, invalidate prior verdicts, and confirm again.
-- Repository specs may link to the contract, but do not silently replace its authority.
+- `accepted`: the recorded acceptance authority has confirmed the current revision and authority payload.
+- To change an accepted authority payload, first satisfy the owner handoff in `SKILL.md`; then reopen as `draft`, increment `contract_revision` once, and invalidate prior verdicts. Further edits while that revision remains draft, including its Confirmation Record, do not increment it again.
+- Mark the authority payload with the exact boundary comments in the template. Resolve `<alpha-goal-root>` as the directory containing the selected `alpha-goal/SKILL.md`; never resolve from the workspace or process CWD. On acceptance, run `node <alpha-goal-root>/scripts/authority-digest.js <absolute-goal-contract-path>` and record its SHA-256 as `accepted_authority_sha256`.
+- `executor` and `verifier` recompute that digest on entry. A mismatch or missing digest invalidates acceptance and returns to `alpha-goal`.
 
 ## Minimum Contract
 
@@ -16,65 +17,63 @@ Use only for a `PERSIST` task or an authority return. Write the canonical contra
 
 status: draft
 contract_revision: 1
-persistence_trigger: <material ambiguity | risky side effect | recovery | audit requirement>
+<!-- authority-payload:start -->
+persistence_trigger:
+- <observed condition that requires persistence>
+workspace_identity: <canonical workspace identity>
 
 ## Authorization Source
-- Who defines desired behavior and which source wins on conflict.
+- Desired behavior authority: <who/source>
+- Side-effect authority: <who may authorize which effects>
+- Acceptance authority: <who may accept this revision>
+- Source precedence: <task-level conflicts only; never override higher-priority instructions or tool policy>
 
 ## Intent and Observable Outcome
-- Why the work matters and the final state an observer can see.
+- <why the work matters and the final state an observer can see>
 
 ## Scope / Non-goals / Material Constraints
-- Included behavior, explicit exclusions, and invariants.
+- Scope: <included behavior and surfaces>
+- Non-goals: <explicit exclusions>
+- Constraints: <invariants that distinguish an acceptable solution>
 
 ## Execution and Side-effect Boundary
-- Allowed files, commands, systems, credentials, environments, and side effects; crossings that require confirmation.
+- <allowed files, commands, systems, credentials, environments, and side effects>
+- <crossings that require confirmation>
 
 ## Decision Boundary
-- Mechanical choices the executor may make and product/risk choices reserved for authority.
+- Executor may decide: <mechanical choices>
+- Authority retains: <behavior, data, interface, migration, rollout, acceptance, and risk choices>
 
 ## Claim Boundary
-- Claims the available observers support and claims that remain caveated.
+- Supported claims: <what available observers can prove>
+- Unsupported claims: <what remains caveated>
 
 ## Success Criteria and Acceptance Evidence
-| ID | Falsifiable criterion | Observer / pass condition |
-| --- | --- | --- |
+| ID | Falsifiable criterion | Observer / pass condition | Freshness / invalidation |
+| --- | --- | --- | --- |
 
 ## Confirmation Record
-- Decision, source, date, accepted revision, and any explicit conditions.
+- Decision: <accepted | refined | rejected>
+- Source and date: <explicit acceptance authority decision>
+- Accepted revision: <revision or none>
+- Supersession basis: <initial | verifier return | explicit terminal revision request>
+- Conditions: <explicit conditions or none>
+<!-- authority-payload:end -->
+
+## Integrity Record
+- accepted_authority_sha256: <sha256 or none>
 ```
 
-Add only when material: current technical context, design decisions, dependencies, rollout/rollback, recovery requirements, discovery notes, or a cross-repository manifest.
+Add only material sections. Keep authority- or acceptance-changing additions inside the payload.
 
 ## Authority Rules
 
-- Record explicit user decisions, authoritative specs/issues, and source precedence under Authorization Source.
-- Treat code, tests, docs, and repository history as descriptive unless an authority source makes them normative.
-- Inspect current facts before asking; label unavailable material context as blocking.
-- Never promote a proposed answer, implementation convenience, or subagent suggestion into authority.
+- Treat code, tests, docs, issues, and history as descriptive unless an authorized source makes them normative.
+- Never promote a proposal, convenience, silence, historical behavior, or agent suggestion into authorization.
 
-## Boundary Rules
+## Boundary and Evidence Rules
 
-- Outcome describes an observable end state, not an implementation technique.
-- Scope describes included behavior; non-goals require explicit exclusion.
-- Constraints distinguish an acceptable solution from a symptom-only fix.
-- The execution boundary identifies allowed mutations and side effects.
-- The decision boundary separates authorized mechanics from behavior, data, interface, migration, rollout, acceptance, and risk choices.
-- The claim boundary keeps proxy evidence from becoming an absolute safety, performance, compatibility, or deployment claim.
-
-## Acceptance Rules
-
-- Give every success criterion a stable ID and a falsifiable pass condition.
-- Map each criterion to a direct observer: command, test, runtime observation, artifact, diff, benchmark, or explicit review.
-- Name proxy evidence and residual uncertainty when direct proof is unavailable.
-- Do not use confidence, effort, question count, or “looks correct” as evidence.
-
-## Confirmation Readiness
-
-Before requesting acceptance, ensure:
-
-- no blocking material decision remains;
-- source conflicts and authorization are explicit;
-- executor actions, forbidden work, and confirmation crossings are clear;
-- every criterion maps to an observer;
-- the final claim cannot exceed the defined evidence.
+- Describe observable outcomes rather than prescribing implementation steps unless the process is itself required.
+- Give every criterion a stable ID, direct observer, pass condition, and any freshness or invalidation rule.
+- State identity must cover every mutable surface relevant to the criterion. Examples include workspace/repository, HEAD, index/dirty/untracked content, artifact digest, remote ref or PR revision, and external observation time.
+- If a surface cannot be identified or refreshed, narrow the Claim Boundary; never call the binding exact.

@@ -28,6 +28,7 @@ function validateRoot(root) {
   const counts = validateSkillBudget(root, contract, errors);
   validateArtifacts(contract, errors);
   validateDistribution(root, contract, errors);
+  validateRuntimeEvals(root, contract, errors);
   validateToolsSurface(root, errors, warnings);
   validateHookTemplate(root, errors);
   validateTomlTemplate(root, errors);
@@ -50,7 +51,7 @@ function readContract(root, errors) {
 }
 
 function validateContract(contract, errors) {
-  if (contract.schemaVersion !== 4) errors.push(`${CONTRACT_PATH}: schemaVersion must be 4`);
+  if (contract.schemaVersion !== 5) errors.push(`${CONTRACT_PATH}: schemaVersion must be 5`);
   if (!Number.isInteger(contract.skillBudgetExclusiveMax) || contract.skillBudgetExclusiveMax < 1) {
     errors.push(`${CONTRACT_PATH}: skillBudgetExclusiveMax must be a positive integer`);
   }
@@ -63,6 +64,7 @@ function validateContract(contract, errors) {
   const skillNames = [];
   const semanticOwners = new Map();
   let entryCount = 0;
+  let entrySkillName;
   for (const skill of contract.publicSkills || []) {
     if (!isObject(skill)) {
       errors.push(`${CONTRACT_PATH}: publicSkills entries must be objects`);
@@ -71,9 +73,13 @@ function validateContract(contract, errors) {
     if (!nonEmptyString(skill.name)) errors.push(`${CONTRACT_PATH}: public skill missing name`);
     else skillNames.push(skill.name);
     if (typeof skill.entry !== "boolean") errors.push(`${CONTRACT_PATH}: public skill ${skill.name || "<unknown>"} entry must be boolean`);
-    if (skill.entry === true) entryCount += 1;
+    if (skill.entry === true) {
+      entryCount += 1;
+      entrySkillName = skill.name;
+    }
     requireArray(skill, "ownedSemantics", errors, `${CONTRACT_PATH}: public skill ${skill.name || "<unknown>"}`);
     requireArray(skill, "references", errors, `${CONTRACT_PATH}: public skill ${skill.name || "<unknown>"}`);
+    requireArray(skill, "scripts", errors, `${CONTRACT_PATH}: public skill ${skill.name || "<unknown>"}`);
 
     for (const semantic of skill.ownedSemantics || []) {
       if (!nonEmptyString(semantic)) {
@@ -85,9 +91,13 @@ function validateContract(contract, errors) {
       }
     }
     requireUniqueStrings(skill.references, `${CONTRACT_PATH}: public skill ${skill.name || "<unknown>"} references`, errors);
+    requireUniqueStrings(skill.scripts, `${CONTRACT_PATH}: public skill ${skill.name || "<unknown>"} scripts`, errors);
   }
   requireUniqueStrings(skillNames, `${CONTRACT_PATH}: public skill names`, errors);
   if (entryCount !== 1) errors.push(`${CONTRACT_PATH}: exactly one public skill must have entry=true`);
+  if (entryCount === 1 && contract.routes?.entry?.owner !== entrySkillName) {
+    errors.push(`${CONTRACT_PATH}: entry route owner must match the public skill with entry=true`);
+  }
 
   const knownOwners = new Set(skillNames);
   for (const [routeName, route] of Object.entries(contract.routes || {})) {
@@ -100,7 +110,7 @@ function validateContract(contract, errors) {
     requireUniqueStrings(route.values, `${CONTRACT_PATH}: route ${routeName} values`, errors);
   }
 
-  for (const key of ["templates", "scripts", "docs"]) {
+  for (const key of ["templates", "scripts", "evals", "docs"]) {
     requireArray(contract.distribution || {}, key, errors, `${CONTRACT_PATH}: distribution`);
     requireUniqueStrings(contract.distribution?.[key], `${CONTRACT_PATH}: distribution.${key}`, errors);
   }
@@ -144,6 +154,17 @@ function validateSkills(root, contract, errors, warnings) {
         errors.push(`${CONTRACT_PATH}: ${skill.name} reference must be a safe relative path: ${JSON.stringify(reference)}`);
       } else if (!isFile(path.join(dir, reference))) {
         errors.push(`${CONTRACT_PATH}: ${skill.name} reference is missing: ${reference}`);
+      }
+    }
+    for (const script of skill.scripts || []) {
+      if (!safeRelativePath(script)) {
+        errors.push(`${CONTRACT_PATH}: ${skill.name} script must be a safe relative path: ${JSON.stringify(script)}`);
+        continue;
+      }
+      const file = path.join(dir, script);
+      if (!isFile(file)) errors.push(`${CONTRACT_PATH}: ${skill.name} script is missing: ${script}`);
+      else if (fs.readFileSync(file, "utf8").startsWith("#!") && (fs.statSync(file).mode & 0o100) === 0) {
+        warnings.push(`${skill.name}: ${script} has a shebang but is not user-executable`);
       }
     }
   }
@@ -225,7 +246,7 @@ function validateArtifacts(contract, errors) {
 }
 
 function validateDistribution(root, contract, errors) {
-  for (const key of ["templates", "scripts", "docs"]) {
+  for (const key of ["templates", "scripts", "evals", "docs"]) {
     for (const rel of contract.distribution?.[key] || []) {
       if (!safeRelativePath(rel)) errors.push(`${CONTRACT_PATH}: distribution.${key} path is unsafe: ${JSON.stringify(rel)}`);
       else if (!isFile(path.join(root, rel))) errors.push(`${CONTRACT_PATH}: distribution.${key} file is missing: ${rel}`);
@@ -242,7 +263,8 @@ function validateToolsSurface(root, errors, warnings) {
   for (const file of walk(toolsRoot).filter(isFile)) {
     const rel = relative(root, file);
     const allowedFixture = /^tools\/fixtures\/validate-skills\/[a-z0-9-]+\.json$/.test(rel);
-    if (rel !== "tools/validate_skills.js" && rel !== CONTRACT_PATH && !allowedFixture) {
+    const allowedEval = rel === "tools/evals/runtime-boundaries.json";
+    if (rel !== "tools/validate_skills.js" && rel !== CONTRACT_PATH && !allowedFixture && !allowedEval) {
       errors.push(`unexpected tools surface: ${rel}`);
     }
     if (fs.readFileSync(file, "utf8").startsWith("#!") && (fs.statSync(file).mode & 0o100) === 0) {
@@ -251,8 +273,49 @@ function validateToolsSurface(root, errors, warnings) {
   }
 }
 
+function validateRuntimeEvals(root, contract, errors) {
+  const rel = "tools/evals/runtime-boundaries.json";
+  let data;
+  try {
+    data = JSON.parse(fs.readFileSync(path.join(root, rel), "utf8"));
+  } catch (error) {
+    errors.push(`${rel}: invalid JSON or missing file: ${errorMessage(error)}`);
+    return;
+  }
+
+  if (!isObject(data) || data.schemaVersion !== 1) errors.push(`${rel}: schemaVersion must be 1`);
+  if (!nonEmptyString(data.claimBoundary)) errors.push(`${rel}: claimBoundary must be a non-empty string`);
+  if (!Array.isArray(data.cases) || data.cases.length !== 28) {
+    errors.push(`${rel}: cases must contain exactly 28 entries`);
+    return;
+  }
+
+  const ids = [];
+  const entryRoutes = new Set([...(contract.routes?.entry?.values || []), "N/A"]);
+  const verificationRoutes = new Set([...(contract.routes?.verification?.values || []), "N/A"]);
+  const owners = new Set(["caller", ...(contract.publicSkills || []).map(skill => skill.name)]);
+  for (const item of data.cases) {
+    if (!isObject(item) || !/^RB[0-9]{2}$/.test(item.id || "")) {
+      errors.push(`${rel}: every case requires an id shaped RB00`);
+      continue;
+    }
+    ids.push(item.id);
+    if (!nonEmptyString(item.scenario)) errors.push(`${rel}: ${item.id} missing scenario`);
+    if (!isObject(item.expected)) {
+      errors.push(`${rel}: ${item.id} missing expected object`);
+      continue;
+    }
+    if (!entryRoutes.has(item.expected.entryRoute)) errors.push(`${rel}: ${item.id} invalid entryRoute`);
+    if (!verificationRoutes.has(item.expected.verificationRoute)) errors.push(`${rel}: ${item.id} invalid verificationRoute`);
+    if (!owners.has(item.expected.nextOwner)) errors.push(`${rel}: ${item.id} invalid nextOwner`);
+    if (!nonEmptyString(item.expected.invariant)) errors.push(`${rel}: ${item.id} missing invariant`);
+  }
+  requireUniqueStrings(ids, `${rel}: case ids`, errors);
+}
+
 function validateHookTemplate(root, errors) {
   const rel = "templates/hooks.json";
+  const managedMarker = /^: 'codex-alpha-goal-compact-recovery:v3';/;
   let data;
   try {
     data = JSON.parse(fs.readFileSync(path.join(root, rel), "utf8"));
@@ -267,6 +330,8 @@ function validateHookTemplate(root, errors) {
   if (!Array.isArray(data.hooks.PostCompact) || data.hooks.PostCompact.length === 0) {
     errors.push(`${rel}: hooks.PostCompact must contain at least one group`);
   }
+  let managedPostCompactCount = 0;
+  let managedOtherEventCount = 0;
   for (const [event, groups] of Object.entries(data.hooks)) {
     if (!Array.isArray(groups)) {
       errors.push(`${rel}: hooks.${event} must be an array`);
@@ -281,18 +346,34 @@ function validateHookTemplate(root, errors) {
         errors.push(`${rel}: hooks.PostCompact groups must not define matcher`);
       }
       for (const hook of group.hooks) {
-        if (!isObject(hook) || !nonEmptyString(hook.type) || !nonEmptyString(hook.command)) {
-          errors.push(`${rel}: hooks.${event} hook entries require type and command strings`);
+        if (!isObject(hook) || hook.type !== "command" || !nonEmptyString(hook.command)) {
+          errors.push(`${rel}: hooks.${event} hook entries require type=command and a command string`);
+        } else if (managedMarker.test(hook.command.trimStart())) {
+          if (event === "PostCompact") managedPostCompactCount += 1;
+          else managedOtherEventCount += 1;
         }
       }
     }
+  }
+  if (managedPostCompactCount !== 1) {
+    errors.push(`${rel}: expected exactly one v3 managed recovery hook inside hooks.PostCompact, found ${managedPostCompactCount}`);
+  }
+  if (managedOtherEventCount !== 0) {
+    errors.push(`${rel}: v3 managed recovery hook must not appear outside hooks.PostCompact`);
   }
 }
 
 function validateTomlTemplate(root, errors) {
   const rel = "templates/config.toml";
   try {
-    parseToml(fs.readFileSync(path.join(root, rel), "utf8"));
+    const data = parseToml(fs.readFileSync(path.join(root, rel), "utf8"));
+    for (const key of ["multi_agent", "default_mode_request_user_input", "child_agents_md"]) {
+      if (data?.features?.[key] !== true) errors.push(`${rel}: features.${key} must be true`);
+    }
+    if (!Number.isInteger(data?.agents?.max_threads) || data.agents.max_threads < 1) errors.push(`${rel}: agents.max_threads must be a positive integer`);
+    if (!Number.isInteger(data?.agents?.max_depth) || data.agents.max_depth < 1) errors.push(`${rel}: agents.max_depth must be a positive integer`);
+    if (data?.features?.multi_agent_v2?.usage_hint_enabled !== true) errors.push(`${rel}: features.multi_agent_v2.usage_hint_enabled must be true`);
+    if (!nonEmptyString(data?.features?.multi_agent_v2?.usage_hint_text)) errors.push(`${rel}: features.multi_agent_v2.usage_hint_text must be a non-empty string`);
   } catch (error) {
     errors.push(`${rel}: invalid TOML or missing file: ${errorMessage(error)}`);
   }
@@ -317,6 +398,18 @@ function runFixtures() {
       errors.push(`${fixtureFile}: invalid fixture JSON: ${errorMessage(error)}`);
       continue;
     }
+    if (typeof fixture.shouldPass !== "boolean") {
+      errors.push(`${fixtureFile}: shouldPass must be boolean`);
+      continue;
+    }
+    if (!fixture.shouldPass && (!Array.isArray(fixture.expectedErrors) || fixture.expectedErrors.length === 0)) {
+      errors.push(`${fixtureFile}: failing fixtures must declare expectedErrors`);
+      continue;
+    }
+    if (Array.isArray(fixture.expectedErrors) && fixture.expectedErrors.some(expected => !nonEmptyString(expected))) {
+      errors.push(`${fixtureFile}: expectedErrors must contain non-empty strings`);
+      continue;
+    }
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "alpha-goal-validator-"));
     try {
       if (fixture.inheritRoot) copyTree(projectRoot, tempRoot);
@@ -329,6 +422,11 @@ function runFixtures() {
       const passed = result.errors.length === 0;
       if (Boolean(fixture.shouldPass) !== passed) {
         errors.push(`${fixtureFile}: expected shouldPass=${fixture.shouldPass}, got errors: ${result.errors.join("; ")}`);
+      }
+      for (const expected of fixture.expectedErrors || []) {
+        if (!result.errors.some(error => error.includes(expected))) {
+          errors.push(`${fixtureFile}: expected error containing ${JSON.stringify(expected)}, got: ${result.errors.join("; ")}`);
+        }
       }
     } finally {
       fs.rmSync(tempRoot, { recursive: true, force: true });
