@@ -3,213 +3,244 @@ const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 
-function fail(message, code = 1) {
-  console.error(message);
-  process.exit(code);
+const owners = ["none", "alpha-goal", "executor", "verifier", "caller"];
+const routeOwner = { PASS_TO_FINAL: "caller", NEXT_ITERATION: "executor", BLOCKED: "caller", RETURN_TO_ALPHA_GOAL: "alpha-goal" };
+const writerPattern = /^(executor|verifier):[A-Za-z0-9][\w.-]{0,127}$/;
+const tokenPattern = /^[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}$/i;
+const revisionPattern = /^(0|[1-9]\d*)$/;
+const digestPattern = /^[\da-f]{64}$/;
+
+function fail(error, message, code = 1, extra) {
+  const failure = new Error(message); Object.assign(failure, { error, code, extra }); throw failure;
+}
+function print(value, stream = process.stdout) { stream.write(`${JSON.stringify(value)}\n`); }
+function done(action, token, phase) { print({ ok: true, action, token, phase }); }
+function usage() { fail("USAGE", "invalid arguments"); }
+function arity(args, size) { if (args.length !== size) usage(); }
+function validRevision(value) { return typeof value === "string" && revisionPattern.test(value); }
+function nextRevision(value) {
+  if (!validRevision(value)) fail("INVALID_REVISION", "invalid revision");
+  return (BigInt(value) + 1n).toString();
+}
+function writerRole(value) {
+  if (!writerPattern.test(value || "")) fail("INVALID_WRITER", "invalid writer");
+  return value.split(":", 1)[0];
+}
+function validOwner(value) { if (!owners.includes(value)) fail("INVALID_OWNER", "invalid owner"); }
+function validToken(value) { if (!tokenPattern.test(value || "")) fail("INVALID_TOKEN", "invalid token"); }
+
+function transition(t) {
+  const role = writerRole(t.writer);
+  validOwner(t.expectedOwner); validOwner(t.nextOwner);
+  let action = null, route = t.route ?? null;
+  if (t.expectedRevision === "absent") {
+    if (role === "executor" && t.expectedOwner === "none" && t.nextRevision === "0" && t.nextOwner === "executor" && route === null) action = "init";
+  } else {
+    const next = nextRevision(t.expectedRevision);
+    if (t.nextRevision !== next) fail("INVALID_TRANSITION", "revision increment");
+    if (role === "executor" && t.expectedOwner === "executor" && ["executor", "verifier"].includes(t.nextOwner) && route === null) action = "execute";
+    else if (role === "verifier" && t.expectedOwner === "verifier") {
+      if (route !== null) {
+        if (!Object.hasOwn(routeOwner, route) || routeOwner[route] !== t.nextOwner) fail("INVALID_TRANSITION", "route mismatch");
+      } else if (["executor", "alpha-goal", "caller"].includes(t.nextOwner)) {
+        route = t.nextOwner === "executor" ? "NEXT_ITERATION" : t.nextOwner === "alpha-goal" ? "RETURN_TO_ALPHA_GOAL" : null;
+      } else fail("INVALID_TRANSITION", "invalid target");
+      action = "verify";
+    } else if (role === "executor" && ["alpha-goal", "caller"].includes(t.expectedOwner) && t.nextOwner === "executor" && route === null) action = "supersede";
+  }
+  if (!action || t.nextOwner === "none") fail("INVALID_TRANSITION", "invalid transition");
+  return { action, route };
 }
 
-function usage() {
-  fail("usage: checkpoint-lock.js acquire <checkpoint.md> <executor|verifier:operation-id> <expected-revision> <expected-owner> <next-revision> <next-owner> | commit|release <checkpoint.md> <token> | recover <checkpoint.md> <token> <actor> | status <checkpoint.md>");
+function resolveCheckpoint(raw) {
+  const checkpoint = path.resolve(raw || "");
+  if (path.basename(checkpoint) !== "checkpoint.md") fail("INVALID_CHECKPOINT", "invalid target");
+  if (!fs.existsSync(path.dirname(checkpoint))) fail("INVALID_CHECKPOINT", "missing parent");
+  return { checkpoint, lock: `${checkpoint}.lock`, ownerFile: `${checkpoint}.lock/owner.json` };
 }
-
-const [command, rawCheckpoint, value, arg4, arg5, arg6, arg7] = process.argv.slice(2);
-if (!command || !rawCheckpoint) usage();
-
-const checkpoint = path.resolve(rawCheckpoint);
-if (path.basename(checkpoint) !== "checkpoint.md") fail("lock target must be named checkpoint.md");
-if (!fs.existsSync(path.dirname(checkpoint))) fail("checkpoint parent directory does not exist");
-
-const lockDir = `${checkpoint}.lock`;
-const ownerFile = path.join(lockDir, "owner.json");
-const validOwners = new Set(["none", "alpha-goal", "executor", "verifier", "caller"]);
-
-function sha256(buffer) {
-  return crypto.createHash("sha256").update(buffer).digest("hex");
-}
-
-function readCheckpointSnapshot(file = checkpoint) {
-  if (!fs.existsSync(file)) return { revision: "absent", owner: "none", digest: "absent" };
+function regularFile(file) {
   const stat = fs.lstatSync(file);
-  if (!stat.isFile() || stat.isSymbolicLink()) throw new Error(`checkpoint is not a regular file: ${file}`);
-  const input = fs.readFileSync(file);
-  const text = input.toString("utf8");
-  const revisions = [...text.matchAll(/^checkpoint_revision:\s*(\S+)\s*$/gm)].map(match => match[1]);
-  const owners = [...text.matchAll(/^active_owner:\s*(\S+)\s*$/gm)].map(match => match[1]);
-  if (revisions.length !== 1 || owners.length !== 1) throw new Error(`checkpoint state fields are missing or ambiguous: ${file}`);
-  return { revision: revisions[0], owner: owners[0], digest: sha256(input) };
+  if (!stat.isFile() || stat.isSymbolicLink()) throw new Error("invalid file");
+  return fs.readFileSync(file);
 }
+function snapshot(c, file = c.checkpoint) {
+  if (!fs.existsSync(file)) {
+    if (file === c.checkpoint) return { revision: "absent", owner: "none", digest: "absent" };
+    throw new Error("missing staged checkpoint");
+  }
+  const input = regularFile(file), text = input.toString("utf8");
+  const revisions = [...text.matchAll(/^checkpoint_revision:\s*(\S+)\s*$/gm)];
+  const activeOwners = [...text.matchAll(/^active_owner:\s*(\S+)\s*$/gm)];
+  if (revisions.length !== 1 || activeOwners.length !== 1) throw new Error("ambiguous checkpoint");
+  const revision = revisions[0][1], owner = activeOwners[0][1];
+  if (!validRevision(revision) || !owners.includes(owner) || owner === "none") throw new Error("invalid checkpoint state");
+  return { revision, owner, digest: crypto.createHash("sha256").update(input).digest("hex") };
+}
+function same(actual, revision, owner, digest) { return actual.revision === revision && actual.owner === owner && actual.digest === digest; }
+function close(c, token) { fs.renameSync(c.lock, `${c.lock}.closed-${token}`); }
 
-function readOwner() {
+function readOwner(c) {
   try {
-    const data = JSON.parse(fs.readFileSync(ownerFile, "utf8"));
-    if (!data || data.schemaVersion !== 3 || typeof data.owner !== "string" || typeof data.token !== "string" ||
-        typeof data.expectedRevision !== "string" || typeof data.expectedOwner !== "string" ||
-        typeof data.expectedCheckpointSha256 !== "string" || typeof data.nextRevision !== "string" ||
-        typeof data.nextOwner !== "string" ||
-        !(data.plannedCheckpointSha256 === null || /^[a-f0-9]{64}$/.test(data.plannedCheckpointSha256))) {
-      fail(`checkpoint lock metadata is malformed: ${ownerFile}`);
-    }
-    return data;
+    if (!fs.lstatSync(c.lock).isDirectory()) throw new Error();
+    const raw = JSON.parse(regularFile(c.ownerFile).toString("utf8"));
+    const writer = raw?.schemaVersion === 3 ? raw.owner : raw?.writer;
+    if (![3, 4].includes(raw?.schemaVersion)) throw new Error();
+    validToken(raw.token);
+    if (!(raw.expectedCheckpointSha256 === "absent" || digestPattern.test(raw.expectedCheckpointSha256)) ||
+        !(raw.plannedCheckpointSha256 === null || digestPattern.test(raw.plannedCheckpointSha256)) ||
+        (raw.expectedRevision === "absent") !== (raw.expectedCheckpointSha256 === "absent")) throw new Error();
+    transition({ ...raw, writer, route: raw.route ?? null });
+    return Object.assign({ raw, writer }, raw);
   } catch (error) {
-    fail(`cannot read checkpoint lock metadata: ${error.message}`);
+    if (error.error) throw error;
+    fail("INVALID_LOCK", "invalid lock metadata");
   }
 }
-
-function closeLock(token) {
-  const closedDir = `${lockDir}.closed-${token}`;
-  fs.renameSync(lockDir, closedDir);
+function inspect(c, record) {
+  let current;
+  try { current = snapshot(c); } catch (_) { return { phase: "invalid-snapshot", recoverableBy: [] }; }
+  const before = same(current, record.expectedRevision, record.expectedOwner, record.expectedCheckpointSha256);
+  const after = record.plannedCheckpointSha256 !== null && same(current, record.nextRevision, record.nextOwner, record.plannedCheckpointSha256);
+  const allowed = new Set(); let phase = "diverged";
+  if (before) {
+    phase = record.plannedCheckpointSha256 === null ? "pre-commit" : "prepared-pre-rename";
+    if (current.owner !== "none") allowed.add(current.owner);
+    if (record.writer.startsWith("executor:") && ["none", "alpha-goal", "caller"].includes(current.owner)) allowed.add("executor");
+  } else if (after) { phase = "post-commit"; allowed.add(current.owner); }
+  return { phase, recoverableBy: [...allowed] };
+}
+function requireLock(c, token) {
+  if (!fs.existsSync(c.lock)) fail("LOCK_NOT_HELD", "missing lock");
+  const record = readOwner(c);
+  if (record.token !== token) fail("TOKEN_MISMATCH", "token mismatch");
+  return record;
+}
+function held(c) {
+  const record = readOwner(c);
+  fail("LOCK_HELD", "locked", 2, { actual: record.writer });
 }
 
-function sameSnapshot(snapshot, revision, owner, digest) {
-  return snapshot.revision === revision && snapshot.owner === owner && snapshot.digest === digest;
-}
-
-if (command === "acquire") {
-  const writerId = value;
-  const expectedRevision = arg4;
-  const expectedOwner = arg5;
-  const nextRevision = arg6;
-  const nextOwner = arg7;
-  if (!writerId || !expectedRevision || !expectedOwner || !nextRevision || !nextOwner) usage();
-  const writerRole = writerId.split(":", 1)[0];
-  if (!new Set(["executor", "verifier"]).has(writerRole) || !writerId.includes(":")) fail("writer id must be executor:<operation-id> or verifier:<operation-id>");
-  if (!validOwners.has(expectedOwner) || !validOwners.has(nextOwner) || nextOwner === "none") fail("checkpoint owner is invalid");
-  if (expectedRevision === "absent") {
-    if (expectedOwner !== "none" || nextRevision !== "0") fail("initial transition must be absent/none -> revision 0");
-  } else if (!/^\d+$/.test(expectedRevision) || !/^\d+$/.test(nextRevision) || BigInt(nextRevision) !== BigInt(expectedRevision) + 1n) {
-    fail("checkpoint transition must increment revision by one");
-  }
-  if (fs.existsSync(lockDir)) {
-    const current = fs.existsSync(ownerFile) ? readOwner() : { owner: "unknown", createdAt: "unknown" };
-    fail(`checkpoint lock is held by ${current.owner} since ${current.createdAt}`, 2);
-  }
-
+function acquire(c, t) {
+  const derived = transition(t);
+  if (fs.existsSync(c.lock)) held(c);
   let before;
-  try {
-    before = readCheckpointSnapshot();
-  } catch (error) {
-    fail(error.message);
+  try { before = snapshot(c); } catch (error) { fail("INVALID_CHECKPOINT", error.message); }
+  if (before.revision !== t.expectedRevision || before.owner !== t.expectedOwner) {
+    fail("STALE_CHECKPOINT", "stale checkpoint", 3, { expected: { revision: t.expectedRevision, owner: t.expectedOwner }, actual: before });
   }
-  if (before.revision !== expectedRevision || before.owner !== expectedOwner) fail("checkpoint does not match the expected pre-write state", 3);
-
-  const record = {
-    schemaVersion: 3,
-    owner: writerId,
-    token: crypto.randomUUID(),
-    expectedRevision,
-    expectedOwner,
-    expectedCheckpointSha256: before.digest,
-    nextRevision,
-    nextOwner,
-    plannedCheckpointSha256: null,
-    createdAt: new Date().toISOString()
-  };
-  const pendingDir = `${lockDir}.pending-${record.token}`;
+  const token = crypto.randomUUID();
+  const record = { schemaVersion: 4, writer: t.writer, token, route: t.route ?? derived.route,
+    expectedRevision: t.expectedRevision, expectedOwner: t.expectedOwner, expectedCheckpointSha256: before.digest,
+    nextRevision: t.nextRevision, nextOwner: t.nextOwner, plannedCheckpointSha256: null };
+  const pending = `${c.lock}.pending-${token}`;
   try {
-    fs.mkdirSync(pendingDir, { mode: 0o700 });
-    fs.writeFileSync(path.join(pendingDir, "owner.json"), `${JSON.stringify(record)}\n`, { flag: "wx", mode: 0o600 });
-    if (fs.existsSync(lockDir)) throw Object.assign(new Error("checkpoint lock appeared during acquisition"), { code: "ELOCKED" });
-    fs.renameSync(pendingDir, lockDir);
+    fs.mkdirSync(pending, { mode: 0o700 });
+    fs.writeFileSync(`${pending}/owner.json`, `${JSON.stringify(record)}\n`, { flag: "wx", mode: 0o600 });
+    if (fs.existsSync(c.lock)) throw new Error("lock raced");
+    fs.renameSync(pending, c.lock);
   } catch (error) {
-    fs.rmSync(pendingDir, { recursive: true, force: true });
-    if (fs.existsSync(lockDir)) {
-      const current = fs.existsSync(ownerFile) ? readOwner() : { owner: "unknown", createdAt: "unknown" };
-      fail(`checkpoint lock is held by ${current.owner} since ${current.createdAt}`, 2);
-    }
-    fail(`cannot acquire checkpoint lock: ${error.message}`);
+    fs.rmSync(pending, { recursive: true, force: true });
+    if (fs.existsSync(c.lock)) held(c);
+    fail("ACQUIRE_FAILED", error.message);
   }
-
   try {
-    const lockedSnapshot = readCheckpointSnapshot();
-    if (!sameSnapshot(lockedSnapshot, record.expectedRevision, record.expectedOwner, record.expectedCheckpointSha256)) {
-      closeLock(record.token);
-      fail("checkpoint changed before lock activation", 3);
+    const current = snapshot(c);
+    if (!same(current, record.expectedRevision, record.expectedOwner, record.expectedCheckpointSha256)) {
+      close(c, token); fail("STALE_CHECKPOINT", "checkpoint changed", 3);
     }
   } catch (error) {
-    if (fs.existsSync(lockDir)) closeLock(record.token);
-    fail(error.message, 3);
+    if (fs.existsSync(c.lock)) try { close(c, token); } catch (_) {}
+    if (error.error) throw error;
+    fail("STALE_CHECKPOINT", error.message, 3);
   }
-  process.stdout.write(`${JSON.stringify(record)}\n`);
-  process.exit(0);
+  print({ ok: true, action: derived.action, token, pendingPath: `${c.checkpoint}.pending-${token}`,
+    from: { revision: record.expectedRevision, owner: record.expectedOwner },
+    to: { revision: record.nextRevision, owner: record.nextOwner }, route: record.route, writer: record.writer });
+}
+function semantic(args, c) {
+  const command = args[0], revision = args[2];
+  let role = "executor", expectedOwner, nextOwner, route = null, next;
+  if (command === "init") { arity(args, 2); return { writer: `executor:init-${crypto.randomUUID()}`, expectedRevision: "absent", expectedOwner: "none", nextRevision: "0", nextOwner: "executor", route }; }
+  arity(args, command === "supersede" ? 3 : 4); next = nextRevision(revision);
+  if (command === "execute") {
+    if (!["executor", "verifier"].includes(args[3])) fail("INVALID_OWNER", "invalid execute target");
+    expectedOwner = "executor"; nextOwner = args[3];
+  } else if (command === "verify") {
+    if (!Object.hasOwn(routeOwner, args[3])) fail("INVALID_ROUTE", "invalid route");
+    role = "verifier"; expectedOwner = "verifier"; route = args[3]; nextOwner = routeOwner[route];
+  } else {
+    const current = snapshot(c);
+    if (!["alpha-goal", "caller"].includes(current.owner)) fail("INVALID_TRANSITION", "invalid owner");
+    expectedOwner = current.owner; nextOwner = "executor";
+  }
+  return { writer: `${role}:${command}-${crypto.randomUUID()}`, expectedRevision: revision, expectedOwner, nextRevision: next, nextOwner, route };
+}
+function legacy(args) {
+  arity(args, 7);
+  const t = { writer: args[2], expectedRevision: args[3], expectedOwner: args[4], nextRevision: args[5], nextOwner: args[6], route: null };
+  const derived = transition(t); return { ...t, route: derived.route };
 }
 
-if (command === "status") {
-  process.stdout.write(fs.existsSync(lockDir) ? `${JSON.stringify(readOwner())}\n` : "unlocked\n");
-  process.exit(0);
+function status(c) {
+  if (!fs.existsSync(c.lock)) return print({ state: "unlocked", phase: "none", recoverableBy: [] });
+  let record;
+  try { record = readOwner(c); } catch (error) {
+    if (error.error) error.extra = { ...error.extra, state: "locked", phase: "invalid-lock", recoverableBy: [] };
+    throw error;
+  }
+  const state = inspect(c, record);
+  print({ state: "locked", ...state, token: record.token, writer: record.writer });
+}
+function commit(c, token) {
+  validToken(token); const record = requireLock(c, token);
+  let before, staged;
+  try { before = snapshot(c); } catch (error) { fail("INVALID_CHECKPOINT", error.message); }
+  if (!same(before, record.expectedRevision, record.expectedOwner, record.expectedCheckpointSha256)) fail("STALE_CHECKPOINT", "digest CAS failed", 3);
+  try { staged = snapshot(c, `${c.checkpoint}.pending-${token}`); } catch (error) { fail("INVALID_STAGED_CHECKPOINT", error.message); }
+  if (staged.revision !== record.nextRevision || staged.owner !== record.nextOwner) fail("INVALID_STAGED_CHECKPOINT", "staged mismatch");
+  const prepared = { ...record.raw, plannedCheckpointSha256: staged.digest };
+  try {
+    fs.writeFileSync(`${c.lock}/.owner.pending-${token}`, `${JSON.stringify(prepared)}\n`, { flag: "wx", mode: 0o600 });
+    fs.renameSync(`${c.lock}/.owner.pending-${token}`, c.ownerFile);
+    fs.renameSync(`${c.checkpoint}.pending-${token}`, c.checkpoint);
+    if (!same(snapshot(c), record.nextRevision, record.nextOwner, staged.digest)) fail("COMMIT_FAILED", "invalid post-write", 3);
+    close(c, token);
+  } catch (error) {
+    if (error.error) throw error;
+    fail("COMMIT_FAILED", error.message);
+  }
+  done("commit", token, "committed");
+}
+function release(c, token) {
+  validToken(token);
+  if (!fs.existsSync(c.lock)) return done("release", token, "none");
+  requireLock(c, token); close(c, token); done("release", token, "released");
 }
 
-if (command === "commit") {
-  if (!value || !fs.existsSync(lockDir)) usage();
-  const current = readOwner();
-  if (current.token !== value) fail("checkpoint lock token does not match");
-  let before;
-  try {
-    before = readCheckpointSnapshot();
-  } catch (error) {
-    fail(error.message);
-  }
-  if (!sameSnapshot(before, current.expectedRevision, current.expectedOwner, current.expectedCheckpointSha256)) {
-    fail("checkpoint changed after lock acquisition");
-  }
-
-  const stagedCheckpoint = `${checkpoint}.pending-${value}`;
-  let staged;
-  try {
-    staged = readCheckpointSnapshot(stagedCheckpoint);
-  } catch (error) {
-    fail(error.message);
-  }
-  if (staged.revision !== current.nextRevision || staged.owner !== current.nextOwner) {
-    fail("staged checkpoint does not match the planned next state");
-  }
-
-  const prepared = { ...current, plannedCheckpointSha256: staged.digest };
-  const pendingOwner = path.join(lockDir, `.owner.pending-${value}`);
-  try {
-    fs.writeFileSync(pendingOwner, `${JSON.stringify(prepared)}\n`, { flag: "wx", mode: 0o600 });
-    fs.renameSync(pendingOwner, ownerFile);
-    fs.renameSync(stagedCheckpoint, checkpoint);
-    const committed = readCheckpointSnapshot();
-    if (!sameSnapshot(committed, prepared.nextRevision, prepared.nextOwner, prepared.plannedCheckpointSha256)) {
-      fail("committed checkpoint failed post-write validation");
-    }
-  } catch (error) {
-    fail(`cannot commit checkpoint: ${error.message}`);
-  }
-  process.stdout.write("committed\n");
-  process.exit(0);
+function abort(c, token) {
+  validToken(token); const record = requireLock(c, token);
+  if (record.plannedCheckpointSha256 !== null || inspect(c, record).phase !== "pre-commit") fail("ABORT_NOT_ALLOWED", "not pre-commit");
+  fs.rmSync(`${c.checkpoint}.pending-${token}`, { force: true }); close(c, token); done("abort", token, "aborted");
 }
 
-if (command === "release" || command === "recover") {
-  if (!value || !fs.existsSync(lockDir)) usage();
-  const current = readOwner();
-  if (current.token !== value) fail("checkpoint lock token does not match");
-  if (command === "recover") {
-    const actor = arg4;
-    if (!actor || !validOwners.has(actor) || actor === "none") usage();
-    let snapshot;
-    try {
-      snapshot = readCheckpointSnapshot();
-    } catch (error) {
-      fail(error.message);
-    }
-    const matchesBefore = sameSnapshot(snapshot, current.expectedRevision, current.expectedOwner, current.expectedCheckpointSha256);
-    const matchesAfter = current.plannedCheckpointSha256 !== null &&
-      sameSnapshot(snapshot, current.nextRevision, current.nextOwner, current.plannedCheckpointSha256);
-    const writerRole = current.owner.split(":", 1)[0];
-    const supersessionOrInit = matchesBefore && actor === "executor" && writerRole === "executor" &&
-      new Set(["none", "alpha-goal", "caller"]).has(snapshot.owner);
-    if ((!matchesBefore && !matchesAfter) || (actor !== snapshot.owner && !supersessionOrInit)) {
-      fail("checkpoint snapshot or recovery actor does not match the lock transition");
-    }
-  }
-  try {
-    closeLock(value);
-  } catch (error) {
-    fail(`cannot ${command} checkpoint lock: ${error.message}`);
-  }
-  process.stdout.write(command === "release" ? "released\n" : "recovered\n");
-  process.exit(0);
+function recover(c, token, actor) {
+  validToken(token); validOwner(actor); if (actor === "none") fail("INVALID_OWNER", "invalid actor");
+  const record = requireLock(c, token), state = inspect(c, record);
+  if (!state.recoverableBy.includes(actor)) fail("RECOVERY_NOT_ALLOWED", "recovery failed", 1, { nextAction: "inspect" });
+  close(c, token); done("recover", token, state.phase);
 }
 
-usage();
+function main() {
+  const args = process.argv.slice(2); if (args.length < 2) usage();
+  const c = resolveCheckpoint(args[1]), command = args[0];
+  if (command === "status") { arity(args, 2); return status(c); }
+  if (command === "acquire") return acquire(c, legacy(args));
+  if (["init", "execute", "verify", "supersede"].includes(command)) return acquire(c, semantic(args, c));
+  if (["commit", "release", "abort"].includes(command)) { arity(args, 3); return { commit, release, abort }[command](c, args[2]); }
+  if (command === "recover") { arity(args, 4); return recover(c, args[2], args[3]); }
+  usage();
+}
+try { main(); } catch (error) {
+  if (error.error) { print({ ok: false, error: error.error, message: error.message, ...error.extra }, process.stderr); process.exit(error.code); }
+  print({ ok: false, error: "INTERNAL_ERROR", message: error.message || String(error) }, process.stderr); process.exit(1);
+}
