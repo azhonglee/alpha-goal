@@ -36,12 +36,12 @@ $HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/
 - Derive the workspace slug from its stable basename, not a full path or session directory. Reuse a task directory only after matching recorded workspace/contract identity; never overwrite unrelated or completed state.
 - Read `references/goal-contract-book.md`; create canonical `goal-contract.md` as `draft`.
 - Ask only the smallest unresolved decision that changes execution or evidence, preferably one structured prompt with facts, consequences, and recommendation.
-- Classify unknowns as `blocking`, `non-material`, or `deferred non-goal`; only the relevant authority may defer a goal item.
+- Classify unknowns as `blocking`, `non-material`, or authority-deferred non-goals. Changes to authority, boundary, execution/risk, or acceptance evidence are blocking; questions, rounds, and confidence never close them. No blocking gap may reach confirmation, handoff, or mutation.
 - Keep material design, rollout, rollback, acceptance, mutable surfaces, and observers in this contract, not a second authority artifact.
 
 ## Confirm and Handoff
 
-Before asking, map every criterion to an attributable observer; check source conflicts, the highest-impact assumption, side-effect authority, freshness, and claim boundary. For cross-cutting/high-risk work, request independent read-only reviews, pass raw artifacts, and wait for every requested result or explicitly cancel it.
+Before asking, map criteria to observers; check source conflicts, side-effect authority, freshness, claim boundary, and test the highest-impact assumption with a counterexample/failure case. Material impact stays blocking. For cross-cutting/high-risk work, request independent read-only review from raw artifacts and await/cancel it; unresolved material findings stay blocking.
 
 Before editing an accepted payload:
 
@@ -56,7 +56,7 @@ Present outcome, boundaries, criteria, evidence, and residual risk. Accept only 
 
 ## Capability-Conditional Aids
 
-- Use native goal tracking only when explicitly required, exposed, policy-permitted, and contract-authorized; it is lifecycle metadata, not authority/evidence.
+- Use native goal tracking only when required, available, permitted, and authorized; metadata is not authority/evidence. Never alter a conflicting active goal. Record conflict/failure; required sync blocks handoff, otherwise mark unsynced.
 - Delegate independent read-heavy investigation, review, or evidence reruns. Parallelize independent reads; sequence dependent decisions; synthesize before acting.
 - Investigation agents never write shared artifacts. A verifier agent writes only verifier-owned checkpoint fields after exclusive handoff.
 - In a Claude context, read `references/claude-adapter.md` only for capability names.

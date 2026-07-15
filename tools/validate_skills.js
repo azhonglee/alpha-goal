@@ -264,7 +264,8 @@ function validateToolsSurface(root, errors, warnings) {
     const rel = relative(root, file);
     const allowedFixture = /^tools\/fixtures\/validate-skills\/[a-z0-9-]+\.json$/.test(rel);
     const allowedEval = rel === "tools/evals/runtime-boundaries.json";
-    if (rel !== "tools/validate_skills.js" && rel !== CONTRACT_PATH && !allowedFixture && !allowedEval) {
+    const allowedTest = rel === "tools/test_checkpoint_lock.js";
+    if (rel !== "tools/validate_skills.js" && rel !== CONTRACT_PATH && !allowedFixture && !allowedEval && !allowedTest) {
       errors.push(`unexpected tools surface: ${rel}`);
     }
     if (fs.readFileSync(file, "utf8").startsWith("#!") && (fs.statSync(file).mode & 0o100) === 0) {

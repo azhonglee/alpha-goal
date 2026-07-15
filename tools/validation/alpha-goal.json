@@ -111,7 +111,8 @@
       "templates/hooks.json"
     ],
     "scripts": [
-      "scripts/install.sh"
+      "scripts/install.sh",
+      "tools/test_checkpoint_lock.js"
     ],
     "evals": [
       "tools/evals/runtime-boundaries.json"

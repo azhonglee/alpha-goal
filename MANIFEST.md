@@ -18,10 +18,11 @@ Claude tool-name adaptation lives in `skills/alpha-goal/references/claude-adapte
 | --- | ---: | --- |
 | `scripts/install.sh` | Yes | Interactively copies the three skills to the selected Codex/Claude roots, synchronizes managed templates/hooks, migrates managed links, and conservatively uninstalls managed artifacts. |
 | `tools/validate_skills.js` | No | Validates contract/schema structure, public skill/frontmatter/reference layout, distribution files, hooks/TOML, fixtures, tools surface, and the count budget. |
+| `tools/test_checkpoint_lock.js` | No | Exercises semantic transitions, rejected misuse, concurrent acquisition, automatic unlock, and schema-v3 recovery compatibility. |
 | `tools/evals/runtime-boundaries.json` | No | Declares 28 expected boundary cases for independent static or runtime review; schema validity alone is not behavioral evidence. |
 
 `skills/alpha-goal/scripts/authority-digest.js` deterministically hashes the marked authority payload used by contract acceptance and entry checks.
-`skills/executor/scripts/checkpoint-lock.js` atomically activates locks and digest-validated checkpoint commits, serializes writers, and closes by token-checked release or proof-based recovery.
+`skills/executor/scripts/checkpoint-lock.js` exposes semantic `init`/`execute`/`verify`/`supersede` transitions, returns JSON lock metadata, atomically commits and unlocks, and supports token-checked abort/recovery plus legacy-lock release.
 
 ## Templates and recovery
 
