@@ -10,7 +10,7 @@
 
 The shared structural contract is `tools/validation/alpha-goal.json`. It declares public skills, semantic owners, routes, conditional artifacts, references, distribution/eval files, and the exclusive skill-unit budget. It does not validate skill prose.
 
-Claude tool-name adaptation lives in `skills/alpha-goal/references/claude-adapter.md`. Codex and Claude installs receive the same runtime-neutral skill tree; no prose is injected into installed copies.
+Claude tool-name adaptation lives in `skills/alpha-goal/references/claude-adapter.md` and is selected by `templates/CLAUDE.md`, not core skill prose. Codex and Claude installs receive the same runtime-neutral skill tree.
 
 ## Scripts
 

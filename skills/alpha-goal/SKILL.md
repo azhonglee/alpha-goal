@@ -59,7 +59,6 @@ Present outcome, boundaries, criteria, evidence, and residual risk. Accept only 
 - Use native goal tracking only when required, available, permitted, and authorized; metadata is not authority/evidence. Never alter a conflicting active goal. Record conflict/failure; required sync blocks handoff, otherwise mark unsynced.
 - Delegate independent read-heavy investigation, review, or evidence reruns. Parallelize independent reads; sequence dependent decisions; synthesize before acting.
 - Investigation agents never write shared artifacts. A verifier agent writes only verifier-owned checkpoint fields after exclusive handoff.
-- In a Claude context, read `references/claude-adapter.md` only for capability names.
 
 ## Resolve Authority Returns
 
