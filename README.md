@@ -58,6 +58,7 @@ $verifier 对当前持久 checkpoint 做风险边界或最终状态验证。
 ## 设计原则
 
 - 先发现事实，再处理由用户或其他授权来源拥有的材料性决策；现有代码不能自行定义期望行为。
+- 已知不可行、required observer 不可用、claim surface 未标识或 prerequisite 未满足时，Goal Contract 必须保持 `draft`；`BLOCKED` 只表示 accepted 前提在运行期被新事实推翻。
 - 直达任务不制造持久协议；持久任务用最小 artifact 支持授权、恢复和审计。
 - 同一低风险边界内批量执行，只在材料性风险边界和最终状态调用 verifier。
 - PASS 绑定实际观察到的最终目标与交付状态；后续 mutation 会使其失效。

@@ -5,7 +5,7 @@ For `PERSIST` or an explicit goal reframe, `alpha-goal` alone writes canonical `
 ## Lifecycle and Integrity
 
 - `draft`: clarification or confirmation is incomplete; target mutation is unauthorized.
-- `accepted`: the recorded acceptance authority has confirmed the current revision and authority payload.
+- `accepted`: the recorded acceptance authority has confirmed a revision with no known infeasibility, unavailable required observer, unidentified claim surface, unmet prerequisite, or blocking gap.
 - To change an accepted authority payload, first satisfy the owner handoff in `SKILL.md`; then reopen as `draft`, increment `contract_revision` once, and invalidate prior verdicts. Further edits while that revision remains draft, including its Confirmation Record, do not increment it again.
 - Mark the authority payload with the exact boundary comments in the template. Resolve `<alpha-goal-root>` as the directory containing the selected `alpha-goal/SKILL.md`; never resolve from the workspace or process CWD. On acceptance, run `node <alpha-goal-root>/scripts/authority-digest.js <absolute-goal-contract-path>` and record its SHA-256 as `accepted_authority_sha256`.
 - `executor` and `verifier` recompute that digest on entry. A mismatch or missing digest invalidates acceptance and blocks use of the contract; only an explicit goal change may start a reframe.
@@ -40,6 +40,11 @@ workspace_identity: <canonical workspace identity>
 - <allowed files, commands, systems, credentials, environments, and side effects>
 - <crossings that require confirmation>
 
+## Prerequisites and Feasibility Basis
+- Required dependencies/conditions: <current attributable availability evidence>
+- Plausible authorized path: <basis, not an implementation prescription>
+- Known blockers: <none or keep draft>
+
 ## Decision Boundary
 - Executor may decide: <mechanical choices>
 - Authority retains: <behavior, data, interface, migration, rollout, acceptance, and risk choices>
@@ -51,6 +56,13 @@ workspace_identity: <canonical workspace identity>
 ## Success Criteria and Acceptance Evidence
 | ID | Falsifiable criterion | Observer / pass condition | Freshness / invalidation |
 | --- | --- | --- | --- |
+
+## Acceptance Completeness
+- Required observers available as_of: <attributable evidence>
+- Claim surfaces identified: <identity coverage>
+- Prerequisites satisfied: <attributable evidence>
+- Feasibility basis current: <attributable evidence>
+- Blocking gaps: none
 
 ## Confirmation Record
 - Decision: <accepted | refined | rejected>
@@ -76,4 +88,4 @@ Add only material sections. Keep authority- or acceptance-changing additions ins
 - Describe observable outcomes rather than prescribing implementation steps unless the process is itself required.
 - Give every criterion a stable ID, direct observer, pass condition, and any freshness or invalidation rule.
 - State identity must cover every mutable surface relevant to the criterion. Examples include workspace/repository, HEAD, index/dirty/untracked content, artifact digest, remote ref or PR revision, and external observation time.
-- If a surface cannot be identified or refreshed, narrow the Claim Boundary; never call the binding exact.
+- If a required surface cannot be identified or refreshed, keep `draft` until the acceptance authority narrows the claim or authorizes an observer; verifier never narrows an accepted claim.

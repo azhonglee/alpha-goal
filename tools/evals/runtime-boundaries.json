@@ -24,8 +24,8 @@
     },
     {
       "id": "RB05",
-      "scenario": "A managed skill-copy replacement fails during activation and restoration is blocked by a target collision.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "The previous managed copy and staged replacement remain at reported recovery paths; neither is deleted." }
+      "scenario": "A Goal Contract says status accepted and has a matching digest, but Acceptance Completeness is missing or false when executor or verifier enters.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Digest integrity cannot replace semantic completeness; entry is rejected without execution, verification verdict, or automatic reframe." }
     },
     {
       "id": "RB06",
@@ -45,7 +45,7 @@
     {
       "id": "RB09",
       "scenario": "The acceptance authority confirms the first draft and alpha-goal fills its Confirmation Record.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Confirmation, digest, and accepted status complete one transaction at the current draft revision; no extra revision is created." }
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Acceptance is allowed only after observers, claim surfaces, prerequisites, feasibility basis, authority, and evidence are complete; confirmation, digest, and status then form one transaction without an extra revision." }
     },
     {
       "id": "RB10",
@@ -64,13 +64,13 @@
     },
     {
       "id": "RB13",
-      "scenario": "An external dependency fails and no authorized alternative remains.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "The blocker is outside the authorized workflow and is reported without changing authority." }
+      "scenario": "An external dependency had attributable availability evidence at acceptance, then fails after execution starts and no authorized alternative remains.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "Known dependency failure would have kept the contract draft; attributable post-acceptance invalidation is reported without changing authority." }
     },
     {
       "id": "RB14",
-      "scenario": "The accepted outcome is technically infeasible and no authorized approach remains.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "No authorized path remains, so verification reports BLOCKED without changing the goal; only an explicit later goal change starts a reframe." }
+      "scenario": "After acceptance, a newly discovered runtime constraint invalidates the documented feasible path and no authorized alternative remains.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "Known infeasibility would have kept the contract draft; only a post-acceptance invalidation produces BLOCKED without changing the goal." }
     },
     {
       "id": "RB15",
@@ -120,7 +120,7 @@
     {
       "id": "RB24",
       "scenario": "Modify only Scope inside an accepted contract while preserving revision and status.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "Recomputed authority digest detects the same-revision tamper and blocks use of the invalid accepted contract." }
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Recomputed authority digest detects the same-revision tamper and rejects entry before execution or a verification verdict." }
     },
     {
       "id": "RB25",
@@ -135,12 +135,12 @@
     {
       "id": "RB27",
       "scenario": "Resume from a checkpoint bound to another task, branch, worktree, or repository set.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "An unrelated binding is rejected as blocked and never enters the same-task epoch-supersession path." }
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "An unrelated binding is rejected at entry without a verdict and never enters the same-task epoch-supersession path." }
     },
     {
       "id": "RB28",
-      "scenario": "A required observer remains empty after every meaningful safe fallback, and proving the claim now requires a different observer or narrower claim authority.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "An accepted goal without usable required evidence is BLOCKED; verifier does not redefine its observer or claim boundary." }
+      "scenario": "A required observer was attributable and available at acceptance but becomes unavailable after execution, with no authorized alternative.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "Unavailable evidence known before acceptance would keep the contract draft; post-acceptance observer invalidation is BLOCKED and verifier does not redefine the claim." }
     }
   ]
 }

@@ -58,6 +58,7 @@ $verifier Verify the current persistent checkpoint at a risk boundary or final s
 ## Principles
 
 - Discover facts before asking for material authority-owned decisions; current code cannot define desired behavior by itself.
+- Known infeasibility, an unavailable required observer, an unidentified claim surface, or an unmet prerequisite keeps the Goal Contract `draft`; `BLOCKED` is only for a post-acceptance invalidation.
 - Direct work creates no persistent protocol; persistent work uses the minimum artifacts needed for authority, recovery, and audit.
 - Batch work inside one low-risk boundary; invoke verifier only at material risk boundaries and final state.
 - PASS binds to the target and delivery state actually observed; a later mutation invalidates it.

@@ -43,7 +43,7 @@ For `PERSIST`, resolve `$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/
 
 ## Confirm and Handoff
 
-Before confirmation, map criteria to observers; check source conflicts, side-effect authority, freshness, claim boundary, and test the highest-impact assumption with a counterexample/failure case. Material impact stays blocking. For cross-cutting/high-risk work, request independent read-only review from raw artifacts and await/cancel it; unresolved material findings stay blocking.
+Before confirmation, map criteria to currently available observers; identify every claim surface and prerequisite; check source conflicts, side-effect authority, freshness, and test the highest-impact assumption with a counterexample/failure case. Keep `draft` while any known infeasibility, unavailable observer, unidentified claim surface, unmet prerequisite, or unresolved material finding remains. For cross-cutting/high-risk work, request independent read-only review from raw artifacts and await/cancel it.
 
 Before editing an accepted payload:
 
@@ -52,7 +52,7 @@ Before editing an accepted payload:
 
 Present the Goal Frame, boundaries, criteria, evidence, and residual risk. Accept only an explicit decision from the recorded acceptance authority; silence, history, a spec, or desired-behavior authority does not grant side-effect authority or acceptance.
 
-- On accept, complete the Confirmation Record, compute the authority-payload digest, set `status: accepted` last, and hand the canonical contract to `executor`; this adds no revision.
+- On accept, complete Acceptance Completeness and the Confirmation Record, compute the authority-payload digest, set `status: accepted` last, and hand the canonical contract to `executor`; this adds no revision.
 - On refine/reject, remain `draft` and do not mutate the target.
 - Reopening sets `draft`, increments the accepted revision once, invalidates prior verdicts, and requires confirmation again.
 
@@ -67,4 +67,4 @@ The accepted Goal Contract is canonical input to `executor`, `verifier`, and nat
 
 ## Reframe a Changed Goal
 
-Only an explicit acceptance-authority goal change re-enters clarification during an active epoch. The current `executor` or `verifier` owner stops work, records `REFRAME_REQUESTED`, the source/change/current identity and unverified mutations, then hands directly to `alpha-goal`; this is not a verification route. Leave that checkpoint immutable, reopen the contract as `draft`, and after explicit acceptance let `executor` supersede the epoch. Infeasible, invalid, or unverifiable accepted goals are `BLOCKED` to the caller, not automatic reframes.
+Only an explicit acceptance-authority goal change re-enters clarification during an active epoch. The current `executor` or `verifier` owner stops work, records `REFRAME_REQUESTED`, the source/change/current identity and unverified mutations, then hands directly to `alpha-goal`; this is not a verification route. Leave that checkpoint immutable, reopen the contract as `draft`, and after explicit acceptance let `executor` supersede the epoch. Known gaps never reach acceptance; invalid bindings are rejected without verdict, and only post-acceptance invalidation of the accepted feasibility basis, prerequisite/dependency, observer, or identified claim surface is `BLOCKED`.
