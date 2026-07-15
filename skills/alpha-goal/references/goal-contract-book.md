@@ -1,6 +1,6 @@
 # Goal Contract Book
 
-Use only for `PERSIST` or an authority return. The canonical `goal-contract.md` lives in the resolved task directory; `alpha-goal` is its only writer.
+For `PERSIST` or an authority return, `alpha-goal` alone writes canonical `goal-contract.md` in the resolved task directory. Once accepted, it is structured input to execution, verification, and optional Goal projection.
 
 ## Lifecycle and Integrity
 

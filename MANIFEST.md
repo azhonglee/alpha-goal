@@ -4,7 +4,7 @@
 
 | Directory | Owned semantics |
 | --- | --- |
-| `skills/alpha-goal/` | Entry routing and Goal Contract authority. |
+| `skills/alpha-goal/` | Goal framing, entry routing, Goal Contract authority, and standard Goal input projection. |
 | `skills/executor/` | Persistent target/delivery mutation, raw execution evidence, and recovery cursor. |
 | `skills/verifier/` | Verification observations, evidence classification, criterion status, and verification route. |
 

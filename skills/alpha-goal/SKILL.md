@@ -1,65 +1,70 @@
 ---
 name: alpha-goal
-description: "Route read-only or change work to normal execution or a persistent Goal Contract. Use when material decisions, external or destructive effects, explicit recovery or audit needs, or verifier authority returns may require clarification. Do not use to execute accepted persistent work or verify completion."
+description: "Clarify and frame read-only/change work as an executable, verifiable goal. Choose DIRECT or PERSIST; create an accepted Goal Contract when authority, recovery, or audit evidence must persist. Do not execute or verify persistent work."
 ---
 
 # Alpha Goal
 
-Choose `DIRECT` or `PERSIST`. For `PERSIST`, establish authority and completion evidence before target mutation; do not implement or verify.
+Turn request and discovered facts into a clear goal. Own goal framing, entry routing, and Goal Contract authority; do not implement or verify persistent work.
 
-## Route from Observed Conditions
+## Frame Before Routing
 
-First read applicable instructions, artifacts, tests, docs, history, and current state. Resolve discoverable facts; separate desired-behavior, side-effect, and acceptance authority from descriptive evidence. Higher-priority instructions, tool policy, credentials, and approval gates remain invariant.
+Read instructions, artifacts, tests, docs, history, and current state. Resolve discoverable facts; descriptive evidence cannot grant desired-behavior, side-effect, or acceptance authority. Higher-priority instructions, tool policy, credentials, and approval gates remain invariant.
 
-Choose `DIRECT` only for:
+For every change task, derive a minimal Goal Frame:
 
-- read-only inspection through already-authorized access that does not expand sensitive-data disclosure, change credentials/sessions, cause material privacy/security impact, or require recovery/persistent audit evidence; an existing session or ordinary access log alone is not such a change;
-- a clear, reversible, in-scope local change with direct final-state observation, no unresolved material authority decision, external/destructive/cross-repository effect, or recovery need.
+- intent and observable outcome;
+- scope, non-goals, and material constraints;
+- falsifiable success signals and observers;
+- unresolved decisions that could change authority, boundaries, execution/risk, or acceptance evidence.
+
+Use authorized or attributable facts only. Ask the smallest unresolved material decision, preferably one structured prompt with facts, consequences, and recommendation. Questions, rounds, and confidence never close a gap. A complete `DIRECT` frame may remain in context; create no lifecycle artifact.
+
+## Choose the Route
+
+Choose `DIRECT` only for authorized read-only work without material disclosure/session/privacy effects or recovery/audit needs, or a clear reversible in-scope local change with direct final-state observation and no unresolved material decision, external/destructive/cross-repository effect, or recovery need.
 
 Choose `PERSIST` when any condition holds:
 
-- a target/delivery decision can change behavior, interface, data, security/privacy, permission, dependency, acceptance, rollout, rollback, or risk treatment;
-- work includes an external write, purchase, destructive/cross-repository action, new or material sensitive-data disclosure, credential/session change, or material privacy/security impact;
-- completion needs recovery across pause, compaction, handoff, or material risk checkpoints;
+- behavior, interface, data, security/privacy, permission, dependency, acceptance, rollout/rollback, or risk treatment requires an authority decision;
+- work includes an external write, purchase, destructive/cross-repository action, material disclosure, credential/session change, or privacy/security impact;
+- completion requires recovery across pause, compaction, handoff, or material risk checkpoints;
 - the user or repository requires a Goal Contract or persistent audit evidence.
 
-Ambiguity, confidence, size, or duration never decides persistence without one of those conditions. Approval alone does not persist an otherwise direct action; pause before it. On `DIRECT`, create no lifecycle artifact, end this skill, and let the current agent execute and validate proportionally. Reroute if a persistent condition appears.
+Ambiguity, confidence, size, duration, or approval alone does not choose persistence. On `DIRECT`, end this skill and let the current agent execute and validate proportionally; reroute if a persistent condition appears.
 
-## Establish the Contract
+## Expand to a Goal Contract
 
-For `PERSIST`, resolve before writing:
+For `PERSIST`, resolve `$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/` from the stable workspace basename. Reuse only after matching workspace/contract identity; never overwrite unrelated or completed state.
 
-```text
-$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/
-```
-
-- Derive the workspace slug from its stable basename, not a full path or session directory. Reuse a task directory only after matching recorded workspace/contract identity; never overwrite unrelated or completed state.
-- Read `references/goal-contract-book.md`; create canonical `goal-contract.md` as `draft`.
-- Ask only the smallest unresolved decision that changes execution or evidence, preferably one structured prompt with facts, consequences, and recommendation.
-- Classify unknowns as `blocking`, `non-material`, or authority-deferred non-goals. Changes to authority, boundary, execution/risk, or acceptance evidence are blocking; questions, rounds, and confidence never close them. No blocking gap may reach confirmation, handoff, or mutation.
+- Read `references/goal-contract-book.md`; create canonical `goal-contract.md` as `draft` and expand the Goal Frame with authority, side-effect, decision, claim, evidence, freshness, and invalidation boundaries.
+- Only the relevant authority may defer a goal item. No blocking gap may reach confirmation, handoff, or target mutation.
 - Keep material design, rollout, rollback, acceptance, mutable surfaces, and observers in this contract, not a second authority artifact.
 
 ## Confirm and Handoff
 
-Before asking, map criteria to observers; check source conflicts, side-effect authority, freshness, claim boundary, and test the highest-impact assumption with a counterexample/failure case. Material impact stays blocking. For cross-cutting/high-risk work, request independent read-only review from raw artifacts and await/cancel it; unresolved material findings stay blocking.
+Before confirmation, map criteria to observers; check source conflicts, side-effect authority, freshness, claim boundary, and test the highest-impact assumption with a counterexample/failure case. Material impact stays blocking. For cross-cutting/high-risk work, request independent read-only review from raw artifacts and await/cancel it; unresolved material findings stay blocking.
 
 Before editing an accepted payload:
 
 - if its checkpoint is owned by `executor` or `verifier`, stop target writes and require `verifier` to return `RETURN_TO_ALPHA_GOAL` naming the change;
-- reopen directly only with no checkpoint, a returned epoch owned by `alpha-goal`, or a terminal `PASS_TO_FINAL`/`BLOCKED` epoch plus an explicit acceptance-authority revision request; record the supersession basis.
+- reopen directly only with no checkpoint, a returned `alpha-goal` epoch, or terminal `PASS_TO_FINAL`/`BLOCKED` plus an explicit acceptance-authority revision request; record the supersession basis.
 
-Present outcome, boundaries, criteria, evidence, and residual risk. Accept only an explicit decision from the recorded acceptance authority; silence, history, a spec, or desired-behavior authority does not grant side-effect authority or acceptance.
+Present the Goal Frame, boundaries, criteria, evidence, and residual risk. Accept only an explicit decision from the recorded acceptance authority; silence, history, a spec, or desired-behavior authority does not grant side-effect authority or acceptance.
 
-- On accept, complete the current revision's Confirmation Record, compute its authority-payload digest, set `status: accepted` last, and hand to `executor`; this transaction adds no revision.
+- On accept, complete the Confirmation Record, compute the authority-payload digest, set `status: accepted` last, and hand the canonical contract to `executor`; this adds no revision.
 - On refine/reject, remain `draft` and do not mutate the target.
-- Reopening an accepted payload sets `draft`, increments its revision once, invalidates prior verdicts, and requires confirmation again.
+- Reopening sets `draft`, increments the accepted revision once, invalidates prior verdicts, and requires confirmation again.
+
+## Standard Goal Input
+
+The accepted Goal Contract is canonical input to `executor`, `verifier`, and native Goal projection. When tracking is required, project `objective=<Intent - Observable Outcome>; criteria=<critical IDs>; contract=<path>@<revision>#<digest>`. This is lifecycle metadata, never authority/evidence. Never alter a conflicting active goal; record conflict/failure. Required sync blocks handoff; otherwise mark unsynced.
 
 ## Capability-Conditional Aids
 
-- Use native goal tracking only when required, available, permitted, and authorized; metadata is not authority/evidence. Never alter a conflicting active goal. Record conflict/failure; required sync blocks handoff, otherwise mark unsynced.
 - Delegate independent read-heavy investigation, review, or evidence reruns. Parallelize independent reads; sequence dependent decisions; synthesize before acting.
 - Investigation agents never write shared artifacts. A verifier agent writes only verifier-owned checkpoint fields after exclusive handoff.
 
 ## Resolve Authority Returns
 
-On `RETURN_TO_ALPHA_GOAL`, reopen only for changed/missing authority, observer, claim boundary, or an explicit decision after authorized approaches are exhausted. Leave a returned checkpoint unchanged; after accepting the next revision, `executor` performs guarded epoch supersession. Send clerical binding/context mismatches to their field owner and unchanged external blockers to `verifier`. Never return unchanged state without a new decision, corrected binding, or changed condition.
+On `RETURN_TO_ALPHA_GOAL`, reopen only for changed/missing authority, observer, claim boundary, or an explicit decision after authorized approaches are exhausted. Leave the returned checkpoint unchanged; after accepting the next revision, `executor` performs guarded epoch supersession. Send clerical binding/context mismatches to their field owner and unchanged external blockers to `verifier`. Never return unchanged state without a new decision, corrected binding, or changed condition.

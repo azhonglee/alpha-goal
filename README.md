@@ -2,14 +2,15 @@
 
 语言：简体中文 | [English](README.en.md)
 
-Alpha Goal 是一套按材料性风险路由的 Goal Engineering 技能。清晰、可逆、范围内的本地任务和纯只读任务直接执行；需要确认、恢复或可审计证据的复杂任务才进入持久闭环。
+Alpha Goal 将用户意图澄清并结构化为可执行、可验收的目标，再按材料性选择直接执行或持久闭环。每个 change task 先形成最小 Goal Frame；需要确认、恢复或可审计证据时再扩展为 Goal Contract。
 
 ## 核心架构
 
 ```mermaid
 flowchart TD
-  A["alpha-goal：发现事实并路由"] --> D["DIRECT：正常执行 + 最终验证"]
-  A --> P["PERSIST：确认 goal-contract.md"]
+  A["alpha-goal：澄清需求并形成 Goal Frame"] --> R{"DIRECT / PERSIST"}
+  R --> D["DIRECT：正常执行 + 最终验证"]
+  R --> P["PERSIST：扩展并确认 goal-contract.md"]
   P --> E["executor：按风险边界执行并记录 checkpoint.md"]
   E --> V["verifier：独立观察当前状态"]
   V -->|"NEXT_ITERATION"| E
@@ -18,9 +19,11 @@ flowchart TD
   V -->|"PASS_TO_FINAL"| F["最终声明"]
 ```
 
-`DIRECT` 不创建 Alpha Goal 状态，也不调用 `executor` 或 `verifier`。`PERSIST` 只保留两个运行时 artifact：
+Goal Frame 包含 intent、observable outcome、scope/non-goals、constraints、success signals、observers 和 material decisions；已清晰的内容直接来自用户请求与可归因事实，只询问会改变执行或验收的缺口。
 
-- `goal-contract.md`：由 `alpha-goal` 独占修改，记录分层权威、边界、成功标准、观察者和 accepted authority digest。
+`DIRECT` 将完整 Goal Frame 保留在当前上下文，不创建 Alpha Goal 状态，也不调用 `executor` 或 `verifier`。`PERSIST` 只保留两个运行时 artifact：
+
+- `goal-contract.md`：由 `alpha-goal` 独占修改；accepted revision 是 executor、verifier 和可选 native Goal projection 的标准结构化输入。
 - `checkpoint.md`：保留不可变契约 epoch，绑定当前 digest 与状态，并用原子锁及 revision/owner 串行化 `executor`、`verifier` 交接。
 
 路由只看材料性影响、副作用、恢复需求和可验证性；不以置信度、文件数、步骤数、问答轮次或预计时长替代风险判断。
@@ -29,7 +32,7 @@ flowchart TD
 
 | Skill | 单一职责 |
 | --- | --- |
-| [`alpha-goal`](skills/alpha-goal/) | 发现事实，选择 `DIRECT / PERSIST`，并在持久路径建立和确认 Goal Contract。 |
+| [`alpha-goal`](skills/alpha-goal/) | 澄清并结构化目标，形成 Goal Frame，选择 `DIRECT / PERSIST`，并在持久路径确认 Goal Contract。 |
 | [`executor`](skills/executor/) | 仅执行已接受的持久契约，维护目标/交付 mutation、原始执行证据和恢复记录。 |
 | [`verifier`](skills/verifier/) | 仅在风险边界或最终状态独立收集验证观察、更新验收条目状态并返回 route。 |
 
@@ -46,7 +49,7 @@ node tools/validate_skills.js --fixtures
 通常不需要显式写 skill 名称，直接描述任务即可。需要手动触发时：
 
 ```text
-$alpha-goal 根据已发现事实判断走 DIRECT 还是 PERSIST。
+$alpha-goal 根据请求和已发现事实形成 Goal Frame，再判断走 DIRECT 还是 PERSIST。
 $executor 从已接受的 Goal Contract 恢复并执行下一批授权工作。
 $verifier 对当前持久 checkpoint 做风险边界或最终状态验证。
 ```
@@ -58,5 +61,5 @@ $verifier 对当前持久 checkpoint 做风险边界或最终状态验证。
 - 同一低风险边界内批量执行，只在材料性风险边界和最终状态调用 verifier。
 - PASS 绑定实际观察到的最终目标与交付状态；后续 mutation 会使其失效。
 - 时效性证据记录观察时间与失效条件；无法标识的可变表面不得声称精确绑定。
-- Native Goal、结构化提问和子代理均按当前表面能力条件化使用，不成为通用运行时前提。
+- Goal Contract 是标准结构化输入；Native Goal 只是绑定其 path/revision/digest 的 capability-conditional lifecycle projection。
 - `tools/evals/runtime-boundaries.json` 固化 28 个静态边界预期；结构校验通过不等于真实运行证据。

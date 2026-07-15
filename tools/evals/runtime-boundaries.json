@@ -10,12 +10,12 @@
     {
       "id": "RB02",
       "scenario": "Make one clear reversible local change with direct final-state validation.",
-      "expected": { "entryRoute": "DIRECT", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "The routing role ends before the current agent implements and validates." }
+      "expected": { "entryRoute": "DIRECT", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "A complete Goal Frame remains in context without lifecycle artifacts; the routing role ends before the current agent implements and validates." }
     },
     {
       "id": "RB03",
       "scenario": "Make a local change that requires approval before external push and PR delivery.",
-      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "The external write, not approval alone, controls persistence; delivery authority and acceptance evidence are contracted before mutation." }
+      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "External delivery, not approval alone, triggers persistence; the Goal Frame, accepted contract, delivery authority, and acceptance evidence exist before any target or delivery mutation." }
     },
     {
       "id": "RB04",
@@ -89,8 +89,8 @@
     },
     {
       "id": "RB18",
-      "scenario": "A clear reversible local fix requires ordinary investigation before editing and proportional validation afterward.",
-      "expected": { "entryRoute": "DIRECT", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Necessary investigation and validation stay inside ordinary execution; they do not create separate approval gates." }
+      "scenario": "Repository inspection resolves current behavior, affected files, and test observers, but one compatibility decision could change public output.",
+      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Use discovered facts without asking for them, ask only the compatibility decision, keep the Goal Frame incomplete until answered, and avoid fixed questionnaires, round-count closure, or target mutation." }
     },
     {
       "id": "RB19",

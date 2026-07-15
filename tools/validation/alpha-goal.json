@@ -6,9 +6,11 @@
       "name": "alpha-goal",
       "entry": true,
       "ownedSemantics": [
+        "goal-framing",
         "entry-route",
         "goal-contract-authority",
-        "accepted-authority-digest"
+        "accepted-authority-digest",
+        "goal-input-projection"
       ],
       "references": [
         "references/goal-contract-book.md",

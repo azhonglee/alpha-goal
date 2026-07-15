@@ -583,7 +583,7 @@ rm -f /tmp/alpha-goal-invalid.out /tmp/alpha-goal-invalid.err
 ## Prompts
 
 ```text
-$alpha-goal 根据已发现事实判断走 DIRECT 还是 PERSIST。
+$alpha-goal 根据请求和已发现事实形成 Goal Frame，再判断走 DIRECT 还是 PERSIST。
 $executor 从已接受的 Goal Contract 恢复并执行下一批授权工作。
 $verifier 对当前持久 checkpoint 做风险边界或最终状态验证。
 ```
