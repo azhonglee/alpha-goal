@@ -21,7 +21,7 @@ Claude tool-name adaptation lives in `skills/alpha-goal/references/claude-adapte
 | `tools/evals/runtime-boundaries.json` | No | Declares 28 expected boundary cases for independent static or runtime review; schema validity alone is not behavioral evidence. |
 
 `skills/alpha-goal/scripts/authority-digest.js` deterministically hashes the marked authority payload used by contract acceptance and entry checks.
-`skills/executor/scripts/checkpoint-lock.js` atomically activates locks and digest-validated checkpoint commits, serializes writers, and closes by token-checked release or proof-based recovery.
+`skills/executor/scripts/checkpoint-lock.js` exposes semantic `init`/`execute`/`verify`/`supersede` transitions, returns JSON lock metadata, atomically commits and unlocks, and supports token-checked abort/recovery; `acquire`/`release` remain compatibility commands.
 
 ## Templates and recovery
 

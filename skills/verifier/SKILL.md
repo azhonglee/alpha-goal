@@ -33,21 +33,17 @@ For empty/partial/suspicious results, continue safe non-mutating observation whi
 
 1. Re-read contract/checkpoint binding, digest, revision, owner, and actual drift.
 2. Collect required observers after the latest relevant mutation and within freshness.
-3. Classify every criterion/gap from verifier observations; authority drift outranks blocker, which outranks fixable work.
-4. Acquire and retain the token:
+3. Classify every criterion/gap; authority drift outranks blocker, which outranks fixable work.
+4. Resolve `<executor-root>` from selected `executor/SKILL.md`, then open the chosen route:
 
 ```text
-node <executor-root>/scripts/checkpoint-lock.js acquire <absolute-checkpoint-path> verifier:<operation-id> <expected-revision> verifier <next-revision> <route-owner>
+node <executor-root>/scripts/checkpoint-lock.js verify <absolute-checkpoint-path> <expected-revision> <PASS_TO_FINAL|NEXT_ITERATION|BLOCKED|RETURN_TO_ALPHA_GOAL>
 ```
 
-5. Re-read the recorded pre-write snapshot; on mismatch release and reload. Otherwise write the complete next checkpoint to `<checkpoint-path>.pending-<token>`, updating only verifier fields, incrementing revision, recording identity/evidence/gap/route, and setting the route owner last. Run `node <executor-root>/scripts/checkpoint-lock.js commit <absolute-checkpoint-path> <token>`.
-6. On every success/abort after acquisition, release:
+5. Parse the returned JSON `token` and `pendingPath`; never construct the pending path. Re-read the pre-write checkpoint. On mismatch or abandonment, run `abort <checkpoint> <token>` and reload. Otherwise write the complete next checkpoint to `pendingPath`, updating only verifier fields, incrementing revision once, recording identity/evidence/gap/route, and setting the route owner last.
+6. Run `commit <checkpoint> <token>`. Success publishes the checkpoint and closes the lock; do not release afterward. `acquire` remains compatibility-only and returns the same JSON fields; `release` is also compatibility-only.
 
-```text
-node <executor-root>/scripts/checkpoint-lock.js release <absolute-checkpoint-path> <token>
-```
-
-If a canonical lock survives, run `node <executor-root>/scripts/checkpoint-lock.js status <absolute-checkpoint-path>`. After proving its writer stopped, the owner of the exact pre-write snapshot or digest-bound successor may run `node <executor-root>/scripts/checkpoint-lock.js recover <absolute-checkpoint-path> <token> <owner>`; otherwise wait/report. Pending records do not block.
+Before recovery, run `status <checkpoint>` and parse its JSON `phase` and `recoverableBy`. After proving the writer stopped, recover only when the verifier is listed, using the held token with `recover <checkpoint> <token> verifier`; otherwise wait/report. Pending records never block.
 
 ## Final Gate
 

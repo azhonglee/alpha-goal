@@ -18,13 +18,13 @@ Deliver the accepted outcome within its authority boundary.
 
 ## Checkpoint and Ownership
 
-Each accepted contract revision is one checkpoint epoch; prior epochs are immutable. To initialize `checkpoint.md`, resolve `<executor-root>` from selected `executor/SKILL.md` and run:
+Each accepted contract revision is one checkpoint epoch; prior epochs are immutable. Resolve `<executor-root>` from selected `executor/SKILL.md`, never CWD. Initialize with:
 
 ```text
-node <executor-root>/scripts/checkpoint-lock.js acquire <absolute-checkpoint-path> executor:<operation-id> absent none 0 executor
+node <executor-root>/scripts/checkpoint-lock.js init <absolute-checkpoint-path>
 ```
 
-After acquisition confirms absence, stage the complete initial checkpoint at `<checkpoint-path>.pending-<token>`, commit, then release. Record schema; checkpoint/state revision `0`; epoch `1`; owner `executor`; contract and execution identity; each criterion's observer/freshness/invalidation; and empty execution/verification records.
+The command returns JSON. Read `token` and `pendingPath` from that JSON; do not derive a pending filename. Write the complete initial checkpoint to `pendingPath`, then run `commit <checkpoint> <token>`. A successful commit publishes the checkpoint and closes the lock; do not release afterward. Record schema; checkpoint/state revision `0`; epoch `1`; owner `executor`; contract/execution identity; criterion observers/freshness/invalidation; and empty execution/verification records.
 
 - `executor` owns binding, state revision, batches, mutations, raw evidence, rollback/recovery, attempts, and unclassified execution gaps.
 - `verifier` owns verification observations, evidence mapping/classification, criterion status, gap cause, observed identity, and route verdict.
@@ -32,29 +32,21 @@ After acquisition confirms absence, stage the complete initial checkpoint at `<c
 
 ### Supersede an Epoch
 
-`executor` may append a new current epoch only when:
+`executor` may append a new current epoch only when task/context match; the prior origin is named `RETURN_TO_ALPHA_GOAL`/`alpha-goal`, or terminal `PASS_TO_FINAL|BLOCKED`/`caller` plus an explicit terminal revision request; and the contract is accepted at exactly the next revision with a valid digest.
 
-- task and execution context match;
-- the prior origin is either named `RETURN_TO_ALPHA_GOAL`/owner `alpha-goal`, or terminal `PASS_TO_FINAL|BLOCKED`/owner `caller` plus an explicit terminal revision request in the new Confirmation Record;
-- the contract is accepted at exactly the next revision with a valid new digest.
-
-Under lock, recheck all guards; keep the old epoch unchanged; append the new binding and criteria without verifier status/verdict; retain `state_revision`; increment `checkpoint_revision`; set owner `executor`. Prior evidence is stale history until re-observed. Any mismatch returns to `alpha-goal`; no other rebinding is allowed.
+Open that transition with `supersede <checkpoint> <expected-revision>`. Read its JSON `token` and `pendingPath`, then use the abort/commit protocol below. Under lock, recheck the guards; keep the old epoch unchanged; append the new binding/criteria without verifier verdict; retain `state_revision`; increment `checkpoint_revision`; set owner `executor`. Prior evidence is stale until re-observed. Any mismatch returns to `alpha-goal`.
 
 ### Write Protocol
 
-For a normal write, acquire and retain the returned token:
+For an executor write, choose its post-commit owner and run:
 
 ```text
-node <executor-root>/scripts/checkpoint-lock.js acquire <absolute-checkpoint-path> executor:<operation-id> <expected-revision> <expected-owner> <next-revision> <next-owner>
+node <executor-root>/scripts/checkpoint-lock.js execute <absolute-checkpoint-path> <expected-revision> <executor|verifier>
 ```
 
-While locked, re-read the recorded pre-write snapshot. On mismatch, release and reload. Otherwise write the complete next checkpoint to `<checkpoint-path>.pending-<token>`, changing only owned fields, incrementing revision once, and setting next owner last. Atomically validate and publish it with `node <executor-root>/scripts/checkpoint-lock.js commit <absolute-checkpoint-path> <token>`. On every success/abort after acquisition, run:
+Parse the returned JSON `token` and `pendingPath`. Re-read the pre-write checkpoint; on mismatch or abandonment, run `abort <checkpoint> <token>` and reload. Otherwise write the complete next checkpoint to the returned `pendingPath`, changing only executor-owned fields, incrementing revision once, and setting the next owner last. Publish with `commit <checkpoint> <token>`; successful commit closes the lock automatically. `acquire` remains a compatibility command returning the same JSON fields; `release` is compatibility-only. Neither is the normal workflow.
 
-```text
-node <executor-root>/scripts/checkpoint-lock.js release <absolute-checkpoint-path> <token>
-```
-
-For an interrupted lock, run `node <executor-root>/scripts/checkpoint-lock.js status <absolute-checkpoint-path>`. After proving the writer stopped, the owner of its exact pre-write snapshot or digest-bound successor may run `node <executor-root>/scripts/checkpoint-lock.js recover <absolute-checkpoint-path> <token> <owner>`; executor may also recover valid initialization/supersession pre-state. Otherwise wait/report. Pending records never block.
+Before recovery, run `status <checkpoint>` and parse its JSON `phase` and `recoverableBy`. After proving the writer stopped, recover only when the intended actor is listed, using the held token with `recover <checkpoint> <token> <actor>`; otherwise wait/report. Pending records never block.
 
 ## Execute Batches
 
