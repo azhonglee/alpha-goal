@@ -590,4 +590,4 @@ $verifier 对当前持久 checkpoint 做风险边界或最终状态验证。
 
 ## Count budget
 
-The validator enforces the whole `skills/` tree strictly below 9,301 word+punctuation units and reports total and per-skill counts. Structure validation deliberately ignores skill prose; semantic quality is covered by independent review against the static boundary corpus and, when separately authorized, runtime evaluations.
+The validator keeps non-script skill instructions strictly below 9,301 word+punctuation units. Script resources under `skills/*/scripts/` are reported separately and excluded because bundled scripts execute without entering model context. Structure validation deliberately ignores skill prose; semantic quality is covered by independent review against the static boundary corpus and, when separately authorized, runtime evaluations.

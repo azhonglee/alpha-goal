@@ -51,9 +51,9 @@ function readContract(root, errors) {
 }
 
 function validateContract(contract, errors) {
-  if (contract.schemaVersion !== 5) errors.push(`${CONTRACT_PATH}: schemaVersion must be 5`);
-  if (!Number.isInteger(contract.skillBudgetExclusiveMax) || contract.skillBudgetExclusiveMax < 1) {
-    errors.push(`${CONTRACT_PATH}: skillBudgetExclusiveMax must be a positive integer`);
+  if (contract.schemaVersion !== 6) errors.push(`${CONTRACT_PATH}: schemaVersion must be 6`);
+  if (!Number.isInteger(contract.instructionBudgetExclusiveMax) || contract.instructionBudgetExclusiveMax < 1) {
+    errors.push(`${CONTRACT_PATH}: instructionBudgetExclusiveMax must be a positive integer`);
   }
 
   requireArray(contract, "publicSkills", errors);
@@ -161,6 +161,10 @@ function validateSkills(root, contract, errors, warnings) {
         errors.push(`${CONTRACT_PATH}: ${skill.name} script must be a safe relative path: ${JSON.stringify(script)}`);
         continue;
       }
+      if (!script.startsWith("scripts/")) {
+        errors.push(`${CONTRACT_PATH}: ${skill.name} script must be under scripts/: ${script}`);
+        continue;
+      }
       const file = path.join(dir, script);
       if (!isFile(file)) errors.push(`${CONTRACT_PATH}: ${skill.name} script is missing: ${script}`);
       else if (fs.readFileSync(file, "utf8").startsWith("#!") && (fs.statSync(file).mode & 0o100) === 0) {
@@ -192,7 +196,7 @@ function parseFrontmatter(text) {
 }
 
 function validateSkillBudget(root, contract, errors) {
-  const counts = { total: 0, skills: {} };
+  const counts = { total: 0, skills: {}, scriptTotal: 0, scripts: {} };
   const skillsRoot = path.join(root, "skills");
   if (!isDirectory(skillsRoot)) return counts;
 
@@ -201,14 +205,21 @@ function validateSkillBudget(root, contract, errors) {
     const dir = path.join(skillsRoot, skill.name);
     if (!isDirectory(dir)) continue;
     const files = walk(dir).filter(isFile);
-    let skillTotal = 0;
-    for (const file of files) skillTotal += countUnits(fs.readFileSync(file, "utf8"));
+    let skillTotal = 0, scriptTotal = 0;
+    for (const file of files) {
+      const rel = relative(dir, file);
+      const units = countUnits(fs.readFileSync(file, "utf8"));
+      if (rel.startsWith("scripts/")) scriptTotal += units;
+      else skillTotal += units;
+    }
     counts.skills[skill.name] = skillTotal;
+    counts.scripts[skill.name] = scriptTotal;
     counts.total += skillTotal;
+    counts.scriptTotal += scriptTotal;
   }
 
-  if (Number.isInteger(contract.skillBudgetExclusiveMax) && counts.total >= contract.skillBudgetExclusiveMax) {
-    errors.push(`skills word+punctuation budget exceeded: ${counts.total} >= ${contract.skillBudgetExclusiveMax}`);
+  if (Number.isInteger(contract.instructionBudgetExclusiveMax) && counts.total >= contract.instructionBudgetExclusiveMax) {
+    errors.push(`skill instruction word+punctuation budget exceeded: ${counts.total} >= ${contract.instructionBudgetExclusiveMax}`);
   }
   return counts;
 }
@@ -417,6 +428,7 @@ function runFixtures() {
       for (const rel of fixture.removeFiles || []) fs.rmSync(path.join(tempRoot, rel), { recursive: true, force: true });
       for (const replacement of fixture.replacements || []) applyReplacement(tempRoot, fixtureFile, replacement, errors);
       for (const [rel, text] of Object.entries(fixture.files || {})) writeFixtureFile(tempRoot, rel, text);
+      for (const repeated of fixture.repeatFiles || []) repeatFixtureFile(tempRoot, fixtureFile, repeated, errors);
       if (fixture.setSkillBudgetToActual) setBudgetToActual(tempRoot);
 
       const result = validateRoot(tempRoot);
@@ -453,11 +465,19 @@ function writeFixtureFile(root, rel, text) {
   fs.writeFileSync(target, text);
 }
 
+function repeatFixtureFile(root, fixtureFile, repeated, errors) {
+  if (!nonEmptyString(repeated?.file) || !nonEmptyString(repeated?.text) || !Number.isInteger(repeated?.count) || repeated.count < 1) {
+    errors.push(`${fixtureFile}: repeatFiles entries require file, text, and a positive count`);
+    return;
+  }
+  fs.appendFileSync(path.join(root, repeated.file), repeated.text.repeat(repeated.count));
+}
+
 function setBudgetToActual(root) {
   const contractPath = path.join(root, CONTRACT_PATH);
   const contract = JSON.parse(fs.readFileSync(contractPath, "utf8"));
-  const counts = validateSkillBudget(root, { ...contract, skillBudgetExclusiveMax: Number.MAX_SAFE_INTEGER }, []);
-  contract.skillBudgetExclusiveMax = counts.total;
+  const counts = validateSkillBudget(root, { ...contract, instructionBudgetExclusiveMax: Number.MAX_SAFE_INTEGER }, []);
+  contract.instructionBudgetExclusiveMax = counts.total;
   fs.writeFileSync(contractPath, `${JSON.stringify(contract, null, 2)}\n`);
 }
 
@@ -546,8 +566,10 @@ function errorMessage(error) {
 function printReport(root, { errors, warnings, counts }) {
   console.log("Skill suite validation");
   console.log(`root: ${root}`);
-  console.log(`skills units: ${counts.total}`);
+  console.log(`skill instruction units: ${counts.total}`);
   for (const [name, count] of Object.entries(counts.skills).sort()) console.log(`- ${name}: ${count}`);
+  console.log(`skill script units (excluded): ${counts.scriptTotal}`);
+  for (const [name, count] of Object.entries(counts.scripts).sort()) console.log(`- ${name}: ${count}`);
   if (warnings.length) {
     console.log("\nWARNINGS:");
     for (const warning of warnings) console.log(`- ${warning}`);

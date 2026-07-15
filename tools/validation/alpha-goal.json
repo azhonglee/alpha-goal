@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 5,
-  "skillBudgetExclusiveMax": 9301,
+  "schemaVersion": 6,
+  "instructionBudgetExclusiveMax": 9301,
   "publicSkills": [
     {
       "name": "alpha-goal",

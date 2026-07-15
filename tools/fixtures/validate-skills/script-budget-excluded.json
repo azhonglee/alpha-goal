@@ -1,0 +1,11 @@
+{
+  "shouldPass": true,
+  "inheritRoot": true,
+  "repeatFiles": [
+    {
+      "file": "skills/executor/scripts/checkpoint-lock.js",
+      "text": "x;",
+      "count": 10000
+    }
+  ]
+}

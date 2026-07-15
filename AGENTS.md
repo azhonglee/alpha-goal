@@ -6,7 +6,7 @@
 
 ## Build, Test, and Development Commands
 
-- `node tools/validate_skills.js .`：验证共享契约、公开技能结构、front matter、引用可发现性、工具/模板/文档/eval 文件存在性、hook/TOML 结构和 `<9301` skills word+punctuation 预算；需要 Node.js 18+。
+- `node tools/validate_skills.js .`：验证共享契约、公开技能结构、front matter、引用可发现性、工具/模板/文档/eval 文件存在性、hook/TOML 结构和 `<9301` skill instruction word+punctuation 预算；`skills/*/scripts/` 下的 script resources 只单独报告、不计入预算；需要 Node.js 18+。
 - `node tools/validate_skills.js --fixtures`：验证 validator fixtures，确保自然语言改写可通过、结构缺失会失败。
 - `node tools/test_checkpoint_lock.js`：验证 checkpoint semantic CLI、非法转换拒绝、并发互斥、自动解锁及 v3/v4 恢复兼容性。
 - 不许添加任何 skill 文本的校验规则。

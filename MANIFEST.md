@@ -8,7 +8,7 @@
 | `skills/executor/` | Persistent target/delivery mutation, raw execution evidence, and recovery cursor. |
 | `skills/verifier/` | Verification observations, evidence classification, criterion status, and verification route. |
 
-The shared structural contract is `tools/validation/alpha-goal.json`. It declares public skills, semantic owners, routes, conditional artifacts, references, distribution/eval files, and the exclusive skill-unit budget. It does not validate skill prose.
+The shared structural contract is `tools/validation/alpha-goal.json`. It declares public skills, semantic owners, routes, conditional artifacts, references, distribution/eval files, and the exclusive instruction-unit budget. It does not validate skill prose.
 
 Claude tool-name adaptation lives in `skills/alpha-goal/references/claude-adapter.md` and is selected by `templates/CLAUDE.md`, not core skill prose. Codex and Claude installs receive the same runtime-neutral skill tree.
 
@@ -45,4 +45,4 @@ Artifacts exist only for `PERSIST`. The state root is `$HOME/.alpha-goal/<worksp
 
 ## Count budget
 
-The complete `skills/` tree must remain strictly below 9,301 word+punctuation units. The validator reports total and per-skill counts; `tools/evals/runtime-boundaries.json` is a static expected-behavior corpus, not runtime evidence.
+Non-script files in the public skill directories must remain strictly below 9,301 word+punctuation units. Script resources under `skills/*/scripts/` are reported separately and do not consume the instruction budget; `tools/evals/runtime-boundaries.json` is a static expected-behavior corpus, not runtime evidence.
