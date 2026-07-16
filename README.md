@@ -40,23 +40,16 @@ Alpha Goal 给 AI Agent 一套 Goal Engineering 控制闭环，重点约束三�
 ## 核心架构
 
 ```mermaid
-%%{init: {"theme":"base","flowchart":{"wrappingWidth":500,"nodeSpacing":80,"rankSpacing":70,"htmlLabels":true},"markdownAutoWrap":false,"themeVariables":{"background":"#364150","primaryColor":"#364150","primaryTextColor":"#f8fafc","primaryBorderColor":"#f8fafc","lineColor":"#f8fafc","edgeLabelBackground":"#364150","fontFamily":"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"}}}%%
 flowchart TD
-  AG["<div align='center'><strong>alpha-goal（入口）</strong></div><div align='left' style='width:550px'><br/>发现事实 → 澄清需求 → 压力测试 → 写 Goal Contract → 用户确认<br/>产出：goal-contract.md（权威契约）</div>"]
-  CL["<div align='center'><strong>executor（执行）</strong></div><div align='left' style='width:550px'><br/>按契约切 slice → 执行 → 收集证据 → 更新 checkpoint<br/>产出：checkpoint.md（执行证据 / 交接状态）</div>"]
-  GV["<div align='center'><strong>verifier（验证）</strong></div><div align='left' style='width:550px'><br/>证据 vs 验收标准 → 给出路由裁决<br/>裁决：PASS_TO_FINAL / NEXT_ITERATION / BLOCKED</div>"]
-  RF["<div align='center'><strong>reframe（生命周期重开）</strong></div><div align='left' style='width:550px'><br/>仅当 acceptance authority 明确改变 active goal 时触发<br/>记录：REFRAME_REQUESTED（不是 verifier verdict）</div>"]
-
-  AG -->|"契约被 accept 之后"| CL
-  CL --> GV
-  GV --> Pass["完成交付<br/>（通过）"]
-  GV --> Next["继续下一轮<br/>（同目标可修）"]
-  RF -.-> AG
-
-  classDef stage fill:#364150,stroke:#f8fafc,color:#f8fafc,stroke-width:2px;
-  classDef route fill:#364150,stroke:#364150,color:#f8fafc,stroke-width:0px;
-  class AG,CL,GV,RF stage;
-  class Pass,Next route;
+  A["alpha-goal：澄清需求并形成 Goal Frame"] --> R{"DIRECT / PERSIST"}
+  R --> D["DIRECT：正常执行 + 最终验证"]
+  R --> P["PERSIST：扩展并确认 goal-contract.md"]
+  P --> E["executor：按风险边界执行并记录 checkpoint.md"]
+  E --> V["verifier：独立观察当前状态"]
+  V -->|"NEXT_ITERATION"| E
+  G["active goal 被 acceptance authority 明确修改"] -. "REFRAME_REQUESTED lifecycle" .-> A
+  V -->|"BLOCKED"| B["报告 blocker"]
+  V -->|"PASS_TO_FINAL"| F["最终声明"]
 ```
 
 ```text

@@ -40,23 +40,16 @@ In practice, it compresses requirement clarification, authority boundaries, iter
 ## Core Architecture
 
 ```mermaid
-%%{init: {"theme":"base","flowchart":{"wrappingWidth":900,"nodeSpacing":80,"rankSpacing":70,"htmlLabels":true},"markdownAutoWrap":false,"themeVariables":{"background":"#364150","primaryColor":"#364150","primaryTextColor":"#f8fafc","primaryBorderColor":"#f8fafc","lineColor":"#f8fafc","edgeLabelBackground":"#364150","fontFamily":"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"}}}%%
 flowchart TD
-  AG["<div align='center'><strong>alpha-goal (entry)</strong></div><div align='left' style='width:900px'><br/>Discover facts → Clarify requirements → Pressure-test → Write Goal Contract → User confirmation<br/>Output: goal-contract.md (authority contract)</div>"]
-  CL["<div align='center'><strong>executor (execution)</strong></div><div align='left' style='width:900px'><br/>Slice by contract → Execute → Collect evidence → Update checkpoint<br/>Output: checkpoint.md (execution evidence / handoff state)</div>"]
-  GV["<div align='center'><strong>verifier (verification)</strong></div><div align='left' style='width:900px'><br/>Evidence vs acceptance criteria → Route decision<br/>Verdicts: PASS_TO_FINAL / NEXT_ITERATION / BLOCKED</div>"]
-  RF["<div align='center'><strong>reframe (lifecycle reopen)</strong></div><div align='left' style='width:900px'><br/>Only when the acceptance authority explicitly changes the active goal<br/>Record: REFRAME_REQUESTED (not a verifier verdict)</div>"]
-
-  AG -->|"after contract is accepted"| CL
-  CL --> GV
-  GV --> Pass["Final delivery<br/>(pass)"]
-  GV --> Next["Continue next round<br/>(same-goal fixable)"]
-  RF -.-> AG
-
-  classDef stage fill:#364150,stroke:#f8fafc,color:#f8fafc,stroke-width:2px;
-  classDef route fill:#364150,stroke:#364150,color:#f8fafc,stroke-width:0px;
-  class AG,CL,GV,RF stage;
-  class Pass,Next route;
+  A["alpha-goal: clarify and form a Goal Frame"] --> R{"DIRECT / PERSIST"}
+  R --> D["DIRECT: normal execution + final validation"]
+  R --> P["PERSIST: expand and confirm goal-contract.md"]
+  P --> E["executor: execute at risk boundaries and record checkpoint.md"]
+  E --> V["verifier: independently observe current state"]
+  V -->|"NEXT_ITERATION"| E
+  G["Acceptance authority explicitly changes the active goal"] -. "REFRAME_REQUESTED lifecycle" .-> A
+  V -->|"BLOCKED"| B["Report blocker"]
+  V -->|"PASS_TO_FINAL"| F["Final claim"]
 ```
 
 ```text
