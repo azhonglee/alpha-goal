@@ -20,7 +20,7 @@ flowchart TD
   V -->|"PASS_TO_FINAL"| F["Final claim"]
 ```
 
-A Goal Frame contains intent, observable outcome, scope/non-goals, constraints, success signals, observers, and material decisions. Clear fields come directly from the request and attributable facts; only gaps that change execution or acceptance are asked.
+A Goal Frame contains intent, observable outcome, scope/non-goals, constraints, success signals, observers, and material decisions. Clear fields come from the request and attributable facts; clarification asks the relevant authority about one highest-impact blocking gap and closes it only when the authorized decision and its material boundaries and execution/evidence consequences are determined.
 
 `DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state, and does not call `executor` or `verifier`. `PERSIST` keeps two runtime artifacts:
 

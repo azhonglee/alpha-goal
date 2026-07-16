@@ -89,8 +89,8 @@
     },
     {
       "id": "RB18",
-      "scenario": "Repository inspection resolves current behavior, affected files, and test observers, but one compatibility decision could change public output.",
-      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Use discovered facts without asking for them, ask only the compatibility decision, keep the Goal Frame incomplete until answered, and avoid fixed questionnaires, round-count closure, or target mutation." }
+      "scenario": "Repository inspection resolves current behavior, affected files, and test observers, but the relevant authority gives a compatibility preference that does not determine the supported public-output boundary.",
+      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Use discovered facts without asking for them; keep the Goal Frame incomplete and ask the relevant authority the smallest follow-up on the compatibility gap until the authorized decision and its material boundaries and execution/evidence consequences are determined. Avoid fixed questionnaires, round-count closure, or target mutation." }
     },
     {
       "id": "RB19",

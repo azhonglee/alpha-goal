@@ -20,7 +20,7 @@ flowchart TD
   V -->|"PASS_TO_FINAL"| F["最终声明"]
 ```
 
-Goal Frame 包含 intent、observable outcome、scope/non-goals、constraints、success signals、observers 和 material decisions；已清晰的内容直接来自用户请求与可归因事实，只询问会改变执行或验收的缺口。
+Goal Frame 包含 intent、observable outcome、scope/non-goals、constraints、success signals、observers 和 material decisions；已清晰内容直接来自请求与可归因事实，只向相关 authority 追问最高影响的单个 blocking gap，并仅在授权决定及其 material boundaries、执行/证据后果可确定时闭合。
 
 `DIRECT` 将完整 Goal Frame 保留在当前上下文，不创建 Alpha Goal 状态，也不调用 `executor` 或 `verifier`。`PERSIST` 只保留两个运行时 artifact：
 

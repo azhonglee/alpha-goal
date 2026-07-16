@@ -18,7 +18,17 @@ For every change task, derive a minimal Goal Frame:
 - falsifiable success signals and observers;
 - unresolved decisions that could change authority, boundaries, execution/risk, or acceptance evidence.
 
-Use authorized or attributable facts only. Ask the smallest unresolved material decision, preferably one structured prompt with facts, consequences, and recommendation. Questions, rounds, and confidence never close a gap. A complete `DIRECT` frame may remain in context; create no lifecycle artifact.
+Use decisions only from the relevant authority and facts only from attributable sources. Descriptive evidence or an agent recommendation never supplies missing authority. A complete `DIRECT` frame may remain in context; create no lifecycle artifact.
+
+## Clarification Loop
+
+Repeat only while the Goal Frame has a blocking gap:
+
+1. Select the highest-impact gap by authority ownership, blast radius, irreversibility, behavior/interface/data impact, acceptance ambiguity, and rollback risk.
+2. Ask the relevant authority for one decision variable. State discovered facts, why it matters, real options when useful, and a recommendation; never ask for discoverable facts.
+3. Check the answer against one concrete boundary, counterexample, or failure case. Record only consequences entailed by the answer and attributable facts; if another reasonable reading changes execution or evidence materially, ask the smallest follow-up on the same gap.
+4. Close only when the authorized decision and all material boundaries and execution/evidence consequences are determined. Reprioritize if the answer exposes a higher-impact gap. Mark non-material only when no authorized answer could change the Goal Frame or route; defer only when the relevant authority explicitly excludes the affected outcome, claim, or side effect from scope.
+5. Update the Goal Frame and stop when no blocking gap remains. Never use a fixed questionnaire, confidence, or round count as completion evidence.
 
 ## Choose the Route
 
