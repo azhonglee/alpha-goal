@@ -80,6 +80,6 @@ Reopen only in one of these states:
 
 - no checkpoint exists;
 - an active epoch has been handed to `alpha-goal` after the acceptance authority explicitly changed the goal and the prior `executor` or `verifier` owner recorded `REFRAME_REQUESTED`, source/change/current identity, and unverified mutations;
-- a terminal `PASS_TO_FINAL`/`BLOCKED` epoch is owned by `caller` and the acceptance authority explicitly requests a revision.
+- after terminal `PASS_TO_FINAL` or `BLOCKED`, the acceptance authority explicitly requests a revision of the same goal.
 
 Record the supersession basis, leave the prior checkpoint epoch immutable, set the contract `draft`, increment its accepted revision once, invalidate prior verdicts, and require confirmation again; after acceptance, `executor` supersedes the epoch. `REFRAME_REQUESTED` is lifecycle handoff, never a verification route. Invalid bindings are rejected without verdict. New attributable post-acceptance facts that invalidate accepted feasibility, prerequisites/dependencies, authority boundary, material-design coverage, touched-risk/recovery mapping, observers, or claim surfaces are `BLOCKED` when no currently authorized path remains; they do not reopen the goal.
