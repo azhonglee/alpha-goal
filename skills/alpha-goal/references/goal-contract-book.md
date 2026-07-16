@@ -77,7 +77,7 @@ Include only authority-retained decisions that can change behavior, interfaces/A
 - Decision: <accepted | refined | rejected>
 - Source and date: <explicit acceptance authority decision>
 - Accepted revision: <revision or none>
-- Supersession basis: <initial | explicit reframe | explicit terminal revision request>
+- Revision basis: <initial | explicit active-goal change | explicit same-goal revision request>
 - Conditions: <explicit conditions or none>
 <!-- authority-payload:end -->
 
