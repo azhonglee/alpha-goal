@@ -54,7 +54,7 @@ Ambiguity, confidence, size, duration, or approval alone does not choose persist
 
 ## Expand to a Goal Contract
 
-For `PERSIST`, resolve `$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/` from the stable workspace basename. Reuse only after matching workspace/contract identity; never overwrite unrelated or completed state.
+For `PERSIST`, resolve `$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/` from the stable workspace basename. Reuse only a matching `draft`. If that name already holds an accepted, terminated, completed, or unrelated task, choose the first unused `-2`, `-3`, ... suffix; never reopen it.
 
 - Read `references/goal-contract-book.md`; create canonical `goal-contract.md` as `draft` and expand the Goal Frame with authority, side-effect, decision, claim, evidence, freshness, and invalidation boundaries.
 - Only the relevant authority may defer a goal item. No blocking gap may reach confirmation, handoff, or target mutation.
@@ -68,6 +68,7 @@ Present the Goal Frame, boundaries, criteria, evidence, and residual risk. When 
 
 - On accept, complete Acceptance Completeness and the Confirmation Record, compute the authority-payload digest, set `status: accepted` last, and hand the canonical contract to `executor`.
 - On refine/reject, remain `draft` and do not mutate the target.
+- After acceptance, a material goal or authority change is a new task: do not edit or reuse the accepted contract or checkpoint. If acceptance exists without a checkpoint, confirm the accepted goal is still current before executor initializes it.
 
 ## Capability-Conditional Aids
 

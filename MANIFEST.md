@@ -4,8 +4,8 @@
 
 | Directory | Owned semantics |
 | --- | --- |
-| `skills/alpha-goal/` | Goal framing, entry routing, and Goal Contract authority/reframing. |
-| `skills/executor/` | Persistent target/delivery mutation, raw execution evidence, recovery cursor, and direct reframe handoff. |
+| `skills/alpha-goal/` | Goal framing, entry routing, and Goal Contract authority. |
+| `skills/executor/` | Persistent target/delivery mutation, raw execution evidence, recovery cursor, and goal-change termination. |
 | `skills/verifier/` | Verification observations, evidence classification, criterion status, and verification route. |
 
 The shared structural contract is `tools/validation/alpha-goal.json`. It declares public skills, semantic owners, routes, conditional artifacts, references, distribution/eval files, and the exclusive instruction-unit budget. It does not validate skill prose.
@@ -22,14 +22,14 @@ Claude tool-name adaptation lives in `skills/alpha-goal/references/claude-adapte
 | `tools/evals/runtime-boundaries.json` | No | Declares 33 expected boundary cases for independent static or runtime review; schema validity alone is not behavioral evidence. |
 
 `skills/alpha-goal/scripts/authority-digest.js` deterministically hashes the marked authority payload used by contract acceptance and entry checks.
-`skills/executor/scripts/checkpoint-lock.js` exposes semantic `init`/`execute`/`verify`/`reframe`/`supersede` transitions, returns JSON lock metadata, atomically commits and unlocks, and supports token-checked abort/recovery plus legacy-lock release.
+`skills/executor/scripts/checkpoint-lock.js` exposes semantic `init`/`execute`/`verify`/`terminate` transitions, returns JSON lock metadata, atomically commits and unlocks, and supports token-checked abort/recovery plus legacy-lock release.
 
 ## Templates and recovery
 
 - `templates/AGENTS.md` and `templates/CLAUDE.md` carry the materiality-based autonomy boundary.
 - `templates/config.toml` declares structured-input and multi-agent defaults. The installer fills missing keys but preserves existing values, including explicit disables; skill behavior still detects whether each capability is exposed.
 - `templates/hooks.json` defines one matcher-free `PostCompact` hook with marker `codex-alpha-goal-compact-recovery:v3`.
-- Recovery uses only an explicit artifact path already present in task context. Recovery reads the checkpoint-recorded current contract epoch and resumes only from top-level `active_owner`; historical routes never override the current handoff. An explicit goal change uses direct `reframe` ownership, then a newly accepted same-task payload uses owner/revision-guarded epoch supersession; verifier never changes authority. Terminal PASS rechecks identity/freshness, and later mutations resume `executor`. A lone accepted contract must have a valid authority digest. Recovery never guesses the active task from directory recency.
+- Recovery uses only an explicit artifact path already present in task context and follows top-level `active_owner`; a legacy `alpha-goal` owner is terminated to `caller` instead of resumed. `PASS_TO_FINAL`, `BLOCKED`, and `GOAL_CHANGED` terminate that checkpoint; later work starts a new Alpha Goal task directory. A lone accepted contract must have a valid authority digest and an unchanged goal before checkpoint initialization. Recovery never guesses the active task from directory recency.
 - Hook replacement uses the marker family, so the current v3 template replaces other managed numbered versions and the experimental family while preserving unmanaged hooks.
 
 ## Runtime artifacts
@@ -39,7 +39,7 @@ Canonical lifecycle artifacts exist only for `PERSIST`; the checkpoint helper al
 | Path | Condition and owner |
 | --- | --- |
 | `<state-root>/YYYYMMDD-<task>/goal-contract.md` | Draft/accepted authority contract with accepted authority-payload digest; only `alpha-goal` modifies it. |
-| `<state-root>/YYYYMMDD-<task>/checkpoint.md` | Created after acceptance; records contract epochs and the current digest/state, carries atomic write control, and partitions sequential executor/verifier fields. |
+| `<state-root>/YYYYMMDD-<task>/checkpoint.md` | Created after acceptance; records the accepted contract identity and current execution/verification state, carries atomic write control, and partitions sequential executor/verifier fields. |
 
 `DIRECT` does not resolve this state root or create either artifact.
 

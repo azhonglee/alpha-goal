@@ -47,7 +47,6 @@ flowchart TD
   P --> E["executor：按风险边界执行并记录 checkpoint.md"]
   E --> V["verifier：独立观察当前状态"]
   V -->|"NEXT_ITERATION"| E
-  G["active goal 被 acceptance authority 明确修改"] -. "REFRAME_REQUESTED lifecycle" .-> A
   V -->|"BLOCKED"| B["报告 blocker"]
   V -->|"PASS_TO_FINAL"| F["最终声明"]
 ```
@@ -55,15 +54,15 @@ flowchart TD
 ```text
 Trigger -> Frame Goal -> Choose DIRECT/PERSIST
 PERSIST -> Confirm accepted Goal Contract -> $executor -> Evidence + checkpoint -> $verifier -> Route -> Next Slice or Final Claim
-Explicit acceptance-authority goal change during an active epoch -> REFRAME_REQUESTED lifecycle handoff -> alpha-goal
+Accepted goal materially changes -> terminate the old checkpoint -> start a new alpha-goal task directory
 ```
 
-Goal Frame 包含 intent、observable outcome、scope/non-goals、constraints、success signals、observers 和 material decisions；已清晰内容直接来自请求与可归因事实，只向相关 authority 追问最高影响的单个 blocking gap，并仅在授权决定及其 material boundaries、执行/证据后果可确定时闭合。`REFRAME_REQUESTED` 仅表示 acceptance authority 明确改变 active goal 后的 lifecycle handoff，不是 verifier verdict。
+Goal Frame 包含 intent、observable outcome、scope/non-goals、constraints、success signals、observers 和 material decisions；已清晰内容直接来自请求与可归因事实，只向相关 authority 追问最高影响的单个 blocking gap，并仅在授权决定及其 material boundaries、执行/证据后果可确定时闭合。accepted goal 发生材料性变化时，旧任务终止；新目标使用新的任务目录重新进入 `alpha-goal`，不重开旧 contract/checkpoint。
 
 `DIRECT` 将完整 Goal Frame 保留在当前上下文，不创建 Alpha Goal 状态，也不调用 `executor` 或 `verifier`。`PERSIST` 的 canonical lifecycle artifacts 只有 `goal-contract.md` 与 `checkpoint.md`；checkpoint helper 还会生成原子写协调记录：活动中的 `.lock`、暂存中的 `.pending-*`，以及原子解锁后尽力清理的 `.lock.closed-*` 临时墓碑。
 
 - `goal-contract.md`：由 `alpha-goal` 独占修改；accepted authority payload 是 executor 和 verifier 的标准结构化输入。
-- `checkpoint.md`：记录当前契约 digest、epoch 与状态，并用原子锁及 `checkpoint_revision`/`active_owner` 串行化 `executor`、`verifier` 交接。
+- `checkpoint.md`：记录当前契约 digest 与执行/验证状态，并用原子锁及 `checkpoint_revision`/`active_owner` 串行化 `executor`、`verifier` 交接。
 
 路由只看材料性影响、副作用、恢复需求和可验证性；不以置信度、文件数、步骤数、问答轮次或预计时长替代风险判断。
 
@@ -118,7 +117,7 @@ Alpha Goal 让 agent 工作保持目标明确、行动有界、声明受证据�
 - 已知不可行、required observer 不可用、claim surface 未标识或 prerequisite 未满足时，Goal Contract 必须保持 `draft`；`BLOCKED` 只表示 accepted 前提在运行期被新事实推翻。
 - 直达任务不制造持久协议；持久任务用最小 artifact 支持授权、恢复和审计。
 - 同一低风险边界内批量执行，只在材料性风险边界和最终状态调用 verifier。
-- PASS 绑定实际观察到的最终目标与交付状态；后续 mutation 会使其失效。
+- PASS 绑定实际观察到的最终目标与交付状态并终止该 checkpoint；后续工作创建新任务。
 - 时效性证据记录观察时间与失效条件；无法标识的可变表面不得声称精确绑定。
 - Goal Contract 是 executor/verifier 的标准结构化输入；平台原生 task/goal tracking 由 caller 管理，不能替代契约 authority。
 - `tools/evals/runtime-boundaries.json` 固化 33 个静态边界预期；结构校验通过不等于真实运行证据。

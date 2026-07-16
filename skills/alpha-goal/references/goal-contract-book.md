@@ -1,12 +1,12 @@
 # Goal Contract Book
 
-For `PERSIST` or an explicit goal reframe, `alpha-goal` alone writes canonical `goal-contract.md` in the resolved task directory. Once accepted, it is structured input to execution and verification.
+For `PERSIST`, `alpha-goal` alone writes canonical `goal-contract.md` in the resolved task directory. Same-day name collisions use the first unused numeric suffix; accepted or terminal directories are never reused. Once accepted, it is structured input to execution and verification.
 
 ## Lifecycle and Integrity
 
 - `draft`: clarification or confirmation is incomplete; target mutation is unauthorized.
 - `accepted`: the recorded acceptance authority has confirmed the authority payload with no known infeasibility, unavailable required observer, unidentified claim surface, unmet prerequisite, or blocking gap.
-- Never edit an accepted authority payload in place. After an explicit acceptance-authority goal change or same-goal change request, and only when no `executor`/`verifier` write ownership remains, return the canonical contract to `draft`, replace the authority payload, and invalidate prior verdicts. Further draft edits, including its Confirmation Record, remain part of that pending acceptance.
+- Never return an accepted contract to `draft` or replace its authority payload. A material goal or authority change terminates that task; start a new task directory and Goal Contract.
 - Mark the authority payload with the exact boundary comments in the template. Resolve `<alpha-goal-root>` as the directory containing the selected `alpha-goal/SKILL.md`; never resolve from the workspace or process CWD. On acceptance, run `node <alpha-goal-root>/scripts/authority-digest.js <absolute-goal-contract-path>` and record its SHA-256 as `accepted_authority_sha256`.
 - `executor` and `verifier` recompute that digest on entry. A mismatch or missing digest invalidates acceptance and blocks use of the contract. The accepted authority digest identifies payload content; it does not prove ordering, historical uniqueness, or acceptance authenticity. A first handoff or new checkpoint requires all current mandatory rows, while an earlier accepted payload lacking them may resume only through an existing checkpoint whose recorded task and accepted digest match; it gains no inferred authority. Extra legacy metadata remains inert and digest-covered.
 
@@ -74,7 +74,6 @@ Include only authority-retained decisions that can change behavior, interfaces/A
 ## Confirmation Record
 - Decision: <accepted | refined | rejected>
 - Source and date: <explicit acceptance authority decision>
-- Change basis: <initial | explicit active-goal change | explicit same-goal change request>
 - Conditions: <explicit conditions or none>
 <!-- authority-payload:end -->
 

@@ -47,7 +47,6 @@ flowchart TD
   P --> E["executor: execute at risk boundaries and record checkpoint.md"]
   E --> V["verifier: independently observe current state"]
   V -->|"NEXT_ITERATION"| E
-  G["Acceptance authority explicitly changes the active goal"] -. "REFRAME_REQUESTED lifecycle" .-> A
   V -->|"BLOCKED"| B["Report blocker"]
   V -->|"PASS_TO_FINAL"| F["Final claim"]
 ```
@@ -55,15 +54,15 @@ flowchart TD
 ```text
 Trigger -> Frame Goal -> Choose DIRECT/PERSIST
 PERSIST -> Confirm accepted Goal Contract -> $executor -> Evidence + checkpoint -> $verifier -> Route -> Next Slice or Final Claim
-Explicit acceptance-authority goal change during an active epoch -> REFRAME_REQUESTED lifecycle handoff -> alpha-goal
+Accepted goal materially changes -> terminate the old checkpoint -> start a new alpha-goal task directory
 ```
 
-A Goal Frame contains intent, observable outcome, scope/non-goals, constraints, success signals, observers, and material decisions. Clear fields come from the request and attributable facts; clarification asks the relevant authority about one highest-impact blocking gap and closes it only when the authorized decision and its material boundaries and execution/evidence consequences are determined. `REFRAME_REQUESTED` is only a lifecycle handoff after the acceptance authority explicitly changes the active goal; it is not a verifier verdict.
+A Goal Frame contains intent, observable outcome, scope/non-goals, constraints, success signals, observers, and material decisions. Clear fields come from the request and attributable facts; clarification asks the relevant authority about one highest-impact blocking gap and closes it only when the authorized decision and its material boundaries and execution/evidence consequences are determined. A material change to an accepted goal terminates the old task; the new goal starts `alpha-goal` in a new task directory instead of reopening the old contract or checkpoint.
 
 `DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state, and does not call `executor` or `verifier`. For `PERSIST`, the only canonical lifecycle artifacts are `goal-contract.md` and `checkpoint.md`; the checkpoint helper also creates atomic-write coordination records: active `.lock`, staged `.pending-*`, and best-effort-cleaned `.lock.closed-*` atomic-unlock tombstones.
 
 - `goal-contract.md`: written only by `alpha-goal`; its accepted authority payload is standard structured input to executor and verifier.
-- `checkpoint.md`: records the current contract digest, epoch, and state, and serializes executor/verifier handoff with atomic `checkpoint_revision`/`active_owner` control.
+- `checkpoint.md`: records the current contract digest and execution/verification state, and serializes executor/verifier handoff with atomic `checkpoint_revision`/`active_owner` control.
 
 Routing uses material impact, side effects, recovery needs, and verifiability. Confidence, file count, step count, question count, and estimated duration are not risk proxies.
 
@@ -118,7 +117,7 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 - Known infeasibility, an unavailable required observer, an unidentified claim surface, or an unmet prerequisite keeps the Goal Contract `draft`; `BLOCKED` only means an accepted premise was invalidated later by new facts.
 - Direct work creates no persistent protocol; persistent work uses the minimum artifacts needed for authority, recovery, and audit.
 - Batch work inside one low-risk boundary; invoke verifier only at material risk boundaries and final state.
-- PASS binds to the target and delivery state actually observed; a later mutation invalidates it.
+- PASS binds to the target and delivery state actually observed and terminates that checkpoint; later work starts a new task.
 - Volatile evidence records observation time and invalidation conditions; unidentified mutable surfaces cannot support an exact-binding claim.
 - The Goal Contract is standard structured input to executor/verifier; platform-native task or goal tracking is caller-owned lifecycle metadata and cannot replace contract authority.
 - `tools/evals/runtime-boundaries.json` preserves 33 static expected-boundary cases; schema validation is not runtime evidence.

@@ -17,7 +17,7 @@ function fail(error, message, code = 1, extra) {
 }
 function print(value, stream = process.stdout) { stream.write(`${JSON.stringify(value)}\n`); }
 function done(action, token, phase) { print({ ok: true, action, token, phase }); }
-function usage() { fail("USAGE", "commands: init execute verify reframe supersede status commit abort release recover"); }
+function usage() { fail("USAGE", "commands: init execute verify terminate status commit abort release recover"); }
 function arity(args, size) { if (args.length !== size) usage(); }
 function validRevision(value) { return typeof value === "string" && revisionPattern.test(value); }
 function nextRevision(value) {
@@ -40,7 +40,11 @@ function transition(t, existing = false) {
   } else {
     const next = nextRevision(t.expectedRevision);
     if (t.nextRevision !== next) fail("INVALID_TRANSITION", "revision increment");
-    if (role === t.expectedOwner && ["executor", "verifier"].includes(role) && t.nextOwner === "alpha-goal" && route === null) action = "reframe";
+    if (existing && role === t.expectedOwner && ["executor", "verifier"].includes(role) && t.nextOwner === "alpha-goal" && route === null) action = "reframe";
+    else if (existing && role === "executor" && ["alpha-goal", "caller"].includes(t.expectedOwner) && t.nextOwner === "executor" && route === null) action = "supersede";
+    else if (t.nextOwner === "caller" && route === null &&
+        ((role === t.expectedOwner && ["executor", "verifier"].includes(role)) ||
+         (role === "executor" && t.expectedOwner === "alpha-goal"))) action = "terminate";
     else if (role === "executor" && t.expectedOwner === "executor" && ["executor", "verifier"].includes(t.nextOwner) && route === null) action = "execute";
     else if (role === "verifier" && t.expectedOwner === "verifier") {
       if (route !== null) {
@@ -50,7 +54,7 @@ function transition(t, existing = false) {
         route = t.nextOwner === "executor" ? "NEXT_ITERATION" : null;
       } else fail("INVALID_TRANSITION", "invalid target");
       action = "verify";
-    } else if (role === "executor" && ["alpha-goal", "caller"].includes(t.expectedOwner) && t.nextOwner === "executor" && route === null) action = "supersede";
+    }
   }
   if (!action || t.nextOwner === "none") fail("INVALID_TRANSITION", "invalid transition");
   return { action, route };
@@ -101,8 +105,8 @@ function readOwner(c) {
         (raw.expectedRevision === "absent") !== (raw.expectedCheckpointSha256 === "absent")) throw new Error();
     const expectedRevision = legacy && raw.expectedRevision !== "absent" ? BigInt(raw.expectedRevision).toString() : raw.expectedRevision;
     const nextRevision = legacy ? BigInt(raw.nextRevision).toString() : raw.nextRevision;
-    transition({ ...raw, writer, expectedRevision, nextRevision, route: raw.route ?? null }, true);
-    return { ...raw, raw, writer: legacy ? raw.owner : writer, expectedRevision, nextRevision, legacy };
+    const derived = transition({ ...raw, writer, expectedRevision, nextRevision, route: raw.route ?? null }, true);
+    return { ...raw, raw, writer: legacy ? raw.owner : writer, expectedRevision, nextRevision, legacy, action: derived.action };
   } catch (error) {
     if (error.error) throw error;
     fail("INVALID_LOCK", "invalid lock metadata");
@@ -118,7 +122,10 @@ function inspect(c, record) {
     phase = record.plannedCheckpointSha256 === null ? "pre-commit" : "prepared-pre-rename";
     if (current.owner !== "none") allowed.add(current.owner);
     if (record.writer.startsWith("executor:") && ["none", "alpha-goal", "caller"].includes(current.owner)) allowed.add("executor");
-  } else if (after) { phase = "post-commit"; allowed.add(current.owner); }
+  } else if (after) {
+    phase = "post-commit"; allowed.add(current.owner);
+    if (current.owner === "alpha-goal" && (record.action === "reframe" || record.route === "RETURN_TO_ALPHA_GOAL")) allowed.add("executor");
+  }
   return { phase, recoverableBy: [...allowed] };
 }
 function requireLock(c, token) {
@@ -173,21 +180,19 @@ function semantic(args, c) {
   const command = args[0], revision = args[2];
   let role = "executor", expectedOwner, nextOwner, route = null, next;
   if (command === "init") { arity(args, 2); return { writer: `executor:init-${crypto.randomUUID()}`, expectedRevision: "absent", expectedOwner: "none", nextRevision: "0", nextOwner: "executor", route }; }
-  arity(args, ["reframe", "supersede"].includes(command) ? 3 : 4); next = nextRevision(revision);
+  arity(args, command === "terminate" ? 3 : 4); next = nextRevision(revision);
   if (command === "execute") {
     if (!["executor", "verifier"].includes(args[3])) fail("INVALID_OWNER", "invalid execute target");
     expectedOwner = "executor"; nextOwner = args[3];
   } else if (command === "verify") {
     if (!Object.hasOwn(routeOwner, args[3])) fail("INVALID_ROUTE", "invalid route");
     role = "verifier"; expectedOwner = "verifier"; route = args[3]; nextOwner = routeOwner[route];
-  } else if (command === "reframe") {
-    const current = snapshot(c);
-    if (!["executor", "verifier"].includes(current.owner)) fail("INVALID_TRANSITION", "invalid owner");
-    role = current.owner; expectedOwner = current.owner; nextOwner = "alpha-goal";
   } else {
-    const current = snapshot(c);
-    if (!["alpha-goal", "caller"].includes(current.owner)) fail("INVALID_TRANSITION", "invalid owner");
-    expectedOwner = current.owner; nextOwner = "executor";
+    let current;
+    try { current = snapshot(c); } catch (error) { fail("INVALID_CHECKPOINT", error.message); }
+    if (!["alpha-goal", "executor", "verifier"].includes(current.owner)) fail("INVALID_TRANSITION", "invalid owner");
+    role = current.owner === "alpha-goal" ? "executor" : current.owner;
+    expectedOwner = current.owner; nextOwner = "caller";
   }
   return { writer: `${role}:${command}-${crypto.randomUUID()}`, expectedRevision: revision, expectedOwner, nextRevision: next, nextOwner, route };
 }
@@ -203,7 +208,7 @@ function status(c) {
 }
 function commit(c, token) {
   validToken(token); const record = requireLock(c, token);
-  if (record.route === "RETURN_TO_ALPHA_GOAL") fail("LEGACY_TRANSITION", "recover or abort obsolete return lock");
+  if (["reframe", "supersede"].includes(record.action) || record.route === "RETURN_TO_ALPHA_GOAL") fail("LEGACY_TRANSITION", "recover or abort obsolete transition lock");
   let before, staged;
   try { before = snapshot(c); } catch (error) { fail("INVALID_CHECKPOINT", error.message); }
   if (!same(before, record.expectedRevision, record.expectedOwner, record.expectedCheckpointSha256)) fail("STALE_CHECKPOINT", "digest CAS failed", 3);
@@ -249,7 +254,7 @@ function main() {
   const args = process.argv.slice(2); if (args.length < 2) usage();
   const c = resolveCheckpoint(args[1]), command = args[0];
   if (command === "status") { arity(args, 2); return status(c); }
-  if (["init", "execute", "verify", "reframe", "supersede"].includes(command)) return acquire(c, semantic(args, c));
+  if (["init", "execute", "verify", "terminate"].includes(command)) return acquire(c, semantic(args, c));
   if (["commit", "release", "abort"].includes(command)) { arity(args, 3); return { commit, release, abort }[command](c, args[2]); }
   if (command === "recover") { arity(args, 4); return recover(c, args[2], args[3]); }
   usage();

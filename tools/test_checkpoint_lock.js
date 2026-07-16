@@ -81,13 +81,26 @@ function semanticLifecycle() {
 
   const backToVerifier = invoke(["execute", checkpoint, "3", "verifier"]);
   stageAndCommit(checkpoint, backToVerifier, "verify-again");
-  const reframed = invoke(["reframe", checkpoint, "4"]);
-  assert.equal(reframed.route, null);
-  assert.deepEqual(reframed.to, { revision: "5", owner: "alpha-goal" });
-  stageAndCommit(checkpoint, reframed, "reframe-requested");
-  const superseded = invoke(["supersede", checkpoint, "5"]);
-  assert.deepEqual(superseded.to, { revision: "6", owner: "executor" });
-  stageAndCommit(checkpoint, superseded, "superseded");
+  const terminated = invoke(["terminate", checkpoint, "4"]);
+  assert.equal(terminated.action, "terminate");
+  assert.equal(terminated.route, null);
+  assert.deepEqual(terminated.to, { revision: "5", owner: "caller" });
+  stageAndCommit(checkpoint, terminated, "terminated");
+}
+
+function executorTerminate() {
+  const { checkpoint } = tempCase();
+  fs.writeFileSync(checkpoint, checkpointText("4", "executor"));
+  const lease = invoke(["terminate", checkpoint, "4"]);
+  assert.equal(lease.action, "terminate");
+  assert.equal(lease.route, null);
+  assert.match(lease.writer, /^executor:terminate-/);
+  assert.deepEqual(lease.to, { revision: "5", owner: "caller" });
+  const record = JSON.parse(fs.readFileSync(`${checkpoint}.lock/owner.json`, "utf8"));
+  assert.equal(record.schemaVersion, 4);
+  assert.equal(record.route, null);
+  assert.equal(Object.hasOwn(record, "action"), false);
+  stageAndCommit(checkpoint, lease, "executor-terminated");
 }
 
 function routeMapping() {
@@ -107,11 +120,6 @@ function routeMapping() {
   const { checkpoint } = tempCase();
   fs.writeFileSync(checkpoint, checkpointText("9", "verifier"));
   assert.equal(invoke(["verify", checkpoint, "9", "RETURN_TO_ALPHA_GOAL"], 1).error, "INVALID_ROUTE");
-  const executorCase = tempCase();
-  fs.writeFileSync(executorCase.checkpoint, checkpointText("4", "executor"));
-  const reframe = invoke(["reframe", executorCase.checkpoint, "4"]);
-  assert.deepEqual(reframe.to, { revision: "5", owner: "alpha-goal" });
-  invoke(["abort", executorCase.checkpoint, reframe.token]);
 }
 
 function rejectedMisuse() {
@@ -120,6 +128,8 @@ function rejectedMisuse() {
   assert.equal(invoke(["execute", checkpoint, "7", "executor"], 3).error, "STALE_CHECKPOINT");
   assert.equal(invoke(["execute", checkpoint, "7", "caller"], 1).error, "INVALID_OWNER");
   assert.equal(invoke(["acquire", checkpoint], 1).error, "USAGE");
+  assert.equal(invoke(["reframe", checkpoint, "7"], 1).error, "USAGE");
+  assert.equal(invoke(["supersede", checkpoint, "7"], 1).error, "USAGE");
   assert.equal(invoke(["status", checkpoint, "extra"], 1).error, "USAGE");
   const stale = invoke(["verify", checkpoint, "6", "PASS_TO_FINAL"], 3);
   assert.equal(stale.error, "STALE_CHECKPOINT");
@@ -130,6 +140,14 @@ function rejectedMisuse() {
   fs.writeFileSync(lease.pendingPath, checkpointText("99", "caller"));
   assert.equal(invoke(["commit", checkpoint, lease.token], 1).error, "INVALID_STAGED_CHECKPOINT");
   invoke(["abort", checkpoint, lease.token]);
+
+  const terminated = invoke(["terminate", checkpoint, "7"]);
+  invoke(["abort", checkpoint, terminated.token]);
+  fs.writeFileSync(checkpoint, checkpointText("8", "caller"));
+  assert.equal(invoke(["terminate", checkpoint, "8"], 1).error, "INVALID_TRANSITION");
+  fs.writeFileSync(checkpoint, checkpointText("8", "alpha-goal"));
+  assert.equal(invoke(["execute", checkpoint, "8", "executor"], 3).error, "STALE_CHECKPOINT");
+  assert.equal(invoke(["verify", checkpoint, "8", "NEXT_ITERATION"], 3).error, "STALE_CHECKPOINT");
 
   const diverged = tempCase();
   fs.writeFileSync(diverged.checkpoint, checkpointText("2", "executor", "before"));
@@ -225,6 +243,50 @@ function legacyRecovery() {
   assert.ok(afterStatus.recoverableBy.includes("verifier"));
   invoke(["recover", afterCase.checkpoint, afterToken, "verifier"]);
 
+  const oldReframe = tempCase();
+  const oldReframeText = checkpointText("5", "verifier", "old-reframe");
+  fs.writeFileSync(oldReframe.checkpoint, oldReframeText);
+  const oldReframeToken = crypto.randomUUID();
+  fs.mkdirSync(`${oldReframe.checkpoint}.lock`);
+  fs.writeFileSync(`${oldReframe.checkpoint}.lock/owner.json`, JSON.stringify({
+    schemaVersion: 4,
+    writer: "verifier:old-reframe",
+    token: oldReframeToken,
+    route: null,
+    expectedRevision: "5",
+    expectedOwner: "verifier",
+    expectedCheckpointSha256: sha256(oldReframeText),
+    nextRevision: "6",
+    nextOwner: "alpha-goal",
+    plannedCheckpointSha256: null
+  }));
+  assert.equal(invoke(["status", oldReframe.checkpoint]).phase, "pre-commit");
+  fs.writeFileSync(`${oldReframe.checkpoint}.pending-${oldReframeToken}`, checkpointText("6", "alpha-goal", "obsolete-reframe"));
+  assert.equal(invoke(["commit", oldReframe.checkpoint, oldReframeToken], 1).error, "LEGACY_TRANSITION");
+  invoke(["abort", oldReframe.checkpoint, oldReframeToken]);
+
+  const oldSupersede = tempCase();
+  const oldSupersedeText = checkpointText("08", "alpha-goal", "old-supersede");
+  fs.writeFileSync(oldSupersede.checkpoint, oldSupersedeText);
+  const oldSupersedeToken = crypto.randomUUID();
+  fs.mkdirSync(`${oldSupersede.checkpoint}.lock`);
+  fs.writeFileSync(`${oldSupersede.checkpoint}.lock/owner.json`, JSON.stringify({
+    schemaVersion: 3,
+    owner: "executor:old supersede",
+    token: oldSupersedeToken,
+    expectedRevision: "08",
+    expectedOwner: "alpha-goal",
+    expectedCheckpointSha256: sha256(oldSupersedeText),
+    nextRevision: "09",
+    nextOwner: "executor",
+    plannedCheckpointSha256: null
+  }));
+  const oldSupersedeStatus = invoke(["status", oldSupersede.checkpoint]);
+  assert.equal(oldSupersedeStatus.phase, "pre-commit");
+  assert.ok(oldSupersedeStatus.recoverableBy.includes("alpha-goal"));
+  assert.equal(invoke(["commit", oldSupersede.checkpoint, oldSupersedeToken], 1).error, "LEGACY_TRANSITION");
+  invoke(["recover", oldSupersede.checkpoint, oldSupersedeToken, "alpha-goal"]);
+
   const oldReturn = tempCase();
   const oldReturnText = checkpointText("5", "verifier", "old-return");
   fs.writeFileSync(oldReturn.checkpoint, oldReturnText);
@@ -248,15 +310,60 @@ function legacyRecovery() {
   invoke(["recover", oldReturn.checkpoint, oldReturnToken, "verifier"]);
 }
 
+function legacyAlphaGoalPostCommitTermination() {
+  for (const legacy of [
+    { name: "reframe", route: null },
+    { name: "return", route: "RETURN_TO_ALPHA_GOAL" }
+  ]) {
+    const { checkpoint } = tempCase();
+    const beforeText = checkpointText("20", "verifier", `${legacy.name}-before`);
+    const alphaGoalText = checkpointText("21", "alpha-goal", `${legacy.name}-committed`);
+    fs.writeFileSync(checkpoint, alphaGoalText);
+    const token = crypto.randomUUID();
+    fs.mkdirSync(`${checkpoint}.lock`);
+    fs.writeFileSync(`${checkpoint}.lock/owner.json`, JSON.stringify({
+      schemaVersion: 4,
+      writer: `verifier:old-${legacy.name}`,
+      token,
+      route: legacy.route,
+      expectedRevision: "20",
+      expectedOwner: "verifier",
+      expectedCheckpointSha256: sha256(beforeText),
+      nextRevision: "21",
+      nextOwner: "alpha-goal",
+      plannedCheckpointSha256: sha256(alphaGoalText)
+    }));
+
+    const status = invoke(["status", checkpoint]);
+    assert.equal(status.phase, "post-commit");
+    assert.ok(status.recoverableBy.includes("alpha-goal"));
+    assert.ok(status.recoverableBy.includes("executor"));
+    assert.equal(invoke(["commit", checkpoint, token], 1).error, "LEGACY_TRANSITION");
+    invoke(["recover", checkpoint, token, "executor"]);
+    assert.equal(fs.readFileSync(checkpoint, "utf8"), alphaGoalText);
+
+    const terminated = invoke(["terminate", checkpoint, "21"]);
+    assert.equal(terminated.action, "terminate");
+    assert.equal(terminated.route, null);
+    assert.match(terminated.writer, /^executor:terminate-/);
+    assert.deepEqual(terminated.from, { revision: "21", owner: "alpha-goal" });
+    assert.deepEqual(terminated.to, { revision: "22", owner: "caller" });
+    stageAndCommit(checkpoint, terminated, `${legacy.name}-terminated`);
+    assert.match(fs.readFileSync(checkpoint, "utf8"), /active_owner: caller/);
+  }
+}
+
 async function main() {
   try {
     semanticLifecycle();
+    executorTerminate();
     routeMapping();
     rejectedMisuse();
     legacyRelease();
     legacyRecovery();
+    legacyAlphaGoalPostCommitTermination();
     await concurrentInit();
-    console.log("PASS: checkpoint lock semantic, misuse, concurrency, and recovery tests");
+    console.log("PASS: checkpoint lock semantic, terminate, misuse, concurrency, and recovery tests");
   } finally {
     for (const dir of temporaryRoots) fs.rmSync(dir, { recursive: true, force: true });
   }

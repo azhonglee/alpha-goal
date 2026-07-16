@@ -9,8 +9,7 @@
         "goal-framing",
         "entry-route",
         "goal-contract-authority",
-        "accepted-authority-digest",
-        "goal-reframing"
+        "accepted-authority-digest"
       ],
       "references": [
         "references/goal-contract-book.md",
@@ -28,8 +27,7 @@
         "raw-execution-evidence",
         "recovery-cursor",
         "checkpoint-write-protocol",
-        "checkpoint-epoch-supersession",
-        "checkpoint-reframe-handoff"
+        "checkpoint-termination"
       ],
       "references": [],
       "scripts": [
@@ -81,7 +79,7 @@
           "owner": "alpha-goal"
         },
         {
-          "name": "confirmation-change-basis-and-authority-digest",
+          "name": "confirmation-and-authority-digest",
           "owner": "alpha-goal"
         }
       ]
@@ -91,7 +89,7 @@
       "condition": "accepted PERSIST contract during execution and verification",
       "sections": [
         {
-          "name": "recorded-contract-identity-state-revision-write-control-and-epochs",
+          "name": "recorded-contract-identity-state-revision-and-write-control",
           "owner": "executor"
         },
         {

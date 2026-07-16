@@ -25,7 +25,7 @@
     {
       "id": "RB05",
       "scenario": "A Goal Contract says status accepted and has a matching digest, but Acceptance Completeness is missing or false when executor or verifier enters.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Digest integrity cannot replace semantic completeness; entry is rejected without execution, verification verdict, or automatic reframe." }
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Digest integrity cannot replace semantic completeness; entry is rejected without execution, verification verdict, or target mutation." }
     },
     {
       "id": "RB06",
@@ -49,8 +49,8 @@
     },
     {
       "id": "RB10",
-      "scenario": "Authority changes either during an active executor/verifier epoch or after a terminal PASS/BLOCKED epoch, then the same task receives a newly accepted authority payload.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Active work records an explicit REFRAME_REQUESTED lifecycle handoff directly to alpha-goal without a verifier verdict; terminal work records an explicit change request. Executor preserves the old epoch and appends a fresh one." }
+      "scenario": "The acceptance authority materially changes an active goal, or requests more work after PASS_TO_FINAL/BLOCKED.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "The old checkpoint terminates with GOAL_CHANGED when active, or remains terminal after PASS/BLOCKED. Follow-up work starts alpha-goal in a new task directory with a new Goal Contract and checkpoint; accepted artifacts are never reopened or reused." }
     },
     {
       "id": "RB11",
@@ -70,17 +70,17 @@
     {
       "id": "RB14",
       "scenario": "After acceptance, a newly discovered runtime constraint or material design dimension invalidates the documented feasible or authorized path; alternatives may exist, but none is currently authorized.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "Known incompleteness would have kept the contract draft; new attributable post-acceptance invalidation of feasibility, authority, design, risk/recovery, observer, or claim coverage is BLOCKED without reframing the goal." }
+      "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "Known incompleteness would have kept the contract draft; new attributable post-acceptance invalidation of feasibility, authority, design, risk/recovery, observer, or claim coverage is BLOCKED." }
     },
     {
       "id": "RB15",
-      "scenario": "After PASS, perform a requested edit, commit, push, and PR update sequence.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "PASS is invalidated, each boundary-changing transition is recorded separately, and final verification follows the last delivery mutation." }
+      "scenario": "After PASS, the user requests an edit, commit, push, and PR update sequence.",
+      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "PASS keeps the old checkpoint terminal. The follow-up external-write task receives a new Goal Frame, Goal Contract, and checkpoint; final verification follows its last delivery mutation." }
     },
     {
       "id": "RB16",
-      "scenario": "Add the verdict to a PR description after PASS.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "PR content is delivered state, not exempt lifecycle metadata." }
+      "scenario": "After PASS, add the verdict to a PR description.",
+      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "PR content is a new external write, not exempt lifecycle metadata; start a new task instead of reopening the passed checkpoint." }
     },
     {
       "id": "RB17",
@@ -94,8 +94,8 @@
     },
     {
       "id": "RB19",
-      "scenario": "Exercise semantic checkpoint init, executor same-owner and verifier handoff writes, the three verifier routes, direct reframe, and epoch supersession; interrupt before commit, attempt invalid transitions, stale revisions/tokens, and recover only after JSON status inspection.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Semantic commands enforce the transition graph, keep reframe separate from verifier verdicts, and check expected revision; every lock-opening result supplies token/pendingPath, commit publishes and unlocks atomically, abort handles abandoned writes, and status phase/recoverableBy gates exact-owner recovery without lost updates." }
+      "scenario": "Exercise semantic checkpoint init, executor same-owner and verifier handoff writes, the three verifier routes, and executor/verifier goal-change termination; interrupt before commit, attempt invalid transitions, stale revisions/tokens, and recover only after JSON status inspection.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Semantic commands enforce the transition graph, keep goal-change termination separate from verifier verdicts, and check expected revision; every lock-opening result supplies token/pendingPath, commit publishes and unlocks atomically, abort handles abandoned writes, and status phase/recoverableBy gates exact-owner recovery without lost updates." }
     },
     {
       "id": "RB20",
@@ -135,7 +135,7 @@
     {
       "id": "RB27",
       "scenario": "Resume from a checkpoint bound to another task, branch, worktree, or repository set.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "An unrelated binding is rejected at entry without a verdict and never enters the same-task epoch-supersession path." }
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "An unrelated checkpoint is rejected at entry without a verdict and is never reused for the current task." }
     },
     {
       "id": "RB28",
