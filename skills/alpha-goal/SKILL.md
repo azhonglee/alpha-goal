@@ -24,7 +24,9 @@ Use decisions only from the relevant authority and facts only from attributable 
 
 Repeat only while the Goal Frame has a blocking gap:
 
-1. Select the highest-impact gap by authority ownership, blast radius, irreversibility, behavior/interface/data impact, acceptance ambiguity, and rollback risk.
+1. Choose the next gap:
+   - Treat intent or observable outcome as blocking when another reasonable reading could change scope, success signals, or evidence; otherwise derive them from the request and attributable facts.
+   - Select the highest-impact remaining gap by authority ownership, blast radius, irreversibility, behavior/interface/data impact, acceptance ambiguity, and rollback risk.
 2. Ask the relevant authority for one decision variable. State discovered facts, why it matters, real options when useful, and a recommendation; never ask for discoverable facts.
 3. Pressure-test the answer:
    - Check one concrete boundary, counterexample, or failure case.
@@ -60,28 +62,24 @@ For `PERSIST`, resolve `$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/
 
 ## Confirm and Handoff
 
-Before confirmation, map criteria to currently available observers; identify every claim surface and prerequisite; complete all authority-retained material design decisions and their risk/observer treatment; check source conflicts, side-effect authority, freshness, and test the highest-impact assumption with a counterexample/failure case. Keep `draft` while any known infeasibility, unavailable observer, unidentified claim surface, unmet prerequisite, incomplete authority-retained material-design coverage, or unresolved material finding remains. For cross-cutting/high-risk work, request independent read-only review from raw artifacts and await/cancel it.
-
-Before editing an accepted payload:
-
-- if its checkpoint is owned by `executor` or `verifier`, edit only after an explicit acceptance-authority goal change makes that owner record `REFRAME_REQUESTED` and hand lifecycle ownership directly to `alpha-goal`;
-- reopen directly only with no checkpoint, a reframed `alpha-goal` epoch, or terminal `PASS_TO_FINAL`/`BLOCKED` plus an explicit acceptance-authority revision request; record the supersession basis.
+Before confirmation, map criteria to currently available observers; identify every claim surface and prerequisite; complete all authority-retained material design decisions and their risk/observer treatment; check source conflicts, side-effect authority, freshness, and the highest-impact assumption with a counterexample/failure case. Keep `draft` while any known infeasibility, unavailable observer, unidentified claim surface, unmet prerequisite, incomplete authority-retained material-design coverage, or unresolved material finding remains. For cross-cutting/high-risk work, request independent read-only review from raw artifacts and await/cancel it.
 
 Present the Goal Frame, boundaries, criteria, evidence, and residual risk. When authority-retained material design is touched, also present its dimensions, interface/data changes, risk-to-observer/test-plan mapping, and rollback/recovery treatment. Accept only an explicit decision from the recorded acceptance authority; silence, history, a spec, or desired-behavior authority does not grant side-effect authority or acceptance.
 
 - On accept, complete Acceptance Completeness and the Confirmation Record, compute the authority-payload digest, set `status: accepted` last, and hand the canonical contract to `executor`; this adds no revision.
 - On refine/reject, remain `draft` and do not mutate the target.
-- Reopening sets `draft`, increments the accepted revision once, invalidates prior verdicts, and requires confirmation again.
-
-## Standard Goal Input
-
-The accepted Goal Contract is canonical input to `executor`, `verifier`, and native Goal projection. When tracking is required, project `objective=<Intent - Observable Outcome>; criteria=<critical IDs>; contract=<path>@<revision>#<digest>`. This is lifecycle metadata, never authority/evidence. Never alter a conflicting active goal; record conflict/failure. Required sync blocks handoff; otherwise mark unsynced.
 
 ## Capability-Conditional Aids
 
 - Delegate independent read-heavy investigation, review, or evidence reruns. Parallelize independent reads; sequence dependent decisions; synthesize before acting.
 - Investigation agents never write shared artifacts. A verifier agent writes only verifier-owned checkpoint fields after exclusive handoff.
 
-## Reframe a Changed Goal
+## Reopen an Accepted Contract
 
-Only an explicit acceptance-authority goal change re-enters clarification during an active epoch. The current `executor` or `verifier` owner stops work, records `REFRAME_REQUESTED`, the source/change/current identity and unverified mutations, then hands directly to `alpha-goal`; this is not a verification route. Leave that checkpoint immutable, reopen the contract as `draft`, and after explicit acceptance let `executor` supersede the epoch. Known gaps never reach acceptance; invalid bindings are rejected without verdict. New attributable post-acceptance facts that invalidate the accepted feasibility basis, prerequisite/dependency, authority boundary, material-design coverage, touched-risk/recovery mapping, observer, or identified claim surface are `BLOCKED` when no currently authorized path remains; they do not reframe the goal.
+Reopen only in one of these states:
+
+- no checkpoint exists;
+- an active epoch has been handed to `alpha-goal` after the acceptance authority explicitly changed the goal and the prior `executor` or `verifier` owner recorded `REFRAME_REQUESTED`, source/change/current identity, and unverified mutations;
+- a terminal `PASS_TO_FINAL`/`BLOCKED` epoch is owned by `caller` and the acceptance authority explicitly requests a revision.
+
+Record the supersession basis, leave the prior checkpoint epoch immutable, set the contract `draft`, increment its accepted revision once, invalidate prior verdicts, and require confirmation again; after acceptance, `executor` supersedes the epoch. `REFRAME_REQUESTED` is lifecycle handoff, never a verification route. Invalid bindings are rejected without verdict. New attributable post-acceptance facts that invalidate accepted feasibility, prerequisites/dependencies, authority boundary, material-design coverage, touched-risk/recovery mapping, observers, or claim surfaces are `BLOCKED` when no currently authorized path remains; they do not reopen the goal.

@@ -10,7 +10,6 @@
         "entry-route",
         "goal-contract-authority",
         "accepted-authority-digest",
-        "goal-input-projection",
         "goal-reframing"
       ],
       "references": [

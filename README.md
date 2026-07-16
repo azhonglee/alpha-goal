@@ -62,7 +62,7 @@ Goal Frame 包含 intent、observable outcome、scope/non-goals、constraints、
 
 `DIRECT` 将完整 Goal Frame 保留在当前上下文，不创建 Alpha Goal 状态，也不调用 `executor` 或 `verifier`。`PERSIST` 的 canonical lifecycle artifacts 只有 `goal-contract.md` 与 `checkpoint.md`；checkpoint helper 还会生成原子写协调记录：活动中的 `.lock`、暂存中的 `.pending-*`，以及提交后保留的 `.lock.closed-*` 关闭记录。
 
-- `goal-contract.md`：由 `alpha-goal` 独占修改；accepted revision 是 executor、verifier 和可选 native Goal projection 的标准结构化输入。
+- `goal-contract.md`：由 `alpha-goal` 独占修改；accepted revision 是 executor 和 verifier 的标准结构化输入。
 - `checkpoint.md`：保留不可变契约 epoch，绑定当前 digest 与状态，并用原子锁及 revision/owner 串行化 `executor`、`verifier` 交接。
 
 路由只看材料性影响、副作用、恢复需求和可验证性；不以置信度、文件数、步骤数、问答轮次或预计时长替代风险判断。
@@ -120,5 +120,5 @@ Alpha Goal 让 agent 工作保持目标明确、行动有界、声明受证据�
 - 同一低风险边界内批量执行，只在材料性风险边界和最终状态调用 verifier。
 - PASS 绑定实际观察到的最终目标与交付状态；后续 mutation 会使其失效。
 - 时效性证据记录观察时间与失效条件；无法标识的可变表面不得声称精确绑定。
-- Goal Contract 是标准结构化输入；Native Goal 只是绑定其 path/revision/digest 的 capability-conditional lifecycle projection。
-- `tools/evals/runtime-boundaries.json` 固化 32 个静态边界预期；结构校验通过不等于真实运行证据。
+- Goal Contract 是 executor/verifier 的标准结构化输入；平台原生 task/goal tracking 由 caller 管理，不能替代契约 authority。
+- `tools/evals/runtime-boundaries.json` 固化 33 个静态边界预期；结构校验通过不等于真实运行证据。

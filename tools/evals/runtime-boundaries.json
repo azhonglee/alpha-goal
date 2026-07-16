@@ -161,6 +161,11 @@
       "id": "RB32",
       "scenario": "A contract has a matching digest but an unsupported present contract_format, or omits contract_format during a first handoff with no already-bound checkpoint.",
       "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Reject unsupported formats and reject missing format for new initialization or first handoff. Only a missing-format contract already bound by an existing checkpoint to the same task, revision, and accepted digest is legacy-readable, without inferred authority." }
+    },
+    {
+      "id": "RB33",
+      "scenario": "A change request admits multiple reasonable intents or observable outcomes that would change scope, success signals, or acceptance evidence.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Treat intent/outcome as blocking instead of silently choosing one interpretation; use discovered facts and ask the relevant authority for the single highest-impact intent or observable-outcome decision, then choose DIRECT or PERSIST from the resolved goal rather than ambiguity alone." }
     }
   ]
 }

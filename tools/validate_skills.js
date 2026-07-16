@@ -317,8 +317,8 @@ function validateRuntimeEvals(root, contract, errors) {
 
   if (!isObject(data) || data.schemaVersion !== 1) errors.push(`${rel}: schemaVersion must be 1`);
   if (!nonEmptyString(data.claimBoundary)) errors.push(`${rel}: claimBoundary must be a non-empty string`);
-  if (!Array.isArray(data.cases) || data.cases.length !== 32) {
-    errors.push(`${rel}: cases must contain exactly 32 entries`);
+  if (!Array.isArray(data.cases) || data.cases.length !== 33) {
+    errors.push(`${rel}: cases must contain exactly 33 entries`);
     return;
   }
 
@@ -343,9 +343,9 @@ function validateRuntimeEvals(root, contract, errors) {
     if (!nonEmptyString(item.expected.invariant)) errors.push(`${rel}: ${item.id} missing invariant`);
   }
   requireUniqueStrings(ids, `${rel}: case ids`, errors);
-  const expectedIds = Array.from({ length: 32 }, (_, index) => `RB${String(index + 1).padStart(2, "0")}`);
-  if (ids.length === 32 && ids.some((id, index) => id !== expectedIds[index])) {
-    errors.push(`${rel}: case ids must be exactly RB01 through RB32 in order`);
+  const expectedIds = Array.from({ length: 33 }, (_, index) => `RB${String(index + 1).padStart(2, "0")}`);
+  if (ids.length === 33 && ids.some((id, index) => id !== expectedIds[index])) {
+    errors.push(`${rel}: case ids must be exactly RB01 through RB33 in order`);
   }
 }
 

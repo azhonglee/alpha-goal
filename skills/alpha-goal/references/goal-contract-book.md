@@ -1,6 +1,6 @@
 # Goal Contract Book
 
-For `PERSIST` or an explicit goal reframe, `alpha-goal` alone writes canonical `goal-contract.md` in the resolved task directory. Once accepted, it is structured input to execution, verification, and optional Goal projection.
+For `PERSIST` or an explicit goal reframe, `alpha-goal` alone writes canonical `goal-contract.md` in the resolved task directory. Once accepted, it is structured input to execution and verification.
 
 ## Lifecycle and Integrity
 

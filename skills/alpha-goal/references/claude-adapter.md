@@ -11,15 +11,6 @@ Read only in a Claude runtime or Claude-installed skill context. This maps expos
 | Narrow file mutation | Available file edit tools |
 | Worktree isolation | `EnterWorktree` or `git worktree` |
 | Independent read/review | `Agent` or agent teams when exposed |
-| Work-item tracking | `TaskCreate`, `TaskUpdate`, `TaskGet`, `TaskList`; not Goal Contract authority |
-| Native completion condition | `/goal` when callable; `TaskCreate` is not equivalent |
-
-## Native Goal
-
-- Query `/goal` before setting a condition; do not replace an unrelated active goal.
-- After contract acceptance, use one verifiable condition only when the user or repository explicitly requires it, the Execution and Side-effect Boundary permits it, and current tool policy allows it.
-- If `/goal` or a completion update is unavailable, record that capability gap. Continue unless the accepted contract or repository explicitly requires native-goal evidence.
-- Never use `/goal clear` to claim success, or invent a Codex-named goal tool call.
 
 ## Adapter Checks
 

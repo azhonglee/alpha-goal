@@ -62,7 +62,7 @@ A Goal Frame contains intent, observable outcome, scope/non-goals, constraints, 
 
 `DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state, and does not call `executor` or `verifier`. For `PERSIST`, the only canonical lifecycle artifacts are `goal-contract.md` and `checkpoint.md`; the checkpoint helper also creates atomic-write coordination records: active `.lock`, staged `.pending-*`, and retained `.lock.closed-*` close records.
 
-- `goal-contract.md`: written only by `alpha-goal`; its accepted revision is standard structured input to executor, verifier, and an optional native Goal projection.
+- `goal-contract.md`: written only by `alpha-goal`; its accepted revision is standard structured input to executor and verifier.
 - `checkpoint.md`: retains immutable contract epochs, binds the current digest and state, and serializes executor/verifier handoff with atomic revision/owner control.
 
 Routing uses material impact, side effects, recovery needs, and verifiability. Confidence, file count, step count, question count, and estimated duration are not risk proxies.
@@ -120,5 +120,5 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 - Batch work inside one low-risk boundary; invoke verifier only at material risk boundaries and final state.
 - PASS binds to the target and delivery state actually observed; a later mutation invalidates it.
 - Volatile evidence records observation time and invalidation conditions; unidentified mutable surfaces cannot support an exact-binding claim.
-- The Goal Contract is standard structured input; a native Goal is only a capability-conditional lifecycle projection bound to its path/revision/digest.
-- `tools/evals/runtime-boundaries.json` preserves 32 static expected-boundary cases; schema validation is not runtime evidence.
+- The Goal Contract is standard structured input to executor/verifier; platform-native task or goal tracking is caller-owned lifecycle metadata and cannot replace contract authority.
+- `tools/evals/runtime-boundaries.json` preserves 33 static expected-boundary cases; schema validation is not runtime evidence.
