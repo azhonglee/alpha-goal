@@ -80,8 +80,7 @@ The installer copies the three public skills into independent runtime-specific r
 ## Usage examples
 
 ```text
-$alpha-goal Decide whether this task should discover facts, clarify, write a contract, confirm, or hand off to execution/verification.
-$executor Execute or harden the next most useful verifiable bounded slice from an accepted Goal Contract.
+$alpha-goal Implement this requirement: <YOUR-PRD> or <YOUR-DESCRIPTION>, <YOUR-UX> or <YOUR-DESIGN>.
 ```
 
 You usually do not need to name a skill. Describe the work normally; Alpha Goal activates implicitly.
