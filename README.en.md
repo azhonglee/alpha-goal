@@ -80,9 +80,8 @@ The installer copies the three public skills into independent runtime-specific r
 ## Usage examples
 
 ```text
-$alpha-goal Form a Goal Frame from the request and discovered facts, then choose DIRECT or PERSIST.
-$executor Resume the accepted Goal Contract and execute the next authorized batch.
-$verifier Verify the current persistent checkpoint at a risk boundary or final state.
+$alpha-goal Decide whether this task should discover facts, clarify, write a contract, confirm, or hand off to execution/verification.
+$executor Execute or harden the next most useful verifiable bounded slice from an accepted Goal Contract.
 ```
 
 You usually do not need to name a skill. Describe the work normally; Alpha Goal activates implicitly.

@@ -80,9 +80,7 @@ node tools/validate_skills.js --fixtures
 ## 使用示例
 
 ```text
-$alpha-goal 根据请求和已发现事实形成 Goal Frame，再判断走 DIRECT 还是 PERSIST。
-$executor 从已接受的 Goal Contract 恢复并执行下一批授权工作。
-$verifier 对当前持久 checkpoint 做风险边界或最终状态验证。
+$alpha-goal 实现一下这个需求:<YOUR-PRD> or <YOUR-DESCRIPTION>，<YOUR-UX> or <YOUR-DESIGN> 。
 ```
 
 通常不需要显式写出 skill 名称。正常描述你的需求即可；Alpha Goal 会隐式触发。
