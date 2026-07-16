@@ -2,39 +2,77 @@
 
 Languages: [Chinese](README.md) | English
 
-Alpha Goal clarifies and structures user intent into an executable, verifiable goal, then routes by materiality. Every change task first gets a minimal Goal Frame; work involving a material authority decision, an external/destructive side effect, recovery, or auditable evidence expands it into a Goal Contract.
+Alpha Goal is a minimal persistent closed-loop skillset for goal engineering work. It guides agents to discover facts before asking, operate within accepted authority boundaries, resume execution from an accepted Goal Contract and the necessary checkpoint state, and make final claims only as far as evidence supports them.
 
-## Core architecture
+## What Problem It Solves
+
+Alpha Goal gives AI agents a Goal Engineering control loop for three common failure modes:
+
+<table>
+  <thead>
+    <tr>
+      <th width="260" align="left">Problem</th>
+      <th align="left">What it looks like</th>
+      <th align="left">Control point</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td width="260" align="left"><strong>Goal&nbsp;drift</strong></td>
+      <td align="left">The agent starts before requirements are clear, gradually moves off target, and changes unrelated things along the way.</td>
+      <td align="left"><code>alpha-goal</code> discovers facts, clarifies the goal, boundaries, non-goals, and acceptance evidence, then writes a user-confirmed <code>goal-contract.md</code>.</td>
+    </tr>
+    <tr>
+      <td width="260" align="left"><strong>Action&nbsp;overreach</strong></td>
+      <td align="left">There is no explicit authority boundary, so work can exceed scope, touch the wrong branch, or treat current implementation as desired behavior.</td>
+      <td align="left"><code>executor</code> executes only bounded slices inside an accepted contract, with worktree/branch, scope, non-goals, and claim-boundary checks before mutation.</td>
+    </tr>
+    <tr>
+      <td width="260" align="left"><strong>Evidence&#8209;free&nbsp;completion</strong></td>
+      <td align="left">A passing test or partial success is treated as proof that the goal is complete.</td>
+      <td align="left"><code>verifier</code> compares fresh evidence against acceptance evidence and returns a route decision.</td>
+    </tr>
+  </tbody>
+</table>
+
+In practice, it compresses requirement clarification, authority boundaries, iterative execution, evidence verification, and delivery claims into a minimal persistent loop that an agent can understand, execute, and recover.
+
+## Core Architecture
 
 ```mermaid
+%%{init: {"theme":"base","flowchart":{"wrappingWidth":900,"nodeSpacing":80,"rankSpacing":70,"htmlLabels":true},"markdownAutoWrap":false,"themeVariables":{"background":"#364150","primaryColor":"#364150","primaryTextColor":"#f8fafc","primaryBorderColor":"#f8fafc","lineColor":"#f8fafc","edgeLabelBackground":"#364150","fontFamily":"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"}}}%%
 flowchart TD
-  A["alpha-goal: clarify and form a Goal Frame"] --> R{"DIRECT / PERSIST"}
-  R --> D["DIRECT: normal execution + final validation"]
-  R --> P["PERSIST: expand and confirm goal-contract.md"]
-  P --> E["executor: execute at risk boundaries and record checkpoint.md"]
-  E --> V["verifier: independently observe current state"]
-  V -->|"NEXT_ITERATION"| E
-  G["Acceptance authority explicitly changes the active goal"] -. "REFRAME_REQUESTED lifecycle" .-> A
-  V -->|"BLOCKED"| B["Report blocker"]
-  V -->|"PASS_TO_FINAL"| F["Final claim"]
+  AG["<div align='center'><strong>alpha-goal (entry)</strong></div><div align='left' style='width:900px'><br/>Discover facts → Clarify requirements → Pressure-test → Write Goal Contract → User confirmation<br/>Output: goal-contract.md (authority contract)</div>"]
+  CL["<div align='center'><strong>executor (execution)</strong></div><div align='left' style='width:900px'><br/>Slice by contract → Execute → Collect evidence → Update checkpoint<br/>Output: checkpoint.md (execution evidence / handoff state)</div>"]
+  GV["<div align='center'><strong>verifier (verification)</strong></div><div align='left' style='width:900px'><br/>Evidence vs acceptance criteria → Route decision<br/>Verdicts: PASS_TO_FINAL / NEXT_ITERATION / BLOCKED</div>"]
+  RF["<div align='center'><strong>reframe (lifecycle reopen)</strong></div><div align='left' style='width:900px'><br/>Only when the acceptance authority explicitly changes the active goal<br/>Record: REFRAME_REQUESTED (not a verifier verdict)</div>"]
+
+  AG -->|"after contract is accepted"| CL
+  CL --> GV
+  GV --> Pass["Final delivery<br/>(pass)"]
+  GV --> Next["Continue next round<br/>(same-goal fixable)"]
+  RF -.-> AG
+
+  classDef stage fill:#364150,stroke:#f8fafc,color:#f8fafc,stroke-width:2px;
+  classDef route fill:#364150,stroke:#364150,color:#f8fafc,stroke-width:0px;
+  class AG,CL,GV,RF stage;
+  class Pass,Next route;
+```
+
+```text
+Trigger -> Frame Goal -> Choose DIRECT/PERSIST
+PERSIST -> Confirm accepted Goal Contract -> $executor -> Evidence + checkpoint -> $verifier -> Route -> Next Slice or Final Claim
+Explicit acceptance-authority goal change during an active epoch -> REFRAME_REQUESTED lifecycle handoff -> alpha-goal
 ```
 
 A Goal Frame contains intent, observable outcome, scope/non-goals, constraints, success signals, observers, and material decisions. Clear fields come from the request and attributable facts; clarification asks the relevant authority about one highest-impact blocking gap and closes it only when the authorized decision and its material boundaries and execution/evidence consequences are determined. `REFRAME_REQUESTED` is only a lifecycle handoff after the acceptance authority explicitly changes the active goal; it is not a verifier verdict.
 
-`DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state, and does not call `executor` or `verifier`. `PERSIST` maintains two canonical lifecycle artifacts; the checkpoint helper also creates atomic-write coordination records: active `.lock`, staged `.pending-*`, and retained `.lock.closed-*` close records:
+`DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state, and does not call `executor` or `verifier`. For `PERSIST`, the only canonical lifecycle artifacts are `goal-contract.md` and `checkpoint.md`; the checkpoint helper also creates atomic-write coordination records: active `.lock`, staged `.pending-*`, and retained `.lock.closed-*` close records.
 
 - `goal-contract.md`: written only by `alpha-goal`; its accepted revision is standard structured input to executor, verifier, and an optional native Goal projection.
-- `checkpoint.md`: retains immutable contract epochs, binds the current digest and state, and serializes executor/verifier handoff with an atomic lock plus revision/owner control.
+- `checkpoint.md`: retains immutable contract epochs, binds the current digest and state, and serializes executor/verifier handoff with atomic revision/owner control.
 
 Routing uses material impact, side effects, recovery needs, and verifiability. Confidence, file count, step count, question count, and estimated duration are not risk proxies.
-
-## Public skills
-
-| Skill | Single responsibility |
-| --- | --- |
-| [`alpha-goal`](skills/alpha-goal/) | Clarify and structure the goal, form a Goal Frame, choose `DIRECT / PERSIST`, and confirm a Goal Contract for persistent work. |
-| [`executor`](skills/executor/) | Execute only an accepted persistent contract; maintain target/delivery mutations, raw execution evidence, and recovery records. |
-| [`verifier`](skills/verifier/) | At a risk boundary or final state, independently collect verification observations, update criterion status, and return a route. |
 
 ## Quick start
 
@@ -46,7 +84,7 @@ node tools/validate_skills.js --fixtures
 
 The installer copies the three public skills into independent runtime-specific roots and synchronizes the selected user templates. See [INSTALL.md](INSTALL.md) for full behavior and smoke testing.
 
-Skills normally trigger from the task description. To invoke them explicitly:
+## Usage examples
 
 ```text
 $alpha-goal Form a Goal Frame from the request and discovered facts, then choose DIRECT or PERSIST.
@@ -54,10 +92,39 @@ $executor Resume the accepted Goal Contract and execute the next authorized batc
 $verifier Verify the current persistent checkpoint at a risk boundary or final state.
 ```
 
+You usually do not need to name a skill. Describe the work normally; Alpha Goal activates implicitly.
+
+## Public skills
+
+<table>
+  <thead>
+    <tr>
+      <th width="150" align="left">Skill</th>
+      <th align="left">What it helps with</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td width="180" align="left"><a href="skills/alpha-goal/"><code>alpha-goal</code></a></td>
+      <td align="left">Clarify intent, boundaries, and acceptance evidence, form a Goal Frame, and produce a Goal Contract when persistent closure is required.</td>
+    </tr>
+    <tr>
+      <td width="180" align="left"><a href="skills/executor/"><code>executor</code></a></td>
+      <td align="left">Execute authorized batches inside an accepted contract; <code>goal-contract.md</code> is authoritative and <code>checkpoint.md</code> records mutations, raw execution evidence, and handoff state.</td>
+    </tr>
+    <tr>
+      <td width="180" align="left"><a href="skills/verifier/"><code>verifier</code></a></td>
+      <td align="left">Verify fresh evidence independently, update criterion status, and return <code>PASS_TO_FINAL</code>, <code>NEXT_ITERATION</code>, or <code>BLOCKED</code>.</td>
+    </tr>
+  </tbody>
+</table>
+
 ## Principles
 
-- Discover facts before asking for material authority-owned decisions; current code cannot define desired behavior by itself.
-- Known infeasibility, an unavailable required observer, an unidentified claim surface, or an unmet prerequisite keeps the Goal Contract `draft`; `BLOCKED` is only for a post-acceptance invalidation.
+Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
+
+- Discover facts before handling material decisions owned by the user or another authority; current code cannot define desired behavior by itself.
+- Known infeasibility, an unavailable required observer, an unidentified claim surface, or an unmet prerequisite keeps the Goal Contract `draft`; `BLOCKED` only means an accepted premise was invalidated later by new facts.
 - Direct work creates no persistent protocol; persistent work uses the minimum artifacts needed for authority, recovery, and audit.
 - Batch work inside one low-risk boundary; invoke verifier only at material risk boundaries and final state.
 - PASS binds to the target and delivery state actually observed; a later mutation invalidates it.

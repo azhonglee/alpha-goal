@@ -2,39 +2,77 @@
 
 语言：简体中文 | [English](README.en.md)
 
-Alpha Goal 将用户意图澄清并结构化为可执行、可验收的目标，再按材料性选择直接执行或持久闭环。每个 change task 先形成最小 Goal Frame；涉及材料性 authority 决策、外部/破坏性副作用、恢复或可审计证据时再扩展为 Goal Contract。
+Alpha Goal 是用于 Goal Engineering 的最小持久闭环技能集。它要求智能体先发现事实再提问，基于已接受的 Goal Contract 和必要 checkpoint 恢复执行，在明确边界内行动，并且只在证据支持的范围内做最终声明。
+
+## 解决什么问题
+
+Alpha Goal 给 AI Agent 一套 Goal Engineering 控制闭环，重点约束三类常见失控：
+
+<table>
+  <thead>
+    <tr>
+      <th width="100" align="left">问题</th>
+      <th align="left">具体表现</th>
+      <th align="left">控制方式</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td width="100" align="left"><strong>目标漂移</strong></td>
+      <td align="left">需求没澄清就动手，做着做着方向偏了，顺手改一堆无关内容。</td>
+      <td align="left"><code>alpha-goal</code> 先发现事实、澄清目标、边界、非目标和验收证据，再写出用户确认的 <code>goal-contract.md</code>。</td>
+    </tr>
+    <tr>
+      <td width="100" align="left"><strong>行动越界</strong></td>
+      <td align="left">没有授权边界，越过 scope、改错分支，或把当前实现当成期望行为。</td>
+      <td align="left"><code>executor</code> 只执行已接受契约内的有界 slice，变更前检查 worktree/branch、scope、non-goals 和 claim boundary。</td>
+    </tr>
+    <tr>
+      <td width="100" align="left"><strong>完成无据</strong></td>
+      <td align="left">测试过了就说完成，或把局部成功当成目标达成。</td>
+      <td align="left"><code>verifier</code> 对照 acceptance evidence 和当前 fresh evidence 做独立验证，并返回路由裁决。</td>
+    </tr>
+  </tbody>
+</table>
+
+本质上，它把需求澄清、授权边界、迭代执行、证据验证和验收声明，压缩成 Agent 能理解、执行、恢复的最小持久闭环。
 
 ## 核心架构
 
 ```mermaid
+%%{init: {"theme":"base","flowchart":{"wrappingWidth":500,"nodeSpacing":80,"rankSpacing":70,"htmlLabels":true},"markdownAutoWrap":false,"themeVariables":{"background":"#364150","primaryColor":"#364150","primaryTextColor":"#f8fafc","primaryBorderColor":"#f8fafc","lineColor":"#f8fafc","edgeLabelBackground":"#364150","fontFamily":"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"}}}%%
 flowchart TD
-  A["alpha-goal：澄清需求并形成 Goal Frame"] --> R{"DIRECT / PERSIST"}
-  R --> D["DIRECT：正常执行 + 最终验证"]
-  R --> P["PERSIST：扩展并确认 goal-contract.md"]
-  P --> E["executor：按风险边界执行并记录 checkpoint.md"]
-  E --> V["verifier：独立观察当前状态"]
-  V -->|"NEXT_ITERATION"| E
-  G["active goal 被 acceptance authority 明确修改"] -. "REFRAME_REQUESTED lifecycle" .-> A
-  V -->|"BLOCKED"| B["报告 blocker"]
-  V -->|"PASS_TO_FINAL"| F["最终声明"]
+  AG["<div align='center'><strong>alpha-goal（入口）</strong></div><div align='left' style='width:550px'><br/>发现事实 → 澄清需求 → 压力测试 → 写 Goal Contract → 用户确认<br/>产出：goal-contract.md（权威契约）</div>"]
+  CL["<div align='center'><strong>executor（执行）</strong></div><div align='left' style='width:550px'><br/>按契约切 slice → 执行 → 收集证据 → 更新 checkpoint<br/>产出：checkpoint.md（执行证据 / 交接状态）</div>"]
+  GV["<div align='center'><strong>verifier（验证）</strong></div><div align='left' style='width:550px'><br/>证据 vs 验收标准 → 给出路由裁决<br/>裁决：PASS_TO_FINAL / NEXT_ITERATION / BLOCKED</div>"]
+  RF["<div align='center'><strong>reframe（生命周期重开）</strong></div><div align='left' style='width:550px'><br/>仅当 acceptance authority 明确改变 active goal 时触发<br/>记录：REFRAME_REQUESTED（不是 verifier verdict）</div>"]
+
+  AG -->|"契约被 accept 之后"| CL
+  CL --> GV
+  GV --> Pass["完成交付<br/>（通过）"]
+  GV --> Next["继续下一轮<br/>（同目标可修）"]
+  RF -.-> AG
+
+  classDef stage fill:#364150,stroke:#f8fafc,color:#f8fafc,stroke-width:2px;
+  classDef route fill:#364150,stroke:#364150,color:#f8fafc,stroke-width:0px;
+  class AG,CL,GV,RF stage;
+  class Pass,Next route;
+```
+
+```text
+Trigger -> Frame Goal -> Choose DIRECT/PERSIST
+PERSIST -> Confirm accepted Goal Contract -> $executor -> Evidence + checkpoint -> $verifier -> Route -> Next Slice or Final Claim
+Explicit acceptance-authority goal change during an active epoch -> REFRAME_REQUESTED lifecycle handoff -> alpha-goal
 ```
 
 Goal Frame 包含 intent、observable outcome、scope/non-goals、constraints、success signals、observers 和 material decisions；已清晰内容直接来自请求与可归因事实，只向相关 authority 追问最高影响的单个 blocking gap，并仅在授权决定及其 material boundaries、执行/证据后果可确定时闭合。`REFRAME_REQUESTED` 仅表示 acceptance authority 明确改变 active goal 后的 lifecycle handoff，不是 verifier verdict。
 
-`DIRECT` 将完整 Goal Frame 保留在当前上下文，不创建 Alpha Goal 状态，也不调用 `executor` 或 `verifier`。`PERSIST` 维护两个 canonical lifecycle artifacts；checkpoint helper 还会生成原子写协调记录：活动中的 `.lock`、暂存中的 `.pending-*`，以及提交后保留的 `.lock.closed-*` 关闭记录：
+`DIRECT` 将完整 Goal Frame 保留在当前上下文，不创建 Alpha Goal 状态，也不调用 `executor` 或 `verifier`。`PERSIST` 的 canonical lifecycle artifacts 只有 `goal-contract.md` 与 `checkpoint.md`；checkpoint helper 还会生成原子写协调记录：活动中的 `.lock`、暂存中的 `.pending-*`，以及提交后保留的 `.lock.closed-*` 关闭记录。
 
 - `goal-contract.md`：由 `alpha-goal` 独占修改；accepted revision 是 executor、verifier 和可选 native Goal projection 的标准结构化输入。
 - `checkpoint.md`：保留不可变契约 epoch，绑定当前 digest 与状态，并用原子锁及 revision/owner 串行化 `executor`、`verifier` 交接。
 
 路由只看材料性影响、副作用、恢复需求和可验证性；不以置信度、文件数、步骤数、问答轮次或预计时长替代风险判断。
-
-## 公开技能
-
-| Skill | 单一职责 |
-| --- | --- |
-| [`alpha-goal`](skills/alpha-goal/) | 澄清并结构化目标，形成 Goal Frame，选择 `DIRECT / PERSIST`，并在持久路径确认 Goal Contract。 |
-| [`executor`](skills/executor/) | 仅执行已接受的持久契约，维护目标/交付 mutation、原始执行证据和恢复记录。 |
-| [`verifier`](skills/verifier/) | 仅在风险边界或最终状态独立收集验证观察、更新验收条目状态并返回 route。 |
 
 ## 快速开始
 
@@ -46,7 +84,7 @@ node tools/validate_skills.js --fixtures
 
 安装器把三个公开技能复制到所选运行时的独立目录，并同步相应用户模板。完整行为和 smoke 流程见 [INSTALL.md](INSTALL.md)。
 
-通常不需要显式写 skill 名称，直接描述任务即可。需要手动触发时：
+## 使用示例
 
 ```text
 $alpha-goal 根据请求和已发现事实形成 Goal Frame，再判断走 DIRECT 还是 PERSIST。
@@ -54,7 +92,36 @@ $executor 从已接受的 Goal Contract 恢复并执行下一批授权工作。
 $verifier 对当前持久 checkpoint 做风险边界或最终状态验证。
 ```
 
+通常不需要显式写出 skill 名称。正常描述你的需求即可；Alpha Goal 会隐式触发。
+
+## 公开技能
+
+<table>
+  <thead>
+    <tr>
+      <th width="150" align="left">Skill</th>
+      <th align="left">作用</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td width="180" align="left"><a href="skills/alpha-goal/"><code>alpha-goal</code></a></td>
+      <td align="left">在开始工作前聚焦澄清意图、边界、验收证据，形成 Goal Frame，并在需要持久闭环时产出待确认 Goal Contract。</td>
+    </tr>
+    <tr>
+      <td width="180" align="left"><a href="skills/executor/"><code>executor</code></a></td>
+      <td align="left">执行已接受契约内的授权 batch；<code>goal-contract.md</code> 是权威输入，<code>checkpoint.md</code> 记录 mutation、原始执行证据与交接状态。</td>
+    </tr>
+    <tr>
+      <td width="180" align="left"><a href="skills/verifier/"><code>verifier</code></a></td>
+      <td align="left">对 fresh evidence 做独立验证，更新 criterion 状态，并输出 <code>PASS_TO_FINAL</code> / <code>NEXT_ITERATION</code> / <code>BLOCKED</code>。</td>
+    </tr>
+  </tbody>
+</table>
+
 ## 设计原则
+
+Alpha Goal 让 agent 工作保持目标明确、行动有界、声明受证据约束。
 
 - 先发现事实，再处理由用户或其他授权来源拥有的材料性决策；现有代码不能自行定义期望行为。
 - 已知不可行、required observer 不可用、claim surface 未标识或 prerequisite 未满足时，Goal Contract 必须保持 `draft`；`BLOCKED` 只表示 accepted 前提在运行期被新事实推翻。
