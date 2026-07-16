@@ -29,7 +29,7 @@ Claude tool-name adaptation lives in `skills/alpha-goal/references/claude-adapte
 - `templates/AGENTS.md` and `templates/CLAUDE.md` carry the materiality-based autonomy boundary.
 - `templates/config.toml` declares structured-input and multi-agent defaults. The installer fills missing keys but preserves existing values, including explicit disables; skill behavior still detects whether each capability is exposed.
 - `templates/hooks.json` defines one matcher-free `PostCompact` hook with marker `codex-alpha-goal-compact-recovery:v3`.
-- Recovery uses only an explicit artifact path already present in task context. A checkpoint validates its current contract epoch and resumes only from top-level `active_owner`; historical routes never override the current handoff. An explicit goal change uses direct `reframe` ownership, then a same-task accepted revision uses guarded epoch supersession; verifier never changes authority. Terminal PASS rechecks identity/freshness, and later mutations resume `executor`. A lone accepted contract must have a valid authority digest. Recovery never guesses the active task from directory recency.
+- Recovery uses only an explicit artifact path already present in task context. Recovery reads the checkpoint-recorded current contract epoch and resumes only from top-level `active_owner`; historical routes never override the current handoff. An explicit goal change uses direct `reframe` ownership, then a newly accepted same-task payload uses owner/revision-guarded epoch supersession; verifier never changes authority. Terminal PASS rechecks identity/freshness, and later mutations resume `executor`. A lone accepted contract must have a valid authority digest. Recovery never guesses the active task from directory recency.
 - Hook replacement uses the marker family, so the current v3 template replaces other managed numbered versions and the experimental family while preserving unmanaged hooks.
 
 ## Runtime artifacts
@@ -39,7 +39,7 @@ Canonical lifecycle artifacts exist only for `PERSIST`; the checkpoint helper al
 | Path | Condition and owner |
 | --- | --- |
 | `<state-root>/YYYYMMDD-<task>/goal-contract.md` | Draft/accepted authority contract with accepted authority-payload digest; only `alpha-goal` modifies it. |
-| `<state-root>/YYYYMMDD-<task>/checkpoint.md` | Created after acceptance; retains immutable contract epochs, binds the current digest/state, carries atomic write control, and partitions sequential executor/verifier fields. |
+| `<state-root>/YYYYMMDD-<task>/checkpoint.md` | Created after acceptance; records contract epochs and the current digest/state, carries atomic write control, and partitions sequential executor/verifier fields. |
 
 `DIRECT` does not resolve this state root or create either artifact.
 

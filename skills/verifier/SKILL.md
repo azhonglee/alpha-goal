@@ -9,7 +9,7 @@ Decide whether bound state satisfies the accepted contract.
 
 ## Validate Entry and Evidence
 
-- Require the accepted contract, its attributable acceptance-time Completeness snapshot, current revision/digest, bound checkpoint epoch, and `active_owner: verifier`. Current authority-retained material-design and touched-risk observer/recovery completeness is required for contracts entering through a new checkpoint. An earlier accepted payload lacking current rows may continue only when the current checkpoint already binds the same task, `contract_revision`, and accepted digest; infer no new authority and reject unresolved gaps already present. New attributable post-acceptance invalidation is classified below, not treated as an entry defect.
+- Require the accepted contract, its attributable acceptance-time Completeness snapshot, current accepted digest, bound checkpoint epoch, and `active_owner: verifier`. Current authority-retained material-design and touched-risk observer/recovery completeness is required for contracts entering through a new checkpoint. An earlier accepted payload lacking current rows may continue only when the current checkpoint records the same task and accepted digest; infer no new authority and reject unresolved gaps already present. New attributable post-acceptance invalidation is classified below, not treated as an entry defect.
 - Resolve `<alpha-goal-root>` and `<executor-root>` from their selected `SKILL.md` locations, never CWD. Recompute with `node <alpha-goal-root>/scripts/authority-digest.js <absolute-contract-path>`; reject an invalid binding without a verification verdict.
 - Inspect actual target, delivery, and dependencies.
 - Re-observe evidence; claim separate-agent independence only when an isolated verifier performed it.
@@ -30,7 +30,7 @@ For empty/partial/suspicious results, continue safe non-mutating observation whi
 
 ## Verify and Write
 
-1. Re-read contract/checkpoint binding, digest, revision, owner, and actual drift.
+1. Re-read recorded contract/checkpoint identity, accepted digest, checkpoint revision/owner, and actual drift.
 2. Collect required observers after the latest relevant mutation and within freshness.
 3. Classify every criterion/gap; entry integrity failures produce no verdict, otherwise post-acceptance blocker outranks fixable work.
 4. Resolve `<executor-root>` from selected `executor/SKILL.md`, then open the chosen route:
@@ -39,7 +39,7 @@ For empty/partial/suspicious results, continue safe non-mutating observation whi
 node <executor-root>/scripts/checkpoint-lock.js verify <absolute-checkpoint-path> <expected-revision> <PASS_TO_FINAL|NEXT_ITERATION|BLOCKED>
 ```
 
-5. Parse the returned JSON `token` and `pendingPath`; never construct the pending path. Re-read the pre-write checkpoint. On mismatch or abandonment, run `abort <checkpoint> <token>` and reload. Otherwise write the complete next checkpoint to `pendingPath`, updating only verifier fields, incrementing revision once, recording identity/evidence/gap/route, and setting the route owner last.
+5. Parse the returned JSON `token` and `pendingPath`; never construct the pending path. Re-read the pre-write checkpoint. On mismatch or abandonment, run `abort <checkpoint> <token>` and reload. Otherwise write the complete next checkpoint to `pendingPath`, updating only verifier fields, incrementing `checkpoint_revision` once, recording identity/evidence/gap/route, and setting `active_owner` last.
 6. Run `commit <checkpoint> <token>`. Success publishes and closes the lock; do not release.
 
 Before recovery, run `status <checkpoint>` and parse its JSON `phase` and `recoverableBy`. After proving the writer stopped, recover only when the verifier is listed, using the held token with `recover <checkpoint> <token> verifier`; otherwise wait/report. Pending records never block.

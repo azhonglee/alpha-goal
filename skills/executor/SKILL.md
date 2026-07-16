@@ -9,30 +9,30 @@ Deliver the accepted outcome within its authority boundary.
 
 ## Validate Entry
 
-- Require canonical `goal-contract.md` with `status: accepted`, current Acceptance Completeness showing available observers, identified claim surfaces, satisfied prerequisites, current feasibility basis and no blocking gaps, a matching Confirmation Record, and `accepted_authority_sha256`. A first handoff or checkpoint initialization requires explicit complete authority-retained material-design and touched-risk observer/recovery rows. An earlier accepted payload lacking current rows may resume only through an existing checkpoint already bound to the same task, `contract_revision`, and accepted digest; it gains no inferred authority and still rejects unresolved gaps already present.
+- Require canonical `goal-contract.md` with `status: accepted`, current Acceptance Completeness showing available observers, identified claim surfaces, satisfied prerequisites, current feasibility basis and no blocking gaps, a matching Confirmation Record, and `accepted_authority_sha256`. A first handoff or checkpoint initialization requires explicit complete authority-retained material-design and touched-risk observer/recovery rows. An earlier accepted payload lacking current rows may resume only through an existing checkpoint whose recorded task and accepted digest match; it gains no inferred authority and still rejects unresolved gaps already present.
 - Resolve `<alpha-goal-root>` from the selected `alpha-goal/SKILL.md`, never CWD. Recompute with `node <alpha-goal-root>/scripts/authority-digest.js <absolute-contract-path>`; reject an invalid binding before execution without creating a verifier verdict.
 - Inspect instructions, workspace/repositories, worktree/branch, unrelated changes, tools, dependencies, delivery surfaces, and rollback.
-- Reject another task, workspace, worktree, branch, or repository-set checkpoint. Only the guarded same-task prior-revision path below may advance.
+- Reject another task, workspace, worktree, branch, or repository-set checkpoint. Only the guarded same-task supersession path below may advance.
 - If the acceptance authority explicitly changes the goal during an active epoch, stop target writes, record the source/change/current identity, and use the direct `reframe` lifecycle handoff; do not route through `verifier` or edit the contract.
 - Correct only executor-owned clerical metadata when contract identity and execution context already match.
 
 ## Checkpoint and Ownership
 
-Each accepted revision is one immutable checkpoint epoch. Resolve `<executor-root>` from selected `executor/SKILL.md`, never CWD. Initialize with:
+Represent each accepted authority payload as one checkpoint epoch. Resolve `<executor-root>` from selected `executor/SKILL.md`, never CWD. Initialize with:
 
 ```text
 node <executor-root>/scripts/checkpoint-lock.js init <absolute-checkpoint-path>
 ```
 
-Use JSON `token`/`pendingPath`; never derive the path. Write the initial checkpoint there, then `commit <checkpoint> <token>` to publish/unlock. Record schema, checkpoint/state revision `0`, epoch `1`, owner `executor`, contract/execution identity, criterion observers/freshness/invalidation, and empty records.
+Use JSON `token`/`pendingPath`; never derive the path. Write the initial checkpoint there, then `commit <checkpoint> <token>` to publish/unlock. Record schema, checkpoint/state revision `0`, epoch `1`, owner `executor`, recorded contract/execution identity, criterion observers/freshness/invalidation, and empty records.
 
-- `executor` owns binding, state revision, batches, mutations, raw evidence, rollback/recovery, attempts, and unclassified execution gaps.
+- `executor` owns recorded contract/execution identity, state revision, batches, mutations, raw evidence, rollback/recovery, attempts, and unclassified execution gaps.
 - `verifier` owns verification observations, evidence mapping/classification, criterion status, gap cause, observed identity, and route verdict.
 - `checkpoint_revision` and `active_owner` are shared write control; only the exclusive current owner writes them with its own fields.
 
 ### Supersede an Epoch
 
-`executor` may append a new current epoch only when task/context match; the prior origin is `REFRAME_REQUESTED`/`alpha-goal`, or terminal `PASS_TO_FINAL|BLOCKED`/`caller` plus an explicit terminal revision request; and the contract is accepted at exactly the next revision with a valid digest.
+`executor` may append a new current epoch only when task/context match; the prior origin is `REFRAME_REQUESTED`/`alpha-goal`, or terminal `PASS_TO_FINAL|BLOCKED`/`caller` plus an explicit terminal change request; and the canonical contract has a newly accepted authority payload with a valid digest distinct from the checkpoint-recorded digest. This detects content replacement but does not claim historical anti-replay without an immutable history anchor.
 
 Open that transition with `supersede <checkpoint> <expected-revision>`. Read its JSON `token` and `pendingPath`, then use the abort/commit protocol below. Under lock, recheck the guards; keep the old epoch unchanged; append the new binding/criteria without verifier verdict; retain `state_revision`; increment `checkpoint_revision`; set owner `executor`. Prior evidence is stale until re-observed. Any mismatch blocks supersession.
 
@@ -46,7 +46,7 @@ For an executor write, choose its post-commit owner and run:
 node <executor-root>/scripts/checkpoint-lock.js execute <absolute-checkpoint-path> <expected-revision> <executor|verifier>
 ```
 
-Use JSON `token`/`pendingPath`. Re-read the checkpoint; on mismatch/abandonment, abort and reload. Otherwise write the complete successor there, changing only executor fields, incrementing revision once, and setting owner last. `commit <checkpoint> <token>` publishes/unlocks.
+Use JSON `token`/`pendingPath`. Re-read the checkpoint; on mismatch/abandonment, abort and reload. Otherwise write the complete successor there, changing only executor fields, incrementing `checkpoint_revision` once, and setting `active_owner` last. `commit <checkpoint> <token>` publishes/unlocks.
 
 Before recovery, read `phase`/`recoverableBy` from `status`. After proving the writer stopped, recover only as a listed actor; otherwise wait/report. Pending records never block.
 

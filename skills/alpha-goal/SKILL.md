@@ -66,7 +66,7 @@ Before confirmation, map criteria to currently available observers; identify eve
 
 Present the Goal Frame, boundaries, criteria, evidence, and residual risk. When authority-retained material design is touched, also present its dimensions, interface/data changes, risk-to-observer/test-plan mapping, and rollback/recovery treatment. Accept only an explicit decision from the recorded acceptance authority; silence, history, a spec, or desired-behavior authority does not grant side-effect authority or acceptance.
 
-- On accept, complete Acceptance Completeness and the Confirmation Record, compute the authority-payload digest, set `status: accepted` last, and hand the canonical contract to `executor`; this adds no revision.
+- On accept, complete Acceptance Completeness and the Confirmation Record, compute the authority-payload digest, set `status: accepted` last, and hand the canonical contract to `executor`.
 - On refine/reject, remain `draft` and do not mutate the target.
 
 ## Capability-Conditional Aids

@@ -62,8 +62,8 @@ A Goal Frame contains intent, observable outcome, scope/non-goals, constraints, 
 
 `DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state, and does not call `executor` or `verifier`. For `PERSIST`, the only canonical lifecycle artifacts are `goal-contract.md` and `checkpoint.md`; the checkpoint helper also creates atomic-write coordination records: active `.lock`, staged `.pending-*`, and best-effort-cleaned `.lock.closed-*` atomic-unlock tombstones.
 
-- `goal-contract.md`: written only by `alpha-goal`; its accepted revision is standard structured input to executor and verifier.
-- `checkpoint.md`: retains immutable contract epochs, binds the current digest and state, and serializes executor/verifier handoff with atomic revision/owner control.
+- `goal-contract.md`: written only by `alpha-goal`; its accepted authority payload is standard structured input to executor and verifier.
+- `checkpoint.md`: records the current contract digest, epoch, and state, and serializes executor/verifier handoff with atomic `checkpoint_revision`/`active_owner` control.
 
 Routing uses material impact, side effects, recovery needs, and verifiability. Confidence, file count, step count, question count, and estimated duration are not risk proxies.
 

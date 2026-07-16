@@ -62,8 +62,8 @@ Goal Frame 包含 intent、observable outcome、scope/non-goals、constraints、
 
 `DIRECT` 将完整 Goal Frame 保留在当前上下文，不创建 Alpha Goal 状态，也不调用 `executor` 或 `verifier`。`PERSIST` 的 canonical lifecycle artifacts 只有 `goal-contract.md` 与 `checkpoint.md`；checkpoint helper 还会生成原子写协调记录：活动中的 `.lock`、暂存中的 `.pending-*`，以及原子解锁后尽力清理的 `.lock.closed-*` 临时墓碑。
 
-- `goal-contract.md`：由 `alpha-goal` 独占修改；accepted revision 是 executor 和 verifier 的标准结构化输入。
-- `checkpoint.md`：保留不可变契约 epoch，绑定当前 digest 与状态，并用原子锁及 revision/owner 串行化 `executor`、`verifier` 交接。
+- `goal-contract.md`：由 `alpha-goal` 独占修改；accepted authority payload 是 executor 和 verifier 的标准结构化输入。
+- `checkpoint.md`：记录当前契约 digest、epoch 与状态，并用原子锁及 `checkpoint_revision`/`active_owner` 串行化 `executor`、`verifier` 交接。
 
 路由只看材料性影响、副作用、恢复需求和可验证性；不以置信度、文件数、步骤数、问答轮次或预计时长替代风险判断。
 

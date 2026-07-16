@@ -45,12 +45,12 @@
     {
       "id": "RB09",
       "scenario": "The acceptance authority confirms the first draft and alpha-goal fills its Confirmation Record.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Acceptance is allowed only after observers, claim surfaces, prerequisites, feasibility basis, authority, and evidence are complete; confirmation, digest, and status then form one transaction without an extra revision." }
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Acceptance is allowed only after observers, claim surfaces, prerequisites, feasibility basis, authority, and evidence are complete; confirmation, digest, and status then form one acceptance transaction." }
     },
     {
       "id": "RB10",
-      "scenario": "Authority changes either during an active executor/verifier epoch or after a terminal PASS/BLOCKED epoch, then the same task is accepted at exactly the next revision.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Active work records an explicit REFRAME_REQUESTED lifecycle handoff directly to alpha-goal without a verifier verdict; terminal work records an explicit revision request. Executor preserves the old epoch and appends a fresh one." }
+      "scenario": "Authority changes either during an active executor/verifier epoch or after a terminal PASS/BLOCKED epoch, then the same task receives a newly accepted authority payload.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Active work records an explicit REFRAME_REQUESTED lifecycle handoff directly to alpha-goal without a verifier verdict; terminal work records an explicit change request. Executor preserves the old epoch and appends a fresh one." }
     },
     {
       "id": "RB11",
@@ -119,8 +119,8 @@
     },
     {
       "id": "RB24",
-      "scenario": "Modify only Scope inside an accepted contract while preserving revision and status.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Recomputed authority digest detects the same-revision tamper and rejects entry before execution or a verification verdict." }
+      "scenario": "Modify only Scope inside an accepted contract while preserving status and the recorded digest.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Recomputed authority digest detects the payload tamper and rejects entry before execution or a verification verdict." }
     },
     {
       "id": "RB25",
@@ -159,8 +159,8 @@
     },
     {
       "id": "RB32",
-      "scenario": "A first handoff omits current material-design/touched-risk completeness, while a separate legacy contract is already bound by an existing checkpoint to the same task, contract_revision, and accepted digest.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Reject incomplete content for new initialization or first handoff. Permit the earlier accepted payload to continue only through its exactly bound existing checkpoint, without inferring missing authority or changing its digest-covered historical metadata." }
+      "scenario": "A first handoff omits current material-design/touched-risk completeness, while a separate legacy contract is recorded by an existing checkpoint with the same task and accepted digest.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Reject incomplete content for new initialization or first handoff. Permit the earlier accepted payload to continue only through its matching existing checkpoint, without inferring missing authority or changing its digest-covered historical metadata." }
     },
     {
       "id": "RB33",

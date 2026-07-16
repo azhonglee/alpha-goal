@@ -81,7 +81,7 @@
           "owner": "alpha-goal"
         },
         {
-          "name": "confirmation-revision-and-authority-digest",
+          "name": "confirmation-change-basis-and-authority-digest",
           "owner": "alpha-goal"
         }
       ]
@@ -91,7 +91,7 @@
       "condition": "accepted PERSIST contract during execution and verification",
       "sections": [
         {
-          "name": "binding-state-revision-write-control-and-contract-epochs",
+          "name": "recorded-contract-identity-state-revision-write-control-and-epochs",
           "owner": "executor"
         },
         {

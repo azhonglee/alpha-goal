@@ -5,10 +5,10 @@ For `PERSIST` or an explicit goal reframe, `alpha-goal` alone writes canonical `
 ## Lifecycle and Integrity
 
 - `draft`: clarification or confirmation is incomplete; target mutation is unauthorized.
-- `accepted`: the recorded acceptance authority has confirmed a revision with no known infeasibility, unavailable required observer, unidentified claim surface, unmet prerequisite, or blocking gap.
-- Never edit an accepted authority payload in place. `alpha-goal` may create the next `draft` revision only after an explicit acceptance-authority goal change or same-goal revision request and when no `executor`/`verifier` write ownership remains. Increment `contract_revision` once and invalidate prior verdicts; further edits while that revision remains draft, including its Confirmation Record, do not increment it again.
+- `accepted`: the recorded acceptance authority has confirmed the authority payload with no known infeasibility, unavailable required observer, unidentified claim surface, unmet prerequisite, or blocking gap.
+- Never edit an accepted authority payload in place. After an explicit acceptance-authority goal change or same-goal change request, and only when no `executor`/`verifier` write ownership remains, return the canonical contract to `draft`, replace the authority payload, and invalidate prior verdicts. Further draft edits, including its Confirmation Record, remain part of that pending acceptance.
 - Mark the authority payload with the exact boundary comments in the template. Resolve `<alpha-goal-root>` as the directory containing the selected `alpha-goal/SKILL.md`; never resolve from the workspace or process CWD. On acceptance, run `node <alpha-goal-root>/scripts/authority-digest.js <absolute-goal-contract-path>` and record its SHA-256 as `accepted_authority_sha256`.
-- `executor` and `verifier` recompute that digest on entry. A mismatch or missing digest invalidates acceptance and blocks use of the contract. New contracts bind `contract_revision` inside the authority payload. Contract compatibility is content-based rather than format-number-based: a first handoff or new checkpoint requires all current mandatory rows, while an earlier accepted payload lacking them may resume only through an existing checkpoint bound to the same task, revision, and accepted digest; it gains no inferred authority. Extra legacy metadata remains inert and digest-covered.
+- `executor` and `verifier` recompute that digest on entry. A mismatch or missing digest invalidates acceptance and blocks use of the contract. The accepted authority digest identifies payload content; it does not prove ordering, historical uniqueness, or acceptance authenticity. A first handoff or new checkpoint requires all current mandatory rows, while an earlier accepted payload lacking them may resume only through an existing checkpoint whose recorded task and accepted digest match; it gains no inferred authority. Extra legacy metadata remains inert and digest-covered.
 
 ## Minimum Contract
 
@@ -17,7 +17,6 @@ For `PERSIST` or an explicit goal reframe, `alpha-goal` alone writes canonical `
 
 status: draft
 <!-- authority-payload:start -->
-contract_revision: 1
 persistence_trigger:
 - <observed condition that requires persistence>
 workspace_identity: <canonical workspace identity>
@@ -25,7 +24,7 @@ workspace_identity: <canonical workspace identity>
 ## Authorization Source
 - Desired behavior authority: <who/source>
 - Side-effect authority: <who may authorize which effects>
-- Acceptance authority: <who may accept this revision>
+- Acceptance authority: <who may accept this payload>
 - Source precedence: <task-level conflicts only; never override higher-priority instructions or tool policy>
 
 ## Intent and Observable Outcome
@@ -75,7 +74,7 @@ Include only authority-retained decisions that can change behavior, interfaces/A
 ## Confirmation Record
 - Decision: <accepted | refined | rejected>
 - Source and date: <explicit acceptance authority decision>
-- Revision basis: <initial | explicit active-goal change | explicit same-goal revision request>
+- Change basis: <initial | explicit active-goal change | explicit same-goal change request>
 - Conditions: <explicit conditions or none>
 <!-- authority-payload:end -->
 
