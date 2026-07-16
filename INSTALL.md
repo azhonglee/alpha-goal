@@ -42,7 +42,7 @@ Use `--uninstall` to enter the interactive uninstall flow. The selected target c
 
 Uninstall is conservative outside the managed copied-skill path. It removes only managed Markdown blocks, managed hooks, `config.toml` that byte-for-byte matches `templates/config.toml`, skill copies with the install marker, and skill symlinks that resolve to this repository. Mixed user Markdown keeps user content, mixed or modified `config.toml` is preserved, unmanaged hooks are preserved, configuration symlinks are not followed or deleted, and unmanaged skill directories or external symlinks are preserved. The interactive cleanup prompts control whether Markdown/config and hook cleanup run.
 
-The compact recovery hook definition lives in `templates/hooks.json`. It is a `PostCompact` hook without a matcher and must not set matcher. It reloads from an explicit current artifact path, verifies bindings, and maps checkpoint owner/routes including terminal states before resuming.
+The compact recovery hook definition lives in `templates/hooks.json`. It is a `PostCompact` hook without a matcher and must not set matcher. It reloads only from an explicit current artifact path and delegates binding, owner, recovery, and supersession decisions to the checkpoint helper and selected skills instead of duplicating their protocol.
 
 Hook replacement is keyed by marker family. The current v3 template replaces other managed numbered versions in that family before it is added. The installer also removes the experimental `codex-compact-skill-recovery` family and preserves unmanaged hooks.
 
@@ -364,12 +364,12 @@ test ! -e "$tmp_codex/.claude/skills/alpha-goal"
 ! grep -q "references/claude-adapter.md" "$tmp_codex/.codex/skills/alpha-goal/SKILL.md"
 python3 -m json.tool "$tmp_codex/.codex/hooks.json" >/dev/null
 grep -q "codex-alpha-goal-compact-recovery:v3" "$tmp_codex/.codex/hooks.json"
-grep -q "For checkpoint.md" "$tmp_codex/.codex/hooks.json"
-grep -q "Resume only from top-level active_owner" "$tmp_codex/.codex/hooks.json"
-grep -q "guarded exact-next-revision epoch supersession" "$tmp_codex/.codex/hooks.json"
-grep -q "REFRAME_REQUESTED/alpha-goal" "$tmp_codex/.codex/hooks.json"
-grep -q "caller reports BLOCKED or rechecks PASS_TO_FINAL" "$tmp_codex/.codex/hooks.json"
-grep -q "accepted with valid Acceptance Completeness and authority digest loads executor" "$tmp_codex/.codex/hooks.json"
+grep -q "Use only an explicit current artifact path" "$tmp_codex/.codex/hooks.json"
+grep -q "Follow top-level active_owner" "$tmp_codex/.codex/hooks.json"
+grep -q "current route only validates owner, historical routes are ignored" "$tmp_codex/.codex/hooks.json"
+grep -q "caller reports BLOCKED or rechecks PASS identity/freshness" "$tmp_codex/.codex/hooks.json"
+grep -q "Supersede only from explicit current context" "$tmp_codex/.codex/hooks.json"
+grep -q "accepted with valid completeness/digest loads executor" "$tmp_codex/.codex/hooks.json"
 ! grep -q "technical_design.md" "$tmp_codex/.codex/hooks.json"
 grep -q "checkpoint.md" "$tmp_codex/.codex/hooks.json"
 codex_repeat_output="$(run_installer "$tmp_codex")"
