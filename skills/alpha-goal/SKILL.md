@@ -73,13 +73,3 @@ Present the Goal Frame, boundaries, criteria, evidence, and residual risk. When 
 
 - Delegate independent read-heavy investigation, review, or evidence reruns. Parallelize independent reads; sequence dependent decisions; synthesize before acting.
 - Investigation agents never write shared artifacts. A verifier agent writes only verifier-owned checkpoint fields after exclusive handoff.
-
-## Reopen an Accepted Contract
-
-Reopen only in one of these states:
-
-- no checkpoint exists;
-- an active epoch has been handed to `alpha-goal` after the acceptance authority explicitly changed the goal and the prior `executor` or `verifier` owner recorded `REFRAME_REQUESTED`, source/change/current identity, and unverified mutations;
-- no active `executor`/`verifier` handoff remains, and the acceptance authority explicitly requests a revision of the same goal.
-
-Record the revision basis, set the contract `draft`, increment its accepted revision once, invalidate prior verdicts, and require confirmation again. If a checkpoint exists, leave its prior epoch immutable and let `executor` supersede it after acceptance; otherwise `executor` initializes one. `REFRAME_REQUESTED` is lifecycle handoff, never a verification route. Invalid bindings are rejected without verdict. New attributable post-acceptance facts that invalidate accepted feasibility, prerequisites/dependencies, authority boundary, material-design coverage, touched-risk/recovery mapping, observers, or claim surfaces are `BLOCKED` when no currently authorized path remains; they do not reopen the goal.
