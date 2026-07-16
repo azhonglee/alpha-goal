@@ -69,8 +69,8 @@
     },
     {
       "id": "RB14",
-      "scenario": "After acceptance, a newly discovered runtime constraint invalidates the documented feasible path and no authorized alternative remains.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "Known infeasibility would have kept the contract draft; only a post-acceptance invalidation produces BLOCKED without changing the goal." }
+      "scenario": "After acceptance, a newly discovered runtime constraint or material design dimension invalidates the documented feasible or authorized path; alternatives may exist, but none is currently authorized.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "Known incompleteness would have kept the contract draft; new attributable post-acceptance invalidation of feasibility, authority, design, risk/recovery, observer, or claim coverage is BLOCKED without reframing the goal." }
     },
     {
       "id": "RB15",
@@ -141,6 +141,26 @@
       "id": "RB28",
       "scenario": "A required observer was attributable and available at acceptance but becomes unavailable after execution, with no authorized alternative.",
       "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "Unavailable evidence known before acceptance would keep the contract draft; post-acceptance observer invalidation is BLOCKED and verifier does not redefine the claim." }
+    },
+    {
+      "id": "RB29",
+      "scenario": "A `contract_format: 2` persistent API and data migration has identified touched interfaces, compatibility risk, and rollback needs, but the Goal Contract records no authorized material-design decisions for them.",
+      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "The contract remains draft: every authority-retained material design decision needs an authorized boundary with decision source/date, execution/observer consequence, risk/recovery treatment, and covered or explicitly non-material/deferred status; executor-owned mechanics remain delegated before acceptance or mutation." }
+    },
+    {
+      "id": "RB30",
+      "scenario": "A Goal Contract contains material interface, data, test-risk, and rollback decisions, but the acceptance request summarizes only the high-level outcome and criteria.",
+      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Do not accept until the recorded acceptance authority is shown the authority-retained design dimensions, interface/data changes, risk-to-observer/test-plan mapping, rollback/recovery treatment, boundaries, criteria, and residual risk in the confirmation summary." }
+    },
+    {
+      "id": "RB31",
+      "scenario": "A broad optimization request names a symptom, while inspection leaves the causal claim uncertain and a smaller viable scope could materially change execution and evidence.",
+      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Investigate problem validity, causal reliability, and root-cause evidence as discoverable facts; keep the gap blocking when those facts or a smaller viable scope could change the goal, ask the authority only for the resulting scope/outcome/claim decision, and do not mutate after a shallow symptom-level answer." }
+    },
+    {
+      "id": "RB32",
+      "scenario": "A contract has a matching digest but an unsupported present contract_format, or omits contract_format during a first handoff with no already-bound checkpoint.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Reject unsupported formats and reject missing format for new initialization or first handoff. Only a missing-format contract already bound by an existing checkpoint to the same task, revision, and accepted digest is legacy-readable, without inferred authority." }
     }
   ]
 }

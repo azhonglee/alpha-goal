@@ -121,4 +121,4 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 - PASS binds to the target and delivery state actually observed; a later mutation invalidates it.
 - Volatile evidence records observation time and invalidation conditions; unidentified mutable surfaces cannot support an exact-binding claim.
 - The Goal Contract is standard structured input; a native Goal is only a capability-conditional lifecycle projection bound to its path/revision/digest.
-- `tools/evals/runtime-boundaries.json` preserves 28 static expected-boundary cases; schema validation is not runtime evidence.
+- `tools/evals/runtime-boundaries.json` preserves 32 static expected-boundary cases; schema validation is not runtime evidence.

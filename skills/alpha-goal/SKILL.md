@@ -26,8 +26,15 @@ Repeat only while the Goal Frame has a blocking gap:
 
 1. Select the highest-impact gap by authority ownership, blast radius, irreversibility, behavior/interface/data impact, acceptance ambiguity, and rollback risk.
 2. Ask the relevant authority for one decision variable. State discovered facts, why it matters, real options when useful, and a recommendation; never ask for discoverable facts.
-3. Check the answer against one concrete boundary, counterexample, or failure case. Record only consequences entailed by the answer and attributable facts; if another reasonable reading changes execution or evidence materially, ask the smallest follow-up on the same gap.
-4. Close only when the authorized decision and all material boundaries and execution/evidence consequences are determined. Reprioritize if the answer exposes a higher-impact gap. Mark non-material only when no authorized answer could change the Goal Frame or route; defer only when the relevant authority explicitly excludes the affected outcome, claim, or side effect from scope.
+3. Pressure-test the answer:
+   - Check one concrete boundary, counterexample, or failure case.
+   - For repair, optimization, or symptom-level goals, investigate problem validity, causal reliability, and root-cause evidence as discoverable facts.
+   - If those facts or a smaller viable scope could materially change the goal, keep the gap blocking and ask the authority only for the resulting scope, outcome, or claim decision.
+   - Record only consequences entailed by the answer and attributable facts; if another reasonable reading changes execution or evidence materially, ask the smallest follow-up on the same gap.
+4. Close only when the authorized decision and all material boundaries and execution/evidence consequences are determined:
+   - Reprioritize if the answer exposes a higher-impact gap.
+   - Mark non-material only when no authorized answer could change the Goal Frame or route.
+   - Defer only when the relevant authority explicitly excludes the affected outcome, claim, or side effect from scope.
 5. Update the Goal Frame and stop when no blocking gap remains. Never use a fixed questionnaire, confidence, or round count as completion evidence.
 
 ## Choose the Route
@@ -49,18 +56,18 @@ For `PERSIST`, resolve `$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/
 
 - Read `references/goal-contract-book.md`; create canonical `goal-contract.md` as `draft` and expand the Goal Frame with authority, side-effect, decision, claim, evidence, freshness, and invalidation boundaries.
 - Only the relevant authority may defer a goal item. No blocking gap may reach confirmation, handoff, or target mutation.
-- Keep material design, rollout, rollback, acceptance, mutable surfaces, and observers in this contract, not a second authority artifact.
+- Keep material design, rollout, rollback, acceptance, mutable surfaces, and observers in this contract, not a second authority artifact. For every authority-retained material design decision, record its boundary, execution/observer consequence, risk/recovery treatment, and status; leave executor-owned mechanics to `executor`.
 
 ## Confirm and Handoff
 
-Before confirmation, map criteria to currently available observers; identify every claim surface and prerequisite; check source conflicts, side-effect authority, freshness, and test the highest-impact assumption with a counterexample/failure case. Keep `draft` while any known infeasibility, unavailable observer, unidentified claim surface, unmet prerequisite, or unresolved material finding remains. For cross-cutting/high-risk work, request independent read-only review from raw artifacts and await/cancel it.
+Before confirmation, map criteria to currently available observers; identify every claim surface and prerequisite; complete all authority-retained material design decisions and their risk/observer treatment; check source conflicts, side-effect authority, freshness, and test the highest-impact assumption with a counterexample/failure case. Keep `draft` while any known infeasibility, unavailable observer, unidentified claim surface, unmet prerequisite, incomplete authority-retained material-design coverage, or unresolved material finding remains. For cross-cutting/high-risk work, request independent read-only review from raw artifacts and await/cancel it.
 
 Before editing an accepted payload:
 
 - if its checkpoint is owned by `executor` or `verifier`, edit only after an explicit acceptance-authority goal change makes that owner record `REFRAME_REQUESTED` and hand lifecycle ownership directly to `alpha-goal`;
 - reopen directly only with no checkpoint, a reframed `alpha-goal` epoch, or terminal `PASS_TO_FINAL`/`BLOCKED` plus an explicit acceptance-authority revision request; record the supersession basis.
 
-Present the Goal Frame, boundaries, criteria, evidence, and residual risk. Accept only an explicit decision from the recorded acceptance authority; silence, history, a spec, or desired-behavior authority does not grant side-effect authority or acceptance.
+Present the Goal Frame, boundaries, criteria, evidence, and residual risk. When authority-retained material design is touched, also present its dimensions, interface/data changes, risk-to-observer/test-plan mapping, and rollback/recovery treatment. Accept only an explicit decision from the recorded acceptance authority; silence, history, a spec, or desired-behavior authority does not grant side-effect authority or acceptance.
 
 - On accept, complete Acceptance Completeness and the Confirmation Record, compute the authority-payload digest, set `status: accepted` last, and hand the canonical contract to `executor`; this adds no revision.
 - On refine/reject, remain `draft` and do not mutate the target.
@@ -77,4 +84,4 @@ The accepted Goal Contract is canonical input to `executor`, `verifier`, and nat
 
 ## Reframe a Changed Goal
 
-Only an explicit acceptance-authority goal change re-enters clarification during an active epoch. The current `executor` or `verifier` owner stops work, records `REFRAME_REQUESTED`, the source/change/current identity and unverified mutations, then hands directly to `alpha-goal`; this is not a verification route. Leave that checkpoint immutable, reopen the contract as `draft`, and after explicit acceptance let `executor` supersede the epoch. Known gaps never reach acceptance; invalid bindings are rejected without verdict, and only post-acceptance invalidation of the accepted feasibility basis, prerequisite/dependency, observer, or identified claim surface is `BLOCKED`.
+Only an explicit acceptance-authority goal change re-enters clarification during an active epoch. The current `executor` or `verifier` owner stops work, records `REFRAME_REQUESTED`, the source/change/current identity and unverified mutations, then hands directly to `alpha-goal`; this is not a verification route. Leave that checkpoint immutable, reopen the contract as `draft`, and after explicit acceptance let `executor` supersede the epoch. Known gaps never reach acceptance; invalid bindings are rejected without verdict. New attributable post-acceptance facts that invalidate the accepted feasibility basis, prerequisite/dependency, authority boundary, material-design coverage, touched-risk/recovery mapping, observer, or identified claim surface are `BLOCKED` when no currently authorized path remains; they do not reframe the goal.

@@ -9,7 +9,7 @@ Deliver the accepted outcome within its authority boundary.
 
 ## Validate Entry
 
-- Require canonical `goal-contract.md` with `status: accepted`, current Acceptance Completeness showing available observers, identified claim surfaces, satisfied prerequisites, current feasibility basis and no blocking gaps, a matching Confirmation Record, and `accepted_authority_sha256`.
+- Require canonical `goal-contract.md` with `status: accepted`, current Acceptance Completeness showing available observers, identified claim surfaces, satisfied prerequisites, current feasibility basis and no blocking gaps, a matching Confirmation Record, and `accepted_authority_sha256`. Require `contract_format: 2` with explicit complete authority-retained material-design and touched-risk observer/recovery rows. Reject unsupported present values. A missing format may resume only through an existing checkpoint already bound to the same task, revision, and accepted digest; it cannot initialize a new checkpoint or first handoff, gains no inferred authority, and still rejects unresolved gaps already present.
 - Resolve `<alpha-goal-root>` from the selected `alpha-goal/SKILL.md`, never CWD. Recompute with `node <alpha-goal-root>/scripts/authority-digest.js <absolute-contract-path>`; reject an invalid binding before execution without creating a verifier verdict.
 - Inspect instructions, workspace/repositories, worktree/branch, unrelated changes, tools, dependencies, delivery surfaces, and rollback.
 - Reject another task, workspace, worktree, branch, or repository-set checkpoint. Only the guarded same-task prior-revision path below may advance.
@@ -68,6 +68,6 @@ Untracked/unpublished lifecycle records and ephemeral observer logs are not targ
 
 ## Stagnation and Final Handoff
 
-Key failures by criterion, mode, dependency, and context. Retry only with new evidence, changed state, a smaller gap, or a materially different authorized approach; record failures. Exhaustion alone proves no route: hand raw evidence to `verifier`, which returns `BLOCKED` only when new evidence invalidates the accepted feasibility basis, prerequisite/dependency, observer, or identified claim surface with no authorized alternative.
+Key failures by criterion, mode, dependency, and context. Retry only with new evidence, changed state, a smaller gap, or a materially different authorized approach; record failures. Exhaustion alone proves no route: hand raw evidence to `verifier`, which returns `BLOCKED` only when new evidence invalidates the accepted feasibility basis, prerequisite/dependency, authority boundary, material-design coverage, touched-risk/recovery mapping, observer, or identified claim surface and no currently authorized path remains.
 
 After the last mutation, collect final-state acceptance evidence and current delivery identity, record remaining gaps, and hand exclusive ownership to `verifier`. Claim completion only from a current `PASS_TO_FINAL` after the latest mutation.

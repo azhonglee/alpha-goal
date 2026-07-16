@@ -9,12 +9,12 @@ Decide whether bound state satisfies the accepted contract.
 
 ## Validate Entry and Evidence
 
-- Require the accepted contract, current Acceptance Completeness, current revision/digest, bound checkpoint epoch, and `active_owner: verifier`; missing or false completeness rejects entry without a verdict.
+- Require the accepted contract, its attributable acceptance-time Completeness snapshot, current revision/digest, bound checkpoint epoch, and `active_owner: verifier`. Require `contract_format: 2`; missing/false authority-retained material-design or touched-risk observer/recovery completeness rejects entry, and unsupported present values are invalid. A missing format is legacy-readable only when the current checkpoint already binds the same task, revision, and accepted digest; infer no new authority and reject unresolved gaps already present. New attributable post-acceptance invalidation is classified below, not treated as an entry defect.
 - Resolve `<alpha-goal-root>` and `<executor-root>` from their selected `SKILL.md` locations, never CWD. Recompute with `node <alpha-goal-root>/scripts/authority-digest.js <absolute-contract-path>`; reject an invalid binding without a verification verdict.
 - Inspect actual target, delivery, and dependencies.
 - Re-observe evidence; claim separate-agent independence only when an isolated verifier performed it.
 
-For every criterion record source, observer, attributable result/status, state identity, `as_of`, freshness/invalidation, and `passed|failed|pending|blocked`. Criterion-specific identity covers applicable repository/worktree, HEAD, dirty/untracked digest, artifact/delivery/remote identity, dependency version, and observation time. A contract containing an unidentified required surface is invalid at entry; only attributable post-acceptance loss of a previously identified surface may be blocked. Verifier never narrows the accepted claim.
+For every criterion record source, observer, attributable result/status, state identity, `as_of`, freshness/invalidation, and `passed|failed|pending|blocked`. Criterion-specific identity covers applicable repository/worktree, HEAD, dirty/untracked digest, artifact/delivery/remote identity, dependency version, and observation time. A contract containing an unidentified required surface at acceptance is invalid at entry; attributable post-acceptance loss or newly discovered invalidation of accepted completeness may be blocked. Verifier never narrows the accepted claim.
 
 Accept only observable attributable evidence. Effort, confidence, absence of failure, native lifecycle state, unrelated tests, and stale results prove nothing. Prefer non-mutating observers; if one changes declared target/delivery state, return `NEXT_ITERATION` so executor records the mutation before re-verification.
 
@@ -23,7 +23,7 @@ Accept only observable attributable evidence. Effort, confidence, absence of fai
 | Cause | Required finding | Route / owner |
 | --- | --- | --- |
 | `same_goal_fixable` | A materially different authorized batch can close the gap. | `NEXT_ITERATION` / `executor` |
-| `blocked` | The accepted feasibility basis, prerequisite/dependency, observer, or identified claim surface is later invalidated, and no authorized alternative remains. | `BLOCKED` / `caller` |
+| `blocked` | New attributable facts later invalidate accepted feasibility, a prerequisite/dependency, authority boundary, material-design coverage, touched-risk/recovery mapping, observer, or identified claim surface, and no currently authorized path remains. | `BLOCKED` / `caller` |
 | none | Every criterion passes against current identified state and fresh evidence. | `PASS_TO_FINAL` / `caller` |
 
 For empty/partial/suspicious results, continue safe non-mutating observation while useful. `incomplete` is not a route: map unavailable facts to an authorized batch or blocker. Never return unchanged state without a blocker, changed condition, or materially different batch. If the acceptance authority explicitly changes the goal while verifier owns the checkpoint, stop observation; run `reframe <checkpoint> <expected-revision>` through the checkpoint helper, commit owner `alpha-goal`, and return no verification verdict.

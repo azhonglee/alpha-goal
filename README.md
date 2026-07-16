@@ -121,4 +121,4 @@ Alpha Goal 让 agent 工作保持目标明确、行动有界、声明受证据�
 - PASS 绑定实际观察到的最终目标与交付状态；后续 mutation 会使其失效。
 - 时效性证据记录观察时间与失效条件；无法标识的可变表面不得声称精确绑定。
 - Goal Contract 是标准结构化输入；Native Goal 只是绑定其 path/revision/digest 的 capability-conditional lifecycle projection。
-- `tools/evals/runtime-boundaries.json` 固化 28 个静态边界预期；结构校验通过不等于真实运行证据。
+- `tools/evals/runtime-boundaries.json` 固化 32 个静态边界预期；结构校验通过不等于真实运行证据。
