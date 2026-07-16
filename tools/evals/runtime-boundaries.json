@@ -144,7 +144,7 @@
     },
     {
       "id": "RB29",
-      "scenario": "A `contract_format: 2` persistent API and data migration has identified touched interfaces, compatibility risk, and rollback needs, but the Goal Contract records no authorized material-design decisions for them.",
+      "scenario": "A persistent API and data migration has identified touched interfaces, compatibility risk, and rollback needs, but the Goal Contract records no authorized material-design decisions for them.",
       "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "The contract remains draft: every authority-retained material design decision needs an authorized boundary with decision source/date, execution/observer consequence, risk/recovery treatment, and covered or explicitly non-material/deferred status; executor-owned mechanics remain delegated before acceptance or mutation." }
     },
     {
@@ -159,8 +159,8 @@
     },
     {
       "id": "RB32",
-      "scenario": "A contract has a matching digest but an unsupported present contract_format, or omits contract_format during a first handoff with no already-bound checkpoint.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Reject unsupported formats and reject missing format for new initialization or first handoff. Only a missing-format contract already bound by an existing checkpoint to the same task, revision, and accepted digest is legacy-readable, without inferred authority." }
+      "scenario": "A first handoff omits current material-design/touched-risk completeness, while a separate legacy contract is already bound by an existing checkpoint to the same task, contract_revision, and accepted digest.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Reject incomplete content for new initialization or first handoff. Permit the earlier accepted payload to continue only through its exactly bound existing checkpoint, without inferring missing authority or changing its digest-covered historical metadata." }
     },
     {
       "id": "RB33",

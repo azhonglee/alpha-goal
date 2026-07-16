@@ -8,7 +8,7 @@ For `PERSIST` or an explicit goal reframe, `alpha-goal` alone writes canonical `
 - `accepted`: the recorded acceptance authority has confirmed a revision with no known infeasibility, unavailable required observer, unidentified claim surface, unmet prerequisite, or blocking gap.
 - Never edit an accepted authority payload in place. `alpha-goal` may create the next `draft` revision only after an explicit acceptance-authority goal change or same-goal revision request and when no `executor`/`verifier` write ownership remains. Increment `contract_revision` once and invalidate prior verdicts; further edits while that revision remains draft, including its Confirmation Record, do not increment it again.
 - Mark the authority payload with the exact boundary comments in the template. Resolve `<alpha-goal-root>` as the directory containing the selected `alpha-goal/SKILL.md`; never resolve from the workspace or process CWD. On acceptance, run `node <alpha-goal-root>/scripts/authority-digest.js <absolute-goal-contract-path>` and record its SHA-256 as `accepted_authority_sha256`.
-- `executor` and `verifier` recompute that digest on entry. A mismatch or missing digest invalidates acceptance and blocks use of the contract; only an explicit goal change may start a reframe. New contracts use `contract_format: 2`, for which the two material-design/touched-risk completeness rows are mandatory. Any present unsupported format is invalid. A missing format is legacy-readable only through an existing checkpoint already bound to the same task, revision, and accepted digest; it cannot initialize a new checkpoint or first handoff and gains no inferred authority.
+- `executor` and `verifier` recompute that digest on entry. A mismatch or missing digest invalidates acceptance and blocks use of the contract. New contracts bind `contract_revision` inside the authority payload. Contract compatibility is content-based rather than format-number-based: a first handoff or new checkpoint requires all current mandatory rows, while an earlier accepted payload lacking them may resume only through an existing checkpoint bound to the same task, revision, and accepted digest; it gains no inferred authority. Extra legacy metadata remains inert and digest-covered.
 
 ## Minimum Contract
 
@@ -16,9 +16,8 @@ For `PERSIST` or an explicit goal reframe, `alpha-goal` alone writes canonical `
 # Goal Contract
 
 status: draft
-contract_revision: 1
 <!-- authority-payload:start -->
-contract_format: 2
+contract_revision: 1
 persistence_trigger:
 - <observed condition that requires persistence>
 workspace_identity: <canonical workspace identity>
@@ -76,7 +75,6 @@ Include only authority-retained decisions that can change behavior, interfaces/A
 ## Confirmation Record
 - Decision: <accepted | refined | rejected>
 - Source and date: <explicit acceptance authority decision>
-- Accepted revision: <revision or none>
 - Revision basis: <initial | explicit active-goal change | explicit same-goal revision request>
 - Conditions: <explicit conditions or none>
 <!-- authority-payload:end -->
