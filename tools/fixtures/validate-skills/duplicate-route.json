@@ -1,0 +1,12 @@
+{
+  "shouldPass": false,
+  "expectedErrors": ["route entry values contains duplicate"],
+  "inheritRoot": true,
+  "replacements": [
+    {
+      "file": "tools/validation/alpha-goal.json",
+      "search": "        \"DIRECT\",\n        \"PERSIST\"",
+      "replace": "        \"DIRECT\",\n        \"DIRECT\""
+    }
+  ]
+}

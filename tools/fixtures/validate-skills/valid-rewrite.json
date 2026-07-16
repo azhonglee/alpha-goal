@@ -1,7 +1,0 @@
-{
-  "shouldPass": true,
-  "inheritRoot": true,
-  "files": {
-    "NOTES.md": "Text-only changes outside validated structure are ignored.\n"
-  }
-}

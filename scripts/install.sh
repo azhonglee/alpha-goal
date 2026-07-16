@@ -514,12 +514,26 @@ same_git_worktree_skill_link() {
   [[ "$target_rel" == "skills/$skill_name" ]]
 }
 
+is_managed_skill_copy_dir() {
+  local target="$1"
+  local marker="$target/$skill_copy_marker"
+
+  [[ -d "$target" && ! -L "$target" && -f "$marker" && ! -L "$marker" ]] || return 1
+  [[ "$(wc -l < "$marker" | tr -d '[:space:]')" == "1" ]] || return 1
+  grep -Eq '^source=.+$' "$marker"
+}
+
 copy_skill_dir() {
   local source="$1"
   local target="$2"
   local label="$3"
   local source_real
+  local activation_marker=".alpha-goal-activation-token"
+  local activation_token
   local replaced=false
+  local stage_root
+  local staged
+  local backup
 
   source_real="$(normalize_path "$source")"
 
@@ -537,7 +551,6 @@ copy_skill_dir() {
     fi
 
     if [[ "$current_target" == "$source_real" || "$current_target" == "$legacy_top_level_source" || "$current_target" == "$legacy_skill_dir_source" || ( -n "$legacy_skillset_source" && "$current_target" == "$legacy_skillset_source" ) ]] || same_git_worktree_skill_link "$source" "$current_target" "$label" || same_git_common_dir_skill_path "$current_target" "$label"; then
-      rm "$target"
       replaced=true
     else
       echo "Refusing to replace existing symlink: $target -> $raw_current_target" >&2
@@ -545,18 +558,75 @@ copy_skill_dir() {
       exit 1
     fi
   elif [[ -e "$target" ]]; then
-    if [[ -d "$target" ]]; then
-      rm -rf "$target"
+    if is_managed_skill_copy_dir "$target"; then
       replaced=true
     else
-      echo "Refusing to replace existing non-directory skill path: $target" >&2
+      echo "Refusing to replace unmanaged or malformed skill directory: $target" >&2
+      echo "Only directories with a valid $skill_copy_marker marker are replaced." >&2
       exit 1
     fi
   fi
 
   mkdir -p "$(dirname "$target")"
-  cp -R "$source" "$target"
-  printf 'source=%s\n' "$source" > "$target/$skill_copy_marker"
+  stage_root="$(mktemp -d "$(dirname "$target")/.alpha-goal-skill-stage.XXXXXX")"
+  staged="$stage_root/$label"
+  backup="$stage_root/original"
+  if ! cp -R "$source" "$staged"; then
+    rm -rf "$stage_root"
+    die "Failed to stage skill copy: $label"
+  fi
+  printf 'source=%s\n' "$source_real" > "$staged/$skill_copy_marker"
+  activation_token="$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
+  printf '%s\n' "$activation_token" > "$staged/$activation_marker"
+
+  if [[ "$replaced" == true ]]; then
+    if ! mv "$target" "$backup"; then
+      rm -rf "$stage_root"
+      die "Failed to preserve existing managed skill before replacement: $target"
+    fi
+  fi
+  if ! mv "$staged" "$target"; then
+    if [[ "$replaced" == true ]] && { [[ -e "$backup" ]] || [[ -L "$backup" ]]; }; then
+      if [[ -e "$target" ]] || [[ -L "$target" ]]; then
+        echo "Failed to activate staged skill because the target reappeared: $target" >&2
+        echo "Previous managed copy preserved at: $backup" >&2
+        echo "Staged replacement preserved at: $staged" >&2
+        exit 1
+      fi
+      if ! mv "$backup" "$target"; then
+        echo "Failed to restore the previous managed skill: $target" >&2
+        echo "Previous managed copy preserved at: $backup" >&2
+        echo "Staged replacement preserved at: $staged" >&2
+        exit 1
+      fi
+    fi
+    rm -rf "$stage_root"
+    die "Failed to activate staged skill copy: $target"
+  fi
+  if [[ ! -f "$target/$activation_marker" || -L "$target/$activation_marker" ]] ||
+     [[ "$(cat "$target/$activation_marker" 2>/dev/null || true)" != "$activation_token" ]] ||
+     [[ ! -f "$target/SKILL.md" || -L "$target/SKILL.md" ]] ||
+     [[ -e "$target/$label/$activation_marker" || -L "$target/$label/$activation_marker" ]]; then
+    echo "Staged skill did not become the managed target: $target" >&2
+    if [[ "$replaced" == true ]] && { [[ -e "$backup" ]] || [[ -L "$backup" ]]; }; then
+      echo "Previous managed copy preserved at: $backup" >&2
+    fi
+    if [[ -e "$staged" ]] || [[ -L "$staged" ]]; then
+      echo "Staged replacement preserved at: $staged" >&2
+    elif [[ -e "$target/$label" ]] || [[ -L "$target/$label" ]]; then
+      echo "Staged replacement preserved at: $target/$label" >&2
+    fi
+    exit 1
+  fi
+  if ! rm "$target/$activation_marker" || ! is_managed_skill_copy_dir "$target"; then
+    echo "Activated skill failed managed-target validation: $target" >&2
+    if [[ "$replaced" == true ]] && { [[ -e "$backup" ]] || [[ -L "$backup" ]]; }; then
+      echo "Previous managed copy preserved at: $backup" >&2
+    fi
+    exit 1
+  fi
+  rm -rf "$stage_root"
+
   if [[ "$replaced" == true ]]; then
     replaced_count=$((replaced_count + 1))
     log "Replaced skill copy: $label -> $target"
@@ -564,47 +634,6 @@ copy_skill_dir() {
     copied_count=$((copied_count + 1))
     log "Copied skill: $label -> $target"
   fi
-}
-
-inject_claude_adapter_into_alpha_goal() {
-  local skill_dir="$1"
-  local skill_md="$skill_dir/SKILL.md"
-
-  if [[ ! -f "$skill_md" ]]; then
-    echo "Cannot inject Claude adapter reminder; missing $skill_md" >&2
-    exit 1
-  fi
-
-  python3 - "$skill_md" <<'PY'
-from pathlib import Path
-import sys
-
-path = Path(sys.argv[1])
-text = path.read_text()
-reminder = "- In Claude runtime or Claude-installed skill context, read `references/claude-adapter.md` before interpreting tool names.\n"
-if reminder in text:
-    sys.exit(0)
-
-entry_start = text.find("## Entry Gate\n")
-if entry_start < 0:
-    print(f"Entry Gate not found in {path}", file=sys.stderr)
-    sys.exit(1)
-
-entry_end = text.find("\n## Clarification Gate", entry_start)
-if entry_end < 0:
-    print(f"Clarification Gate not found after Entry Gate in {path}", file=sys.stderr)
-    sys.exit(1)
-
-entry = text[entry_start:entry_end]
-anchor = "- Inspect relevant files, docs, recent commits, and existing patterns.\n"
-if anchor not in entry:
-    print(f"Entry Gate injection anchor not found in {path}", file=sys.stderr)
-    sys.exit(1)
-
-updated_entry = entry.replace(anchor, anchor + reminder, 1)
-path.write_text(text[:entry_start] + updated_entry + text[entry_end:])
-PY
-  log "Injected Claude adapter Entry Gate reminder: $skill_md"
 }
 
 remove_legacy_support_link_from_root() {
@@ -666,7 +695,7 @@ remove_installed_skill_link() {
     return
   fi
 
-  if [[ ! -L "$target" && -d "$target" && -f "$target/$skill_copy_marker" ]]; then
+  if is_managed_skill_copy_dir "$target"; then
     rm -rf "$target"
     uninstall_skill_removed_count=$((uninstall_skill_removed_count + 1))
     log "Removed installed skill copy: $target"
@@ -705,7 +734,7 @@ remove_claude_skill_link() {
     return
   fi
 
-  if [[ ! -L "$target" && -d "$target" && -f "$target/$skill_copy_marker" ]]; then
+  if is_managed_skill_copy_dir "$target"; then
     rm -rf "$target"
     uninstall_skill_removed_count=$((uninstall_skill_removed_count + 1))
     log "Removed Claude skill copy: $target"
@@ -1214,7 +1243,7 @@ const path = require("node:path");
 const [hooksArg, templateArg, configArg, tomlPath] = process.argv.slice(2);
 const toml = require(tomlPath);
 const MANAGED_MARKER_RE = /^: 'codex-alpha-goal-compact-recovery:v[0-9]+';/;
-const LEGACY_MANAGED_MARKER_RE = /(^|[\s;'\x22])codex-compact-skill-recovery(?::v[0-9]+)?($|[\s;'\x22])/;
+const LEGACY_MANAGED_MARKER_RE = /(^|[\s;'\x22])codex-compact-skill-recovery(?::(?:v[0-9]+|experimental))?($|[\s;'\x22])/;
 
 function loadJson(file, emptyDefault) {
   if (emptyDefault && (!fs.existsSync(file) || !fs.readFileSync(file, "utf8").trim())) return emptyDefault;
@@ -1407,7 +1436,7 @@ const path = require("node:path");
 
 const [hooksArg] = process.argv.slice(2);
 const MANAGED_MARKER_RE = /^: 'codex-alpha-goal-compact-recovery:v[0-9]+';/;
-const LEGACY_MANAGED_MARKER_RE = /(^|[\s;'\x22])codex-compact-skill-recovery(?::v[0-9]+)?($|[\s;'\x22])/;
+const LEGACY_MANAGED_MARKER_RE = /(^|[\s;'\x22])codex-compact-skill-recovery(?::(?:v[0-9]+|experimental))?($|[\s;'\x22])/;
 
 function loadJson(file) {
   try {
@@ -1667,7 +1696,6 @@ fi
 installed=0
 install_skill_copies_to_root() {
   local root="$1"
-  local inject_claude_adapter="$2"
   local skill_dir
   local skill_name
 
@@ -1675,18 +1703,15 @@ install_skill_copies_to_root() {
     skill_dir="$(cd "$(dirname "$skill_file")" && pwd -P)"
     skill_name="$(basename "$skill_dir")"
     copy_skill_dir "$skill_dir" "$root/$skill_name" "$skill_name"
-    if [[ "$inject_claude_adapter" == true && "$skill_name" == "alpha-goal" ]]; then
-      inject_claude_adapter_into_alpha_goal "$root/$skill_name"
-    fi
     installed=$((installed + 1))
   done
 }
 
 if [[ "$sync_codex_config" == true ]]; then
-  install_skill_copies_to_root "$target_root" false
+  install_skill_copies_to_root "$target_root"
 fi
 if [[ "$sync_claude_config" == true ]]; then
-  install_skill_copies_to_root "$claude_skill_root" true
+  install_skill_copies_to_root "$claude_skill_root"
 fi
 
 if [[ "$sync_codex_config" == true ]]; then

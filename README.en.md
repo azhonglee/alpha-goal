@@ -2,7 +2,7 @@
 
 Languages: [Chinese](README.md) | English
 
-Alpha Goal is a minimal persistent closed-loop skillset for goal engineering work. It guides agents to discover facts before asking, resume goal framing from a draft or accepted `goal-contract.md`, pass user confirmation gates before handing an accepted Goal Contract to execution, and make final claims only as far as evidence supports them.
+Alpha Goal is a minimal persistent closed-loop skillset for goal engineering work. It guides agents to discover facts before asking, operate within accepted authority boundaries, resume execution from an accepted Goal Contract and the necessary checkpoint state, and make final claims only as far as evidence supports them.
 
 ## What Problem It Solves
 
@@ -30,7 +30,7 @@ Alpha Goal gives AI agents a Goal Engineering control loop for three common fail
     <tr>
       <td width="260" align="left"><strong>Evidence&#8209;free&nbsp;completion</strong></td>
       <td align="left">A passing test or partial success is treated as proof that the goal is complete.</td>
-      <td align="left"><code>verifier</code> compares evidence against acceptance evidence and the hard-blocking checklist, then returns a route decision.</td>
+      <td align="left"><code>verifier</code> compares fresh evidence against acceptance evidence and returns a route decision.</td>
     </tr>
   </tbody>
 </table>
@@ -40,46 +40,46 @@ In practice, it compresses requirement clarification, authority boundaries, iter
 ## Core Architecture
 
 ```mermaid
-%%{init: {"theme":"base","flowchart":{"wrappingWidth":900,"nodeSpacing":80,"rankSpacing":70,"htmlLabels":true},"markdownAutoWrap":false,"themeVariables":{"background":"#364150","primaryColor":"#364150","primaryTextColor":"#f8fafc","primaryBorderColor":"#f8fafc","lineColor":"#f8fafc","edgeLabelBackground":"#364150","fontFamily":"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"}}}%%
 flowchart TD
-  AG["<div align='center'><strong>alpha-goal (entry)</strong></div><div align='left' style='width:900px'><br/>Discover facts → Clarify requirements → Pressure-test → Write Goal Contract → User confirmation<br/>Output: goal-contract.md (authority contract)</div>"]
-  CL["<div align='center'><strong>executor (execution)</strong></div><div align='left' style='width:900px'><br/>Slice by contract → Execute → Collect evidence → Update hard-blocking checklist<br/>Output: checkpoint.md (required checklist / evidence handoff)</div>"]
-  GV["<div align='center'><strong>verifier (verification)</strong></div><div align='left' style='width:900px'><br/>Evidence + checklist vs acceptance evidence → Route decision<br/>Verdicts: PASS_TO_FINAL / NEXT_ITERATION / BLOCKED / RETURN...</div>"]
-
-  AG -->|"after contract is accepted"| CL
-  CL --> GV
-  GV --> Pass["Final delivery<br/>(pass)"]
-  GV --> Next["Continue next round<br/>(same-goal fixable)"]
-  GV --> Return["Return to alpha-goal<br/>(goal changed / overreach)"]
-
-  classDef stage fill:#364150,stroke:#f8fafc,color:#f8fafc,stroke-width:2px;
-  classDef route fill:#364150,stroke:#364150,color:#f8fafc,stroke-width:0px;
-  class AG,CL,GV stage;
-  class Pass,Next,Return route;
+  A["alpha-goal: clarify and form a Goal Frame"] --> R{"DIRECT / PERSIST"}
+  R --> D["DIRECT: normal execution + final validation"]
+  R --> P["PERSIST: expand and confirm goal-contract.md"]
+  P --> E["executor: execute at risk boundaries and record checkpoint.md"]
+  E --> V["verifier: independently observe current state"]
+  V -->|"NEXT_ITERATION"| E
+  V -->|"BLOCKED"| B["Report blocker"]
+  V -->|"PASS_TO_FINAL"| F["Final claim"]
 ```
 
 ```text
-Trigger -> Preflight/Discovery -> Clarify Goal Contract -> Review -> Confirm: launch / technical design / refine / reject
-Technical design option -> Technical Design Runbook -> Technical Review -> Technical Confirm -> Native Goal Sync -> $executor
-Accepted Goal Contract -> Native Goal Sync -> $executor -> Act -> Evidence + Checklist -> $verifier -> Route -> Next Slice or Final Claim
+Trigger -> Frame Goal -> Choose DIRECT/PERSIST
+PERSIST -> Confirm accepted Goal Contract -> $executor -> Evidence + checkpoint -> $verifier -> Route -> Next Slice or Final Claim
+Accepted goal materially changes -> terminate the old checkpoint -> start a new alpha-goal task directory
 ```
+
+A Goal Frame contains intent, observable outcome, scope/non-goals, constraints, success signals, observers, and material decisions. Clear fields come from the request and attributable facts; clarification asks the relevant authority about one highest-impact blocking gap and closes it only when the authorized decision and its material boundaries and execution/evidence consequences are determined. A material change to an accepted goal terminates the old task; the new goal starts `alpha-goal` in a new task directory instead of reopening the old contract or checkpoint.
+
+`DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state, and does not call `executor` or `verifier`. For `PERSIST`, the only canonical lifecycle artifacts are `goal-contract.md` and `checkpoint.md`; the checkpoint helper also creates atomic-write coordination records: active `.lock`, staged `.pending-*`, and best-effort-cleaned `.lock.closed-*` atomic-unlock tombstones.
+
+- `goal-contract.md`: written only by `alpha-goal`; its accepted authority payload is standard structured input to executor and verifier.
+- `checkpoint.md`: records the current contract digest and execution/verification state, and serializes executor/verifier handoff with atomic `checkpoint_revision`/`active_owner` control.
+
+Routing uses material impact, side effects, recovery needs, and verifiability. Confidence, file count, step count, question count, and estimated duration are not risk proxies.
 
 ## Quick start
 
 ```bash
 bash ./scripts/install.sh
 node tools/validate_skills.js .
+node tools/validate_skills.js --fixtures
 ```
 
-Requires Node.js 18+. The validator and installer TOML merge use repository-local JavaScript and vendored dependencies; `tsx` is not required.
-
-The installer copies the three public skills into target-specific independent roots: `$HOME/.codex/skills` for `codex`, and `$HOME/.claude/skills` for `claude`. Interactive terminals use a color+Unicode arrow-key menu with `codex` highlighted by default; the menu includes `codex`, `claude`, and `all`. `--uninstall` is the only supported CLI option; install asks only for the target menu and then uses fixed defaults, while uninstall asks for cleanup choices. Non-interactive runs are refused. Successful install and uninstall runs print one concise completion line. Install migrates `skills/<skill>` symlinks from another worktree with the same Git common-dir into copied directories; external symlinks are refused, same-name real directories are recopied, and ordinary files are refused. `--uninstall` enters the interactive uninstall flow. Uninstall does not follow configuration symlinks and does not remove external symlinks or mixed user configuration.
+The installer copies the three public skills into independent runtime-specific roots and synchronizes the selected user templates. See [INSTALL.md](INSTALL.md) for full behavior and smoke testing.
 
 ## Usage examples
 
 ```text
-$alpha-goal Decide whether this task should discover facts, clarify, write a contract, add a technical design, confirm, or hand off to execution/verification.
-$executor Execute or harden the next most useful verifiable bounded slice from an accepted Goal Contract.
+$alpha-goal Implement this requirement: <YOUR-PRD> or <YOUR-DESCRIPTION>, <YOUR-UX> or <YOUR-DESIGN>.
 ```
 
 You usually do not need to name a skill. Describe the work normally; Alpha Goal activates implicitly.
@@ -96,15 +96,15 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
   <tbody>
     <tr>
       <td width="180" align="left"><a href="skills/alpha-goal/"><code>alpha-goal</code></a></td>
-      <td align="left">Clarify intent, boundaries, and acceptance evidence, produce a Goal Contract for confirmation, and offer launch, technical design, refine, or reject as confirmation choices.</td>
+      <td align="left">Clarify intent, boundaries, and acceptance evidence, form a Goal Frame, and produce a Goal Contract when persistent closure is required.</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/executor/"><code>executor</code></a></td>
-      <td align="left">Execute or harden an authorized slice; <code>goal-contract.md</code> is authoritative and <code>checkpoint.md</code> must persist the checklist, slice evidence, and verifier route.</td>
+      <td align="left">Execute authorized batches inside an accepted contract; <code>goal-contract.md</code> is authoritative and <code>checkpoint.md</code> records mutations, raw execution evidence, and handoff state.</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/verifier/"><code>verifier</code></a></td>
-      <td align="left">Verify goal completion, claim boundary, evidence coverage, blockers, and checklist coverage, then return the next route.</td>
+      <td align="left">Verify fresh evidence independently, update criterion status, and return <code>PASS_TO_FINAL</code>, <code>NEXT_ITERATION</code>, or <code>BLOCKED</code>.</td>
     </tr>
   </tbody>
 </table>
@@ -113,10 +113,11 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
 
 Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 
-- Evidence before authority: Current code facts describe current state; desired behavior comes from user intent, specs, issues, or accepted contracts.
-- Goals before action: expected outcome, scope, non-goals, acceptance evidence, decision owner, and claim boundary define what may change.
-- Progressive disclosure: `alpha-goal` keeps only Goal Contract clarification, review, confirmation, and Native Goal Sync in `SKILL.md`; Technical Design clarification, review, and confirmation live in `references/technical-design-runbook.md`.
-- Native Goal Sync: after the user accepts the contract, `alpha-goal` may create or reuse the current thread's native goal; the verifier supplies routes and the calling Agent manages native Goal updates from terminal routes.
-- Bounded execution: prefer bounded evidence-producing actions or targeted changes over broad refactors and speculative cleanup.
-- Iterative verification: after every important slice, `verifier` independently checks fresh evidence, hard-blocking checklist coverage, blockers, and authority.
-- Honest routing: unclear goals return to `alpha-goal`; same-goal fixable execution gaps return to `executor`.
+- Discover facts before handling material decisions owned by the user or another authority; current code cannot define desired behavior by itself.
+- Known infeasibility, an unavailable required observer, an unidentified claim surface, or an unmet prerequisite keeps the Goal Contract `draft`; `BLOCKED` only means an accepted premise was invalidated later by new facts.
+- Direct work creates no persistent protocol; persistent work uses the minimum artifacts needed for authority, recovery, and audit.
+- Batch work inside one low-risk boundary; invoke verifier only at material risk boundaries and final state.
+- PASS binds to the target and delivery state actually observed and terminates that checkpoint; later work starts a new task.
+- Volatile evidence records observation time and invalidation conditions; unidentified mutable surfaces cannot support an exact-binding claim.
+- The Goal Contract is standard structured input to executor/verifier; platform-native task or goal tracking is caller-owned lifecycle metadata and cannot replace contract authority.
+- `tools/evals/runtime-boundaries.json` preserves 33 static expected-boundary cases; schema validation is not runtime evidence.

@@ -1,0 +1,12 @@
+{
+  "shouldPass": false,
+  "expectedErrors": ["hooks.PostCompact groups must not define matcher"],
+  "inheritRoot": true,
+  "replacements": [
+    {
+      "file": "templates/hooks.json",
+      "search": "      {\n        \"hooks\": [",
+      "replace": "      {\n        \"matcher\": \"*\",\n        \"hooks\": ["
+    }
+  ]
+}

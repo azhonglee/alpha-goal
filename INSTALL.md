@@ -2,7 +2,7 @@
 
 ## Install
 
-Requires Node.js 18+ when syncing Codex config or hooks. The installer uses repository-local JavaScript and vendored `smol-toml` for config TOML merge; Python 3.11 `tomllib` is not required.
+Requires Node.js 18+ and Python 3. The installer uses repository-local JavaScript, vendored `smol-toml`, and Python only from the standard library.
 
 ```bash
 scripts/install.sh
@@ -30,27 +30,27 @@ The script creates copied skill directories under target-specific independent ro
 - `claude`: sync Claude `CLAUDE.md` and Claude skill copies.
 - `all`: sync or uninstall both Codex and Claude in one run.
 
-The target menu uses Up/Down plus Enter only; `codex` is selected by default. Install asks only for that target menu, ignores `CODEX_HOME`, and then uses fixed defaults: Codex home `$HOME/.codex`, `force=false`, template sync enabled, Codex hook sync enabled, and verbose output disabled. For uninstall, the flow asks for the target, Codex home when relevant, template cleanup, hook cleanup when relevant, and verbose output.
+The target menu uses Up/Down plus Enter only; `codex` is selected by default. Install asks only for that target menu, ignores `CODEX_HOME`, and then uses fixed defaults: Codex home `$HOME/.codex`, template sync enabled, Codex hook sync enabled, and verbose output disabled. For uninstall, the flow asks for the target, Codex home when relevant, template cleanup, hook cleanup when relevant, and verbose output.
 
 Non-interactive runs are refused. Any CLI argument other than `--uninstall`, including `--help`, `--target`, `--codex-home`, `--force`, sync toggles, or `--verbose`, is rejected.
 
 Successful install and uninstall runs print one concise success line. Failures continue to print the specific error and exit non-zero.
 
-When installing skill copies, an existing target skill symlink is migrated only when it points to `skills/<skill-name>` in this repository or another worktree with the same Git common directory. Existing managed real directories are removed and recopied. Git detection failures, external symlinks, symlinks to other repo-relative paths, and ordinary files are refused. For `claude`, the installer injects a ClaudeAdapter Entry Gate reminder into the installed Alpha Goal copy; `codex` installs leave that reminder out.
+When installing skill copies, an existing target skill symlink is migrated only when it points to `skills/<skill-name>` in this repository or another worktree with the same Git common directory. A real directory is replaced only when it contains a valid, regular `.alpha-goal-skill-copy` marker; the new copy is staged before the managed target is moved. If activation and restoration are both obstructed, the installer exits without deleting the previous copy or staged replacement and reports both recovery paths. Unmanaged or malformed directories, Git detection failures, external symlinks, symlinks to other repo-relative paths, and ordinary files are refused. Codex and Claude receive the same runtime-neutral skill tree; Claude capability mapping is a conditional reference in that tree, not installer-injected prose.
 
 Use `--uninstall` to enter the interactive uninstall flow. The selected target controls which managed configuration and skill copies are removed.
 
 Uninstall is conservative outside the managed copied-skill path. It removes only managed Markdown blocks, managed hooks, `config.toml` that byte-for-byte matches `templates/config.toml`, skill copies with the install marker, and skill symlinks that resolve to this repository. Mixed user Markdown keeps user content, mixed or modified `config.toml` is preserved, unmanaged hooks are preserved, configuration symlinks are not followed or deleted, and unmanaged skill directories or external symlinks are preserved. The interactive cleanup prompts control whether Markdown/config and hook cleanup run.
 
-The compact recovery hook definition lives in `templates/hooks.json`. It is a `PostCompact` hook without a matcher and must not set matcher. It tells Codex to reload the applicable Alpha Goal skill and resume from an explicit current artifact path already present in task context.
+The compact recovery hook definition lives in `templates/hooks.json`. It is a `PostCompact` hook without a matcher and must not set matcher. It reloads only from an explicit current artifact path and delegates identity, owner, recovery, and termination decisions to the checkpoint helper and selected skills instead of duplicating their protocol.
 
-Hook upgrades are keyed by marker family. If the template marker changes from `...:v1` to `...:v2`, the installer removes older hooks from the same family before adding the template hook. It also removes the earlier experimental `codex-compact-skill-recovery` hook family.
+Hook replacement is keyed by marker family. The current v3 template replaces other managed numbered versions in that family before it is added. The installer also removes the experimental `codex-compact-skill-recovery` family and preserves unmanaged hooks.
 
 Codex may require reviewing and trusting the changed hook with `/hooks` before it runs.
 
 ## Smoke test
 
-The smoke test checks target-specific skill copies, config sync, ClaudeAdapter injection, hook recovery text, install prompt reduction, concise success output, uninstall cleanup, rejected legacy CLI arguments, refused external symlinks, and ignored `CODEX_HOME` values. It does not touch real user configuration.
+The smoke test checks source-identical skill copies; semantic checkpoint transitions, JSON lock metadata, automatic unlock, stale-write rejection, abort/recovery, and legacy-lock release from arbitrary CWD; missing-key TOML merge while preserving explicit values; adapter discoverability; managed hook replacement; idempotence; failure preservation; concise output; fresh and mixed-config uninstall behavior; rejected arguments; refused unmanaged targets; and ignored `CODEX_HOME`. It uses temporary homes and does not touch real user configuration.
 
 ```bash
 set -euo pipefail
@@ -186,6 +186,21 @@ assert_simple_success_output() {
   ! grep -q "╰─" <<<"$output"
 }
 
+assert_skill_tree_matches() {
+  local source="$1"
+  local target="$2"
+  local source_count
+  local target_count
+
+  source_count="$(find "$source" -type f | wc -l | tr -d ' ')"
+  target_count="$(find "$target" -type f ! -name '.alpha-goal-skill-copy' | wc -l | tr -d ' ')"
+  test "$source_count" -eq "$target_count"
+  while IFS= read -r source_file; do
+    local relative_file="${source_file#"$source"/}"
+    cmp "$source_file" "$target/$relative_file"
+  done < <(find "$source" -type f | sort)
+}
+
 tmp_codex="$(mktemp -d)"
 codex_output="$(run_installer "$tmp_codex")"
 assert_simple_success_output "$codex_output" "Alpha Goal install completed."
@@ -198,7 +213,161 @@ for skill in alpha-goal executor verifier; do
   test -d "$tmp_codex/.codex/skills/$skill"
   test ! -L "$tmp_codex/.codex/skills/$skill"
   test -f "$tmp_codex/.codex/skills/$skill/SKILL.md"
+  assert_skill_tree_matches "$repo_root/skills/$skill" "$tmp_codex/.codex/skills/$skill"
 done
+test -x "$tmp_codex/.codex/skills/alpha-goal/scripts/authority-digest.js"
+test -x "$tmp_codex/.codex/skills/executor/scripts/checkpoint-lock.js"
+test "$(node "$repo_root/skills/alpha-goal/scripts/authority-digest.js" "$repo_root/skills/alpha-goal/references/goal-contract-book.md")" = "$(node "$tmp_codex/.codex/skills/alpha-goal/scripts/authority-digest.js" "$tmp_codex/.codex/skills/alpha-goal/references/goal-contract-book.md")"
+lock_checkpoint="$tmp_codex/lock-smoke/checkpoint.md"
+mkdir -p "$(dirname "$lock_checkpoint")"
+mkdir -p "$lock_checkpoint.lock.pending-simulated-interruption"
+printf '{"complete":false}\n' > "$lock_checkpoint.lock.pending-simulated-interruption/owner.json"
+lock_helper="$tmp_codex/.codex/skills/executor/scripts/checkpoint-lock.js"
+
+assert_unlocked() {
+  local status_json
+  status_json="$(node "$lock_helper" status "$lock_checkpoint")"
+  node -e 'const s=JSON.parse(process.argv[1]); if (s.phase !== "unlocked" || !Object.hasOwn(s, "recoverableBy")) process.exit(1)' "$status_json"
+}
+
+init_record="$(cd /tmp && node "$lock_helper" init "$lock_checkpoint")"
+init_token="$(node -p 'JSON.parse(process.argv[1]).token' "$init_record")"
+init_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$init_record")"
+test -n "$init_token"
+test -n "$init_pending"
+if node "$lock_helper" init "$lock_checkpoint" >/dev/null 2>&1; then
+  echo "second checkpoint writer should not acquire the held lock" >&2
+  exit 1
+fi
+printf 'checkpoint_revision: 0\nactive_owner: executor\npayload: initial\n' > "$init_pending"
+node "$lock_helper" commit "$lock_checkpoint" "$init_token" >/dev/null
+assert_unlocked
+
+same_owner_record="$(node "$lock_helper" execute "$lock_checkpoint" 0 executor)"
+same_owner_token="$(node -p 'JSON.parse(process.argv[1]).token' "$same_owner_record")"
+same_owner_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$same_owner_record")"
+printf 'checkpoint_revision: 1\nactive_owner: executor\npayload: same-owner\n' > "$same_owner_pending"
+node "$lock_helper" commit "$lock_checkpoint" "$same_owner_token" >/dev/null
+assert_unlocked
+
+handoff_record="$(node "$lock_helper" execute "$lock_checkpoint" 1 verifier)"
+handoff_token="$(node -p 'JSON.parse(process.argv[1]).token' "$handoff_record")"
+handoff_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$handoff_record")"
+printf 'checkpoint_revision: 2\nactive_owner: verifier\npayload: verify-next\n' > "$handoff_pending"
+node "$lock_helper" commit "$lock_checkpoint" "$handoff_token" >/dev/null
+assert_unlocked
+
+next_record="$(node "$lock_helper" verify "$lock_checkpoint" 2 NEXT_ITERATION)"
+next_token="$(node -p 'JSON.parse(process.argv[1]).token' "$next_record")"
+next_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$next_record")"
+printf 'checkpoint_revision: 3\nactive_owner: executor\npayload: next-iteration\n' > "$next_pending"
+node "$lock_helper" commit "$lock_checkpoint" "$next_token" >/dev/null
+assert_unlocked
+
+before_invalid="$(shasum -a 256 "$lock_checkpoint" | awk '{print $1}')"
+if node "$lock_helper" verify "$lock_checkpoint" 3 PASS_TO_FINAL >/dev/null 2>&1; then
+  echo "invalid executor-to-verdict transition should fail" >&2
+  exit 1
+fi
+if node "$lock_helper" execute "$lock_checkpoint" 2 verifier >/dev/null 2>&1; then
+  echo "stale expected revision should fail" >&2
+  exit 1
+fi
+test "$before_invalid" = "$(shasum -a 256 "$lock_checkpoint" | awk '{print $1}')"
+
+verify_handoff_record="$(node "$lock_helper" execute "$lock_checkpoint" 3 verifier)"
+verify_handoff_token="$(node -p 'JSON.parse(process.argv[1]).token' "$verify_handoff_record")"
+verify_handoff_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$verify_handoff_record")"
+if node "$lock_helper" abort "$lock_checkpoint" "$next_token" >/dev/null 2>&1; then
+  echo "a stale token should not abort its successor lock" >&2
+  exit 1
+fi
+printf 'checkpoint_revision: 4\nactive_owner: verifier\npayload: recoverable-verifier\n' > "$verify_handoff_pending"
+node "$lock_helper" commit "$lock_checkpoint" "$verify_handoff_token" >/dev/null
+assert_unlocked
+
+if node "$lock_helper" verify "$lock_checkpoint" 4 RETURN_TO_ALPHA_GOAL >/dev/null 2>&1; then
+  echo "RETURN_TO_ALPHA_GOAL is not a verification route" >&2
+  exit 1
+fi
+recovery_record="$(node "$lock_helper" terminate "$lock_checkpoint" 4)"
+recovery_token="$(node -p 'JSON.parse(process.argv[1]).token' "$recovery_record")"
+recovery_status="$(node "$lock_helper" status "$lock_checkpoint")"
+node -e 'const s=JSON.parse(process.argv[1]); const r=s.recoverableBy; if (s.phase === "unlocked" || !(r === "verifier" || (Array.isArray(r) && r.includes("verifier")))) process.exit(1)' "$recovery_status"
+node "$lock_helper" recover "$lock_checkpoint" "$recovery_token" verifier >/dev/null
+assert_unlocked
+
+if node "$lock_helper" reframe "$lock_checkpoint" 4 >/dev/null 2>&1; then
+  echo "reframe should no longer be creatable" >&2
+  exit 1
+fi
+if node "$lock_helper" supersede "$lock_checkpoint" 4 >/dev/null 2>&1; then
+  echo "supersede should no longer be creatable" >&2
+  exit 1
+fi
+
+resume_record="$(node "$lock_helper" verify "$lock_checkpoint" 4 NEXT_ITERATION)"
+resume_token="$(node -p 'JSON.parse(process.argv[1]).token' "$resume_record")"
+resume_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$resume_record")"
+printf 'checkpoint_revision: 5\nactive_owner: executor\npayload: resumed\n' > "$resume_pending"
+node "$lock_helper" commit "$lock_checkpoint" "$resume_token" >/dev/null
+assert_unlocked
+
+terminate_dir="$tmp_codex/terminate-case"
+mkdir -p "$terminate_dir"
+terminate_checkpoint="$terminate_dir/checkpoint.md"
+terminate_init="$(node "$lock_helper" init "$terminate_checkpoint")"
+terminate_init_token="$(node -p 'JSON.parse(process.argv[1]).token' "$terminate_init")"
+terminate_init_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$terminate_init")"
+printf 'checkpoint_revision: 0\nactive_owner: executor\npayload: terminate-initial\n' > "$terminate_init_pending"
+node "$lock_helper" commit "$terminate_checkpoint" "$terminate_init_token" >/dev/null
+terminate_record="$(node "$lock_helper" terminate "$terminate_checkpoint" 0)"
+terminate_token="$(node -p 'JSON.parse(process.argv[1]).token' "$terminate_record")"
+terminate_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$terminate_record")"
+printf 'checkpoint_revision: 1\nactive_owner: caller\ntermination_reason: GOAL_CHANGED\n' > "$terminate_pending"
+node "$lock_helper" commit "$terminate_checkpoint" "$terminate_token" >/dev/null
+test ! -e "$terminate_checkpoint.lock"
+
+release_token="$(python3 - "$lock_checkpoint" <<'PY'
+import hashlib
+import json
+import sys
+import uuid
+from pathlib import Path
+
+checkpoint = Path(sys.argv[1])
+token = str(uuid.uuid4())
+lock = Path(f"{checkpoint}.lock")
+lock.mkdir()
+record = {
+    "schemaVersion": 3,
+    "owner": "executor:legacy/release",
+    "token": token,
+    "expectedRevision": "5",
+    "expectedOwner": "executor",
+    "expectedCheckpointSha256": hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
+    "nextRevision": "6",
+    "nextOwner": "executor",
+    "plannedCheckpointSha256": None,
+}
+(lock / "owner.json").write_text(json.dumps(record))
+print(token)
+PY
+)"
+node "$lock_helper" release "$lock_checkpoint" "$release_token" >/dev/null
+assert_unlocked
+
+final_handoff_record="$(node "$lock_helper" execute "$lock_checkpoint" 5 verifier)"
+final_handoff_token="$(node -p 'JSON.parse(process.argv[1]).token' "$final_handoff_record")"
+final_handoff_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$final_handoff_record")"
+printf 'checkpoint_revision: 6\nactive_owner: verifier\npayload: final-check\n' > "$final_handoff_pending"
+node "$lock_helper" commit "$lock_checkpoint" "$final_handoff_token" >/dev/null
+pass_record="$(node "$lock_helper" verify "$lock_checkpoint" 6 PASS_TO_FINAL)"
+pass_token="$(node -p 'JSON.parse(process.argv[1]).token' "$pass_record")"
+pass_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$pass_record")"
+printf 'checkpoint_revision: 7\nactive_owner: caller\npayload: passed\n' > "$pass_pending"
+node "$lock_helper" commit "$lock_checkpoint" "$pass_token" >/dev/null
+assert_unlocked
 test -f "$tmp_codex/.codex/AGENTS.md"
 test -f "$tmp_codex/.codex/config.toml"
 test -f "$tmp_codex/.codex/hooks.json"
@@ -207,10 +376,18 @@ test ! -e "$tmp_codex/.claude/CLAUDE.md"
 test ! -e "$tmp_codex/.claude/skills/alpha-goal"
 ! grep -q "references/claude-adapter.md" "$tmp_codex/.codex/skills/alpha-goal/SKILL.md"
 python3 -m json.tool "$tmp_codex/.codex/hooks.json" >/dev/null
-grep -q "codex-alpha-goal-compact-recovery:v1" "$tmp_codex/.codex/hooks.json"
-grep -q "resume from the explicit current goal-contract.md or checkpoint.md path" "$tmp_codex/.codex/hooks.json"
-grep -q "technical_design.md" "$tmp_codex/.codex/hooks.json"
+grep -q "codex-alpha-goal-compact-recovery:v3" "$tmp_codex/.codex/hooks.json"
+grep -q "Use only an explicit current artifact path" "$tmp_codex/.codex/hooks.json"
+grep -q "Follow top-level active_owner" "$tmp_codex/.codex/hooks.json"
+grep -q "legacy alpha-goal owner loads executor only to terminate it to caller" "$tmp_codex/.codex/hooks.json"
+grep -q "caller reports PASS/BLOCKED/GOAL_CHANGED as terminal" "$tmp_codex/.codex/hooks.json"
+grep -q "Later work uses a new Alpha Goal task directory" "$tmp_codex/.codex/hooks.json"
+grep -q "accepted with valid completeness/digest loads alpha-goal to confirm the goal is unchanged" "$tmp_codex/.codex/hooks.json"
+! grep -q "technical_design.md" "$tmp_codex/.codex/hooks.json"
 grep -q "checkpoint.md" "$tmp_codex/.codex/hooks.json"
+codex_repeat_output="$(run_installer "$tmp_codex")"
+assert_simple_success_output "$codex_repeat_output" "Alpha Goal install completed."
+test "$(grep -o "codex-alpha-goal-compact-recovery:v3" "$tmp_codex/.codex/hooks.json" | wc -l | tr -d ' ')" -eq 1
 
 tmp_claude="$(mktemp -d)"
 claude_output="$(TARGET_CHOICE=claude run_installer "$tmp_claude")"
@@ -219,11 +396,14 @@ for skill in alpha-goal executor verifier; do
   test -d "$tmp_claude/.claude/skills/$skill"
   test ! -L "$tmp_claude/.claude/skills/$skill"
   test -f "$tmp_claude/.claude/skills/$skill/SKILL.md"
+  assert_skill_tree_matches "$repo_root/skills/$skill" "$tmp_claude/.claude/skills/$skill"
 done
 test -f "$tmp_claude/.claude/CLAUDE.md"
 test ! -e "$tmp_claude/.codex/AGENTS.md"
 test ! -e "$tmp_claude/.codex/skills/alpha-goal"
-grep -q "references/claude-adapter.md" "$tmp_claude/.claude/skills/alpha-goal/SKILL.md"
+! grep -q "references/claude-adapter.md" "$tmp_claude/.claude/skills/alpha-goal/SKILL.md"
+grep -q '\$HOME/.claude/skills/alpha-goal/references/claude-adapter.md' "$tmp_claude/.claude/CLAUDE.md"
+cmp "$repo_root/skills/alpha-goal/references/claude-adapter.md" "$tmp_claude/.claude/skills/alpha-goal/references/claude-adapter.md"
 
 tmp_all="$(mktemp -d)"
 all_install_output="$(TARGET_CHOICE=all run_installer "$tmp_all")"
@@ -242,7 +422,68 @@ test -f "$tmp_all/.codex/config.toml"
 test -f "$tmp_all/.codex/hooks.json"
 test -f "$tmp_all/.claude/CLAUDE.md"
 ! grep -q "references/claude-adapter.md" "$tmp_all/.codex/skills/alpha-goal/SKILL.md"
-grep -q "references/claude-adapter.md" "$tmp_all/.claude/skills/alpha-goal/SKILL.md"
+! grep -q "references/claude-adapter.md" "$tmp_all/.claude/skills/alpha-goal/SKILL.md"
+grep -q '\$HOME/.claude/skills/alpha-goal/references/claude-adapter.md' "$tmp_all/.claude/CLAUDE.md"
+
+tmp_upgrade="$(mktemp -d)"
+mkdir -p "$tmp_upgrade/.codex"
+python3 - "$tmp_upgrade/.codex/hooks.json" <<'PY'
+import json
+import sys
+
+data = {
+    "hooks": {
+        "PostCompact": [
+            {"hooks": [{"type": "command", "command": ": 'codex-alpha-goal-compact-recovery:v1'; printf old"}]},
+            {"hooks": [{"type": "command", "command": ": 'codex-alpha-goal-compact-recovery:v2'; printf old2"}]},
+            {"hooks": [{"type": "command", "command": ": 'codex-compact-skill-recovery:experimental'; printf experimental"}]},
+            {"hooks": [{"type": "command", "command": "printf unmanaged"}]},
+        ]
+    }
+}
+with open(sys.argv[1], "w") as handle:
+    json.dump(data, handle)
+PY
+upgrade_output="$(run_installer "$tmp_upgrade")"
+assert_simple_success_output "$upgrade_output" "Alpha Goal install completed."
+! grep -q "codex-alpha-goal-compact-recovery:v1" "$tmp_upgrade/.codex/hooks.json"
+! grep -q "codex-alpha-goal-compact-recovery:v2" "$tmp_upgrade/.codex/hooks.json"
+! grep -q "codex-compact-skill-recovery:experimental" "$tmp_upgrade/.codex/hooks.json"
+test "$(grep -o "codex-alpha-goal-compact-recovery:v3" "$tmp_upgrade/.codex/hooks.json" | wc -l | tr -d ' ')" -eq 1
+grep -q "printf unmanaged" "$tmp_upgrade/.codex/hooks.json"
+
+tmp_merge="$(mktemp -d)"
+mkdir -p "$tmp_merge/.codex"
+cat > "$tmp_merge/.codex/config.toml" <<'EOF'
+[features]
+multi_agent = false
+
+[custom]
+keep = "yes"
+EOF
+merge_install_output="$(run_installer "$tmp_merge")"
+assert_simple_success_output "$merge_install_output" "Alpha Goal install completed."
+node - "$tmp_merge/.codex/config.toml" "$repo_root/vendor/smol-toml/dist/index.cjs" <<'JS'
+const fs = require("node:fs");
+const toml = require(process.argv[3]);
+const data = toml.parse(fs.readFileSync(process.argv[2], "utf8"));
+if (data.features?.multi_agent !== false) process.exit(1);
+if (data.features?.default_mode_request_user_input !== true) process.exit(1);
+if (data.features?.child_agents_md !== true) process.exit(1);
+if (data.features?.multi_agent_v2?.usage_hint_enabled !== true) process.exit(1);
+if (data.agents?.max_threads !== 6 || data.agents?.max_depth !== 1) process.exit(1);
+if (data.custom?.keep !== "yes") process.exit(1);
+JS
+merge_uninstall_output="$(run_installer "$tmp_merge" --uninstall)"
+assert_simple_success_output "$merge_uninstall_output" "Alpha Goal uninstall completed."
+test -f "$tmp_merge/.codex/config.toml"
+grep -q 'keep = "yes"' "$tmp_merge/.codex/config.toml"
+grep -q 'multi_agent = false' "$tmp_merge/.codex/config.toml"
+for skill in alpha-goal executor verifier; do
+  test ! -e "$tmp_merge/.codex/skills/$skill"
+done
+test ! -e "$tmp_merge/.codex/AGENTS.md"
+test ! -e "$tmp_merge/.codex/hooks.json"
 
 all_uninstall_output="$(TARGET_CHOICE=all run_installer "$tmp_all" --uninstall)"
 assert_simple_success_output "$all_uninstall_output" "Alpha Goal uninstall completed."
@@ -255,14 +496,20 @@ test ! -e "$tmp_all/.codex/config.toml"
 test ! -e "$tmp_all/.codex/hooks.json"
 test ! -e "$tmp_all/.claude/CLAUDE.md"
 
-if HOME="$(mktemp -d)" "$repo_root/scripts/install.sh" </dev/null; then
+tmp_noninteractive_install="$(mktemp -d)"
+tmp_noninteractive_uninstall="$(mktemp -d)"
+if noninteractive_install_output="$(HOME="$tmp_noninteractive_install" "$repo_root/scripts/install.sh" </dev/null 2>&1)"; then
   echo "non-interactive install should fail" >&2
   exit 1
 fi
-if HOME="$(mktemp -d)" "$repo_root/scripts/install.sh" --uninstall </dev/null; then
+grep -q "Interactive terminal required" <<<"$noninteractive_install_output"
+test ! -e "$tmp_noninteractive_install/.codex/skills/alpha-goal"
+if noninteractive_uninstall_output="$(HOME="$tmp_noninteractive_uninstall" "$repo_root/scripts/install.sh" --uninstall </dev/null 2>&1)"; then
   echo "non-interactive uninstall should fail" >&2
   exit 1
 fi
+grep -q "Interactive terminal required" <<<"$noninteractive_uninstall_output"
+test ! -e "$tmp_noninteractive_uninstall/.codex/skills/alpha-goal"
 
 tmp_conflict="$(mktemp -d)"
 if conflict_output="$(TARGET_CHOICE=all CODEX_HOME_INPUT="$tmp_conflict/.claude" run_installer "$tmp_conflict" --uninstall 2>&1)"; then
@@ -284,11 +531,65 @@ tmp_external="$(mktemp -d)"
 mkdir -p "$tmp_external/.codex/skills" "$tmp_external/external-alpha-goal"
 ln -s "$tmp_external/external-alpha-goal" "$tmp_external/.codex/skills/alpha-goal"
 if external_output="$(run_installer "$tmp_external" 2>&1)"; then
-  echo "install should refuse external skill symlinks with force=false" >&2
+  echo "install should refuse external skill symlinks without an override" >&2
   exit 1
 fi
 grep -q "External skill symlinks are not replaced during install" <<<"$external_output"
 test -L "$tmp_external/.codex/skills/alpha-goal"
+
+tmp_unmanaged="$(mktemp -d)"
+mkdir -p "$tmp_unmanaged/.codex/skills/alpha-goal"
+printf 'user-owned\n' > "$tmp_unmanaged/.codex/skills/alpha-goal/sentinel"
+if unmanaged_output="$(run_installer "$tmp_unmanaged" 2>&1)"; then
+  echo "install should refuse an unmanaged same-name skill directory" >&2
+  exit 1
+fi
+grep -q "Refusing to replace unmanaged or malformed skill directory" <<<"$unmanaged_output"
+grep -q "user-owned" "$tmp_unmanaged/.codex/skills/alpha-goal/sentinel"
+test ! -e "$tmp_unmanaged/.codex/skills/alpha-goal/.alpha-goal-skill-copy"
+
+tmp_malformed="$(mktemp -d)"
+mkdir -p "$tmp_malformed/.codex/skills/alpha-goal"
+printf 'not-a-managed-marker\n' > "$tmp_malformed/.codex/skills/alpha-goal/.alpha-goal-skill-copy"
+printf 'keep-me\n' > "$tmp_malformed/.codex/skills/alpha-goal/sentinel"
+if malformed_output="$(run_installer "$tmp_malformed" 2>&1)"; then
+  echo "install should refuse a malformed managed marker" >&2
+  exit 1
+fi
+grep -q "Refusing to replace unmanaged or malformed skill directory" <<<"$malformed_output"
+grep -q "keep-me" "$tmp_malformed/.codex/skills/alpha-goal/sentinel"
+
+tmp_recovery="$(mktemp -d)"
+run_installer "$tmp_recovery" >/dev/null
+printf 'old-copy\n' > "$tmp_recovery/.codex/skills/alpha-goal/recovery-sentinel"
+mkdir -p "$tmp_recovery/fake-bin"
+real_mv="$(command -v mv)"
+python3 - "$tmp_recovery/fake-bin/mv" <<'PY'
+import os
+import sys
+
+wrapper = r'''#!/usr/bin/env bash
+if [[ "$1" == *"/.alpha-goal-skill-stage."*"/alpha-goal" && "$2" == *"/.codex/skills/alpha-goal" ]]; then
+  mkdir -p "$2"
+  printf 'source=concurrent-writer\n' > "$2/.alpha-goal-skill-copy"
+  printf 'collision\n' > "$2/user-sentinel"
+fi
+exec "$REAL_MV" "$@"
+'''
+with open(sys.argv[1], "w") as handle:
+    handle.write(wrapper)
+os.chmod(sys.argv[1], 0o755)
+PY
+if recovery_output="$(PATH="$tmp_recovery/fake-bin:$PATH" REAL_MV="$real_mv" run_installer "$tmp_recovery" 2>&1)"; then
+  echo "collision-injected replacement should fail" >&2
+  exit 1
+fi
+grep -q "Previous managed copy preserved at:" <<<"$recovery_output"
+recovery_stage="$(find "$tmp_recovery/.codex/skills" -maxdepth 1 -type d -name '.alpha-goal-skill-stage.*' -print -quit)"
+test -n "$recovery_stage"
+grep -q "old-copy" "$recovery_stage/original/recovery-sentinel"
+test -f "$recovery_stage/alpha-goal/SKILL.md" || test -f "$tmp_recovery/.codex/skills/alpha-goal/alpha-goal/SKILL.md"
+grep -q "collision" "$tmp_recovery/.codex/skills/alpha-goal/user-sentinel"
 
 codex_uninstall_output="$(run_installer "$tmp_codex" --uninstall)"
 assert_simple_success_output "$codex_uninstall_output" "Alpha Goal uninstall completed."
@@ -331,19 +632,19 @@ expect_invalid_arg positional
 bash -n scripts/install.sh
 node tools/validate_skills.js .
 node tools/validate_skills.js --fixtures
-rm -rf "$tmp_codex" "$tmp_claude" "$tmp_all" "$tmp_conflict" "$tmp_link_conflict" "$tmp_external"
+node tools/test_checkpoint_lock.js
+rm -rf "$tmp_codex" "$tmp_claude" "$tmp_all" "$tmp_upgrade" "$tmp_merge" "$tmp_noninteractive_install" "$tmp_noninteractive_uninstall" "$tmp_conflict" "$tmp_link_conflict" "$tmp_external" "$tmp_unmanaged" "$tmp_malformed" "$tmp_recovery"
 rm -f /tmp/alpha-goal-invalid.out /tmp/alpha-goal-invalid.err
 ```
 
 ## Prompts
 
 ```text
-$alpha-goal 判断这个任务下一步应澄清、执行、验证，还是继续闭环。
-$executor 根据 Goal Contract 和已有条件检查点做下一轮最有用且可验证的有界 slice。
-$verifier 对照验收证据和 hard-blocking checklist 验证完成、声明边界和 blocker，并返回下一步 route。
+$alpha-goal 根据请求和已发现事实形成 Goal Frame，再判断走 DIRECT 还是 PERSIST。
+$executor 从已接受的 Goal Contract 恢复并执行下一批授权工作。
+$verifier 对当前持久 checkpoint 做风险边界或最终状态验证。
 ```
 
 ## Count budget
 
-The validator enforces the whole `skills/` tree under 15,000 word+punctuation units, counted as words plus punctuation/symbol marks.
-This budget preserves trigger behavior, durable state, authority gates, hard-blocking acceptance checks, route decisions, and verifier feedback without over-compressing their meaning.
+The validator keeps non-script skill instructions strictly below 9,301 word+punctuation units. Script resources under `skills/*/scripts/` are reported separately and excluded because they are executable resources rather than loaded skill instruction prose. Structure validation deliberately ignores skill prose; semantic quality is covered by independent review against the static boundary corpus and, when separately authorized, runtime evaluations.

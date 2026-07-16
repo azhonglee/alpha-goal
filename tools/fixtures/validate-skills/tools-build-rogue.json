@@ -1,0 +1,8 @@
+{
+  "shouldPass": false,
+  "expectedErrors": ["unexpected tools surface: tools/build/rogue.txt"],
+  "inheritRoot": true,
+  "files": {
+    "tools/build/rogue.txt": "rogue\n"
+  }
+}

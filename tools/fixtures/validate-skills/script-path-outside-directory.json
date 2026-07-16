@@ -1,0 +1,12 @@
+{
+  "shouldPass": false,
+  "expectedErrors": ["script must be under scripts/"],
+  "inheritRoot": true,
+  "replacements": [
+    {
+      "file": "tools/validation/alpha-goal.json",
+      "search": "\"scripts/authority-digest.js\"",
+      "replace": "\"SKILL.md\""
+    }
+  ]
+}

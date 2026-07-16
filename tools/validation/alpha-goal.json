@@ -1,52 +1,128 @@
 {
-  "schemaVersion": 3,
-  "skills": [
-    "alpha-goal",
-    "executor",
-    "verifier"
+  "schemaVersion": 6,
+  "instructionBudgetExclusiveMax": 9301,
+  "publicSkills": [
+    {
+      "name": "alpha-goal",
+      "entry": true,
+      "ownedSemantics": [
+        "goal-framing",
+        "entry-route",
+        "goal-contract-authority",
+        "accepted-authority-digest"
+      ],
+      "references": [
+        "references/goal-contract-book.md",
+        "references/claude-adapter.md"
+      ],
+      "scripts": [
+        "scripts/authority-digest.js"
+      ]
+    },
+    {
+      "name": "executor",
+      "entry": false,
+      "ownedSemantics": [
+        "target-delivery-mutation",
+        "raw-execution-evidence",
+        "recovery-cursor",
+        "checkpoint-write-protocol",
+        "checkpoint-termination"
+      ],
+      "references": [],
+      "scripts": [
+        "scripts/checkpoint-lock.js"
+      ]
+    },
+    {
+      "name": "verifier",
+      "entry": false,
+      "ownedSemantics": [
+        "evidence-classification",
+        "verification-observations",
+        "criterion-status",
+        "evidence-freshness",
+        "verification-route"
+      ],
+      "references": [],
+      "scripts": []
+    }
   ],
+  "routes": {
+    "entry": {
+      "owner": "alpha-goal",
+      "values": [
+        "DIRECT",
+        "PERSIST"
+      ]
+    },
+    "verification": {
+      "owner": "verifier",
+      "values": [
+        "PASS_TO_FINAL",
+        "NEXT_ITERATION",
+        "BLOCKED"
+      ]
+    }
+  },
   "artifacts": [
     {
       "path": "goal-contract.md",
-      "kind": "task",
-      "requirement": "required",
-      "condition": "all alpha-goal tasks"
-    },
-    {
-      "path": "technical_design.md",
-      "kind": "task",
-      "requirement": "conditional",
-      "condition": "Goal Contract Confirmation Gate selects run technical design"
+      "condition": "PERSIST route before target mutation",
+      "sections": [
+        {
+          "name": "authority-and-boundaries",
+          "owner": "alpha-goal"
+        },
+        {
+          "name": "success-criteria-and-acceptance-evidence",
+          "owner": "alpha-goal"
+        },
+        {
+          "name": "confirmation-and-authority-digest",
+          "owner": "alpha-goal"
+        }
+      ]
     },
     {
       "path": "checkpoint.md",
-      "kind": "task",
-      "requirement": "conditional",
-      "condition": "all executor runs; update after every important slice and before verifier handoff",
-      "context": "Canonical artifact paths + workspace identity + every in-scope repo manifest/worktree/branch + single-writer execution context"
+      "condition": "accepted PERSIST contract during execution and verification",
+      "sections": [
+        {
+          "name": "recorded-contract-identity-state-revision-and-write-control",
+          "owner": "executor"
+        },
+        {
+          "name": "execution-and-stagnation-records",
+          "owner": "executor"
+        },
+        {
+          "name": "verification-observations-criterion-status-and-verdict",
+          "owner": "verifier"
+        }
+      ]
     }
   ],
-  "requiredGates": [
-    "Entry Gate",
-    "Clarification Gate",
-    "Review Gate",
-    "Confirmation Gate"
-  ],
-  "claudeAdapter": {
-    "path": "references/claude-adapter.md"
-  },
-  "technicalDesignRunbook": {
-    "path": "references/technical-design-runbook.md"
-  },
-  "checkedFiles": [
-    "skills/alpha-goal/SKILL.md",
-    "skills/executor/SKILL.md",
-    "skills/verifier/SKILL.md",
-    "MANIFEST.md",
-    "templates/hooks.json",
-    "README.md",
-    "README.en.md",
-    "INSTALL.md",
-    "AGENTS.md"
-  ]
+  "distribution": {
+    "templates": [
+      "templates/AGENTS.md",
+      "templates/CLAUDE.md",
+      "templates/config.toml",
+      "templates/hooks.json"
+    ],
+    "scripts": [
+      "scripts/install.sh",
+      "tools/test_checkpoint_lock.js"
+    ],
+    "evals": [
+      "tools/evals/runtime-boundaries.json"
+    ],
+    "docs": [
+      "AGENTS.md",
+      "README.md",
+      "README.en.md",
+      "INSTALL.md",
+      "MANIFEST.md"
+    ]
+  }
 }

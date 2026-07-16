@@ -1,0 +1,8 @@
+{
+  "shouldPass": false,
+  "expectedErrors": ["missing required skill directory"],
+  "inheritRoot": true,
+  "removeFiles": [
+    "skills/verifier"
+  ]
+}

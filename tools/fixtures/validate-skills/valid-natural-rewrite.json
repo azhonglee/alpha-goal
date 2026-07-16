@@ -1,0 +1,9 @@
+{
+  "shouldPass": true,
+  "inheritRoot": true,
+  "files": {
+    "skills/alpha-goal/SKILL.md": "---\nname: alpha-goal\ndescription: Rewritten entry prose for a structurally valid skill.\n---\n\n# Entirely Different Alpha Prose\n\nThis fixture intentionally contains no production headings or sentences.\n",
+    "skills/executor/SKILL.md": "---\nname: executor\ndescription: Rewritten execution prose for a structurally valid skill.\n---\n\n# Entirely Different Executor Prose\n\nNatural-language rewrites are outside structural validation.\n",
+    "skills/verifier/SKILL.md": "---\nname: verifier\ndescription: Rewritten verification prose for a structurally valid skill.\n---\n\n# Entirely Different Verifier Prose\n\nSemantic quality belongs to review and behavior tests.\n"
+  }
+}

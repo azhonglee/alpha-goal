@@ -1,0 +1,6 @@
+{
+  "shouldPass": false,
+  "expectedErrors": ["skill instruction word+punctuation budget exceeded"],
+  "inheritRoot": true,
+  "setSkillBudgetToActual": true
+}
