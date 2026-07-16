@@ -36,7 +36,7 @@ function stageAndCommit(checkpoint, lease, payload = "state") {
   assert.equal(status.ok, true);
   assert.equal(status.state, "unlocked");
   assert.equal(status.phase, "unlocked");
-  assert.ok(fs.existsSync(`${checkpoint}.lock.closed-${lease.token}`));
+  assert.ok(!fs.existsSync(`${checkpoint}.lock.closed-${lease.token}`));
 }
 
 function sha256(text) {

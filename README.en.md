@@ -60,7 +60,7 @@ Explicit acceptance-authority goal change during an active epoch -> REFRAME_REQU
 
 A Goal Frame contains intent, observable outcome, scope/non-goals, constraints, success signals, observers, and material decisions. Clear fields come from the request and attributable facts; clarification asks the relevant authority about one highest-impact blocking gap and closes it only when the authorized decision and its material boundaries and execution/evidence consequences are determined. `REFRAME_REQUESTED` is only a lifecycle handoff after the acceptance authority explicitly changes the active goal; it is not a verifier verdict.
 
-`DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state, and does not call `executor` or `verifier`. For `PERSIST`, the only canonical lifecycle artifacts are `goal-contract.md` and `checkpoint.md`; the checkpoint helper also creates atomic-write coordination records: active `.lock`, staged `.pending-*`, and retained `.lock.closed-*` close records.
+`DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state, and does not call `executor` or `verifier`. For `PERSIST`, the only canonical lifecycle artifacts are `goal-contract.md` and `checkpoint.md`; the checkpoint helper also creates atomic-write coordination records: active `.lock`, staged `.pending-*`, and best-effort-cleaned `.lock.closed-*` atomic-unlock tombstones.
 
 - `goal-contract.md`: written only by `alpha-goal`; its accepted revision is standard structured input to executor and verifier.
 - `checkpoint.md`: retains immutable contract epochs, binds the current digest and state, and serializes executor/verifier handoff with atomic revision/owner control.

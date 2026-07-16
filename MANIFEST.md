@@ -34,7 +34,7 @@ Claude tool-name adaptation lives in `skills/alpha-goal/references/claude-adapte
 
 ## Runtime artifacts
 
-Canonical lifecycle artifacts exist only for `PERSIST`; the checkpoint helper also creates coordination records: active `.lock`, staged `.pending-*`, and retained `.lock.closed-*` close records. The state root is `$HOME/.alpha-goal/<workspace-slug>/`, where the slug comes from the stable workspace basename.
+Canonical lifecycle artifacts exist only for `PERSIST`; the checkpoint helper also creates coordination records: active `.lock`, staged `.pending-*`, and best-effort-cleaned `.lock.closed-*` atomic-unlock tombstones. The state root is `$HOME/.alpha-goal/<workspace-slug>/`, where the slug comes from the stable workspace basename.
 
 | Path | Condition and owner |
 | --- | --- |

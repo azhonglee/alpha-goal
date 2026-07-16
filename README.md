@@ -60,7 +60,7 @@ Explicit acceptance-authority goal change during an active epoch -> REFRAME_REQU
 
 Goal Frame 包含 intent、observable outcome、scope/non-goals、constraints、success signals、observers 和 material decisions；已清晰内容直接来自请求与可归因事实，只向相关 authority 追问最高影响的单个 blocking gap，并仅在授权决定及其 material boundaries、执行/证据后果可确定时闭合。`REFRAME_REQUESTED` 仅表示 acceptance authority 明确改变 active goal 后的 lifecycle handoff，不是 verifier verdict。
 
-`DIRECT` 将完整 Goal Frame 保留在当前上下文，不创建 Alpha Goal 状态，也不调用 `executor` 或 `verifier`。`PERSIST` 的 canonical lifecycle artifacts 只有 `goal-contract.md` 与 `checkpoint.md`；checkpoint helper 还会生成原子写协调记录：活动中的 `.lock`、暂存中的 `.pending-*`，以及提交后保留的 `.lock.closed-*` 关闭记录。
+`DIRECT` 将完整 Goal Frame 保留在当前上下文，不创建 Alpha Goal 状态，也不调用 `executor` 或 `verifier`。`PERSIST` 的 canonical lifecycle artifacts 只有 `goal-contract.md` 与 `checkpoint.md`；checkpoint helper 还会生成原子写协调记录：活动中的 `.lock`、暂存中的 `.pending-*`，以及原子解锁后尽力清理的 `.lock.closed-*` 临时墓碑。
 
 - `goal-contract.md`：由 `alpha-goal` 独占修改；accepted revision 是 executor 和 verifier 的标准结构化输入。
 - `checkpoint.md`：保留不可变契约 epoch，绑定当前 digest 与状态，并用原子锁及 revision/owner 串行化 `executor`、`verifier` 交接。

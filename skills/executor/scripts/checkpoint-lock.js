@@ -82,7 +82,11 @@ function snapshot(c, file = c.checkpoint, canonical = false) {
   return { revision, owner, digest: crypto.createHash("sha256").update(input).digest("hex") };
 }
 function same(actual, revision, owner, digest) { return actual.revision === revision && actual.owner === owner && actual.digest === digest; }
-function close(c, token) { fs.renameSync(c.lock, `${c.lock}.closed-${token}`); }
+function close(c, token) {
+  const closed = `${c.lock}.closed-${token}`;
+  fs.renameSync(c.lock, closed);
+  try { fs.rmSync(closed, { recursive: true, force: true }); } catch (_) {}
+}
 
 function readOwner(c) {
   try {
