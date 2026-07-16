@@ -1,0 +1,15 @@
+{
+  "shouldPass": false,
+  "expectedErrors": ["skill instruction word+punctuation budget exceeded"],
+  "inheritRoot": true,
+  "files": {
+    "skills/alpha-goal/build/generated.txt": ""
+  },
+  "repeatFiles": [
+    {
+      "file": "skills/alpha-goal/build/generated.txt",
+      "text": "generated ",
+      "count": 10000
+    }
+  ]
+}

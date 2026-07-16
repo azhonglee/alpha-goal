@@ -8,6 +8,14 @@ const FRONTMATTER_RE = /^---\n(.*?)\n---\n/s;
 const FIELD_RE = /^([A-Za-z0-9_-]+):\s*(.*?)\s*$/;
 const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
 const CONTRACT_PATH = "tools/validation/alpha-goal.json";
+const REQUIRED_FIXTURES = new Set([
+  "hidden-build-budget.json",
+  "missing-skill.json",
+  "skill-directory-symlink.json",
+  "tools-build-rogue.json",
+  "tools-directory-symlink.json",
+  "valid-natural-rewrite.json"
+]);
 
 function main(args = process.argv.slice(2)) {
   if (args[0] === "--fixtures") return runFixtures();
@@ -204,10 +212,15 @@ function validateSkillBudget(root, contract, errors) {
     if (!nonEmptyString(skill.name)) continue;
     const dir = path.join(skillsRoot, skill.name);
     if (!isDirectory(dir)) continue;
-    const files = walk(dir).filter(isFile);
+    const entries = walkAll(dir);
     let skillTotal = 0, scriptTotal = 0;
-    for (const file of files) {
+    for (const file of entries) {
       const rel = relative(dir, file);
+      if (isSymbolicLink(file)) {
+        errors.push(`public skill files must not be symlinks: skills/${skill.name}/${rel}`);
+        continue;
+      }
+      if (!isFile(file)) continue;
       const units = countUnits(fs.readFileSync(file, "utf8"));
       if (rel.startsWith("scripts/")) scriptTotal += units;
       else skillTotal += units;
@@ -271,8 +284,13 @@ function validateToolsSurface(root, errors, warnings) {
     errors.push("missing tools directory: tools");
     return;
   }
-  for (const file of walk(toolsRoot).filter(isFile)) {
+  for (const file of walkAll(toolsRoot)) {
     const rel = relative(root, file);
+    if (isSymbolicLink(file)) {
+      errors.push(`tools surface must not contain symlinks: ${rel}`);
+      continue;
+    }
+    if (!isFile(file)) continue;
     const allowedFixture = /^tools\/fixtures\/validate-skills\/[a-z0-9-]+\.json$/.test(rel);
     const allowedEval = rel === "tools/evals/runtime-boundaries.json";
     const allowedTest = rel === "tools/test_checkpoint_lock.js";
@@ -401,7 +419,13 @@ function runFixtures() {
     return 1;
   }
 
-  for (const fixtureFile of fs.readdirSync(fixturesRoot).filter(file => file.endsWith(".json")).sort()) {
+  const fixtureFiles = fs.readdirSync(fixturesRoot).filter(file => file.endsWith(".json")).sort();
+  if (fixtureFiles.length === 0) errors.push("fixtures directory contains no JSON fixtures");
+  for (const required of REQUIRED_FIXTURES) {
+    if (!fixtureFiles.includes(required)) errors.push(`missing required fixture: ${required}`);
+  }
+
+  for (const fixtureFile of fixtureFiles) {
     const fixturePath = path.join(fixturesRoot, fixtureFile);
     let fixture;
     try {
@@ -429,6 +453,7 @@ function runFixtures() {
       for (const replacement of fixture.replacements || []) applyReplacement(tempRoot, fixtureFile, replacement, errors);
       for (const [rel, text] of Object.entries(fixture.files || {})) writeFixtureFile(tempRoot, rel, text);
       for (const repeated of fixture.repeatFiles || []) repeatFixtureFile(tempRoot, fixtureFile, repeated, errors);
+      for (const symlink of fixture.symlinks || []) writeFixtureSymlink(tempRoot, fixtureFile, symlink, errors);
       if (fixture.setSkillBudgetToActual) setBudgetToActual(tempRoot);
 
       const result = validateRoot(tempRoot);
@@ -463,6 +488,17 @@ function writeFixtureFile(root, rel, text) {
   const target = path.join(root, rel);
   fs.mkdirSync(path.dirname(target), { recursive: true });
   fs.writeFileSync(target, text);
+}
+
+
+function writeFixtureSymlink(root, fixtureFile, symlink, errors) {
+  if (!nonEmptyString(symlink?.path) || !nonEmptyString(symlink?.target)) {
+    errors.push(`${fixtureFile}: symlinks entries require path and target`);
+    return;
+  }
+  const linkPath = path.join(root, symlink.path);
+  fs.mkdirSync(path.dirname(linkPath), { recursive: true });
+  fs.symlinkSync(symlink.target, linkPath, symlink.type || "dir");
 }
 
 function repeatFixtureFile(root, fixtureFile, repeated, errors) {
@@ -539,10 +575,13 @@ function isDirectory(file) {
   try { return fs.statSync(file).isDirectory(); } catch { return false; }
 }
 
-function walk(root) {
+function isSymbolicLink(file) {
+  try { return fs.lstatSync(file).isSymbolicLink(); } catch { return false; }
+}
+
+function walk(root, skipped = new Set([".git", ".worktrees", "node_modules", "dist", "build", ".venv", "__pycache__"])) {
   const result = [];
   if (!fs.existsSync(root)) return result;
-  const skipped = new Set([".git", ".worktrees", "node_modules", "dist", "build", ".venv", "__pycache__"]);
   function visit(dir) {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
       if (entry.isDirectory() && skipped.has(entry.name)) continue;
@@ -553,6 +592,10 @@ function walk(root) {
   }
   visit(root);
   return result.sort();
+}
+
+function walkAll(root) {
+  return walk(root, new Set());
 }
 
 function relative(root, file) {

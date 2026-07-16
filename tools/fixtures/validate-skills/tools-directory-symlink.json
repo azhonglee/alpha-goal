@@ -1,0 +1,12 @@
+{
+  "shouldPass": false,
+  "expectedErrors": ["tools surface must not contain symlinks: tools/build"],
+  "inheritRoot": true,
+  "symlinks": [
+    {
+      "path": "tools/build",
+      "target": "fixtures",
+      "type": "dir"
+    }
+  ]
+}

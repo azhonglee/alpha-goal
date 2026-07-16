@@ -1,0 +1,12 @@
+{
+  "shouldPass": false,
+  "expectedErrors": ["public skill files must not be symlinks: skills/alpha-goal/build"],
+  "inheritRoot": true,
+  "symlinks": [
+    {
+      "path": "skills/alpha-goal/build",
+      "target": "references",
+      "type": "dir"
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 Languages: [Chinese](README.md) | English
 
-Alpha Goal clarifies and structures user intent into an executable, verifiable goal, then routes by materiality. Every change task first gets a minimal Goal Frame; work needing confirmation, recovery, or auditable evidence expands it into a Goal Contract.
+Alpha Goal clarifies and structures user intent into an executable, verifiable goal, then routes by materiality. Every change task first gets a minimal Goal Frame; work involving a material authority decision, an external/destructive side effect, recovery, or auditable evidence expands it into a Goal Contract.
 
 ## Core architecture
 
@@ -14,15 +14,14 @@ flowchart TD
   P --> E["executor: execute at risk boundaries and record checkpoint.md"]
   E --> V["verifier: independently observe current state"]
   V -->|"NEXT_ITERATION"| E
-  E -. "REFRAME_REQUESTED" .-> A
-  V -. "REFRAME_REQUESTED" .-> A
+  G["Acceptance authority explicitly changes the active goal"] -. "REFRAME_REQUESTED lifecycle" .-> A
   V -->|"BLOCKED"| B["Report blocker"]
   V -->|"PASS_TO_FINAL"| F["Final claim"]
 ```
 
-A Goal Frame contains intent, observable outcome, scope/non-goals, constraints, success signals, observers, and material decisions. Clear fields come from the request and attributable facts; clarification asks the relevant authority about one highest-impact blocking gap and closes it only when the authorized decision and its material boundaries and execution/evidence consequences are determined.
+A Goal Frame contains intent, observable outcome, scope/non-goals, constraints, success signals, observers, and material decisions. Clear fields come from the request and attributable facts; clarification asks the relevant authority about one highest-impact blocking gap and closes it only when the authorized decision and its material boundaries and execution/evidence consequences are determined. `REFRAME_REQUESTED` is only a lifecycle handoff after the acceptance authority explicitly changes the active goal; it is not a verifier verdict.
 
-`DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state, and does not call `executor` or `verifier`. `PERSIST` keeps two runtime artifacts:
+`DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state, and does not call `executor` or `verifier`. `PERSIST` maintains two canonical lifecycle artifacts; the checkpoint helper also creates atomic-write coordination records: active `.lock`, staged `.pending-*`, and retained `.lock.closed-*` close records:
 
 - `goal-contract.md`: written only by `alpha-goal`; its accepted revision is standard structured input to executor, verifier, and an optional native Goal projection.
 - `checkpoint.md`: retains immutable contract epochs, binds the current digest and state, and serializes executor/verifier handoff with an atomic lock plus revision/owner control.

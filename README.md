@@ -2,7 +2,7 @@
 
 语言：简体中文 | [English](README.en.md)
 
-Alpha Goal 将用户意图澄清并结构化为可执行、可验收的目标，再按材料性选择直接执行或持久闭环。每个 change task 先形成最小 Goal Frame；需要确认、恢复或可审计证据时再扩展为 Goal Contract。
+Alpha Goal 将用户意图澄清并结构化为可执行、可验收的目标，再按材料性选择直接执行或持久闭环。每个 change task 先形成最小 Goal Frame；涉及材料性 authority 决策、外部/破坏性副作用、恢复或可审计证据时再扩展为 Goal Contract。
 
 ## 核心架构
 
@@ -14,15 +14,14 @@ flowchart TD
   P --> E["executor：按风险边界执行并记录 checkpoint.md"]
   E --> V["verifier：独立观察当前状态"]
   V -->|"NEXT_ITERATION"| E
-  E -. "REFRAME_REQUESTED" .-> A
-  V -. "REFRAME_REQUESTED" .-> A
+  G["active goal 被 acceptance authority 明确修改"] -. "REFRAME_REQUESTED lifecycle" .-> A
   V -->|"BLOCKED"| B["报告 blocker"]
   V -->|"PASS_TO_FINAL"| F["最终声明"]
 ```
 
-Goal Frame 包含 intent、observable outcome、scope/non-goals、constraints、success signals、observers 和 material decisions；已清晰内容直接来自请求与可归因事实，只向相关 authority 追问最高影响的单个 blocking gap，并仅在授权决定及其 material boundaries、执行/证据后果可确定时闭合。
+Goal Frame 包含 intent、observable outcome、scope/non-goals、constraints、success signals、observers 和 material decisions；已清晰内容直接来自请求与可归因事实，只向相关 authority 追问最高影响的单个 blocking gap，并仅在授权决定及其 material boundaries、执行/证据后果可确定时闭合。`REFRAME_REQUESTED` 仅表示 acceptance authority 明确改变 active goal 后的 lifecycle handoff，不是 verifier verdict。
 
-`DIRECT` 将完整 Goal Frame 保留在当前上下文，不创建 Alpha Goal 状态，也不调用 `executor` 或 `verifier`。`PERSIST` 只保留两个运行时 artifact：
+`DIRECT` 将完整 Goal Frame 保留在当前上下文，不创建 Alpha Goal 状态，也不调用 `executor` 或 `verifier`。`PERSIST` 维护两个 canonical lifecycle artifacts；checkpoint helper 还会生成原子写协调记录：活动中的 `.lock`、暂存中的 `.pending-*`，以及提交后保留的 `.lock.closed-*` 关闭记录：
 
 - `goal-contract.md`：由 `alpha-goal` 独占修改；accepted revision 是 executor、verifier 和可选 native Goal projection 的标准结构化输入。
 - `checkpoint.md`：保留不可变契约 epoch，绑定当前 digest 与状态，并用原子锁及 revision/owner 串行化 `executor`、`verifier` 交接。

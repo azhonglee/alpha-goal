@@ -30,7 +30,7 @@ The script creates copied skill directories under target-specific independent ro
 - `claude`: sync Claude `CLAUDE.md` and Claude skill copies.
 - `all`: sync or uninstall both Codex and Claude in one run.
 
-The target menu uses Up/Down plus Enter only; `codex` is selected by default. Install asks only for that target menu, ignores `CODEX_HOME`, and then uses fixed defaults: Codex home `$HOME/.codex`, `force=false`, template sync enabled, Codex hook sync enabled, and verbose output disabled. For uninstall, the flow asks for the target, Codex home when relevant, template cleanup, hook cleanup when relevant, and verbose output.
+The target menu uses Up/Down plus Enter only; `codex` is selected by default. Install asks only for that target menu, ignores `CODEX_HOME`, and then uses fixed defaults: Codex home `$HOME/.codex`, template sync enabled, Codex hook sync enabled, and verbose output disabled. For uninstall, the flow asks for the target, Codex home when relevant, template cleanup, hook cleanup when relevant, and verbose output.
 
 Non-interactive runs are refused. Any CLI argument other than `--uninstall`, including `--help`, `--target`, `--codex-home`, `--force`, sync toggles, or `--verbose`, is rejected.
 
@@ -44,13 +44,13 @@ Uninstall is conservative outside the managed copied-skill path. It removes only
 
 The compact recovery hook definition lives in `templates/hooks.json`. It is a `PostCompact` hook without a matcher and must not set matcher. It reloads from an explicit current artifact path, verifies bindings, and maps checkpoint owner/routes including terminal states before resuming.
 
-Hook upgrades are keyed by marker family. A newer marker removes older hooks from the same family before adding the template hook. The installer also removes the earlier experimental `codex-compact-skill-recovery` family.
+Hook replacement is keyed by marker family. The current v3 template replaces other managed numbered versions in that family before it is added. The installer also removes the experimental `codex-compact-skill-recovery` family and preserves unmanaged hooks.
 
 Codex may require reviewing and trusting the changed hook with `/hooks` before it runs.
 
 ## Smoke test
 
-The smoke test checks source-identical skill copies; semantic checkpoint transitions, JSON lock metadata, automatic unlock, stale-write rejection, abort/recovery, and legacy-lock release from arbitrary CWD; config sync; adapter discoverability; hook upgrade; idempotence; failure preservation; concise output; conservative uninstall; rejected arguments; refused unmanaged targets; and ignored `CODEX_HOME`. It does not touch real user configuration.
+The smoke test checks source-identical skill copies; semantic checkpoint transitions, JSON lock metadata, automatic unlock, stale-write rejection, abort/recovery, and legacy-lock release from arbitrary CWD; missing-key TOML merge while preserving explicit values; adapter discoverability; managed hook replacement; idempotence; failure preservation; concise output; fresh and mixed-config uninstall behavior; rejected arguments; refused unmanaged targets; and ignored `CODEX_HOME`. It uses temporary homes and does not touch real user configuration.
 
 ```bash
 set -euo pipefail
@@ -439,6 +439,39 @@ assert_simple_success_output "$upgrade_output" "Alpha Goal install completed."
 test "$(grep -o "codex-alpha-goal-compact-recovery:v3" "$tmp_upgrade/.codex/hooks.json" | wc -l | tr -d ' ')" -eq 1
 grep -q "printf unmanaged" "$tmp_upgrade/.codex/hooks.json"
 
+tmp_merge="$(mktemp -d)"
+mkdir -p "$tmp_merge/.codex"
+cat > "$tmp_merge/.codex/config.toml" <<'EOF'
+[features]
+multi_agent = false
+
+[custom]
+keep = "yes"
+EOF
+merge_install_output="$(run_installer "$tmp_merge")"
+assert_simple_success_output "$merge_install_output" "Alpha Goal install completed."
+node - "$tmp_merge/.codex/config.toml" "$repo_root/vendor/smol-toml/dist/index.cjs" <<'JS'
+const fs = require("node:fs");
+const toml = require(process.argv[3]);
+const data = toml.parse(fs.readFileSync(process.argv[2], "utf8"));
+if (data.features?.multi_agent !== false) process.exit(1);
+if (data.features?.default_mode_request_user_input !== true) process.exit(1);
+if (data.features?.child_agents_md !== true) process.exit(1);
+if (data.features?.multi_agent_v2?.usage_hint_enabled !== true) process.exit(1);
+if (data.agents?.max_threads !== 6 || data.agents?.max_depth !== 1) process.exit(1);
+if (data.custom?.keep !== "yes") process.exit(1);
+JS
+merge_uninstall_output="$(run_installer "$tmp_merge" --uninstall)"
+assert_simple_success_output "$merge_uninstall_output" "Alpha Goal uninstall completed."
+test -f "$tmp_merge/.codex/config.toml"
+grep -q 'keep = "yes"' "$tmp_merge/.codex/config.toml"
+grep -q 'multi_agent = false' "$tmp_merge/.codex/config.toml"
+for skill in alpha-goal executor verifier; do
+  test ! -e "$tmp_merge/.codex/skills/$skill"
+done
+test ! -e "$tmp_merge/.codex/AGENTS.md"
+test ! -e "$tmp_merge/.codex/hooks.json"
+
 all_uninstall_output="$(TARGET_CHOICE=all run_installer "$tmp_all" --uninstall)"
 assert_simple_success_output "$all_uninstall_output" "Alpha Goal uninstall completed."
 for skill in alpha-goal executor verifier; do
@@ -450,14 +483,20 @@ test ! -e "$tmp_all/.codex/config.toml"
 test ! -e "$tmp_all/.codex/hooks.json"
 test ! -e "$tmp_all/.claude/CLAUDE.md"
 
-if HOME="$(mktemp -d)" "$repo_root/scripts/install.sh" </dev/null; then
+tmp_noninteractive_install="$(mktemp -d)"
+tmp_noninteractive_uninstall="$(mktemp -d)"
+if noninteractive_install_output="$(HOME="$tmp_noninteractive_install" "$repo_root/scripts/install.sh" </dev/null 2>&1)"; then
   echo "non-interactive install should fail" >&2
   exit 1
 fi
-if HOME="$(mktemp -d)" "$repo_root/scripts/install.sh" --uninstall </dev/null; then
+grep -q "Interactive terminal required" <<<"$noninteractive_install_output"
+test ! -e "$tmp_noninteractive_install/.codex/skills/alpha-goal"
+if noninteractive_uninstall_output="$(HOME="$tmp_noninteractive_uninstall" "$repo_root/scripts/install.sh" --uninstall </dev/null 2>&1)"; then
   echo "non-interactive uninstall should fail" >&2
   exit 1
 fi
+grep -q "Interactive terminal required" <<<"$noninteractive_uninstall_output"
+test ! -e "$tmp_noninteractive_uninstall/.codex/skills/alpha-goal"
 
 tmp_conflict="$(mktemp -d)"
 if conflict_output="$(TARGET_CHOICE=all CODEX_HOME_INPUT="$tmp_conflict/.claude" run_installer "$tmp_conflict" --uninstall 2>&1)"; then
@@ -479,7 +518,7 @@ tmp_external="$(mktemp -d)"
 mkdir -p "$tmp_external/.codex/skills" "$tmp_external/external-alpha-goal"
 ln -s "$tmp_external/external-alpha-goal" "$tmp_external/.codex/skills/alpha-goal"
 if external_output="$(run_installer "$tmp_external" 2>&1)"; then
-  echo "install should refuse external skill symlinks with force=false" >&2
+  echo "install should refuse external skill symlinks without an override" >&2
   exit 1
 fi
 grep -q "External skill symlinks are not replaced during install" <<<"$external_output"
@@ -581,7 +620,7 @@ bash -n scripts/install.sh
 node tools/validate_skills.js .
 node tools/validate_skills.js --fixtures
 node tools/test_checkpoint_lock.js
-rm -rf "$tmp_codex" "$tmp_claude" "$tmp_all" "$tmp_upgrade" "$tmp_conflict" "$tmp_link_conflict" "$tmp_external" "$tmp_unmanaged" "$tmp_malformed" "$tmp_recovery"
+rm -rf "$tmp_codex" "$tmp_claude" "$tmp_all" "$tmp_upgrade" "$tmp_merge" "$tmp_noninteractive_install" "$tmp_noninteractive_uninstall" "$tmp_conflict" "$tmp_link_conflict" "$tmp_external" "$tmp_unmanaged" "$tmp_malformed" "$tmp_recovery"
 rm -f /tmp/alpha-goal-invalid.out /tmp/alpha-goal-invalid.err
 ```
 
@@ -595,4 +634,4 @@ $verifier 对当前持久 checkpoint 做风险边界或最终状态验证。
 
 ## Count budget
 
-The validator keeps non-script skill instructions strictly below 9,301 word+punctuation units. Script resources under `skills/*/scripts/` are reported separately and excluded because bundled scripts execute without entering model context. Structure validation deliberately ignores skill prose; semantic quality is covered by independent review against the static boundary corpus and, when separately authorized, runtime evaluations.
+The validator keeps non-script skill instructions strictly below 9,301 word+punctuation units. Script resources under `skills/*/scripts/` are reported separately and excluded because they are executable resources rather than loaded skill instruction prose. Structure validation deliberately ignores skill prose; semantic quality is covered by independent review against the static boundary corpus and, when separately authorized, runtime evaluations.
