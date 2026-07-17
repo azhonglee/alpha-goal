@@ -9,12 +9,14 @@ Install this repository's public skill directories as copied directories.
 The codex target installs skills under $HOME/.codex/skills by default. The claude
 target installs independent Claude skill copies under $HOME/.claude/skills.
 
-Install runs ask only for the target app configuration. Uninstall runs ask for
-cleanup choices. Non-interactive runs are refused.
+Install runs ask for the target app configuration and whether to install the
+optional executor/verifier role pair. alpha-goal is always installed. Uninstall
+runs ask for cleanup choices. Non-interactive runs are refused.
 
-The codex target syncs Codex AGENTS.md, config.toml, hooks.json, and Codex
-skills. The claude target syncs Claude CLAUDE.md and Claude skills. The
-interactive all menu option syncs both targets.
+The codex target syncs Codex AGENTS.md, config.toml, selected skills, and
+hooks.json when the optional roles are selected. The claude target syncs
+Claude CLAUDE.md and selected skills. The interactive all menu option syncs
+both targets.
 With --uninstall, each target removes only its managed configuration and skill
 copies.
 
@@ -33,6 +35,7 @@ uninstall=false
 verbose=false
 sync_user_templates=true
 sync_user_hooks=true
+install_optional_roles=true
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -145,9 +148,9 @@ render_install_target_menu() {
   local labels=("codex" "claude" "all")
   local summaries=("Codex only (recommended)" "Claude only" "Codex and Claude")
   local details=(
-    "Updates Codex AGENTS.md/config.toml/hooks.json and Codex skills"
-    "Updates Claude CLAUDE.md and Claude skills"
-    "Updates both Codex and Claude configuration and skills"
+    "Updates Codex configuration and selected skills"
+    "Updates Claude configuration and selected skills"
+    "Updates both Codex and Claude configuration and selected skills"
   )
 
   if [[ "$uninstall" == true ]]; then
@@ -337,6 +340,10 @@ case "$install_target" in
     ;;
 esac
 
+if [[ "$uninstall" != true ]]; then
+  install_optional_roles="$(prompt_yes_no "Install executor and verifier" true)"
+fi
+
 codex_home="$(absolute_path "$(default_codex_home)")"
 if [[ "$uninstall" == true && "$sync_codex_config" == true ]]; then
   codex_home="$(absolute_path "$(prompt_text "Codex home" "$(default_codex_home)")")"
@@ -349,8 +356,10 @@ fi
 if [[ "$sync_codex_config" == true ]]; then
   if [[ "$uninstall" == true ]]; then
     sync_user_hooks="$(prompt_yes_no "Clean up Codex user hooks" true)"
-  else
+  elif [[ "$install_optional_roles" == true ]]; then
     sync_user_hooks=true
+  else
+    sync_user_hooks=false
   fi
 else
   sync_user_hooks=false
@@ -1612,6 +1621,10 @@ fi
 
 required_skills=(alpha-goal executor verifier)
 renamed_legacy_skills=(control-loop goal-verify)
+install_skills=(alpha-goal)
+if [[ "$install_optional_roles" == true ]]; then
+  install_skills+=(executor verifier)
+fi
 skill_files=()
 for skill_name in "${required_skills[@]}"; do
   skill_file="$source_skill_root/$skill_name/SKILL.md"
@@ -1619,7 +1632,9 @@ for skill_name in "${required_skills[@]}"; do
     echo "Missing required skill: $skill_file" >&2
     exit 1
   fi
-  skill_files+=("$skill_file")
+done
+for skill_name in "${install_skills[@]}"; do
+  skill_files+=("$source_skill_root/$skill_name/SKILL.md")
 done
 
 if [[ "$uninstall" == true ]]; then

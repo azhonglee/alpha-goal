@@ -8,7 +8,7 @@ Requires Node.js 18+ and Python 3. The installer uses repository-local JavaScrip
 scripts/install.sh
 ```
 
-The script copies three public skills under the selected target's skill root:
+The script always copies `alpha-goal` under the selected target's skill root and optionally copies the `executor` / `verifier` role pair:
 
 ```text
 codex:  $HOME/.codex/skills
@@ -30,7 +30,7 @@ The script creates copied skill directories under target-specific independent ro
 - `claude`: sync Claude `CLAUDE.md` and Claude skill copies.
 - `all`: sync or uninstall both Codex and Claude in one run.
 
-The target menu uses Up/Down plus Enter only; `codex` is selected by default. Install asks only for that target menu, ignores `CODEX_HOME`, and then uses fixed defaults: Codex home `$HOME/.codex`, template sync enabled, Codex hook sync enabled, and verbose output disabled. For uninstall, the flow asks for the target, Codex home when relevant, template cleanup, hook cleanup when relevant, and verbose output.
+The target menu uses Up/Down plus Enter only; `codex` is selected by default. Install then asks whether to install `executor` and `verifier` together; the default is Yes. `alpha-goal` is always installed. Choosing No skips installation and updates for both optional roles, preserves any existing copies, and skips Codex recovery-hook installation or update. The installer ignores `CODEX_HOME` and otherwise uses fixed defaults: Codex home `$HOME/.codex`, template sync enabled, and verbose output disabled. For uninstall, the flow asks for the target, Codex home when relevant, template cleanup, hook cleanup when relevant, and verbose output; uninstall continues to remove all managed public skills.
 
 Non-interactive runs are refused. Any CLI argument other than `--uninstall`, including `--help`, `--target`, `--codex-home`, `--force`, sync toggles, or `--verbose`, is rejected.
 
@@ -54,7 +54,7 @@ Codex may require reviewing and trusting the changed hook with `/hooks` before i
 
 Before upgrading, finish any active checkpoint handoff. A remaining legacy `checkpoint.md.lock` is an unresolved conflict; do not guess whether its write completed.
 
-The smoke test checks source-identical skill copies; missing-key TOML merge while preserving explicit values; adapter discoverability; managed hook replacement; idempotence; failure preservation; concise output; fresh and mixed-config uninstall behavior; rejected arguments; refused unmanaged targets; and ignored `CODEX_HOME`. It uses temporary homes and does not touch real user configuration.
+The smoke test checks default full installation; fresh alpha-only installation for one or both targets; preservation of existing optional-role copies when skipped; source-identical skill copies; missing-key TOML merge while preserving explicit values; adapter discoverability; managed hook replacement; idempotence; failure preservation; concise output; fresh and mixed-config uninstall behavior; rejected arguments; refused unmanaged targets; and ignored `CODEX_HOME`. It uses temporary homes and does not touch real user configuration.
 
 ```bash
 set -euo pipefail
@@ -80,6 +80,7 @@ codex_home_input = os.environ.get("CODEX_HOME_INPUT", "")
 template_input = os.environ.get("TEMPLATE_INPUT", "")
 hook_input = os.environ.get("HOOK_INPUT", "")
 verbose_input = os.environ.get("VERBOSE_INPUT", "")
+optional_roles_input = os.environ.get("OPTIONAL_ROLES_INPUT", "")
 
 if target == "codex":
     target_action = [b"\r"]
@@ -91,7 +92,9 @@ else:
     raise SystemExit(f"unknown TARGET_CHOICE: {target}")
 
 actions = [(b"Choose which app configuration", target_action)]
-if is_uninstall:
+if not is_uninstall:
+    actions.append((b"Install executor and verifier", [optional_roles_input.encode(), b"\r"]))
+else:
     actions.extend([
         (b"Codex home", [codex_home_input.encode(), b"\r"]),
         (b"Clean up user templates", [template_input.encode(), b"\r"]),
@@ -249,6 +252,27 @@ test "$(grep -o "codex-alpha-goal-compact-recovery:v4" "$tmp_codex/.codex/hooks.
 test ! -e "$tmp_codex/.codex/skills/executor/scripts"
 test ! -e "$tmp_codex/.codex/skills/verifier/scripts"
 
+hooks_before_skip="$(shasum -a 256 "$tmp_codex/.codex/hooks.json" | awk '{print $1}')"
+for skill in executor verifier; do
+  printf 'preserve me\n' > "$tmp_codex/.codex/skills/$skill/preserve-sentinel"
+done
+codex_skip_roles_output="$(OPTIONAL_ROLES_INPUT=n run_installer "$tmp_codex")"
+assert_simple_success_output "$codex_skip_roles_output" "Alpha Goal install completed."
+test "$hooks_before_skip" = "$(shasum -a 256 "$tmp_codex/.codex/hooks.json" | awk '{print $1}')"
+for skill in executor verifier; do
+  grep -q "preserve me" "$tmp_codex/.codex/skills/$skill/preserve-sentinel"
+done
+
+tmp_alpha_only="$(mktemp -d)"
+alpha_only_output="$(OPTIONAL_ROLES_INPUT=n run_installer "$tmp_alpha_only")"
+assert_simple_success_output "$alpha_only_output" "Alpha Goal install completed."
+assert_skill_tree_matches "$repo_root/skills/alpha-goal" "$tmp_alpha_only/.codex/skills/alpha-goal"
+test ! -e "$tmp_alpha_only/.codex/skills/executor"
+test ! -e "$tmp_alpha_only/.codex/skills/verifier"
+test -f "$tmp_alpha_only/.codex/AGENTS.md"
+test -f "$tmp_alpha_only/.codex/config.toml"
+test ! -e "$tmp_alpha_only/.codex/hooks.json"
+
 tmp_claude="$(mktemp -d)"
 claude_output="$(TARGET_CHOICE=claude run_installer "$tmp_claude")"
 assert_simple_success_output "$claude_output" "Alpha Goal install completed."
@@ -284,6 +308,19 @@ test -f "$tmp_all/.claude/CLAUDE.md"
 ! grep -q "references/claude-adapter.md" "$tmp_all/.codex/skills/alpha-goal/SKILL.md"
 ! grep -q "references/claude-adapter.md" "$tmp_all/.claude/skills/alpha-goal/SKILL.md"
 grep -q '\$HOME/.claude/skills/alpha-goal/references/claude-adapter.md' "$tmp_all/.claude/CLAUDE.md"
+
+tmp_alpha_only_all="$(mktemp -d)"
+alpha_only_all_output="$(TARGET_CHOICE=all OPTIONAL_ROLES_INPUT=n run_installer "$tmp_alpha_only_all")"
+assert_simple_success_output "$alpha_only_all_output" "Alpha Goal install completed."
+for root in "$tmp_alpha_only_all/.codex/skills" "$tmp_alpha_only_all/.claude/skills"; do
+  assert_skill_tree_matches "$repo_root/skills/alpha-goal" "$root/alpha-goal"
+  test ! -e "$root/executor"
+  test ! -e "$root/verifier"
+done
+test -f "$tmp_alpha_only_all/.codex/AGENTS.md"
+test -f "$tmp_alpha_only_all/.codex/config.toml"
+test ! -e "$tmp_alpha_only_all/.codex/hooks.json"
+test -f "$tmp_alpha_only_all/.claude/CLAUDE.md"
 
 tmp_upgrade="$(mktemp -d)"
 mkdir -p "$tmp_upgrade/.codex"
@@ -494,7 +531,7 @@ expect_invalid_arg positional
 bash -n scripts/install.sh
 node tools/validate_skills.js .
 node tools/validate_skills.js --fixtures
-rm -rf "$tmp_codex" "$tmp_claude" "$tmp_all" "$tmp_upgrade" "$tmp_merge" "$tmp_noninteractive_install" "$tmp_noninteractive_uninstall" "$tmp_conflict" "$tmp_link_conflict" "$tmp_external" "$tmp_unmanaged" "$tmp_malformed" "$tmp_recovery"
+rm -rf "$tmp_codex" "$tmp_claude" "$tmp_all" "$tmp_alpha_only" "$tmp_alpha_only_all" "$tmp_upgrade" "$tmp_merge" "$tmp_noninteractive_install" "$tmp_noninteractive_uninstall" "$tmp_conflict" "$tmp_link_conflict" "$tmp_external" "$tmp_unmanaged" "$tmp_malformed" "$tmp_recovery"
 rm -f /tmp/alpha-goal-invalid.out /tmp/alpha-goal-invalid.err
 ```
 
