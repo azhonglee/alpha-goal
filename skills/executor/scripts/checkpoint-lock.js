@@ -1,265 +1,184 @@
 #!/usr/bin/env node
 const crypto = require("node:crypto");
 const fs = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
+const { spawn } = require("node:child_process");
 
 const owners = ["none", "alpha-goal", "executor", "verifier", "caller"];
 const routeOwner = { PASS_TO_FINAL: "caller", NEXT_ITERATION: "executor", BLOCKED: "caller" };
-const legacyRouteOwner = { ...routeOwner, RETURN_TO_ALPHA_GOAL: "alpha-goal" };
-const writerPattern = /^(executor|verifier):[A-Za-z0-9][\w.-]{0,127}$/;
-const tokenPattern = /^[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}$/i;
 const revisionPattern = /^(0|[1-9]\d*)$/;
 const legacyRevisionPattern = /^\d+$/;
-const digestPattern = /^[\da-f]{64}$/;
 
-function fail(error, message, code = 1, extra) {
-  const failure = new Error(message); Object.assign(failure, { error, code, extra }); throw failure;
+function problem(error, message, code = 1, extra) {
+  const failure = new Error(message); Object.assign(failure, { error, code, extra }); return failure;
 }
+function fail(error, message, code = 1, extra) { throw problem(error, message, code, extra); }
 function print(value, stream = process.stdout) { stream.write(`${JSON.stringify(value)}\n`); }
-function done(action, token, phase) { print({ ok: true, action, token, phase }); }
-function usage() { fail("USAGE", "commands: init execute verify terminate status commit abort release recover"); }
+function usage() { fail("USAGE", "commands: init execute verify terminate; provide the complete successor on stdin"); }
 function arity(args, size) { if (args.length !== size) usage(); }
 function validRevision(value) { return typeof value === "string" && revisionPattern.test(value); }
 function nextRevision(value) {
   if (!validRevision(value)) fail("INVALID_REVISION", "invalid revision");
   return (BigInt(value) + 1n).toString();
 }
-function writerRole(value) {
-  if (!writerPattern.test(value || "")) fail("INVALID_WRITER", "invalid writer");
-  return value.split(":", 1)[0];
-}
-function validOwner(value) { if (!owners.includes(value)) fail("INVALID_OWNER", "invalid owner"); }
-function validToken(value) { if (!tokenPattern.test(value || "")) fail("INVALID_TOKEN", "invalid token"); }
 
-function transition(t, existing = false) {
-  const role = writerRole(t.writer);
-  validOwner(t.expectedOwner); validOwner(t.nextOwner);
-  let action = null, route = t.route ?? null;
-  if (t.expectedRevision === "absent") {
-    if (role === "executor" && t.expectedOwner === "none" && t.nextRevision === "0" && t.nextOwner === "executor" && route === null) action = "init";
-  } else {
-    const next = nextRevision(t.expectedRevision);
-    if (t.nextRevision !== next) fail("INVALID_TRANSITION", "revision increment");
-    if (existing && role === t.expectedOwner && ["executor", "verifier"].includes(role) && t.nextOwner === "alpha-goal" && route === null) action = "reframe";
-    else if (existing && role === "executor" && ["alpha-goal", "caller"].includes(t.expectedOwner) && t.nextOwner === "executor" && route === null) action = "supersede";
-    else if (t.nextOwner === "caller" && route === null &&
-        ((role === t.expectedOwner && ["executor", "verifier"].includes(role)) ||
-         (role === "executor" && t.expectedOwner === "alpha-goal"))) action = "terminate";
-    else if (role === "executor" && t.expectedOwner === "executor" && ["executor", "verifier"].includes(t.nextOwner) && route === null) action = "execute";
-    else if (role === "verifier" && t.expectedOwner === "verifier") {
-      if (route !== null) {
-        const routes = existing ? legacyRouteOwner : routeOwner;
-        if (!Object.hasOwn(routes, route) || routes[route] !== t.nextOwner) fail("INVALID_TRANSITION", "route mismatch");
-      } else if (["executor", "caller"].includes(t.nextOwner)) {
-        route = t.nextOwner === "executor" ? "NEXT_ITERATION" : null;
-      } else fail("INVALID_TRANSITION", "invalid target");
-      action = "verify";
-    }
-  }
-  if (!action || t.nextOwner === "none") fail("INVALID_TRANSITION", "invalid transition");
-  return { action, route };
-}
 function resolveCheckpoint(raw) {
-  const checkpoint = path.resolve(raw || "");
-  if (path.basename(checkpoint) !== "checkpoint.md") fail("INVALID_CHECKPOINT", "invalid target");
-  if (!fs.existsSync(path.dirname(checkpoint))) fail("INVALID_CHECKPOINT", "missing parent");
-  return { checkpoint, lock: `${checkpoint}.lock`, ownerFile: `${checkpoint}.lock/owner.json` };
+  const requested = path.resolve(raw || "");
+  if (path.basename(requested) !== "checkpoint.md") fail("INVALID_CHECKPOINT", "invalid target");
+  if (!fs.existsSync(path.dirname(requested))) fail("INVALID_CHECKPOINT", "missing parent");
+  let checkpoint;
+  try { checkpoint = path.join(fs.realpathSync(path.dirname(requested)), path.basename(requested)); }
+  catch (error) { fail("INVALID_CHECKPOINT", error.message); }
+  const identity = crypto.createHash("sha256").update(checkpoint).digest("hex").slice(0, 32);
+  const uid = typeof process.getuid === "function" ? process.getuid() : "user";
+  return { checkpoint, staged: path.join(path.dirname(checkpoint), `.${path.basename(checkpoint)}.successor`),
+    legacyLock: `${checkpoint}.lock`, lock: path.join(os.tmpdir(), `alpha-goal-checkpoint-${uid}-${identity}.lock`) };
 }
 function regularFile(file) {
   const stat = fs.lstatSync(file);
   if (!stat.isFile() || stat.isSymbolicLink()) throw new Error("invalid file");
   return fs.readFileSync(file);
 }
-function snapshot(c, file = c.checkpoint, canonical = false) {
-  if (!fs.existsSync(file)) {
-    if (file === c.checkpoint) return { revision: "absent", owner: "none", digest: "absent" };
-    throw new Error("missing staged checkpoint");
-  }
-  const input = regularFile(file), text = input.toString("utf8");
+function describe(input, canonical = false) {
+  const text = input.toString("utf8");
   const revisions = [...text.matchAll(/^checkpoint_revision:\s*(\S+)\s*$/gm)];
   const activeOwners = [...text.matchAll(/^active_owner:\s*(\S+)\s*$/gm)];
   if (revisions.length !== 1 || activeOwners.length !== 1) throw new Error("ambiguous checkpoint");
   const rawRevision = revisions[0][1], owner = activeOwners[0][1];
   if (!legacyRevisionPattern.test(rawRevision) || !owners.includes(owner) || owner === "none") throw new Error("invalid checkpoint state");
   const revision = BigInt(rawRevision).toString();
-  if (canonical && revision !== rawRevision) throw new Error("noncanonical staged revision");
+  if (canonical && revision !== rawRevision) throw new Error("noncanonical successor revision");
   return { revision, owner, digest: crypto.createHash("sha256").update(input).digest("hex") };
 }
-function same(actual, revision, owner, digest) { return actual.revision === revision && actual.owner === owner && actual.digest === digest; }
-function close(c, token) {
-  const closed = `${c.lock}.closed-${token}`;
-  fs.renameSync(c.lock, closed);
-  try { fs.rmSync(closed, { recursive: true, force: true }); } catch (_) {}
+function snapshot(file, absent = false) {
+  if (!fs.existsSync(file)) {
+    if (absent) return { revision: "absent", owner: "none", digest: "absent" };
+    throw new Error("missing checkpoint");
+  }
+  return describe(regularFile(file));
+}
+function same(left, right) {
+  return left.revision === right.revision && left.owner === right.owner && left.digest === right.digest;
 }
 
-function readOwner(c) {
-  try {
-    if (!fs.lstatSync(c.lock).isDirectory()) throw new Error();
-    const raw = JSON.parse(regularFile(c.ownerFile).toString("utf8"));
-    const legacy = raw?.schemaVersion === 3;
-    const writer = legacy ? `${String(raw.owner).split(":", 1)[0]}:legacy` : raw?.writer;
-    if (![3, 4].includes(raw?.schemaVersion)) throw new Error();
-    validToken(raw.token);
-    if (!(raw.expectedCheckpointSha256 === "absent" || digestPattern.test(raw.expectedCheckpointSha256)) ||
-        !(raw.plannedCheckpointSha256 === null || digestPattern.test(raw.plannedCheckpointSha256)) ||
-        (raw.expectedRevision === "absent") !== (raw.expectedCheckpointSha256 === "absent")) throw new Error();
-    const expectedRevision = legacy && raw.expectedRevision !== "absent" ? BigInt(raw.expectedRevision).toString() : raw.expectedRevision;
-    const nextRevision = legacy ? BigInt(raw.nextRevision).toString() : raw.nextRevision;
-    const derived = transition({ ...raw, writer, expectedRevision, nextRevision, route: raw.route ?? null }, true);
-    return { ...raw, raw, writer: legacy ? raw.owner : writer, expectedRevision, nextRevision, legacy, action: derived.action };
-  } catch (error) {
-    if (error.error) throw error;
-    fail("INVALID_LOCK", "invalid lock metadata");
-  }
-}
-function inspect(c, record) {
-  let current;
-  try { current = snapshot(c); } catch (_) { return { phase: "invalid-snapshot", recoverableBy: [] }; }
-  const before = same(current, record.expectedRevision, record.expectedOwner, record.expectedCheckpointSha256);
-  const after = record.plannedCheckpointSha256 !== null && same(current, record.nextRevision, record.nextOwner, record.plannedCheckpointSha256);
-  const allowed = new Set(); let phase = "diverged";
-  if (before) {
-    phase = record.plannedCheckpointSha256 === null ? "pre-commit" : "prepared-pre-rename";
-    if (current.owner !== "none") allowed.add(current.owner);
-    if (record.writer.startsWith("executor:") && ["none", "alpha-goal", "caller"].includes(current.owner)) allowed.add("executor");
-  } else if (after) {
-    phase = "post-commit"; allowed.add(current.owner);
-    if (current.owner === "alpha-goal" && (record.action === "reframe" || record.route === "RETURN_TO_ALPHA_GOAL")) allowed.add("executor");
-  }
-  return { phase, recoverableBy: [...allowed] };
-}
-function requireLock(c, token) {
-  if (!fs.existsSync(c.lock)) fail("LOCK_NOT_HELD", "missing lock");
-  const record = readOwner(c);
-  if (record.token !== token) fail("TOKEN_MISMATCH", "token mismatch");
-  return record;
-}
-function held(c) {
-  const record = readOwner(c);
-  fail("LOCK_HELD", "locked", 2, { actual: record.writer });
-}
-
-function acquire(c, t) {
-  const derived = transition(t);
-  if (fs.existsSync(c.lock)) held(c);
-  let before;
-  try { before = snapshot(c); } catch (error) { fail("INVALID_CHECKPOINT", error.message); }
-  if (before.revision !== t.expectedRevision || before.owner !== t.expectedOwner) {
-    fail("STALE_CHECKPOINT", "stale checkpoint", 3, { expected: { revision: t.expectedRevision, owner: t.expectedOwner }, actual: before });
-  }
-  const token = crypto.randomUUID();
-  const record = { schemaVersion: 4, writer: t.writer, token, route: t.route ?? derived.route,
-    expectedRevision: t.expectedRevision, expectedOwner: t.expectedOwner, expectedCheckpointSha256: before.digest,
-    nextRevision: t.nextRevision, nextOwner: t.nextOwner, plannedCheckpointSha256: null, createdAt: new Date().toISOString() };
-  const pending = `${c.lock}.pending-${token}`;
-  try {
-    fs.mkdirSync(pending, { mode: 0o700 });
-    fs.writeFileSync(`${pending}/owner.json`, `${JSON.stringify(record)}\n`, { flag: "wx", mode: 0o600 });
-    if (fs.existsSync(c.lock)) throw new Error("lock raced");
-    fs.renameSync(pending, c.lock);
-  } catch (error) {
-    fs.rmSync(pending, { recursive: true, force: true });
-    if (fs.existsSync(c.lock)) held(c);
-    fail("ACQUIRE_FAILED", error.message);
-  }
-  try {
-    const current = snapshot(c);
-    if (!same(current, record.expectedRevision, record.expectedOwner, record.expectedCheckpointSha256)) {
-      close(c, token); fail("STALE_CHECKPOINT", "checkpoint changed", 3);
-    }
-  } catch (error) {
-    if (fs.existsSync(c.lock)) try { close(c, token); } catch (_) {}
-    if (error.error) throw error;
-    fail("STALE_CHECKPOINT", error.message, 3);
-  }
-  print({ ok: true, action: derived.action, token, pendingPath: `${c.checkpoint}.pending-${token}`,
-    from: { revision: record.expectedRevision, owner: record.expectedOwner },
-    to: { revision: record.nextRevision, owner: record.nextOwner }, route: record.route, writer: record.writer });
-}
-function semantic(args, c) {
+function transition(args, current) {
   const command = args[0], revision = args[2];
-  let role = "executor", expectedOwner, nextOwner, route = null, next;
-  if (command === "init") { arity(args, 2); return { writer: `executor:init-${crypto.randomUUID()}`, expectedRevision: "absent", expectedOwner: "none", nextRevision: "0", nextOwner: "executor", route }; }
-  arity(args, command === "terminate" ? 3 : 4); next = nextRevision(revision);
+  if (command === "init") {
+    arity(args, 2);
+    return { action: "init", route: null, expectedRevision: "absent", expectedOwner: "none", nextRevision: "0", nextOwner: "executor" };
+  }
   if (command === "execute") {
+    arity(args, 4);
     if (!["executor", "verifier"].includes(args[3])) fail("INVALID_OWNER", "invalid execute target");
-    expectedOwner = "executor"; nextOwner = args[3];
-  } else if (command === "verify") {
+    return { action: "execute", route: null, expectedRevision: revision, expectedOwner: "executor", nextRevision: nextRevision(revision), nextOwner: args[3] };
+  }
+  if (command === "verify") {
+    arity(args, 4);
     if (!Object.hasOwn(routeOwner, args[3])) fail("INVALID_ROUTE", "invalid route");
-    role = "verifier"; expectedOwner = "verifier"; route = args[3]; nextOwner = routeOwner[route];
-  } else {
-    let current;
-    try { current = snapshot(c); } catch (error) { fail("INVALID_CHECKPOINT", error.message); }
+    return { action: "verify", route: args[3], expectedRevision: revision, expectedOwner: "verifier", nextRevision: nextRevision(revision), nextOwner: routeOwner[args[3]] };
+  }
+  if (command === "terminate") {
+    arity(args, 3);
     if (!["alpha-goal", "executor", "verifier"].includes(current.owner)) fail("INVALID_TRANSITION", "invalid owner");
-    role = current.owner === "alpha-goal" ? "executor" : current.owner;
-    expectedOwner = current.owner; nextOwner = "caller";
+    return { action: "terminate", route: null, expectedRevision: revision, expectedOwner: current.owner, nextRevision: nextRevision(revision), nextOwner: "caller" };
   }
-  return { writer: `${role}:${command}-${crypto.randomUUID()}`, expectedRevision: revision, expectedOwner, nextRevision: next, nextOwner, route };
-}
-function status(c) {
-  if (!fs.existsSync(c.lock)) return print({ ok: true, state: "unlocked", phase: "unlocked", recoverableBy: [] });
-  let record;
-  try { record = readOwner(c); } catch (error) {
-    if (error.error) error.extra = { ...error.extra, state: "locked", phase: "invalid-lock", recoverableBy: [] };
-    throw error;
-  }
-  const state = inspect(c, record);
-  print({ ok: true, state: "locked", ...state, token: record.token, writer: record.writer, createdAt: record.createdAt });
-}
-function commit(c, token) {
-  validToken(token); const record = requireLock(c, token);
-  if (["reframe", "supersede"].includes(record.action) || record.route === "RETURN_TO_ALPHA_GOAL") fail("LEGACY_TRANSITION", "recover or abort obsolete transition lock");
-  let before, staged;
-  try { before = snapshot(c); } catch (error) { fail("INVALID_CHECKPOINT", error.message); }
-  if (!same(before, record.expectedRevision, record.expectedOwner, record.expectedCheckpointSha256)) fail("STALE_CHECKPOINT", "digest CAS failed", 3);
-  try { staged = snapshot(c, `${c.checkpoint}.pending-${token}`, !record.legacy); } catch (error) { fail("INVALID_STAGED_CHECKPOINT", error.message); }
-  if (staged.revision !== record.nextRevision || staged.owner !== record.nextOwner) fail("INVALID_STAGED_CHECKPOINT", "staged mismatch");
-  const prepared = { ...record.raw, plannedCheckpointSha256: staged.digest };
-  try {
-    fs.writeFileSync(`${c.lock}/.owner.pending-${token}`, `${JSON.stringify(prepared)}\n`, { flag: "wx", mode: 0o600 });
-    fs.renameSync(`${c.lock}/.owner.pending-${token}`, c.ownerFile);
-    fs.renameSync(`${c.checkpoint}.pending-${token}`, c.checkpoint);
-    if (!same(snapshot(c), record.nextRevision, record.nextOwner, staged.digest)) fail("COMMIT_FAILED", "invalid post-write", 3);
-    close(c, token);
-  } catch (error) {
-    if (error.error) throw error;
-    fail("COMMIT_FAILED", error.message);
-  }
-  done("commit", token, "committed");
-}
-function release(c, token) {
-  validToken(token);
-  if (!fs.existsSync(c.lock)) return done("release", token, "none");
-  const record = requireLock(c, token);
-  if (!record.legacy) fail("RELEASE_NOT_ALLOWED", "use abort");
-  const phase = inspect(c, record).phase;
-  if (!phase.endsWith("commit")) fail("RELEASE_NOT_ALLOWED", "unsafe release");
-  close(c, token); done("release", token, phase);
-}
-
-function abort(c, token) {
-  validToken(token); const record = requireLock(c, token);
-  if (record.plannedCheckpointSha256 !== null || inspect(c, record).phase !== "pre-commit") fail("ABORT_NOT_ALLOWED", "not pre-commit");
-  fs.rmSync(`${c.checkpoint}.pending-${token}`, { force: true }); close(c, token); done("abort", token, "aborted");
-}
-
-function recover(c, token, actor) {
-  validToken(token); validOwner(actor); if (actor === "none") fail("INVALID_OWNER", "invalid actor");
-  const record = requireLock(c, token), state = inspect(c, record);
-  if (!state.recoverableBy.includes(actor)) fail("RECOVERY_NOT_ALLOWED", "recovery failed", 1, { nextAction: "inspect" });
-  close(c, token); done("recover", token, state.phase);
-}
-
-function main() {
-  const args = process.argv.slice(2); if (args.length < 2) usage();
-  const c = resolveCheckpoint(args[1]), command = args[0];
-  if (command === "status") { arity(args, 2); return status(c); }
-  if (["init", "execute", "verify", "terminate"].includes(command)) return acquire(c, semantic(args, c));
-  if (["commit", "release", "abort"].includes(command)) { arity(args, 3); return { commit, release, abort }[command](c, args[2]); }
-  if (command === "recover") { arity(args, 4); return recover(c, args[2], args[3]); }
   usage();
 }
-try { main(); } catch (error) {
+
+function clearStaged(c) {
+  if (!fs.existsSync(c.staged)) return;
+  const stat = fs.lstatSync(c.staged);
+  if (!stat.isFile() || stat.isSymbolicLink() || stat.nlink !== 1) fail("UNSAFE_SUCCESSOR", "unsafe fixed successor");
+  fs.unlinkSync(c.staged);
+}
+
+function update(args, c, input) {
+  let before;
+  try { before = snapshot(c.checkpoint, true); } catch (error) { fail("INVALID_CHECKPOINT", error.message); }
+  const change = transition(args, before);
+  if (before.revision !== change.expectedRevision || before.owner !== change.expectedOwner) {
+    fail("STALE_CHECKPOINT", "stale checkpoint", 3, {
+      expected: { revision: change.expectedRevision, owner: change.expectedOwner },
+      actual: { revision: before.revision, owner: before.owner, digest: before.digest }
+    });
+  }
+  if (input.length === 0) fail("INVALID_SUCCESSOR", "empty stdin");
+  let successor;
+  try { successor = describe(input, true); } catch (error) { fail("INVALID_SUCCESSOR", error.message); }
+  if (successor.revision !== change.nextRevision || successor.owner !== change.nextOwner) {
+    fail("INVALID_SUCCESSOR", "successor transition mismatch", 1, {
+      expected: { revision: change.nextRevision, owner: change.nextOwner },
+      actual: { revision: successor.revision, owner: successor.owner }
+    });
+  }
+  let current;
+  try { current = snapshot(c.checkpoint, true); } catch (error) { fail("INVALID_CHECKPOINT", error.message); }
+  if (!same(current, before)) fail("STALE_CHECKPOINT", "digest CAS failed", 3);
+  let descriptor, stagedOwned = false;
+  try {
+    clearStaged(c);
+    descriptor = fs.openSync(c.staged, "wx", 0o600);
+    stagedOwned = true;
+    fs.writeFileSync(descriptor, input);
+    fs.closeSync(descriptor); descriptor = undefined;
+    fs.renameSync(c.staged, c.checkpoint);
+    const published = snapshot(c.checkpoint);
+    if (!same(published, successor)) fail("WRITE_FAILED", "invalid published checkpoint", 3);
+  } finally {
+    if (descriptor !== undefined) fs.closeSync(descriptor);
+    if (stagedOwned) fs.rmSync(c.staged, { force: true });
+  }
+  print({ ok: true, action: change.action, route: change.route,
+    from: { revision: before.revision, owner: before.owner },
+    to: { revision: successor.revision, owner: successor.owner } });
+}
+
+function runWithSystemLock(c, action) {
+  let command, lockArgs;
+  const holder = "process.stdout.write('LOCKED\\n'); process.stdin.resume();";
+  if (process.platform === "darwin") {
+    command = "/usr/bin/lockf";
+    lockArgs = ["-t", "0", c.lock, process.execPath, "-e", holder];
+  } else if (process.platform === "linux") {
+    command = "flock";
+    lockArgs = ["-E", "75", "-n", c.lock, process.execPath, "-e", holder];
+  } else {
+    fail("UNSUPPORTED_PLATFORM", "checkpoint locking requires lockf on macOS or flock on Linux");
+  }
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, lockArgs, { stdio: ["pipe", "pipe", "pipe"] });
+    let ready = false, stdout = "", stderr = "", actionError = null;
+    child.once("error", error => reject(problem("LOCK_FAILED", error.message)));
+    child.stdin.on("error", error => { if (!actionError) actionError = problem("LOCK_FAILED", error.message); });
+    child.stderr.on("data", chunk => { stderr += chunk; });
+    child.stdout.on("data", chunk => {
+      stdout += chunk;
+      if (ready || !stdout.includes("LOCKED")) return;
+      ready = true;
+      try { action(); } catch (error) { actionError = error; }
+      child.stdin.end();
+    });
+    child.once("close", code => {
+      if (actionError) return reject(actionError);
+      if (code === 75) return reject(problem("LOCK_HELD", "checkpoint writer active", 2));
+      if (!ready || code !== 0) return reject(problem("LOCK_FAILED", stderr.trim() || `lock holder exited ${code}`));
+      resolve();
+    });
+  });
+}
+
+async function main() {
+  const args = process.argv.slice(2);
+  if (args.length < 2) usage();
+  const checkpoint = resolveCheckpoint(args[1]);
+  if (fs.existsSync(checkpoint.legacyLock)) fail("LEGACY_LOCK_PRESENT", "resolve the legacy checkpoint lock with the previous helper before retrying");
+  const input = fs.readFileSync(0);
+  await runWithSystemLock(checkpoint, () => update(args, checkpoint, input));
+}
+
+function report(error) {
   if (error.error) { print({ ok: false, error: error.error, message: error.message, ...error.extra }, process.stderr); process.exit(error.code); }
   print({ ok: false, error: "INTERNAL_ERROR", message: error.message || String(error) }, process.stderr); process.exit(1);
 }
+if (require.main === module) main().catch(report);

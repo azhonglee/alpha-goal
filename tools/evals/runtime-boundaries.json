@@ -94,8 +94,8 @@
     },
     {
       "id": "RB19",
-      "scenario": "Exercise semantic checkpoint init, executor same-owner and verifier handoff writes, the three verifier routes, and executor/verifier goal-change termination; interrupt before commit, attempt invalid transitions, stale revisions/tokens, and recover only after JSON status inspection.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Semantic commands enforce the transition graph, keep goal-change termination separate from verifier verdicts, and check expected revision; every lock-opening result supplies token/pendingPath, commit publishes and unlocks atomically, abort handles abandoned writes, and status phase/recoverableBy gates exact-owner recovery without lost updates." }
+      "scenario": "Exercise one-shot semantic checkpoint init, executor same-owner and verifier handoff writes, the three verifier routes, and executor/verifier goal-change termination; race concurrent writers and attempt invalid transitions, stale revisions, owners, and successor content.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Each command accepts one complete successor on stdin, enforces the transition graph, keeps goal-change termination separate from verifier verdicts, rejects stale revision/owner/content, serializes real-path-equivalent writers with a process-scoped operating-system lock, atomically replaces canonical state, and creates no UUID pending series." }
     },
     {
       "id": "RB20",
@@ -104,8 +104,8 @@
     },
     {
       "id": "RB21",
-      "scenario": "Verifier is loaded alone after compaction, resolves helpers from selected skill roots, opens a semantic verify transition from an arbitrary CWD, consumes JSON pendingPath/token, encounters stale state, and inspects status before recovery.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "Verifier needs no remembered executor text: it aborts failed writes, never releases after successful commit, and uses JSON phase/recoverableBy before proof-based recovery; release is only for legacy-lock compatibility." }
+      "scenario": "Verifier is loaded alone after compaction, resolves helpers from selected skill roots, constructs a complete successor, invokes semantic verify from an arbitrary CWD, and encounters a stale checkpoint.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "Verifier needs no remembered executor text or lock token: one command checks current revision/owner/content, publishes a valid successor, or rejects stale state so verifier reloads before retrying." }
     },
     {
       "id": "RB22",

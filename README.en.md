@@ -59,10 +59,10 @@ Accepted goal materially changes -> terminate the old checkpoint -> start a new 
 
 A Goal Frame contains intent, observable outcome, scope/non-goals, constraints, success signals, observers, and material decisions. Clear fields come from the request and attributable facts; clarification asks the relevant authority about one highest-impact blocking gap and closes it only when the authorized decision and its material boundaries and execution/evidence consequences are determined. A material change to an accepted goal terminates the old task; the new goal starts `alpha-goal` in a new task directory instead of reopening the old contract or checkpoint.
 
-`DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state, and does not call `executor` or `verifier`. For `PERSIST`, the only canonical lifecycle artifacts are `goal-contract.md` and `checkpoint.md`; the checkpoint helper also creates atomic-write coordination records: active `.lock`, staged `.pending-*`, and best-effort-cleaned `.lock.closed-*` atomic-unlock tombstones.
+`DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state, and does not call `executor` or `verifier`. For `PERSIST`, the only canonical lifecycle artifacts are `goal-contract.md` and `checkpoint.md`; one helper command serializes each checkpoint write with an operating-system lock, revision/owner/content CAS, and atomic replacement, without UUID pending records.
 
 - `goal-contract.md`: written only by `alpha-goal`; its accepted authority payload is standard structured input to executor and verifier.
-- `checkpoint.md`: records the current contract digest and execution/verification state, and serializes executor/verifier handoff with atomic `checkpoint_revision`/`active_owner` control.
+- `checkpoint.md`: records the current contract digest and execution/verification state, and serializes executor/verifier handoff with one-shot CAS plus `checkpoint_revision`/`active_owner` control.
 
 Routing uses material impact, side effects, recovery needs, and verifiability. Confidence, file count, step count, question count, and estimated duration are not risk proxies.
 

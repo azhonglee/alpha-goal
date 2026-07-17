@@ -30,26 +30,28 @@ For empty/partial/suspicious results, continue safe non-mutating observation whi
 If the acceptance authority materially changes the goal while verifier owns the checkpoint, stop observation and do not issue a verdict. Run:
 
 ```text
-node <executor-root>/scripts/checkpoint-lock.js terminate <absolute-checkpoint-path> <expected-revision>
+node <executor-root>/scripts/checkpoint-lock.js terminate <absolute-checkpoint-path> <expected-revision> <<'CHECKPOINT'
+<complete successor checkpoint>
+CHECKPOINT
 ```
 
-Write `termination_reason: GOAL_CHANGED`, attributable source/date, change summary, current observed identity, incremented `checkpoint_revision`, and `active_owner: caller`; commit it. Follow-up starts a new `alpha-goal` task directory.
+Stream one complete successor on stdin with `termination_reason: GOAL_CHANGED`, attributable source/date, change summary, current observed identity, incremented `checkpoint_revision`, and `active_owner: caller`. Follow-up starts a new `alpha-goal` task directory.
 
 ## Verify and Write
 
 1. Re-read recorded contract/checkpoint identity, accepted digest, checkpoint revision/owner, and actual drift.
 2. Collect required observers after the latest relevant mutation and within freshness.
 3. Classify every criterion/gap; entry integrity failures produce no verdict, otherwise a blocker outranks fixable work.
-4. Open the route:
+4. Re-read the checkpoint and construct one complete successor, changing only verifier fields, incrementing `checkpoint_revision` once, recording identity/evidence/gap/route, and setting `active_owner` last.
+5. Invoke the route with that successor:
 
 ```text
-node <executor-root>/scripts/checkpoint-lock.js verify <absolute-checkpoint-path> <expected-revision> <PASS_TO_FINAL|NEXT_ITERATION|BLOCKED>
+node <executor-root>/scripts/checkpoint-lock.js verify <absolute-checkpoint-path> <expected-revision> <PASS_TO_FINAL|NEXT_ITERATION|BLOCKED> <<'CHECKPOINT'
+<complete successor checkpoint>
+CHECKPOINT
 ```
 
-5. Parse JSON `token`/`pendingPath`; never construct the path. Re-read the checkpoint. On mismatch or abandonment, run `abort <checkpoint> <token>` and reload. Otherwise write the complete successor, changing only verifier fields, incrementing `checkpoint_revision` once, recording identity/evidence/gap/route, and setting `active_owner` last.
-6. Run `commit <checkpoint> <token>`; success publishes and unlocks.
-
-Before recovery, run `status <checkpoint>` and parse `phase`/`recoverableBy`. After proving the writer stopped, recover only when `verifier` is listed, using `recover <checkpoint> <token> verifier`; otherwise wait/report.
+6. The helper validates revision/owner/content identity and atomically replaces the checkpoint in one operating-system-locked command. On rejection, reload current state and retry; no separate recovery command exists. Resolve any legacy `checkpoint.md.lock` with the prior helper before using this protocol.
 
 ## Final Gate
 
