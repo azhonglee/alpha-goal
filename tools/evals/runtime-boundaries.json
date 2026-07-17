@@ -54,22 +54,22 @@
     },
     {
       "id": "RB11",
-      "scenario": "A verification observer updates a tracked snapshot.",
+      "scenario": "During the terminal audit, a verification observer updates a tracked snapshot.",
       "expected": { "entryRoute": "N/A", "verificationRoute": "NEXT_ITERATION", "nextOwner": "executor", "invariant": "Verifier does not silently continue against changed state; executor records the observer mutation before re-verification." }
     },
     {
       "id": "RB12",
-      "scenario": "A failed criterion has a materially different authorized approach, including an available external alternative.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "NEXT_ITERATION", "nextOwner": "executor", "invariant": "The route names the precise gap and different batch boundary." }
+      "scenario": "The terminal audit finds a failed criterion with a materially different authorized approach, including an available external alternative.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "NEXT_ITERATION", "nextOwner": "executor", "invariant": "The route names the precise gap and authorized rework boundary; it does not turn verifier into an intermediate-slice reviewer." }
     },
     {
       "id": "RB13",
-      "scenario": "An external dependency had attributable availability evidence at acceptance, then fails after execution starts and no authorized alternative remains.",
+      "scenario": "An external dependency had attributable availability evidence at acceptance, then fails after execution starts; executor exhausts authorized alternatives and submits a terminal blocker candidate.",
       "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "Known dependency failure would have kept the contract draft; attributable post-acceptance invalidation is reported without changing authority." }
     },
     {
       "id": "RB14",
-      "scenario": "After acceptance, a newly discovered runtime constraint or material design dimension invalidates the documented feasible or authorized path; alternatives may exist, but none is currently authorized.",
+      "scenario": "After acceptance, a newly discovered runtime constraint or material design dimension invalidates the documented path; executor exhausts authorized approaches and submits a terminal blocker candidate.",
       "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "Known incompleteness would have kept the contract draft; new attributable post-acceptance invalidation of feasibility, authority, design, risk/recovery, observer, or claim coverage is BLOCKED." }
     },
     {
@@ -84,7 +84,7 @@
     },
     {
       "id": "RB17",
-      "scenario": "A remote or deployed state changes after evidence was collected without a local target mutation.",
+      "scenario": "A remote or deployed state changes after terminal-audit evidence was collected without a local target mutation.",
       "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "Freshness or invalidation conditions make the evidence stale and require re-observation." }
     },
     {
@@ -94,8 +94,8 @@
     },
     {
       "id": "RB19",
-      "scenario": "Exercise one-shot semantic checkpoint init, executor same-owner and verifier handoff writes, the three verifier routes, and executor/verifier goal-change termination; race concurrent writers and attempt invalid transitions, stale revisions, owners, and successor content.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Each command accepts one complete successor on stdin, enforces the transition graph, keeps goal-change termination separate from verifier verdicts, rejects stale revision/owner/content, serializes real-path-equivalent writers with a process-scoped operating-system lock, atomically replaces canonical state, and creates no UUID pending series." }
+      "scenario": "Exercise sequential checkpoint initialization, executor-owned intermediate batches, one terminal verifier handoff, the three final-audit routes, and goal-change termination; attempt writes with stale revisions, unexpected owners, changed content, or another active writer.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Each writer re-reads canonical checkpoint identity immediately before editing, writes only while it is active_owner, preserves other-owned fields, increments checkpoint_revision once, and sets the next owner last. A stale revision, unexpected owner, or changed content forces reload; knowledge that another writer may be active prevents the write. Concurrent writers are unsupported, and GOAL_CHANGED remains separate from verifier verdicts." }
     },
     {
       "id": "RB20",
@@ -104,12 +104,12 @@
     },
     {
       "id": "RB21",
-      "scenario": "Verifier is loaded alone after compaction, resolves helpers from selected skill roots, constructs a complete successor, invokes semantic verify from an arbitrary CWD, and encounters a stale checkpoint.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "Verifier needs no remembered executor text or lock token: one command checks current revision/owner/content, publishes a valid successor, or rejects stale state so verifier reloads before retrying." }
+      "scenario": "Verifier is loaded alone after compaction from an explicit checkpoint path, resolves canonical artifacts independently of the process CWD, and discovers changed revision or owner on its immediate pre-write re-read.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "Verifier needs no remembered executor text. It follows identity and active_owner from canonical artifacts, emits no verdict or write for stale state, reloads, and continues only when the current owner is verifier and no other writer may be active." }
     },
     {
       "id": "RB22",
-      "scenario": "A verifier starts with a vague state label, then identifies every claim-relevant surface and collects fresh passing evidence.",
+      "scenario": "At the proposed terminal state, verifier starts with a vague state label, then identifies every claim-relevant surface and collects fresh passing evidence.",
       "expected": { "entryRoute": "N/A", "verificationRoute": "PASS_TO_FINAL", "nextOwner": "caller", "invariant": "The vague label is insufficient; PASS occurs only after complete attributable identity and fresh evidence." }
     },
     {
@@ -124,7 +124,7 @@
     },
     {
       "id": "RB25",
-      "scenario": "Verifier returns NEXT_ITERATION; executor completes a new batch, hands back to verifier, and compaction occurs while the old NEXT route remains in history.",
+      "scenario": "The terminal audit returns NEXT_ITERATION; executor completes the required rework, proposes a new terminal state, and compaction occurs while the old route remains in history.",
       "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "Top-level active_owner is authoritative; a historical route never overrides the current handoff." }
     },
     {
@@ -179,8 +179,8 @@
     },
     {
       "id": "RB36",
-      "scenario": "Execution and verification continue after alpha-goal reuses or creates the native goal.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Native goal state remains lifecycle metadata and never replaces Goal Contract authority or acceptance evidence." }
+      "scenario": "After native-goal sync, execution continues through multiple batches and risk boundaries before a proposed terminal state exists.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Executor retains ownership, performs proportionate execution checks, and records progress; verifier is not invoked for intermediate slices. Native goal state remains lifecycle metadata and never replaces Goal Contract authority or acceptance evidence." }
     }
   ]
 }

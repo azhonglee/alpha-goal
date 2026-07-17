@@ -3,7 +3,7 @@
   "inheritRoot": true,
   "repeatFiles": [
     {
-      "file": "skills/executor/scripts/checkpoint-lock.js",
+      "file": "skills/alpha-goal/scripts/authority-digest.js",
       "text": "x;",
       "count": 10000
     }
