@@ -1,6 +1,6 @@
 ---
 name: alpha-goal
-description: "Clarify and frame read-only/change work as an executable, verifiable goal. Choose DIRECT or PERSIST; create an accepted Goal Contract when authority, recovery, or audit evidence must persist. Do not execute or verify persistent work."
+description: "Clarify and frame read-only/change work as an executable, verifiable goal. Choose DIRECT or PERSIST; create an accepted Goal Contract and bind it to the thread's native goal when persistence is required. Do not execute or verify persistent work."
 ---
 
 # Alpha Goal
@@ -11,7 +11,7 @@ Turn request and discovered facts into a clear goal. Own goal framing, entry rou
 
 Read instructions, artifacts, tests, docs, history, and current state. Resolve discoverable facts; descriptive evidence cannot grant desired-behavior, side-effect, or acceptance authority. Higher-priority instructions, tool policy, credentials, and approval gates remain invariant.
 
-For every change task, derive a minimal Goal Frame:
+For every task handled by this skill, derive a minimal Goal Frame:
 
 - intent and observable outcome;
 - scope, non-goals, and material constraints;
@@ -26,6 +26,7 @@ Repeat only while the Goal Frame has a blocking gap:
 
 1. Choose the next gap:
    - Treat intent or observable outcome as blocking when another reasonable reading could change scope, success signals, or evidence; otherwise derive them from the request and attributable facts.
+   - Treat a design choice as blocking only when another reasonable choice could change an authority-controlled outcome, interface/data contract, migration/rollout, security/privacy, external SLO, risk/recovery, or acceptance boundary; otherwise do not ask about it.
    - Select the highest-impact remaining gap by authority ownership, blast radius, irreversibility, behavior/interface/data impact, acceptance ambiguity, and rollback risk.
 2. Ask the relevant authority for one decision variable. State discovered facts, why it matters, real options when useful, and a recommendation; never ask for discoverable facts.
 3. Pressure-test the answer:
@@ -58,19 +59,36 @@ For `PERSIST`, resolve `$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/
 
 - Read `references/goal-contract-book.md`; create canonical `goal-contract.md` as `draft` and expand the Goal Frame with authority, side-effect, decision, claim, evidence, freshness, and invalidation boundaries.
 - Only the relevant authority may defer a goal item. No blocking gap may reach confirmation, handoff, or target mutation.
-- Keep material design, rollout, rollback, acceptance, mutable surfaces, and observers in this contract, not a second authority artifact. For every authority-retained material design decision, record its boundary, execution/observer consequence, risk/recovery treatment, and status; leave executor-owned mechanics to `executor`.
+- Keep authority-retained material design, rollout/rollback, acceptance, mutable surfaces, and observers in the Goal Contract rather than a second authority artifact.
 
 ## Confirm and Handoff
 
-Before confirmation, map criteria to currently available observers; identify every claim surface and prerequisite; complete all authority-retained material design decisions and their risk/observer treatment; check source conflicts, side-effect authority, freshness, and the highest-impact assumption with a counterexample/failure case. Keep `draft` while any known infeasibility, unavailable observer, unidentified claim surface, unmet prerequisite, incomplete authority-retained material-design coverage, or unresolved material finding remains. For cross-cutting/high-risk work, request independent read-only review from raw artifacts and await/cancel it.
+Before confirmation:
 
-Present the Goal Frame, boundaries, criteria, evidence, and residual risk. When authority-retained material design is touched, also present its dimensions, interface/data changes, risk-to-observer/test-plan mapping, and rollback/recovery treatment. Accept only an explicit decision from the recorded acceptance authority; silence, history, a spec, or desired-behavior authority does not grant side-effect authority or acceptance.
+- Map every criterion to a currently available observer; identify every claim surface and prerequisite.
+- Complete authority-retained material design decisions and their risk/observer treatment.
+- Check source conflicts, side-effect authority, freshness, and the highest-impact assumption with a counterexample or failure case.
+- Keep `draft` while any known infeasibility, unavailable observer, unidentified claim surface, unmet prerequisite, incomplete authority-retained material-design coverage, or unresolved material finding remains.
+- For cross-cutting/high-risk work, request independent read-only review from raw artifacts and await or cancel it.
 
-- On accept, complete Acceptance Completeness and the Confirmation Record, compute the authority-payload digest, set `status: accepted` last, and hand the canonical contract to `executor`.
-- On refine/reject, remain `draft` and do not mutate the target.
-- After acceptance, a material goal or authority change is a new task: do not edit or reuse the accepted contract or checkpoint. If acceptance exists without a checkpoint, confirm the accepted goal is still current before executor initializes it.
+At confirmation:
+
+- Present the Goal Frame, boundaries, criteria, evidence, and residual risk.
+- Accept only an explicit decision from the recorded acceptance authority; silence, history, a spec, or desired-behavior authority does not grant side-effect authority or acceptance.
+
+After the decision:
+
+- On accept, complete Acceptance Completeness and the Confirmation Record, compute the authority-payload digest, set `status: accepted` last, perform Native Goal Sync, and hand off the canonical contract to the designated execution owner.
+- On refine/reject, remain `draft`; do not mutate the target or native goal.
+- After acceptance, a material goal or authority change is a new task: do not edit or reuse the accepted contract or checkpoint. If acceptance exists without a checkpoint, confirm the accepted goal is still current before handoff.
+
+## Native Goal Sync
+
+Treat the native goal as lifecycle metadata, never as authority or acceptance evidence. Apply this only to `PERSIST`; `DIRECT` creates no native goal.
+
+- After acceptance, call `get_goal`. Reuse any unfinished native goal; if none exists, call `create_goal` with the accepted outcome and canonical `goal-contract.md` path. Set `token_budget` only when the user explicitly supplied one.
 
 ## Capability-Conditional Aids
 
 - Delegate independent read-heavy investigation, review, or evidence reruns. Parallelize independent reads; sequence dependent decisions; synthesize before acting.
-- Investigation agents never write shared artifacts. A verifier agent writes only verifier-owned checkpoint fields after exclusive handoff.
+- Investigation agents never write shared artifacts.

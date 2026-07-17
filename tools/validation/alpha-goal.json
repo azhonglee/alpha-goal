@@ -9,7 +9,8 @@
         "goal-framing",
         "entry-route",
         "goal-contract-authority",
-        "accepted-authority-digest"
+        "accepted-authority-digest",
+        "native-goal-binding"
       ],
       "references": [
         "references/goal-contract-book.md",

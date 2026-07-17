@@ -145,12 +145,12 @@
     {
       "id": "RB29",
       "scenario": "A persistent API and data migration has identified touched interfaces, compatibility risk, and rollback needs, but the Goal Contract records no authorized material-design decisions for them.",
-      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "The contract remains draft: every authority-retained material design decision needs an authorized boundary with decision source/date, execution/observer consequence, risk/recovery treatment, and covered or explicitly non-material/deferred status; executor-owned mechanics remain delegated before acceptance or mutation." }
+      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "The contract remains draft: every authority-retained material design decision needs an authorized boundary with decision source/date, execution/observer consequence, risk/recovery treatment, and covered or explicitly non-material/deferred status; design choices not retained by the authority remain outside the material-design table." }
     },
     {
       "id": "RB30",
       "scenario": "A Goal Contract contains material interface, data, test-risk, and rollback decisions, but the acceptance request summarizes only the high-level outcome and criteria.",
-      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Do not accept until the recorded acceptance authority is shown the authority-retained design dimensions, interface/data changes, risk-to-observer/test-plan mapping, rollback/recovery treatment, boundaries, criteria, and residual risk in the confirmation summary." }
+      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Keep authority-retained design dimensions, interface/data changes, risk-to-observer/test-plan mapping, and rollback/recovery treatment in the Goal Contract. The confirmation presentation summarizes the Goal Frame, boundaries, criteria, evidence, and residual risk without duplicating those design details." }
     },
     {
       "id": "RB31",
@@ -166,6 +166,21 @@
       "id": "RB33",
       "scenario": "A change request admits multiple reasonable intents or observable outcomes that would change scope, success signals, or acceptance evidence.",
       "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Treat intent/outcome as blocking instead of silently choosing one interpretation; use discovered facts and ask the relevant authority for the single highest-impact intent or observable-outcome decision, then choose DIRECT or PERSIST from the resolved goal rather than ambiguity alone." }
+    },
+    {
+      "id": "RB34",
+      "scenario": "A DIRECT task has a complete in-context Goal Frame and is ready for ordinary execution.",
+      "expected": { "entryRoute": "DIRECT", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Native Goal Sync is not invoked; direct work creates neither lifecycle artifacts nor native goal state." }
+    },
+    {
+      "id": "RB35",
+      "scenario": "A PERSIST contract is explicitly accepted and alpha-goal synchronizes the thread's native goal before executor handoff.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Call get_goal after acceptance. Reuse any unfinished native goal; when none exists, create one from the accepted outcome and canonical contract path, supplying token_budget only when the user explicitly requested one." }
+    },
+    {
+      "id": "RB36",
+      "scenario": "Execution and verification continue after alpha-goal reuses or creates the native goal.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Native goal state remains lifecycle metadata and never replaces Goal Contract authority or acceptance evidence." }
     }
   ]
 }
