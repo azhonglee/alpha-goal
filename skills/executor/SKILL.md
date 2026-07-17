@@ -20,10 +20,12 @@ Deliver the accepted outcome within its authority boundary.
 Each accepted contract has one flat `checkpoint.md`; never reopen or replace its authority payload. Initialize with:
 
 ```text
-node <executor-root>/scripts/checkpoint-lock.js init <absolute-checkpoint-path>
+node <executor-root>/scripts/checkpoint-lock.js init <absolute-checkpoint-path> <<'CHECKPOINT'
+<complete initial checkpoint>
+CHECKPOINT
 ```
 
-Resolve `<executor-root>` from selected `executor/SKILL.md`, never CWD. Use returned JSON `token`/`pendingPath`; never derive the path. Write the initial checkpoint with `checkpoint_revision: 0`, `state_revision: 0`, `active_owner: executor`, contract/workspace/repository/worktree identity, criterion observers/freshness/invalidation, and empty execution/verification records; then `commit <checkpoint> <token>`.
+Resolve `<executor-root>` from selected `executor/SKILL.md`, never CWD. Stream one complete initial checkpoint on stdin with `checkpoint_revision: 0`, `state_revision: 0`, `active_owner: executor`, contract/workspace/repository/worktree identity, criterion observers/freshness/invalidation, and empty execution/verification records. The command validates and publishes it as one revision-checked write.
 
 - `executor` owns recorded contract/execution identity, state revision, batches, mutations, raw evidence, rollback/recovery, attempts, and unclassified execution gaps.
 - `verifier` owns verification observations, evidence classification, criterion status, observed identity, freshness, and route.
@@ -34,22 +36,24 @@ Resolve `<executor-root>` from selected `executor/SKILL.md`, never CWD. Use retu
 If the acceptance authority materially changes the goal, authority, scope, criteria, claim boundary, or risk boundary, stop target writes. Do not edit the accepted contract or route through verifier. Open:
 
 ```text
-node <executor-root>/scripts/checkpoint-lock.js terminate <absolute-checkpoint-path> <expected-revision>
+node <executor-root>/scripts/checkpoint-lock.js terminate <absolute-checkpoint-path> <expected-revision> <<'CHECKPOINT'
+<complete successor checkpoint>
+CHECKPOINT
 ```
 
-Write the successor to `pendingPath` with `termination_reason: GOAL_CHANGED`, attributable source/date, change summary, current state identity, unverified mutations, incremented `checkpoint_revision`, and `active_owner: caller`; then commit. Any follow-up starts `alpha-goal` as a new task directory with a new Goal Contract and checkpoint. Never reuse the terminated artifacts.
+Stream one complete successor on stdin with `termination_reason: GOAL_CHANGED`, attributable source/date, change summary, current state identity, unverified mutations, incremented `checkpoint_revision`, and `active_owner: caller`. Any follow-up starts `alpha-goal` as a new task directory with a new Goal Contract and checkpoint. Never reuse the terminated artifacts.
 
 ## Write Protocol
 
-For an executor batch or handoff, open:
+For an executor batch or handoff, re-read the checkpoint and construct one complete successor, changing only executor fields, incrementing `checkpoint_revision` once, and setting `active_owner` last. Then invoke:
 
 ```text
-node <executor-root>/scripts/checkpoint-lock.js execute <absolute-checkpoint-path> <expected-revision> <executor|verifier>
+node <executor-root>/scripts/checkpoint-lock.js execute <absolute-checkpoint-path> <expected-revision> <executor|verifier> <<'CHECKPOINT'
+<complete successor checkpoint>
+CHECKPOINT
 ```
 
-Use JSON `token`/`pendingPath`. Re-read the checkpoint; on mismatch or abandonment run `abort <checkpoint> <token>` and reload. Otherwise write the complete successor, changing only executor fields, incrementing `checkpoint_revision` once, and setting `active_owner` last. `commit <checkpoint> <token>` publishes and unlocks.
-
-Before recovery, run `status <checkpoint>` and parse `phase`/`recoverableBy`. After proving the writer stopped, recover only when `executor` is listed, using `recover <checkpoint> <token> executor`; otherwise wait/report. Pending records never block.
+The helper takes an operating-system lock, checks revision/owner/content identity, atomically replaces the checkpoint through one fixed internal successor, and releases the lock with the process. On rejection, reload current state and retry; there is no multi-command lock or UUID pending record. A legacy `checkpoint.md.lock` must be resolved with the prior helper before using this protocol.
 
 ## Execute
 
