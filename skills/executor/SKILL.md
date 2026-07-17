@@ -49,7 +49,7 @@ node <executor-root>/scripts/checkpoint-lock.js execute <absolute-checkpoint-pat
 
 Use JSON `token`/`pendingPath`. Re-read the checkpoint; on mismatch or abandonment run `abort <checkpoint> <token>` and reload. Otherwise write the complete successor, changing only executor fields, incrementing `checkpoint_revision` once, and setting `active_owner` last. `commit <checkpoint> <token>` publishes and unlocks.
 
-Before recovery, run `status <checkpoint>` and parse `phase`/`recoverableBy`. After proving the writer stopped, recover only when `executor` is listed, using `recover <checkpoint> <token> executor`; otherwise wait/report. Recovery removes its token's pending record, and the next validated lock removes older orphans. Recovery cleanup failure retains the lock; acquisition cleanup failure rolls it back.
+Before recovery, run `status <checkpoint>` and parse `phase`/`recoverableBy`. After proving the writer stopped, recover only when `executor` is listed, using `recover <checkpoint> <token> executor`; otherwise wait/report.
 
 ## Execute
 

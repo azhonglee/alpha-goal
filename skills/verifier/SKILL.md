@@ -49,7 +49,7 @@ node <executor-root>/scripts/checkpoint-lock.js verify <absolute-checkpoint-path
 5. Parse JSON `token`/`pendingPath`; never construct the path. Re-read the checkpoint. On mismatch or abandonment, run `abort <checkpoint> <token>` and reload. Otherwise write the complete successor, changing only verifier fields, incrementing `checkpoint_revision` once, recording identity/evidence/gap/route, and setting `active_owner` last.
 6. Run `commit <checkpoint> <token>`; success publishes and unlocks.
 
-Before recovery, run `status <checkpoint>` and parse `phase`/`recoverableBy`. After proving the writer stopped, recover only when `verifier` is listed, using `recover <checkpoint> <token> verifier`; otherwise wait/report. Recovery removes its token's pending record, and the next validated lock removes older orphans. Recovery cleanup failure retains the lock; acquisition cleanup failure rolls it back.
+Before recovery, run `status <checkpoint>` and parse `phase`/`recoverableBy`. After proving the writer stopped, recover only when `verifier` is listed, using `recover <checkpoint> <token> verifier`; otherwise wait/report.
 
 ## Final Gate
 
