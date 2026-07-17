@@ -62,6 +62,8 @@ A Goal Frame contains intent, observable outcome, scope/non-goals, constraints, 
 
 `DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state or native goal, and does not call `executor` or `verifier`. After a `PERSIST` contract is explicitly accepted, Alpha Goal reuses any unfinished native goal in the current thread; it creates one only when none is unfinished. Native state is lifecycle metadata and never replaces contract authority or acceptance evidence. The only canonical `PERSIST` lifecycle artifacts remain `goal-contract.md` and `checkpoint.md`.
 
+The complete `PERSIST` execution and final-audit loop requires both `executor` and `verifier`; install only `alpha-goal` when that loop is not needed.
+
 - `goal-contract.md`: written only by `alpha-goal`; its accepted authority payload is standard structured input to executor and verifier.
 - `checkpoint.md`: records the current contract digest and execution/terminal-audit state. Executor and verifier hand off sequentially through `checkpoint_revision` and `active_owner`; each writer re-reads current state and stops on conflict.
 
@@ -75,7 +77,7 @@ node tools/validate_skills.js .
 node tools/validate_skills.js --fixtures
 ```
 
-The installer copies the three public skills into independent runtime-specific roots and synchronizes the selected user templates. See [INSTALL.md](INSTALL.md) for full behavior and smoke testing.
+The installer always copies `alpha-goal` and lets the user choose whether to install `executor` and `verifier` as a pair; choosing No preserves existing copies. See [INSTALL.md](INSTALL.md) for full behavior and smoke testing.
 
 ## Usage examples
 
