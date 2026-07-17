@@ -2,7 +2,7 @@
 
 ## Install
 
-Requires Node.js 18+ and Python 3. The installer uses repository-local JavaScript, vendored `smol-toml`, and Python only from the standard library.
+Requires Linux, Node.js 18+, Python 3, and util-linux `flock`. The installer uses repository-local JavaScript, vendored `smol-toml`, and Python only from the standard library.
 
 ```bash
 scripts/install.sh
@@ -44,13 +44,13 @@ Uninstall is conservative outside the managed copied-skill path. It removes only
 
 The compact recovery hook definition lives in `templates/hooks.json`. It is a `PostCompact` hook without a matcher and must not set matcher. It reloads only from an explicit current artifact path and delegates identity, owner, recovery, and termination decisions to the checkpoint helper and selected skills instead of duplicating their protocol.
 
-Hook replacement is keyed by marker family. The current v3 template replaces other managed numbered versions in that family before it is added. The installer also removes the experimental `codex-compact-skill-recovery` family and preserves unmanaged hooks.
+Hook replacement is keyed by marker family. The current v4 template replaces other managed numbered versions in that family before it is added. The installer also removes the experimental `codex-compact-skill-recovery` family and preserves unmanaged hooks.
 
 Codex may require reviewing and trusting the changed hook with `/hooks` before it runs.
 
 ## Smoke test
 
-The smoke test checks source-identical skill copies; semantic checkpoint transitions, JSON lock metadata, automatic unlock, stale-write rejection, abort/recovery, and legacy-lock release from arbitrary CWD; missing-key TOML merge while preserving explicit values; adapter discoverability; managed hook replacement; idempotence; failure preservation; concise output; fresh and mixed-config uninstall behavior; rejected arguments; refused unmanaged targets; and ignored `CODEX_HOME`. It uses temporary homes and does not touch real user configuration.
+The smoke test checks source-identical skill copies; append-only checkpoint records, bounded tail reads, stale-write rejection, and automatic mutex release; missing-key TOML merge while preserving explicit values; adapter discoverability; managed hook replacement; idempotence; failure preservation; concise output; fresh and mixed-config uninstall behavior; rejected arguments; refused unmanaged targets; and ignored `CODEX_HOME`. It uses temporary homes and does not touch real user configuration.
 
 ```bash
 set -euo pipefail
@@ -216,158 +216,32 @@ for skill in alpha-goal executor verifier; do
   assert_skill_tree_matches "$repo_root/skills/$skill" "$tmp_codex/.codex/skills/$skill"
 done
 test -x "$tmp_codex/.codex/skills/alpha-goal/scripts/authority-digest.js"
+test -x "$tmp_codex/.codex/skills/executor/scripts/checkpoint-lock.sh"
+test -x "$tmp_codex/.codex/skills/executor/scripts/checkpoint-append.js"
+test -x "$tmp_codex/.codex/skills/executor/scripts/checkpoint-update.js"
 test -x "$tmp_codex/.codex/skills/executor/scripts/checkpoint-lock.js"
 test "$(node "$repo_root/skills/alpha-goal/scripts/authority-digest.js" "$repo_root/skills/alpha-goal/references/goal-contract-book.md")" = "$(node "$tmp_codex/.codex/skills/alpha-goal/scripts/authority-digest.js" "$tmp_codex/.codex/skills/alpha-goal/references/goal-contract-book.md")"
-lock_checkpoint="$tmp_codex/lock-smoke/checkpoint.md"
+lock_checkpoint="$tmp_codex/lock-smoke/checkpoint.jsonl"
 mkdir -p "$(dirname "$lock_checkpoint")"
-mkdir -p "$lock_checkpoint.lock.pending-simulated-interruption"
-printf '{"complete":false}\n' > "$lock_checkpoint.lock.pending-simulated-interruption/owner.json"
-lock_helper="$tmp_codex/.codex/skills/executor/scripts/checkpoint-lock.js"
+cat > "$(dirname "$lock_checkpoint")/goal-contract.md" <<'EOF'
+status: accepted
+workspace_identity: /tmp/install-smoke
+- accepted_authority_sha256: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+EOF
+lock_helper="$tmp_codex/.codex/skills/executor/scripts/checkpoint-lock.sh"
+printf '%s' 'initial handoff' | (cd /tmp && bash "$lock_helper" init "$lock_checkpoint" /tmp/install-smoke /tmp/install-smoke codex/install-smoke) >/dev/null
+printf '%s' 'verify next batch' | bash "$lock_helper" execute "$lock_checkpoint" 0 verifier next >/dev/null
+printf '%s' 'next iteration result' | bash "$lock_helper" verify "$lock_checkpoint" 1 NEXT_ITERATION >/dev/null
 
-assert_unlocked() {
-  local status_json
-  status_json="$(node "$lock_helper" status "$lock_checkpoint")"
-  node -e 'const s=JSON.parse(process.argv[1]); if (s.phase !== "unlocked" || !Object.hasOwn(s, "recoverableBy")) process.exit(1)' "$status_json"
-}
-
-init_record="$(cd /tmp && node "$lock_helper" init "$lock_checkpoint")"
-init_token="$(node -p 'JSON.parse(process.argv[1]).token' "$init_record")"
-init_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$init_record")"
-test -n "$init_token"
-test -n "$init_pending"
-if node "$lock_helper" init "$lock_checkpoint" >/dev/null 2>&1; then
-  echo "second checkpoint writer should not acquire the held lock" >&2
-  exit 1
-fi
-printf 'checkpoint_revision: 0\nactive_owner: executor\npayload: initial\n' > "$init_pending"
-node "$lock_helper" commit "$lock_checkpoint" "$init_token" >/dev/null
-assert_unlocked
-
-same_owner_record="$(node "$lock_helper" execute "$lock_checkpoint" 0 executor)"
-same_owner_token="$(node -p 'JSON.parse(process.argv[1]).token' "$same_owner_record")"
-same_owner_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$same_owner_record")"
-printf 'checkpoint_revision: 1\nactive_owner: executor\npayload: same-owner\n' > "$same_owner_pending"
-node "$lock_helper" commit "$lock_checkpoint" "$same_owner_token" >/dev/null
-assert_unlocked
-
-handoff_record="$(node "$lock_helper" execute "$lock_checkpoint" 1 verifier)"
-handoff_token="$(node -p 'JSON.parse(process.argv[1]).token' "$handoff_record")"
-handoff_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$handoff_record")"
-printf 'checkpoint_revision: 2\nactive_owner: verifier\npayload: verify-next\n' > "$handoff_pending"
-node "$lock_helper" commit "$lock_checkpoint" "$handoff_token" >/dev/null
-assert_unlocked
-
-next_record="$(node "$lock_helper" verify "$lock_checkpoint" 2 NEXT_ITERATION)"
-next_token="$(node -p 'JSON.parse(process.argv[1]).token' "$next_record")"
-next_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$next_record")"
-printf 'checkpoint_revision: 3\nactive_owner: executor\npayload: next-iteration\n' > "$next_pending"
-node "$lock_helper" commit "$lock_checkpoint" "$next_token" >/dev/null
-assert_unlocked
-
-before_invalid="$(shasum -a 256 "$lock_checkpoint" | awk '{print $1}')"
-if node "$lock_helper" verify "$lock_checkpoint" 3 PASS_TO_FINAL >/dev/null 2>&1; then
-  echo "invalid executor-to-verdict transition should fail" >&2
-  exit 1
-fi
-if node "$lock_helper" execute "$lock_checkpoint" 2 verifier >/dev/null 2>&1; then
+before_invalid="$(sha256sum "$lock_checkpoint" | awk '{print $1}')"
+if printf '%s' 'stale result' | bash "$lock_helper" execute "$lock_checkpoint" 1 executor same >/dev/null 2>&1; then
   echo "stale expected revision should fail" >&2
   exit 1
 fi
-test "$before_invalid" = "$(shasum -a 256 "$lock_checkpoint" | awk '{print $1}')"
-
-verify_handoff_record="$(node "$lock_helper" execute "$lock_checkpoint" 3 verifier)"
-verify_handoff_token="$(node -p 'JSON.parse(process.argv[1]).token' "$verify_handoff_record")"
-verify_handoff_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$verify_handoff_record")"
-if node "$lock_helper" abort "$lock_checkpoint" "$next_token" >/dev/null 2>&1; then
-  echo "a stale token should not abort its successor lock" >&2
-  exit 1
-fi
-printf 'checkpoint_revision: 4\nactive_owner: verifier\npayload: recoverable-verifier\n' > "$verify_handoff_pending"
-node "$lock_helper" commit "$lock_checkpoint" "$verify_handoff_token" >/dev/null
-assert_unlocked
-
-if node "$lock_helper" verify "$lock_checkpoint" 4 RETURN_TO_ALPHA_GOAL >/dev/null 2>&1; then
-  echo "RETURN_TO_ALPHA_GOAL is not a verification route" >&2
-  exit 1
-fi
-recovery_record="$(node "$lock_helper" terminate "$lock_checkpoint" 4)"
-recovery_token="$(node -p 'JSON.parse(process.argv[1]).token' "$recovery_record")"
-recovery_status="$(node "$lock_helper" status "$lock_checkpoint")"
-node -e 'const s=JSON.parse(process.argv[1]); const r=s.recoverableBy; if (s.phase === "unlocked" || !(r === "verifier" || (Array.isArray(r) && r.includes("verifier")))) process.exit(1)' "$recovery_status"
-node "$lock_helper" recover "$lock_checkpoint" "$recovery_token" verifier >/dev/null
-assert_unlocked
-
-if node "$lock_helper" reframe "$lock_checkpoint" 4 >/dev/null 2>&1; then
-  echo "reframe should no longer be creatable" >&2
-  exit 1
-fi
-if node "$lock_helper" supersede "$lock_checkpoint" 4 >/dev/null 2>&1; then
-  echo "supersede should no longer be creatable" >&2
-  exit 1
-fi
-
-resume_record="$(node "$lock_helper" verify "$lock_checkpoint" 4 NEXT_ITERATION)"
-resume_token="$(node -p 'JSON.parse(process.argv[1]).token' "$resume_record")"
-resume_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$resume_record")"
-printf 'checkpoint_revision: 5\nactive_owner: executor\npayload: resumed\n' > "$resume_pending"
-node "$lock_helper" commit "$lock_checkpoint" "$resume_token" >/dev/null
-assert_unlocked
-
-terminate_dir="$tmp_codex/terminate-case"
-mkdir -p "$terminate_dir"
-terminate_checkpoint="$terminate_dir/checkpoint.md"
-terminate_init="$(node "$lock_helper" init "$terminate_checkpoint")"
-terminate_init_token="$(node -p 'JSON.parse(process.argv[1]).token' "$terminate_init")"
-terminate_init_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$terminate_init")"
-printf 'checkpoint_revision: 0\nactive_owner: executor\npayload: terminate-initial\n' > "$terminate_init_pending"
-node "$lock_helper" commit "$terminate_checkpoint" "$terminate_init_token" >/dev/null
-terminate_record="$(node "$lock_helper" terminate "$terminate_checkpoint" 0)"
-terminate_token="$(node -p 'JSON.parse(process.argv[1]).token' "$terminate_record")"
-terminate_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$terminate_record")"
-printf 'checkpoint_revision: 1\nactive_owner: caller\ntermination_reason: GOAL_CHANGED\n' > "$terminate_pending"
-node "$lock_helper" commit "$terminate_checkpoint" "$terminate_token" >/dev/null
-test ! -e "$terminate_checkpoint.lock"
-
-release_token="$(python3 - "$lock_checkpoint" <<'PY'
-import hashlib
-import json
-import sys
-import uuid
-from pathlib import Path
-
-checkpoint = Path(sys.argv[1])
-token = str(uuid.uuid4())
-lock = Path(f"{checkpoint}.lock")
-lock.mkdir()
-record = {
-    "schemaVersion": 3,
-    "owner": "executor:legacy/release",
-    "token": token,
-    "expectedRevision": "5",
-    "expectedOwner": "executor",
-    "expectedCheckpointSha256": hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
-    "nextRevision": "6",
-    "nextOwner": "executor",
-    "plannedCheckpointSha256": None,
-}
-(lock / "owner.json").write_text(json.dumps(record))
-print(token)
-PY
-)"
-node "$lock_helper" release "$lock_checkpoint" "$release_token" >/dev/null
-assert_unlocked
-
-final_handoff_record="$(node "$lock_helper" execute "$lock_checkpoint" 5 verifier)"
-final_handoff_token="$(node -p 'JSON.parse(process.argv[1]).token' "$final_handoff_record")"
-final_handoff_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$final_handoff_record")"
-printf 'checkpoint_revision: 6\nactive_owner: verifier\npayload: final-check\n' > "$final_handoff_pending"
-node "$lock_helper" commit "$lock_checkpoint" "$final_handoff_token" >/dev/null
-pass_record="$(node "$lock_helper" verify "$lock_checkpoint" 6 PASS_TO_FINAL)"
-pass_token="$(node -p 'JSON.parse(process.argv[1]).token' "$pass_record")"
-pass_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$pass_record")"
-printf 'checkpoint_revision: 7\nactive_owner: caller\npayload: passed\n' > "$pass_pending"
-node "$lock_helper" commit "$lock_checkpoint" "$pass_token" >/dev/null
-assert_unlocked
+test "$before_invalid" = "$(sha256sum "$lock_checkpoint" | awk '{print $1}')"
+status_json="$(bash "$lock_helper" status "$lock_checkpoint")"
+node -e 'const s=JSON.parse(process.argv[1]); if (s.revision !== 2 || s.owner !== "executor") process.exit(1)' "$status_json"
+node -e 'const fs=require("fs"); const rows=fs.readFileSync(process.argv[1],"utf8").split("\n").filter(Boolean).map(JSON.parse); if(rows.length!==3 || rows[2].result.text!=="next iteration result") process.exit(1)' "$lock_checkpoint"
 test -f "$tmp_codex/.codex/AGENTS.md"
 test -f "$tmp_codex/.codex/config.toml"
 test -f "$tmp_codex/.codex/hooks.json"
@@ -376,18 +250,19 @@ test ! -e "$tmp_codex/.claude/CLAUDE.md"
 test ! -e "$tmp_codex/.claude/skills/alpha-goal"
 ! grep -q "references/claude-adapter.md" "$tmp_codex/.codex/skills/alpha-goal/SKILL.md"
 python3 -m json.tool "$tmp_codex/.codex/hooks.json" >/dev/null
-grep -q "codex-alpha-goal-compact-recovery:v3" "$tmp_codex/.codex/hooks.json"
+grep -q "codex-alpha-goal-compact-recovery:v4" "$tmp_codex/.codex/hooks.json"
 grep -q "Use only an explicit current artifact path" "$tmp_codex/.codex/hooks.json"
-grep -q "Follow top-level active_owner" "$tmp_codex/.codex/hooks.json"
-grep -q "legacy alpha-goal owner loads executor only to terminate it to caller" "$tmp_codex/.codex/hooks.json"
+grep -q "read the last valid JSON record and follow active_owner" "$tmp_codex/.codex/hooks.json"
+grep -q "Send only the current result as plain text" "$tmp_codex/.codex/hooks.json"
+grep -q "checkpoint.md is legacy and stays on the compatibility path" "$tmp_codex/.codex/hooks.json"
 grep -q "caller reports PASS/BLOCKED/GOAL_CHANGED as terminal" "$tmp_codex/.codex/hooks.json"
 grep -q "Later work uses a new Alpha Goal task directory" "$tmp_codex/.codex/hooks.json"
 grep -q "accepted with valid completeness/digest loads alpha-goal to confirm the goal is unchanged" "$tmp_codex/.codex/hooks.json"
 ! grep -q "technical_design.md" "$tmp_codex/.codex/hooks.json"
-grep -q "checkpoint.md" "$tmp_codex/.codex/hooks.json"
+grep -q "checkpoint.jsonl" "$tmp_codex/.codex/hooks.json"
 codex_repeat_output="$(run_installer "$tmp_codex")"
 assert_simple_success_output "$codex_repeat_output" "Alpha Goal install completed."
-test "$(grep -o "codex-alpha-goal-compact-recovery:v3" "$tmp_codex/.codex/hooks.json" | wc -l | tr -d ' ')" -eq 1
+test "$(grep -o "codex-alpha-goal-compact-recovery:v4" "$tmp_codex/.codex/hooks.json" | wc -l | tr -d ' ')" -eq 1
 
 tmp_claude="$(mktemp -d)"
 claude_output="$(TARGET_CHOICE=claude run_installer "$tmp_claude")"
@@ -436,6 +311,7 @@ data = {
         "PostCompact": [
             {"hooks": [{"type": "command", "command": ": 'codex-alpha-goal-compact-recovery:v1'; printf old"}]},
             {"hooks": [{"type": "command", "command": ": 'codex-alpha-goal-compact-recovery:v2'; printf old2"}]},
+            {"hooks": [{"type": "command", "command": ": 'codex-alpha-goal-compact-recovery:v3'; printf old3"}]},
             {"hooks": [{"type": "command", "command": ": 'codex-compact-skill-recovery:experimental'; printf experimental"}]},
             {"hooks": [{"type": "command", "command": "printf unmanaged"}]},
         ]
@@ -448,8 +324,9 @@ upgrade_output="$(run_installer "$tmp_upgrade")"
 assert_simple_success_output "$upgrade_output" "Alpha Goal install completed."
 ! grep -q "codex-alpha-goal-compact-recovery:v1" "$tmp_upgrade/.codex/hooks.json"
 ! grep -q "codex-alpha-goal-compact-recovery:v2" "$tmp_upgrade/.codex/hooks.json"
+! grep -q "codex-alpha-goal-compact-recovery:v3" "$tmp_upgrade/.codex/hooks.json"
 ! grep -q "codex-compact-skill-recovery:experimental" "$tmp_upgrade/.codex/hooks.json"
-test "$(grep -o "codex-alpha-goal-compact-recovery:v3" "$tmp_upgrade/.codex/hooks.json" | wc -l | tr -d ' ')" -eq 1
+test "$(grep -o "codex-alpha-goal-compact-recovery:v4" "$tmp_upgrade/.codex/hooks.json" | wc -l | tr -d ' ')" -eq 1
 grep -q "printf unmanaged" "$tmp_upgrade/.codex/hooks.json"
 
 tmp_merge="$(mktemp -d)"
@@ -642,7 +519,7 @@ rm -f /tmp/alpha-goal-invalid.out /tmp/alpha-goal-invalid.err
 ```text
 $alpha-goal 根据请求和已发现事实形成 Goal Frame，再判断走 DIRECT 还是 PERSIST。
 $executor 从已接受的 Goal Contract 恢复并执行下一批授权工作。
-$verifier 对当前持久 checkpoint 做风险边界或最终状态验证。
+$verifier 对当前持久 checkpoint log 做风险边界或最终状态验证。
 ```
 
 ## Count budget

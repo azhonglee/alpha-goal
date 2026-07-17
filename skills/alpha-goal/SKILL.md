@@ -68,9 +68,9 @@ Present the Goal Frame, boundaries, criteria, evidence, and residual risk. When 
 
 - On accept, complete Acceptance Completeness and the Confirmation Record, compute the authority-payload digest, set `status: accepted` last, and hand the canonical contract to `executor`.
 - On refine/reject, remain `draft` and do not mutate the target.
-- After acceptance, a material goal or authority change is a new task: do not edit or reuse the accepted contract or checkpoint. If acceptance exists without a checkpoint, confirm the accepted goal is still current before executor initializes it.
+- After acceptance, a material goal or authority change is a new task: do not edit or reuse the accepted contract or checkpoint log. If acceptance exists without a checkpoint log, confirm the accepted goal is still current before executor initializes it.
 
 ## Capability-Conditional Aids
 
 - Delegate independent read-heavy investigation, review, or evidence reruns. Parallelize independent reads; sequence dependent decisions; synthesize before acting.
-- Investigation agents never write shared artifacts. A verifier agent writes only verifier-owned checkpoint fields after exclusive handoff.
+- Investigation agents never write shared artifacts. A verifier agent appends only its current verification-result record after exclusive handoff.

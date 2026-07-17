@@ -86,6 +86,23 @@ function snapshot(c, file = c.checkpoint, canonical = false) {
   return { revision, owner, digest: crypto.createHash("sha256").update(input).digest("hex") };
 }
 function same(actual, revision, owner, digest) { return actual.revision === revision && actual.owner === owner && actual.digest === digest; }
+function pendingPath(c, token) { return `${c.checkpoint}.pending-${token}`; }
+function cleanupOrphanPending(c) {
+  const directory = path.dirname(c.checkpoint), prefix = `${path.basename(c.checkpoint)}.pending-`;
+  let names;
+  try { names = fs.readdirSync(directory); } catch (error) { fail("PENDING_CLEANUP_FAILED", error.message, 1, { nextAction: "retry" }); }
+  for (const name of names) {
+    if (!name.startsWith(prefix) || !tokenPattern.test(name.slice(prefix.length))) continue;
+    try { fs.unlinkSync(path.join(directory, name)); } catch (error) {
+      if (error.code !== "ENOENT") fail("PENDING_CLEANUP_FAILED", error.message, 1, { nextAction: "retry" });
+    }
+  }
+}
+function cleanupCurrentPending(c, token) {
+  try { fs.unlinkSync(pendingPath(c, token)); } catch (error) {
+    if (error.code !== "ENOENT") fail("PENDING_CLEANUP_FAILED", error.message, 1, { nextAction: "status" });
+  }
+}
 function close(c, token) {
   const closed = `${c.lock}.closed-${token}`;
   fs.renameSync(c.lock, closed);
@@ -172,7 +189,15 @@ function acquire(c, t) {
     if (error.error) throw error;
     fail("STALE_CHECKPOINT", error.message, 3);
   }
-  print({ ok: true, action: derived.action, token, pendingPath: `${c.checkpoint}.pending-${token}`,
+  requireLock(c, token);
+  try { cleanupOrphanPending(c); } catch (error) {
+    try { close(c, token); } catch (closeError) {
+      if (error.error) error.extra = { ...error.extra, closeError: closeError.message, nextAction: "status" };
+      throw error;
+    }
+    throw error;
+  }
+  print({ ok: true, action: derived.action, token, pendingPath: pendingPath(c, token),
     from: { revision: record.expectedRevision, owner: record.expectedOwner },
     to: { revision: record.nextRevision, owner: record.nextOwner }, route: record.route, writer: record.writer });
 }
@@ -212,13 +237,13 @@ function commit(c, token) {
   let before, staged;
   try { before = snapshot(c); } catch (error) { fail("INVALID_CHECKPOINT", error.message); }
   if (!same(before, record.expectedRevision, record.expectedOwner, record.expectedCheckpointSha256)) fail("STALE_CHECKPOINT", "digest CAS failed", 3);
-  try { staged = snapshot(c, `${c.checkpoint}.pending-${token}`, !record.legacy); } catch (error) { fail("INVALID_STAGED_CHECKPOINT", error.message); }
+  try { staged = snapshot(c, pendingPath(c, token), !record.legacy); } catch (error) { fail("INVALID_STAGED_CHECKPOINT", error.message); }
   if (staged.revision !== record.nextRevision || staged.owner !== record.nextOwner) fail("INVALID_STAGED_CHECKPOINT", "staged mismatch");
   const prepared = { ...record.raw, plannedCheckpointSha256: staged.digest };
   try {
     fs.writeFileSync(`${c.lock}/.owner.pending-${token}`, `${JSON.stringify(prepared)}\n`, { flag: "wx", mode: 0o600 });
     fs.renameSync(`${c.lock}/.owner.pending-${token}`, c.ownerFile);
-    fs.renameSync(`${c.checkpoint}.pending-${token}`, c.checkpoint);
+    fs.renameSync(pendingPath(c, token), c.checkpoint);
     if (!same(snapshot(c), record.nextRevision, record.nextOwner, staged.digest)) fail("COMMIT_FAILED", "invalid post-write", 3);
     close(c, token);
   } catch (error) {
@@ -234,19 +259,21 @@ function release(c, token) {
   if (!record.legacy) fail("RELEASE_NOT_ALLOWED", "use abort");
   const phase = inspect(c, record).phase;
   if (!phase.endsWith("commit")) fail("RELEASE_NOT_ALLOWED", "unsafe release");
+  cleanupCurrentPending(c, token);
   close(c, token); done("release", token, phase);
 }
 
 function abort(c, token) {
   validToken(token); const record = requireLock(c, token);
   if (record.plannedCheckpointSha256 !== null || inspect(c, record).phase !== "pre-commit") fail("ABORT_NOT_ALLOWED", "not pre-commit");
-  fs.rmSync(`${c.checkpoint}.pending-${token}`, { force: true }); close(c, token); done("abort", token, "aborted");
+  cleanupCurrentPending(c, token); close(c, token); done("abort", token, "aborted");
 }
 
 function recover(c, token, actor) {
   validToken(token); validOwner(actor); if (actor === "none") fail("INVALID_OWNER", "invalid actor");
   const record = requireLock(c, token), state = inspect(c, record);
   if (!state.recoverableBy.includes(actor)) fail("RECOVERY_NOT_ALLOWED", "recovery failed", 1, { nextAction: "inspect" });
+  cleanupCurrentPending(c, token);
   close(c, token); done("recover", token, state.phase);
 }
 

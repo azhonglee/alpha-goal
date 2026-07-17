@@ -8,6 +8,7 @@ const FRONTMATTER_RE = /^---\n(.*?)\n---\n/s;
 const FIELD_RE = /^([A-Za-z0-9_-]+):\s*(.*?)\s*$/;
 const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
 const CONTRACT_PATH = "tools/validation/alpha-goal.json";
+const REQUIRED_TOOL_COMMONJS_PACKAGES = ["tools/package.json"];
 const REQUIRED_FIXTURES = new Set([
   "hidden-build-budget.json",
   "missing-skill.json",
@@ -34,6 +35,7 @@ function validateRoot(root) {
   const contract = readContract(root, errors);
 
   validateContract(contract, errors);
+  validateCommonJsPackages(root, contract, errors);
   validateSkills(root, contract, errors, warnings);
   const counts = validateSkillBudget(root, contract, errors);
   validateArtifacts(contract, errors);
@@ -61,7 +63,7 @@ function readContract(root, errors) {
 }
 
 function validateContract(contract, errors) {
-  if (contract.schemaVersion !== 6) errors.push(`${CONTRACT_PATH}: schemaVersion must be 6`);
+  if (contract.schemaVersion !== 8) errors.push(`${CONTRACT_PATH}: schemaVersion must be 8`);
   if (!Number.isInteger(contract.instructionBudgetExclusiveMax) || contract.instructionBudgetExclusiveMax < 1) {
     errors.push(`${CONTRACT_PATH}: instructionBudgetExclusiveMax must be a positive integer`);
   }
@@ -104,6 +106,7 @@ function validateContract(contract, errors) {
     requireUniqueStrings(skill.scripts, `${CONTRACT_PATH}: public skill ${skill.name || "<unknown>"} scripts`, errors);
   }
   requireUniqueStrings(skillNames, `${CONTRACT_PATH}: public skill names`, errors);
+  requireUniqueStrings(contract.commonJsPackages, `${CONTRACT_PATH}: commonJsPackages`, errors);
   if (entryCount !== 1) errors.push(`${CONTRACT_PATH}: exactly one public skill must have entry=true`);
   if (entryCount === 1 && contract.routes?.entry?.owner !== entrySkillName) {
     errors.push(`${CONTRACT_PATH}: entry route owner must match the public skill with entry=true`);
@@ -124,6 +127,59 @@ function validateContract(contract, errors) {
     requireArray(contract.distribution || {}, key, errors, `${CONTRACT_PATH}: distribution`);
     requireUniqueStrings(contract.distribution?.[key], `${CONTRACT_PATH}: distribution.${key}`, errors);
   }
+}
+
+function validateCommonJsPackages(root, contract, errors) {
+  const validDeclaration = Array.isArray(contract.commonJsPackages);
+  const declared = validDeclaration ? contract.commonJsPackages : [];
+  const required = requiredCommonJsPackages(contract);
+  const packages = new Set(required);
+  if (!validDeclaration) {
+    errors.push(`${CONTRACT_PATH}: commonJsPackages must be an array`);
+  } else {
+    for (const rel of required) {
+      if (!declared.includes(rel)) errors.push(`${CONTRACT_PATH}: commonJsPackages must include required boundary: ${rel}`);
+    }
+  }
+  for (const rel of declared) {
+    if (!safeRelativePath(rel) || path.basename(rel) !== "package.json") {
+      errors.push(`${CONTRACT_PATH}: commonJsPackages entry must be a safe package.json path: ${JSON.stringify(rel)}`);
+      continue;
+    }
+    packages.add(rel);
+  }
+  for (const rel of packages) {
+    const file = path.join(root, rel);
+    if (!isFile(file)) {
+      errors.push(`${CONTRACT_PATH}: commonJsPackages file is missing: ${rel}`);
+      continue;
+    }
+    try {
+      const manifest = JSON.parse(fs.readFileSync(file, "utf8"));
+      if (!isObject(manifest) || manifest.type !== "commonjs") errors.push(`${rel}: type must be commonjs`);
+    } catch (error) {
+      errors.push(`${rel}: invalid JSON: ${errorMessage(error)}`);
+    }
+  }
+}
+
+function requiredCommonJsPackages(contract) {
+  const packages = new Set(REQUIRED_TOOL_COMMONJS_PACKAGES);
+  const skills = Array.isArray(contract.publicSkills) ? contract.publicSkills : [];
+  for (const skill of skills) {
+    if (!isObject(skill) || !Array.isArray(skill.scripts)) continue;
+    for (const script of skill.scripts) {
+      const boundary = commonJsBoundaryForSkillScript(skill.name, script);
+      if (boundary) packages.add(boundary);
+    }
+  }
+  return packages;
+}
+
+function commonJsBoundaryForSkillScript(skillName, script) {
+  if (!safeRelativePath(skillName) || /[\\/]/.test(skillName)) return null;
+  if (!safeRelativePath(script) || !script.startsWith("scripts/") || path.posix.extname(script) !== ".js") return null;
+  return path.posix.join("skills", skillName, "scripts", "package.json");
 }
 
 function validateSkills(root, contract, errors, warnings) {
@@ -295,8 +351,9 @@ function validateToolsSurface(root, errors, warnings) {
     if (!isFile(file)) continue;
     const allowedFixture = /^tools\/fixtures\/validate-skills\/[a-z0-9-]+\.json$/.test(rel);
     const allowedEval = rel === "tools/evals/runtime-boundaries.json";
-    const allowedTest = rel === "tools/test_checkpoint_lock.js";
-    if (rel !== "tools/validate_skills.js" && rel !== CONTRACT_PATH && !allowedFixture && !allowedEval && !allowedTest) {
+    const allowedTest = rel === "tools/test_authority_digest.js" || rel === "tools/test_checkpoint_lock.js";
+    const allowedPackage = rel === "tools/package.json";
+    if (rel !== "tools/validate_skills.js" && rel !== CONTRACT_PATH && !allowedFixture && !allowedEval && !allowedTest && !allowedPackage) {
       errors.push(`unexpected tools surface: ${rel}`);
     }
     if (fs.readFileSync(file, "utf8").startsWith("#!") && (fs.statSync(file).mode & 0o100) === 0) {
@@ -351,7 +408,7 @@ function validateRuntimeEvals(root, contract, errors) {
 
 function validateHookTemplate(root, errors) {
   const rel = "templates/hooks.json";
-  const managedMarker = /^: 'codex-alpha-goal-compact-recovery:v3';/;
+  const managedMarker = /^: 'codex-alpha-goal-compact-recovery:v4';/;
   let data;
   try {
     data = JSON.parse(fs.readFileSync(path.join(root, rel), "utf8"));
@@ -392,10 +449,10 @@ function validateHookTemplate(root, errors) {
     }
   }
   if (managedPostCompactCount !== 1) {
-    errors.push(`${rel}: expected exactly one v3 managed recovery hook inside hooks.PostCompact, found ${managedPostCompactCount}`);
+    errors.push(`${rel}: expected exactly one v4 managed recovery hook inside hooks.PostCompact, found ${managedPostCompactCount}`);
   }
   if (managedOtherEventCount !== 0) {
-    errors.push(`${rel}: v3 managed recovery hook must not appear outside hooks.PostCompact`);
+    errors.push(`${rel}: v4 managed recovery hook must not appear outside hooks.PostCompact`);
   }
 }
 
@@ -476,8 +533,74 @@ function runFixtures() {
       fs.rmSync(tempRoot, { recursive: true, force: true });
     }
   }
+  runGeneratedCommonJsFixtures(projectRoot, errors);
   printFixtureReport(errors);
   return errors.length ? 1 : 0;
+}
+
+function runGeneratedCommonJsFixtures(projectRoot, errors) {
+  const sourceContract = JSON.parse(fs.readFileSync(path.join(projectRoot, CONTRACT_PATH), "utf8"));
+  const boundary = [...requiredCommonJsPackages(sourceContract)].find(rel => rel.startsWith("skills/"));
+  if (!boundary) {
+    errors.push("missing-required-commonjs-boundary: fixture requires at least one public skill .js script");
+    return;
+  }
+  runGeneratedFixture("missing-required-commonjs-boundary", projectRoot, root => {
+    const contractPath = path.join(root, CONTRACT_PATH);
+    const contract = JSON.parse(fs.readFileSync(contractPath, "utf8"));
+    contract.commonJsPackages = contract.commonJsPackages.filter(rel => rel !== boundary);
+    fs.writeFileSync(contractPath, `${JSON.stringify(contract, null, 2)}\n`);
+    fs.rmSync(path.join(root, boundary));
+  }, [
+    `commonJsPackages must include required boundary: ${boundary}`,
+    `commonJsPackages file is missing: ${boundary}`
+  ], errors);
+
+  runGeneratedFixture("wrong-type-commonjs-packages", projectRoot, root => {
+    const contractPath = path.join(root, CONTRACT_PATH);
+    const contract = JSON.parse(fs.readFileSync(contractPath, "utf8"));
+    contract.commonJsPackages = {};
+    fs.writeFileSync(contractPath, `${JSON.stringify(contract, null, 2)}\n`);
+  }, ["commonJsPackages must be an array"], errors);
+
+  const verifierScript = "scripts/boundary-fixture.js";
+  const verifierBoundary = commonJsBoundaryForSkillScript("verifier", verifierScript);
+  runGeneratedFixture("verifier-script-missing-commonjs-boundary", projectRoot, root => {
+    const contractPath = path.join(root, CONTRACT_PATH);
+    const contract = JSON.parse(fs.readFileSync(contractPath, "utf8"));
+    const verifier = contract.publicSkills.find(skill => skill.name === "verifier");
+    verifier.scripts.push(verifierScript);
+    fs.writeFileSync(contractPath, `${JSON.stringify(contract, null, 2)}\n`);
+    writeFixtureFile(root, path.posix.join("skills", "verifier", verifierScript), "const fixture = true;\n");
+  }, [
+    `commonJsPackages must include required boundary: ${verifierBoundary}`,
+    `commonJsPackages file is missing: ${verifierBoundary}`
+  ], errors);
+}
+
+function runGeneratedFixture(name, projectRoot, mutate, expectedErrors, errors) {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "alpha-goal-validator-"));
+  try {
+    copyTree(projectRoot, tempRoot);
+    mutate(tempRoot);
+    let result;
+    try {
+      result = validateRoot(tempRoot);
+    } catch (error) {
+      errors.push(`${name}: validator threw instead of returning errors: ${errorMessage(error)}`);
+      return;
+    }
+    if (result.errors.length === 0) errors.push(`${name}: expected validation errors, got none`);
+    for (const expected of expectedErrors) {
+      if (!result.errors.some(error => error.includes(expected))) {
+        errors.push(`${name}: expected error containing ${JSON.stringify(expected)}, got: ${result.errors.join("; ")}`);
+      }
+    }
+  } catch (error) {
+    errors.push(`${name}: fixture setup failed: ${errorMessage(error)}`);
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
 }
 
 function applyReplacement(root, fixtureFile, replacement, errors) {

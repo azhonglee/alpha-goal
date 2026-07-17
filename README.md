@@ -44,7 +44,7 @@ flowchart TD
   A["alpha-goal：澄清需求并形成 Goal Frame"] --> R{"DIRECT / PERSIST"}
   R --> D["DIRECT：正常执行 + 最终验证"]
   R --> P["PERSIST：扩展并确认 goal-contract.md"]
-  P --> E["executor：按风险边界执行并记录 checkpoint.md"]
+  P --> E["executor：按风险边界执行并追加 checkpoint.jsonl"]
   E --> V["verifier：独立观察当前状态"]
   V -->|"NEXT_ITERATION"| E
   V -->|"BLOCKED"| B["报告 blocker"]
@@ -59,10 +59,10 @@ Accepted goal materially changes -> terminate the old checkpoint -> start a new 
 
 Goal Frame 包含 intent、observable outcome、scope/non-goals、constraints、success signals、observers 和 material decisions；已清晰内容直接来自请求与可归因事实，只向相关 authority 追问最高影响的单个 blocking gap，并仅在授权决定及其 material boundaries、执行/证据后果可确定时闭合。accepted goal 发生材料性变化时，旧任务终止；新目标使用新的任务目录重新进入 `alpha-goal`，不重开旧 contract/checkpoint。
 
-`DIRECT` 将完整 Goal Frame 保留在当前上下文，不创建 Alpha Goal 状态，也不调用 `executor` 或 `verifier`。`PERSIST` 的 canonical lifecycle artifacts 只有 `goal-contract.md` 与 `checkpoint.md`；checkpoint helper 还会生成原子写协调记录：活动中的 `.lock`、暂存中的 `.pending-*`，以及原子解锁后尽力清理的 `.lock.closed-*` 临时墓碑。
+`DIRECT` 将完整 Goal Frame 保留在当前上下文，不创建 Alpha Goal 状态，也不调用 `executor` 或 `verifier`。`PERSIST` 的 canonical lifecycle artifacts 只有 `goal-contract.md` 与 `checkpoint.jsonl`；Agent 只提交当前 task result 的普通文本，helper 读取最后一条有效记录并生成 JSONL。有效历史从不重写；重试只会丢弃未完成的尾部残片。
 
 - `goal-contract.md`：由 `alpha-goal` 独占修改；accepted authority payload 是 executor 和 verifier 的标准结构化输入。
-- `checkpoint.md`：记录当前契约 digest 与执行/验证状态，并用原子锁及 `checkpoint_revision`/`active_owner` 串行化 `executor`、`verifier` 交接。
+- `checkpoint.jsonl`：每行是一条自包含结果记录；task mutex 与 `checkpoint_revision`/`active_owner` 串行化 `executor`、`verifier` 交接。
 
 路由只看材料性影响、副作用、恢复需求和可验证性；不以置信度、文件数、步骤数、问答轮次或预计时长替代风险判断。
 
@@ -100,7 +100,7 @@ $alpha-goal 实现一下这个需求:<YOUR-PRD> or <YOUR-DESCRIPTION>，<YOUR-UX
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/executor/"><code>executor</code></a></td>
-      <td align="left">执行已接受契约内的授权 batch；<code>goal-contract.md</code> 是权威输入，<code>checkpoint.md</code> 记录 mutation、原始执行证据与交接状态。</td>
+      <td align="left">执行已接受契约内的授权 batch；<code>goal-contract.md</code> 是权威输入，<code>checkpoint.jsonl</code> 逐条追加当前 mutation、证据与交接结果。</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/verifier/"><code>verifier</code></a></td>
