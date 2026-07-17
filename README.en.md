@@ -49,8 +49,7 @@ flowchart TD
   E --> V["verifier: independently observe current state"]
   V -->|"NEXT_ITERATION"| E
   V -->|"BLOCKED"| B["Report blocker"]
-  V -->|"PASS_TO_FINAL"| C["synchronize native terminal state per runtime"]
-  C --> F["Final claim"]
+  V -->|"PASS_TO_FINAL"| F["Final claim"]
 ```
 
 ```text
@@ -121,5 +120,5 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 - Batch work inside one low-risk boundary; invoke verifier only at material risk boundaries and final state.
 - PASS binds to the target and delivery state actually observed and terminates that checkpoint; later work starts a new task.
 - Volatile evidence records observation time and invalidation conditions; unidentified mutable surfaces cannot support an exact-binding claim.
-- The Goal Contract is standard structured input to executor/verifier; `alpha-goal` reuses or creates the native goal before accepted `PERSIST` handoff, then synchronizes terminal state per runtime after `PASS_TO_FINAL` with no required work left.
+- The Goal Contract is standard structured input to executor/verifier; `alpha-goal` reuses or creates the native goal before accepted `PERSIST` handoff.
 - `tools/evals/runtime-boundaries.json` preserves 36 static expected-boundary cases; schema validation is not runtime evidence.

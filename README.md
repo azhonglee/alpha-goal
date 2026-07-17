@@ -49,8 +49,7 @@ flowchart TD
   E --> V["verifier：独立观察当前状态"]
   V -->|"NEXT_ITERATION"| E
   V -->|"BLOCKED"| B["报告 blocker"]
-  V -->|"PASS_TO_FINAL"| C["按 runtime 能力同步 native goal 终态"]
-  C --> F["最终声明"]
+  V -->|"PASS_TO_FINAL"| F["最终声明"]
 ```
 
 ```text
@@ -121,5 +120,5 @@ Alpha Goal 让 agent 工作保持目标明确、行动有界、声明受证据�
 - 同一低风险边界内批量执行，只在材料性风险边界和最终状态调用 verifier。
 - PASS 绑定实际观察到的最终目标与交付状态并终止该 checkpoint；后续工作创建新任务。
 - 时效性证据记录观察时间与失效条件；无法标识的可变表面不得声称精确绑定。
-- Goal Contract 是 executor/verifier 的标准结构化输入；`alpha-goal` 在 accepted `PERSIST` 交接前复用或创建 native goal，并在 `PASS_TO_FINAL` 且无剩余工作后按 runtime 能力同步终态。
+- Goal Contract 是 executor/verifier 的标准结构化输入；`alpha-goal` 在 accepted `PERSIST` 交接前复用或创建 native goal。
 - `tools/evals/runtime-boundaries.json` 固化 36 个静态边界预期；结构校验通过不等于真实运行证据。

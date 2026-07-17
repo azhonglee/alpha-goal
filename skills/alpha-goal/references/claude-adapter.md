@@ -11,7 +11,7 @@ Read only in a Claude runtime or Claude-installed skill context. This maps expos
 | Narrow file mutation | Available file edit tools |
 | Worktree isolation | `EnterWorktree` or `git worktree` |
 | Independent read/review | `Agent` or agent teams when exposed |
-| Native Goal Sync | Reuse an active `/goal`; otherwise set `/goal <verifiable condition>` when exposed. Completion is evaluator-driven. |
+| Native Goal Sync | Reuse an active `/goal`; otherwise set `/goal <verifiable condition>` when exposed. |
 
 ## Adapter Checks
 

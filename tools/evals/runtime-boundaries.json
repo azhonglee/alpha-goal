@@ -150,7 +150,7 @@
     {
       "id": "RB30",
       "scenario": "A Goal Contract contains material interface, data, test-risk, and rollback decisions, but the acceptance request summarizes only the high-level outcome and criteria.",
-      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Do not accept until the recorded acceptance authority is shown the authority-retained design dimensions, interface/data changes, risk-to-observer/test-plan mapping, rollback/recovery treatment, boundaries, criteria, and residual risk in the confirmation summary." }
+      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Keep authority-retained design dimensions, interface/data changes, risk-to-observer/test-plan mapping, and rollback/recovery treatment in the Goal Contract. The confirmation presentation summarizes the Goal Frame, boundaries, criteria, evidence, and residual risk without duplicating those design details." }
     },
     {
       "id": "RB31",
@@ -179,8 +179,8 @@
     },
     {
       "id": "RB36",
-      "scenario": "Verifier returns NEXT_ITERATION, BLOCKED, or PASS_TO_FINAL for a task using a native goal.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Executor and verifier do not update native goal state. The caller leaves NEXT_ITERATION unfinished, marks complete after PASS_TO_FINAL with no required work left, and marks blocked only when the native tool policy permits it." }
+      "scenario": "Execution and verification continue after alpha-goal reuses or creates the native goal.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Native goal state remains lifecycle metadata and never replaces Goal Contract authority or acceptance evidence." }
     }
   ]
 }
