@@ -58,7 +58,7 @@ For `PERSIST`, resolve `$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/
 
 - Read `references/goal-contract-book.md`; create canonical `goal-contract.md` as `draft` and expand the Goal Frame with authority, side-effect, decision, claim, evidence, freshness, and invalidation boundaries.
 - Only the relevant authority may defer a goal item. No blocking gap may reach confirmation, handoff, or target mutation.
-- Keep material design, rollout, rollback, acceptance, mutable surfaces, and observers in this contract, not a second authority artifact. For every authority-retained material design decision, record its boundary, interface/data effects, execution/observer/test consequence, risk/rollback/recovery treatment, and status; leave executor-owned mechanics to `executor`.
+- Keep authority-retained material design, rollout/rollback, acceptance, mutable surfaces, and observers in the Goal Contract rather than a second authority artifact; leave executor-owned mechanics to `executor`.
 
 ## Confirm and Handoff
 
