@@ -9,7 +9,7 @@ Deliver the accepted outcome within its authority boundary.
 
 ## Validate Entry
 
-- Legacy exception: if the checkpoint itself has `active_owner: alpha-goal`, validate only its task/context identity and lock state, then use `terminate` to move it to `caller` with `termination_reason: GOAL_CHANGED`. Do not require the current contract to remain accepted or digest-matched, and never execute or verify that checkpoint.
+- Legacy exception: if the checkpoint itself has `active_owner: alpha-goal`, validate only its task/context identity and current status, then use `terminate` to move it to `caller` with `termination_reason: GOAL_CHANGED`. Do not require the current contract to remain accepted or digest-matched, and never execute or verify that checkpoint.
 - Otherwise require canonical `goal-contract.md` with `status: accepted`, complete acceptance-time observers/claim surfaces/prerequisites/feasibility/material decisions/risk coverage, no blocking gaps, a matching Confirmation Record, and `accepted_authority_sha256`.
 - Resolve `<alpha-goal-root>` from the selected `alpha-goal/SKILL.md`, never CWD. Recompute with `node <alpha-goal-root>/scripts/authority-digest.js <absolute-contract-path>`; reject a missing or mismatched digest before execution without creating a verifier verdict.
 - Inspect instructions, workspace/repositories, worktree/branch, unrelated changes, tools, dependencies, delivery surfaces, and rollback. Reject a checkpoint for another task or execution context.
@@ -20,10 +20,10 @@ Deliver the accepted outcome within its authority boundary.
 Each accepted contract has one flat `checkpoint.md`; never reopen or replace its authority payload. Initialize with:
 
 ```text
-node <executor-root>/scripts/checkpoint-lock.js init <absolute-checkpoint-path>
+bash <executor-root>/scripts/checkpoint-lock.sh init <absolute-checkpoint-path> < successor.md
 ```
 
-Resolve `<executor-root>` from selected `executor/SKILL.md`, never CWD. Use returned JSON `token`/`pendingPath`; never derive the path. Write the initial checkpoint with `checkpoint_revision: 0`, `state_revision: 0`, `active_owner: executor`, contract/workspace/repository/worktree identity, criterion observers/freshness/invalidation, and empty execution/verification records; then `commit <checkpoint> <token>`.
+Resolve `<executor-root>` from selected `executor/SKILL.md`, never CWD. Send the complete initial checkpoint on stdin with `checkpoint_revision: 0`, `state_revision: 0`, `active_owner: executor`, contract/workspace/repository/worktree identity, criterion observers/freshness/invalidation, and empty execution/verification records. After the command returns or is interrupted, reload canonical `checkpoint.md` before deciding the next action.
 
 - `executor` owns recorded contract/execution identity, state revision, batches, mutations, raw evidence, rollback/recovery, attempts, and unclassified execution gaps.
 - `verifier` owns verification observations, evidence classification, criterion status, observed identity, freshness, and route.
@@ -34,22 +34,22 @@ Resolve `<executor-root>` from selected `executor/SKILL.md`, never CWD. Use retu
 If the acceptance authority materially changes the goal, authority, scope, criteria, claim boundary, or risk boundary, stop target writes. Do not edit the accepted contract or route through verifier. Open:
 
 ```text
-node <executor-root>/scripts/checkpoint-lock.js terminate <absolute-checkpoint-path> <expected-revision>
+bash <executor-root>/scripts/checkpoint-lock.sh terminate <absolute-checkpoint-path> <expected-revision> < successor.md
 ```
 
-Write the successor to `pendingPath` with `termination_reason: GOAL_CHANGED`, attributable source/date, change summary, current state identity, unverified mutations, incremented `checkpoint_revision`, and `active_owner: caller`; then commit. Any follow-up starts `alpha-goal` as a new task directory with a new Goal Contract and checkpoint. Never reuse the terminated artifacts.
+Send the complete successor on stdin with `termination_reason: GOAL_CHANGED`, attributable source/date, change summary, current state identity, unverified mutations, incremented `checkpoint_revision`, and `active_owner: caller`. After the command returns or is interrupted, reload canonical `checkpoint.md` before deciding the next action. Any follow-up starts `alpha-goal` as a new task directory with a new Goal Contract and checkpoint. Never reuse the terminated artifacts.
 
 ## Write Protocol
 
-For an executor batch or handoff, open:
+For an executor batch or handoff, send the complete successor on stdin:
 
 ```text
-node <executor-root>/scripts/checkpoint-lock.js execute <absolute-checkpoint-path> <expected-revision> <executor|verifier>
+bash <executor-root>/scripts/checkpoint-lock.sh execute <absolute-checkpoint-path> <expected-revision> <executor|verifier> < successor.md
 ```
 
-Use JSON `token`/`pendingPath`. Re-read the checkpoint; on mismatch or abandonment run `abort <checkpoint> <token>` and reload. Otherwise write the complete successor, changing only executor fields, incrementing `checkpoint_revision` once, and setting `active_owner` last. `commit <checkpoint> <token>` publishes and unlocks.
+Before invoking it, re-read the checkpoint; change only executor fields, increment `checkpoint_revision` once, and set `active_owner` last. After the command returns or is interrupted, reload canonical `checkpoint.md` before deciding the next action.
 
-Before recovery, run `status <checkpoint>` and parse `phase`/`recoverableBy`. After proving the writer stopped, recover only when `executor` is listed, using `recover <checkpoint> <token> executor`; otherwise wait/report.
+Use `bash <executor-root>/scripts/checkpoint-lock.sh status <absolute-checkpoint-path>` to inspect the current revision and owner.
 
 ## Execute
 

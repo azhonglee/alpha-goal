@@ -36,6 +36,8 @@
       ],
       "references": [],
       "scripts": [
+        "scripts/checkpoint-lock.sh",
+        "scripts/checkpoint-update.js",
         "scripts/checkpoint-lock.js"
       ]
     },

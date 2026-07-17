@@ -17,13 +17,16 @@ Claude tool-name adaptation lives in `skills/alpha-goal/references/claude-adapte
 | Path | Persistent managed-state mutation? | Purpose |
 | --- | ---: | --- |
 | `scripts/install.sh` | Yes | Interactively copies the three skills to the selected Codex/Claude roots, synchronizes managed templates/hooks, migrates managed links, and conservatively uninstalls managed artifacts. |
+| `skills/executor/scripts/checkpoint-lock.sh` | Yes | Public one-shot checkpoint command and task mutex. |
+| `skills/executor/scripts/checkpoint-update.js` | Yes | Private successor validation and atomic checkpoint replacement. |
+| `skills/executor/scripts/checkpoint-lock.js` | Yes | Legacy helper retained only for transactions it already opened. |
 | `tools/validate_skills.js` | No | Validates contract/schema structure, public skill/frontmatter/reference layout, distribution files, hooks/TOML, fixtures, tools surface, and the count budget. |
 | `tools/test_authority_digest.js` | No | Exercises the authority-payload golden SHA-256, marker and line-ending byte semantics, and success/failure output streams. |
-| `tools/test_checkpoint_lock.js` | No | Exercises semantic transitions, rejected misuse, concurrent acquisition, automatic unlock, and schema-v3/v4 recovery compatibility. |
+| `tools/test_checkpoint_lock.js` | No | Exercises one-shot transitions, stale/invalid writes, mutex contention, process-kill unlock, legacy refusal, and installed module boundaries. |
 | `tools/evals/runtime-boundaries.json` | No | Declares 33 expected boundary cases for independent static or runtime review; schema validity alone is not behavioral evidence. |
 
 `skills/alpha-goal/scripts/authority-digest.js` deterministically hashes the marked authority payload used by contract acceptance and entry checks.
-`skills/executor/scripts/checkpoint-lock.js` exposes semantic `init`/`execute`/`verify`/`terminate` transitions, returns JSON lock metadata, atomically commits and unlocks, and supports token-checked abort/recovery plus legacy-lock release.
+`skills/executor/scripts/checkpoint-lock.sh` serializes each mutation with `flock`; its private JavaScript helper validates the complete successor from stdin and atomically replaces `checkpoint.md`. The historical `checkpoint-lock.js` remains only for transactions it already opened.
 Each public CommonJS script directory carries a local `package.json` boundary so installed copies do not inherit an ancestor package's module type.
 
 ## Templates and recovery
@@ -36,7 +39,7 @@ Each public CommonJS script directory carries a local `package.json` boundary so
 
 ## Runtime artifacts
 
-Canonical lifecycle artifacts exist only for `PERSIST`; the checkpoint helper also creates coordination records: active `.lock`, staged `.pending-*`, and best-effort-cleaned `.lock.closed-*` atomic-unlock tombstones. The state root is `$HOME/.alpha-goal/<workspace-slug>/`, where the slug comes from the stable workspace basename.
+Canonical lifecycle artifacts exist only for `PERSIST`; checkpoint mutation is completed by one helper command and has no public transaction lifecycle. The state root is `$HOME/.alpha-goal/<workspace-slug>/`, where the slug comes from the stable workspace basename.
 
 | Path | Condition and owner |
 | --- | --- |

@@ -2,7 +2,7 @@
 
 ## Install
 
-Requires Node.js 18+ and Python 3. The installer uses repository-local JavaScript, vendored `smol-toml`, and Python only from the standard library.
+Requires Linux, Node.js 18+, Python 3, and util-linux `flock`. The installer uses repository-local JavaScript, vendored `smol-toml`, and Python only from the standard library.
 
 ```bash
 scripts/install.sh
@@ -50,7 +50,7 @@ Codex may require reviewing and trusting the changed hook with `/hooks` before i
 
 ## Smoke test
 
-The smoke test checks source-identical skill copies; semantic checkpoint transitions, JSON lock metadata, automatic unlock, stale-write rejection, abort/recovery, and legacy-lock release from arbitrary CWD; missing-key TOML merge while preserving explicit values; adapter discoverability; managed hook replacement; idempotence; failure preservation; concise output; fresh and mixed-config uninstall behavior; rejected arguments; refused unmanaged targets; and ignored `CODEX_HOME`. It uses temporary homes and does not touch real user configuration.
+The smoke test checks source-identical skill copies; one-shot checkpoint updates, stale-write rejection, and automatic mutex release; missing-key TOML merge while preserving explicit values; adapter discoverability; managed hook replacement; idempotence; failure preservation; concise output; fresh and mixed-config uninstall behavior; rejected arguments; refused unmanaged targets; and ignored `CODEX_HOME`. It uses temporary homes and does not touch real user configuration.
 
 ```bash
 set -euo pipefail
@@ -216,158 +216,34 @@ for skill in alpha-goal executor verifier; do
   assert_skill_tree_matches "$repo_root/skills/$skill" "$tmp_codex/.codex/skills/$skill"
 done
 test -x "$tmp_codex/.codex/skills/alpha-goal/scripts/authority-digest.js"
+test -x "$tmp_codex/.codex/skills/executor/scripts/checkpoint-lock.sh"
+test -x "$tmp_codex/.codex/skills/executor/scripts/checkpoint-update.js"
 test -x "$tmp_codex/.codex/skills/executor/scripts/checkpoint-lock.js"
 test "$(node "$repo_root/skills/alpha-goal/scripts/authority-digest.js" "$repo_root/skills/alpha-goal/references/goal-contract-book.md")" = "$(node "$tmp_codex/.codex/skills/alpha-goal/scripts/authority-digest.js" "$tmp_codex/.codex/skills/alpha-goal/references/goal-contract-book.md")"
 lock_checkpoint="$tmp_codex/lock-smoke/checkpoint.md"
 mkdir -p "$(dirname "$lock_checkpoint")"
-mkdir -p "$lock_checkpoint.lock.pending-simulated-interruption"
-printf '{"complete":false}\n' > "$lock_checkpoint.lock.pending-simulated-interruption/owner.json"
-lock_helper="$tmp_codex/.codex/skills/executor/scripts/checkpoint-lock.js"
+lock_helper="$tmp_codex/.codex/skills/executor/scripts/checkpoint-lock.sh"
 
-assert_unlocked() {
-  local status_json
-  status_json="$(node "$lock_helper" status "$lock_checkpoint")"
-  node -e 'const s=JSON.parse(process.argv[1]); if (s.phase !== "unlocked" || !Object.hasOwn(s, "recoverableBy")) process.exit(1)' "$status_json"
-}
+init_successor=$'checkpoint_revision: 0\nactive_owner: executor\npayload: initial\n'
+printf '%s' "$init_successor" | (cd /tmp && bash "$lock_helper" init "$lock_checkpoint") >/dev/null
+cmp <(printf '%s' "$init_successor") "$lock_checkpoint"
 
-init_record="$(cd /tmp && node "$lock_helper" init "$lock_checkpoint")"
-init_token="$(node -p 'JSON.parse(process.argv[1]).token' "$init_record")"
-init_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$init_record")"
-test -n "$init_token"
-test -n "$init_pending"
-if node "$lock_helper" init "$lock_checkpoint" >/dev/null 2>&1; then
-  echo "second checkpoint writer should not acquire the held lock" >&2
-  exit 1
-fi
-printf 'checkpoint_revision: 0\nactive_owner: executor\npayload: initial\n' > "$init_pending"
-node "$lock_helper" commit "$lock_checkpoint" "$init_token" >/dev/null
-assert_unlocked
+handoff_successor=$'checkpoint_revision: 1\nactive_owner: verifier\npayload: verify-next\n'
+printf '%s' "$handoff_successor" | bash "$lock_helper" execute "$lock_checkpoint" 0 verifier >/dev/null
+cmp <(printf '%s' "$handoff_successor") "$lock_checkpoint"
 
-same_owner_record="$(node "$lock_helper" execute "$lock_checkpoint" 0 executor)"
-same_owner_token="$(node -p 'JSON.parse(process.argv[1]).token' "$same_owner_record")"
-same_owner_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$same_owner_record")"
-printf 'checkpoint_revision: 1\nactive_owner: executor\npayload: same-owner\n' > "$same_owner_pending"
-node "$lock_helper" commit "$lock_checkpoint" "$same_owner_token" >/dev/null
-assert_unlocked
+next_successor=$'checkpoint_revision: 2\nactive_owner: executor\nroute: NEXT_ITERATION\npayload: next-iteration\n'
+printf '%s' "$next_successor" | bash "$lock_helper" verify "$lock_checkpoint" 1 NEXT_ITERATION >/dev/null
+cmp <(printf '%s' "$next_successor") "$lock_checkpoint"
 
-handoff_record="$(node "$lock_helper" execute "$lock_checkpoint" 1 verifier)"
-handoff_token="$(node -p 'JSON.parse(process.argv[1]).token' "$handoff_record")"
-handoff_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$handoff_record")"
-printf 'checkpoint_revision: 2\nactive_owner: verifier\npayload: verify-next\n' > "$handoff_pending"
-node "$lock_helper" commit "$lock_checkpoint" "$handoff_token" >/dev/null
-assert_unlocked
-
-next_record="$(node "$lock_helper" verify "$lock_checkpoint" 2 NEXT_ITERATION)"
-next_token="$(node -p 'JSON.parse(process.argv[1]).token' "$next_record")"
-next_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$next_record")"
-printf 'checkpoint_revision: 3\nactive_owner: executor\npayload: next-iteration\n' > "$next_pending"
-node "$lock_helper" commit "$lock_checkpoint" "$next_token" >/dev/null
-assert_unlocked
-
-before_invalid="$(shasum -a 256 "$lock_checkpoint" | awk '{print $1}')"
-if node "$lock_helper" verify "$lock_checkpoint" 3 PASS_TO_FINAL >/dev/null 2>&1; then
-  echo "invalid executor-to-verdict transition should fail" >&2
-  exit 1
-fi
-if node "$lock_helper" execute "$lock_checkpoint" 2 verifier >/dev/null 2>&1; then
+before_invalid="$(sha256sum "$lock_checkpoint" | awk '{print $1}')"
+if printf '%s' "$next_successor" | bash "$lock_helper" execute "$lock_checkpoint" 1 executor >/dev/null 2>&1; then
   echo "stale expected revision should fail" >&2
   exit 1
 fi
-test "$before_invalid" = "$(shasum -a 256 "$lock_checkpoint" | awk '{print $1}')"
-
-verify_handoff_record="$(node "$lock_helper" execute "$lock_checkpoint" 3 verifier)"
-verify_handoff_token="$(node -p 'JSON.parse(process.argv[1]).token' "$verify_handoff_record")"
-verify_handoff_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$verify_handoff_record")"
-if node "$lock_helper" abort "$lock_checkpoint" "$next_token" >/dev/null 2>&1; then
-  echo "a stale token should not abort its successor lock" >&2
-  exit 1
-fi
-printf 'checkpoint_revision: 4\nactive_owner: verifier\npayload: recoverable-verifier\n' > "$verify_handoff_pending"
-node "$lock_helper" commit "$lock_checkpoint" "$verify_handoff_token" >/dev/null
-assert_unlocked
-
-if node "$lock_helper" verify "$lock_checkpoint" 4 RETURN_TO_ALPHA_GOAL >/dev/null 2>&1; then
-  echo "RETURN_TO_ALPHA_GOAL is not a verification route" >&2
-  exit 1
-fi
-recovery_record="$(node "$lock_helper" terminate "$lock_checkpoint" 4)"
-recovery_token="$(node -p 'JSON.parse(process.argv[1]).token' "$recovery_record")"
-recovery_status="$(node "$lock_helper" status "$lock_checkpoint")"
-node -e 'const s=JSON.parse(process.argv[1]); const r=s.recoverableBy; if (s.phase === "unlocked" || !(r === "verifier" || (Array.isArray(r) && r.includes("verifier")))) process.exit(1)' "$recovery_status"
-node "$lock_helper" recover "$lock_checkpoint" "$recovery_token" verifier >/dev/null
-assert_unlocked
-
-if node "$lock_helper" reframe "$lock_checkpoint" 4 >/dev/null 2>&1; then
-  echo "reframe should no longer be creatable" >&2
-  exit 1
-fi
-if node "$lock_helper" supersede "$lock_checkpoint" 4 >/dev/null 2>&1; then
-  echo "supersede should no longer be creatable" >&2
-  exit 1
-fi
-
-resume_record="$(node "$lock_helper" verify "$lock_checkpoint" 4 NEXT_ITERATION)"
-resume_token="$(node -p 'JSON.parse(process.argv[1]).token' "$resume_record")"
-resume_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$resume_record")"
-printf 'checkpoint_revision: 5\nactive_owner: executor\npayload: resumed\n' > "$resume_pending"
-node "$lock_helper" commit "$lock_checkpoint" "$resume_token" >/dev/null
-assert_unlocked
-
-terminate_dir="$tmp_codex/terminate-case"
-mkdir -p "$terminate_dir"
-terminate_checkpoint="$terminate_dir/checkpoint.md"
-terminate_init="$(node "$lock_helper" init "$terminate_checkpoint")"
-terminate_init_token="$(node -p 'JSON.parse(process.argv[1]).token' "$terminate_init")"
-terminate_init_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$terminate_init")"
-printf 'checkpoint_revision: 0\nactive_owner: executor\npayload: terminate-initial\n' > "$terminate_init_pending"
-node "$lock_helper" commit "$terminate_checkpoint" "$terminate_init_token" >/dev/null
-terminate_record="$(node "$lock_helper" terminate "$terminate_checkpoint" 0)"
-terminate_token="$(node -p 'JSON.parse(process.argv[1]).token' "$terminate_record")"
-terminate_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$terminate_record")"
-printf 'checkpoint_revision: 1\nactive_owner: caller\ntermination_reason: GOAL_CHANGED\n' > "$terminate_pending"
-node "$lock_helper" commit "$terminate_checkpoint" "$terminate_token" >/dev/null
-test ! -e "$terminate_checkpoint.lock"
-
-release_token="$(python3 - "$lock_checkpoint" <<'PY'
-import hashlib
-import json
-import sys
-import uuid
-from pathlib import Path
-
-checkpoint = Path(sys.argv[1])
-token = str(uuid.uuid4())
-lock = Path(f"{checkpoint}.lock")
-lock.mkdir()
-record = {
-    "schemaVersion": 3,
-    "owner": "executor:legacy/release",
-    "token": token,
-    "expectedRevision": "5",
-    "expectedOwner": "executor",
-    "expectedCheckpointSha256": hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
-    "nextRevision": "6",
-    "nextOwner": "executor",
-    "plannedCheckpointSha256": None,
-}
-(lock / "owner.json").write_text(json.dumps(record))
-print(token)
-PY
-)"
-node "$lock_helper" release "$lock_checkpoint" "$release_token" >/dev/null
-assert_unlocked
-
-final_handoff_record="$(node "$lock_helper" execute "$lock_checkpoint" 5 verifier)"
-final_handoff_token="$(node -p 'JSON.parse(process.argv[1]).token' "$final_handoff_record")"
-final_handoff_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$final_handoff_record")"
-printf 'checkpoint_revision: 6\nactive_owner: verifier\npayload: final-check\n' > "$final_handoff_pending"
-node "$lock_helper" commit "$lock_checkpoint" "$final_handoff_token" >/dev/null
-pass_record="$(node "$lock_helper" verify "$lock_checkpoint" 6 PASS_TO_FINAL)"
-pass_token="$(node -p 'JSON.parse(process.argv[1]).token' "$pass_record")"
-pass_pending="$(node -p 'JSON.parse(process.argv[1]).pendingPath' "$pass_record")"
-printf 'checkpoint_revision: 7\nactive_owner: caller\npayload: passed\n' > "$pass_pending"
-node "$lock_helper" commit "$lock_checkpoint" "$pass_token" >/dev/null
-assert_unlocked
+test "$before_invalid" = "$(sha256sum "$lock_checkpoint" | awk '{print $1}')"
+status_json="$(bash "$lock_helper" status "$lock_checkpoint")"
+node -e 'const s=JSON.parse(process.argv[1]); if (s.revision !== "2" || s.owner !== "executor") process.exit(1)' "$status_json"
 test -f "$tmp_codex/.codex/AGENTS.md"
 test -f "$tmp_codex/.codex/config.toml"
 test -f "$tmp_codex/.codex/hooks.json"
@@ -378,7 +254,7 @@ test ! -e "$tmp_codex/.claude/skills/alpha-goal"
 python3 -m json.tool "$tmp_codex/.codex/hooks.json" >/dev/null
 grep -q "codex-alpha-goal-compact-recovery:v3" "$tmp_codex/.codex/hooks.json"
 grep -q "Use only an explicit current artifact path" "$tmp_codex/.codex/hooks.json"
-grep -q "Follow top-level active_owner" "$tmp_codex/.codex/hooks.json"
+grep -q "follow top-level active_owner" "$tmp_codex/.codex/hooks.json"
 grep -q "legacy alpha-goal owner loads executor only to terminate it to caller" "$tmp_codex/.codex/hooks.json"
 grep -q "caller reports PASS/BLOCKED/GOAL_CHANGED as terminal" "$tmp_codex/.codex/hooks.json"
 grep -q "Later work uses a new Alpha Goal task directory" "$tmp_codex/.codex/hooks.json"

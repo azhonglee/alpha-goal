@@ -94,8 +94,8 @@
     },
     {
       "id": "RB19",
-      "scenario": "Exercise semantic checkpoint init, executor same-owner and verifier handoff writes, the three verifier routes, and executor/verifier goal-change termination; interrupt before commit, attempt invalid transitions, stale revisions/tokens, and recover only after JSON status inspection.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Semantic commands enforce the transition graph, keep goal-change termination separate from verifier verdicts, and check expected revision; every lock-opening result supplies token/pendingPath, commit publishes and unlocks atomically, abort handles abandoned writes, and status phase/recoverableBy gates exact-owner recovery without lost updates." }
+      "scenario": "Exercise one-shot checkpoint transitions through checkpoint-lock.sh with complete successors on stdin, concurrent writers, a stale tmp file, orphan legacy pending records, and an active legacy lock.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "One task mutex serializes mutations; one complete successor is atomically published. Stale tmp and orphan pending records do not block, while an active legacy lock is refused." }
     },
     {
       "id": "RB20",
@@ -104,8 +104,8 @@
     },
     {
       "id": "RB21",
-      "scenario": "Verifier is loaded alone after compaction, resolves helpers from selected skill roots, opens a semantic verify transition from an arbitrary CWD, consumes JSON pendingPath/token, encounters stale state, and inspects status before recovery.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "Verifier needs no remembered executor text: it aborts failed writes, never releases after successful commit, and uses JSON phase/recoverableBy before proof-based recovery; release is only for legacy-lock compatibility." }
+      "scenario": "Verifier is loaded alone after compaction, resolves checkpoint-lock.sh from the selected executor skill, invokes verify from an arbitrary CWD with the complete successor on stdin, and encounters stale state.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "The stale write changes nothing; verifier reloads canonical checkpoint.md and retries through the one-shot helper." }
     },
     {
       "id": "RB22",
