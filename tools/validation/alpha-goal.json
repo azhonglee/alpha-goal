@@ -1,6 +1,11 @@
 {
-  "schemaVersion": 6,
+  "schemaVersion": 7,
   "instructionBudgetExclusiveMax": 9301,
+  "commonJsPackages": [
+    "skills/alpha-goal/scripts/package.json",
+    "skills/executor/scripts/package.json",
+    "tools/package.json"
+  ],
   "publicSkills": [
     {
       "name": "alpha-goal",
@@ -112,6 +117,7 @@
     ],
     "scripts": [
       "scripts/install.sh",
+      "tools/test_authority_digest.js",
       "tools/test_checkpoint_lock.js"
     ],
     "evals": [
