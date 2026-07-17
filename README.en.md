@@ -46,7 +46,7 @@ flowchart TD
   R --> P["PERSIST: expand and confirm goal-contract.md"]
   P --> S["Native Goal Sync: create or reuse the thread goal"]
   S --> E["executor: execute at risk boundaries and record checkpoint.md"]
-  E --> V["verifier: independently observe current state"]
+  E --> V["verifier: re-observe current state"]
   V -->|"NEXT_ITERATION"| E
   V -->|"BLOCKED"| B["Report blocker"]
   V -->|"PASS_TO_FINAL"| F["Final claim"]
@@ -60,10 +60,10 @@ Accepted goal materially changes -> terminate the old checkpoint -> start a new 
 
 A Goal Frame contains intent, observable outcome, scope/non-goals, constraints, success signals, observers, and material decisions. Clear fields come from the request and attributable facts; clarification asks the relevant authority about one highest-impact blocking gap and closes it only when the authorized decision and its material boundaries and execution/evidence consequences are determined. A material change to an accepted goal terminates the old task; the new goal starts `alpha-goal` in a new task directory instead of reopening the old contract or checkpoint.
 
-`DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state or native goal, and does not call `executor` or `verifier`. After a `PERSIST` contract is explicitly accepted, Alpha Goal reuses any unfinished native goal in the current thread; it creates one only when none is unfinished. Native state is lifecycle metadata and never replaces contract authority or acceptance evidence. The only canonical `PERSIST` lifecycle artifacts remain `goal-contract.md` and `checkpoint.md`; one helper command serializes each checkpoint write with an operating-system lock, revision/owner/content CAS, and atomic replacement, without UUID pending records.
+`DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state or native goal, and does not call `executor` or `verifier`. After a `PERSIST` contract is explicitly accepted, Alpha Goal reuses any unfinished native goal in the current thread; it creates one only when none is unfinished. Native state is lifecycle metadata and never replaces contract authority or acceptance evidence. The only canonical `PERSIST` lifecycle artifacts remain `goal-contract.md` and `checkpoint.md`.
 
 - `goal-contract.md`: written only by `alpha-goal`; its accepted authority payload is standard structured input to executor and verifier.
-- `checkpoint.md`: records the current contract digest and execution/verification state, and serializes executor/verifier handoff with one-shot CAS plus `checkpoint_revision`/`active_owner` control.
+- `checkpoint.md`: records the current contract digest and execution/verification state. Executor and verifier hand off sequentially through `checkpoint_revision` and `active_owner`; each writer re-reads current state and stops on conflict.
 
 Routing uses material impact, side effects, recovery needs, and verifiability. Confidence, file count, step count, question count, and estimated duration are not risk proxies.
 
@@ -105,7 +105,7 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/verifier/"><code>verifier</code></a></td>
-      <td align="left">Verify fresh evidence independently, update criterion status, and return <code>PASS_TO_FINAL</code>, <code>NEXT_ITERATION</code>, or <code>BLOCKED</code>.</td>
+      <td align="left">Re-observe current state, evaluate fresh evidence, update criterion status, and return <code>PASS_TO_FINAL</code>, <code>NEXT_ITERATION</code>, or <code>BLOCKED</code>.</td>
     </tr>
   </tbody>
 </table>

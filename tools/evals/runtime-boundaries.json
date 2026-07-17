@@ -94,8 +94,8 @@
     },
     {
       "id": "RB19",
-      "scenario": "Exercise one-shot semantic checkpoint init, executor same-owner and verifier handoff writes, the three verifier routes, and executor/verifier goal-change termination; race concurrent writers and attempt invalid transitions, stale revisions, owners, and successor content.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Each command accepts one complete successor on stdin, enforces the transition graph, keeps goal-change termination separate from verifier verdicts, rejects stale revision/owner/content, serializes real-path-equivalent writers with a process-scoped operating-system lock, atomically replaces canonical state, and creates no UUID pending series." }
+      "scenario": "Exercise sequential checkpoint initialization, executor/verifier handoff, the three verifier routes, and goal-change termination; attempt writes with stale revisions, unexpected owners, changed content, or another active writer.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Each writer re-reads canonical checkpoint identity immediately before editing, writes only while it is active_owner, preserves other-owned fields, increments checkpoint_revision once, and sets the next owner last. A stale revision, unexpected owner, or changed content forces reload; knowledge that another writer may be active prevents the write. Concurrent writers are unsupported, and GOAL_CHANGED remains separate from verifier verdicts." }
     },
     {
       "id": "RB20",
@@ -104,8 +104,8 @@
     },
     {
       "id": "RB21",
-      "scenario": "Verifier is loaded alone after compaction, resolves helpers from selected skill roots, constructs a complete successor, invokes semantic verify from an arbitrary CWD, and encounters a stale checkpoint.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "Verifier needs no remembered executor text or lock token: one command checks current revision/owner/content, publishes a valid successor, or rejects stale state so verifier reloads before retrying." }
+      "scenario": "Verifier is loaded alone after compaction from an explicit checkpoint path, resolves canonical artifacts independently of the process CWD, and discovers changed revision or owner on its immediate pre-write re-read.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "Verifier needs no remembered executor text. It follows identity and active_owner from canonical artifacts, emits no verdict or write for stale state, reloads, and continues only when the current owner is verifier and no other writer may be active." }
     },
     {
       "id": "RB22",
