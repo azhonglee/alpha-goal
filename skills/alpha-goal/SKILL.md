@@ -11,7 +11,7 @@ Turn request and discovered facts into a clear goal. Own goal framing, entry rou
 
 Read instructions, artifacts, tests, docs, history, and current state. Resolve discoverable facts; descriptive evidence cannot grant desired-behavior, side-effect, or acceptance authority. Higher-priority instructions, tool policy, credentials, and approval gates remain invariant.
 
-For every change task, derive a minimal Goal Frame:
+For every task handled by this skill, derive a minimal Goal Frame:
 
 - intent and observable outcome;
 - scope, non-goals, and material constraints;
@@ -62,9 +62,20 @@ For `PERSIST`, resolve `$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/
 
 ## Confirm and Handoff
 
-Before confirmation, map criteria to currently available observers; identify every claim surface and prerequisite; complete all authority-retained material design decisions and their risk/observer treatment; check source conflicts, side-effect authority, freshness, and the highest-impact assumption with a counterexample/failure case. Keep `draft` while any known infeasibility, unavailable observer, unidentified claim surface, unmet prerequisite, incomplete authority-retained material-design coverage, or unresolved material finding remains. For cross-cutting/high-risk work, request independent read-only review from raw artifacts and await/cancel it.
+Before confirmation:
 
-Present the Goal Frame, boundaries, criteria, evidence, and residual risk. Accept only an explicit decision from the recorded acceptance authority; silence, history, a spec, or desired-behavior authority does not grant side-effect authority or acceptance.
+- Map every criterion to a currently available observer; identify every claim surface and prerequisite.
+- Complete authority-retained material design decisions and their risk/observer treatment.
+- Check source conflicts, side-effect authority, freshness, and the highest-impact assumption with a counterexample or failure case.
+- Keep `draft` while any known infeasibility, unavailable observer, unidentified claim surface, unmet prerequisite, incomplete authority-retained material-design coverage, or unresolved material finding remains.
+- For cross-cutting/high-risk work, request independent read-only review from raw artifacts and await or cancel it.
+
+At confirmation:
+
+- Present the Goal Frame, boundaries, criteria, evidence, and residual risk.
+- Accept only an explicit decision from the recorded acceptance authority; silence, history, a spec, or desired-behavior authority does not grant side-effect authority or acceptance.
+
+After the decision:
 
 - On accept, complete Acceptance Completeness and the Confirmation Record, compute the authority-payload digest, set `status: accepted` last, perform Native Goal Sync, and hand the canonical contract to `executor`.
 - On refine/reject, remain `draft`; do not mutate the target or native goal.

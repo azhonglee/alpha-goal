@@ -52,8 +52,6 @@ workspace_identity: <canonical workspace identity>
 | Authority-retained dimension | Authorized decision / boundary / source | Execution / observer consequence | Risk / rollback / recovery | Status |
 | --- | --- | --- | --- | --- |
 
-Include only authority-retained decisions that can change behavior, interfaces/API, data contracts/models, migration/rollout, security/privacy, externally visible performance/SLOs, or risk/recovery boundaries. Architecture, components, dependency selection, and test implementation remain executor-owned mechanics unless the authority explicitly retains them. Each covered/deferred row cites the relevant authority decision source and date. Use `covered`, `non-material`, or authority-deferred `non-goal`; any unresolved row keeps the contract `draft`.
-
 ## Claim Boundary
 - Supported claims: <what available observers can prove>
 - Unsupported claims: <what remains caveated>
@@ -87,6 +85,13 @@ Add only material sections. Keep authority- or acceptance-changing additions ins
 
 - Treat code, tests, docs, issues, and history as descriptive unless an authorized source makes them normative.
 - Never promote a proposal, convenience, silence, historical behavior, or agent suggestion into authorization.
+
+## Material Design Rules
+
+- Include only authority-retained decisions that can change behavior, interfaces/APIs, data contracts/models, migration/rollout, security/privacy, externally visible performance/SLOs, or risk/recovery boundaries.
+- Treat architecture, components, dependency selection, and test implementation as executor-owned mechanics unless the authority explicitly retains them.
+- Cite the relevant authority decision source and date for every covered or deferred row.
+- Use `covered`, `non-material`, or authority-deferred `non-goal`; any unresolved row keeps the contract `draft`.
 
 ## Boundary and Evidence Rules
 
