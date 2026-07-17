@@ -58,13 +58,13 @@ For `PERSIST`, resolve `$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/
 
 - Read `references/goal-contract-book.md`; create canonical `goal-contract.md` as `draft` and expand the Goal Frame with authority, side-effect, decision, claim, evidence, freshness, and invalidation boundaries.
 - Only the relevant authority may defer a goal item. No blocking gap may reach confirmation, handoff, or target mutation.
-- Keep material design, rollout, rollback, acceptance, mutable surfaces, and observers in this contract, not a second authority artifact. For every authority-retained material design decision, record its boundary, execution/observer consequence, risk/recovery treatment, and status; leave executor-owned mechanics to `executor`.
+- Keep material design, rollout, rollback, acceptance, mutable surfaces, and observers in this contract, not a second authority artifact. For every authority-retained material design decision, record its boundary, interface/data effects, execution/observer/test consequence, risk/rollback/recovery treatment, and status; leave executor-owned mechanics to `executor`.
 
 ## Confirm and Handoff
 
 Before confirmation, map criteria to currently available observers; identify every claim surface and prerequisite; complete all authority-retained material design decisions and their risk/observer treatment; check source conflicts, side-effect authority, freshness, and the highest-impact assumption with a counterexample/failure case. Keep `draft` while any known infeasibility, unavailable observer, unidentified claim surface, unmet prerequisite, incomplete authority-retained material-design coverage, or unresolved material finding remains. For cross-cutting/high-risk work, request independent read-only review from raw artifacts and await/cancel it.
 
-Present the Goal Frame, boundaries, criteria, evidence, and residual risk. Keep authority-retained material design and its interface/data, observer/test, and rollback/recovery details in the Goal Contract instead of repeating them in the confirmation presentation. Accept only an explicit decision from the recorded acceptance authority; silence, history, a spec, or desired-behavior authority does not grant side-effect authority or acceptance.
+Present the Goal Frame, boundaries, criteria, evidence, and residual risk. Accept only an explicit decision from the recorded acceptance authority; silence, history, a spec, or desired-behavior authority does not grant side-effect authority or acceptance.
 
 - On accept, complete Acceptance Completeness and the Confirmation Record, compute the authority-payload digest, set `status: accepted` last, perform Native Goal Sync, and hand the canonical contract to `executor`.
 - On refine/reject, remain `draft`; do not mutate the target or native goal.
