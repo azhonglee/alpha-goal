@@ -26,6 +26,7 @@ Repeat only while the Goal Frame has a blocking gap:
 
 1. Choose the next gap:
    - Treat intent or observable outcome as blocking when another reasonable reading could change scope, success signals, or evidence; otherwise derive them from the request and attributable facts.
+   - Treat a design choice as blocking only when another reasonable choice could change an authority-controlled outcome, interface/data contract, migration/rollout, security/privacy, external SLO, risk/recovery, or acceptance boundary; otherwise do not ask about it.
    - Select the highest-impact remaining gap by authority ownership, blast radius, irreversibility, behavior/interface/data impact, acceptance ambiguity, and rollback risk.
 2. Ask the relevant authority for one decision variable. State discovered facts, why it matters, real options when useful, and a recommendation; never ask for discoverable facts.
 3. Pressure-test the answer:
@@ -77,9 +78,9 @@ At confirmation:
 
 After the decision:
 
-- On accept, complete Acceptance Completeness and the Confirmation Record, compute the authority-payload digest, set `status: accepted` last, perform Native Goal Sync, and hand the canonical contract to `executor`.
+- On accept, complete Acceptance Completeness and the Confirmation Record, compute the authority-payload digest, set `status: accepted` last, perform Native Goal Sync, and hand off the canonical contract to the designated execution owner.
 - On refine/reject, remain `draft`; do not mutate the target or native goal.
-- After acceptance, a material goal or authority change is a new task: do not edit or reuse the accepted contract or checkpoint. If acceptance exists without a checkpoint, confirm the accepted goal is still current before executor initializes it.
+- After acceptance, a material goal or authority change is a new task: do not edit or reuse the accepted contract or checkpoint. If acceptance exists without a checkpoint, confirm the accepted goal is still current before handoff.
 
 ## Native Goal Sync
 
@@ -90,4 +91,4 @@ Treat the native goal as lifecycle metadata, never as authority or acceptance ev
 ## Capability-Conditional Aids
 
 - Delegate independent read-heavy investigation, review, or evidence reruns. Parallelize independent reads; sequence dependent decisions; synthesize before acting.
-- Investigation agents never write shared artifacts. A verifier agent writes only verifier-owned checkpoint fields after exclusive handoff.
+- Investigation agents never write shared artifacts.

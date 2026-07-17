@@ -145,7 +145,7 @@
     {
       "id": "RB29",
       "scenario": "A persistent API and data migration has identified touched interfaces, compatibility risk, and rollback needs, but the Goal Contract records no authorized material-design decisions for them.",
-      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "The contract remains draft: every authority-retained material design decision needs an authorized boundary with decision source/date, execution/observer consequence, risk/recovery treatment, and covered or explicitly non-material/deferred status; executor-owned mechanics remain delegated before acceptance or mutation." }
+      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "The contract remains draft: every authority-retained material design decision needs an authorized boundary with decision source/date, execution/observer consequence, risk/recovery treatment, and covered or explicitly non-material/deferred status; design choices not retained by the authority remain outside the material-design table." }
     },
     {
       "id": "RB30",
