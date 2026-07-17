@@ -31,9 +31,7 @@
         "checkpoint-termination"
       ],
       "references": [],
-      "scripts": [
-        "scripts/checkpoint-lock.js"
-      ]
+      "scripts": []
     },
     {
       "name": "verifier",
@@ -112,8 +110,7 @@
       "templates/hooks.json"
     ],
     "scripts": [
-      "scripts/install.sh",
-      "tools/test_checkpoint_lock.js"
+      "scripts/install.sh"
     ],
     "evals": [
       "tools/evals/runtime-boundaries.json"

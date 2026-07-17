@@ -295,8 +295,7 @@ function validateToolsSurface(root, errors, warnings) {
     if (!isFile(file)) continue;
     const allowedFixture = /^tools\/fixtures\/validate-skills\/[a-z0-9-]+\.json$/.test(rel);
     const allowedEval = rel === "tools/evals/runtime-boundaries.json";
-    const allowedTest = rel === "tools/test_checkpoint_lock.js";
-    if (rel !== "tools/validate_skills.js" && rel !== CONTRACT_PATH && !allowedFixture && !allowedEval && !allowedTest) {
+    if (rel !== "tools/validate_skills.js" && rel !== CONTRACT_PATH && !allowedFixture && !allowedEval) {
       errors.push(`unexpected tools surface: ${rel}`);
     }
     if (fs.readFileSync(file, "utf8").startsWith("#!") && (fs.statSync(file).mode & 0o100) === 0) {
@@ -351,7 +350,7 @@ function validateRuntimeEvals(root, contract, errors) {
 
 function validateHookTemplate(root, errors) {
   const rel = "templates/hooks.json";
-  const managedMarker = /^: 'codex-alpha-goal-compact-recovery:v3';/;
+  const managedMarker = /^: 'codex-alpha-goal-compact-recovery:v4';/;
   let data;
   try {
     data = JSON.parse(fs.readFileSync(path.join(root, rel), "utf8"));
@@ -392,10 +391,10 @@ function validateHookTemplate(root, errors) {
     }
   }
   if (managedPostCompactCount !== 1) {
-    errors.push(`${rel}: expected exactly one v3 managed recovery hook inside hooks.PostCompact, found ${managedPostCompactCount}`);
+    errors.push(`${rel}: expected exactly one v4 managed recovery hook inside hooks.PostCompact, found ${managedPostCompactCount}`);
   }
   if (managedOtherEventCount !== 0) {
-    errors.push(`${rel}: v3 managed recovery hook must not appear outside hooks.PostCompact`);
+    errors.push(`${rel}: v4 managed recovery hook must not appear outside hooks.PostCompact`);
   }
 }
 

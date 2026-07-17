@@ -30,7 +30,7 @@ Alpha Goal 给 AI Agent 一套 Goal Engineering 控制闭环，重点约束三�
     <tr>
       <td width="100" align="left"><strong>完成无据</strong></td>
       <td align="left">测试过了就说完成，或把局部成功当成目标达成。</td>
-      <td align="left"><code>verifier</code> 对照 acceptance evidence 和当前 fresh evidence 做独立验证，并返回路由裁决。</td>
+      <td align="left"><code>verifier</code> 对照 acceptance evidence 重新观察当前状态，并返回路由裁决。</td>
     </tr>
   </tbody>
 </table>
@@ -46,7 +46,7 @@ flowchart TD
   R --> P["PERSIST：扩展并确认 goal-contract.md"]
   P --> S["Native Goal Sync：创建或复用线程目标"]
   S --> E["executor：按风险边界执行并记录 checkpoint.md"]
-  E --> V["verifier：独立观察当前状态"]
+  E --> V["verifier：重新观察当前状态"]
   V -->|"NEXT_ITERATION"| E
   V -->|"BLOCKED"| B["报告 blocker"]
   V -->|"PASS_TO_FINAL"| F["最终声明"]
@@ -60,10 +60,10 @@ Accepted goal materially changes -> terminate the old checkpoint -> start a new 
 
 Goal Frame 包含 intent、observable outcome、scope/non-goals、constraints、success signals、observers 和 material decisions；已清晰内容直接来自请求与可归因事实，只向相关 authority 追问最高影响的单个 blocking gap，并仅在授权决定及其 material boundaries、执行/证据后果可确定时闭合。accepted goal 发生材料性变化时，旧任务终止；新目标使用新的任务目录重新进入 `alpha-goal`，不重开旧 contract/checkpoint。
 
-`DIRECT` 将完整 Goal Frame 保留在当前上下文，不创建 Alpha Goal 状态或 native goal，也不调用 `executor` 或 `verifier`。`PERSIST` 在契约被明确接受后复用当前线程中未完成的 native goal；没有未完成目标时才创建。native goal 只是 lifecycle metadata，不能替代契约 authority 或验收证据。`PERSIST` 的 canonical lifecycle artifacts 仍只有 `goal-contract.md` 与 `checkpoint.md`；checkpoint helper 在一次命令内用操作系统锁、revision/owner/content CAS 和原子替换串行化写入，不产生 UUID pending 记录。
+`DIRECT` 将完整 Goal Frame 保留在当前上下文，不创建 Alpha Goal 状态或 native goal，也不调用 `executor` 或 `verifier`。`PERSIST` 在契约被明确接受后复用当前线程中未完成的 native goal；没有未完成目标时才创建。native goal 只是 lifecycle metadata，不能替代契约 authority 或验收证据。`PERSIST` 的 canonical lifecycle artifacts 仍只有 `goal-contract.md` 与 `checkpoint.md`。
 
 - `goal-contract.md`：由 `alpha-goal` 独占修改；accepted authority payload 是 executor 和 verifier 的标准结构化输入。
-- `checkpoint.md`：记录当前契约 digest 与执行/验证状态，并用一次性 CAS 及 `checkpoint_revision`/`active_owner` 串行化 `executor`、`verifier` 交接。
+- `checkpoint.md`：记录当前契约 digest 与执行/验证状态；`executor`、`verifier` 通过 `checkpoint_revision` 和 `active_owner` 顺序交接，写前必须重读当前状态，冲突时停止并重新判断。
 
 路由只看材料性影响、副作用、恢复需求和可验证性；不以置信度、文件数、步骤数、问答轮次或预计时长替代风险判断。
 
@@ -105,7 +105,7 @@ $alpha-goal 实现一下这个需求:<YOUR-PRD> or <YOUR-DESCRIPTION>，<YOUR-UX
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/verifier/"><code>verifier</code></a></td>
-      <td align="left">对 fresh evidence 做独立验证，更新 criterion 状态，并输出 <code>PASS_TO_FINAL</code> / <code>NEXT_ITERATION</code> / <code>BLOCKED</code>。</td>
+      <td align="left">重新观察当前状态并判断 fresh evidence，更新 criterion 状态，并输出 <code>PASS_TO_FINAL</code> / <code>NEXT_ITERATION</code> / <code>BLOCKED</code>。</td>
     </tr>
   </tbody>
 </table>
