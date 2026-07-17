@@ -1,6 +1,6 @@
 ---
 name: alpha-goal
-description: "Clarify and frame read-only/change work as an executable, verifiable goal. Choose DIRECT or PERSIST; create an accepted Goal Contract when authority, recovery, or audit evidence must persist. Do not execute or verify persistent work."
+description: "Clarify and frame read-only/change work as an executable, verifiable goal. Choose DIRECT or PERSIST; create an accepted Goal Contract and bind it to the thread's native goal when persistence is required. Do not execute or verify persistent work."
 ---
 
 # Alpha Goal
@@ -64,11 +64,21 @@ For `PERSIST`, resolve `$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/
 
 Before confirmation, map criteria to currently available observers; identify every claim surface and prerequisite; complete all authority-retained material design decisions and their risk/observer treatment; check source conflicts, side-effect authority, freshness, and the highest-impact assumption with a counterexample/failure case. Keep `draft` while any known infeasibility, unavailable observer, unidentified claim surface, unmet prerequisite, incomplete authority-retained material-design coverage, or unresolved material finding remains. For cross-cutting/high-risk work, request independent read-only review from raw artifacts and await/cancel it.
 
-Present the Goal Frame, boundaries, criteria, evidence, and residual risk. When authority-retained material design is touched, also present its dimensions, interface/data changes, risk-to-observer/test-plan mapping, and rollback/recovery treatment. Accept only an explicit decision from the recorded acceptance authority; silence, history, a spec, or desired-behavior authority does not grant side-effect authority or acceptance.
+Present the Goal Frame, boundaries, criteria, evidence, residual risk, and intended native-goal binding. When authority-retained material design is touched, also present its dimensions, interface/data changes, risk-to-observer/test-plan mapping, and rollback/recovery treatment. Accept only an explicit decision from the recorded acceptance authority; silence, history, a spec, or desired-behavior authority does not grant side-effect authority or acceptance.
 
-- On accept, complete Acceptance Completeness and the Confirmation Record, compute the authority-payload digest, set `status: accepted` last, and hand the canonical contract to `executor`.
-- On refine/reject, remain `draft` and do not mutate the target.
+- On accept, complete Acceptance Completeness and the Confirmation Record, compute the authority-payload digest, set `status: accepted` last, perform Native Goal Sync, and hand the canonical contract to `executor`.
+- On refine/reject, remain `draft`; do not mutate the target or native goal.
 - After acceptance, a material goal or authority change is a new task: do not edit or reuse the accepted contract or checkpoint. If acceptance exists without a checkpoint, confirm the accepted goal is still current before executor initializes it.
+
+## Native Goal Sync
+
+Treat the native goal as lifecycle metadata, never as authority or acceptance evidence. Apply this only to `PERSIST`; `DIRECT` creates no native goal.
+
+- After acceptance, call `get_goal`. Reuse any unfinished native goal; if none exists, call `create_goal` with the accepted outcome and canonical `goal-contract.md` path. Set `token_budget` only when the user explicitly supplied one.
+- `executor` and `verifier` do not update native goal state.
+- On `NEXT_ITERATION`, leave the native goal unfinished.
+- On `PASS_TO_FINAL`, when no required work remains, call `update_goal(status=complete)`; report final usage for a budgeted goal.
+- On `BLOCKED`, call `update_goal(status=blocked)` only when the native tool's blocked policy permits it.
 
 ## Capability-Conditional Aids
 

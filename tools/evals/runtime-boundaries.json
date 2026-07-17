@@ -166,6 +166,21 @@
       "id": "RB33",
       "scenario": "A change request admits multiple reasonable intents or observable outcomes that would change scope, success signals, or acceptance evidence.",
       "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Treat intent/outcome as blocking instead of silently choosing one interpretation; use discovered facts and ask the relevant authority for the single highest-impact intent or observable-outcome decision, then choose DIRECT or PERSIST from the resolved goal rather than ambiguity alone." }
+    },
+    {
+      "id": "RB34",
+      "scenario": "A DIRECT task has a complete in-context Goal Frame and is ready for ordinary execution.",
+      "expected": { "entryRoute": "DIRECT", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Native Goal Sync is not invoked; direct work creates neither lifecycle artifacts nor native goal state." }
+    },
+    {
+      "id": "RB35",
+      "scenario": "A PERSIST contract is explicitly accepted and alpha-goal synchronizes the thread's native goal before executor handoff.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Call get_goal after acceptance. Reuse any unfinished native goal; when none exists, create one from the accepted outcome and canonical contract path, supplying token_budget only when the user explicitly requested one." }
+    },
+    {
+      "id": "RB36",
+      "scenario": "Verifier returns NEXT_ITERATION, BLOCKED, or PASS_TO_FINAL for a task using a native goal.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Executor and verifier do not update native goal state. The caller leaves NEXT_ITERATION unfinished, marks complete after PASS_TO_FINAL with no required work left, and marks blocked only when the native tool policy permits it." }
     }
   ]
 }

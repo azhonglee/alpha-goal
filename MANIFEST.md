@@ -4,11 +4,13 @@
 
 | Directory | Owned semantics |
 | --- | --- |
-| `skills/alpha-goal/` | Goal framing, entry routing, and Goal Contract authority. |
+| `skills/alpha-goal/` | Goal framing, entry routing, Goal Contract authority, and accepted-contract native-goal binding. |
 | `skills/executor/` | Persistent target/delivery mutation, raw execution evidence, recovery cursor, and goal-change termination. |
 | `skills/verifier/` | Verification observations, evidence classification, criterion status, and verification route. |
 
 The shared structural contract is `tools/validation/alpha-goal.json`. It declares public skills, semantic owners, routes, conditional artifacts, references, distribution/eval files, and the exclusive instruction-unit budget. It does not validate skill prose.
+
+Native Goal Sync applies only to `PERSIST`: after explicit contract acceptance, `alpha-goal` reuses any unfinished thread goal or creates one when none exists. Native state is not a canonical Alpha Goal artifact or acceptance evidence. Terminal state follows the runtime mapping; `executor` and `verifier` do not control it.
 
 Claude tool-name adaptation lives in `skills/alpha-goal/references/claude-adapter.md` and is selected by `templates/CLAUDE.md`, not core skill prose. Codex and Claude installs receive the same runtime-neutral skill tree.
 
@@ -19,7 +21,7 @@ Claude tool-name adaptation lives in `skills/alpha-goal/references/claude-adapte
 | `scripts/install.sh` | Yes | Interactively copies the three skills to the selected Codex/Claude roots, synchronizes managed templates/hooks, migrates managed links, and conservatively uninstalls managed artifacts. |
 | `tools/validate_skills.js` | No | Validates contract/schema structure, public skill/frontmatter/reference layout, distribution files, hooks/TOML, fixtures, tools surface, and the count budget. |
 | `tools/test_checkpoint_lock.js` | No | Exercises one-shot semantic transitions, rejected writes, operating-system lock release, symlink identity, concurrency, CAS, and atomic publication. |
-| `tools/evals/runtime-boundaries.json` | No | Declares 33 expected boundary cases for independent static or runtime review; schema validity alone is not behavioral evidence. |
+| `tools/evals/runtime-boundaries.json` | No | Declares 36 expected boundary cases for independent static or runtime review; schema validity alone is not behavioral evidence. |
 
 `skills/alpha-goal/scripts/authority-digest.js` deterministically hashes the marked authority payload used by contract acceptance and entry checks.
 `skills/executor/scripts/checkpoint-lock.js` accepts a complete successor on stdin and applies semantic `init`/`execute`/`verify`/`terminate` transitions as one operating-system-locked, revision/owner/content-checked atomic replacement.

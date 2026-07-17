@@ -44,22 +44,24 @@ flowchart TD
   A["alpha-goal: clarify and form a Goal Frame"] --> R{"DIRECT / PERSIST"}
   R --> D["DIRECT: normal execution + final validation"]
   R --> P["PERSIST: expand and confirm goal-contract.md"]
-  P --> E["executor: execute at risk boundaries and record checkpoint.md"]
+  P --> S["Native Goal Sync: create or reuse the thread goal"]
+  S --> E["executor: execute at risk boundaries and record checkpoint.md"]
   E --> V["verifier: independently observe current state"]
   V -->|"NEXT_ITERATION"| E
   V -->|"BLOCKED"| B["Report blocker"]
-  V -->|"PASS_TO_FINAL"| F["Final claim"]
+  V -->|"PASS_TO_FINAL"| C["synchronize native terminal state per runtime"]
+  C --> F["Final claim"]
 ```
 
 ```text
 Trigger -> Frame Goal -> Choose DIRECT/PERSIST
-PERSIST -> Confirm accepted Goal Contract -> $executor -> Evidence + checkpoint -> $verifier -> Route -> Next Slice or Final Claim
+PERSIST -> Confirm accepted Goal Contract -> Native Goal Sync -> $executor -> Evidence + checkpoint -> $verifier -> Route -> Next Slice or Final Claim
 Accepted goal materially changes -> terminate the old checkpoint -> start a new alpha-goal task directory
 ```
 
 A Goal Frame contains intent, observable outcome, scope/non-goals, constraints, success signals, observers, and material decisions. Clear fields come from the request and attributable facts; clarification asks the relevant authority about one highest-impact blocking gap and closes it only when the authorized decision and its material boundaries and execution/evidence consequences are determined. A material change to an accepted goal terminates the old task; the new goal starts `alpha-goal` in a new task directory instead of reopening the old contract or checkpoint.
 
-`DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state, and does not call `executor` or `verifier`. For `PERSIST`, the only canonical lifecycle artifacts are `goal-contract.md` and `checkpoint.md`; one helper command serializes each checkpoint write with an operating-system lock, revision/owner/content CAS, and atomic replacement, without UUID pending records.
+`DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state or native goal, and does not call `executor` or `verifier`. After a `PERSIST` contract is explicitly accepted, Alpha Goal reuses any unfinished native goal in the current thread; it creates one only when none is unfinished. Native state is lifecycle metadata and never replaces contract authority or acceptance evidence. The only canonical `PERSIST` lifecycle artifacts remain `goal-contract.md` and `checkpoint.md`; one helper command serializes each checkpoint write with an operating-system lock, revision/owner/content CAS, and atomic replacement, without UUID pending records.
 
 - `goal-contract.md`: written only by `alpha-goal`; its accepted authority payload is standard structured input to executor and verifier.
 - `checkpoint.md`: records the current contract digest and execution/verification state, and serializes executor/verifier handoff with one-shot CAS plus `checkpoint_revision`/`active_owner` control.
@@ -119,5 +121,5 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 - Batch work inside one low-risk boundary; invoke verifier only at material risk boundaries and final state.
 - PASS binds to the target and delivery state actually observed and terminates that checkpoint; later work starts a new task.
 - Volatile evidence records observation time and invalidation conditions; unidentified mutable surfaces cannot support an exact-binding claim.
-- The Goal Contract is standard structured input to executor/verifier; platform-native task or goal tracking is caller-owned lifecycle metadata and cannot replace contract authority.
-- `tools/evals/runtime-boundaries.json` preserves 33 static expected-boundary cases; schema validation is not runtime evidence.
+- The Goal Contract is standard structured input to executor/verifier; `alpha-goal` reuses or creates the native goal before accepted `PERSIST` handoff, then synchronizes terminal state per runtime after `PASS_TO_FINAL` with no required work left.
+- `tools/evals/runtime-boundaries.json` preserves 36 static expected-boundary cases; schema validation is not runtime evidence.
