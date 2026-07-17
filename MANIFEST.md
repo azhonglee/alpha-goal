@@ -18,24 +18,25 @@ Claude tool-name adaptation lives in `skills/alpha-goal/references/claude-adapte
 | --- | ---: | --- |
 | `scripts/install.sh` | Yes | Interactively copies the three skills to the selected Codex/Claude roots, synchronizes managed templates/hooks, migrates managed links, and conservatively uninstalls managed artifacts. |
 | `skills/executor/scripts/checkpoint-lock.sh` | Yes | Public one-shot checkpoint command and task mutex. |
-| `skills/executor/scripts/checkpoint-update.js` | Yes | Private successor validation and atomic checkpoint replacement. |
+| `skills/executor/scripts/checkpoint-append.js` | Yes | Private bounded tail-read and plain-result-to-JSONL append implementation. |
+| `skills/executor/scripts/checkpoint-update.js` | Yes | Compatibility implementation for existing one-shot `checkpoint.md` tasks. |
 | `skills/executor/scripts/checkpoint-lock.js` | Yes | Legacy helper retained only for transactions it already opened. |
 | `tools/validate_skills.js` | No | Validates contract/schema structure, public skill/frontmatter/reference layout, distribution files, hooks/TOML, fixtures, tools surface, and the count budget. |
 | `tools/test_authority_digest.js` | No | Exercises the authority-payload golden SHA-256, marker and line-ending byte semantics, and success/failure output streams. |
-| `tools/test_checkpoint_lock.js` | No | Exercises one-shot transitions, stale/invalid writes, mutex contention, process-kill unlock, legacy refusal, and installed module boundaries. |
+| `tools/test_checkpoint_lock.js` | No | Exercises JSONL transitions, bounded tail reads, stale/invalid appends, contention, process-kill recovery, compatibility, and installed module boundaries. |
 | `tools/evals/runtime-boundaries.json` | No | Declares 33 expected boundary cases for independent static or runtime review; schema validity alone is not behavioral evidence. |
 
 `skills/alpha-goal/scripts/authority-digest.js` deterministically hashes the marked authority payload used by contract acceptance and entry checks.
-`skills/executor/scripts/checkpoint-lock.sh` serializes each mutation with `flock`; its private JavaScript helper validates the complete successor from stdin and atomically replaces `checkpoint.md`. The historical `checkpoint-lock.js` remains only for transactions it already opened.
+`skills/executor/scripts/checkpoint-lock.sh` serializes each mutation with `flock`; new tasks send plain-text current results and `checkpoint-append.js` constructs the JSONL record after reading the bounded tail. A valid retry truncates only incomplete trailing bytes before append. Existing `checkpoint.md` tasks remain on `checkpoint-update.js`; the historical `checkpoint-lock.js` only finishes transactions it already opened.
 Each public CommonJS script directory carries a local `package.json` boundary so installed copies do not inherit an ancestor package's module type.
 
 ## Templates and recovery
 
 - `templates/AGENTS.md` and `templates/CLAUDE.md` carry the materiality-based autonomy boundary.
 - `templates/config.toml` declares structured-input and multi-agent defaults. The installer fills missing keys but preserves existing values, including explicit disables; skill behavior still detects whether each capability is exposed.
-- `templates/hooks.json` defines one matcher-free `PostCompact` hook with marker `codex-alpha-goal-compact-recovery:v3`.
+- `templates/hooks.json` defines one matcher-free `PostCompact` hook with marker `codex-alpha-goal-compact-recovery:v4`.
 - Recovery uses only an explicit artifact path already present in task context and follows top-level `active_owner`; a legacy `alpha-goal` owner is terminated to `caller` instead of resumed. `PASS_TO_FINAL`, `BLOCKED`, and `GOAL_CHANGED` terminate that checkpoint; later work starts a new Alpha Goal task directory. A lone accepted contract must have a valid authority digest and an unchanged goal before checkpoint initialization. Recovery never guesses the active task from directory recency.
-- Hook replacement uses the marker family, so the current v3 template replaces other managed numbered versions and the experimental family while preserving unmanaged hooks.
+- Hook replacement uses the marker family, so the current v4 template replaces other managed numbered versions and the experimental family while preserving unmanaged hooks.
 
 ## Runtime artifacts
 
@@ -44,7 +45,7 @@ Canonical lifecycle artifacts exist only for `PERSIST`; checkpoint mutation is c
 | Path | Condition and owner |
 | --- | --- |
 | `<state-root>/YYYYMMDD-<task>/goal-contract.md` | Draft/accepted authority contract with accepted authority-payload digest; only `alpha-goal` modifies it. |
-| `<state-root>/YYYYMMDD-<task>/checkpoint.md` | Created after acceptance; records the accepted contract identity and current execution/verification state, carries atomic write control, and partitions sequential executor/verifier fields. |
+| `<state-root>/YYYYMMDD-<task>/checkpoint.jsonl` | Created after acceptance; each line repeats stable contract/execution-context identity and appends only the current executor/verifier result with revision/owner control. |
 
 `DIRECT` does not resolve this state root or create either artifact.
 

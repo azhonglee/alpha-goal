@@ -44,7 +44,7 @@ flowchart TD
   A["alpha-goal: clarify and form a Goal Frame"] --> R{"DIRECT / PERSIST"}
   R --> D["DIRECT: normal execution + final validation"]
   R --> P["PERSIST: expand and confirm goal-contract.md"]
-  P --> E["executor: execute at risk boundaries and record checkpoint.md"]
+  P --> E["executor: execute at risk boundaries and append checkpoint.jsonl"]
   E --> V["verifier: independently observe current state"]
   V -->|"NEXT_ITERATION"| E
   V -->|"BLOCKED"| B["Report blocker"]
@@ -59,10 +59,10 @@ Accepted goal materially changes -> terminate the old checkpoint -> start a new 
 
 A Goal Frame contains intent, observable outcome, scope/non-goals, constraints, success signals, observers, and material decisions. Clear fields come from the request and attributable facts; clarification asks the relevant authority about one highest-impact blocking gap and closes it only when the authorized decision and its material boundaries and execution/evidence consequences are determined. A material change to an accepted goal terminates the old task; the new goal starts `alpha-goal` in a new task directory instead of reopening the old contract or checkpoint.
 
-`DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state, and does not call `executor` or `verifier`. For `PERSIST`, the only canonical lifecycle artifacts are `goal-contract.md` and `checkpoint.md`; each checkpoint update is one helper command that holds the task mutex, validates the complete successor, and atomically replaces `checkpoint.md` through a temporary file.
+`DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state, and does not call `executor` or `verifier`. For `PERSIST`, the only canonical lifecycle artifacts are `goal-contract.md` and `checkpoint.jsonl`; the agent sends only plain-text current task results, and the helper reads the last valid record and generates JSONL. Valid history is never rewritten; a retry discards only an incomplete trailing fragment.
 
 - `goal-contract.md`: written only by `alpha-goal`; its accepted authority payload is standard structured input to executor and verifier.
-- `checkpoint.md`: records the current contract digest and execution/verification state, and serializes executor/verifier handoff with atomic `checkpoint_revision`/`active_owner` control.
+- `checkpoint.jsonl`: stores one self-contained result record per line and serializes executor/verifier handoff with the task mutex plus `checkpoint_revision`/`active_owner`.
 
 Routing uses material impact, side effects, recovery needs, and verifiability. Confidence, file count, step count, question count, and estimated duration are not risk proxies.
 
@@ -100,7 +100,7 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/executor/"><code>executor</code></a></td>
-      <td align="left">Execute authorized batches inside an accepted contract; <code>goal-contract.md</code> is authoritative and <code>checkpoint.md</code> records mutations, raw execution evidence, and handoff state.</td>
+      <td align="left">Execute authorized batches inside an accepted contract; <code>goal-contract.md</code> is authoritative and <code>checkpoint.jsonl</code> appends each current mutation, evidence, and handoff result.</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/verifier/"><code>verifier</code></a></td>

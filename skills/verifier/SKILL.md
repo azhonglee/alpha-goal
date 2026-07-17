@@ -9,7 +9,7 @@ Independently determine what current evidence proves.
 
 ## Validate Entry and Evidence
 
-- Require the accepted contract, accepted authority digest, acceptance-time completeness, matching task/context checkpoint, and `active_owner: verifier`. Recompute the digest with `authority-digest.js`; an invalid entry produces no verdict.
+- Require the accepted contract, accepted authority digest, acceptance-time completeness, matching task/context checkpoint log whose last valid record has `active_owner: verifier`. Recompute the digest with `authority-digest.js`; an invalid entry produces no verdict.
 - An earlier accepted payload lacking current completeness rows may continue only when the checkpoint records the same task and digest; infer no authority and reject gaps already present.
 - Inspect actual target, delivery, and dependencies. Re-observe evidence; claim separate-agent independence only when an isolated verifier performed it.
 
@@ -30,28 +30,28 @@ For empty/partial/suspicious results, continue safe non-mutating observation whi
 If the acceptance authority materially changes the goal while verifier owns the checkpoint, stop observation and do not issue a verdict. Run:
 
 ```text
-bash <executor-root>/scripts/checkpoint-lock.sh terminate <absolute-checkpoint-path> <expected-revision> < successor.md
+bash <executor-root>/scripts/checkpoint-lock.sh terminate <absolute-checkpoint.jsonl> <expected-revision> < result.md
 ```
 
-Send the complete successor on stdin with `termination_reason: GOAL_CHANGED`, attributable source/date, change summary, current observed identity, incremented `checkpoint_revision`, and `active_owner: caller`. After the command returns or is interrupted, reload canonical `checkpoint.md` before deciding the next action. Follow-up starts a new `alpha-goal` task directory.
+Send only the attributable goal change as plain text. The helper constructs the termination record. After any return or interruption, inspect the last valid record. Follow-up starts a new `alpha-goal` task directory.
 
 ## Verify and Write
 
 Resolve the checkpoint helper from the selected `executor/SKILL.md`, never CWD.
 
-1. Re-read recorded contract/checkpoint identity, accepted digest, checkpoint revision/owner, and actual drift.
+1. Read the last valid record and recheck task identity, digest, revision/owner, and drift.
 2. Collect required observers after the latest relevant mutation and within freshness.
 3. Classify every criterion/gap; entry integrity failures produce no verdict, otherwise a blocker outranks fixable work.
-4. Send the complete successor on stdin:
+4. Append one current verification-result record:
 
 ```text
-bash <executor-root>/scripts/checkpoint-lock.sh verify <absolute-checkpoint-path> <expected-revision> <PASS_TO_FINAL|NEXT_ITERATION|BLOCKED> < successor.md
+bash <executor-root>/scripts/checkpoint-lock.sh verify <absolute-checkpoint.jsonl> <expected-revision> <PASS_TO_FINAL|NEXT_ITERATION|BLOCKED> < result.md
 ```
 
-5. Change only verifier fields, increment `checkpoint_revision` once, record identity/evidence/gap/route, and set `active_owner` last.
-6. After the command returns or is interrupted, reload canonical `checkpoint.md` before deciding the next action.
+5. Send only current observations/status/gaps as plain UTF-8/Markdown; the helper constructs and JSON-encodes identity, revision, route, and owner.
+6. Do not copy prior records or hand-write JSON. After any return or interruption, inspect the last valid record before deciding the next action.
 
-Use `bash <executor-root>/scripts/checkpoint-lock.sh status <absolute-checkpoint-path>` to inspect the current revision and owner.
+Use `bash <executor-root>/scripts/checkpoint-lock.sh status <absolute-checkpoint.jsonl>` to inspect the latest revision and owner.
 
 ## Final Gate
 

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 7,
+  "schemaVersion": 8,
   "instructionBudgetExclusiveMax": 9301,
   "commonJsPackages": [
     "skills/alpha-goal/scripts/package.json",
@@ -36,6 +36,7 @@
       ],
       "references": [],
       "scripts": [
+        "scripts/checkpoint-append.js",
         "scripts/checkpoint-lock.sh",
         "scripts/checkpoint-update.js",
         "scripts/checkpoint-lock.js"
@@ -92,19 +93,19 @@
       ]
     },
     {
-      "path": "checkpoint.md",
+      "path": "checkpoint.jsonl",
       "condition": "accepted PERSIST contract during execution and verification",
       "sections": [
         {
-          "name": "recorded-contract-identity-state-revision-and-write-control",
+          "name": "stable-task-contract-identity-and-write-control",
           "owner": "executor"
         },
         {
-          "name": "execution-and-stagnation-records",
+          "name": "executor-current-result-records",
           "owner": "executor"
         },
         {
-          "name": "verification-observations-criterion-status-and-verdict",
+          "name": "verifier-current-result-records",
           "owner": "verifier"
         }
       ]

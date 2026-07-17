@@ -44,13 +44,13 @@ Uninstall is conservative outside the managed copied-skill path. It removes only
 
 The compact recovery hook definition lives in `templates/hooks.json`. It is a `PostCompact` hook without a matcher and must not set matcher. It reloads only from an explicit current artifact path and delegates identity, owner, recovery, and termination decisions to the checkpoint helper and selected skills instead of duplicating their protocol.
 
-Hook replacement is keyed by marker family. The current v3 template replaces other managed numbered versions in that family before it is added. The installer also removes the experimental `codex-compact-skill-recovery` family and preserves unmanaged hooks.
+Hook replacement is keyed by marker family. The current v4 template replaces other managed numbered versions in that family before it is added. The installer also removes the experimental `codex-compact-skill-recovery` family and preserves unmanaged hooks.
 
 Codex may require reviewing and trusting the changed hook with `/hooks` before it runs.
 
 ## Smoke test
 
-The smoke test checks source-identical skill copies; one-shot checkpoint updates, stale-write rejection, and automatic mutex release; missing-key TOML merge while preserving explicit values; adapter discoverability; managed hook replacement; idempotence; failure preservation; concise output; fresh and mixed-config uninstall behavior; rejected arguments; refused unmanaged targets; and ignored `CODEX_HOME`. It uses temporary homes and does not touch real user configuration.
+The smoke test checks source-identical skill copies; append-only checkpoint records, bounded tail reads, stale-write rejection, and automatic mutex release; missing-key TOML merge while preserving explicit values; adapter discoverability; managed hook replacement; idempotence; failure preservation; concise output; fresh and mixed-config uninstall behavior; rejected arguments; refused unmanaged targets; and ignored `CODEX_HOME`. It uses temporary homes and does not touch real user configuration.
 
 ```bash
 set -euo pipefail
@@ -217,33 +217,31 @@ for skill in alpha-goal executor verifier; do
 done
 test -x "$tmp_codex/.codex/skills/alpha-goal/scripts/authority-digest.js"
 test -x "$tmp_codex/.codex/skills/executor/scripts/checkpoint-lock.sh"
+test -x "$tmp_codex/.codex/skills/executor/scripts/checkpoint-append.js"
 test -x "$tmp_codex/.codex/skills/executor/scripts/checkpoint-update.js"
 test -x "$tmp_codex/.codex/skills/executor/scripts/checkpoint-lock.js"
 test "$(node "$repo_root/skills/alpha-goal/scripts/authority-digest.js" "$repo_root/skills/alpha-goal/references/goal-contract-book.md")" = "$(node "$tmp_codex/.codex/skills/alpha-goal/scripts/authority-digest.js" "$tmp_codex/.codex/skills/alpha-goal/references/goal-contract-book.md")"
-lock_checkpoint="$tmp_codex/lock-smoke/checkpoint.md"
+lock_checkpoint="$tmp_codex/lock-smoke/checkpoint.jsonl"
 mkdir -p "$(dirname "$lock_checkpoint")"
+cat > "$(dirname "$lock_checkpoint")/goal-contract.md" <<'EOF'
+status: accepted
+workspace_identity: /tmp/install-smoke
+- accepted_authority_sha256: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+EOF
 lock_helper="$tmp_codex/.codex/skills/executor/scripts/checkpoint-lock.sh"
-
-init_successor=$'checkpoint_revision: 0\nactive_owner: executor\npayload: initial\n'
-printf '%s' "$init_successor" | (cd /tmp && bash "$lock_helper" init "$lock_checkpoint") >/dev/null
-cmp <(printf '%s' "$init_successor") "$lock_checkpoint"
-
-handoff_successor=$'checkpoint_revision: 1\nactive_owner: verifier\npayload: verify-next\n'
-printf '%s' "$handoff_successor" | bash "$lock_helper" execute "$lock_checkpoint" 0 verifier >/dev/null
-cmp <(printf '%s' "$handoff_successor") "$lock_checkpoint"
-
-next_successor=$'checkpoint_revision: 2\nactive_owner: executor\nroute: NEXT_ITERATION\npayload: next-iteration\n'
-printf '%s' "$next_successor" | bash "$lock_helper" verify "$lock_checkpoint" 1 NEXT_ITERATION >/dev/null
-cmp <(printf '%s' "$next_successor") "$lock_checkpoint"
+printf '%s' 'initial handoff' | (cd /tmp && bash "$lock_helper" init "$lock_checkpoint" /tmp/install-smoke /tmp/install-smoke codex/install-smoke) >/dev/null
+printf '%s' 'verify next batch' | bash "$lock_helper" execute "$lock_checkpoint" 0 verifier next >/dev/null
+printf '%s' 'next iteration result' | bash "$lock_helper" verify "$lock_checkpoint" 1 NEXT_ITERATION >/dev/null
 
 before_invalid="$(sha256sum "$lock_checkpoint" | awk '{print $1}')"
-if printf '%s' "$next_successor" | bash "$lock_helper" execute "$lock_checkpoint" 1 executor >/dev/null 2>&1; then
+if printf '%s' 'stale result' | bash "$lock_helper" execute "$lock_checkpoint" 1 executor same >/dev/null 2>&1; then
   echo "stale expected revision should fail" >&2
   exit 1
 fi
 test "$before_invalid" = "$(sha256sum "$lock_checkpoint" | awk '{print $1}')"
 status_json="$(bash "$lock_helper" status "$lock_checkpoint")"
-node -e 'const s=JSON.parse(process.argv[1]); if (s.revision !== "2" || s.owner !== "executor") process.exit(1)' "$status_json"
+node -e 'const s=JSON.parse(process.argv[1]); if (s.revision !== 2 || s.owner !== "executor") process.exit(1)' "$status_json"
+node -e 'const fs=require("fs"); const rows=fs.readFileSync(process.argv[1],"utf8").split("\n").filter(Boolean).map(JSON.parse); if(rows.length!==3 || rows[2].result.text!=="next iteration result") process.exit(1)' "$lock_checkpoint"
 test -f "$tmp_codex/.codex/AGENTS.md"
 test -f "$tmp_codex/.codex/config.toml"
 test -f "$tmp_codex/.codex/hooks.json"
@@ -252,18 +250,19 @@ test ! -e "$tmp_codex/.claude/CLAUDE.md"
 test ! -e "$tmp_codex/.claude/skills/alpha-goal"
 ! grep -q "references/claude-adapter.md" "$tmp_codex/.codex/skills/alpha-goal/SKILL.md"
 python3 -m json.tool "$tmp_codex/.codex/hooks.json" >/dev/null
-grep -q "codex-alpha-goal-compact-recovery:v3" "$tmp_codex/.codex/hooks.json"
+grep -q "codex-alpha-goal-compact-recovery:v4" "$tmp_codex/.codex/hooks.json"
 grep -q "Use only an explicit current artifact path" "$tmp_codex/.codex/hooks.json"
-grep -q "follow top-level active_owner" "$tmp_codex/.codex/hooks.json"
-grep -q "legacy alpha-goal owner loads executor only to terminate it to caller" "$tmp_codex/.codex/hooks.json"
+grep -q "read the last valid JSON record and follow active_owner" "$tmp_codex/.codex/hooks.json"
+grep -q "Send only the current result as plain text" "$tmp_codex/.codex/hooks.json"
+grep -q "checkpoint.md is legacy and stays on the compatibility path" "$tmp_codex/.codex/hooks.json"
 grep -q "caller reports PASS/BLOCKED/GOAL_CHANGED as terminal" "$tmp_codex/.codex/hooks.json"
 grep -q "Later work uses a new Alpha Goal task directory" "$tmp_codex/.codex/hooks.json"
 grep -q "accepted with valid completeness/digest loads alpha-goal to confirm the goal is unchanged" "$tmp_codex/.codex/hooks.json"
 ! grep -q "technical_design.md" "$tmp_codex/.codex/hooks.json"
-grep -q "checkpoint.md" "$tmp_codex/.codex/hooks.json"
+grep -q "checkpoint.jsonl" "$tmp_codex/.codex/hooks.json"
 codex_repeat_output="$(run_installer "$tmp_codex")"
 assert_simple_success_output "$codex_repeat_output" "Alpha Goal install completed."
-test "$(grep -o "codex-alpha-goal-compact-recovery:v3" "$tmp_codex/.codex/hooks.json" | wc -l | tr -d ' ')" -eq 1
+test "$(grep -o "codex-alpha-goal-compact-recovery:v4" "$tmp_codex/.codex/hooks.json" | wc -l | tr -d ' ')" -eq 1
 
 tmp_claude="$(mktemp -d)"
 claude_output="$(TARGET_CHOICE=claude run_installer "$tmp_claude")"
@@ -312,6 +311,7 @@ data = {
         "PostCompact": [
             {"hooks": [{"type": "command", "command": ": 'codex-alpha-goal-compact-recovery:v1'; printf old"}]},
             {"hooks": [{"type": "command", "command": ": 'codex-alpha-goal-compact-recovery:v2'; printf old2"}]},
+            {"hooks": [{"type": "command", "command": ": 'codex-alpha-goal-compact-recovery:v3'; printf old3"}]},
             {"hooks": [{"type": "command", "command": ": 'codex-compact-skill-recovery:experimental'; printf experimental"}]},
             {"hooks": [{"type": "command", "command": "printf unmanaged"}]},
         ]
@@ -324,8 +324,9 @@ upgrade_output="$(run_installer "$tmp_upgrade")"
 assert_simple_success_output "$upgrade_output" "Alpha Goal install completed."
 ! grep -q "codex-alpha-goal-compact-recovery:v1" "$tmp_upgrade/.codex/hooks.json"
 ! grep -q "codex-alpha-goal-compact-recovery:v2" "$tmp_upgrade/.codex/hooks.json"
+! grep -q "codex-alpha-goal-compact-recovery:v3" "$tmp_upgrade/.codex/hooks.json"
 ! grep -q "codex-compact-skill-recovery:experimental" "$tmp_upgrade/.codex/hooks.json"
-test "$(grep -o "codex-alpha-goal-compact-recovery:v3" "$tmp_upgrade/.codex/hooks.json" | wc -l | tr -d ' ')" -eq 1
+test "$(grep -o "codex-alpha-goal-compact-recovery:v4" "$tmp_upgrade/.codex/hooks.json" | wc -l | tr -d ' ')" -eq 1
 grep -q "printf unmanaged" "$tmp_upgrade/.codex/hooks.json"
 
 tmp_merge="$(mktemp -d)"
@@ -518,7 +519,7 @@ rm -f /tmp/alpha-goal-invalid.out /tmp/alpha-goal-invalid.err
 ```text
 $alpha-goal 根据请求和已发现事实形成 Goal Frame，再判断走 DIRECT 还是 PERSIST。
 $executor 从已接受的 Goal Contract 恢复并执行下一批授权工作。
-$verifier 对当前持久 checkpoint 做风险边界或最终状态验证。
+$verifier 对当前持久 checkpoint log 做风险边界或最终状态验证。
 ```
 
 ## Count budget

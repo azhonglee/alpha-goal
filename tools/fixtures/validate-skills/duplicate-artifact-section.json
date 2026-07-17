@@ -5,8 +5,8 @@
   "replacements": [
     {
       "file": "tools/validation/alpha-goal.json",
-      "search": "        {\n          \"name\": \"verification-observations-criterion-status-and-verdict\",\n          \"owner\": \"verifier\"\n        }",
-      "replace": "        {\n          \"name\": \"verification-observations-criterion-status-and-verdict\",\n          \"owner\": \"verifier\"\n        },\n        {\n          \"name\": \"verification-observations-criterion-status-and-verdict\",\n          \"owner\": \"verifier\"\n        }"
+      "search": "        {\n          \"name\": \"verifier-current-result-records\",\n          \"owner\": \"verifier\"\n        }",
+      "replace": "        {\n          \"name\": \"verifier-current-result-records\",\n          \"owner\": \"verifier\"\n        },\n        {\n          \"name\": \"verifier-current-result-records\",\n          \"owner\": \"verifier\"\n        }"
     }
   ]
 }

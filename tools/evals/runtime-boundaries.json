@@ -94,8 +94,8 @@
     },
     {
       "id": "RB19",
-      "scenario": "Exercise one-shot checkpoint transitions through checkpoint-lock.sh with complete successors on stdin, concurrent writers, a stale tmp file, orphan legacy pending records, and an active legacy lock.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "One task mutex serializes mutations; one complete successor is atomically published. Stale tmp and orphan pending records do not block, while an active legacy lock is refused." }
+      "scenario": "Exercise checkpoint.jsonl transitions through checkpoint-lock.sh with plain-text current results on stdin, concurrent writers, a truncated tail record, and a large history.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "The helper—not the agent—constructs JSON. One task mutex serializes appends; status reads only the tail, the last valid record controls state, stale revisions append nothing, and truncated tail data does not block the next valid record." }
     },
     {
       "id": "RB20",
@@ -104,8 +104,8 @@
     },
     {
       "id": "RB21",
-      "scenario": "Verifier is loaded alone after compaction, resolves checkpoint-lock.sh from the selected executor skill, invokes verify from an arbitrary CWD with the complete successor on stdin, and encounters stale state.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "The stale write changes nothing; verifier reloads canonical checkpoint.md and retries through the one-shot helper." }
+      "scenario": "Verifier is loaded alone after compaction, resolves checkpoint-lock.sh from the selected executor skill, reads the last valid checkpoint.jsonl record, sends one plain-text current verification result, and encounters stale state.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "The stale write appends nothing; verifier rereads the last valid record and retries without copying historical results." }
     },
     {
       "id": "RB22",
@@ -125,7 +125,7 @@
     {
       "id": "RB25",
       "scenario": "Verifier returns NEXT_ITERATION; executor completes a new batch, hands back to verifier, and compaction occurs while the old NEXT route remains in history.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "Top-level active_owner is authoritative; a historical route never overrides the current handoff." }
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "The last valid record's active_owner is authoritative; a historical route never overrides the current handoff." }
     },
     {
       "id": "RB26",
@@ -134,8 +134,8 @@
     },
     {
       "id": "RB27",
-      "scenario": "Resume from a checkpoint bound to another task, branch, worktree, or repository set.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "An unrelated checkpoint is rejected at entry without a verdict and is never reused for the current task." }
+      "scenario": "Resume from a checkpoint log whose last valid record is bound to another task, branch, worktree, or repository set.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "An unrelated checkpoint log is rejected at entry without a verdict and is never reused for the current task." }
     },
     {
       "id": "RB28",
@@ -159,8 +159,8 @@
     },
     {
       "id": "RB32",
-      "scenario": "A first handoff omits current material-design/touched-risk completeness, while a separate legacy contract is recorded by an existing checkpoint with the same task and accepted digest.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Reject incomplete content for new initialization or first handoff. Permit the earlier accepted payload to continue only through its matching existing checkpoint, without inferring missing authority or changing its digest-covered historical metadata." }
+      "scenario": "A first handoff omits current material-design/touched-risk completeness, while a separate legacy contract is recorded by an existing checkpoint log with the same task and accepted digest.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Reject incomplete content for new initialization or first handoff. Permit the earlier accepted payload to continue only when the last valid record matches its task and digest, without inferring missing authority." }
     },
     {
       "id": "RB33",

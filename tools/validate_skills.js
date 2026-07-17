@@ -63,7 +63,7 @@ function readContract(root, errors) {
 }
 
 function validateContract(contract, errors) {
-  if (contract.schemaVersion !== 7) errors.push(`${CONTRACT_PATH}: schemaVersion must be 7`);
+  if (contract.schemaVersion !== 8) errors.push(`${CONTRACT_PATH}: schemaVersion must be 8`);
   if (!Number.isInteger(contract.instructionBudgetExclusiveMax) || contract.instructionBudgetExclusiveMax < 1) {
     errors.push(`${CONTRACT_PATH}: instructionBudgetExclusiveMax must be a positive integer`);
   }
@@ -408,7 +408,7 @@ function validateRuntimeEvals(root, contract, errors) {
 
 function validateHookTemplate(root, errors) {
   const rel = "templates/hooks.json";
-  const managedMarker = /^: 'codex-alpha-goal-compact-recovery:v3';/;
+  const managedMarker = /^: 'codex-alpha-goal-compact-recovery:v4';/;
   let data;
   try {
     data = JSON.parse(fs.readFileSync(path.join(root, rel), "utf8"));
@@ -449,10 +449,10 @@ function validateHookTemplate(root, errors) {
     }
   }
   if (managedPostCompactCount !== 1) {
-    errors.push(`${rel}: expected exactly one v3 managed recovery hook inside hooks.PostCompact, found ${managedPostCompactCount}`);
+    errors.push(`${rel}: expected exactly one v4 managed recovery hook inside hooks.PostCompact, found ${managedPostCompactCount}`);
   }
   if (managedOtherEventCount !== 0) {
-    errors.push(`${rel}: v3 managed recovery hook must not appear outside hooks.PostCompact`);
+    errors.push(`${rel}: v4 managed recovery hook must not appear outside hooks.PostCompact`);
   }
 }
 
