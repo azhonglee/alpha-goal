@@ -12,13 +12,15 @@ The shared structural contract is `tools/validation/alpha-goal.json`. It declare
 
 Native Goal Sync applies only to `PERSIST`: after explicit contract acceptance, `alpha-goal` reuses any unfinished thread goal or creates one when none exists. Native state is not a canonical Alpha Goal artifact or acceptance evidence.
 
+The installer may omit the executor/verifier pair; that pair is required for the repository-defined persistent execution and final-audit loop. When the pair is omitted, the Codex recovery hook is not installed or updated.
+
 Claude tool-name adaptation lives in `skills/alpha-goal/references/claude-adapter.md` and is selected by `templates/CLAUDE.md`, not core skill prose. Codex and Claude installs receive the same runtime-neutral skill tree.
 
 ## Scripts
 
 | Path | Persistent managed-state mutation? | Purpose |
 | --- | ---: | --- |
-| `scripts/install.sh` | Yes | Interactively copies the three skills to the selected Codex/Claude roots, synchronizes managed templates/hooks, migrates managed links, and conservatively uninstalls managed artifacts. |
+| `scripts/install.sh` | Yes | Always copies `alpha-goal`, optionally copies the executor/verifier pair to selected Codex/Claude roots, synchronizes applicable managed templates/hooks, migrates managed links, and conservatively uninstalls managed artifacts. |
 | `tools/validate_skills.js` | No | Validates contract/schema structure, public skill/frontmatter/reference layout, distribution files, hooks/TOML, fixtures, tools surface, and the count budget. |
 | `tools/evals/runtime-boundaries.json` | No | Declares 36 expected boundary cases for independent static or runtime review; schema validity alone is not behavioral evidence. |
 
