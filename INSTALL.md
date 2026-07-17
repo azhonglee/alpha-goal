@@ -503,7 +503,7 @@ rm -f /tmp/alpha-goal-invalid.out /tmp/alpha-goal-invalid.err
 ```text
 $alpha-goal 根据请求和已发现事实形成 Goal Frame，再判断走 DIRECT 还是 PERSIST。
 $executor 从已接受的 Goal Contract 恢复并执行下一批授权工作。
-$verifier 对当前持久 checkpoint 做风险边界或最终状态验证。
+$verifier 只审核 executor 提交的拟议终态，并给出最终路由。
 ```
 
 ## Count budget

@@ -38,10 +38,10 @@
       "entry": false,
       "ownedSemantics": [
         "evidence-classification",
-        "verification-observations",
+        "terminal-audit-observations",
         "criterion-status",
         "evidence-freshness",
-        "verification-route"
+        "final-audit-route"
       ],
       "references": [],
       "scripts": []
@@ -96,7 +96,7 @@
           "owner": "executor"
         },
         {
-          "name": "verification-observations-criterion-status-and-verdict",
+          "name": "terminal-audit-observations-criterion-status-and-verdict",
           "owner": "verifier"
         }
       ]

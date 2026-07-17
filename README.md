@@ -25,12 +25,12 @@ Alpha Goal 给 AI Agent 一套 Goal Engineering 控制闭环，重点约束三�
     <tr>
       <td width="100" align="left"><strong>行动越界</strong></td>
       <td align="left">没有授权边界，越过 scope、改错分支，或把当前实现当成期望行为。</td>
-      <td align="left"><code>executor</code> 只执行已接受契约内的有界 slice，变更前检查 worktree/branch、scope、non-goals 和 claim boundary。</td>
+      <td align="left"><code>executor</code> 持续完成已接受契约内的全部授权 batch，变更前检查 worktree/branch、scope、non-goals 和 claim boundary。</td>
     </tr>
     <tr>
       <td width="100" align="left"><strong>完成无据</strong></td>
       <td align="left">测试过了就说完成，或把局部成功当成目标达成。</td>
-      <td align="left"><code>verifier</code> 对照 acceptance evidence 重新观察当前状态，并返回路由裁决。</td>
+      <td align="left"><code>verifier</code> 只审核 executor 提交的终态，对照 acceptance evidence 返回最终路由裁决。</td>
     </tr>
   </tbody>
 </table>
@@ -45,16 +45,16 @@ flowchart TD
   R --> D["DIRECT：正常执行 + 最终验证"]
   R --> P["PERSIST：扩展并确认 goal-contract.md"]
   P --> S["Native Goal Sync：创建或复用线程目标"]
-  S --> E["executor：按风险边界执行并记录 checkpoint.md"]
-  E --> V["verifier：重新观察当前状态"]
-  V -->|"NEXT_ITERATION"| E
+  S --> E["executor：完成全部 batch、自检并记录 checkpoint.md"]
+  E --> V["verifier：审核拟议终态"]
+  V -->|"NEXT_ITERATION（返工）"| E
   V -->|"BLOCKED"| B["报告 blocker"]
   V -->|"PASS_TO_FINAL"| F["最终声明"]
 ```
 
 ```text
 Trigger -> Frame Goal -> Choose DIRECT/PERSIST
-PERSIST -> Confirm accepted Goal Contract -> Native Goal Sync -> $executor -> Evidence + checkpoint -> $verifier -> Route -> Next Slice or Final Claim
+PERSIST -> Confirm accepted Goal Contract -> Native Goal Sync -> $executor -> Proposed Terminal State -> $verifier -> Rework or Final Claim
 Accepted goal materially changes -> terminate the old checkpoint -> start a new alpha-goal task directory
 ```
 
@@ -63,7 +63,7 @@ Goal Frame 包含 intent、observable outcome、scope/non-goals、constraints、
 `DIRECT` 将完整 Goal Frame 保留在当前上下文，不创建 Alpha Goal 状态或 native goal，也不调用 `executor` 或 `verifier`。`PERSIST` 在契约被明确接受后复用当前线程中未完成的 native goal；没有未完成目标时才创建。native goal 只是 lifecycle metadata，不能替代契约 authority 或验收证据。`PERSIST` 的 canonical lifecycle artifacts 仍只有 `goal-contract.md` 与 `checkpoint.md`。
 
 - `goal-contract.md`：由 `alpha-goal` 独占修改；accepted authority payload 是 executor 和 verifier 的标准结构化输入。
-- `checkpoint.md`：记录当前契约 digest 与执行/验证状态；`executor`、`verifier` 通过 `checkpoint_revision` 和 `active_owner` 顺序交接，写前必须重读当前状态，冲突时停止并重新判断。
+- `checkpoint.md`：记录当前契约 digest 与执行/终态审核状态；`executor`、`verifier` 通过 `checkpoint_revision` 和 `active_owner` 顺序交接，写前必须重读当前状态，冲突时停止并重新判断。
 
 路由只看材料性影响、副作用、恢复需求和可验证性；不以置信度、文件数、步骤数、问答轮次或预计时长替代风险判断。
 
@@ -105,7 +105,7 @@ $alpha-goal 实现一下这个需求:<YOUR-PRD> or <YOUR-DESCRIPTION>，<YOUR-UX
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/verifier/"><code>verifier</code></a></td>
-      <td align="left">重新观察当前状态并判断 fresh evidence，更新 criterion 状态，并输出 <code>PASS_TO_FINAL</code> / <code>NEXT_ITERATION</code> / <code>BLOCKED</code>。</td>
+      <td align="left">只审核拟议终态的 fresh evidence，更新 criterion 状态，并输出 <code>PASS_TO_FINAL</code> / <code>NEXT_ITERATION</code> / <code>BLOCKED</code>。</td>
     </tr>
   </tbody>
 </table>
@@ -117,7 +117,7 @@ Alpha Goal 让 agent 工作保持目标明确、行动有界、声明受证据�
 - 先发现事实，再处理由用户或其他授权来源拥有的材料性决策；现有代码不能自行定义期望行为。
 - 已知不可行、required observer 不可用、claim surface 未标识或 prerequisite 未满足时，Goal Contract 必须保持 `draft`；`BLOCKED` 只表示 accepted 前提在运行期被新事实推翻。
 - 直达任务不制造持久协议；持久任务用最小 artifact 支持授权、恢复和审计。
-- 同一低风险边界内批量执行，只在材料性风险边界和最终状态调用 verifier。
+- executor 负责全部中间 batch、风险边界和按比例自检；只有拟议完成态或需要终态 blocker 判定时才调用 verifier。
 - PASS 绑定实际观察到的最终目标与交付状态并终止该 checkpoint；后续工作创建新任务。
 - 时效性证据记录观察时间与失效条件；无法标识的可变表面不得声称精确绑定。
 - Goal Contract 是 executor/verifier 的标准结构化输入；`alpha-goal` 在 accepted `PERSIST` 交接前复用或创建 native goal。

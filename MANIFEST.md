@@ -6,7 +6,7 @@
 | --- | --- |
 | `skills/alpha-goal/` | Goal framing, entry routing, Goal Contract authority, and accepted-contract native-goal binding. |
 | `skills/executor/` | Persistent target/delivery mutation, raw execution evidence, recovery cursor, and goal-change termination. |
-| `skills/verifier/` | Verification observations, evidence classification, criterion status, and verification route. |
+| `skills/verifier/` | Terminal-state observations, evidence classification, criterion status, and final audit route. |
 
 The shared structural contract is `tools/validation/alpha-goal.json`. It declares public skills, semantic owners, routes, conditional artifacts, references, distribution/eval files, and the exclusive instruction-unit budget. It does not validate skill prose.
 
@@ -39,7 +39,7 @@ Canonical lifecycle artifacts exist only for `PERSIST`. Checkpoint updates use a
 | Path | Condition and owner |
 | --- | --- |
 | `<state-root>/YYYYMMDD-<task>/goal-contract.md` | Draft/accepted authority contract with accepted authority-payload digest; only `alpha-goal` modifies it. |
-| `<state-root>/YYYYMMDD-<task>/checkpoint.md` | Created after acceptance; records accepted contract identity and current execution/verification state, partitions executor/verifier fields, and carries sequential handoff state. |
+| `<state-root>/YYYYMMDD-<task>/checkpoint.md` | Created after acceptance; records accepted contract identity and current execution/final-audit state, partitions executor/verifier fields, and carries sequential handoff state. |
 
 `DIRECT` does not resolve this state root or create either artifact.
 
