@@ -4,13 +4,13 @@
 
 | Directory | Owned semantics |
 | --- | --- |
-| `skills/alpha-goal/` | PERSIST-only goal framing and entry, Goal Contract authority, and accepted-contract native-goal binding. |
+| `skills/alpha-goal/` | Persistence-eligible goal framing and activation, Goal Contract authority, and accepted-contract native-goal binding. |
 | `skills/executor/` | Persistent target/delivery mutation, raw execution evidence, recovery cursor, and goal-change termination. |
 | `skills/verifier/` | Terminal-state observations, evidence classification, criterion status, and final audit route. |
 
-The shared structural contract is `tools/validation/alpha-goal.json`. It declares public skills, semantic owners, routes, conditional artifacts, references, distribution/eval files, and the exclusive instruction-unit budget. It does not validate skill prose.
+The shared structural contract is `tools/validation/alpha-goal.json`. It declares public skills, semantic owners, verification routes, conditional artifacts, references, distribution/eval files, and the exclusive instruction-unit budget. It does not validate skill prose.
 
-Native Goal Sync applies only to `PERSIST`: after explicit contract acceptance, `alpha-goal` reuses any unfinished thread goal or creates one when none exists. Native state is not a canonical Alpha Goal artifact or acceptance evidence.
+Native Goal Sync applies only after a persistent Goal Contract is explicitly accepted: `alpha-goal` reuses any unfinished thread goal or creates one when none exists. Native state is not a canonical Alpha Goal artifact or acceptance evidence.
 
 The installer may omit the executor/verifier pair; that pair is required for the repository-defined persistent execution and final-audit loop. When the pair is omitted, the Codex recovery hook is not installed or updated.
 
@@ -37,14 +37,14 @@ Claude tool-name adaptation lives in `skills/alpha-goal/references/claude-adapte
 
 ## Runtime artifacts
 
-Canonical lifecycle artifacts exist only for `PERSIST`. Checkpoint updates use a sequential single-writer protocol: the active owner re-reads canonical state before editing, preserves other-owned fields, increments `checkpoint_revision` once, and sets the next owner last. A stale revision, unexpected owner, or changed content stops the write; concurrent writers are unsupported. The state root is `$HOME/.alpha-goal/<workspace-slug>/`, where the slug comes from the stable workspace basename.
+Canonical lifecycle artifacts exist only for persistent work handled by `alpha-goal`. Checkpoint updates use a sequential single-writer protocol: the active owner re-reads canonical state before editing, preserves other-owned fields, increments `checkpoint_revision` once, and sets the next owner last. A stale revision, unexpected owner, or changed content stops the write; concurrent writers are unsupported. The state root is `$HOME/.alpha-goal/<workspace-slug>/`, where the slug comes from the stable workspace basename.
 
 | Path | Condition and owner |
 | --- | --- |
 | `<state-root>/YYYYMMDD-<task>/goal-contract.md` | Draft/accepted authority contract with accepted authority-payload digest; only `alpha-goal` modifies it. |
 | `<state-root>/YYYYMMDD-<task>/checkpoint.md` | Created after acceptance; records accepted contract identity and current execution/final-audit state, partitions executor/verifier fields, and carries sequential handoff state. |
 
-Ordinary direct work does not activate `alpha-goal`, resolve this state root, or create either artifact. An explicit non-applicable invocation returns to the caller without an entry route or lifecycle state.
+Ordinary read-only work and clear reversible local changes do not activate `alpha-goal`, resolve this state root, or create either artifact. An explicit non-applicable invocation returns to the caller without lifecycle state.
 
 ## Count budget
 

@@ -41,11 +41,10 @@ Alpha Goal 给 AI Agent 一套 Goal Engineering 控制闭环，重点约束三�
 
 ```mermaid
 flowchart TD
-  Q["用户请求"] --> R{"存在 PERSIST trigger？"}
+  Q["用户请求"] --> R{"需要持久 Goal Contract 生命周期？"}
   R -->|"否"| D["caller：正常执行 + 最终验证"]
   R -->|"是"| A["alpha-goal：澄清并确认 goal-contract.md"]
-  A --> P["PERSIST"]
-  P --> S["Native Goal Sync：创建或复用线程目标"]
+  A --> S["Native Goal Sync：创建或复用线程目标"]
   S --> E["executor：完成全部 batch、自检并记录 checkpoint.md"]
   E --> V["verifier：审核拟议终态"]
   V -->|"NEXT_ITERATION（返工）"| E
@@ -54,21 +53,21 @@ flowchart TD
 ```
 
 ```text
-Ordinary direct work -> caller execution and validation without alpha-goal
-PERSIST trigger -> Frame Goal -> Confirm accepted Goal Contract -> Native Goal Sync -> $executor -> Proposed Terminal State -> $verifier -> Rework or Final Claim
+Ordinary local/read-only work -> caller execution and validation without alpha-goal
+Persistence trigger -> Frame Goal -> Confirm accepted Goal Contract -> Native Goal Sync -> $executor -> Proposed Terminal State -> $verifier -> Rework or Final Claim
 Accepted goal materially changes -> terminate the old checkpoint -> start a new alpha-goal task directory
 ```
 
 Goal Frame 包含 intent、observable outcome、scope/non-goals、constraints、success signals、observers 和 material decisions；已清晰内容直接来自请求与可归因事实，只向相关 authority 追问最高影响的单个 blocking gap，并仅在授权决定及其 material boundaries、执行/证据后果可确定时闭合。accepted goal 发生材料性变化时，旧任务终止；新目标使用新的任务目录重新进入 `alpha-goal`，不重开旧 contract/checkpoint。
 
-普通 direct work 不触发 `alpha-goal`，由 caller 直接执行和验证，不创建 Alpha Goal 状态或 native goal，也不调用 `executor` 或 `verifier`。显式调用 `$alpha-goal` 但不存在 persistence trigger 时，skill 仅返回 caller，不产生入口 route。`PERSIST` 在契约被明确接受后复用当前线程中未完成的 native goal；没有未完成目标时才创建。native goal 只是 lifecycle metadata，不能替代契约 authority 或验收证据。`PERSIST` 的 canonical lifecycle artifacts 仍只有 `goal-contract.md` 与 `checkpoint.md`。
+普通只读工作和清晰可逆的本地修改不触发 `alpha-goal`，由 caller 直接执行和验证，不创建 Alpha Goal 状态或 native goal，也不调用 `executor` 或 `verifier`。显式调用 `$alpha-goal` 但不存在 persistence trigger 时，skill 仅返回 caller，不创建生命周期状态。持久 Goal Contract 被明确接受后，Alpha Goal 复用当前线程中未完成的 native goal；没有未完成目标时才创建。native goal 只是 lifecycle metadata，不能替代契约 authority 或验收证据。canonical lifecycle artifacts 仍只有 `goal-contract.md` 与 `checkpoint.md`。
 
-完整的 `PERSIST` 执行与终审闭环需要同时安装 `executor` 和 `verifier`；只安装 `alpha-goal` 适用于不需要该闭环的场景。
+完整的持久执行与终审闭环需要同时安装 `executor` 和 `verifier`；只安装 `alpha-goal` 适用于不需要该闭环的场景。
 
 - `goal-contract.md`：由 `alpha-goal` 独占修改；accepted authority payload 是 executor 和 verifier 的标准结构化输入。
 - `checkpoint.md`：记录当前契约 digest 与执行/终态审核状态；`executor`、`verifier` 通过 `checkpoint_revision` 和 `active_owner` 顺序交接，写前必须重读当前状态，冲突时停止并重新判断。
 
-路由只看材料性影响、副作用、恢复需求和可验证性；不以置信度、文件数、步骤数、问答轮次或预计时长替代风险判断。
+是否进入持久生命周期只看材料性影响、副作用、恢复需求和可验证性；不以置信度、文件数、步骤数、问答轮次或预计时长替代风险判断。
 
 ## 快速开始
 
@@ -123,5 +122,5 @@ Alpha Goal 让 agent 工作保持目标明确、行动有界、声明受证据�
 - executor 负责全部中间 batch、风险边界和按比例自检；只有拟议完成态或需要终态 blocker 判定时才调用 verifier。
 - PASS 绑定实际观察到的最终目标与交付状态并终止该 checkpoint；后续工作创建新任务。
 - 时效性证据记录观察时间与失效条件；无法标识的可变表面不得声称精确绑定。
-- Goal Contract 是 executor/verifier 的标准结构化输入；`alpha-goal` 在 accepted `PERSIST` 交接前复用或创建 native goal。
+- Goal Contract 是 executor/verifier 的标准结构化输入；`alpha-goal` 在把已接受的 Goal Contract 交给 executor 前复用或创建 native goal。
 - `tools/evals/runtime-boundaries.json` 固化 36 个生命周期与路由边界预期；`tools/evals/trigger-boundaries.json` 固化 12 个启用/跳过预期。结构校验通过不等于真实模型触发证据。

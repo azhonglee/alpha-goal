@@ -1,6 +1,6 @@
 # Goal Contract Book
 
-For `PERSIST`, `alpha-goal` alone writes canonical `goal-contract.md` in the resolved task directory. Same-day name collisions use the first unused numeric suffix; accepted or terminal directories are never reused. Once accepted, it is the canonical authority artifact for subsequent work.
+For persistent work, `alpha-goal` alone writes canonical `goal-contract.md` in the resolved task directory. Same-day name collisions use the first unused numeric suffix; accepted or terminal directories are never reused. Once accepted, it is the canonical authority artifact for subsequent work.
 
 ## Lifecycle and Integrity
 

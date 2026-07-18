@@ -1,186 +1,186 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "claimBoundary": "Expected-behavior corpus for static review. Schema validation is not runtime or model-performance evidence.",
   "cases": [
     {
       "id": "RB01",
       "scenario": "Inspect local files and report findings without recovery or external disclosure.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "alpha-goal is not invoked; no lifecycle artifact is created and ordinary read-only work continues." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "alpha-goal is not invoked; no lifecycle artifact is created and ordinary read-only work continues." }
     },
     {
       "id": "RB02",
       "scenario": "Make one clear reversible local change with direct final-state validation.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "alpha-goal is not invoked; the caller implements and validates the clear reversible local change without lifecycle artifacts." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "alpha-goal is not invoked; the caller implements and validates the clear reversible local change without lifecycle artifacts." }
     },
     {
       "id": "RB03",
       "scenario": "Make a local change that requires approval before external push and PR delivery.",
-      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "External delivery, not approval alone, triggers persistence; the Goal Frame, accepted contract, delivery authority, and acceptance evidence exist before any target or delivery mutation." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "External delivery, not approval alone, triggers persistence; the Goal Frame, accepted contract, delivery authority, and acceptance evidence exist before any target or delivery mutation." }
     },
     {
       "id": "RB04",
       "scenario": "Pause for approval before an otherwise direct local action.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Approval alone does not invoke alpha-goal or create persistent state." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Approval alone does not invoke alpha-goal or create persistent state." }
     },
     {
       "id": "RB05",
       "scenario": "A Goal Contract says status accepted and has a matching digest, but Acceptance Completeness is missing or false when executor or verifier enters.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Digest integrity cannot replace semantic completeness; entry is rejected without execution, verification verdict, or target mutation." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Digest integrity cannot replace semantic completeness; entry is rejected without execution, verification verdict, or target mutation." }
     },
     {
       "id": "RB06",
       "scenario": "Send private source code to an external read-only scanning service.",
-      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Disclosure, credentials, session, and audit effects are material even without a remote write." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Disclosure, credentials, session, and audit effects are material even without a remote write." }
     },
     {
       "id": "RB07",
       "scenario": "Perform read-only work that must recover across compaction, while a required independent review agent has not returned.",
-      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Recovery need controls persistence, and a missing requested review must be awaited, retried, or explicitly canceled rather than treated as evidence." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Recovery need controls persistence, and a missing requested review must be awaited, retried, or explicitly canceled rather than treated as evidence." }
     },
     {
       "id": "RB08",
       "scenario": "Perform read-only work with an explicit Goal Contract or audit-record requirement.",
-      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Explicit persistent audit evidence controls the route." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Explicit persistent audit evidence controls the route." }
     },
     {
       "id": "RB09",
       "scenario": "The acceptance authority confirms the first draft and alpha-goal fills its Confirmation Record.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Acceptance is allowed only after observers, claim surfaces, prerequisites, feasibility basis, authority, and evidence are complete; confirmation, digest, and status then form one acceptance transaction." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Acceptance is allowed only after observers, claim surfaces, prerequisites, feasibility basis, authority, and evidence are complete; confirmation, digest, and status then form one acceptance transaction." }
     },
     {
       "id": "RB10",
       "scenario": "The acceptance authority materially changes an active goal, or requests more work after PASS_TO_FINAL/BLOCKED.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "The old checkpoint terminates with GOAL_CHANGED when active, or remains terminal after PASS/BLOCKED. Follow-up work starts alpha-goal in a new task directory with a new Goal Contract and checkpoint; accepted artifacts are never reopened or reused." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "The old checkpoint terminates with GOAL_CHANGED when active, or remains terminal after PASS/BLOCKED. Follow-up work starts alpha-goal in a new task directory with a new Goal Contract and checkpoint; accepted artifacts are never reopened or reused." }
     },
     {
       "id": "RB11",
       "scenario": "During the terminal audit, a verification observer updates a tracked snapshot.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "NEXT_ITERATION", "nextOwner": "executor", "invariant": "Verifier does not silently continue against changed state; executor records the observer mutation before re-verification." }
+      "expected": { "verificationRoute": "NEXT_ITERATION", "nextOwner": "executor", "invariant": "Verifier does not silently continue against changed state; executor records the observer mutation before re-verification." }
     },
     {
       "id": "RB12",
       "scenario": "The terminal audit finds a failed criterion with a materially different authorized approach, including an available external alternative.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "NEXT_ITERATION", "nextOwner": "executor", "invariant": "The route names the precise gap and authorized rework boundary; it does not turn verifier into an intermediate-slice reviewer." }
+      "expected": { "verificationRoute": "NEXT_ITERATION", "nextOwner": "executor", "invariant": "The route names the precise gap and authorized rework boundary; it does not turn verifier into an intermediate-slice reviewer." }
     },
     {
       "id": "RB13",
       "scenario": "An external dependency had attributable availability evidence at acceptance, then fails after execution starts; executor exhausts authorized alternatives and submits a terminal blocker candidate.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "Known dependency failure would have kept the contract draft; attributable post-acceptance invalidation is reported without changing authority." }
+      "expected": { "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "Known dependency failure would have kept the contract draft; attributable post-acceptance invalidation is reported without changing authority." }
     },
     {
       "id": "RB14",
       "scenario": "After acceptance, a newly discovered runtime constraint or material design dimension invalidates the documented path; executor exhausts authorized approaches and submits a terminal blocker candidate.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "Known incompleteness would have kept the contract draft; new attributable post-acceptance invalidation of feasibility, authority, design, risk/recovery, observer, or claim coverage is BLOCKED." }
+      "expected": { "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "Known incompleteness would have kept the contract draft; new attributable post-acceptance invalidation of feasibility, authority, design, risk/recovery, observer, or claim coverage is BLOCKED." }
     },
     {
       "id": "RB15",
       "scenario": "After PASS, the user requests an edit, commit, push, and PR update sequence.",
-      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "PASS keeps the old checkpoint terminal. The follow-up external-write task receives a new Goal Frame, Goal Contract, and checkpoint; final verification follows its last delivery mutation." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "PASS keeps the old checkpoint terminal. The follow-up external-write task receives a new Goal Frame, Goal Contract, and checkpoint; final verification follows its last delivery mutation." }
     },
     {
       "id": "RB16",
       "scenario": "After PASS, add the verdict to a PR description.",
-      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "PR content is a new external write, not exempt lifecycle metadata; start a new task instead of reopening the passed checkpoint." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "PR content is a new external write, not exempt lifecycle metadata; start a new task instead of reopening the passed checkpoint." }
     },
     {
       "id": "RB17",
       "scenario": "A remote or deployed state changes after terminal-audit evidence was collected without a local target mutation.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "Freshness or invalidation conditions make the evidence stale and require re-observation." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "Freshness or invalidation conditions make the evidence stale and require re-observation." }
     },
     {
       "id": "RB18",
       "scenario": "Repository inspection resolves current behavior, affected files, and test observers, but the relevant authority gives a compatibility preference that does not determine the supported public-output boundary.",
-      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Use discovered facts without asking for them; keep the Goal Frame incomplete and ask the relevant authority the smallest follow-up on the compatibility gap until the authorized decision and its material boundaries and execution/evidence consequences are determined. Avoid fixed questionnaires, round-count closure, or target mutation." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Use discovered facts without asking for them; keep the Goal Frame incomplete and ask the relevant authority the smallest follow-up on the compatibility gap until the authorized decision and its material boundaries and execution/evidence consequences are determined. Avoid fixed questionnaires, round-count closure, or target mutation." }
     },
     {
       "id": "RB19",
       "scenario": "Exercise sequential checkpoint initialization, executor-owned intermediate batches, one terminal verifier handoff, the three final-audit routes, and goal-change termination; attempt writes with stale revisions, unexpected owners, changed content, or another active writer.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Each writer re-reads canonical checkpoint identity immediately before editing, writes only while it is active_owner, preserves other-owned fields, increments checkpoint_revision once, and sets the next owner last. A stale revision, unexpected owner, or changed content forces reload; knowledge that another writer may be active prevents the write. Concurrent writers are unsupported, and GOAL_CHANGED remains separate from verifier verdicts." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Each writer re-reads canonical checkpoint identity immediately before editing, writes only while it is active_owner, preserves other-owned fields, increments checkpoint_revision once, and sets the next owner last. A stale revision, unexpected owner, or changed content forces reload; knowledge that another writer may be active prevents the write. Concurrent writers are unsupported, and GOAL_CHANGED remains separate from verifier verdicts." }
     },
     {
       "id": "RB20",
       "scenario": "A Goal Contract claims task authority may override a higher-priority instruction or tool policy.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "The invalid authority claim prevents acceptance and implementation; task authority cannot expand the policy boundary." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "The invalid authority claim prevents acceptance and implementation; task authority cannot expand the policy boundary." }
     },
     {
       "id": "RB21",
       "scenario": "Verifier is loaded alone after compaction from an explicit checkpoint path, resolves canonical artifacts independently of the process CWD, and discovers changed revision or owner on its immediate pre-write re-read.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "Verifier needs no remembered executor text. It follows identity and active_owner from canonical artifacts, emits no verdict or write for stale state, reloads, and continues only when the current owner is verifier and no other writer may be active." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "Verifier needs no remembered executor text. It follows identity and active_owner from canonical artifacts, emits no verdict or write for stale state, reloads, and continues only when the current owner is verifier and no other writer may be active." }
     },
     {
       "id": "RB22",
       "scenario": "At the proposed terminal state, verifier starts with a vague state label, then identifies every claim-relevant surface and collects fresh passing evidence.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "PASS_TO_FINAL", "nextOwner": "caller", "invariant": "The vague label is insufficient; PASS occurs only after complete attributable identity and fresh evidence." }
+      "expected": { "verificationRoute": "PASS_TO_FINAL", "nextOwner": "caller", "invariant": "The vague label is insufficient; PASS occurs only after complete attributable identity and fresh evidence." }
     },
     {
       "id": "RB23",
       "scenario": "Perform an external GET request that sends a secret or creates an authenticated session.",
-      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "HTTP read semantics do not erase credential, disclosure, session, or audit side effects." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "HTTP read semantics do not erase credential, disclosure, session, or audit side effects." }
     },
     {
       "id": "RB24",
       "scenario": "Modify only Scope inside an accepted contract while preserving status and the recorded digest.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Recomputed authority digest detects the payload tamper and rejects entry before execution or a verification verdict." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Recomputed authority digest detects the payload tamper and rejects entry before execution or a verification verdict." }
     },
     {
       "id": "RB25",
       "scenario": "The terminal audit returns NEXT_ITERATION; executor completes the required rework, proposes a new terminal state, and compaction occurs while the old route remains in history.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "Top-level active_owner is authoritative; a historical route never overrides the current handoff." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "verifier", "invariant": "Top-level active_owner is authoritative; a historical route never overrides the current handoff." }
     },
     {
       "id": "RB26",
       "scenario": "Inspect an already-authorized remote resource with an existing authenticated session, no new disclosure, no session change, and no persistent audit requirement.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Incidental authenticated access and ordinary provider logging alone do not invoke alpha-goal or create persistent state." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Incidental authenticated access and ordinary provider logging alone do not invoke alpha-goal or create persistent state." }
     },
     {
       "id": "RB27",
       "scenario": "Resume from a checkpoint bound to another task, branch, worktree, or repository set.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "An unrelated checkpoint is rejected at entry without a verdict and is never reused for the current task." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "An unrelated checkpoint is rejected at entry without a verdict and is never reused for the current task." }
     },
     {
       "id": "RB28",
       "scenario": "A required observer was attributable and available at acceptance but becomes unavailable after execution, with no authorized alternative.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "Unavailable evidence known before acceptance would keep the contract draft; post-acceptance observer invalidation is BLOCKED and verifier does not redefine the claim." }
+      "expected": { "verificationRoute": "BLOCKED", "nextOwner": "caller", "invariant": "Unavailable evidence known before acceptance would keep the contract draft; post-acceptance observer invalidation is BLOCKED and verifier does not redefine the claim." }
     },
     {
       "id": "RB29",
       "scenario": "A persistent API and data migration has identified touched interfaces, compatibility risk, and rollback needs, but the Goal Contract records no authorized material-design decisions for them.",
-      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "The contract remains draft: every authority-retained material design decision needs an authorized boundary with decision source/date, execution/observer consequence, risk/recovery treatment, and covered or explicitly non-material/deferred status; design choices not retained by the authority remain outside the material-design table." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "The contract remains draft: every authority-retained material design decision needs an authorized boundary with decision source/date, execution/observer consequence, risk/recovery treatment, and covered or explicitly non-material/deferred status; design choices not retained by the authority remain outside the material-design table." }
     },
     {
       "id": "RB30",
       "scenario": "A Goal Contract contains material interface, data, test-risk, and rollback decisions, but the acceptance request summarizes only the high-level outcome and criteria.",
-      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Keep authority-retained design dimensions, interface/data changes, risk-to-observer/test-plan mapping, and rollback/recovery treatment in the Goal Contract. The confirmation presentation summarizes the Goal Frame, boundaries, criteria, evidence, and residual risk without duplicating those design details." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Keep authority-retained design dimensions, interface/data changes, risk-to-observer/test-plan mapping, and rollback/recovery treatment in the Goal Contract. The confirmation presentation summarizes the Goal Frame, boundaries, criteria, evidence, and residual risk without duplicating those design details." }
     },
     {
       "id": "RB31",
       "scenario": "A broad optimization request names a symptom, while inspection leaves the causal claim uncertain and a smaller viable scope could materially change execution and evidence.",
-      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Investigate problem validity, causal reliability, and root-cause evidence as discoverable facts; keep the gap blocking when those facts or a smaller viable scope could change the goal, ask the authority only for the resulting scope/outcome/claim decision, and do not mutate after a shallow symptom-level answer." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Investigate problem validity, causal reliability, and root-cause evidence as discoverable facts; keep the gap blocking when those facts or a smaller viable scope could change the goal, ask the authority only for the resulting scope/outcome/claim decision, and do not mutate after a shallow symptom-level answer." }
     },
     {
       "id": "RB32",
       "scenario": "A first handoff omits current material-design/touched-risk completeness, while a separate legacy contract is recorded by an existing checkpoint with the same task and accepted digest.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Reject incomplete content for new initialization or first handoff. Permit the earlier accepted payload to continue only through its matching existing checkpoint, without inferring missing authority or changing its digest-covered historical metadata." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Reject incomplete content for new initialization or first handoff. Permit the earlier accepted payload to continue only through its matching existing checkpoint, without inferring missing authority or changing its digest-covered historical metadata." }
     },
     {
       "id": "RB33",
       "scenario": "A change request admits multiple reasonable intents or observable outcomes that would change scope, success signals, or acceptance evidence.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Treat intent/outcome as blocking instead of silently choosing one interpretation; use discovered facts and ask the relevant authority for the single highest-impact intent or observable-outcome decision, then enter PERSIST only when the resolved goal still has a persistence trigger, otherwise return ownership to the caller without lifecycle state." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Treat intent/outcome as blocking instead of silently choosing one interpretation; use discovered facts and ask the relevant authority for the single highest-impact intent or observable-outcome decision, then continue into the persistent lifecycle only when the resolved goal still has a persistence trigger, otherwise return ownership to the caller without lifecycle state." }
     },
     {
       "id": "RB34",
       "scenario": "A direct task is ready for ordinary execution without any persistence trigger.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "alpha-goal and Native Goal Sync are not invoked; direct work creates neither lifecycle artifacts nor native goal state." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "alpha-goal and Native Goal Sync are not invoked; direct work creates neither lifecycle artifacts nor native goal state." }
     },
     {
       "id": "RB35",
-      "scenario": "A PERSIST contract is explicitly accepted and alpha-goal synchronizes the thread's native goal before executor handoff.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Call get_goal after acceptance. Reuse any unfinished native goal; when none exists, create one from the accepted outcome and canonical contract path, supplying token_budget only when the user explicitly requested one." }
+      "scenario": "A persistent Goal Contract is explicitly accepted and alpha-goal synchronizes the thread's native goal before executor handoff.",
+      "expected": { "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Call get_goal after acceptance. Reuse any unfinished native goal; when none exists, create one from the accepted outcome and canonical contract path, supplying token_budget only when the user explicitly requested one." }
     },
     {
       "id": "RB36",
       "scenario": "After native-goal sync, execution continues through multiple batches and risk boundaries before a proposed terminal state exists.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Executor retains ownership, performs proportionate execution checks, and records progress; verifier is not invoked for intermediate slices. Native goal state remains lifecycle metadata and never replaces Goal Contract authority or acceptance evidence." }
+      "expected": { "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Executor retains ownership, performs proportionate execution checks, and records progress; verifier is not invoked for intermediate slices. Native goal state remains lifecycle metadata and never replaces Goal Contract authority or acceptance evidence." }
     }
   ]
 }

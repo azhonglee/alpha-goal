@@ -1,90 +1,90 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "claimBoundary": "Static activation expectations for independent review or runtime evaluation. Schema validation does not prove model trigger precision or recall.",
   "cases": [
     {
       "id": "TB01",
-      "kind": "negative-direct",
+      "kind": "negative-bypass",
       "invocation": "implicit",
       "prompt": "Inspect local files and report findings without recovery, disclosure, or external writes.",
-      "expected": { "activate": false, "entryRoute": "N/A", "nextOwner": "caller", "invariant": "Ordinary read-only work bypasses alpha-goal and creates no lifecycle state." }
+      "expected": { "activate": false, "lifecycle": "none", "nextOwner": "caller", "invariant": "Ordinary read-only work bypasses alpha-goal and creates no lifecycle state." }
     },
     {
       "id": "TB02",
-      "kind": "negative-direct",
+      "kind": "negative-bypass",
       "invocation": "implicit",
       "prompt": "Make one clear reversible local change and validate the final file state.",
-      "expected": { "activate": false, "entryRoute": "N/A", "nextOwner": "caller", "invariant": "A clear local change stays with the caller and does not load alpha-goal." }
+      "expected": { "activate": false, "lifecycle": "none", "nextOwner": "caller", "invariant": "A clear local change stays with the caller and does not load alpha-goal." }
     },
     {
       "id": "TB03",
-      "kind": "negative-direct",
+      "kind": "negative-bypass",
       "invocation": "implicit",
       "prompt": "Pause for my approval before an otherwise direct local action.",
-      "expected": { "activate": false, "entryRoute": "N/A", "nextOwner": "caller", "invariant": "Approval alone is not a persistence trigger." }
+      "expected": { "activate": false, "lifecycle": "none", "nextOwner": "caller", "invariant": "Approval alone is not a persistence trigger." }
     },
     {
       "id": "TB04",
-      "kind": "negative-direct",
+      "kind": "negative-bypass",
       "invocation": "implicit",
       "prompt": "Inspect an already-authorized remote resource through the existing session without new disclosure, session change, or audit requirements.",
-      "expected": { "activate": false, "entryRoute": "N/A", "nextOwner": "caller", "invariant": "Incidental authenticated access alone does not activate alpha-goal." }
+      "expected": { "activate": false, "lifecycle": "none", "nextOwner": "caller", "invariant": "Incidental authenticated access alone does not activate alpha-goal." }
     },
     {
       "id": "TB05",
-      "kind": "explicit-non-persist",
+      "kind": "explicit-nonpersistent",
       "invocation": "explicit",
       "prompt": "$alpha-goal inspect these local files and summarize what they do.",
-      "expected": { "activate": true, "entryRoute": "N/A", "nextOwner": "caller", "invariant": "Explicit invocation loads the skill, but no persistence trigger means a safe exit with no lifecycle state." }
+      "expected": { "activate": true, "lifecycle": "none", "nextOwner": "caller", "invariant": "Explicit invocation loads the skill, but no persistence trigger means a safe exit with no lifecycle state." }
     },
     {
       "id": "TB06",
-      "kind": "positive-persist",
+      "kind": "positive-persistent",
       "invocation": "implicit",
       "prompt": "Make the local change, push the branch, and open a pull request.",
-      "expected": { "activate": true, "entryRoute": "PERSIST", "nextOwner": "alpha-goal", "invariant": "External delivery activates persistent authority and evidence handling before mutation." }
+      "expected": { "activate": true, "lifecycle": "goal-contract", "nextOwner": "alpha-goal", "invariant": "External delivery activates persistent authority and evidence handling before mutation." }
     },
     {
       "id": "TB07",
-      "kind": "positive-persist",
+      "kind": "positive-persistent",
       "invocation": "implicit",
       "prompt": "Send this private source code to an external read-only scanning service.",
-      "expected": { "activate": true, "entryRoute": "PERSIST", "nextOwner": "alpha-goal", "invariant": "Material disclosure activates persistence even when the remote operation is read-only." }
+      "expected": { "activate": true, "lifecycle": "goal-contract", "nextOwner": "alpha-goal", "invariant": "Material disclosure activates persistence even when the remote operation is read-only." }
     },
     {
       "id": "TB08",
-      "kind": "positive-persist",
+      "kind": "positive-persistent",
       "invocation": "implicit",
       "prompt": "Run a long read-only review that must recover across compaction and await an independent reviewer.",
-      "expected": { "activate": true, "entryRoute": "PERSIST", "nextOwner": "alpha-goal", "invariant": "Recovery and required handoff evidence activate persistent state." }
+      "expected": { "activate": true, "lifecycle": "goal-contract", "nextOwner": "alpha-goal", "invariant": "Recovery and required handoff evidence activate persistent state." }
     },
     {
       "id": "TB09",
-      "kind": "positive-persist",
+      "kind": "positive-persistent",
       "invocation": "explicit",
       "prompt": "$alpha-goal create a Goal Contract and persistent audit record for this migration.",
-      "expected": { "activate": true, "entryRoute": "PERSIST", "nextOwner": "alpha-goal", "invariant": "Explicit persistent audit requirements activate the full contract workflow." }
+      "expected": { "activate": true, "lifecycle": "goal-contract", "nextOwner": "alpha-goal", "invariant": "Explicit persistent audit requirements activate the full contract workflow." }
     },
     {
       "id": "TB10",
-      "kind": "positive-persist",
+      "kind": "positive-persistent",
       "invocation": "implicit",
       "prompt": "Perform an external GET request that sends a secret and establishes a new authenticated session.",
-      "expected": { "activate": true, "entryRoute": "PERSIST", "nextOwner": "alpha-goal", "invariant": "Credential disclosure and session mutation activate persistence regardless of HTTP method." }
+      "expected": { "activate": true, "lifecycle": "goal-contract", "nextOwner": "alpha-goal", "invariant": "Credential disclosure and session mutation activate persistence regardless of HTTP method." }
     },
     {
       "id": "TB11",
-      "kind": "positive-persist",
+      "kind": "positive-persistent",
       "invocation": "implicit",
       "prompt": "Migrate the public API and stored data; compatibility, rollout, and rollback decisions are still mine.",
-      "expected": { "activate": true, "entryRoute": "PERSIST", "nextOwner": "alpha-goal", "invariant": "Authority-retained interface, data, rollout, and recovery decisions require a persistent contract." }
+      "expected": { "activate": true, "lifecycle": "goal-contract", "nextOwner": "alpha-goal", "invariant": "Authority-retained interface, data, rollout, and recovery decisions require a persistent contract." }
     },
     {
       "id": "TB12",
-      "kind": "positive-persist",
+      "kind": "positive-persistent",
       "invocation": "implicit",
       "prompt": "Optimize this behavior, but two reasonable public-output boundaries would change scope and acceptance evidence.",
-      "expected": { "activate": true, "entryRoute": "PERSIST", "nextOwner": "alpha-goal", "invariant": "A material authority decision affecting observable behavior and acceptance activates persistence." }
+      "expected": { "activate": true, "lifecycle": "goal-contract", "nextOwner": "alpha-goal", "invariant": "A material authority decision affecting observable behavior and acceptance activates persistence." }
     }
   ]
 }

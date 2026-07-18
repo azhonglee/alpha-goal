@@ -1,6 +1,6 @@
 ---
 name: executor
-description: "Execute or resume all authorized work bound to one accepted PERSIST Goal Contract. Use after accepted handoff or final-audit NEXT_ITERATION; retain ownership through intermediate batches and hand off only for a terminal audit. Do not change the contract, classify criteria, or make the final claim."
+description: "Execute or resume all authorized work bound to one accepted persistent Goal Contract. Use after accepted handoff or final-audit NEXT_ITERATION; retain ownership through intermediate batches and hand off only for a terminal audit. Do not change the contract, classify criteria, or make the final claim."
 ---
 
 # Executor

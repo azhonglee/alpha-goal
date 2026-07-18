@@ -1,11 +1,11 @@
 ---
 name: alpha-goal
-description: "Create and accept a persistent Goal Contract when work needs a material authority decision, external/destructive/cross-repository or disclosure/session effects, recovery across pause/compaction/handoff, or explicit audit evidence. Also use when the user explicitly invokes alpha-goal. Do not use for ordinary read-only analysis or clear reversible local changes."
+description: "Create and accept a Goal Contract for work requiring a material authority decision, external/destructive/cross-repository or disclosure/session effects, recovery across pause/compaction/handoff, or explicit audit evidence. Also use when explicitly invoked. Skip ordinary read-only analysis and clear reversible local changes."
 ---
 
 # Alpha Goal
 
-Turn only persistence-eligible work into an accepted Goal Contract. Own persistent goal framing, entry, and contract authority; do not implement or verify the work.
+Turn persistence-eligible work into an accepted Goal Contract. Own goal framing, activation eligibility, and contract authority; do not implement or verify.
 
 ## Frame Before Persistence
 
@@ -40,9 +40,9 @@ Repeat only while the Goal Frame has a blocking gap:
    - Defer only when the relevant authority explicitly excludes the affected outcome, claim, or side effect from scope.
 5. Update the Goal Frame and stop when no blocking gap remains. Never use a fixed questionnaire, confidence, or round count as completion evidence.
 
-## Require a Persistence Trigger
+## Require a Persistent Lifecycle
 
-Enter `PERSIST` only when any condition holds:
+Create persistent state only when any condition holds:
 
 - behavior, interface, data, security/privacy, permission, dependency, acceptance, rollout/rollback, or risk treatment requires an authority decision;
 - work includes an external write, purchase, destructive/cross-repository action, material disclosure, credential/session change, or privacy/security impact;
@@ -53,7 +53,7 @@ Ambiguity, confidence, size, duration, or approval alone does not trigger persis
 
 ## Expand to a Goal Contract
 
-For `PERSIST`, resolve `$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/` from the stable workspace basename. Reuse only a matching `draft`. If that name already holds an accepted, terminated, completed, or unrelated task, choose the first unused `-2`, `-3`, ... suffix; never reopen it.
+When eligible, resolve `$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/` from the stable workspace basename. Reuse only a matching `draft`. If that name already holds an accepted, terminated, completed, or unrelated task, choose the first unused `-2`, `-3`, ... suffix; never reopen it.
 
 - Read `references/goal-contract-book.md`; create canonical `goal-contract.md` as `draft` and expand the Goal Frame with authority, side-effect, decision, claim, evidence, freshness, and invalidation boundaries.
 - Only the relevant authority may defer a goal item. No blocking gap may reach confirmation, handoff, or target mutation.
@@ -82,7 +82,7 @@ After the decision:
 
 ## Native Goal Sync
 
-Treat the native goal as lifecycle metadata, never as authority or acceptance evidence. Apply this only to `PERSIST`; a non-applicable invocation creates no native goal.
+After Goal Contract acceptance, treat the native goal as lifecycle metadata, never authority or acceptance evidence. A non-applicable invocation creates no native goal.
 
 - After acceptance, call `get_goal`. Reuse any unfinished native goal; if none exists, call `create_goal` with the accepted outcome and canonical `goal-contract.md` path. Set `token_budget` only when the user explicitly supplied one.
 
