@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 6,
+  "schemaVersion": 7,
   "instructionBudgetExclusiveMax": 9301,
   "publicSkills": [
     {
@@ -7,7 +7,7 @@
       "entry": true,
       "ownedSemantics": [
         "goal-framing",
-        "entry-route",
+        "activation-eligibility",
         "goal-contract-authority",
         "accepted-authority-digest",
         "native-goal-binding"
@@ -48,13 +48,6 @@
     }
   ],
   "routes": {
-    "entry": {
-      "owner": "alpha-goal",
-      "values": [
-        "DIRECT",
-        "PERSIST"
-      ]
-    },
     "verification": {
       "owner": "verifier",
       "values": [
@@ -67,7 +60,7 @@
   "artifacts": [
     {
       "path": "goal-contract.md",
-      "condition": "PERSIST route before target mutation",
+      "condition": "persistent Goal Contract lifecycle before target mutation",
       "sections": [
         {
           "name": "authority-and-boundaries",
@@ -85,7 +78,7 @@
     },
     {
       "path": "checkpoint.md",
-      "condition": "accepted PERSIST contract during execution and verification",
+      "condition": "accepted persistent Goal Contract during execution and verification",
       "sections": [
         {
           "name": "recorded-contract-identity-state-revision-and-write-control",
@@ -113,7 +106,8 @@
       "scripts/install.sh"
     ],
     "evals": [
-      "tools/evals/runtime-boundaries.json"
+      "tools/evals/runtime-boundaries.json",
+      "tools/evals/trigger-boundaries.json"
     ],
     "docs": [
       "AGENTS.md",

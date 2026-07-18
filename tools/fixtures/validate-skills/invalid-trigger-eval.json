@@ -1,0 +1,12 @@
+{
+  "inheritRoot": true,
+  "shouldPass": false,
+  "expectedErrors": ["TB01 negative-bypass must be implicit, inactive, lifecycle-free, and caller-owned"],
+  "replacements": [
+    {
+      "file": "tools/evals/trigger-boundaries.json",
+      "search": "\"activate\": false",
+      "replace": "\"activate\": true"
+    }
+  ]
+}

@@ -41,10 +41,10 @@ In practice, it compresses requirement clarification, authority boundaries, iter
 
 ```mermaid
 flowchart TD
-  A["alpha-goal: clarify and form a Goal Frame"] --> R{"DIRECT / PERSIST"}
-  R --> D["DIRECT: normal execution + final validation"]
-  R --> P["PERSIST: expand and confirm goal-contract.md"]
-  P --> S["Native Goal Sync: create or reuse the thread goal"]
+  Q["User request"] --> R{"Persistent Goal Contract lifecycle needed?"}
+  R -->|"No"| D["caller: normal execution + final validation"]
+  R -->|"Yes"| A["alpha-goal: clarify and confirm goal-contract.md"]
+  A --> S["Native Goal Sync: create or reuse the thread goal"]
   S --> E["executor: complete all batches, self-check, and record checkpoint.md"]
   E --> V["verifier: audit the proposed terminal state"]
   V -->|"NEXT_ITERATION (rework)"| E
@@ -53,21 +53,21 @@ flowchart TD
 ```
 
 ```text
-Trigger -> Frame Goal -> Choose DIRECT/PERSIST
-PERSIST -> Confirm accepted Goal Contract -> Native Goal Sync -> $executor -> Proposed Terminal State -> $verifier -> Rework or Final Claim
+Ordinary local/read-only work -> caller execution and validation without alpha-goal
+Persistence trigger -> Frame Goal -> Confirm accepted Goal Contract -> Native Goal Sync -> $executor -> Proposed Terminal State -> $verifier -> Rework or Final Claim
 Accepted goal materially changes -> terminate the old checkpoint -> start a new alpha-goal task directory
 ```
 
 A Goal Frame contains intent, observable outcome, scope/non-goals, constraints, success signals, observers, and material decisions. Clear fields come from the request and attributable facts; clarification asks the relevant authority about one highest-impact blocking gap and closes it only when the authorized decision and its material boundaries and execution/evidence consequences are determined. A material change to an accepted goal terminates the old task; the new goal starts `alpha-goal` in a new task directory instead of reopening the old contract or checkpoint.
 
-`DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state or native goal, and does not call `executor` or `verifier`. After a `PERSIST` contract is explicitly accepted, Alpha Goal reuses any unfinished native goal in the current thread; it creates one only when none is unfinished. Native state is lifecycle metadata and never replaces contract authority or acceptance evidence. The only canonical `PERSIST` lifecycle artifacts remain `goal-contract.md` and `checkpoint.md`.
+Ordinary read-only work and clear reversible local changes do not activate `alpha-goal`; the caller executes and validates them without Alpha Goal state, a native goal, `executor`, or `verifier`. An explicit `$alpha-goal` invocation with no persistence trigger returns to the caller without creating lifecycle state. After a persistent Goal Contract is explicitly accepted, Alpha Goal reuses any unfinished native goal in the current thread; it creates one only when none is unfinished. Native state is lifecycle metadata and never replaces contract authority or acceptance evidence. The only canonical lifecycle artifacts remain `goal-contract.md` and `checkpoint.md`.
 
-The complete `PERSIST` execution and final-audit loop requires both `executor` and `verifier`; install only `alpha-goal` when that loop is not needed.
+The complete persistent execution and final-audit loop requires both `executor` and `verifier`; install only `alpha-goal` when that loop is not needed.
 
 - `goal-contract.md`: written only by `alpha-goal`; its accepted authority payload is standard structured input to executor and verifier.
 - `checkpoint.md`: records the current contract digest and execution/terminal-audit state. Executor and verifier hand off sequentially through `checkpoint_revision` and `active_owner`; each writer re-reads current state and stops on conflict.
 
-Routing uses material impact, side effects, recovery needs, and verifiability. Confidence, file count, step count, question count, and estimated duration are not risk proxies.
+Persistent-lifecycle eligibility uses material impact, side effects, recovery needs, and verifiability. Confidence, file count, step count, question count, and estimated duration are not risk proxies.
 
 ## Quick start
 
@@ -85,7 +85,7 @@ The installer always copies `alpha-goal` and lets the user choose whether to ins
 $alpha-goal Implement this requirement: <YOUR-PRD> or <YOUR-DESCRIPTION>, <YOUR-UX> or <YOUR-DESIGN>.
 ```
 
-You usually do not need to name a skill. Describe the work normally; Alpha Goal activates implicitly.
+You usually do not need to name a skill. Alpha Goal activates implicitly only for material authority decisions, external/destructive/cross-repository or disclosure/session effects, recovery across pauses/compaction/handoffs, or explicit audit requirements. Ordinary direct work does not activate it.
 
 ## Public skills
 
@@ -99,7 +99,7 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
   <tbody>
     <tr>
       <td width="180" align="left"><a href="skills/alpha-goal/"><code>alpha-goal</code></a></td>
-      <td align="left">Clarify intent, boundaries, and acceptance evidence, form a Goal Frame, and produce a Goal Contract when persistent closure is required.</td>
+      <td align="left">Clarify intent, boundaries, and acceptance evidence only for work that requires persistent authority, recovery, or audit closure, then produce a Goal Contract.</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/executor/"><code>executor</code></a></td>
@@ -122,5 +122,5 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 - Executor owns all intermediate batches, risk boundaries, and proportionate checks; invoke verifier only for proposed completion or a terminal blocker decision.
 - PASS binds to the target and delivery state actually observed and terminates that checkpoint; later work starts a new task.
 - Volatile evidence records observation time and invalidation conditions; unidentified mutable surfaces cannot support an exact-binding claim.
-- The Goal Contract is standard structured input to executor/verifier; `alpha-goal` reuses or creates the native goal before accepted `PERSIST` handoff.
-- `tools/evals/runtime-boundaries.json` preserves 36 static expected-boundary cases; schema validation is not runtime evidence.
+- The Goal Contract is standard structured input to executor/verifier; `alpha-goal` reuses or creates the native goal before handing an accepted Goal Contract to executor.
+- `tools/evals/runtime-boundaries.json` preserves 36 lifecycle and routing boundary expectations; `tools/evals/trigger-boundaries.json` preserves 12 activation/skip expectations. Schema validation is not evidence of actual model triggering.

@@ -10,6 +10,8 @@ const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
 const CONTRACT_PATH = "tools/validation/alpha-goal.json";
 const REQUIRED_FIXTURES = new Set([
   "hidden-build-budget.json",
+  "invalid-trigger-eval.json",
+  "missing-entry-skill.json",
   "missing-skill.json",
   "runtime-eval-id-gap.json",
   "runtime-eval-order.json",
@@ -39,6 +41,7 @@ function validateRoot(root) {
   validateArtifacts(contract, errors);
   validateDistribution(root, contract, errors);
   validateRuntimeEvals(root, contract, errors);
+  validateTriggerEvals(root, contract, errors);
   validateToolsSurface(root, errors, warnings);
   validateHookTemplate(root, errors);
   validateTomlTemplate(root, errors);
@@ -61,7 +64,7 @@ function readContract(root, errors) {
 }
 
 function validateContract(contract, errors) {
-  if (contract.schemaVersion !== 6) errors.push(`${CONTRACT_PATH}: schemaVersion must be 6`);
+  if (contract.schemaVersion !== 7) errors.push(`${CONTRACT_PATH}: schemaVersion must be 7`);
   if (!Number.isInteger(contract.instructionBudgetExclusiveMax) || contract.instructionBudgetExclusiveMax < 1) {
     errors.push(`${CONTRACT_PATH}: instructionBudgetExclusiveMax must be a positive integer`);
   }
@@ -70,11 +73,14 @@ function validateContract(contract, errors) {
   requireArray(contract, "artifacts", errors);
   requireObject(contract, "routes", errors);
   requireObject(contract, "distribution", errors);
+  if (isObject(contract.routes)) {
+    requireOnlyKeys(contract.routes, ["verification"], `${CONTRACT_PATH}: routes`, errors);
+    requireObject(contract.routes, "verification", errors, `${CONTRACT_PATH}: routes`);
+  }
 
   const skillNames = [];
   const semanticOwners = new Map();
   let entryCount = 0;
-  let entrySkillName;
   for (const skill of contract.publicSkills || []) {
     if (!isObject(skill)) {
       errors.push(`${CONTRACT_PATH}: publicSkills entries must be objects`);
@@ -85,7 +91,6 @@ function validateContract(contract, errors) {
     if (typeof skill.entry !== "boolean") errors.push(`${CONTRACT_PATH}: public skill ${skill.name || "<unknown>"} entry must be boolean`);
     if (skill.entry === true) {
       entryCount += 1;
-      entrySkillName = skill.name;
     }
     requireArray(skill, "ownedSemantics", errors, `${CONTRACT_PATH}: public skill ${skill.name || "<unknown>"}`);
     requireArray(skill, "references", errors, `${CONTRACT_PATH}: public skill ${skill.name || "<unknown>"}`);
@@ -105,9 +110,6 @@ function validateContract(contract, errors) {
   }
   requireUniqueStrings(skillNames, `${CONTRACT_PATH}: public skill names`, errors);
   if (entryCount !== 1) errors.push(`${CONTRACT_PATH}: exactly one public skill must have entry=true`);
-  if (entryCount === 1 && contract.routes?.entry?.owner !== entrySkillName) {
-    errors.push(`${CONTRACT_PATH}: entry route owner must match the public skill with entry=true`);
-  }
 
   const knownOwners = new Set(skillNames);
   for (const [routeName, route] of Object.entries(contract.routes || {})) {
@@ -294,7 +296,7 @@ function validateToolsSurface(root, errors, warnings) {
     }
     if (!isFile(file)) continue;
     const allowedFixture = /^tools\/fixtures\/validate-skills\/[a-z0-9-]+\.json$/.test(rel);
-    const allowedEval = rel === "tools/evals/runtime-boundaries.json";
+    const allowedEval = rel === "tools/evals/runtime-boundaries.json" || rel === "tools/evals/trigger-boundaries.json";
     if (rel !== "tools/validate_skills.js" && rel !== CONTRACT_PATH && !allowedFixture && !allowedEval) {
       errors.push(`unexpected tools surface: ${rel}`);
     }
@@ -314,7 +316,7 @@ function validateRuntimeEvals(root, contract, errors) {
     return;
   }
 
-  if (!isObject(data) || data.schemaVersion !== 1) errors.push(`${rel}: schemaVersion must be 1`);
+  if (!isObject(data) || data.schemaVersion !== 2) errors.push(`${rel}: schemaVersion must be 2`);
   if (!nonEmptyString(data.claimBoundary)) errors.push(`${rel}: claimBoundary must be a non-empty string`);
   if (!Array.isArray(data.cases) || data.cases.length !== 36) {
     errors.push(`${rel}: cases must contain exactly 36 entries`);
@@ -322,7 +324,6 @@ function validateRuntimeEvals(root, contract, errors) {
   }
 
   const ids = [];
-  const entryRoutes = new Set([...(contract.routes?.entry?.values || []), "N/A"]);
   const verificationRoutes = new Set([...(contract.routes?.verification?.values || []), "N/A"]);
   const owners = new Set(["caller", ...(contract.publicSkills || []).map(skill => skill.name)]);
   for (const item of data.cases) {
@@ -336,7 +337,7 @@ function validateRuntimeEvals(root, contract, errors) {
       errors.push(`${rel}: ${item.id} missing expected object`);
       continue;
     }
-    if (!entryRoutes.has(item.expected.entryRoute)) errors.push(`${rel}: ${item.id} invalid entryRoute`);
+    requireOnlyKeys(item.expected, ["verificationRoute", "nextOwner", "invariant"], `${rel}: ${item.id} expected`, errors);
     if (!verificationRoutes.has(item.expected.verificationRoute)) errors.push(`${rel}: ${item.id} invalid verificationRoute`);
     if (!owners.has(item.expected.nextOwner)) errors.push(`${rel}: ${item.id} invalid nextOwner`);
     if (!nonEmptyString(item.expected.invariant)) errors.push(`${rel}: ${item.id} missing invariant`);
@@ -345,6 +346,70 @@ function validateRuntimeEvals(root, contract, errors) {
   const expectedIds = Array.from({ length: 36 }, (_, index) => `RB${String(index + 1).padStart(2, "0")}`);
   if (ids.length === 36 && ids.some((id, index) => id !== expectedIds[index])) {
     errors.push(`${rel}: case ids must be exactly RB01 through RB36 in order`);
+  }
+}
+
+function validateTriggerEvals(root, contract, errors) {
+  const rel = "tools/evals/trigger-boundaries.json";
+  let data;
+  try {
+    data = JSON.parse(fs.readFileSync(path.join(root, rel), "utf8"));
+  } catch (error) {
+    errors.push(`${rel}: invalid JSON or missing file: ${errorMessage(error)}`);
+    return;
+  }
+
+  if (!isObject(data) || data.schemaVersion !== 2) errors.push(`${rel}: schemaVersion must be 2`);
+  if (!nonEmptyString(data.claimBoundary)) errors.push(`${rel}: claimBoundary must be a non-empty string`);
+  if (!Array.isArray(data.cases) || data.cases.length !== 12) {
+    errors.push(`${rel}: cases must contain exactly 12 entries`);
+    return;
+  }
+
+  const ids = [];
+  const kinds = new Set(["negative-bypass", "explicit-nonpersistent", "positive-persistent"]);
+  const invocations = new Set(["implicit", "explicit"]);
+  const lifecycles = new Set(["none", "goal-contract"]);
+  const owners = new Set(["caller", ...(contract.publicSkills || []).map(skill => skill.name)]);
+  for (const item of data.cases) {
+    if (!isObject(item) || !/^TB[0-9]{2}$/.test(item.id || "")) {
+      errors.push(`${rel}: every case requires an id shaped TB00`);
+      continue;
+    }
+    ids.push(item.id);
+    if (!kinds.has(item.kind)) errors.push(`${rel}: ${item.id} invalid kind`);
+    if (!invocations.has(item.invocation)) errors.push(`${rel}: ${item.id} invalid invocation`);
+    if (!nonEmptyString(item.prompt)) errors.push(`${rel}: ${item.id} missing prompt`);
+    if (!isObject(item.expected)) {
+      errors.push(`${rel}: ${item.id} missing expected object`);
+      continue;
+    }
+    requireOnlyKeys(item.expected, ["activate", "lifecycle", "nextOwner", "invariant"], `${rel}: ${item.id} expected`, errors);
+    if (typeof item.expected.activate !== "boolean") errors.push(`${rel}: ${item.id} activate must be boolean`);
+    if (!lifecycles.has(item.expected.lifecycle)) errors.push(`${rel}: ${item.id} invalid lifecycle`);
+    if (!owners.has(item.expected.nextOwner)) errors.push(`${rel}: ${item.id} invalid nextOwner`);
+    if (!nonEmptyString(item.expected.invariant)) errors.push(`${rel}: ${item.id} missing invariant`);
+
+    if (item.kind === "negative-bypass" &&
+        (item.invocation !== "implicit" || item.expected.activate !== false || item.expected.lifecycle !== "none" || item.expected.nextOwner !== "caller")) {
+      errors.push(`${rel}: ${item.id} negative-bypass must be implicit, inactive, lifecycle-free, and caller-owned`);
+    }
+    if (item.kind === "explicit-nonpersistent" &&
+        (item.invocation !== "explicit" || item.expected.activate !== true || item.expected.lifecycle !== "none" || item.expected.nextOwner !== "caller")) {
+      errors.push(`${rel}: ${item.id} explicit-nonpersistent must be explicit, active, lifecycle-free, and caller-owned`);
+    }
+    if (item.kind === "positive-persistent" &&
+        (item.expected.activate !== true || item.expected.lifecycle !== "goal-contract" || item.expected.nextOwner !== "alpha-goal")) {
+      errors.push(`${rel}: ${item.id} positive-persistent must be active, goal-contract, and alpha-goal-owned`);
+    }
+  }
+  requireUniqueStrings(ids, `${rel}: case ids`, errors);
+  const expectedIds = Array.from({ length: 12 }, (_, index) => `TB${String(index + 1).padStart(2, "0")}`);
+  if (ids.length === 12 && ids.some((id, index) => id !== expectedIds[index])) {
+    errors.push(`${rel}: case ids must be exactly TB01 through TB12 in order`);
+  }
+  for (const kind of kinds) {
+    if (!data.cases.some(item => item.kind === kind)) errors.push(`${rel}: missing ${kind} coverage`);
   }
 }
 
@@ -540,6 +605,13 @@ function requireArray(object, key, errors, prefix = CONTRACT_PATH) {
 
 function requireObject(object, key, errors, prefix = CONTRACT_PATH) {
   if (!isObject(object?.[key])) errors.push(`${prefix}: ${key} must be an object`);
+}
+
+function requireOnlyKeys(object, allowedKeys, label, errors) {
+  const allowed = new Set(allowedKeys);
+  for (const key of Object.keys(object)) {
+    if (!allowed.has(key)) errors.push(`${label}: unexpected field ${key}`);
+  }
 }
 
 function requireUniqueStrings(values, label, errors) {

@@ -3,6 +3,6 @@
   "expectedErrors": ["cases must contain exactly 36 entries"],
   "inheritRoot": true,
   "files": {
-    "tools/evals/runtime-boundaries.json": "{\n  \"schemaVersion\": 1,\n  \"claimBoundary\": \"fixture\",\n  \"cases\": []\n}\n"
+    "tools/evals/runtime-boundaries.json": "{\n  \"schemaVersion\": 2,\n  \"claimBoundary\": \"fixture\",\n  \"cases\": []\n}\n"
   }
 }

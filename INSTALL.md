@@ -44,7 +44,7 @@ Uninstall is conservative outside the managed copied-skill path. It removes only
 
 The compact recovery hook definition lives in `templates/hooks.json`. It is a `PostCompact` hook without a matcher and must not set matcher. It reloads only from an explicit current artifact path and delegates identity, owner, recovery, and termination decisions to the selected skills instead of duplicating their protocol.
 
-Native Goal Sync is not hook-driven. On `PERSIST`, `alpha-goal` reuses an unfinished native goal or creates one after explicit Goal Contract acceptance; `DIRECT` creates no native goal.
+Native Goal Sync is not hook-driven. After a persistent Goal Contract is explicitly accepted, `alpha-goal` reuses an unfinished native goal or creates one. Ordinary read-only work and clear reversible local changes do not activate `alpha-goal` or create a native goal; an explicit non-applicable invocation exits without lifecycle state.
 
 Hook replacement is keyed by marker family. The current v4 template replaces other managed numbered versions in that family before it is added. The installer also removes the experimental `codex-compact-skill-recovery` family and preserves unmanaged hooks.
 
@@ -538,7 +538,7 @@ rm -f /tmp/alpha-goal-invalid.out /tmp/alpha-goal-invalid.err
 ## Prompts
 
 ```text
-$alpha-goal 根据请求和已发现事实形成 Goal Frame，再判断走 DIRECT 还是 PERSIST。
+$alpha-goal 为具有 persistence trigger 的请求形成 Goal Frame 并确认持久 Goal Contract；无 trigger 的显式调用直接返回 caller。
 $executor 从已接受的 Goal Contract 恢复并执行下一批授权工作。
 $verifier 只审核 executor 提交的拟议终态，并给出最终路由。
 ```

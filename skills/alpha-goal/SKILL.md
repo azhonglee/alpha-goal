@@ -1,24 +1,24 @@
 ---
 name: alpha-goal
-description: "Clarify and frame read-only/change work as an executable, verifiable goal. Choose DIRECT or PERSIST; create an accepted Goal Contract and bind it to the thread's native goal when persistence is required. Do not execute or verify persistent work."
+description: "Create and accept a Goal Contract for work requiring a material authority decision, external/destructive/cross-repository or disclosure/session effects, recovery across pause/compaction/handoff, or explicit audit evidence. Also use when explicitly invoked. Skip ordinary read-only analysis and clear reversible local changes."
 ---
 
 # Alpha Goal
 
-Turn request and discovered facts into a clear goal. Own goal framing, entry routing, and Goal Contract authority; do not implement or verify persistent work.
+Turn persistence-eligible work into an accepted Goal Contract. Own goal framing, activation eligibility, and contract authority; do not implement or verify.
 
-## Frame Before Routing
+## Frame Before Persistence
 
 Read instructions, artifacts, tests, docs, history, and current state. Resolve discoverable facts; descriptive evidence cannot grant desired-behavior, side-effect, or acceptance authority. Higher-priority instructions, tool policy, credentials, and approval gates remain invariant.
 
-For every task handled by this skill, derive a minimal Goal Frame:
+Derive a minimal Goal Frame:
 
 - intent and observable outcome;
 - scope, non-goals, and material constraints;
 - falsifiable success signals and observers;
 - unresolved decisions that could change authority, boundaries, execution/risk, or acceptance evidence.
 
-Use decisions only from the relevant authority and facts only from attributable sources. Descriptive evidence or an agent recommendation never supplies missing authority. A complete `DIRECT` frame may remain in context; create no lifecycle artifact.
+Use decisions only from the relevant authority and facts only from attributable sources. Descriptive evidence or an agent recommendation never supplies missing authority.
 
 ## Clarification Loop
 
@@ -40,22 +40,20 @@ Repeat only while the Goal Frame has a blocking gap:
    - Defer only when the relevant authority explicitly excludes the affected outcome, claim, or side effect from scope.
 5. Update the Goal Frame and stop when no blocking gap remains. Never use a fixed questionnaire, confidence, or round count as completion evidence.
 
-## Choose the Route
+## Require a Persistent Lifecycle
 
-Choose `DIRECT` only for authorized read-only work without material disclosure/session/privacy effects or recovery/audit needs, or a clear reversible in-scope local change with direct final-state observation and no unresolved material decision, external/destructive/cross-repository effect, or recovery need.
-
-Choose `PERSIST` when any condition holds:
+Create persistent state only when any condition holds:
 
 - behavior, interface, data, security/privacy, permission, dependency, acceptance, rollout/rollback, or risk treatment requires an authority decision;
 - work includes an external write, purchase, destructive/cross-repository action, material disclosure, credential/session change, or privacy/security impact;
 - completion requires recovery across pause, compaction, handoff, or material risk checkpoints;
 - the user or repository requires a Goal Contract or persistent audit evidence.
 
-Ambiguity, confidence, size, duration, or approval alone does not choose persistence. On `DIRECT`, end this skill and let the current agent execute and validate proportionally; reroute if a persistent condition appears.
+Ambiguity, confidence, size, duration, or approval alone does not trigger persistence. If no trigger remains after discovery and clarification, stop and return ownership to the caller without a route, lifecycle artifact, state-root lookup, or native goal. This is the required exit for an explicit but non-applicable invocation; ordinary direct work should not invoke this skill.
 
 ## Expand to a Goal Contract
 
-For `PERSIST`, resolve `$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/` from the stable workspace basename. Reuse only a matching `draft`. If that name already holds an accepted, terminated, completed, or unrelated task, choose the first unused `-2`, `-3`, ... suffix; never reopen it.
+When eligible, resolve `$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/` from the stable workspace basename. Reuse only a matching `draft`. If that name already holds an accepted, terminated, completed, or unrelated task, choose the first unused `-2`, `-3`, ... suffix; never reopen it.
 
 - Read `references/goal-contract-book.md`; create canonical `goal-contract.md` as `draft` and expand the Goal Frame with authority, side-effect, decision, claim, evidence, freshness, and invalidation boundaries.
 - Only the relevant authority may defer a goal item. No blocking gap may reach confirmation, handoff, or target mutation.
@@ -84,7 +82,7 @@ After the decision:
 
 ## Native Goal Sync
 
-Treat the native goal as lifecycle metadata, never as authority or acceptance evidence. Apply this only to `PERSIST`; `DIRECT` creates no native goal.
+After Goal Contract acceptance, treat the native goal as lifecycle metadata, never authority or acceptance evidence. A non-applicable invocation creates no native goal.
 
 - After acceptance, call `get_goal`. Reuse any unfinished native goal; if none exists, call `create_goal` with the accepted outcome and canonical `goal-contract.md` path. Set `token_budget` only when the user explicitly supplied one.
 
