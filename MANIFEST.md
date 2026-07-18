@@ -4,7 +4,7 @@
 
 | Directory | Owned semantics |
 | --- | --- |
-| `skills/alpha-goal/` | Goal framing, entry routing, Goal Contract authority, and accepted-contract native-goal binding. |
+| `skills/alpha-goal/` | PERSIST-only goal framing and entry, Goal Contract authority, and accepted-contract native-goal binding. |
 | `skills/executor/` | Persistent target/delivery mutation, raw execution evidence, recovery cursor, and goal-change termination. |
 | `skills/verifier/` | Terminal-state observations, evidence classification, criterion status, and final audit route. |
 
@@ -23,6 +23,7 @@ Claude tool-name adaptation lives in `skills/alpha-goal/references/claude-adapte
 | `scripts/install.sh` | Yes | Always copies `alpha-goal`, optionally copies the executor/verifier pair to selected Codex/Claude roots, synchronizes applicable managed templates/hooks, migrates managed links, and conservatively uninstalls managed artifacts. |
 | `tools/validate_skills.js` | No | Validates contract/schema structure, public skill/frontmatter/reference layout, distribution files, hooks/TOML, fixtures, tools surface, and the count budget. |
 | `tools/evals/runtime-boundaries.json` | No | Declares 36 expected boundary cases for independent static or runtime review; schema validity alone is not behavioral evidence. |
+| `tools/evals/trigger-boundaries.json` | No | Declares 12 static activation/skip expectations, including ordinary direct work and explicit non-applicable invocation; schema validity does not prove model trigger behavior. |
 
 `skills/alpha-goal/scripts/authority-digest.js` deterministically hashes the marked authority payload used by contract acceptance and entry checks.
 
@@ -43,8 +44,8 @@ Canonical lifecycle artifacts exist only for `PERSIST`. Checkpoint updates use a
 | `<state-root>/YYYYMMDD-<task>/goal-contract.md` | Draft/accepted authority contract with accepted authority-payload digest; only `alpha-goal` modifies it. |
 | `<state-root>/YYYYMMDD-<task>/checkpoint.md` | Created after acceptance; records accepted contract identity and current execution/final-audit state, partitions executor/verifier fields, and carries sequential handoff state. |
 
-`DIRECT` does not resolve this state root or create either artifact.
+Ordinary direct work does not activate `alpha-goal`, resolve this state root, or create either artifact. An explicit non-applicable invocation returns to the caller without an entry route or lifecycle state.
 
 ## Count budget
 
-Non-script files in the public skill directories must remain strictly below 9,301 word+punctuation units. Script resources under `skills/*/scripts/` are reported separately and do not consume the instruction budget; `tools/evals/runtime-boundaries.json` is a static expected-behavior corpus, not runtime evidence.
+Non-script files in the public skill directories must remain strictly below 9,301 word+punctuation units. Script resources under `skills/*/scripts/` are reported separately and do not consume the instruction budget; runtime and trigger boundary corpora are static expected-behavior artifacts, not model-performance evidence.

@@ -5,8 +5,8 @@
   "replacements": [
     {
       "file": "tools/validation/alpha-goal.json",
-      "search": "        \"DIRECT\",\n        \"PERSIST\"",
-      "replace": "        \"DIRECT\",\n        \"DIRECT\""
+      "search": "        \"PERSIST\"\n      ]",
+      "replace": "        \"PERSIST\",\n        \"PERSIST\"\n      ]"
     }
   ]
 }

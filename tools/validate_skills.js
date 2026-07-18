@@ -10,6 +10,7 @@ const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
 const CONTRACT_PATH = "tools/validation/alpha-goal.json";
 const REQUIRED_FIXTURES = new Set([
   "hidden-build-budget.json",
+  "invalid-trigger-eval.json",
   "missing-skill.json",
   "runtime-eval-id-gap.json",
   "runtime-eval-order.json",
@@ -39,6 +40,7 @@ function validateRoot(root) {
   validateArtifacts(contract, errors);
   validateDistribution(root, contract, errors);
   validateRuntimeEvals(root, contract, errors);
+  validateTriggerEvals(root, contract, errors);
   validateToolsSurface(root, errors, warnings);
   validateHookTemplate(root, errors);
   validateTomlTemplate(root, errors);
@@ -294,7 +296,7 @@ function validateToolsSurface(root, errors, warnings) {
     }
     if (!isFile(file)) continue;
     const allowedFixture = /^tools\/fixtures\/validate-skills\/[a-z0-9-]+\.json$/.test(rel);
-    const allowedEval = rel === "tools/evals/runtime-boundaries.json";
+    const allowedEval = rel === "tools/evals/runtime-boundaries.json" || rel === "tools/evals/trigger-boundaries.json";
     if (rel !== "tools/validate_skills.js" && rel !== CONTRACT_PATH && !allowedFixture && !allowedEval) {
       errors.push(`unexpected tools surface: ${rel}`);
     }
@@ -345,6 +347,69 @@ function validateRuntimeEvals(root, contract, errors) {
   const expectedIds = Array.from({ length: 36 }, (_, index) => `RB${String(index + 1).padStart(2, "0")}`);
   if (ids.length === 36 && ids.some((id, index) => id !== expectedIds[index])) {
     errors.push(`${rel}: case ids must be exactly RB01 through RB36 in order`);
+  }
+}
+
+function validateTriggerEvals(root, contract, errors) {
+  const rel = "tools/evals/trigger-boundaries.json";
+  let data;
+  try {
+    data = JSON.parse(fs.readFileSync(path.join(root, rel), "utf8"));
+  } catch (error) {
+    errors.push(`${rel}: invalid JSON or missing file: ${errorMessage(error)}`);
+    return;
+  }
+
+  if (!isObject(data) || data.schemaVersion !== 1) errors.push(`${rel}: schemaVersion must be 1`);
+  if (!nonEmptyString(data.claimBoundary)) errors.push(`${rel}: claimBoundary must be a non-empty string`);
+  if (!Array.isArray(data.cases) || data.cases.length !== 12) {
+    errors.push(`${rel}: cases must contain exactly 12 entries`);
+    return;
+  }
+
+  const ids = [];
+  const kinds = new Set(["negative-direct", "explicit-non-persist", "positive-persist"]);
+  const invocations = new Set(["implicit", "explicit"]);
+  const entryRoutes = new Set([...(contract.routes?.entry?.values || []), "N/A"]);
+  const owners = new Set(["caller", ...(contract.publicSkills || []).map(skill => skill.name)]);
+  for (const item of data.cases) {
+    if (!isObject(item) || !/^TB[0-9]{2}$/.test(item.id || "")) {
+      errors.push(`${rel}: every case requires an id shaped TB00`);
+      continue;
+    }
+    ids.push(item.id);
+    if (!kinds.has(item.kind)) errors.push(`${rel}: ${item.id} invalid kind`);
+    if (!invocations.has(item.invocation)) errors.push(`${rel}: ${item.id} invalid invocation`);
+    if (!nonEmptyString(item.prompt)) errors.push(`${rel}: ${item.id} missing prompt`);
+    if (!isObject(item.expected)) {
+      errors.push(`${rel}: ${item.id} missing expected object`);
+      continue;
+    }
+    if (typeof item.expected.activate !== "boolean") errors.push(`${rel}: ${item.id} activate must be boolean`);
+    if (!entryRoutes.has(item.expected.entryRoute)) errors.push(`${rel}: ${item.id} invalid entryRoute`);
+    if (!owners.has(item.expected.nextOwner)) errors.push(`${rel}: ${item.id} invalid nextOwner`);
+    if (!nonEmptyString(item.expected.invariant)) errors.push(`${rel}: ${item.id} missing invariant`);
+
+    if (item.kind === "negative-direct" &&
+        (item.invocation !== "implicit" || item.expected.activate !== false || item.expected.entryRoute !== "N/A" || item.expected.nextOwner !== "caller")) {
+      errors.push(`${rel}: ${item.id} negative-direct must be implicit, inactive, N/A, and caller-owned`);
+    }
+    if (item.kind === "explicit-non-persist" &&
+        (item.invocation !== "explicit" || item.expected.activate !== true || item.expected.entryRoute !== "N/A" || item.expected.nextOwner !== "caller")) {
+      errors.push(`${rel}: ${item.id} explicit-non-persist must be explicit, active, N/A, and caller-owned`);
+    }
+    if (item.kind === "positive-persist" &&
+        (item.expected.activate !== true || item.expected.entryRoute !== "PERSIST" || item.expected.nextOwner !== "alpha-goal")) {
+      errors.push(`${rel}: ${item.id} positive-persist must be active, PERSIST, and alpha-goal-owned`);
+    }
+  }
+  requireUniqueStrings(ids, `${rel}: case ids`, errors);
+  const expectedIds = Array.from({ length: 12 }, (_, index) => `TB${String(index + 1).padStart(2, "0")}`);
+  if (ids.length === 12 && ids.some((id, index) => id !== expectedIds[index])) {
+    errors.push(`${rel}: case ids must be exactly TB01 through TB12 in order`);
+  }
+  for (const kind of kinds) {
+    if (!data.cases.some(item => item.kind === kind)) errors.push(`${rel}: missing ${kind} coverage`);
   }
 }
 

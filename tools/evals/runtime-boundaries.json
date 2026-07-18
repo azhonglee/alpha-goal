@@ -5,12 +5,12 @@
     {
       "id": "RB01",
       "scenario": "Inspect local files and report findings without recovery or external disclosure.",
-      "expected": { "entryRoute": "DIRECT", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "No lifecycle artifact is created; ordinary read-only work continues." }
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "alpha-goal is not invoked; no lifecycle artifact is created and ordinary read-only work continues." }
     },
     {
       "id": "RB02",
       "scenario": "Make one clear reversible local change with direct final-state validation.",
-      "expected": { "entryRoute": "DIRECT", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "A complete Goal Frame remains in context without lifecycle artifacts; the routing role ends before the current agent implements and validates." }
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "alpha-goal is not invoked; the caller implements and validates the clear reversible local change without lifecycle artifacts." }
     },
     {
       "id": "RB03",
@@ -20,7 +20,7 @@
     {
       "id": "RB04",
       "scenario": "Pause for approval before an otherwise direct local action.",
-      "expected": { "entryRoute": "DIRECT", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Approval alone does not create persistent state." }
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Approval alone does not invoke alpha-goal or create persistent state." }
     },
     {
       "id": "RB05",
@@ -130,7 +130,7 @@
     {
       "id": "RB26",
       "scenario": "Inspect an already-authorized remote resource with an existing authenticated session, no new disclosure, no session change, and no persistent audit requirement.",
-      "expected": { "entryRoute": "DIRECT", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Incidental authenticated access and ordinary provider logging alone do not force persistent routing." }
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Incidental authenticated access and ordinary provider logging alone do not invoke alpha-goal or create persistent state." }
     },
     {
       "id": "RB27",
@@ -165,12 +165,12 @@
     {
       "id": "RB33",
       "scenario": "A change request admits multiple reasonable intents or observable outcomes that would change scope, success signals, or acceptance evidence.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Treat intent/outcome as blocking instead of silently choosing one interpretation; use discovered facts and ask the relevant authority for the single highest-impact intent or observable-outcome decision, then choose DIRECT or PERSIST from the resolved goal rather than ambiguity alone." }
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Treat intent/outcome as blocking instead of silently choosing one interpretation; use discovered facts and ask the relevant authority for the single highest-impact intent or observable-outcome decision, then enter PERSIST only when the resolved goal still has a persistence trigger, otherwise return ownership to the caller without lifecycle state." }
     },
     {
       "id": "RB34",
-      "scenario": "A DIRECT task has a complete in-context Goal Frame and is ready for ordinary execution.",
-      "expected": { "entryRoute": "DIRECT", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Native Goal Sync is not invoked; direct work creates neither lifecycle artifacts nor native goal state." }
+      "scenario": "A direct task is ready for ordinary execution without any persistence trigger.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "alpha-goal and Native Goal Sync are not invoked; direct work creates neither lifecycle artifacts nor native goal state." }
     },
     {
       "id": "RB35",

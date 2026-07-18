@@ -51,7 +51,6 @@
     "entry": {
       "owner": "alpha-goal",
       "values": [
-        "DIRECT",
         "PERSIST"
       ]
     },
@@ -113,7 +112,8 @@
       "scripts/install.sh"
     ],
     "evals": [
-      "tools/evals/runtime-boundaries.json"
+      "tools/evals/runtime-boundaries.json",
+      "tools/evals/trigger-boundaries.json"
     ],
     "docs": [
       "AGENTS.md",
