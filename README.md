@@ -77,7 +77,7 @@ node tools/validate_skills.js .
 node tools/validate_skills.js --fixtures
 ```
 
-安装器始终复制 `alpha-goal`，并让用户选择是否成组安装 `executor` 与 `verifier`；选择 No 会保留已有副本。完整行为和 smoke 流程见 [INSTALL.md](INSTALL.md)。
+安装器始终复制 `alpha-goal`，并让用户选择是否成组安装 `executor` 与 `verifier`；Codex/all 还会独立询问是否安装全局 `scout`、`builder`、`reviewer` Custom Agents（默认 Yes），选择 No 会保留已有副本。完整行为和 smoke 流程见 [INSTALL.md](INSTALL.md)。
 
 ## 使用示例
 
