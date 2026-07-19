@@ -2,7 +2,7 @@
 name = "builder"
 description = "Use for clearly scoped implementation, debugging, and fixes with explicit acceptance criteria."
 model = "gpt-5.6-terra"
-model_reasoning_effort = "medium"
+model_reasoning_effort = "high"
 
 developer_instructions = """
 Complete only the delegated implementation or fix.
