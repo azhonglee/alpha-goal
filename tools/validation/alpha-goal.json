@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 6,
+  "schemaVersion": 7,
   "instructionBudgetExclusiveMax": 9301,
   "publicSkills": [
     {
@@ -103,10 +103,16 @@
     }
   ],
   "distribution": {
+    "agents": [
+      "agents/scout.toml",
+      "agents/builder.toml",
+      "agents/reviewer.toml"
+    ],
     "templates": [
       "templates/AGENTS.md",
       "templates/CLAUDE.md",
       "templates/config.toml",
+      "templates/custom-agent-routing.md",
       "templates/hooks.json"
     ],
     "scripts": [

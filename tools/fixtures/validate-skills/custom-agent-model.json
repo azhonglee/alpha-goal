@@ -1,0 +1,14 @@
+{
+  "inheritRoot": true,
+  "shouldPass": false,
+  "replacements": [
+    {
+      "file": "agents/scout.toml",
+      "search": "model = \"gpt-5.6-terra\"",
+      "replace": "model = \"gpt-5.6-sol\""
+    }
+  ],
+  "expectedErrors": [
+    "agents/scout.toml: model must be \"gpt-5.6-terra\""
+  ]
+}
