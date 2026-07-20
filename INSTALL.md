@@ -15,7 +15,7 @@ codex:  $HOME/.codex/skills
 claude: $HOME/.claude/skills
 ```
 
-For `codex` and `all`, a separate default-Yes prompt installs the repository's managed Custom Agents under `$HOME/.codex/agents` and their routing block in `$HOME/.codex/AGENTS.md`. These agent files are user configuration, not skills or plugin components.
+For `codex` and `all`, a separate default-Yes prompt copies the repository's managed Custom Agents under `$HOME/.codex/agents`. These agent files are user configuration, not skills or plugin components.
 
 ## Options
 
@@ -32,7 +32,7 @@ The script creates copied skill directories under target-specific independent ro
 - `claude`: sync Claude `CLAUDE.md` and Claude skill copies.
 - `all`: sync or uninstall both Codex and Claude in one run.
 
-The target menu uses Up/Down plus Enter only; `codex` is selected by default. Install asks whether to install `executor` and `verifier` together; the default is Yes. For `codex` and `all`, it then independently asks whether to install `scout`, `builder`, and `reviewer`; this also defaults to Yes. `alpha-goal` is always installed. Choosing No for optional roles preserves those skill copies and skips Codex recovery-hook installation or update. Choosing No for Custom Agents leaves all three same-name files and the managed routing block untouched. Claude-only runs never inspect or modify Codex agents. The installer ignores `CODEX_HOME` and otherwise uses fixed defaults: Codex home `$HOME/.codex`, template sync enabled, and verbose output disabled. For uninstall, the flow asks for the target, Codex home when relevant, Custom Agent cleanup when relevant, template cleanup, hook cleanup when relevant, and verbose output; uninstall continues to remove all managed public skills.
+The target menu uses Up/Down plus Enter only; `codex` is selected by default. Install asks whether to install `executor` and `verifier` together; the default is Yes. For `codex` and `all`, it then independently asks whether to install `scout`, `builder`, and `reviewer`; this also defaults to Yes. `alpha-goal` is always installed. Choosing No for optional roles preserves those skill copies and skips Codex recovery-hook installation or update. Choosing No for Custom Agents leaves all three same-name files untouched. When selected, Custom Agent installation replaces same-name regular files directly and replaces same-name symlinks without following them; non-regular target paths are refused. Claude-only runs never inspect or modify Codex agents. The installer ignores `CODEX_HOME` and otherwise uses fixed defaults: Codex home `$HOME/.codex`, template sync enabled, and verbose output disabled. For uninstall, the flow asks for the target, Codex home when relevant, Custom Agent cleanup when relevant, template cleanup, hook cleanup when relevant, and verbose output; uninstall continues to remove all managed public skills.
 
 Non-interactive runs are refused. Any CLI argument other than `--uninstall`, including `--help`, `--target`, `--codex-home`, `--force`, sync toggles, or `--verbose`, is rejected.
 
@@ -42,7 +42,7 @@ When installing skill copies, an existing target skill symlink is migrated only 
 
 Use `--uninstall` to enter the interactive uninstall flow. The selected target controls which managed configuration and skill copies are removed.
 
-Custom Agent installation performs a complete preflight before any agent or other install target is written. Existing same-name files are replaced only when their first line is the managed marker `# alpha-goal-managed-custom-agent:v1`; symlinks, non-regular paths, and unmarked files fail the install without changing any old target. Managed files are staged and replaced atomically per file.
+Custom Agent installation performs a complete preflight before any agent or other install target is written. Same-name regular files are replaced directly, regardless of prior contents. Same-name symlinks are replaced as links without following their targets. Non-regular target paths are refused. Source files are staged and each target is replaced atomically.
 
 Uninstall is conservative outside the managed copied-skill path. It removes only managed Markdown blocks, managed Custom Agent files, managed hooks, `config.toml` that byte-for-byte matches `templates/config.toml`, skill copies with the install marker, and skill symlinks that resolve to this repository. Mixed user Markdown keeps user content, mixed or modified `config.toml` is preserved, unmanaged agents and hooks are preserved, configuration symlinks are not followed or deleted, and unmanaged skill directories or external symlinks are preserved. The interactive cleanup prompts independently control Custom Agent, Markdown/config, and hook cleanup.
 
@@ -58,7 +58,7 @@ Codex may require reviewing and trusting the changed hook with `/hooks` before i
 
 Before upgrading, finish any active checkpoint handoff. A remaining legacy `checkpoint.md.lock` is an unresolved conflict; do not guess whether its write completed.
 
-The smoke test checks default and skipped Custom Agent installation for Codex/all, Claude isolation, exact agent fields, managed routing, agent upgrade/idempotence, all conflict classes, conservative agent uninstall, default full skill installation, alpha-only installation, source-identical skill copies, missing-key TOML merge while preserving explicit values, adapter discoverability, managed hook replacement, failure preservation, concise output, mixed-config uninstall behavior, rejected arguments, refused unmanaged targets, and ignored `CODEX_HOME`. It uses temporary homes and does not touch real user configuration.
+The smoke test checks default and skipped Custom Agent installation for Codex/all, Claude isolation, exact agent fields, direct same-name replacement, agent upgrade/idempotence, refusal of non-regular targets, conservative agent uninstall, default full skill installation, alpha-only installation, source-identical skill copies, missing-key TOML merge while preserving explicit values, adapter discoverability, managed hook replacement, failure preservation, concise output, mixed-config uninstall behavior, rejected arguments, and ignored `CODEX_HOME`. It uses temporary homes and does not touch real user configuration.
 
 ```bash
 set -euo pipefail
@@ -232,8 +232,8 @@ const path = require("node:path");
 const toml = require(process.argv[3]);
 const root = process.argv[2];
 const expected = {
-  scout: ["gpt-5.6-terra", "low", "read-only"],
-  builder: ["gpt-5.6-terra", "medium", undefined],
+  scout: ["gpt-5.6-terra", "medium", "read-only"],
+  builder: ["gpt-5.6-terra", "high", undefined],
   reviewer: ["gpt-5.6-sol", "high", "read-only"],
 };
 for (const [name, [model, effort, sandbox]] of Object.entries(expected)) {
@@ -243,11 +243,7 @@ for (const [name, [model, effort, sandbox]] of Object.entries(expected)) {
   if (!data.description || !data.developer_instructions) process.exit(1);
 }
 JS
-  grep -q '<!-- alpha-goal-managed-custom-agent-routing:v1 -->' "$codex_home/AGENTS.md"
-  test "$(grep -c '<!-- generate-with-template:custom-agent-routing -->' "$codex_home/AGENTS.md")" -eq 1
-  for agent in scout builder reviewer; do
-    grep -q "\`$agent\`" "$codex_home/AGENTS.md"
-  done
+  ! grep -q 'alpha-goal-managed-custom-agent-routing' "$codex_home/AGENTS.md"
 }
 
 tmp_codex="$(mktemp -d)"
@@ -299,13 +295,11 @@ printf '\n# preserve-on-No\n' >> "$tmp_codex/.codex/agents/scout.toml"
 scout_before_skip="$(shasum -a 256 "$tmp_codex/.codex/agents/scout.toml" | awk '{print $1}')"
 builder_before_skip="$(shasum -a 256 "$tmp_codex/.codex/agents/builder.toml" | awk '{print $1}')"
 reviewer_before_skip="$(shasum -a 256 "$tmp_codex/.codex/agents/reviewer.toml" | awk '{print $1}')"
-routing_before_skip="$(shasum -a 256 "$tmp_codex/.codex/AGENTS.md" | awk '{print $1}')"
 custom_agents_skip_output="$(CUSTOM_AGENTS_INPUT=n run_installer "$tmp_codex")"
 assert_simple_success_output "$custom_agents_skip_output" "Alpha Goal install completed."
 test "$scout_before_skip" = "$(shasum -a 256 "$tmp_codex/.codex/agents/scout.toml" | awk '{print $1}')"
 test "$builder_before_skip" = "$(shasum -a 256 "$tmp_codex/.codex/agents/builder.toml" | awk '{print $1}')"
 test "$reviewer_before_skip" = "$(shasum -a 256 "$tmp_codex/.codex/agents/reviewer.toml" | awk '{print $1}')"
-test "$routing_before_skip" = "$(shasum -a 256 "$tmp_codex/.codex/AGENTS.md" | awk '{print $1}')"
 
 custom_agents_upgrade_output="$(run_installer "$tmp_codex")"
 assert_simple_success_output "$custom_agents_upgrade_output" "Alpha Goal install completed."
@@ -332,7 +326,6 @@ test -f "$tmp_alpha_only/.codex/AGENTS.md"
 test -f "$tmp_alpha_only/.codex/config.toml"
 test ! -e "$tmp_alpha_only/.codex/hooks.json"
 test ! -e "$tmp_alpha_only/.codex/agents"
-! grep -q 'alpha-goal-managed-custom-agent-routing' "$tmp_alpha_only/.codex/AGENTS.md"
 
 tmp_claude="$(mktemp -d)"
 mkdir -p "$tmp_claude/.codex/agents"
@@ -391,7 +384,6 @@ test -f "$tmp_alpha_only_all/.codex/config.toml"
 test ! -e "$tmp_alpha_only_all/.codex/hooks.json"
 test -f "$tmp_alpha_only_all/.claude/CLAUDE.md"
 test ! -e "$tmp_alpha_only_all/.codex/agents"
-! grep -q 'alpha-goal-managed-custom-agent-routing' "$tmp_alpha_only_all/.codex/AGENTS.md"
 
 tmp_upgrade="$(mktemp -d)"
 mkdir -p "$tmp_upgrade/.codex"
@@ -474,15 +466,12 @@ test ! -e "$tmp_all/.codex/agents"
 tmp_custom_uninstall_no="$(mktemp -d)"
 run_installer "$tmp_custom_uninstall_no" >/dev/null
 scout_before_uninstall_skip="$(shasum -a 256 "$tmp_custom_uninstall_no/.codex/agents/scout.toml" | awk '{print $1}')"
-routing_before_uninstall_skip="$(shasum -a 256 "$tmp_custom_uninstall_no/.codex/AGENTS.md" | awk '{print $1}')"
 custom_uninstall_no_output="$(CUSTOM_AGENTS_INPUT=n run_installer "$tmp_custom_uninstall_no" --uninstall)"
 assert_simple_success_output "$custom_uninstall_no_output" "Alpha Goal uninstall completed."
 test "$scout_before_uninstall_skip" = "$(shasum -a 256 "$tmp_custom_uninstall_no/.codex/agents/scout.toml" | awk '{print $1}')"
 for agent in scout builder reviewer; do
   test -f "$tmp_custom_uninstall_no/.codex/agents/$agent.toml"
 done
-grep -q 'alpha-goal-managed-custom-agent-routing:v1' "$tmp_custom_uninstall_no/.codex/AGENTS.md"
-test "$routing_before_uninstall_skip" != "$(shasum -a 256 "$tmp_custom_uninstall_no/.codex/AGENTS.md" | awk '{print $1}')"
 test ! -e "$tmp_custom_uninstall_no/.codex/skills/alpha-goal"
 
 tmp_markdown_mix="$(mktemp -d)"
@@ -495,14 +484,11 @@ EOF
 run_installer "$tmp_markdown_mix" >/dev/null
 grep -q 'Keep this text.' "$tmp_markdown_mix/.codex/AGENTS.md"
 test "$(grep -c '<!-- generate-with-template:agents-md -->' "$tmp_markdown_mix/.codex/AGENTS.md")" -eq 1
-test "$(grep -c '<!-- generate-with-template:custom-agent-routing -->' "$tmp_markdown_mix/.codex/AGENTS.md")" -eq 1
 run_installer "$tmp_markdown_mix" >/dev/null
 test "$(grep -c '<!-- generate-with-template:agents-md -->' "$tmp_markdown_mix/.codex/AGENTS.md")" -eq 1
-test "$(grep -c '<!-- generate-with-template:custom-agent-routing -->' "$tmp_markdown_mix/.codex/AGENTS.md")" -eq 1
 run_installer "$tmp_markdown_mix" --uninstall >/dev/null
 grep -q 'Keep this text.' "$tmp_markdown_mix/.codex/AGENTS.md"
 ! grep -q 'generate-with-template:agents-md' "$tmp_markdown_mix/.codex/AGENTS.md"
-! grep -q 'generate-with-template:custom-agent-routing' "$tmp_markdown_mix/.codex/AGENTS.md"
 test ! -e "$tmp_markdown_mix/.codex/agents"
 
 tmp_noninteractive_install="$(mktemp -d)"
@@ -539,32 +525,19 @@ grep -q "requires distinct Codex and Claude skill roots" <<<"$link_conflict_outp
 tmp_agent_unmanaged="$(mktemp -d)"
 mkdir -p "$tmp_agent_unmanaged/.codex/agents"
 printf 'user-owned\n' > "$tmp_agent_unmanaged/.codex/agents/builder.toml"
-agent_unmanaged_before="$(shasum -a 256 "$tmp_agent_unmanaged/.codex/agents/builder.toml" | awk '{print $1}')"
-if agent_unmanaged_output="$(run_installer "$tmp_agent_unmanaged" 2>&1)"; then
-  echo "install should refuse an unmanaged same-name custom agent" >&2
-  exit 1
-fi
-grep -q "Refusing to replace unmanaged or non-regular custom agent" <<<"$agent_unmanaged_output"
-test "$agent_unmanaged_before" = "$(shasum -a 256 "$tmp_agent_unmanaged/.codex/agents/builder.toml" | awk '{print $1}')"
-test ! -e "$tmp_agent_unmanaged/.codex/agents/scout.toml"
-test ! -e "$tmp_agent_unmanaged/.codex/agents/reviewer.toml"
-test ! -e "$tmp_agent_unmanaged/.codex/AGENTS.md"
-test ! -e "$tmp_agent_unmanaged/.codex/config.toml"
-test ! -e "$tmp_agent_unmanaged/.codex/skills"
+agent_unmanaged_output="$(run_installer "$tmp_agent_unmanaged")"
+assert_simple_success_output "$agent_unmanaged_output" "Alpha Goal install completed."
+assert_custom_agents_match "$tmp_agent_unmanaged/.codex"
+! grep -q 'user-owned' "$tmp_agent_unmanaged/.codex/agents/builder.toml"
 
 tmp_agent_symlink="$(mktemp -d)"
 mkdir -p "$tmp_agent_symlink/.codex/agents"
 printf 'external\n' > "$tmp_agent_symlink/external-scout.toml"
 ln -s "$tmp_agent_symlink/external-scout.toml" "$tmp_agent_symlink/.codex/agents/scout.toml"
-if agent_symlink_output="$(run_installer "$tmp_agent_symlink" 2>&1)"; then
-  echo "install should refuse a same-name custom agent symlink" >&2
-  exit 1
-fi
-grep -q "Refusing to replace custom agent symlink" <<<"$agent_symlink_output"
-test -L "$tmp_agent_symlink/.codex/agents/scout.toml"
+agent_symlink_output="$(run_installer "$tmp_agent_symlink")"
+assert_simple_success_output "$agent_symlink_output" "Alpha Goal install completed."
+assert_custom_agents_match "$tmp_agent_symlink/.codex"
 grep -q external "$tmp_agent_symlink/external-scout.toml"
-test ! -e "$tmp_agent_symlink/.codex/agents/builder.toml"
-test ! -e "$tmp_agent_symlink/.codex/AGENTS.md"
 
 tmp_agent_nonregular="$(mktemp -d)"
 mkdir -p "$tmp_agent_nonregular/.codex/agents/reviewer.toml"
@@ -573,7 +546,7 @@ if agent_nonregular_output="$(run_installer "$tmp_agent_nonregular" 2>&1)"; then
   echo "install should refuse a non-regular same-name custom agent" >&2
   exit 1
 fi
-grep -q "Refusing to replace unmanaged or non-regular custom agent" <<<"$agent_nonregular_output"
+grep -q "Refusing to replace non-regular custom agent path" <<<"$agent_nonregular_output"
 grep -q keep "$tmp_agent_nonregular/.codex/agents/reviewer.toml/sentinel"
 test ! -e "$tmp_agent_nonregular/.codex/agents/scout.toml"
 test ! -e "$tmp_agent_nonregular/.codex/AGENTS.md"

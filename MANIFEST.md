@@ -20,7 +20,7 @@ Claude tool-name adaptation lives in `skills/alpha-goal/references/claude-adapte
 
 | Path | Persistent managed-state mutation? | Purpose |
 | --- | ---: | --- |
-| `scripts/install.sh` | Yes | Always copies `alpha-goal`, optionally copies the executor/verifier pair, independently installs managed Codex Custom Agents, synchronizes applicable templates/hooks, migrates managed links, and conservatively uninstalls managed artifacts. |
+| `scripts/install.sh` | Yes | Always copies `alpha-goal`, optionally copies the executor/verifier pair, independently copies managed Codex Custom Agents over same-name files, synchronizes applicable templates/hooks, migrates managed links, and conservatively uninstalls managed artifacts. |
 | `tools/validate_skills.js` | No | Validates contract/schema structure, public skill/frontmatter/reference layout, Custom Agent fields, distribution files, hooks/TOML, fixtures, tools surface, and the count budget. |
 | `tools/evals/runtime-boundaries.json` | No | Declares 36 expected boundary cases for independent static or runtime review; schema validity alone is not behavioral evidence. |
 
@@ -30,7 +30,6 @@ Claude tool-name adaptation lives in `skills/alpha-goal/references/claude-adapte
 
 - `agents/scout.toml`, `agents/builder.toml`, and `agents/reviewer.toml` are standalone global Codex Custom Agent sources; they are not skills or plugin components.
 - `templates/AGENTS.md` and `templates/CLAUDE.md` carry the materiality-based autonomy boundary.
-- `templates/custom-agent-routing.md` is a separately managed global `AGENTS.md` block installed only with the Custom Agent set.
 - `templates/config.toml` declares structured-input and multi-agent defaults. The installer fills missing keys but preserves existing values, including explicit disables; skill behavior still detects whether each capability is exposed.
 - `templates/hooks.json` defines one matcher-free `PostCompact` hook with marker `codex-alpha-goal-compact-recovery:v4`.
 - Recovery uses only an explicit artifact path already present in task context and follows top-level `active_owner`; a legacy `alpha-goal` owner is terminated to `caller` instead of resumed. `PASS_TO_FINAL`, `BLOCKED`, and `GOAL_CHANGED` terminate that checkpoint; later work starts a new Alpha Goal task directory. A lone accepted contract must have a valid authority digest and an unchanged goal before checkpoint initialization. Recovery never guesses the active task from directory recency.

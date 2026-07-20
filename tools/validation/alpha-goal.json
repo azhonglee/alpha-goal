@@ -112,7 +112,6 @@
       "templates/AGENTS.md",
       "templates/CLAUDE.md",
       "templates/config.toml",
-      "templates/custom-agent-routing.md",
       "templates/hooks.json"
     ],
     "scripts": [

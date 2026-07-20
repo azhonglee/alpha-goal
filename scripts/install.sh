@@ -13,8 +13,8 @@ Install runs ask for the target app configuration and whether to install the
 optional executor/verifier role pair. alpha-goal is always installed. Uninstall
 runs ask for cleanup choices. Non-interactive runs are refused.
 
-The codex target can also install the repository's managed Custom Agents and
-routing block under $HOME/.codex. It syncs Codex AGENTS.md, config.toml,
+The codex target can also install the repository's managed Custom Agents under
+$HOME/.codex/agents. It syncs Codex AGENTS.md, config.toml,
 selected skills, and hooks.json when the optional roles are selected. The
 claude target syncs Claude CLAUDE.md and selected skills. The interactive all
 menu option syncs both targets.
@@ -397,7 +397,6 @@ agents_template="$repo_root/templates/AGENTS.md"
 claude_template="$repo_root/templates/CLAUDE.md"
 config_template="$repo_root/templates/config.toml"
 hooks_template="$repo_root/templates/hooks.json"
-custom_agent_routing_template="$repo_root/templates/custom-agent-routing.md"
 agents_target="$codex_home/AGENTS.md"
 claude_target="$claude_home/CLAUDE.md"
 config_target="$codex_home/config.toml"
@@ -405,7 +404,6 @@ hooks_target="$codex_home/hooks.json"
 custom_agents_root="$codex_home/agents"
 legacy_codex_skill_root="$codex_home/skills"
 agents_template_marker="<!-- generate-with-template:agents-md -->"
-custom_agent_routing_marker="<!-- generate-with-template:custom-agent-routing -->"
 claude_template_marker="<!-- generate-with-template:claude-md -->"
 skill_copy_marker=".alpha-goal-skill-copy"
 custom_agent_copy_marker="# alpha-goal-managed-custom-agent:v1"
@@ -418,7 +416,6 @@ agents_action="skipped"
 claude_action="skipped"
 config_action="skipped"
 hooks_action="skipped"
-custom_agent_routing_action="skipped"
 custom_agent_installed_count=0
 custom_agent_replaced_count=0
 custom_agent_removed_count=0
@@ -844,11 +841,8 @@ preflight_custom_agent_targets() {
     if ! is_managed_custom_agent_file "$source"; then
       die "Custom agent source is missing managed marker: $source"
     fi
-    if [[ -L "$target" ]]; then
-      die "Refusing to replace custom agent symlink: $target"
-    fi
-    if [[ -e "$target" ]] && ! is_managed_custom_agent_file "$target"; then
-      die "Refusing to replace unmanaged or non-regular custom agent: $target"
+    if [[ -e "$target" && ! -f "$target" && ! -L "$target" ]]; then
+      die "Refusing to replace non-regular custom agent path: $target"
     fi
   done
 }
@@ -876,17 +870,20 @@ sync_custom_agent_files() {
     target="$custom_agents_root/$name.toml"
     staged="$stage_root/$name.toml"
     existed=false
-    if [[ -e "$target" ]]; then
+    if [[ -L "$target" ]]; then
       existed=true
-      if ! is_managed_custom_agent_file "$target"; then
+      if ! rm "$target"; then
         rm -rf "$stage_root"
-        die "Custom agent target changed after preflight: $target"
+        die "Failed to replace custom agent symlink: $target"
       fi
-    elif [[ -L "$target" ]]; then
-      rm -rf "$stage_root"
-      die "Custom agent target changed after preflight: $target"
+    elif [[ -e "$target" ]]; then
+      existed=true
+      if [[ ! -f "$target" ]]; then
+        rm -rf "$stage_root"
+        die "Custom agent target changed to a non-regular path: $target"
+      fi
     fi
-    if ! mv "$staged" "$target"; then
+    if ! mv -f "$staged" "$target"; then
       rm -rf "$stage_root"
       die "Failed to install custom agent: $target"
     fi
@@ -1062,11 +1059,6 @@ inject_agents_template() {
   agents_action="$markdown_template_action"
 }
 
-inject_custom_agent_routing_template() {
-  sync_markdown_template "$custom_agent_routing_template" "$agents_target" "$custom_agent_routing_marker" "custom-agent routing"
-  custom_agent_routing_action="$markdown_template_action"
-}
-
 inject_claude_template() {
   sync_markdown_template "$claude_template" "$claude_target" "$claude_template_marker" "CLAUDE.md"
   claude_action="$markdown_template_action"
@@ -1178,11 +1170,6 @@ PY
 remove_agents_template() {
   remove_markdown_template "$agents_template" "$agents_target" "$agents_template_marker" "AGENTS.md"
   agents_action="$markdown_template_action"
-}
-
-remove_custom_agent_routing_template() {
-  remove_markdown_template "$custom_agent_routing_template" "$agents_target" "$custom_agent_routing_marker" "custom-agent routing"
-  custom_agent_routing_action="$markdown_template_action"
 }
 
 remove_claude_template() {
@@ -1767,9 +1754,6 @@ if [[ "$sync_claude_config" == true && "$sync_user_templates" == true ]]; then
 fi
 
 if [[ "$sync_codex_config" == true && "$sync_custom_agents" == true ]]; then
-  if [[ ! -f "$custom_agent_routing_template" || -L "$custom_agent_routing_template" ]]; then
-    die "Missing regular custom-agent routing template: $custom_agent_routing_template"
-  fi
   if [[ "$uninstall" != true ]]; then
     preflight_custom_agent_targets
   fi
@@ -1799,7 +1783,6 @@ if [[ "$uninstall" == true ]]; then
   fi
 
   if [[ "$sync_codex_config" == true && "$sync_custom_agents" == true ]]; then
-    remove_custom_agent_routing_template
     remove_custom_agent_files
   elif [[ "$sync_codex_config" == true ]]; then
     log "Skipped custom-agent cleanup by interactive choice"
@@ -1864,7 +1847,6 @@ fi
 
 if [[ "$sync_codex_config" == true && "$sync_custom_agents" == true ]]; then
   sync_custom_agent_files
-  inject_custom_agent_routing_template
 elif [[ "$sync_codex_config" == true ]]; then
   log "Skipped custom-agent sync by interactive choice"
 fi

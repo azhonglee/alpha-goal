@@ -10,8 +10,8 @@ const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
 const CONTRACT_PATH = "tools/validation/alpha-goal.json";
 const CUSTOM_AGENT_MARKER = "# alpha-goal-managed-custom-agent:v1";
 const CUSTOM_AGENT_SPECS = {
-  scout: { model: "gpt-5.6-terra", effort: "low", sandbox: "read-only" },
-  builder: { model: "gpt-5.6-terra", effort: "medium", sandbox: undefined },
+  scout: { model: "gpt-5.6-terra", effort: "medium", sandbox: "read-only" },
+  builder: { model: "gpt-5.6-terra", effort: "high", sandbox: undefined },
   reviewer: { model: "gpt-5.6-sol", effort: "high", sandbox: "read-only" }
 };
 const REQUIRED_FIXTURES = new Set([
@@ -50,7 +50,6 @@ function validateRoot(root) {
   validateCustomAgents(root, contract, errors);
   validateHookTemplate(root, errors);
   validateTomlTemplate(root, errors);
-  validateCustomAgentRoutingTemplate(root, errors);
 
   return { errors, warnings, counts };
 }
@@ -338,26 +337,6 @@ function validateCustomAgents(root, contract, errors) {
     } catch (error) {
       errors.push(`${rel}: invalid TOML: ${errorMessage(error)}`);
     }
-  }
-}
-
-function validateCustomAgentRoutingTemplate(root, errors) {
-  const rel = "templates/custom-agent-routing.md";
-  if (isSymbolicLink(path.join(root, rel))) {
-    errors.push(`${rel}: must not be a symlink`);
-    return;
-  }
-  if (!isFile(path.join(root, rel))) return;
-  const text = fs.readFileSync(path.join(root, rel), "utf8");
-  if (!text.startsWith("<!-- alpha-goal-managed-custom-agent-routing:v1 -->\n")) {
-    errors.push(`${rel}: missing managed block start marker`);
-  }
-  const endMarker = "<!-- generate-with-template:custom-agent-routing -->";
-  if (countMatches(text, new RegExp(endMarker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) !== 1) {
-    errors.push(`${rel}: expected exactly one managed block end marker`);
-  }
-  for (const name of Object.keys(CUSTOM_AGENT_SPECS)) {
-    if (!text.includes(`\`${name}\``)) errors.push(`${rel}: routing template must reference ${name}`);
   }
 }
 
