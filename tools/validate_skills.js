@@ -9,7 +9,7 @@ const FIELD_RE = /^([A-Za-z0-9_-]+):\s*(.*?)\s*$/;
 const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
 const CONTRACT_PATH = "tools/validation/alpha-goal.json";
 const CUSTOM_AGENT_MARKER = "# alpha-goal-managed-custom-agent:v1";
-const CUSTOM_AGENT_EFFORTS = new Set(["low", "medium", "high"]);
+const CUSTOM_AGENT_EFFORTS = new Set(["low", "medium", "high", "xhigh"]);
 const CUSTOM_AGENT_SANDBOXES = new Set(["read-only", "workspace-write", "danger-full-access"]);
 const REQUIRED_FIXTURES = new Set([
   "custom-agent-contract-drift.json",
