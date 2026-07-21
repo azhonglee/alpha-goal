@@ -86,9 +86,14 @@ else:
 
 actions = []
 if not is_uninstall:
-    actions.append((b"Step 1 of 3", target_action))
+    if wizard_mode == "up-wrap":
+        actions.append((b"Step 1 of 3", [b"\x1b[A", b"\r"]))
+    else:
+        actions.append((b"Step 1 of 3", target_action))
     feature_action = []
-    if optional_roles_input.lower() in {"n", "no"}:
+    if wizard_mode == "up-wrap":
+        feature_action.extend([b"\x1b[A", b" "])
+    elif optional_roles_input.lower() in {"n", "no"}:
         feature_action.append(b" ")
     if target in {"codex", "all"} and custom_agents_input.lower() in {"n", "no"}:
         feature_action.extend([b"\x1b[B", b" "])
@@ -430,6 +435,20 @@ test ! -e "$tmp_wizard_back/.codex/skills/executor"
 test ! -e "$tmp_wizard_back/.codex/skills/verifier"
 test ! -e "$tmp_wizard_back/.codex/hooks.json"
 assert_custom_agents_match "$tmp_wizard_back/.codex"
+
+tmp_wizard_up_wrap="$(mktemp -d)"
+wizard_up_wrap_output="$(WIZARD_MODE=up-wrap run_installer "$tmp_wizard_up_wrap")"
+assert_simple_success_output "$wizard_up_wrap_output" "Alpha Goal install completed."
+grep -q "$tmp_wizard_up_wrap/.codex/skills" <<<"$wizard_up_wrap_output"
+grep -q "$tmp_wizard_up_wrap/.claude/skills" <<<"$wizard_up_wrap_output"
+for root in "$tmp_wizard_up_wrap/.codex/skills" "$tmp_wizard_up_wrap/.claude/skills"; do
+  assert_skill_tree_matches "$repo_root/skills/alpha-goal" "$root/alpha-goal"
+  assert_skill_tree_matches "$repo_root/skills/executor" "$root/executor"
+  assert_skill_tree_matches "$repo_root/skills/verifier" "$root/verifier"
+done
+test -f "$tmp_wizard_up_wrap/.codex/hooks.json"
+test ! -e "$tmp_wizard_up_wrap/.codex/agents"
+! grep -q 'alpha-goal-managed-custom-agent-routing' "$tmp_wizard_up_wrap/.codex/AGENTS.md"
 
 tmp_wizard_cancel="$(mktemp -d)"
 mkdir -p "$tmp_wizard_cancel/.codex" "$tmp_wizard_cancel/.claude"
