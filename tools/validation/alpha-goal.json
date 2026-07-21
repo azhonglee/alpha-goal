@@ -1,6 +1,23 @@
 {
-  "schemaVersion": 7,
+  "schemaVersion": 8,
   "instructionBudgetExclusiveMax": 9301,
+  "customAgents": {
+    "scout": {
+      "model": "gpt-5.6-terra",
+      "effort": "medium",
+      "sandbox": "read-only"
+    },
+    "builder": {
+      "model": "gpt-5.6-terra",
+      "effort": "high",
+      "sandbox": null
+    },
+    "reviewer": {
+      "model": "gpt-5.6-sol",
+      "effort": "high",
+      "sandbox": "read-only"
+    }
+  },
   "publicSkills": [
     {
       "name": "alpha-goal",
@@ -116,7 +133,18 @@
       "templates/hooks.json"
     ],
     "scripts": [
-      "scripts/install.sh"
+      "scripts/install.sh",
+      "scripts/test-install.sh",
+      "scripts/install/common.sh",
+      "scripts/install/interactive.sh",
+      "scripts/install/skills.sh",
+      "scripts/install/agents.sh",
+      "scripts/install/markdown.sh",
+      "scripts/install/config.sh",
+      "scripts/install/hooks.sh",
+      "scripts/install/transaction.sh",
+      "scripts/install/context.sh",
+      "scripts/install/preflight.sh"
     ],
     "evals": [
       "tools/evals/runtime-boundaries.json"

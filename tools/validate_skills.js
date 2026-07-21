@@ -9,15 +9,15 @@ const FIELD_RE = /^([A-Za-z0-9_-]+):\s*(.*?)\s*$/;
 const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
 const CONTRACT_PATH = "tools/validation/alpha-goal.json";
 const CUSTOM_AGENT_MARKER = "# alpha-goal-managed-custom-agent:v1";
-const CUSTOM_AGENT_SPECS = {
-  scout: { model: "gpt-5.6-terra", effort: "low", sandbox: "read-only" },
-  builder: { model: "gpt-5.6-terra", effort: "medium", sandbox: undefined },
-  reviewer: { model: "gpt-5.6-sol", effort: "high", sandbox: "read-only" }
-};
+const CUSTOM_AGENT_EFFORTS = new Set(["low", "medium", "high"]);
+const CUSTOM_AGENT_SANDBOXES = new Set(["read-only", "workspace-write", "danger-full-access"]);
 const REQUIRED_FIXTURES = new Set([
+  "custom-agent-contract-drift.json",
+  "custom-agent-contract-shape.json",
   "custom-agent-model.json",
   "hidden-build-budget.json",
   "missing-skill.json",
+  "removed-config-fields.json",
   "runtime-eval-id-gap.json",
   "runtime-eval-order.json",
   "skill-directory-symlink.json",
@@ -50,7 +50,7 @@ function validateRoot(root) {
   validateCustomAgents(root, contract, errors);
   validateHookTemplate(root, errors);
   validateTomlTemplate(root, errors);
-  validateCustomAgentRoutingTemplate(root, errors);
+  validateCustomAgentRoutingTemplate(root, contract, errors);
 
   return { errors, warnings, counts };
 }
@@ -70,7 +70,7 @@ function readContract(root, errors) {
 }
 
 function validateContract(contract, errors) {
-  if (contract.schemaVersion !== 7) errors.push(`${CONTRACT_PATH}: schemaVersion must be 7`);
+  if (contract.schemaVersion !== 8) errors.push(`${CONTRACT_PATH}: schemaVersion must be 8`);
   if (!Number.isInteger(contract.instructionBudgetExclusiveMax) || contract.instructionBudgetExclusiveMax < 1) {
     errors.push(`${CONTRACT_PATH}: instructionBudgetExclusiveMax must be a positive integer`);
   }
@@ -79,6 +79,8 @@ function validateContract(contract, errors) {
   requireArray(contract, "artifacts", errors);
   requireObject(contract, "routes", errors);
   requireObject(contract, "distribution", errors);
+  requireObject(contract, "customAgents", errors);
+  validateCustomAgentContract(contract.customAgents, errors);
 
   const skillNames = [];
   const semanticOwners = new Map();
@@ -132,6 +134,32 @@ function validateContract(contract, errors) {
   for (const key of ["agents", "templates", "scripts", "evals", "docs"]) {
     requireArray(contract.distribution || {}, key, errors, `${CONTRACT_PATH}: distribution`);
     requireUniqueStrings(contract.distribution?.[key], `${CONTRACT_PATH}: distribution.${key}`, errors);
+  }
+}
+
+function validateCustomAgentContract(customAgents, errors) {
+  if (!isObject(customAgents)) return;
+  const roles = Object.keys(customAgents);
+  if (roles.length === 0) errors.push(`${CONTRACT_PATH}: customAgents must declare at least one role`);
+
+  for (const [role, spec] of Object.entries(customAgents)) {
+    const prefix = `${CONTRACT_PATH}: customAgents.${role}`;
+    if (!validCustomAgentRole(role)) errors.push(`${prefix}: role name must be lowercase kebab-case`);
+    if (!isObject(spec)) {
+      errors.push(`${prefix} must be an object`);
+      continue;
+    }
+
+    const allowed = new Set(["model", "effort", "sandbox"]);
+    for (const key of Object.keys(spec)) if (!allowed.has(key)) errors.push(`${prefix}: unexpected key ${key}`);
+    for (const key of allowed) if (!Object.hasOwn(spec, key)) errors.push(`${prefix}: missing ${key}`);
+    if (!nonEmptyString(spec.model)) errors.push(`${prefix}: model must be a non-empty string`);
+    if (!CUSTOM_AGENT_EFFORTS.has(spec.effort)) {
+      errors.push(`${prefix}: effort must be one of ${[...CUSTOM_AGENT_EFFORTS].join(", ")}`);
+    }
+    if (spec.sandbox !== null && !CUSTOM_AGENT_SANDBOXES.has(spec.sandbox)) {
+      errors.push(`${prefix}: sandbox must be null or one of ${[...CUSTOM_AGENT_SANDBOXES].join(", ")}`);
+    }
   }
 }
 
@@ -291,8 +319,11 @@ function validateDistribution(root, contract, errors) {
 
 function validateCustomAgents(root, contract, errors) {
   const declared = contract.distribution?.agents;
-  const expected = Object.keys(CUSTOM_AGENT_SPECS).map(name => `agents/${name}.toml`);
-  if (!Array.isArray(declared)) return;
+  const specs = contract.customAgents;
+  if (!Array.isArray(declared) || !isObject(specs)) return;
+  const roles = Object.keys(specs);
+  if (roles.some(role => !validCustomAgentRole(role))) return;
+  const expected = roles.map(name => `agents/${name}.toml`);
   if (declared.length !== expected.length || expected.some(path => !declared.includes(path))) {
     errors.push(`${CONTRACT_PATH}: distribution.agents must declare exactly ${expected.join(", ")}`);
   }
@@ -311,7 +342,8 @@ function validateCustomAgents(root, contract, errors) {
   for (const file of expectedFiles) if (!actual.includes(file)) errors.push(`missing custom agent: agents/${file}`);
   for (const file of actual) if (!expectedFiles.includes(file)) errors.push(`unexpected custom agent entry: agents/${file}`);
 
-  for (const [name, spec] of Object.entries(CUSTOM_AGENT_SPECS)) {
+  for (const [name, spec] of Object.entries(specs)) {
+    if (!isObject(spec)) continue;
     const rel = `agents/${name}.toml`;
     const file = path.join(root, rel);
     if (isSymbolicLink(file)) {
@@ -329,7 +361,7 @@ function validateCustomAgents(root, contract, errors) {
       if (!nonEmptyString(data.description)) errors.push(`${rel}: description must be a non-empty string`);
       if (data.model !== spec.model) errors.push(`${rel}: model must be ${JSON.stringify(spec.model)}`);
       if (data.model_reasoning_effort !== spec.effort) errors.push(`${rel}: model_reasoning_effort must be ${JSON.stringify(spec.effort)}`);
-      if (spec.sandbox === undefined) {
+      if (spec.sandbox === null) {
         if (Object.hasOwn(data, "sandbox_mode")) errors.push(`${rel}: sandbox_mode must inherit from the parent task`);
       } else if (data.sandbox_mode !== spec.sandbox) {
         errors.push(`${rel}: sandbox_mode must be ${JSON.stringify(spec.sandbox)}`);
@@ -341,7 +373,7 @@ function validateCustomAgents(root, contract, errors) {
   }
 }
 
-function validateCustomAgentRoutingTemplate(root, errors) {
+function validateCustomAgentRoutingTemplate(root, contract, errors) {
   const rel = "templates/custom-agent-routing.md";
   if (isSymbolicLink(path.join(root, rel))) {
     errors.push(`${rel}: must not be a symlink`);
@@ -356,7 +388,7 @@ function validateCustomAgentRoutingTemplate(root, errors) {
   if (countMatches(text, new RegExp(endMarker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) !== 1) {
     errors.push(`${rel}: expected exactly one managed block end marker`);
   }
-  for (const name of Object.keys(CUSTOM_AGENT_SPECS)) {
+  for (const name of Object.keys(contract.customAgents || {})) {
     if (!text.includes(`\`${name}\``)) errors.push(`${rel}: routing template must reference ${name}`);
   }
 }
@@ -483,13 +515,15 @@ function validateTomlTemplate(root, errors) {
   const rel = "templates/config.toml";
   try {
     const data = parseToml(fs.readFileSync(path.join(root, rel), "utf8"));
-    for (const key of ["multi_agent", "default_mode_request_user_input", "child_agents_md"]) {
-      if (data?.features?.[key] !== true) errors.push(`${rel}: features.${key} must be true`);
+    if (data?.features?.multi_agent !== true) errors.push(`${rel}: features.multi_agent must be true`);
+    if (data?.features?.default_mode_request_user_input !== true) {
+      errors.push(`${rel}: features.default_mode_request_user_input must be true`);
+    }
+    for (const key of ["child_agents_md", "multi_agent_v2"]) {
+      if (Object.hasOwn(data?.features || {}, key)) errors.push(`${rel}: features.${key} must be absent`);
     }
     if (data?.agents?.max_threads !== 6) errors.push(`${rel}: agents.max_threads must be 6`);
     if (data?.agents?.max_depth !== 1) errors.push(`${rel}: agents.max_depth must be 1`);
-    if (data?.features?.multi_agent_v2?.usage_hint_enabled !== true) errors.push(`${rel}: features.multi_agent_v2.usage_hint_enabled must be true`);
-    if (!nonEmptyString(data?.features?.multi_agent_v2?.usage_hint_text)) errors.push(`${rel}: features.multi_agent_v2.usage_hint_text must be a non-empty string`);
   } catch (error) {
     errors.push(`${rel}: invalid TOML or missing file: ${errorMessage(error)}`);
   }
@@ -639,6 +673,10 @@ function requireUniqueStrings(values, label, errors) {
 
 function safeRelativePath(value) {
   return nonEmptyString(value) && !path.isAbsolute(value) && !value.split(/[\\/]/).includes("..");
+}
+
+function validCustomAgentRole(value) {
+  return typeof value === "string" && /^[a-z][a-z0-9-]*$/.test(value);
 }
 
 function nonEmptyString(value) {

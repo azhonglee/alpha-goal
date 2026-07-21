@@ -1,0 +1,20 @@
+{
+  "inheritRoot": true,
+  "shouldPass": false,
+  "replacements": [
+    {
+      "file": "templates/config.toml",
+      "search": "multi_agent = true",
+      "replace": "multi_agent = true\nchild_agents_md = true"
+    },
+    {
+      "file": "templates/config.toml",
+      "search": "max_depth = 1",
+      "replace": "max_depth = 1\n\n[features.multi_agent_v2]\nusage_hint_enabled = true\nusage_hint_text = \"legacy hint\""
+    }
+  ],
+  "expectedErrors": [
+    "features.child_agents_md must be absent",
+    "features.multi_agent_v2 must be absent"
+  ]
+}

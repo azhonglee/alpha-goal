@@ -1,0 +1,16 @@
+{
+  "inheritRoot": true,
+  "shouldPass": false,
+  "replacements": [
+    {
+      "file": "tools/validation/alpha-goal.json",
+      "search": "\"effort\": \"high\",\n      \"sandbox\": null",
+      "replace": "\"effort\": \"maximum\",\n      \"sandboxMode\": null"
+    }
+  ],
+  "expectedErrors": [
+    "customAgents.builder: unexpected key sandboxMode",
+    "customAgents.builder: missing sandbox",
+    "customAgents.builder: effort must be one of low, medium, high"
+  ]
+}

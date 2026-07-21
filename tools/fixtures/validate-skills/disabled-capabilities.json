@@ -1,6 +1,9 @@
 {
   "shouldPass": false,
-  "expectedErrors": ["features.multi_agent must be true", "features.multi_agent_v2.usage_hint_enabled must be true"],
+  "expectedErrors": [
+    "features.multi_agent must be true",
+    "features.default_mode_request_user_input must be true"
+  ],
   "inheritRoot": true,
   "replacements": [
     {
@@ -10,8 +13,8 @@
     },
     {
       "file": "templates/config.toml",
-      "search": "usage_hint_enabled = true",
-      "replace": "usage_hint_enabled = false"
+      "search": "default_mode_request_user_input = true",
+      "replace": "default_mode_request_user_input = false"
     }
   ]
 }
