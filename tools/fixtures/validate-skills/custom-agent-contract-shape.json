@@ -4,7 +4,7 @@
   "replacements": [
     {
       "file": "tools/validation/alpha-goal.json",
-      "search": "\"effort\": \"medium\",\n      \"sandbox\": null",
+      "search": "\"effort\": \"high\",\n      \"sandbox\": null",
       "replace": "\"effort\": \"maximum\",\n      \"sandboxMode\": null"
     }
   ],
