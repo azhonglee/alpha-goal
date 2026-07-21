@@ -73,6 +73,7 @@ hook_input = os.environ.get("HOOK_INPUT", "")
 verbose_input = os.environ.get("VERBOSE_INPUT", "")
 optional_roles_input = os.environ.get("OPTIONAL_ROLES_INPUT", "")
 custom_agents_input = os.environ.get("CUSTOM_AGENTS_INPUT", "")
+wizard_mode = os.environ.get("WIZARD_MODE", "install")
 
 if target == "codex":
     target_action = [b"\r"]
@@ -83,12 +84,35 @@ elif target == "all":
 else:
     raise SystemExit(f"unknown TARGET_CHOICE: {target}")
 
-actions = [(b"Choose which app configuration", target_action)]
+actions = []
 if not is_uninstall:
-    actions.append((b"Install executor and verifier", [optional_roles_input.encode(), b"\r"]))
-    if target in {"codex", "all"}:
-        actions.append((b"Install Codex custom agents", [custom_agents_input.encode(), b"\r"]))
+    actions.append((b"Step 1 of 3", target_action))
+    feature_action = []
+    if optional_roles_input.lower() in {"n", "no"}:
+        feature_action.append(b" ")
+    if target in {"codex", "all"} and custom_agents_input.lower() in {"n", "no"}:
+        feature_action.extend([b"\x1b[B", b" "])
+    if wizard_mode == "cancel-features-esc":
+        feature_action.append(b"\x1b")
+    else:
+        feature_action.append(b"\r")
+    actions.append((b"Step 2 of 3", feature_action))
+    if wizard_mode == "cancel-target":
+        actions = [(b"Step 1 of 3", [b"q"])]
+    elif wizard_mode == "cancel-features-esc":
+        pass
+    elif wizard_mode == "cancel":
+        actions.append((b"Step 3 of 3", [b"q"]))
+    elif wizard_mode == "back-disable-roles":
+        actions.extend([
+            (b"Step 3 of 3", [b"b"]),
+            (b"Choose features", [b" ", b"\r"]),
+            (b"Review installation", [b"\r"]),
+        ])
+    else:
+        actions.append((b"Step 3 of 3", [b"\r"]))
 else:
+    actions.append((b"Choose which app configuration", target_action))
     if target in {"codex", "all"}:
         actions.extend([
             (b"Codex home", [codex_home_input.encode(), b"\r"]),
@@ -110,7 +134,8 @@ proc = subprocess.Popen(
 os.close(slave)
 
 output = bytearray()
-sent = set()
+action_index = 0
+action_cursor = 0
 deadline = time.time() + 120
 while True:
     if time.time() > deadline:
@@ -126,12 +151,15 @@ while True:
         if not chunk:
             break
         output.extend(chunk)
-        for pattern, chunks in actions:
-            if pattern in output and pattern not in sent:
+        if action_index < len(actions):
+            pattern, chunks = actions[action_index]
+            match_at = output.find(pattern, action_cursor)
+            if match_at != -1:
                 for item in chunks:
                     os.write(master, item)
                     time.sleep(0.05)
-                sent.add(pattern)
+                action_index += 1
+                action_cursor = len(output)
     if proc.poll() is not None:
         while True:
             ready, _, _ = select.select([master], [], [], 0)
@@ -248,6 +276,15 @@ JS
 tmp_codex="$(mktemp -d)"
 codex_output="$(run_installer "$tmp_codex")"
 assert_simple_success_output "$codex_output" "Alpha Goal install completed."
+grep -q "Step 1 of 3" <<<"$codex_output"
+grep -q "Step 2 of 3" <<<"$codex_output"
+grep -q "Step 3 of 3" <<<"$codex_output"
+grep -q "Review installation" <<<"$codex_output"
+grep -q "$tmp_codex/.codex/skills" <<<"$codex_output"
+grep -q "executor + verifier" <<<"$codex_output"
+grep -q "Codex Custom Agents" <<<"$codex_output"
+! grep -q "Install executor and verifier \[Y/n\]" <<<"$codex_output"
+! grep -q "Install Codex custom agents \[Y/n\]" <<<"$codex_output"
 ! grep -q "Codex home \\[" <<<"$codex_output"
 ! grep -q "Replace external" <<<"$codex_output"
 ! grep -q "Sync user templates" <<<"$codex_output"
@@ -385,6 +422,49 @@ test -f "$tmp_alpha_only/.codex/config.toml"
 test ! -e "$tmp_alpha_only/.codex/hooks.json"
 test ! -e "$tmp_alpha_only/.codex/agents"
 ! grep -q 'alpha-goal-managed-custom-agent-routing' "$tmp_alpha_only/.codex/AGENTS.md"
+
+tmp_wizard_back="$(mktemp -d)"
+wizard_back_output="$(WIZARD_MODE=back-disable-roles run_installer "$tmp_wizard_back")"
+assert_simple_success_output "$wizard_back_output" "Alpha Goal install completed."
+test ! -e "$tmp_wizard_back/.codex/skills/executor"
+test ! -e "$tmp_wizard_back/.codex/skills/verifier"
+test ! -e "$tmp_wizard_back/.codex/hooks.json"
+assert_custom_agents_match "$tmp_wizard_back/.codex"
+
+tmp_wizard_cancel="$(mktemp -d)"
+mkdir -p "$tmp_wizard_cancel/.codex" "$tmp_wizard_cancel/.claude"
+printf 'codex sentinel\n' > "$tmp_wizard_cancel/.codex/sentinel"
+printf 'claude sentinel\n' > "$tmp_wizard_cancel/.claude/sentinel"
+cancel_before="$(find "$tmp_wizard_cancel" -type f -exec sha256sum {} \; | sort)"
+if wizard_cancel_output="$(WIZARD_MODE=cancel run_installer "$tmp_wizard_cancel" 2>&1)"; then
+  echo "cancelled install should exit non-zero" >&2
+  exit 1
+fi
+grep -q "Installation cancelled." <<<"$wizard_cancel_output"
+test "$cancel_before" = "$(find "$tmp_wizard_cancel" -type f -exec sha256sum {} \; | sort)"
+test "$(find "$tmp_wizard_cancel" -type f | wc -l | tr -d ' ')" -eq 2
+
+for cancel_mode in cancel-target cancel-features-esc; do
+  tmp_cancel_page="$(mktemp -d)"
+  mkdir -p "$tmp_cancel_page/.codex"
+  printf 'sentinel\n' > "$tmp_cancel_page/.codex/sentinel"
+  if cancel_page_output="$(WIZARD_MODE="$cancel_mode" run_installer "$tmp_cancel_page" 2>&1)"; then
+    echo "$cancel_mode should exit non-zero" >&2
+    exit 1
+  fi
+  grep -q "Installation cancelled." <<<"$cancel_page_output"
+  test "$(find "$tmp_cancel_page" -type f | wc -l | tr -d ' ')" -eq 1
+  grep -q sentinel "$tmp_cancel_page/.codex/sentinel"
+done
+
+tmp_no_color="$(mktemp -d)"
+no_color_output="$(NO_COLOR=1 TERM=dumb run_installer "$tmp_no_color")"
+assert_simple_success_output "$no_color_output" "Alpha Goal install completed."
+if [[ "$no_color_output" == *$'\033'* ]]; then
+  echo "TERM=dumb output should not contain ANSI escape sequences" >&2
+  exit 1
+fi
+grep -q "Step 3 of 3" <<<"$no_color_output"
 
 tmp_hooks_backup="$(mktemp -d)"
 mkdir -p "$tmp_hooks_backup/.codex"

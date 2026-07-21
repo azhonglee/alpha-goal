@@ -2,7 +2,16 @@
 
 initialize_install_target_context() {
   require_interactive_terminal
-  install_target="$(resolve_install_target)"
+  if [[ "$uninstall" == true ]]; then
+    install_target="$(resolve_install_target)"
+  else
+    local wizard_result wizard_status
+    wizard_result="$(run_install_wizard)" || {
+      wizard_status=$?
+      exit "$wizard_status"
+    }
+    IFS=$'\t' read -r install_target install_optional_roles sync_custom_agents <<<"$wizard_result"
+  fi
   sync_codex_config=false
   sync_claude_config=false
   case "$install_target" in
@@ -17,10 +26,6 @@ initialize_install_target_context() {
       sync_claude_config=true
       ;;
   esac
-
-  if [[ "$uninstall" != true ]]; then
-    install_optional_roles="$(prompt_yes_no "Install executor and verifier" true)"
-  fi
 
   codex_home=""
   target_root=""
@@ -48,8 +53,6 @@ initialize_install_target_context() {
   if [[ "$sync_codex_config" == true ]]; then
     if [[ "$uninstall" == true ]]; then
       sync_custom_agents="$(prompt_yes_no "Clean up Codex custom agents" true)"
-    else
-      sync_custom_agents="$(prompt_yes_no "Install Codex custom agents" true)"
     fi
   fi
   if [[ "$uninstall" == true ]]; then
