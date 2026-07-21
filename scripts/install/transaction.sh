@@ -118,6 +118,57 @@ transaction_register_transient() {
     install_transaction_transients+=("$target")
   fi
 }
+transaction_path_matches_snapshot() {
+  local index="$1"
+  python3 - \
+    "${install_transaction_paths[$index]}" \
+    "${install_transaction_backups[$index]}" \
+    "${install_transaction_original_states[$index]}" <<'PY'
+import os
+import stat
+import sys
+
+target, backup, original_state = sys.argv[1:]
+
+if original_state == "missing":
+    raise SystemExit(0 if not os.path.lexists(target) else 1)
+
+
+def same(left, right):
+    try:
+        left_stat = os.lstat(left)
+        right_stat = os.lstat(right)
+    except FileNotFoundError:
+        return False
+
+    if stat.S_IFMT(left_stat.st_mode) != stat.S_IFMT(right_stat.st_mode):
+        return False
+    if stat.S_IMODE(left_stat.st_mode) != stat.S_IMODE(right_stat.st_mode):
+        return False
+    if stat.S_ISLNK(left_stat.st_mode):
+        return os.readlink(left) == os.readlink(right)
+    if stat.S_ISREG(left_stat.st_mode):
+        if left_stat.st_size != right_stat.st_size:
+            return False
+        with open(left, "rb") as left_file, open(right, "rb") as right_file:
+            while True:
+                left_chunk = left_file.read(1024 * 1024)
+                right_chunk = right_file.read(1024 * 1024)
+                if left_chunk != right_chunk:
+                    return False
+                if not left_chunk:
+                    return True
+    if stat.S_ISDIR(left_stat.st_mode):
+        left_names = sorted(os.listdir(left))
+        if left_names != sorted(os.listdir(right)):
+            return False
+        return all(same(os.path.join(left, name), os.path.join(right, name)) for name in left_names)
+    return left_stat.st_rdev == right_stat.st_rdev
+
+
+raise SystemExit(0 if same(target, backup) else 1)
+PY
+}
 
 atomic_replace_path() {
   local source="$1"
@@ -212,6 +263,9 @@ rollback_install_transaction() {
   for ((index=${#install_transaction_paths[@]} - 1; index >= 0; index--)); do
     target="${install_transaction_paths[$index]}"
     backup="${install_transaction_backups[$index]}"
+    if [[ "$uninstall" == true ]] && transaction_path_matches_snapshot "$index"; then
+      continue
+    fi
     if [[ -z "$target" || "$target" == "/" ]]; then
       echo "Refusing unsafe rollback target: $target" >&2
       failed=true
@@ -273,11 +327,27 @@ install_transaction_exit() {
   fi
   exit "$status"
 }
-begin_install_transaction() {
-  local name
+register_skill_transaction_paths() {
+  local root="$1"
   local skill_file
   local skill_dir
   local skill_name
+
+  if [[ "$uninstall" == true ]]; then
+    for skill_name in "${required_skills[@]}"; do
+      transaction_register_path "$root/$skill_name"
+    done
+    return
+  fi
+
+  for skill_file in "${skill_files[@]}"; do
+    skill_dir="$(cd "$(dirname "$skill_file")" && pwd -P)"
+    skill_name="$(basename "$skill_dir")"
+    transaction_register_path "$root/$skill_name"
+  done
+}
+begin_install_transaction() {
+  local name
   install_transaction_dir="$(mktemp -d "${TMPDIR:-/tmp}/alpha-goal-install-transaction.XXXXXX")"
   mkdir -p "$install_transaction_dir/snapshots"
   install_transaction_state="preparing"
@@ -297,21 +367,13 @@ begin_install_transaction() {
     if [[ "$sync_user_hooks" == true ]]; then
       transaction_register_path "$hooks_target" true
     fi
-    for skill_file in "${skill_files[@]}"; do
-      skill_dir="$(cd "$(dirname "$skill_file")" && pwd -P)"
-      skill_name="$(basename "$skill_dir")"
-      transaction_register_path "$target_root/$skill_name"
-    done
+    register_skill_transaction_paths "$target_root"
   fi
   if [[ "$sync_claude_config" == true ]]; then
     if [[ "$sync_user_templates" == true ]]; then
       transaction_register_path "$claude_target" true
     fi
-    for skill_file in "${skill_files[@]}"; do
-      skill_dir="$(cd "$(dirname "$skill_file")" && pwd -P)"
-      skill_name="$(basename "$skill_dir")"
-      transaction_register_path "$claude_skill_root/$skill_name"
-    done
+    register_skill_transaction_paths "$claude_skill_root"
   fi
   install_transaction_state="active"
 }

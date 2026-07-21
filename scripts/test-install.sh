@@ -16,6 +16,7 @@ cleanup() {
     -name '.alpha-goal-skill-stage.*' -o \
     -name '.alpha-goal-custom-agent-stage.*' -o \
     -name '.alpha-goal-write.*' -o \
+    -name '.alpha-goal-hooks-uninstall.*' -o \
     -name '.alpha-goal-hooks-backup.*' \
   \) -print 2>/dev/null || true)"
   if [[ -n "$residue" ]]; then
@@ -865,6 +866,87 @@ test -f "$tmp_write_fault/fault-fired"
 grep -q "Failed to activate staged skill copy" <<<"$write_fault_output"
 grep -q "restored all managed targets changed by this run" <<<"$write_fault_output"
 test ! -e "$tmp_write_fault/.codex"
+
+tmp_uninstall_fault="$(mktemp -d)"
+TARGET_CHOICE=all run_installer "$tmp_uninstall_fault" >/dev/null
+chmod 0711 "$tmp_uninstall_fault/.codex/agents"
+mkdir -p "$tmp_uninstall_fault/external"
+rm "$tmp_uninstall_fault/.codex/config.toml"
+printf 'external config\n' > "$tmp_uninstall_fault/external/config.toml"
+ln "$tmp_uninstall_fault/external/config.toml" "$tmp_uninstall_fault/external/config-alias.toml"
+ln -s "$tmp_uninstall_fault/external/config.toml" "$tmp_uninstall_fault/.codex/config.toml"
+rm -rf "$tmp_uninstall_fault/.codex/skills/verifier"
+printf 'external skill\n' > "$tmp_uninstall_fault/external/skill"
+ln "$tmp_uninstall_fault/external/skill" "$tmp_uninstall_fault/.codex/skills/verifier"
+printf 'user sidecar\n' > "$tmp_uninstall_fault/.codex/hooks.json.tmp"
+node - "$tmp_uninstall_fault/.codex/hooks.json" <<'JS'
+const fs = require("node:fs");
+const hooksPath = process.argv[2];
+const hooks = JSON.parse(fs.readFileSync(hooksPath, "utf8"));
+hooks.userOwned = { preserve: true };
+fs.writeFileSync(hooksPath, `${JSON.stringify(hooks, null, 2)}\n`);
+JS
+mkdir -p "$tmp_uninstall_fault/before"
+cp -a "$tmp_uninstall_fault/.codex" "$tmp_uninstall_fault/before/codex"
+cp -a "$tmp_uninstall_fault/.claude" "$tmp_uninstall_fault/before/claude"
+mkdir -p "$tmp_uninstall_fault/fake-bin"
+real_rm="$(command -v rm)"
+cat > "$tmp_uninstall_fault/fake-bin/rm" <<'SH'
+#!/usr/bin/env bash
+for argument in "$@"; do
+  if [[ "$argument" == "$FAIL_TARGET" && ! -e "$FAIL_MARKER" ]]; then
+    : > "$FAIL_MARKER"
+    exit 72
+  fi
+done
+exec "$REAL_RM" "$@"
+SH
+chmod +x "$tmp_uninstall_fault/fake-bin/rm"
+if uninstall_fault_output="$(
+  PATH="$tmp_uninstall_fault/fake-bin:$PATH" \
+  REAL_RM="$real_rm" \
+  FAIL_MARKER="$tmp_uninstall_fault/fault-fired" \
+  FAIL_TARGET="$tmp_uninstall_fault/.claude/skills/executor" \
+  TARGET_CHOICE=all \
+  run_installer "$tmp_uninstall_fault" --uninstall 2>&1
+)"; then
+  echo "uninstall-fault injection should fail" >&2
+  exit 1
+fi
+test -f "$tmp_uninstall_fault/fault-fired"
+grep -q "restored all managed targets changed by this run" <<<"$uninstall_fault_output"
+diff -r --no-dereference "$tmp_uninstall_fault/before/codex" "$tmp_uninstall_fault/.codex"
+diff -r --no-dereference "$tmp_uninstall_fault/before/claude" "$tmp_uninstall_fault/.claude"
+test "$(stat -c '%a' "$tmp_uninstall_fault/.codex/agents")" = "711"
+test "$tmp_uninstall_fault/external/config.toml" -ef "$tmp_uninstall_fault/external/config-alias.toml"
+test "$tmp_uninstall_fault/external/skill" -ef "$tmp_uninstall_fault/.codex/skills/verifier"
+grep -q 'user sidecar' "$tmp_uninstall_fault/.codex/hooks.json.tmp"
+
+unmanaged_fault_agent="$(contract_agent_names | tail -1)"
+rm "$tmp_uninstall_fault/.codex/agents/$unmanaged_fault_agent.toml"
+printf 'external agent\n' > "$tmp_uninstall_fault/external/agent.toml"
+ln "$tmp_uninstall_fault/external/agent.toml" "$tmp_uninstall_fault/.codex/agents/$unmanaged_fault_agent.toml"
+mkdir -p "$tmp_uninstall_fault/before-unmanaged"
+cp -a "$tmp_uninstall_fault/.codex" "$tmp_uninstall_fault/before-unmanaged/codex"
+cp -a "$tmp_uninstall_fault/.claude" "$tmp_uninstall_fault/before-unmanaged/claude"
+rm "$tmp_uninstall_fault/fault-fired"
+if unmanaged_fault_output="$(
+  PATH="$tmp_uninstall_fault/fake-bin:$PATH" \
+  REAL_RM="$real_rm" \
+  FAIL_MARKER="$tmp_uninstall_fault/fault-fired" \
+  FAIL_TARGET="$tmp_uninstall_fault/.claude/skills/executor" \
+  TARGET_CHOICE=all \
+  run_installer "$tmp_uninstall_fault" --uninstall 2>&1
+)"; then
+  echo "unmanaged uninstall-fault injection should fail" >&2
+  exit 1
+fi
+test -f "$tmp_uninstall_fault/fault-fired"
+grep -q "restored all managed targets changed by this run" <<<"$unmanaged_fault_output"
+diff -r --no-dereference "$tmp_uninstall_fault/before-unmanaged/codex" "$tmp_uninstall_fault/.codex"
+diff -r --no-dereference "$tmp_uninstall_fault/before-unmanaged/claude" "$tmp_uninstall_fault/.claude"
+test "$tmp_uninstall_fault/external/agent.toml" -ef "$tmp_uninstall_fault/.codex/agents/$unmanaged_fault_agent.toml"
+test -z "$(find "$TMPDIR" -maxdepth 1 -type d -name 'alpha-goal-install-transaction.*' -print -quit)"
 
 unmanaged_uninstall_agent="$(contract_agent_names | tail -1)"
 rm "$tmp_codex/.codex/agents/$unmanaged_uninstall_agent.toml"

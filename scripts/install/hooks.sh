@@ -230,6 +230,9 @@ JS
 }
 
 remove_hooks_template() {
+  local stage_dir
+  local staged_hooks
+
   if [[ -L "$hooks_target" ]]; then
     hooks_action="preserved"
     log "Preserved symlinked hooks.json during uninstall: $hooks_target"
@@ -248,12 +251,16 @@ remove_hooks_template() {
     return
   fi
 
+  stage_dir="$(mktemp -d "$(dirname "$hooks_target")/.alpha-goal-hooks-uninstall.XXXXXX")"
+  staged_hooks="$stage_dir/hooks.json"
+  transaction_register_transient "$stage_dir"
+
   local result
-  result="$(node - "$hooks_target" <<'JS'
+  result="$(node - "$hooks_target" "$staged_hooks" <<'JS'
 const fs = require("node:fs");
 const path = require("node:path");
 
-const [hooksArg] = process.argv.slice(2);
+const [hooksArg, stagedHooksArg] = process.argv.slice(2);
 const MANAGED_MARKER_RE = /^: 'codex-alpha-goal-compact-recovery:v[0-9]+';/;
 const LEGACY_MANAGED_MARKER_RE = /(^|[\s;'\x22])codex-compact-skill-recovery(?::(?:v[0-9]+|experimental))?($|[\s;'\x22])/;
 
@@ -325,6 +332,7 @@ function hasNonManagedContent(data) {
 }
 
 const hooksPath = path.resolve(hooksArg);
+const stagedHooksPath = path.resolve(stagedHooksArg);
 const original = fs.readFileSync(hooksPath, "utf8");
 const data = loadJson(hooksPath);
 const removed = removeManagedHooks(data, hooksPath);
@@ -346,12 +354,12 @@ if (nextText === original) {
   process.exit(0);
 }
 
-const tmpPath = `${hooksPath}.tmp`;
-fs.writeFileSync(tmpPath, nextText);
-fs.renameSync(tmpPath, hooksPath);
+fs.writeFileSync(stagedHooksPath, nextText);
+fs.renameSync(stagedHooksPath, hooksPath);
 console.log("updated");
 JS
 )"
+  rm -rf -- "$stage_dir"
 
   case "$result" in
     current|removed|updated)

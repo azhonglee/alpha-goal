@@ -162,6 +162,9 @@ remove_custom_agent_files() {
       log "Preserved unmanaged custom agent during uninstall: $target"
     fi
   done
+}
+
+remove_empty_custom_agents_root() {
   if [[ -d "$custom_agents_root" && ! -L "$custom_agents_root" ]]; then
     rmdir "$custom_agents_root" 2>/dev/null || true
   fi

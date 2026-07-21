@@ -69,6 +69,8 @@ if [[ "$uninstall" == true ]]; then
     preflight_hooks_template
   fi
 
+  begin_install_transaction
+
   if [[ "$sync_codex_config" == true && "$sync_custom_agents" == true ]]; then
     remove_custom_agent_routing_template
     remove_custom_agent_files
@@ -112,6 +114,10 @@ if [[ "$uninstall" == true ]]; then
     done
   fi
 
+  commit_install_transaction
+  if [[ "$sync_codex_config" == true && "$sync_custom_agents" == true ]]; then
+    remove_empty_custom_agents_root
+  fi
   print_uninstall_summary
   exit 0
 fi
