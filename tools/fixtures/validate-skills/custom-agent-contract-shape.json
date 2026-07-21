@@ -11,6 +11,6 @@
   "expectedErrors": [
     "customAgents.builder: unexpected key sandboxMode",
     "customAgents.builder: missing sandbox",
-    "customAgents.builder: effort must be one of low, medium, high"
+    "customAgents.builder: effort must be one of low, medium, high, xhigh"
   ]
 }
