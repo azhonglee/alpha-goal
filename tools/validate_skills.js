@@ -516,7 +516,10 @@ function validateTomlTemplate(root, errors) {
   try {
     const data = parseToml(fs.readFileSync(path.join(root, rel), "utf8"));
     if (data?.features?.multi_agent !== true) errors.push(`${rel}: features.multi_agent must be true`);
-    for (const key of ["default_mode_request_user_input", "child_agents_md", "multi_agent_v2"]) {
+    if (data?.features?.default_mode_request_user_input !== true) {
+      errors.push(`${rel}: features.default_mode_request_user_input must be true`);
+    }
+    for (const key of ["child_agents_md", "multi_agent_v2"]) {
       if (Object.hasOwn(data?.features || {}, key)) errors.push(`${rel}: features.${key} must be absent`);
     }
     if (data?.agents?.max_threads !== 6) errors.push(`${rel}: agents.max_threads must be 6`);

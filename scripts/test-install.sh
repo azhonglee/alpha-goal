@@ -266,6 +266,16 @@ test -f "$tmp_codex/.codex/config.toml"
 test -f "$tmp_codex/.codex/hooks.json"
 assert_custom_agents_match "$tmp_codex/.codex"
 env HOME="$tmp_codex" CODEX_HOME="$tmp_codex/.codex" codex app-server --strict-config --listen stdio:// </dev/null >/dev/null 2>&1
+node - "$tmp_codex/.codex/config.toml" "$repo_root/vendor/smol-toml/dist/index.cjs" <<'JS'
+const fs = require("node:fs");
+const toml = require(process.argv[3]);
+const data = toml.parse(fs.readFileSync(process.argv[2], "utf8"));
+if (data.features?.multi_agent !== true) process.exit(1);
+if (data.features?.default_mode_request_user_input !== true) process.exit(1);
+if (Object.hasOwn(data.features || {}, "child_agents_md")) process.exit(1);
+if (Object.hasOwn(data.features || {}, "multi_agent_v2")) process.exit(1);
+if (data.agents?.max_threads !== 6 || data.agents?.max_depth !== 1) process.exit(1);
+JS
 test ! -e "$tmp_codex/.claude/CLAUDE.md"
 test ! -e "$tmp_codex/.claude/skills/alpha-goal"
 ! grep -q "references/claude-adapter.md" "$tmp_codex/.codex/skills/alpha-goal/SKILL.md"
@@ -519,7 +529,7 @@ const fs = require("node:fs");
 const toml = require(process.argv[3]);
 const data = toml.parse(fs.readFileSync(process.argv[2], "utf8"));
 if (Object.hasOwn(data.features || {}, "child_agents_md")) process.exit(1);
-if (Object.hasOwn(data.features || {}, "default_mode_request_user_input")) process.exit(1);
+if (data.features?.default_mode_request_user_input !== true) process.exit(1);
 if (Object.hasOwn(data.features || {}, "multi_agent_v2")) process.exit(1);
 JS
 
@@ -551,7 +561,7 @@ const toml = require(process.argv[3]);
 const data = toml.parse(fs.readFileSync(process.argv[2], "utf8"));
 if (data.features?.multi_agent !== false) process.exit(1);
 if (Object.hasOwn(data.features || {}, "child_agents_md")) process.exit(1);
-if (Object.hasOwn(data.features || {}, "default_mode_request_user_input")) process.exit(1);
+if (data.features?.default_mode_request_user_input !== true) process.exit(1);
 if (Object.hasOwn(data.features || {}, "multi_agent_v2")) process.exit(1);
 if (data.agents?.max_threads !== 4 || data.agents?.max_depth !== 1) process.exit(1);
 JS
@@ -589,7 +599,7 @@ const toml = require(process.argv[3]);
 const data = toml.parse(fs.readFileSync(process.argv[2], "utf8"));
 if (data.features?.multi_agent !== false) process.exit(1);
 if (Object.hasOwn(data.features || {}, "child_agents_md")) process.exit(1);
-if (Object.hasOwn(data.features || {}, "default_mode_request_user_input")) process.exit(1);
+if (data.features?.default_mode_request_user_input !== true) process.exit(1);
 if (Object.hasOwn(data.features || {}, "multi_agent_v2")) process.exit(1);
 if (data.agents?.max_threads !== 5 || data.agents?.max_depth !== 1) process.exit(1);
 JS

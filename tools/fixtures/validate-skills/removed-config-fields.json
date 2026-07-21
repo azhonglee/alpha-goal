@@ -5,7 +5,7 @@
     {
       "file": "templates/config.toml",
       "search": "multi_agent = true",
-      "replace": "multi_agent = true\ndefault_mode_request_user_input = true\nchild_agents_md = true"
+      "replace": "multi_agent = true\nchild_agents_md = true"
     },
     {
       "file": "templates/config.toml",
@@ -14,7 +14,6 @@
     }
   ],
   "expectedErrors": [
-    "features.default_mode_request_user_input must be absent",
     "features.child_agents_md must be absent",
     "features.multi_agent_v2 must be absent"
   ]

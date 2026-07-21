@@ -272,9 +272,6 @@ let retiredRemoved = 0;
 if (Object.hasOwn(originalData.features || {}, "child_agents_md")) {
   retiredRemoved += removeAssignment(lines, ["features", "child_agents_md"]);
 }
-if (originalData.features?.default_mode_request_user_input === true) {
-  retiredRemoved += removeAssignment(lines, ["features", "default_mode_request_user_input"]);
-}
 if (exactOldManagedMultiAgentV2(originalData.features?.multi_agent_v2)) {
   retiredRemoved += removeTableValue(lines, ["features", "multi_agent_v2"]);
 }
@@ -283,8 +280,6 @@ const migratedText = lines.join("");
 const targetData = parseToml(migratedText, targetArg);
 const remainingFeatures = targetData.features || {};
 if (Object.hasOwn(remainingFeatures, "child_agents_md") ||
-    (originalData.features?.default_mode_request_user_input === true &&
-      remainingFeatures.default_mode_request_user_input === true) ||
     (exactOldManagedMultiAgentV2(originalData.features?.multi_agent_v2) &&
       exactOldManagedMultiAgentV2(remainingFeatures.multi_agent_v2))) {
   console.error(
