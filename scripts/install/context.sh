@@ -109,7 +109,6 @@ initialize_install_target_context() {
   custom_agent_routing_marker="<!-- generate-with-template:custom-agent-routing -->"
   claude_template_marker="<!-- generate-with-template:claude-md -->"
   skill_copy_marker=".alpha-goal-skill-copy"
-  custom_agent_copy_marker="# alpha-goal-managed-custom-agent:v1"
   custom_agent_names=()
   copied_count=0
   replaced_count=0

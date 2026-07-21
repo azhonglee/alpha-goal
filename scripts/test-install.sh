@@ -15,6 +15,7 @@ cleanup() {
     -name 'alpha-goal-install-preflight.*' -o \
     -name '.alpha-goal-skill-stage.*' -o \
     -name '.alpha-goal-custom-agent-stage.*' -o \
+    -name '.alpha-goal-install-snapshot.*' -o \
     -name '.alpha-goal-write.*' -o \
     -name '.alpha-goal-hooks-uninstall.*' -o \
     -name '.alpha-goal-hooks-backup.*' \
@@ -238,6 +239,36 @@ contract_agent_names() {
   node -e 'const c=require(process.argv[1]); for (const name of Object.keys(c.customAgents || {}).sort()) console.log(name)' "$repo_root/tools/validation/alpha-goal.json"
 }
 
+file_mode() {
+  python3 - "$1" <<'PY'
+import os
+import stat
+import sys
+
+print(format(stat.S_IMODE(os.stat(sys.argv[1]).st_mode), "o"))
+PY
+}
+
+file_mtime_ns() {
+  python3 - "$1" <<'PY'
+import os
+import sys
+
+print(os.stat(sys.argv[1]).st_mtime_ns)
+PY
+}
+
+set_file_mtime_ns() {
+  python3 - "$1" "$2" <<'PY'
+import os
+import sys
+
+path, mtime_ns = sys.argv[1], int(sys.argv[2])
+stat_result = os.stat(path)
+os.utime(path, ns=(stat_result.st_atime_ns, mtime_ns))
+PY
+}
+
 
 assert_custom_agents_match() {
   local codex_home="$1"
@@ -256,7 +287,7 @@ for (const [name, profile] of Object.entries(profiles)) {
   const target = path.join(codexHome, "agents", `${name}.toml`);
   if (!fs.statSync(target).isFile() || fs.lstatSync(target).isSymbolicLink()) process.exit(1);
   if (fs.readFileSync(source, "utf8") !== fs.readFileSync(target, "utf8")) process.exit(1);
-  if (fs.readFileSync(target, "utf8").split(/\r?\n/, 1)[0] !== "# alpha-goal-managed-custom-agent:v1") process.exit(1);
+  if (fs.readFileSync(target, "utf8").split(/\r?\n/, 1)[0] !== `name = "${name}"`) process.exit(1);
   const data = toml.parse(fs.readFileSync(target, "utf8"));
   if (data.name !== name || data.model !== profile.model || data.model_reasoning_effort !== profile.effort) process.exit(1);
   if (profile.sandbox === null ? Object.hasOwn(data, "sandbox_mode") : data.sandbox_mode !== profile.sandbox) process.exit(1);
@@ -833,22 +864,18 @@ if link_conflict_output="$(TARGET_CHOICE=all run_installer "$tmp_link_conflict" 
 fi
 grep -q "requires distinct Codex and Claude skill roots" <<<"$link_conflict_output"
 
-tmp_agent_unmanaged="$(mktemp -d)"
-mkdir -p "$tmp_agent_unmanaged/.codex/agents"
-printf 'user-owned\n' > "$tmp_agent_unmanaged/.codex/agents/builder.toml"
-agent_unmanaged_before="$(shasum -a 256 "$tmp_agent_unmanaged/.codex/agents/builder.toml" | awk '{print $1}')"
-if agent_unmanaged_output="$(run_installer "$tmp_agent_unmanaged" 2>&1)"; then
-  echo "install should refuse an unmanaged same-name custom agent" >&2
-  exit 1
-fi
-grep -q "Refusing to replace unmanaged or non-regular custom agent" <<<"$agent_unmanaged_output"
-test "$agent_unmanaged_before" = "$(shasum -a 256 "$tmp_agent_unmanaged/.codex/agents/builder.toml" | awk '{print $1}')"
-test ! -e "$tmp_agent_unmanaged/.codex/agents/architect.toml"
-test ! -e "$tmp_agent_unmanaged/.codex/agents/scout.toml"
-test ! -e "$tmp_agent_unmanaged/.codex/agents/reviewer.toml"
-test ! -e "$tmp_agent_unmanaged/.codex/AGENTS.md"
-test ! -e "$tmp_agent_unmanaged/.codex/config.toml"
-test ! -e "$tmp_agent_unmanaged/.codex/skills"
+tmp_agent_existing="$(mktemp -d)"
+mkdir -p "$tmp_agent_existing/.codex/agents" "$tmp_agent_existing/external"
+printf 'user-owned\n' > "$tmp_agent_existing/.codex/agents/builder.toml"
+printf 'hard-linked user-owned\n' > "$tmp_agent_existing/external/scout.toml"
+ln "$tmp_agent_existing/external/scout.toml" "$tmp_agent_existing/.codex/agents/scout.toml"
+agent_existing_before="$(shasum -a 256 "$tmp_agent_existing/.codex/agents/builder.toml" | awk '{print $1}')"
+agent_existing_output="$(run_installer "$tmp_agent_existing")"
+assert_simple_success_output "$agent_existing_output" "Alpha Goal install completed."
+test "$agent_existing_before" != "$(shasum -a 256 "$tmp_agent_existing/.codex/agents/builder.toml" | awk '{print $1}')"
+test ! "$tmp_agent_existing/external/scout.toml" -ef "$tmp_agent_existing/.codex/agents/scout.toml"
+grep -q 'hard-linked user-owned' "$tmp_agent_existing/external/scout.toml"
+assert_custom_agents_match "$tmp_agent_existing/.codex"
 
 tmp_agent_symlink="$(mktemp -d)"
 mkdir -p "$tmp_agent_symlink/.codex/agents"
@@ -864,6 +891,10 @@ grep -q external "$tmp_agent_symlink/external-scout.toml"
 test ! -e "$tmp_agent_symlink/.codex/agents/architect.toml"
 test ! -e "$tmp_agent_symlink/.codex/agents/builder.toml"
 test ! -e "$tmp_agent_symlink/.codex/AGENTS.md"
+agent_symlink_uninstall_output="$(run_installer "$tmp_agent_symlink" --uninstall)"
+assert_simple_success_output "$agent_symlink_uninstall_output" "Alpha Goal uninstall completed."
+test -L "$tmp_agent_symlink/.codex/agents/scout.toml"
+grep -q external "$tmp_agent_symlink/external-scout.toml"
 
 tmp_agent_nonregular="$(mktemp -d)"
 mkdir -p "$tmp_agent_nonregular/.codex/agents/reviewer.toml"
@@ -872,11 +903,14 @@ if agent_nonregular_output="$(run_installer "$tmp_agent_nonregular" 2>&1)"; then
   echo "install should refuse a non-regular same-name custom agent" >&2
   exit 1
 fi
-grep -q "Refusing to replace unmanaged or non-regular custom agent" <<<"$agent_nonregular_output"
+grep -q "Refusing to replace non-regular custom agent" <<<"$agent_nonregular_output"
 grep -q keep "$tmp_agent_nonregular/.codex/agents/reviewer.toml/sentinel"
 test ! -e "$tmp_agent_nonregular/.codex/agents/architect.toml"
 test ! -e "$tmp_agent_nonregular/.codex/agents/scout.toml"
 test ! -e "$tmp_agent_nonregular/.codex/AGENTS.md"
+agent_nonregular_uninstall_output="$(run_installer "$tmp_agent_nonregular" --uninstall)"
+assert_simple_success_output "$agent_nonregular_uninstall_output" "Alpha Goal uninstall completed."
+grep -q keep "$tmp_agent_nonregular/.codex/agents/reviewer.toml/sentinel"
 
 tmp_legacy_unmanaged="$(mktemp -d)"
 mkdir -p "$tmp_legacy_unmanaged/.codex/skills/tools" "$tmp_legacy_unmanaged/.codex/skills/templates"
@@ -937,7 +971,19 @@ grep -q "Refusing to replace unmanaged or malformed skill directory" <<<"$malfor
 grep -q "keep-me" "$tmp_malformed/.codex/skills/alpha-goal/sentinel"
 
 tmp_write_fault="$(mktemp -d)"
-mkdir -p "$tmp_write_fault/fake-bin"
+mkdir -p "$tmp_write_fault/fake-bin" "$tmp_write_fault/.codex/agents" "$tmp_write_fault/external"
+write_fault_hardlink_agent="$(contract_agent_names | tail -1)"
+write_fault_regular_agent="$(contract_agent_names | head -1)"
+printf 'hard-linked user agent\n' > "$tmp_write_fault/external/agent.toml"
+chmod 0640 "$tmp_write_fault/external/agent.toml"
+set_file_mtime_ns "$tmp_write_fault/external/agent.toml" 946684800123456789
+ln "$tmp_write_fault/external/agent.toml" "$tmp_write_fault/external/agent-alias.toml"
+ln "$tmp_write_fault/external/agent.toml" "$tmp_write_fault/.codex/agents/$write_fault_hardlink_agent.toml"
+printf 'ordinary user agent\n' > "$tmp_write_fault/.codex/agents/$write_fault_regular_agent.toml"
+chmod 0600 "$tmp_write_fault/.codex/agents/$write_fault_regular_agent.toml"
+write_fault_hardlink_hash="$(shasum -a 256 "$tmp_write_fault/external/agent.toml" | awk '{print $1}')"
+write_fault_regular_hash="$(shasum -a 256 "$tmp_write_fault/.codex/agents/$write_fault_regular_agent.toml" | awk '{print $1}')"
+write_fault_hardlink_mtime="$(file_mtime_ns "$tmp_write_fault/external/agent.toml")"
 real_python="$(command -v python3)"
 python3 - "$tmp_write_fault/fake-bin/python3" <<'PYWRAP'
 import os
@@ -961,7 +1007,23 @@ fi
 test -f "$tmp_write_fault/fault-fired"
 grep -q "Failed to activate staged skill copy" <<<"$write_fault_output"
 grep -q "restored all managed targets changed by this run" <<<"$write_fault_output"
-test ! -e "$tmp_write_fault/.codex"
+test "$tmp_write_fault/external/agent.toml" -ef "$tmp_write_fault/.codex/agents/$write_fault_hardlink_agent.toml"
+test "$tmp_write_fault/external/agent-alias.toml" -ef "$tmp_write_fault/.codex/agents/$write_fault_hardlink_agent.toml"
+test "$write_fault_hardlink_hash" = "$(shasum -a 256 "$tmp_write_fault/.codex/agents/$write_fault_hardlink_agent.toml" | awk '{print $1}')"
+test "$write_fault_regular_hash" = "$(shasum -a 256 "$tmp_write_fault/.codex/agents/$write_fault_regular_agent.toml" | awk '{print $1}')"
+test "$(file_mode "$tmp_write_fault/.codex/agents/$write_fault_hardlink_agent.toml")" = "640"
+test "$(file_mode "$tmp_write_fault/.codex/agents/$write_fault_regular_agent.toml")" = "600"
+test "$(file_mtime_ns "$tmp_write_fault/.codex/agents/$write_fault_hardlink_agent.toml")" = "$write_fault_hardlink_mtime"
+while IFS= read -r agent; do
+  if [[ "$agent" != "$write_fault_hardlink_agent" && "$agent" != "$write_fault_regular_agent" ]]; then
+    test ! -e "$tmp_write_fault/.codex/agents/$agent.toml"
+  fi
+done < <(contract_agent_names)
+test ! -e "$tmp_write_fault/.codex/AGENTS.md"
+test ! -e "$tmp_write_fault/.codex/config.toml"
+test ! -e "$tmp_write_fault/.codex/hooks.json"
+test ! -e "$tmp_write_fault/.codex/skills"
+test -z "$(find "$tmp_write_fault/.codex/agents" -maxdepth 1 -type d -name '.alpha-goal-install-snapshot.*' -print -quit)"
 
 tmp_uninstall_fault="$(mktemp -d)"
 TARGET_CHOICE=all run_installer "$tmp_uninstall_fault" >/dev/null
@@ -982,6 +1044,11 @@ const hooks = JSON.parse(fs.readFileSync(hooksPath, "utf8"));
 hooks.userOwned = { preserve: true };
 fs.writeFileSync(hooksPath, `${JSON.stringify(hooks, null, 2)}\n`);
 JS
+chmod 0640 "$tmp_uninstall_fault/.codex/AGENTS.md"
+set_file_mtime_ns "$tmp_uninstall_fault/.codex/AGENTS.md" 978307200234567890
+ln "$tmp_uninstall_fault/.codex/AGENTS.md" "$tmp_uninstall_fault/external/AGENTS-alias.md"
+uninstall_fault_agents_hash="$(shasum -a 256 "$tmp_uninstall_fault/.codex/AGENTS.md" | awk '{print $1}')"
+uninstall_fault_agents_mtime="$(file_mtime_ns "$tmp_uninstall_fault/.codex/AGENTS.md")"
 mkdir -p "$tmp_uninstall_fault/before"
 cp -a "$tmp_uninstall_fault/.codex" "$tmp_uninstall_fault/before/codex"
 cp -a "$tmp_uninstall_fault/.claude" "$tmp_uninstall_fault/before/claude"
@@ -991,6 +1058,24 @@ cat > "$tmp_uninstall_fault/fake-bin/rm" <<'SH'
 #!/usr/bin/env bash
 for argument in "$@"; do
   if [[ "$argument" == "$FAIL_TARGET" && ! -e "$FAIL_MARKER" ]]; then
+    if [[ -n "${MUTATION_TARGET:-}" ]]; then
+      current_hash="$(shasum -a 256 "$MUTATION_TARGET" | awk '{print $1}')"
+      if [[ "$current_hash" == "$MUTATION_ORIGINAL_HASH" ]]; then
+        exit 73
+      fi
+      : > "$INSTALLER_MUTATION_MARKER"
+      printf 'fault-injected hard-link mutation\n' > "$MUTATION_TARGET"
+      chmod 0600 "$MUTATION_TARGET"
+      python3 - "$MUTATION_TARGET" <<'PY'
+import os
+import sys
+
+path = sys.argv[1]
+stat_result = os.stat(path)
+os.utime(path, ns=(stat_result.st_atime_ns, 1104537600456789012))
+PY
+      : > "$FAULT_MUTATION_MARKER"
+    fi
     : > "$FAIL_MARKER"
     exit 72
   fi
@@ -1003,6 +1088,10 @@ if uninstall_fault_output="$(
   REAL_RM="$real_rm" \
   FAIL_MARKER="$tmp_uninstall_fault/fault-fired" \
   FAIL_TARGET="$tmp_uninstall_fault/.claude/skills/executor" \
+  MUTATION_TARGET="$tmp_uninstall_fault/external/AGENTS-alias.md" \
+  MUTATION_ORIGINAL_HASH="$uninstall_fault_agents_hash" \
+  INSTALLER_MUTATION_MARKER="$tmp_uninstall_fault/installer-mutation-fired" \
+  FAULT_MUTATION_MARKER="$tmp_uninstall_fault/fault-mutation-fired" \
   TARGET_CHOICE=all \
   run_installer "$tmp_uninstall_fault" --uninstall 2>&1
 )"; then
@@ -1010,43 +1099,65 @@ if uninstall_fault_output="$(
   exit 1
 fi
 test -f "$tmp_uninstall_fault/fault-fired"
+test -f "$tmp_uninstall_fault/installer-mutation-fired"
+test -f "$tmp_uninstall_fault/fault-mutation-fired"
 grep -q "restored all managed targets changed by this run" <<<"$uninstall_fault_output"
 diff -r --no-dereference "$tmp_uninstall_fault/before/codex" "$tmp_uninstall_fault/.codex"
 diff -r --no-dereference "$tmp_uninstall_fault/before/claude" "$tmp_uninstall_fault/.claude"
-test "$(stat -c '%a' "$tmp_uninstall_fault/.codex/agents")" = "711"
+test "$(file_mode "$tmp_uninstall_fault/.codex/agents")" = "711"
 test "$tmp_uninstall_fault/external/config.toml" -ef "$tmp_uninstall_fault/external/config-alias.toml"
 test "$tmp_uninstall_fault/external/skill" -ef "$tmp_uninstall_fault/.codex/skills/verifier"
 grep -q 'user sidecar' "$tmp_uninstall_fault/.codex/hooks.json.tmp"
+test "$tmp_uninstall_fault/external/AGENTS-alias.md" -ef "$tmp_uninstall_fault/.codex/AGENTS.md"
+test "$uninstall_fault_agents_hash" = "$(shasum -a 256 "$tmp_uninstall_fault/.codex/AGENTS.md" | awk '{print $1}')"
+test "$(file_mode "$tmp_uninstall_fault/.codex/AGENTS.md")" = "640"
+test "$(file_mtime_ns "$tmp_uninstall_fault/.codex/AGENTS.md")" = "$uninstall_fault_agents_mtime"
 
-unmanaged_fault_agent="$(contract_agent_names | tail -1)"
-rm "$tmp_uninstall_fault/.codex/agents/$unmanaged_fault_agent.toml"
+hardlink_fault_agent="$(contract_agent_names | tail -1)"
+rm "$tmp_uninstall_fault/.codex/agents/$hardlink_fault_agent.toml"
 printf 'external agent\n' > "$tmp_uninstall_fault/external/agent.toml"
-ln "$tmp_uninstall_fault/external/agent.toml" "$tmp_uninstall_fault/.codex/agents/$unmanaged_fault_agent.toml"
-mkdir -p "$tmp_uninstall_fault/before-unmanaged"
-cp -a "$tmp_uninstall_fault/.codex" "$tmp_uninstall_fault/before-unmanaged/codex"
-cp -a "$tmp_uninstall_fault/.claude" "$tmp_uninstall_fault/before-unmanaged/claude"
+chmod 0640 "$tmp_uninstall_fault/external/agent.toml"
+set_file_mtime_ns "$tmp_uninstall_fault/external/agent.toml" 1009843200345678901
+ln "$tmp_uninstall_fault/external/agent.toml" "$tmp_uninstall_fault/external/agent-alias.toml"
+ln "$tmp_uninstall_fault/external/agent.toml" "$tmp_uninstall_fault/.codex/agents/$hardlink_fault_agent.toml"
+mkdir -p "$tmp_uninstall_fault/before-hardlink"
+cp -a "$tmp_uninstall_fault/.codex" "$tmp_uninstall_fault/before-hardlink/codex"
+cp -a "$tmp_uninstall_fault/.claude" "$tmp_uninstall_fault/before-hardlink/claude"
+hardlink_fault_mtime="$(file_mtime_ns "$tmp_uninstall_fault/external/agent.toml")"
 rm "$tmp_uninstall_fault/fault-fired"
-if unmanaged_fault_output="$(
+rm "$tmp_uninstall_fault/installer-mutation-fired"
+rm "$tmp_uninstall_fault/fault-mutation-fired"
+if hardlink_fault_output="$(
   PATH="$tmp_uninstall_fault/fake-bin:$PATH" \
   REAL_RM="$real_rm" \
   FAIL_MARKER="$tmp_uninstall_fault/fault-fired" \
   FAIL_TARGET="$tmp_uninstall_fault/.claude/skills/executor" \
+  MUTATION_TARGET="$tmp_uninstall_fault/external/AGENTS-alias.md" \
+  MUTATION_ORIGINAL_HASH="$uninstall_fault_agents_hash" \
+  INSTALLER_MUTATION_MARKER="$tmp_uninstall_fault/installer-mutation-fired" \
+  FAULT_MUTATION_MARKER="$tmp_uninstall_fault/fault-mutation-fired" \
   TARGET_CHOICE=all \
   run_installer "$tmp_uninstall_fault" --uninstall 2>&1
 )"; then
-  echo "unmanaged uninstall-fault injection should fail" >&2
+  echo "hard-linked custom-agent uninstall-fault injection should fail" >&2
   exit 1
 fi
 test -f "$tmp_uninstall_fault/fault-fired"
-grep -q "restored all managed targets changed by this run" <<<"$unmanaged_fault_output"
-diff -r --no-dereference "$tmp_uninstall_fault/before-unmanaged/codex" "$tmp_uninstall_fault/.codex"
-diff -r --no-dereference "$tmp_uninstall_fault/before-unmanaged/claude" "$tmp_uninstall_fault/.claude"
-test "$tmp_uninstall_fault/external/agent.toml" -ef "$tmp_uninstall_fault/.codex/agents/$unmanaged_fault_agent.toml"
+test -f "$tmp_uninstall_fault/installer-mutation-fired"
+test -f "$tmp_uninstall_fault/fault-mutation-fired"
+grep -q "restored all managed targets changed by this run" <<<"$hardlink_fault_output"
+diff -r --no-dereference "$tmp_uninstall_fault/before-hardlink/codex" "$tmp_uninstall_fault/.codex"
+diff -r --no-dereference "$tmp_uninstall_fault/before-hardlink/claude" "$tmp_uninstall_fault/.claude"
+test "$tmp_uninstall_fault/external/agent.toml" -ef "$tmp_uninstall_fault/.codex/agents/$hardlink_fault_agent.toml"
+test "$tmp_uninstall_fault/external/agent-alias.toml" -ef "$tmp_uninstall_fault/.codex/agents/$hardlink_fault_agent.toml"
+test "$(file_mode "$tmp_uninstall_fault/.codex/agents/$hardlink_fault_agent.toml")" = "640"
+test "$(file_mtime_ns "$tmp_uninstall_fault/.codex/agents/$hardlink_fault_agent.toml")" = "$hardlink_fault_mtime"
+test -z "$(find "$tmp_uninstall_fault/.codex/agents" -maxdepth 1 -type d -name '.alpha-goal-install-snapshot.*' -print -quit)"
 test -z "$(find "$TMPDIR" -maxdepth 1 -type d -name 'alpha-goal-install-transaction.*' -print -quit)"
 
-unmanaged_uninstall_agent="$(contract_agent_names | tail -1)"
-rm "$tmp_codex/.codex/agents/$unmanaged_uninstall_agent.toml"
-printf 'user-owned uninstall agent\n' > "$tmp_codex/.codex/agents/$unmanaged_uninstall_agent.toml"
+modified_uninstall_agent="$(contract_agent_names | tail -1)"
+rm "$tmp_codex/.codex/agents/$modified_uninstall_agent.toml"
+printf 'user-owned uninstall agent\n' > "$tmp_codex/.codex/agents/$modified_uninstall_agent.toml"
 codex_uninstall_output="$(run_installer "$tmp_codex" --uninstall)"
 assert_simple_success_output "$codex_uninstall_output" "Alpha Goal uninstall completed."
 for skill in alpha-goal executor verifier; do
@@ -1056,12 +1167,9 @@ test ! -e "$tmp_codex/.codex/AGENTS.md"
 test ! -e "$tmp_codex/.codex/config.toml"
 test ! -e "$tmp_codex/.codex/hooks.json"
 while IFS= read -r agent; do
-  if [[ "$agent" == "$unmanaged_uninstall_agent" ]]; then
-    grep -q 'user-owned uninstall agent' "$tmp_codex/.codex/agents/$agent.toml"
-  else
-    test ! -e "$tmp_codex/.codex/agents/$agent.toml"
-  fi
+  test ! -e "$tmp_codex/.codex/agents/$agent.toml"
 done < <(contract_agent_names)
+test ! -e "$tmp_codex/.codex/agents"
 
 claude_uninstall_output="$(TARGET_CHOICE=claude run_installer "$tmp_claude" --uninstall)"
 assert_simple_success_output "$claude_uninstall_output" "Alpha Goal uninstall completed."

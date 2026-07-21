@@ -4,9 +4,12 @@ install_transaction_dir=""
 install_transaction_keys=()
 install_transaction_paths=()
 install_transaction_backups=()
+install_transaction_backup_hardlinks=()
+install_transaction_backup_anchors=()
 install_transaction_original_states=()
 install_transaction_created_dirs=()
 install_transaction_transients=()
+install_transaction_snapshot_dirs=()
 atomic_stage_dir=""
 atomic_work_path=""
 atomic_target_path=""
@@ -90,6 +93,10 @@ transaction_register_path() {
   local actual_target
   local key
   local backup
+  local backup_hardlink=false
+  local backup_anchor=""
+  local link_count
+  local snapshot_dir
   local original_state="missing"
   actual_target="$(transaction_mutation_path "$target" "$follow_symlink")"
   key="$(transaction_path_key "$target" "$follow_symlink")"
@@ -100,12 +107,36 @@ transaction_register_path() {
   transaction_track_created_parents "$actual_target"
   backup="$install_transaction_dir/snapshots/${#install_transaction_paths[@]}"
   if [[ -e "$actual_target" || -L "$actual_target" ]]; then
-    cp -a -- "$actual_target" "$backup" || die "Failed to snapshot install target: $actual_target"
+    if [[ -f "$actual_target" && ! -L "$actual_target" ]]; then
+      cp -a -- "$actual_target" "$backup" || die "Failed to snapshot install target: $actual_target"
+      link_count="$(python3 - "$actual_target" <<'PY'
+import os
+import sys
+
+print(os.stat(sys.argv[1]).st_nlink)
+PY
+)" || die "Failed to inspect hard-link count for install target: $actual_target"
+      if (( link_count > 1 )); then
+        snapshot_dir="$(mktemp -d "$(dirname "$actual_target")/.alpha-goal-install-snapshot.XXXXXX")" ||
+          die "Failed to create hard-link snapshot directory for install target: $actual_target"
+        backup_anchor="$snapshot_dir/value"
+        if ! ln "$actual_target" "$backup_anchor"; then
+          rm -rf -- "$snapshot_dir"
+          die "Failed to create hard-link snapshot for install target: $actual_target"
+        fi
+        install_transaction_snapshot_dirs+=("$snapshot_dir")
+        backup_hardlink=true
+      fi
+    else
+      cp -a -- "$actual_target" "$backup" || die "Failed to snapshot install target: $actual_target"
+    fi
     original_state="present"
   fi
   install_transaction_keys+=("$key")
   install_transaction_paths+=("$actual_target")
   install_transaction_backups+=("$backup")
+  install_transaction_backup_hardlinks+=("$backup_hardlink")
+  install_transaction_backup_anchors+=("$backup_anchor")
   install_transaction_original_states+=("$original_state")
 }
 transaction_register_transient() {
@@ -123,12 +154,14 @@ transaction_path_matches_snapshot() {
   python3 - \
     "${install_transaction_paths[$index]}" \
     "${install_transaction_backups[$index]}" \
-    "${install_transaction_original_states[$index]}" <<'PY'
+    "${install_transaction_original_states[$index]}" \
+    "${install_transaction_backup_hardlinks[$index]}" \
+    "${install_transaction_backup_anchors[$index]}" <<'PY'
 import os
 import stat
 import sys
 
-target, backup, original_state = sys.argv[1:]
+target, backup, original_state, backup_hardlink, backup_anchor = sys.argv[1:]
 
 if original_state == "missing":
     raise SystemExit(0 if not os.path.lexists(target) else 1)
@@ -148,6 +181,13 @@ def same(left, right):
     if stat.S_ISLNK(left_stat.st_mode):
         return os.readlink(left) == os.readlink(right)
     if stat.S_ISREG(left_stat.st_mode):
+        if backup_hardlink == "true":
+            try:
+                anchor_stat = os.lstat(backup_anchor)
+            except FileNotFoundError:
+                return False
+            if not os.path.samestat(left_stat, anchor_stat):
+                return False
         if left_stat.st_size != right_stat.st_size:
             return False
         with open(left, "rb") as left_file, open(right, "rb") as right_file:
@@ -259,10 +299,14 @@ rollback_install_transaction() {
   local index
   local target
   local backup
+  local backup_hardlink
+  local backup_anchor
   set +e
   for ((index=${#install_transaction_paths[@]} - 1; index >= 0; index--)); do
     target="${install_transaction_paths[$index]}"
     backup="${install_transaction_backups[$index]}"
+    backup_hardlink="${install_transaction_backup_hardlinks[$index]}"
+    backup_anchor="${install_transaction_backup_anchors[$index]}"
     if [[ "$uninstall" == true ]] && transaction_path_matches_snapshot "$index"; then
       continue
     fi
@@ -277,7 +321,56 @@ rollback_install_transaction() {
       continue
     fi
     if [[ "${install_transaction_original_states[$index]}" == "present" ]]; then
-      if ! mkdir -p "$(dirname "$target")" || ! cp -a -- "$backup" "$target"; then
+      if ! mkdir -p "$(dirname "$target")"; then
+        echo "Failed to restore install target from snapshot: $target" >&2
+        failed=true
+      elif [[ "$backup_hardlink" == true ]]; then
+        if ! python3 - "$backup" "$backup_anchor" <<'PY'
+import os
+import stat
+import sys
+
+source, anchor = sys.argv[1:]
+source_stat = os.stat(source)
+anchor_stat = os.stat(anchor)
+
+
+def same_content():
+    if source_stat.st_size != anchor_stat.st_size:
+        return False
+    with open(source, "rb") as source_file, open(anchor, "rb") as anchor_file:
+        while True:
+            source_chunk = source_file.read(1024 * 1024)
+            anchor_chunk = anchor_file.read(1024 * 1024)
+            if source_chunk != anchor_chunk:
+                return False
+            if not source_chunk:
+                return True
+
+
+content_changed = not same_content()
+mode_changed = stat.S_IMODE(source_stat.st_mode) != stat.S_IMODE(anchor_stat.st_mode)
+mtime_changed = source_stat.st_mtime_ns != anchor_stat.st_mtime_ns
+if content_changed:
+    with open(source, "rb") as source_file, open(anchor, "wb") as anchor_file:
+        while True:
+            chunk = source_file.read(1024 * 1024)
+            if not chunk:
+                break
+            anchor_file.write(chunk)
+if mode_changed:
+    os.chmod(anchor, stat.S_IMODE(source_stat.st_mode))
+if content_changed or mtime_changed:
+    os.utime(anchor, ns=(anchor_stat.st_atime_ns, source_stat.st_mtime_ns))
+PY
+        then
+          echo "Failed to restore hard-link snapshot contents: $target" >&2
+          failed=true
+        elif ! ln "$backup_anchor" "$target"; then
+          echo "Failed to restore hard-link identity from snapshot: $target" >&2
+          failed=true
+        fi
+      elif ! cp -a -- "$backup" "$target"; then
         echo "Failed to restore install target from snapshot: $target" >&2
         failed=true
       fi
@@ -293,7 +386,7 @@ rollback_install_transaction() {
     rmdir -- "${install_transaction_created_dirs[$index]}" 2>/dev/null || true
   done
   if [[ "$failed" == true ]]; then
-    echo "Install rollback was incomplete; recovery snapshots remain at: $install_transaction_dir" >&2
+    echo "Install rollback was incomplete; recovery snapshots remain at: $install_transaction_dir ${install_transaction_snapshot_dirs[*]}" >&2
     return 1
   fi
   echo "Install failed; restored all managed targets changed by this run." >&2
@@ -302,14 +395,30 @@ rollback_install_transaction() {
 
 cleanup_install_transaction_snapshots() {
   local retained_path="$install_transaction_dir"
+  local snapshot_dir
+  local failed=false
+  local retained_paths=()
   if [[ -z "$retained_path" ]]; then
     return 0
   fi
-  if rm -rf -- "$retained_path" && [[ ! -e "$retained_path" && ! -L "$retained_path" ]]; then
+  if ! rm -rf -- "$retained_path" || [[ -e "$retained_path" || -L "$retained_path" ]]; then
+    retained_paths+=("$retained_path")
+    failed=true
+  fi
+  if (( ${#install_transaction_snapshot_dirs[@]} > 0 )); then
+    for snapshot_dir in "${install_transaction_snapshot_dirs[@]}"; do
+      if ! rm -rf -- "$snapshot_dir" || [[ -e "$snapshot_dir" || -L "$snapshot_dir" ]]; then
+        retained_paths+=("$snapshot_dir")
+        failed=true
+      fi
+    done
+  fi
+  if [[ "$failed" == false ]]; then
     install_transaction_dir=""
+    install_transaction_snapshot_dirs=()
     return 0
   fi
-  echo "Warning: transaction snapshots could not be removed; retained at: $retained_path" >&2
+  echo "Warning: transaction snapshots could not be removed; retained at: ${retained_paths[*]}" >&2
   return 1
 }
 install_transaction_exit() {

@@ -17,7 +17,7 @@ codex:  ${CODEX_HOME:-$HOME/.codex}/skills
 claude: $HOME/.claude/skills
 ```
 
-For `codex` and `all`, a separate default-Yes prompt installs the repository's managed Custom Agents under `${CODEX_HOME:-$HOME/.codex}/agents` and their routing block in the same configuration root's `AGENTS.md`. These agent files are user configuration, not skills or plugin components.
+For `codex` and `all`, a separate default-Yes prompt installs the repository's bundled Custom Agents under `${CODEX_HOME:-$HOME/.codex}/agents` and their routing block in the same configuration root's `AGENTS.md`. These agent files are user configuration, not skills or plugin components.
 
 ## Options
 
@@ -48,11 +48,11 @@ When installing skill copies, an existing target skill symlink is migrated only 
 
 Use `--uninstall` to enter the interactive uninstall flow. The selected target controls which managed configuration and skill copies are removed.
 
-Existing same-name Custom Agent files are replaced only when their first line is the managed marker `# alpha-goal-managed-custom-agent:v1`; symlinks, non-regular paths, and unmarked files fail the whole install during preflight. Managed files are staged before activation and participate in the same rollback transaction.
+Existing same-name regular Custom Agent files are replaced regardless of their contents. Symlinks and non-regular same-name paths fail the whole install during preflight. Agent files are staged before activation and participate in the same rollback transaction; a failed transaction restores overwritten files, including their hard-link identity.
 
 `templates/config.toml` contains only the stable managed defaults: `features.multi_agent`, `agents.max_threads`, and `agents.max_depth`. Config merge fills missing stable keys without replacing existing values. It also retires fields from the previous managed template: `features.child_agents_md` is removed; `features.default_mode_request_user_input` is removed only at its former managed value; and the complete `features.multi_agent_v2` table is removed only when it still exactly matches the former managed table. User-different values and tables with additional keys are preserved. If `features` is written as a parent inline table (`features = { ... }`) containing retired fields, preflight refuses the install without writing managed targets; rewrite it as a standard table or dotted-key form before retrying.
 
-Uninstall is conservative outside the managed copied-skill path. It removes only managed Markdown blocks, managed Custom Agent files, managed hooks, `config.toml` that byte-for-byte matches `templates/config.toml`, skill copies with the install marker, and skill symlinks that resolve to this repository. Mixed user Markdown keeps user content, mixed or modified `config.toml` is preserved, unmanaged agents and hooks are preserved, configuration symlinks are not followed or deleted, and unmanaged skill directories or external symlinks are preserved. The interactive cleanup prompts independently control Custom Agent, Markdown/config, and hook cleanup.
+Uninstall is conservative outside the managed copied-skill path, except for the explicitly selected Custom Agent cleanup. It removes managed Markdown blocks, every same-name regular Custom Agent file, managed hooks, `config.toml` that byte-for-byte matches `templates/config.toml`, skill copies with the install marker, and skill symlinks that resolve to this repository. Mixed user Markdown keeps user content, mixed or modified `config.toml` is preserved, Custom Agent symlinks and non-regular paths are preserved, configuration symlinks are not followed or deleted, and unmanaged skill directories or external symlinks are preserved. The interactive cleanup prompts independently control Custom Agent, Markdown/config, and hook cleanup.
 
 The compact recovery hook definition lives in `templates/hooks.json`. It is a `PostCompact` hook without a matcher and must not set matcher. It reloads only from an explicit current artifact path and delegates identity, owner, recovery, and termination decisions to the selected skills instead of duplicating their protocol.
 

@@ -12,13 +12,13 @@ Install runs ask for the target app configuration and whether to install the
 optional executor/verifier role pair. alpha-goal is always installed. Uninstall
 runs ask for cleanup choices. Non-interactive runs are refused.
 
-The codex target can also install the repository's managed Custom Agents and
+The codex target can also install the repository's bundled Custom Agents and
 routing block under the Codex configuration root. It syncs AGENTS.md, config.toml,
 selected skills, and hooks.json when the optional roles are selected. The
 claude target syncs Claude CLAUDE.md and selected skills. The interactive all
 menu option syncs both targets.
-With --uninstall, each target removes only its managed configuration, Custom
-Agents when selected, and skill copies.
+With --uninstall, each target removes only its managed configuration, same-name
+Custom Agent files when selected, and skill copies.
 
 Options:
   --uninstall
