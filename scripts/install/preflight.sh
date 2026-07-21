@@ -164,7 +164,8 @@ preflight_install_targets() {
         mkdir -p "$custom_agents_root"
         for name in "${custom_agent_names[@]}"; do
           cp -- "$source_agent_root/$name.toml" "$custom_agents_root/$name.toml"
-          is_managed_custom_agent_file "$custom_agents_root/$name.toml"
+          test -f "$custom_agents_root/$name.toml"
+          test ! -L "$custom_agents_root/$name.toml"
         done
         inject_custom_agent_routing_template
       fi

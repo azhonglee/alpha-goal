@@ -1,4 +1,3 @@
-# alpha-goal-managed-custom-agent:v1
 name = "builder"
 description = "Use for clearly scoped implementation, debugging, and fixes with explicit acceptance criteria."
 model = "gpt-5.6-terra"
