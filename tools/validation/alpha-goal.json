@@ -2,6 +2,11 @@
   "schemaVersion": 8,
   "instructionBudgetExclusiveMax": 9301,
   "customAgents": {
+    "architect": {
+      "model": "gpt-5.6-sol",
+      "effort": "high",
+      "sandbox": "read-only"
+    },
     "scout": {
       "model": "gpt-5.6-terra",
       "effort": "medium",
@@ -121,6 +126,7 @@
   ],
   "distribution": {
     "agents": [
+      "agents/architect.toml",
       "agents/scout.toml",
       "agents/builder.toml",
       "agents/reviewer.toml"
