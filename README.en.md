@@ -77,7 +77,7 @@ node tools/validate_skills.js .
 node tools/validate_skills.js --fixtures
 ```
 
-The installer always copies `alpha-goal` and lets the user choose whether to install `executor` and `verifier` as a pair. Codex/all runs independently offer the global `scout`, `builder`, and `reviewer` Custom Agents (default Yes); choosing No preserves existing copies. See [INSTALL.md](INSTALL.md) for full behavior and smoke testing.
+The installer always copies `alpha-goal` and lets the user choose whether to install `executor` and `verifier` as a pair. Codex/all runs independently offer the global Custom Agents declared by the shared contract (default Yes); choosing No preserves existing copies. See [INSTALL.md](INSTALL.md) for full behavior and smoke testing.
 
 ## Usage examples
 

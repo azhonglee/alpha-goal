@@ -2,7 +2,7 @@
 name = "scout"
 description = "Use for bounded, read-only exploration and evidence collection before decisions or changes."
 model = "gpt-5.6-terra"
-model_reasoning_effort = "medium"
+model_reasoning_effort = "low"
 sandbox_mode = "read-only"
 
 developer_instructions = """

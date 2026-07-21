@@ -1,17 +1,12 @@
 {
   "shouldPass": false,
-  "expectedErrors": ["features.multi_agent must be true", "features.multi_agent_v2.usage_hint_enabled must be true"],
+  "expectedErrors": ["features.multi_agent must be true"],
   "inheritRoot": true,
   "replacements": [
     {
       "file": "templates/config.toml",
       "search": "multi_agent = true",
       "replace": "multi_agent = false"
-    },
-    {
-      "file": "templates/config.toml",
-      "search": "usage_hint_enabled = true",
-      "replace": "usage_hint_enabled = false"
     }
   ]
 }

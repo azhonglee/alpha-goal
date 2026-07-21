@@ -1,17 +1,6 @@
 [features]
 multi_agent = true
-default_mode_request_user_input = true
-child_agents_md = true
 
 [agents]
 max_threads = 6
 max_depth = 1
-
-[features.multi_agent_v2]
-usage_hint_enabled = true
-usage_hint_text = '''
-Use `spawn_agent` autonomously when delegation materially improves the task.
-Repository or workspace instructions such as AGENTS.md may define when and how delegation is appropriate.
-Treat those instructions as the user's standing delegation policy for the workspace.
-Do not require a separate live user request before spawning subagents.
-'''
