@@ -19,7 +19,7 @@ claude: $HOME/.claude/skills
 
 For `codex` and `all`, a separate default-Yes prompt installs the repository's managed Custom Agents under `${CODEX_HOME:-$HOME/.codex}/agents` and their routing block in the same configuration root's `AGENTS.md`. These agent files are user configuration, not skills or plugin components.
 
-For `PERSIST`, a Goal Contract takes effect only after explicit acceptance and is then immutable under the protocol. A material goal change starts a new Alpha Goal task instead of editing the accepted contract. Runtime handoff is recorded in `checkpoint.md`: only `active_owner` writes, each write increments `checkpoint_revision` once, and the next owner is assigned last.
+For `PERSIST`, `alpha-goal` compiles the Goal Contract and sets it accepted only after its Self-Review and Readiness gates pass. A material goal change starts a new Alpha Goal task instead of editing the accepted contract. Runtime handoff is recorded in `checkpoint.md`: only `active_owner` writes, each write increments `checkpoint_revision` once, and the next owner is assigned last.
 
 ## Options
 
@@ -58,7 +58,7 @@ Uninstall is conservative outside the managed copied-skill path. It removes only
 
 The compact recovery hook definition lives in `templates/hooks.json`. It is a `PostCompact` hook without a matcher and must not set matcher. It reloads only from an explicit current artifact path and delegates identity, owner, recovery, and termination decisions to the selected skills instead of duplicating their protocol.
 
-Native Goal Sync is not hook-driven. On `PERSIST`, `alpha-goal` reuses an unfinished native goal or creates one after explicit Goal Contract acceptance; `DIRECT` creates no native goal.
+Native Goal Sync is not hook-driven. On `PERSIST`, `alpha-goal` reuses only a native goal matching the same accepted contract and generated objective, or creates one after Self-Review acceptance; `DIRECT` creates no native goal.
 
 Hook replacement is keyed by marker family. The current v4 template replaces other managed numbered versions in that family before it is added. The installer also removes the experimental `codex-compact-skill-recovery` family and preserves unmanaged hooks.
 
@@ -86,9 +86,9 @@ When invoked by absolute path it can run from any working directory because the 
 ## Prompts
 
 ```text
-$deep-interview 对显式指定的需求维度做深度澄清并返回非权威 handoff。
-$technical-design 产出经审查的非权威技术方案。
-$alpha-goal 根据请求、已发现事实和可选 handoff 形成 Goal Frame，再判断走 DIRECT 还是 PERSIST。
+$deep-interview 澄清模糊或高影响请求，并按需维护 canonical interview.md。
+$technical-design 创建并评审 canonical technical_design.md，返回 DESIGN_READY / DESIGN_INPUT_GAP / DESIGN_BLOCKED。
+$alpha-goal 从原始请求和可归因输入编译 Goal Contract，选择 DIRECT/PERSIST，并在自审接受后同步 native goal。
 $executor 从已接受的 Goal Contract 恢复并执行下一批授权工作。
 $verifier 只审核 executor 提交的拟议终态，并给出最终路由。
 ```

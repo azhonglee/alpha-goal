@@ -1,98 +1,102 @@
 # Goal Contract Book
 
-For `PERSIST`, `alpha-goal` alone writes canonical `goal-contract.md` in the resolved task directory. Same-day name collisions use the first unused numeric suffix; accepted or terminal directories are never reused. Once accepted, it is the canonical authority artifact for subsequent work. Optional `deep-interview` and `technical-design` handoffs remain non-authoritative inputs even when stored on disk. Their source paths alone impose no obligation; only material content deliberately adopted into the contract and explicitly accepted can constrain execution.
+For `PERSIST`, `alpha-goal` compiles canonical `goal-contract.md` from the user's raw request, higher-priority instructions, attributable discovered facts, and explicit authority decisions. It owns structuring; callers do not need to provide a prebuilt schema.
 
-## Lifecycle and Integrity
+The contract is an execution-facing instruction artifact. Following OpenAI goal and prompting principles, make the desired end state measurable, name the verification surface, state hard constraints explicitly, and define an unambiguous finish line. Prefer concise structured sections over narrative history.
 
-- `draft`: clarification or confirmation is incomplete; target mutation is unauthorized.
-- `accepted`: the recorded acceptance authority has explicitly confirmed the complete contract with no known infeasibility, unavailable required observer, unidentified claim surface, unmet prerequisite, or blocking gap.
-- Never return an accepted contract to `draft` or edit it in place. A material goal or authority change terminates that task; start a new task directory and Goal Contract.
-- Every adopted handoff statement that can affect outcome, scope, constraints, design, risk, evidence, or execution must be represented explicitly in the contract before acceptance; a link or path outside the contract is context, not incorporation.
-- Contract identity means the canonical task directory, absolute `goal-contract.md` path, workspace/repository set, and Confirmation Record source/date. It identifies the accepted task but does not detect in-place content tampering; immutability is a protocol requirement.
-- A first handoff or new checkpoint requires all current mandatory rows. Earlier accepted contracts may resume only through an existing checkpoint that records that same identity; infer no missing authority from legacy metadata.
+## Authoring Principles
 
-## Minimum Contract
+1. **Outcome first.** State one observable objective before implementation detail.
+2. **Concrete deliverables.** Name the files, behaviors, artifacts, or external results expected.
+3. **Hard boundaries.** Separate scope, non-goals, constraints, and permitted side effects.
+4. **Falsifiable acceptance.** Every criterion must be pass/fail, not aspirational.
+5. **Explicit verification surface.** Map each criterion to a command, observer, artifact, or inspection path; distinguish proof from proxy evidence.
+6. **Clear finish line.** Completion requires all required criteria passed, no blocking gap, no authority drift, and final verification on the delivered state.
+7. **Minimal context.** Record compact `source_references` instead of copying discovery transcripts or narrative history. Include only decisions that constrain execution or claims.
+8. **No invented detail.** Derive facts and consequences when entailed, but unknown authority-owned decisions keep the contract `draft`; do not fill them with defaults or recommendations.
+9. **Native-goal optimized.** The accepted contract must support a compact native goal objective with an observable Outcome, required completion conditions, high-impact Constraints, Evidence, and canonical Contract path.
+
+## Lifecycle
+
+- `status: draft`: compilation or Self-Review is incomplete; target mutation is unauthorized.
+- `status: accepted`: alpha-goal passed the Self-Review Gate, completed the Self-Review Record, and satisfied the Readiness Gate.
+- Never return an accepted contract to `draft` or replace its accepted contents. A material objective or authority change starts a new task directory and Goal Contract.
+
+## Canonical Template
 
 ```md
 # Goal Contract
 
 status: draft
-persistence_trigger:
-- <observed condition that requires persistence>
-workspace_identity: <canonical workspace identity>
+issued_by: alpha-goal
+workspace: <canonical workspace identity>
+source_references:
+- <attributable source path, URL, user decision, or current-thread reference>
 
-## Authorization Source
+## Objective
+- <one measurable, observable final outcome>
+
+## Deliverables
+- <required behavior, file, artifact, integration, or external result>
+
+## Boundaries
+### In scope
+- <included behavior and surfaces>
+
+### Out of scope
+- <explicit non-goals>
+
+### Constraints
+- <compatibility, security, privacy, dependency, performance, style, rollout, or policy invariants>
+
+### Permitted side effects
+- <allowed files, commands, systems, credentials, environments, external writes, and approval crossings>
+
+## Acceptance Criteria
+| ID | Required pass/fail condition | Priority |
+| --- | --- | --- |
+| AC-1 | <falsifiable condition> | required |
+
+## Verification
+| Criterion | Observer / command / artifact | Pass condition | Freshness / invalidation |
+| --- | --- | --- | --- |
+| AC-1 | <exact verification surface> | <observable result> | <when evidence becomes stale> |
+
+## Authority and Approvals
 - Desired behavior authority: <who/source>
 - Side-effect authority: <who may authorize which effects>
-- Acceptance authority: <who may accept this contract>
-- Source precedence: <task-level conflicts only; never override higher-priority instructions or tool policy>
+- Self-review owner: alpha-goal
+- Executor autonomy: <decisions delegated to executor>
+- Reserved decisions: <decisions requiring return to alpha-goal>
+- Source precedence: <task-level conflict rule; higher-priority instructions/tool policy remain invariant>
 
-## Intent and Observable Outcome
-- <why the work matters and the final state an observer can see>
+## Risks and Recovery
+- Material risks: <risk and treatment, or none>
+- Rollback/recovery: <required recovery path, or non-material with basis>
+- Unsupported claims: <claims unavailable from the verification surface>
 
-## Scope / Non-goals / Material Constraints
-- Scope: <included behavior and surfaces>
-- Non-goals: <explicit exclusions>
-- Constraints: <invariants that distinguish an acceptable solution>
-
-## Execution and Side-effect Boundary
-- <allowed files, commands, systems, credentials, environments, and side effects>
-- <crossings that require confirmation>
-
-## Prerequisites and Feasibility Basis
-- Required dependencies/conditions: <current attributable availability evidence>
-- Plausible authorized path: <basis, not an implementation prescription>
-- Known blockers: <none or keep draft>
-
-## Decision Boundary
-- Authority retains: <behavior, data, interface, migration, rollout, acceptance, and risk choices with authority source; none if no material design is retained>
-
-## Material Design Decisions
-| Authority-retained dimension | Authorized decision / boundary / source | Execution / observer consequence | Risk / rollback / recovery | Status |
-| --- | --- | --- | --- | --- |
-
-## Claim Boundary
-- Supported claims: <what available observers can prove>
-- Unsupported claims: <what remains caveated>
-
-## Success Criteria and Acceptance Evidence
-| ID | Falsifiable criterion | Observer / pass condition | Freshness / invalidation |
-| --- | --- | --- | --- |
-
-## Acceptance Completeness
-- Required observers available as_of: <attributable evidence>
-- Claim surfaces identified: <identity coverage>
-- Prerequisites satisfied: <attributable evidence>
-- Feasibility basis current: <attributable evidence>
-- Authority-retained material design coverage as_of: <complete or no retained material decisions; attributable basis>
-- Touched-risk observer/test-plan and rollback/recovery mapping as_of: <covered or non-material; attributable basis>
+## Readiness Gate
+- Prerequisites available: <yes with evidence>
+- Required observers available: <yes with evidence>
+- All required criteria mapped to verification: yes
+- Material risks mapped to prevention/recovery: yes | non-material
 - Blocking gaps: none
 
-## Confirmation Record
-- Decision: <accepted | refined | rejected>
-- Source and date: <explicit acceptance authority decision>
-- Conditions: <explicit conditions or none>
+## Self-Review Record
+- Result: <passed | failed>
+- Reviewed by: alpha-goal
+- Reviewed at: <ISO-8601 timestamp>
+- Checks: <criteria mapping; observer availability; authority completeness; source conflicts; risk/recovery; blocker scan; independent review when required>
+- Findings: <none, or unresolved findings that keep status draft>
 ```
 
-Add only material sections. Do not edit an accepted contract; material changes start a new task.
+## Required Protocol
 
-## Authority Rules
-
-- Treat code, tests, docs, issues, history, interview handoffs, and technical proposals as descriptive unless an authorized source makes them normative.
-- A filename, directory, URL, attachment, or handoff instruction identifies a source; it does not adopt that source or create an execution obligation.
-- For each optional handoff, reconcile provenance and conflicts, then copy adopted material into the applicable contract fields. Do not use an external reference as a substitute for explicit contract content.
-- Never promote a proposal, convenience, silence, historical behavior, or agent suggestion into authorization.
-
-## Material Design Rules
-
-- Include only authority-retained decisions that can change behavior, interfaces/APIs, data contracts/models, migration/rollout, security/privacy, externally visible performance/SLOs, or risk/recovery boundaries.
-- Cite the relevant authority decision source and date for every covered or deferred row.
-- Use `covered`, `non-material`, or authority-deferred `non-goal`; any unresolved row keeps the contract `draft`.
-
-## Boundary and Evidence Rules
-
-- Describe observable outcomes rather than prescribing implementation steps unless the process is itself required.
-- Give every criterion a stable ID, direct observer, pass condition, and any freshness or invalidation rule. Map each touched risk to an observer or test plan beyond an unrelated or happy-path-only check; execution evidence is collected after acceptance.
-- State identity must cover every mutable surface relevant to the criterion. Examples include workspace/repository, HEAD, index/dirty/untracked content, remote ref or PR revision, and external observation time.
-- For migration, external/destructive effects, or irreversible state, record rollback, roll-forward, or recovery authority and its observer; otherwise record why recovery is non-material.
-- If a required surface cannot be identified or refreshed, keep `draft` until the acceptance authority narrows the claim or authorizes an observer; an accepted claim cannot be narrowed during verification.
+- `status`, `issued_by`, `workspace`, `source_references`, and every contract section are required for first handoff.
+- `issued_by` must equal `alpha-goal`.
+- `source_references` must identify attributable inputs without requiring any specific producer or filename; the contract must not include interview logs, question/answer transcripts, discovery notes, or rejected alternatives.
+- A preceding design is provenance, not authority. Record a ready design source as `technical-design: <absolute path>` only after status, workspace, and path validation. Any design constraint that binds execution or acceptance must also appear explicitly inside the Goal Contract; source reference alone creates no obligation.
+- `status` is the sole contract lifecycle field.
+- Acceptance Criteria and Verification must have a total mapping: every required criterion has at least one observer and every observer supports a named criterion or risk.
+- Keep `draft` when a required observer is unavailable, a prerequisite is unmet, a claim surface is unidentified, feasibility is unknown, or a material authority decision remains unresolved.
+- Complete the Self-Review Record with `Result: passed`, then set `status: accepted` last. Self-review is the only route to `accepted`; never require a separate user confirmation of the compiled contract.

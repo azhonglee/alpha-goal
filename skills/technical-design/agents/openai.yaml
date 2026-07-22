@@ -1,4 +1,4 @@
 interface:
   display_name: "Technical Design"
-  short_description: "Develop reviewed non-authoritative design options"
-  default_prompt: "Use $technical-design to develop a bounded technical proposal and return a non-authoritative handoff."
+  short_description: "Design first, then hand structured context to Alpha Goal"
+  default_prompt: "Use $technical-design to create and review technical_design.md, then return a DESIGN_READY packet for the caller to start Alpha Goal."

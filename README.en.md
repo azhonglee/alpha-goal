@@ -20,7 +20,7 @@ Alpha Goal gives AI agents a Goal Engineering control loop for three common fail
     <tr>
       <td width="260" align="left"><strong>Goal&nbsp;drift</strong></td>
       <td align="left">The agent starts before requirements are clear, gradually moves off target, and changes unrelated things along the way.</td>
-      <td align="left"><code>alpha-goal</code> discovers facts, clarifies the goal, boundaries, non-goals, and acceptance evidence, then writes a user-confirmed <code>goal-contract.md</code>.</td>
+      <td align="left"><code>alpha-goal</code> compiles <code>goal-contract.md</code> from the raw request, attributable inputs, and discovered facts, and accepts it only after Readiness and Self-Review pass.</td>
     </tr>
     <tr>
       <td width="260" align="left"><strong>Action&nbsp;overreach</strong></td>
@@ -41,35 +41,24 @@ In practice, it compresses requirement clarification, authority boundaries, iter
 
 ```mermaid
 flowchart TD
-  I["deep-interview: optional deep clarification"] -.-> A["alpha-goal: form a Goal Frame"]
-  T["technical-design: optional technical proposal"] -.-> A
+  I["deep-interview: independent clarification / interview.md"] -.-> C["caller chooses the next stage"]
+  T["technical-design: technical_design.md"] -.-> C
+  C --> A["alpha-goal: compile Goal Contract"]
   A --> R{"DIRECT / PERSIST"}
-  R --> D["DIRECT: normal execution + final validation"]
-  R --> P["PERSIST: expand and confirm goal-contract.md"]
-  P --> S["Native Goal Sync: create or reuse the thread goal"]
-  S --> E["executor: complete all batches, self-check, and record checkpoint.md"]
-  E --> V["verifier: audit the proposed terminal state"]
-  V -->|"NEXT_ITERATION (rework)"| E
-  V -->|"BLOCKED"| B["Report blocker"]
-  V -->|"PASS_TO_FINAL"| F["Final claim"]
+  R --> D["DIRECT: ignore design handoff and execute normally"]
+  R --> P["PERSIST: Self-Review accepted"]
+  P --> S["Native Goal Sync"]
+  S --> E["executor"]
+  E --> V["verifier"]
+  V -->|"NEXT_ITERATION"| E
+  V -->|"BLOCKED / PASS_TO_FINAL"| F["caller reports"]
 ```
 
-```text
-Trigger -> Frame Goal -> Choose DIRECT/PERSIST
-PERSIST -> Confirm accepted Goal Contract -> Native Goal Sync -> $executor -> Proposed Terminal State -> $verifier -> Rework or Final Claim
-Accepted goal materially changes -> terminate the old checkpoint -> start a new alpha-goal task directory
-```
+`deep-interview` is an independent, source-neutral clarification stage. It may maintain canonical `interview.md` with append-only turns, provenance, and unresolved gaps, but it does not choose an execution route. `technical-design` is an independent pre-goal design stage. It writes canonical `technical_design.md`, returns `DESIGN_READY` after review, or returns `DESIGN_INPUT_GAP` / `DESIGN_BLOCKED`; recovery requires the exact path preserved in current context.
 
-A Goal Frame contains intent, observable outcome, scope/non-goals, constraints, success signals, observers, and material decisions. Clear fields come from the request and attributable facts; clarification asks the relevant authority about one highest-impact blocking gap and closes it only when the authorized decision and its material boundaries and execution/evidence consequences are determined. A Goal Contract takes effect only after explicit acceptance; once accepted, it is immutable under the protocol. A material goal change terminates the old task and starts `alpha-goal` in a new task directory rather than editing or reopening the old contract or checkpoint.
+`alpha-goal` compiles directly from the raw request, attributable inputs, and discovered facts. Consuming any `DESIGN_READY` proposal forces `PERSIST`; `DIRECT` must ignore the design completely. A design path is provenance only. A constraint affects execution or acceptance only after it is written explicitly into the Goal Contract. `alpha-goal` sets the contract to `accepted` only after Readiness and Self-Review pass; there is no separate contract-confirmation ceremony.
 
-`deep-interview` and `technical-design` provide optional attributable, non-authoritative inputs. A source path creates no execution obligation; only content written into the Goal Contract by `alpha-goal` and explicitly accepted can constrain execution. `DIRECT` keeps the complete Goal Frame in current context, creates no Alpha Goal state or native goal, and does not call `executor` or `verifier`. After a `PERSIST` contract is explicitly accepted, Alpha Goal reuses any unfinished native goal in the current thread; it creates one only when none is unfinished. Native state is lifecycle metadata and never replaces contract authority or acceptance evidence. The only canonical `PERSIST` lifecycle artifacts remain `goal-contract.md` and `checkpoint.md`.
-
-The installer always installs the three goal-engineering skills: `deep-interview`, `alpha-goal`, and `technical-design`. The complete `PERSIST` execution and final-audit loop additionally requires the optional `executor` and `verifier` pair.
-
-- `goal-contract.md`: maintained by `alpha-goal` while draft; after explicit acceptance it is immutable under the protocol and becomes standard structured input to executor and verifier.
-- `checkpoint.md`: records the accepted contract identity and execution/terminal-audit state. Only `active_owner` may write; each write increments `checkpoint_revision` once and assigns the next owner last. The writer re-reads current state and stops on owner, revision, or content conflict.
-
-Routing uses material impact, side effects, recovery needs, and verifiability. Confidence, file count, step count, question count, and estimated duration are not risk proxies.
+`executor` and `verifier` accept only an accepted Goal Contract with `issued_by: alpha-goal`. They may read a design as explanatory context only after path, ready status, and workspace match, and must not expand scope, acceptance criteria, or checklists from it. `checkpoint.md` retains the sequential single-writer protocol.
 
 ## Quick start
 
@@ -101,15 +90,15 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
   <tbody>
     <tr>
       <td width="180" align="left"><a href="skills/deep-interview/"><code>deep-interview</code></a></td>
-      <td align="left">Perform explicitly requested or caller-bounded deep clarification and return attributable facts, decisions, and gaps without choosing a route or granting execution authority.</td>
+      <td align="left">Independently clarify ambiguous or high-impact requests and maintain append-only <code>interview.md</code> when durable provenance is needed, without choosing a route or granting execution authority.</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/alpha-goal/"><code>alpha-goal</code></a></td>
-      <td align="left">Clarify intent, boundaries, and acceptance evidence, form a Goal Frame, and produce a Goal Contract when persistent closure is required.</td>
+      <td align="left">Choose DIRECT/PERSIST from raw and attributable input, compile and self-review the Goal Contract, then generate and synchronize the native goal objective.</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/technical-design/"><code>technical-design</code></a></td>
-      <td align="left">Produce an explicitly requested, reviewed, non-authoritative technical proposal covering interfaces, data, migration, tests, and risk without creating or accepting a Goal Contract.</td>
+      <td align="left">Maintain canonical <code>technical_design.md</code>, run technical review, and return DESIGN_READY / DESIGN_INPUT_GAP / DESIGN_BLOCKED without creating a Goal Contract.</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/executor/"><code>executor</code></a></td>
@@ -117,7 +106,7 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/verifier/"><code>verifier</code></a></td>
-      <td align="left">Audit fresh evidence for the proposed terminal state, update criterion status, and return <code>PASS_TO_FINAL</code>, <code>NEXT_ITERATION</code>, or <code>BLOCKED</code>.</td>
+      <td align="left">Audit fresh evidence for the proposed terminal state, update criterion status, and return <code>PASS_TO_FINAL</code>, <code>NEXT_ITERATION</code>, <code>BLOCKED</code>.</td>
     </tr>
   </tbody>
 </table>

@@ -28,24 +28,26 @@
       "name": "deep-interview",
       "entry": false,
       "ownedSemantics": [
-        "bounded-requirement-interview",
+        "independent-requirement-clarification",
         "interview-provenance",
-        "clarification-handoff"
+        "append-only-interview-record",
+        "source-neutral-clarification-handoff"
       ],
-      "references": [],
+      "references": [
+        "references/claude-adapter.md"
+      ],
       "scripts": []
     },
     {
       "name": "alpha-goal",
       "entry": true,
       "ownedSemantics": [
-        "goal-framing",
-        "clarification-loop",
+        "raw-input-goal-compilation",
         "entry-route",
         "optional-input-adoption",
         "goal-contract-authority",
-        "explicit-acceptance",
-        "native-goal-binding"
+        "self-review-acceptance",
+        "native-goal-objective-and-sync"
       ],
       "references": [
         "references/goal-contract-book.md",
@@ -57,11 +59,16 @@
       "name": "technical-design",
       "entry": false,
       "ownedSemantics": [
-        "bounded-technical-proposal",
+        "pre-goal-technical-design",
+        "design-input-gap-routing",
         "design-review",
+        "design-recovery",
         "design-handoff"
       ],
-      "references": [],
+      "references": [
+        "references/technical-design-book.md",
+        "references/claude-adapter.md"
+      ],
       "scripts": []
     },
     {
@@ -106,23 +113,51 @@
         "NEXT_ITERATION",
         "BLOCKED"
       ]
+    },
+    "design": {
+      "owner": "technical-design",
+      "values": [
+        "DESIGN_READY",
+        "DESIGN_INPUT_GAP",
+        "DESIGN_BLOCKED"
+      ]
     }
   },
   "artifacts": [
+    {
+      "path": "interview.md",
+      "condition": "durable clarification requested or needed",
+      "sections": [
+        {
+          "name": "append-only-interview-log-and-handoff",
+          "owner": "deep-interview"
+        }
+      ]
+    },
+    {
+      "path": "technical_design.md",
+      "condition": "technical-design stage",
+      "sections": [
+        {
+          "name": "input-classification-proposal-evidence-and-review",
+          "owner": "technical-design"
+        }
+      ]
+    },
     {
       "path": "goal-contract.md",
       "condition": "PERSIST route before target mutation",
       "sections": [
         {
-          "name": "authority-and-boundaries",
+          "name": "objective-deliverables-and-boundaries",
           "owner": "alpha-goal"
         },
         {
-          "name": "success-criteria-and-acceptance-evidence",
+          "name": "acceptance-criteria-and-verification",
           "owner": "alpha-goal"
         },
         {
-          "name": "confirmation-and-explicit-acceptance",
+          "name": "readiness-and-self-review",
           "owner": "alpha-goal"
         }
       ]

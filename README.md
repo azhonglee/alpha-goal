@@ -20,7 +20,7 @@ Alpha Goal 给 AI Agent 一套 Goal Engineering 控制闭环，重点约束三�
     <tr>
       <td width="100" align="left"><strong>目标漂移</strong></td>
       <td align="left">需求没澄清就动手，做着做着方向偏了，顺手改一堆无关内容。</td>
-      <td align="left"><code>alpha-goal</code> 先发现事实、澄清目标、边界、非目标和验收证据，再写出用户确认的 <code>goal-contract.md</code>。</td>
+      <td align="left"><code>alpha-goal</code> 从原始请求、可归因输入和已发现事实编译 <code>goal-contract.md</code>，并仅在 Readiness 与 Self-Review 通过后接受。</td>
     </tr>
     <tr>
       <td width="100" align="left"><strong>行动越界</strong></td>
@@ -41,35 +41,24 @@ Alpha Goal 给 AI Agent 一套 Goal Engineering 控制闭环，重点约束三�
 
 ```mermaid
 flowchart TD
-  I["deep-interview：可选深度澄清"] -.-> A["alpha-goal：形成 Goal Frame"]
-  T["technical-design：可选技术方案"] -.-> A
+  I["deep-interview：独立澄清 / interview.md"] -.-> C["调用者选择下一阶段"]
+  T["technical-design：technical_design.md"] -.-> C
+  C --> A["alpha-goal：编译 Goal Contract"]
   A --> R{"DIRECT / PERSIST"}
-  R --> D["DIRECT：正常执行 + 最终验证"]
-  R --> P["PERSIST：扩展并确认 goal-contract.md"]
-  P --> S["Native Goal Sync：创建或复用线程目标"]
-  S --> E["executor：完成全部 batch、自检并记录 checkpoint.md"]
-  E --> V["verifier：审核拟议终态"]
-  V -->|"NEXT_ITERATION（返工）"| E
-  V -->|"BLOCKED"| B["报告 blocker"]
-  V -->|"PASS_TO_FINAL"| F["最终声明"]
+  R --> D["DIRECT：忽略设计 handoff，正常执行"]
+  R --> P["PERSIST：Self-Review accepted"]
+  P --> S["Native Goal Sync"]
+  S --> E["executor"]
+  E --> V["verifier"]
+  V -->|"NEXT_ITERATION"| E
+  V -->|"BLOCKED / PASS_TO_FINAL"| F["调用者报告"]
 ```
 
-```text
-Trigger -> Frame Goal -> Choose DIRECT/PERSIST
-PERSIST -> Confirm accepted Goal Contract -> Native Goal Sync -> $executor -> Proposed Terminal State -> $verifier -> Rework or Final Claim
-Accepted goal materially changes -> terminate the old checkpoint -> start a new alpha-goal task directory
-```
+`deep-interview` 是独立、source-neutral 的澄清阶段：按需写入 canonical `interview.md`，保留 append-only 问答、来源和未决 gap，不选择执行路由。`technical-design` 是独立的 pre-goal 设计阶段：写入 canonical `technical_design.md`，通过技术评审后返回 `DESIGN_READY`，或返回 `DESIGN_INPUT_GAP` / `DESIGN_BLOCKED`；恢复时必须使用当前上下文保存的精确路径。
 
-Goal Frame 包含 intent、observable outcome、scope/non-goals、constraints、success signals、observers 和 material decisions；已清晰内容直接来自请求与可归因事实，只向相关 authority 追问最高影响的单个 blocking gap，并仅在授权决定及其 material boundaries、执行/证据后果可确定时闭合。Goal Contract 必须被明确接受后才生效；accepted contract 按协议不可变。目标发生材料性变化时，终止旧任务并在新任务目录重新进入 `alpha-goal`，不得改写或重开旧 contract/checkpoint。
+`alpha-goal` 直接从原始请求、可归因输入和已发现事实编译目标。若消费 `DESIGN_READY` 的任何提案，必须走 `PERSIST`；`DIRECT` 必须完全忽略该设计。设计路径只表示 provenance，只有显式写入 Goal Contract 的约束才影响执行或验收。Goal Contract 由 `alpha-goal` 完成 Readiness Gate 和 Self-Review 后设置为 `accepted`，不再增加单独的用户确认仪式。
 
-`deep-interview` 与 `technical-design` 只提供可归因、非权威的可选输入；来源路径本身不产生执行义务，只有被 `alpha-goal` 写入 Goal Contract 并经明确接受的内容才约束执行。`DIRECT` 将完整 Goal Frame 保留在当前上下文，不创建 Alpha Goal 状态或 native goal，也不调用 `executor` 或 `verifier`。`PERSIST` 在契约被明确接受后复用当前线程中未完成的 native goal；没有未完成目标时才创建。native goal 只是 lifecycle metadata，不能替代契约 authority 或验收证据。`PERSIST` 的 canonical lifecycle artifacts 仍只有 `goal-contract.md` 与 `checkpoint.md`。
-
-安装器始终安装 `deep-interview`、`alpha-goal` 与 `technical-design` 三个目标工程技能；完整的 `PERSIST` 执行与终审闭环还需要可选的 `executor` 与 `verifier`。
-
-- `goal-contract.md`：由 `alpha-goal` 在 draft 阶段维护；明确接受后按协议不可变，是 executor 和 verifier 的标准结构化输入。
-- `checkpoint.md`：记录 accepted contract identity 与执行/终态审核状态；仅 `active_owner` 可写，每次写入将 `checkpoint_revision` 增加一次并最后移交 owner。写前必须重读当前状态，owner、revision 或内容冲突时停止。
-
-路由只看材料性影响、副作用、恢复需求和可验证性；不以置信度、文件数、步骤数、问答轮次或预计时长替代风险判断。
+`executor` 与 `verifier` 只接受 `issued_by: alpha-goal` 的 accepted Goal Contract。它们可在路径、ready 状态和 workspace 匹配后读取设计作为解释性上下文，但不得从设计扩张 scope、acceptance criteria 或 checklist。`checkpoint.md` 继续采用 sequential single-writer 协议。
 
 ## 快速开始
 
@@ -101,15 +90,15 @@ $alpha-goal 实现一下这个需求:<YOUR-PRD> or <YOUR-DESCRIPTION>，<YOUR-UX
   <tbody>
     <tr>
       <td width="180" align="left"><a href="skills/deep-interview/"><code>deep-interview</code></a></td>
-      <td align="left">按显式请求或有界委托深入澄清需求，返回可归因事实、决定和未决 gap；不选择路由或授予执行权限。</td>
+      <td align="left">独立澄清模糊或高影响请求，按需维护 append-only <code>interview.md</code>；不选择路由或授予执行权限。</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/alpha-goal/"><code>alpha-goal</code></a></td>
-      <td align="left">在开始工作前聚焦澄清意图、边界、验收证据，形成 Goal Frame，并在需要持久闭环时产出待确认 Goal Contract。</td>
+      <td align="left">从原始请求和可归因输入选择 DIRECT/PERSIST，编译并自审 Goal Contract，再生成和同步 native goal objective。</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/technical-design/"><code>technical-design</code></a></td>
-      <td align="left">按显式请求产出经审查的非权威技术方案，覆盖接口、数据、迁移、测试与风险，不创建或接受 Goal Contract。</td>
+      <td align="left">维护 canonical <code>technical_design.md</code>，完成技术评审并返回 DESIGN_READY / DESIGN_INPUT_GAP / DESIGN_BLOCKED；不创建 Goal Contract。</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/executor/"><code>executor</code></a></td>
