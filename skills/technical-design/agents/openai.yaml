@@ -1,0 +1,4 @@
+interface:
+  display_name: "Technical Design"
+  short_description: "Develop reviewed non-authoritative design options"
+  default_prompt: "Use $technical-design to develop a bounded technical proposal and return a non-authoritative handoff."

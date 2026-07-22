@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-本仓库维护 `alpha-goal` Codex 技能包。公开技能位于 `skills/alpha-goal/`、`skills/executor/`、`skills/verifier/`；目标成帧、需求澄清和 Goal Contract authority 已集中在 `alpha-goal` 主技能。`tools/validation/alpha-goal.json` 是 validator 共享契约，`templates/` 是可选用户配置模板，`scripts/install.sh` 负责受管目录复制安装，`tools/validate_skills.js` 用于本地布局校验。`README.md`、`INSTALL.md`、`MANIFEST.md` 应与这些路径和命令保持一致。
+本仓库维护 `alpha-goal` Codex 技能包。公开技能位于 `skills/deep-interview/`、`skills/alpha-goal/`、`skills/technical-design/`、`skills/executor/`、`skills/verifier/`；深度访谈与技术设计是可选、非权威的前置输入，目标成帧、入口路由和 Goal Contract authority 仍集中在 `alpha-goal` 主技能。`tools/validation/alpha-goal.json` 是 validator 共享契约，`templates/` 是可选用户配置模板，`scripts/install.sh` 负责受管目录复制安装，`tools/validate_skills.js` 用于本地布局校验。`README.md`、`INSTALL.md`、`MANIFEST.md` 应与这些路径和命令保持一致。
 
 ## Build, Test, and Development Commands
 
@@ -27,7 +27,7 @@
 
 ## Testing Guidelines
 
-当前没有独立测试框架。修改技能布局、front matter、安装文档、模板或阶段输出契约后，至少运行 `node tools/validate_skills.js .` 和 `node tools/validate_skills.js --fixtures`。修改 JavaScript 校验脚本时运行对应命令。修改安装入口、内部模块或 smoke 时，逐个运行 `bash -n`；修改 `templates/config.toml`、安装行为或安装说明时，运行 `bash scripts/test-install.sh`。默认运行态记录只写入用户级 Alpha Goal state root：`$HOME/.alpha-goal/<workspace-slug>/`，其中 `<workspace-slug>` 来自稳定 workspace identity：`slug(repo_root or Goal Contract target workspace)`；当前任务的 `goal-contract.md` 是默认入口；executor batches/mutations/raw evidence 与 verifier final-audit observations/criterion status/route 写入同任务目录下的 `checkpoint.md`。
+当前没有独立测试框架。修改技能布局、front matter、安装文档、模板或阶段输出契约后，至少运行 `node tools/validate_skills.js .` 和 `node tools/validate_skills.js --fixtures`。修改 JavaScript 校验脚本时运行对应命令。修改安装入口、内部模块或 smoke 时，逐个运行 `bash -n`；修改 `templates/config.toml`、安装行为或安装说明时，运行 `bash scripts/test-install.sh`。默认运行态记录只写入用户级 Alpha Goal state root：`$HOME/.alpha-goal/<workspace-slug>/`，其中 `<workspace-slug>` 来自稳定 workspace identity：`slug(repo_root or Goal Contract target workspace)`。Goal Contract 仅在明确 acceptance 后生效，accepted contract 按协议不可变；材料性变化必须创建新任务。executor batches/mutations/raw evidence 与 verifier final-audit observations/criterion status/route 写入同任务目录下的 `checkpoint.md`；仅 `active_owner` 可写，每次写入将 `checkpoint_revision` 增加一次并最后移交 owner。
 
 ## Commit & Pull Request Guidelines
 

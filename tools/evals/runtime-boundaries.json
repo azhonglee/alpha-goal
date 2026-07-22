@@ -24,8 +24,8 @@
     },
     {
       "id": "RB05",
-      "scenario": "A Goal Contract says status accepted and has a matching digest, but Acceptance Completeness is missing or false when executor or verifier enters.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Digest integrity cannot replace semantic completeness; entry is rejected without execution, verification verdict, or target mutation." }
+      "scenario": "A Goal Contract says status accepted, but Acceptance Completeness is missing or false when executor or verifier enters.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Status alone cannot replace semantic completeness and explicit acceptance; entry is rejected without execution, verification verdict, or target mutation." }
     },
     {
       "id": "RB06",
@@ -45,7 +45,7 @@
     {
       "id": "RB09",
       "scenario": "The acceptance authority confirms the first draft and alpha-goal fills its Confirmation Record.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Acceptance is allowed only after observers, claim surfaces, prerequisites, feasibility basis, authority, and evidence are complete; confirmation, digest, and status then form one acceptance transaction." }
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Acceptance is allowed only after observers, claim surfaces, prerequisites, feasibility basis, authority, and evidence are complete; the explicit Confirmation Record and status then form one acceptance transaction." }
     },
     {
       "id": "RB10",
@@ -119,8 +119,8 @@
     },
     {
       "id": "RB24",
-      "scenario": "Modify only Scope inside an accepted contract while preserving status and the recorded digest.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Recomputed authority digest detects the payload tamper and rejects entry before execution or a verification verdict." }
+      "scenario": "Modify Scope inside an accepted contract while preserving status and its prior Confirmation Record.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Accepted contracts are immutable by protocol, not tamper-detected. An attributable material change terminates the old task and requires a new Goal Contract; if in-place tampering is suspected or identity no longer matches, stop rather than execute or verify." }
     },
     {
       "id": "RB25",
@@ -159,8 +159,8 @@
     },
     {
       "id": "RB32",
-      "scenario": "A first handoff omits current material-design/touched-risk completeness, while a separate legacy contract is recorded by an existing checkpoint with the same task and accepted digest.",
-      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Reject incomplete content for new initialization or first handoff. Permit the earlier accepted payload to continue only through its matching existing checkpoint, without inferring missing authority or changing its digest-covered historical metadata." }
+      "scenario": "A first handoff omits current material-design/touched-risk completeness, while a separate legacy contract is recorded by an existing checkpoint with the same task and contract identity.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "caller", "invariant": "Reject incomplete content for new initialization or first handoff. Permit the earlier accepted contract to continue only through its matching existing checkpoint, without inferring missing authority or changing historical metadata." }
     },
     {
       "id": "RB33",
@@ -181,6 +181,36 @@
       "id": "RB36",
       "scenario": "After native-goal sync, execution continues through multiple batches and risk boundaries before a proposed terminal state exists.",
       "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "executor", "invariant": "Executor retains ownership, performs proportionate execution checks, and records progress; verifier is not invoked for intermediate slices. Native goal state remains lifecycle metadata and never replaces Goal Contract authority or acceptance evidence." }
+    },
+    {
+      "id": "RB37",
+      "scenario": "The caller requests deeper requirement exploration before alpha-goal and does not request a file.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "deep-interview", "invariant": "Deep interview stays bounded and non-authoritative, asks only material clarification questions, and returns an attributable inline handoff without creating lifecycle state or choosing DIRECT/PERSIST." }
+    },
+    {
+      "id": "RB38",
+      "scenario": "The caller supplies a path to an interview handoff but does not instruct alpha-goal to adopt any of its contents.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "A source path alone creates no loading, adoption, persistence, or execution obligation. Alpha-goal independently inspects only as relevant and grants no authority to the path or handoff." }
+    },
+    {
+      "id": "RB39",
+      "scenario": "Alpha-goal adopts material scope and acceptance content from a deep-interview handoff for a PERSIST task.",
+      "expected": { "entryRoute": "PERSIST", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Adopted handoff content is reconciled with facts and authority, copied explicitly into the Goal Contract, and accepted by the recorded acceptance authority; a link outside the contract is insufficient." }
+    },
+    {
+      "id": "RB40",
+      "scenario": "The caller requests architecture options before alpha-goal but neither explicitly requests a durable design artifact nor supplies an exact output directory.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "technical-design", "invariant": "Technical design returns a reviewed non-authoritative inline handoff, does not invent a storage directory, choose the goal route, accept the proposal, synchronize a native goal, or mutate the target." }
+    },
+    {
+      "id": "RB41",
+      "scenario": "After routing, the caller explicitly delegates an optional handoff write, supplies the exact output path, and records side-effect and replacement authority when needed.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "The optional skill may write only that exact non-lifecycle file and still returns the inline handoff. Without the caller record, exact path, or required replacement authority, it performs no write. The artifact itself grants no authority, and alpha-goal independently decides adoption." }
+    },
+    {
+      "id": "RB42",
+      "scenario": "Alpha-goal receives conflicting interview and technical-design handoffs while retaining its ordinary clarification and routing responsibilities.",
+      "expected": { "entryRoute": "N/A", "verificationRoute": "N/A", "nextOwner": "alpha-goal", "invariant": "Alpha-goal resolves discoverable conflicts, continues its Clarification Loop for authority-owned gaps, chooses DIRECT/PERSIST itself, requires explicit acceptance for PERSIST, records every adopted material item in the Goal Contract, and performs Native Goal Sync only after acceptance." }
     }
   ]
 }

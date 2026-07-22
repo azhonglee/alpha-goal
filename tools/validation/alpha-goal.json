@@ -25,22 +25,44 @@
   },
   "publicSkills": [
     {
+      "name": "deep-interview",
+      "entry": false,
+      "ownedSemantics": [
+        "bounded-requirement-interview",
+        "interview-provenance",
+        "clarification-handoff"
+      ],
+      "references": [],
+      "scripts": []
+    },
+    {
       "name": "alpha-goal",
       "entry": true,
       "ownedSemantics": [
         "goal-framing",
+        "clarification-loop",
         "entry-route",
+        "optional-input-adoption",
         "goal-contract-authority",
-        "accepted-authority-digest",
+        "explicit-acceptance",
         "native-goal-binding"
       ],
       "references": [
         "references/goal-contract-book.md",
         "references/claude-adapter.md"
       ],
-      "scripts": [
-        "scripts/authority-digest.js"
-      ]
+      "scripts": []
+    },
+    {
+      "name": "technical-design",
+      "entry": false,
+      "ownedSemantics": [
+        "bounded-technical-proposal",
+        "design-review",
+        "design-handoff"
+      ],
+      "references": [],
+      "scripts": []
     },
     {
       "name": "executor",
@@ -100,7 +122,7 @@
           "owner": "alpha-goal"
         },
         {
-          "name": "confirmation-and-authority-digest",
+          "name": "confirmation-and-explicit-acceptance",
           "owner": "alpha-goal"
         }
       ]

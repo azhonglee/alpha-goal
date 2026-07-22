@@ -9,8 +9,8 @@ Audit whether the accepted goal is terminally passed, fixable, or blocked withou
 
 ## Enter
 
-- Require an accepted contract, matching task/context checkpoint, and `active_owner: verifier`. Resolve `<alpha-goal-root>` from the selected `alpha-goal/SKILL.md`, never CWD, and require `node <alpha-goal-root>/scripts/authority-digest.js <absolute-contract-path>` to equal `accepted_authority_sha256`.
-- Require complete Acceptance Completeness and a matching Confirmation Record unless an earlier accepted payload is resuming through a checkpoint with the same task and accepted digest. In that legacy case, infer no missing authority and reject any unresolved gap already recorded.
+- Require an accepted contract, matching task/context checkpoint, and `active_owner: verifier`.
+- Require complete Acceptance Completeness and a matching explicit Confirmation Record unless an earlier accepted contract is resuming through a checkpoint with the same canonical task directory, contract path, workspace/repository set, and Confirmation Record source/date. In that legacy case, infer no missing authority and reject any unresolved gap already recorded.
 - Any other invalid entry produces no verdict or checkpoint write.
 - Require the checkpoint to state either proposed final readiness or exhaustion of authorized approaches.
 - Re-observe the final target, delivery, and dependencies. Claim independent verification only when an isolated verifier performed it.

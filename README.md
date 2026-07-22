@@ -2,7 +2,7 @@
 
 语言：简体中文 | [English](README.en.md)
 
-Alpha Goal 是用于 Goal Engineering 的最小持久闭环技能集。它要求智能体先发现事实再提问，基于已接受的 Goal Contract 和必要 checkpoint 恢复执行，在明确边界内行动，并且只在证据支持的范围内做最终声明。
+Alpha Goal 是用于 Goal Engineering 的模块化最小持久闭环技能集。它要求智能体先发现事实再提问，基于已接受的 Goal Contract 和必要 checkpoint 恢复执行，在明确边界内行动，并且只在证据支持的范围内做最终声明。
 
 ## 解决什么问题
 
@@ -41,7 +41,9 @@ Alpha Goal 给 AI Agent 一套 Goal Engineering 控制闭环，重点约束三�
 
 ```mermaid
 flowchart TD
-  A["alpha-goal：澄清需求并形成 Goal Frame"] --> R{"DIRECT / PERSIST"}
+  I["deep-interview：可选深度澄清"] -.-> A["alpha-goal：形成 Goal Frame"]
+  T["technical-design：可选技术方案"] -.-> A
+  A --> R{"DIRECT / PERSIST"}
   R --> D["DIRECT：正常执行 + 最终验证"]
   R --> P["PERSIST：扩展并确认 goal-contract.md"]
   P --> S["Native Goal Sync：创建或复用线程目标"]
@@ -58,14 +60,14 @@ PERSIST -> Confirm accepted Goal Contract -> Native Goal Sync -> $executor -> Pr
 Accepted goal materially changes -> terminate the old checkpoint -> start a new alpha-goal task directory
 ```
 
-Goal Frame 包含 intent、observable outcome、scope/non-goals、constraints、success signals、observers 和 material decisions；已清晰内容直接来自请求与可归因事实，只向相关 authority 追问最高影响的单个 blocking gap，并仅在授权决定及其 material boundaries、执行/证据后果可确定时闭合。accepted goal 发生材料性变化时，旧任务终止；新目标使用新的任务目录重新进入 `alpha-goal`，不重开旧 contract/checkpoint。
+Goal Frame 包含 intent、observable outcome、scope/non-goals、constraints、success signals、observers 和 material decisions；已清晰内容直接来自请求与可归因事实，只向相关 authority 追问最高影响的单个 blocking gap，并仅在授权决定及其 material boundaries、执行/证据后果可确定时闭合。Goal Contract 必须被明确接受后才生效；accepted contract 按协议不可变。目标发生材料性变化时，终止旧任务并在新任务目录重新进入 `alpha-goal`，不得改写或重开旧 contract/checkpoint。
 
-`DIRECT` 将完整 Goal Frame 保留在当前上下文，不创建 Alpha Goal 状态或 native goal，也不调用 `executor` 或 `verifier`。`PERSIST` 在契约被明确接受后复用当前线程中未完成的 native goal；没有未完成目标时才创建。native goal 只是 lifecycle metadata，不能替代契约 authority 或验收证据。`PERSIST` 的 canonical lifecycle artifacts 仍只有 `goal-contract.md` 与 `checkpoint.md`。
+`deep-interview` 与 `technical-design` 只提供可归因、非权威的可选输入；来源路径本身不产生执行义务，只有被 `alpha-goal` 写入 Goal Contract 并经明确接受的内容才约束执行。`DIRECT` 将完整 Goal Frame 保留在当前上下文，不创建 Alpha Goal 状态或 native goal，也不调用 `executor` 或 `verifier`。`PERSIST` 在契约被明确接受后复用当前线程中未完成的 native goal；没有未完成目标时才创建。native goal 只是 lifecycle metadata，不能替代契约 authority 或验收证据。`PERSIST` 的 canonical lifecycle artifacts 仍只有 `goal-contract.md` 与 `checkpoint.md`。
 
-完整的 `PERSIST` 执行与终审闭环需要同时安装 `executor` 和 `verifier`；只安装 `alpha-goal` 适用于不需要该闭环的场景。
+安装器始终安装 `deep-interview`、`alpha-goal` 与 `technical-design` 三个目标工程技能；完整的 `PERSIST` 执行与终审闭环还需要可选的 `executor` 与 `verifier`。
 
-- `goal-contract.md`：由 `alpha-goal` 独占修改；accepted authority payload 是 executor 和 verifier 的标准结构化输入。
-- `checkpoint.md`：记录当前契约 digest 与执行/终态审核状态；`executor`、`verifier` 通过 `checkpoint_revision` 和 `active_owner` 顺序交接，写前必须重读当前状态，冲突时停止并重新判断。
+- `goal-contract.md`：由 `alpha-goal` 在 draft 阶段维护；明确接受后按协议不可变，是 executor 和 verifier 的标准结构化输入。
+- `checkpoint.md`：记录 accepted contract identity 与执行/终态审核状态；仅 `active_owner` 可写，每次写入将 `checkpoint_revision` 增加一次并最后移交 owner。写前必须重读当前状态，owner、revision 或内容冲突时停止。
 
 路由只看材料性影响、副作用、恢复需求和可验证性；不以置信度、文件数、步骤数、问答轮次或预计时长替代风险判断。
 
@@ -77,7 +79,7 @@ node tools/validate_skills.js .
 node tools/validate_skills.js --fixtures
 ```
 
-安装器始终复制 `alpha-goal`，并让用户选择是否成组安装 `executor` 与 `verifier`；Codex/all 还会独立询问是否安装共享契约声明的全局 Custom Agents（默认 Yes），选择 No 会保留已有副本。完整行为和 smoke 流程见 [INSTALL.md](INSTALL.md)。
+安装器始终复制 `deep-interview`、`alpha-goal` 与 `technical-design`，并让用户选择是否成组安装 `executor` 与 `verifier`；Codex/all 还会独立询问是否安装共享契约声明的全局 Custom Agents（默认 Yes），选择 No 会保留已有副本。完整行为和 smoke 流程见 [INSTALL.md](INSTALL.md)。
 
 ## 使用示例
 
@@ -98,8 +100,16 @@ $alpha-goal 实现一下这个需求:<YOUR-PRD> or <YOUR-DESCRIPTION>，<YOUR-UX
   </thead>
   <tbody>
     <tr>
+      <td width="180" align="left"><a href="skills/deep-interview/"><code>deep-interview</code></a></td>
+      <td align="left">按显式请求或有界委托深入澄清需求，返回可归因事实、决定和未决 gap；不选择路由或授予执行权限。</td>
+    </tr>
+    <tr>
       <td width="180" align="left"><a href="skills/alpha-goal/"><code>alpha-goal</code></a></td>
       <td align="left">在开始工作前聚焦澄清意图、边界、验收证据，形成 Goal Frame，并在需要持久闭环时产出待确认 Goal Contract。</td>
+    </tr>
+    <tr>
+      <td width="180" align="left"><a href="skills/technical-design/"><code>technical-design</code></a></td>
+      <td align="left">按显式请求产出经审查的非权威技术方案，覆盖接口、数据、迁移、测试与风险，不创建或接受 Goal Contract。</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/executor/"><code>executor</code></a></td>
@@ -123,4 +133,4 @@ Alpha Goal 让 agent 工作保持目标明确、行动有界、声明受证据�
 - PASS 绑定实际观察到的最终目标与交付状态并终止该 checkpoint；后续工作创建新任务。
 - 时效性证据记录观察时间与失效条件；无法标识的可变表面不得声称精确绑定。
 - Goal Contract 是 executor/verifier 的标准结构化输入；`alpha-goal` 在 accepted `PERSIST` 交接前复用或创建 native goal。
-- `tools/evals/runtime-boundaries.json` 固化 36 个静态边界预期；结构校验通过不等于真实运行证据。
+- `tools/evals/runtime-boundaries.json` 固化 42 个静态边界预期；结构校验通过不等于真实运行证据。

@@ -263,7 +263,9 @@ render_install_review() {
   esac
   menu_print_line ""
   menu_print_line "${bold}Features${reset}"
+  menu_print_line "  deep-interview        ${green}enabled${reset}"
   menu_print_line "  alpha-goal            ${green}enabled${reset}"
+  menu_print_line "  technical-design      ${green}enabled${reset}"
   menu_print_line "  executor + verifier   $(format_enabled "$optional_roles")"
   if [[ "$target" == codex || "$target" == all ]]; then
     menu_print_line "  Codex Custom Agents   $(format_enabled "$custom_agents")"

@@ -5,7 +5,7 @@ description: "Clarify and frame read-only/change work as an executable, verifiab
 
 # Alpha Goal
 
-Turn request and discovered facts into a clear goal. Own goal framing, entry routing, and Goal Contract authority; do not implement or verify persistent work.
+Turn request, discovered facts, and any optional handoff into a clear goal. Own goal framing, entry routing, adoption, and Goal Contract authority; do not implement or verify persistent work.
 
 ## Frame Before Routing
 
@@ -18,7 +18,7 @@ For every task handled by this skill, derive a minimal Goal Frame:
 - falsifiable success signals and observers;
 - unresolved decisions that could change authority, boundaries, execution/risk, or acceptance evidence.
 
-Use decisions only from the relevant authority and facts only from attributable sources. Descriptive evidence or an agent recommendation never supplies missing authority. A complete `DIRECT` frame may remain in context; create no lifecycle artifact.
+Use decisions only from the relevant authority and facts only from attributable sources. Descriptive evidence or an agent recommendation never supplies missing authority. Optional `deep-interview` or `technical-design` output is non-authoritative input: a source path alone creates no duty to load, adopt, persist, or execute it. Reconcile any handoff with current facts and authority; copy only adopted content into the Goal Frame. A complete `DIRECT` frame may remain in context; create no lifecycle artifact.
 
 ## Clarification Loop
 
@@ -57,7 +57,7 @@ Ambiguity, confidence, size, duration, or approval alone does not choose persist
 
 For `PERSIST`, resolve `$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/` from the stable workspace basename. Reuse only a matching `draft`. If that name already holds an accepted, terminated, completed, or unrelated task, choose the first unused `-2`, `-3`, ... suffix; never reopen it.
 
-- Read `references/goal-contract-book.md`; create canonical `goal-contract.md` as `draft` and expand the Goal Frame with authority, side-effect, decision, claim, evidence, freshness, and invalidation boundaries.
+- Read `references/goal-contract-book.md`; create canonical `goal-contract.md` as `draft` and expand the Goal Frame with authority, side-effect, decision, claim, evidence, freshness, and invalidation boundaries. Record every adopted handoff decision, boundary, proposal, assumption, or constraint explicitly in the contract; leave unadopted material out or identify it as non-authoritative context.
 - Only the relevant authority may defer a goal item. No blocking gap may reach confirmation, handoff, or target mutation.
 - Keep authority-retained material design, rollout/rollback, acceptance, mutable surfaces, and observers in the Goal Contract rather than a second authority artifact.
 
@@ -78,7 +78,7 @@ At confirmation:
 
 After the decision:
 
-- On accept, complete Acceptance Completeness and the Confirmation Record, compute the authority-payload digest, set `status: accepted` last, perform Native Goal Sync, and hand off the canonical contract to the designated execution owner.
+- On accept, complete Acceptance Completeness and the Confirmation Record, set `status: accepted` last, perform Native Goal Sync, and hand off the canonical contract to the designated execution owner.
 - On refine/reject, remain `draft`; do not mutate the target or native goal.
 - After acceptance, a material goal or authority change is a new task: do not edit or reuse the accepted contract or checkpoint. If acceptance exists without a checkpoint, confirm the accepted goal is still current before handoff.
 

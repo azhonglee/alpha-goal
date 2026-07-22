@@ -1,0 +1,4 @@
+interface:
+  display_name: "Deep Interview"
+  short_description: "Clarify material goal ambiguity without authority"
+  default_prompt: "Use $deep-interview to clarify this request and return a bounded non-authoritative handoff."

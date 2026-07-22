@@ -5,13 +5,13 @@ description: "Execute or resume all authorized work bound to one accepted PERSIS
 
 # Executor
 
-Execute the accepted outcome without changing its authority payload.
+Execute the accepted outcome without changing the Goal Contract.
 
 ## Enter
 
-- Require canonical `goal-contract.md` with `status: accepted`; match the recorded task, workspace/repositories, worktree/branch, and current instructions. Resolve `<alpha-goal-root>` from the selected `alpha-goal/SKILL.md`, never CWD, and require `node <alpha-goal-root>/scripts/authority-digest.js <absolute-contract-path>` to equal `accepted_authority_sha256`.
+- Require canonical `goal-contract.md` with `status: accepted`, complete Acceptance Completeness, and a matching explicit Confirmation Record; match the recorded task, workspace/repositories, worktree/branch, and current instructions.
 - For a first handoff with no checkpoint, also require complete Acceptance Completeness and a matching Confirmation Record, then create canonical `checkpoint.md` with `checkpoint_revision: 0`, `state_revision: 0`, `active_owner: executor`, contract/state identity, criterion observers/freshness, and empty execution and verification records.
-- An earlier accepted payload lacking current mandatory rows may resume only through an existing checkpoint with the same task and accepted digest and `active_owner: executor`. Infer no missing authority and reject any unresolved gap already recorded.
+- An earlier accepted contract lacking current mandatory rows may resume only through an existing checkpoint with the same canonical task directory, contract path, workspace/repository set, and Confirmation Record source/date and `active_owner: executor`. Infer no missing authority and reject any unresolved gap already recorded.
 - Any other invalid entry authorizes no target or checkpoint write.
 - Treat a legacy `active_owner: alpha-goal` checkpoint as obsolete: verify its identity, record `termination_reason: GOAL_CHANGED`, hand it to `caller`, and do not execute it. A legacy `.lock` is an unresolved conflict; stop without writing.
 

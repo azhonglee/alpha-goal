@@ -3,6 +3,9 @@ set -euo pipefail
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd -- "$script_dir/.." && pwd -P)"
+core_skills=(deep-interview alpha-goal technical-design)
+optional_role_skills=(executor verifier)
+managed_public_skills=("${core_skills[@]}" "${optional_role_skills[@]}")
 smoke_root="$(mktemp -d "${TMPDIR:-/tmp}/alpha-goal-install-smoke.XXXXXX")"
 
 cleanup() {
@@ -281,6 +284,8 @@ grep -q "Step 2 of 3" <<<"$codex_output"
 grep -q "Step 3 of 3" <<<"$codex_output"
 grep -q "Review installation" <<<"$codex_output"
 grep -q "$tmp_codex/.codex/skills" <<<"$codex_output"
+grep -q "deep-interview" <<<"$codex_output"
+grep -q "technical-design" <<<"$codex_output"
 grep -q "executor + verifier" <<<"$codex_output"
 grep -q "Codex Custom Agents" <<<"$codex_output"
 ! grep -q "Install executor and verifier \[Y/n\]" <<<"$codex_output"
@@ -288,16 +293,13 @@ grep -q "Codex Custom Agents" <<<"$codex_output"
 ! grep -q "Codex home \\[" <<<"$codex_output"
 ! grep -q "Replace external" <<<"$codex_output"
 ! grep -q "Sync user templates" <<<"$codex_output"
-! grep -q "Sync Codex user hooks" <<<"$codex_output"
 ! grep -q "Print detailed" <<<"$codex_output"
-for skill in alpha-goal executor verifier; do
+for skill in "${managed_public_skills[@]}"; do
   test -d "$tmp_codex/.codex/skills/$skill"
   test ! -L "$tmp_codex/.codex/skills/$skill"
   test -f "$tmp_codex/.codex/skills/$skill/SKILL.md"
   assert_skill_tree_matches "$repo_root/skills/$skill" "$tmp_codex/.codex/skills/$skill"
 done
-test -x "$tmp_codex/.codex/skills/alpha-goal/scripts/authority-digest.js"
-test "$(node "$repo_root/skills/alpha-goal/scripts/authority-digest.js" "$repo_root/skills/alpha-goal/references/goal-contract-book.md")" = "$(node "$tmp_codex/.codex/skills/alpha-goal/scripts/authority-digest.js" "$tmp_codex/.codex/skills/alpha-goal/references/goal-contract-book.md")"
 test -f "$tmp_codex/.codex/AGENTS.md"
 test -f "$tmp_codex/.codex/config.toml"
 test -f "$tmp_codex/.codex/hooks.json"
@@ -321,11 +323,7 @@ grep -q "codex-alpha-goal-compact-recovery:v4" "$tmp_codex/.codex/hooks.json"
 grep -q "Use only an explicit current artifact path" "$tmp_codex/.codex/hooks.json"
 grep -q "follow top-level active_owner" "$tmp_codex/.codex/hooks.json"
 grep -q "Re-read before any sequential write" "$tmp_codex/.codex/hooks.json"
-grep -q "Legacy alpha-goal owner loads executor only to terminate it to caller" "$tmp_codex/.codex/hooks.json"
-grep -q "caller reports PASS/BLOCKED/GOAL_CHANGED as terminal" "$tmp_codex/.codex/hooks.json"
-grep -q "Later work uses a new Alpha Goal task directory" "$tmp_codex/.codex/hooks.json"
-grep -q "accepted with valid completeness/digest loads alpha-goal to confirm the goal is unchanged" "$tmp_codex/.codex/hooks.json"
-! grep -q "technical_design.md" "$tmp_codex/.codex/hooks.json"
+grep -q "complete Acceptance Completeness and an explicit Confirmation Record" "$tmp_codex/.codex/hooks.json"
 grep -q "checkpoint.md" "$tmp_codex/.codex/hooks.json"
 
 tmp_codex_override="$(mktemp -d)"
@@ -336,7 +334,7 @@ test -f "$override_codex_home/AGENTS.md"
 test -f "$override_codex_home/config.toml"
 test -f "$override_codex_home/hooks.json"
 assert_custom_agents_match "$override_codex_home"
-for skill in alpha-goal executor verifier; do
+for skill in "${managed_public_skills[@]}"; do
   assert_skill_tree_matches "$repo_root/skills/$skill" "$override_codex_home/skills/$skill"
 done
 test ! -e "$tmp_codex_override/.codex"
@@ -347,11 +345,15 @@ codex_no_home_root="$tmp_codex_no_home/codex"
 codex_no_home_output="$(UNSET_HOME=true INSTALL_CODEX_HOME="$codex_no_home_root" run_installer "$tmp_codex_no_home")"
 assert_simple_success_output "$codex_no_home_output" "Alpha Goal install completed."
 test -f "$codex_no_home_root/config.toml"
-test -f "$codex_no_home_root/skills/alpha-goal/SKILL.md"
+for skill in "${managed_public_skills[@]}"; do
+  test -f "$codex_no_home_root/skills/$skill/SKILL.md"
+done
 grep -q 'claude unavailable (HOME unset)' <<<"$codex_no_home_output"
 codex_no_home_uninstall_output="$(UNSET_HOME=true INSTALL_CODEX_HOME="$codex_no_home_root" run_installer "$tmp_codex_no_home" --uninstall)"
 assert_simple_success_output "$codex_no_home_uninstall_output" "Alpha Goal uninstall completed."
-test ! -e "$codex_no_home_root/skills/alpha-goal"
+for skill in "${managed_public_skills[@]}"; do
+  test ! -e "$codex_no_home_root/skills/$skill"
+done
 
 tmp_no_home_targets="$(mktemp -d)"
 for target in claude all; do
@@ -372,7 +374,7 @@ fi
 grep -q 'Install targets overlap' <<<"$nested_overlap_output"
 test ! -e "$nested_codex_home/AGENTS.md"
 
-for skill in executor verifier; do
+for skill in "${optional_role_skills[@]}"; do
   mkdir -p "$tmp_codex/.codex/skills/$skill/scripts"
   printf 'obsolete script\n' > "$tmp_codex/.codex/skills/$skill/scripts/obsolete.js"
 done
@@ -401,33 +403,47 @@ assert_simple_success_output "$custom_agents_upgrade_output" "Alpha Goal install
 assert_custom_agents_match "$tmp_codex/.codex"
 
 hooks_before_skip="$(shasum -a 256 "$tmp_codex/.codex/hooks.json" | awk '{print $1}')"
-for skill in executor verifier; do
+for skill in "${optional_role_skills[@]}"; do
   printf 'preserve me\n' > "$tmp_codex/.codex/skills/$skill/preserve-sentinel"
+done
+for skill in "${core_skills[@]}"; do
+  printf 'replace me\n' > "$tmp_codex/.codex/skills/$skill/core-update-sentinel"
 done
 codex_skip_roles_output="$(OPTIONAL_ROLES_INPUT=n run_installer "$tmp_codex")"
 assert_simple_success_output "$codex_skip_roles_output" "Alpha Goal install completed."
 test "$hooks_before_skip" = "$(shasum -a 256 "$tmp_codex/.codex/hooks.json" | awk '{print $1}')"
-for skill in executor verifier; do
+for skill in "${optional_role_skills[@]}"; do
   grep -q "preserve me" "$tmp_codex/.codex/skills/$skill/preserve-sentinel"
 done
+for skill in "${core_skills[@]}"; do
+  assert_skill_tree_matches "$repo_root/skills/$skill" "$tmp_codex/.codex/skills/$skill"
+  test ! -e "$tmp_codex/.codex/skills/$skill/core-update-sentinel"
+done
 
-tmp_alpha_only="$(mktemp -d)"
-alpha_only_output="$(OPTIONAL_ROLES_INPUT=n CUSTOM_AGENTS_INPUT=n run_installer "$tmp_alpha_only")"
-assert_simple_success_output "$alpha_only_output" "Alpha Goal install completed."
-assert_skill_tree_matches "$repo_root/skills/alpha-goal" "$tmp_alpha_only/.codex/skills/alpha-goal"
-test ! -e "$tmp_alpha_only/.codex/skills/executor"
-test ! -e "$tmp_alpha_only/.codex/skills/verifier"
-test -f "$tmp_alpha_only/.codex/AGENTS.md"
-test -f "$tmp_alpha_only/.codex/config.toml"
-test ! -e "$tmp_alpha_only/.codex/hooks.json"
-test ! -e "$tmp_alpha_only/.codex/agents"
-! grep -q 'alpha-goal-managed-custom-agent-routing' "$tmp_alpha_only/.codex/AGENTS.md"
+tmp_core_only="$(mktemp -d)"
+core_only_output="$(OPTIONAL_ROLES_INPUT=n CUSTOM_AGENTS_INPUT=n run_installer "$tmp_core_only")"
+assert_simple_success_output "$core_only_output" "Alpha Goal install completed."
+for skill in "${core_skills[@]}"; do
+  assert_skill_tree_matches "$repo_root/skills/$skill" "$tmp_core_only/.codex/skills/$skill"
+done
+for skill in "${optional_role_skills[@]}"; do
+  test ! -e "$tmp_core_only/.codex/skills/$skill"
+done
+test -f "$tmp_core_only/.codex/AGENTS.md"
+test -f "$tmp_core_only/.codex/config.toml"
+test ! -e "$tmp_core_only/.codex/hooks.json"
+test ! -e "$tmp_core_only/.codex/agents"
+! grep -q 'alpha-goal-managed-custom-agent-routing' "$tmp_core_only/.codex/AGENTS.md"
 
 tmp_wizard_back="$(mktemp -d)"
 wizard_back_output="$(WIZARD_MODE=back-disable-roles run_installer "$tmp_wizard_back")"
 assert_simple_success_output "$wizard_back_output" "Alpha Goal install completed."
-test ! -e "$tmp_wizard_back/.codex/skills/executor"
-test ! -e "$tmp_wizard_back/.codex/skills/verifier"
+for skill in "${core_skills[@]}"; do
+  assert_skill_tree_matches "$repo_root/skills/$skill" "$tmp_wizard_back/.codex/skills/$skill"
+done
+for skill in "${optional_role_skills[@]}"; do
+  test ! -e "$tmp_wizard_back/.codex/skills/$skill"
+done
 test ! -e "$tmp_wizard_back/.codex/hooks.json"
 assert_custom_agents_match "$tmp_wizard_back/.codex"
 
@@ -491,7 +507,8 @@ hooks_backup_count="$(find "$tmp_hooks_backup/.codex" -maxdepth 1 -type f -name 
 test "$hooks_backup_count" -eq 1
 hooks_backup_file="$(find "$tmp_hooks_backup/.codex" -maxdepth 1 -type f -name 'hooks.json.bak-*')"
 cmp "$tmp_hooks_backup/hooks-before.json" "$hooks_backup_file"
-grep -q 'codex-alpha-goal-compact-recovery' "$tmp_hooks_backup/.codex/hooks.json"
+grep -q 'codex-alpha-goal-compact-recovery:v4' "$tmp_hooks_backup/.codex/hooks.json"
+grep -q 'printf user-hook' "$tmp_hooks_backup/.codex/hooks.json"
 
 tmp_claude="$(mktemp -d)"
 mkdir -p "$tmp_claude/.codex/agents"
@@ -499,7 +516,7 @@ printf 'claude-must-not-touch\n' > "$tmp_claude/.codex/agents/scout.toml"
 claude_agent_before="$(shasum -a 256 "$tmp_claude/.codex/agents/scout.toml" | awk '{print $1}')"
 claude_output="$(INSTALL_CODEX_HOME="$tmp_claude/custom-codex" TARGET_CHOICE=claude run_installer "$tmp_claude")"
 assert_simple_success_output "$claude_output" "Alpha Goal install completed."
-for skill in alpha-goal executor verifier; do
+for skill in "${managed_public_skills[@]}"; do
   test -d "$tmp_claude/.claude/skills/$skill"
   test ! -L "$tmp_claude/.claude/skills/$skill"
   test -f "$tmp_claude/.claude/skills/$skill/SKILL.md"
@@ -517,6 +534,22 @@ test ! -e "$tmp_claude/.codex/agents/reviewer.toml"
 ! grep -q "references/claude-adapter.md" "$tmp_claude/.claude/skills/alpha-goal/SKILL.md"
 grep -q '\$HOME/.claude/skills/alpha-goal/references/claude-adapter.md' "$tmp_claude/.claude/CLAUDE.md"
 cmp "$repo_root/skills/alpha-goal/references/claude-adapter.md" "$tmp_claude/.claude/skills/alpha-goal/references/claude-adapter.md"
+for skill in "${optional_role_skills[@]}"; do
+  printf 'preserve claude role\n' > "$tmp_claude/.claude/skills/$skill/preserve-sentinel"
+done
+for skill in "${core_skills[@]}"; do
+  printf 'replace claude core\n' > "$tmp_claude/.claude/skills/$skill/core-update-sentinel"
+done
+claude_skip_roles_output="$(INSTALL_CODEX_HOME="$tmp_claude/custom-codex" TARGET_CHOICE=claude OPTIONAL_ROLES_INPUT=n run_installer "$tmp_claude")"
+assert_simple_success_output "$claude_skip_roles_output" "Alpha Goal install completed."
+for skill in "${optional_role_skills[@]}"; do
+  grep -q "preserve claude role" "$tmp_claude/.claude/skills/$skill/preserve-sentinel"
+done
+for skill in "${core_skills[@]}"; do
+  assert_skill_tree_matches "$repo_root/skills/$skill" "$tmp_claude/.claude/skills/$skill"
+  test ! -e "$tmp_claude/.claude/skills/$skill/core-update-sentinel"
+done
+test ! -e "$tmp_claude/custom-codex"
 
 tmp_all="$(mktemp -d)"
 all_install_output="$(TARGET_CHOICE=all run_installer "$tmp_all")"
@@ -524,9 +557,8 @@ assert_simple_success_output "$all_install_output" "Alpha Goal install completed
 ! grep -q "Codex home \\[" <<<"$all_install_output"
 ! grep -q "Replace external" <<<"$all_install_output"
 ! grep -q "Sync user templates" <<<"$all_install_output"
-! grep -q "Sync Codex user hooks" <<<"$all_install_output"
 ! grep -q "Print detailed" <<<"$all_install_output"
-for skill in alpha-goal executor verifier; do
+for skill in "${managed_public_skills[@]}"; do
   test -d "$tmp_all/.codex/skills/$skill"
   test -d "$tmp_all/.claude/skills/$skill"
 done
@@ -539,20 +571,23 @@ assert_custom_agents_match "$tmp_all/.codex"
 ! grep -q "references/claude-adapter.md" "$tmp_all/.claude/skills/alpha-goal/SKILL.md"
 grep -q '\$HOME/.claude/skills/alpha-goal/references/claude-adapter.md' "$tmp_all/.claude/CLAUDE.md"
 
-tmp_alpha_only_all="$(mktemp -d)"
-alpha_only_all_output="$(TARGET_CHOICE=all OPTIONAL_ROLES_INPUT=n CUSTOM_AGENTS_INPUT=n run_installer "$tmp_alpha_only_all")"
-assert_simple_success_output "$alpha_only_all_output" "Alpha Goal install completed."
-for root in "$tmp_alpha_only_all/.codex/skills" "$tmp_alpha_only_all/.claude/skills"; do
-  assert_skill_tree_matches "$repo_root/skills/alpha-goal" "$root/alpha-goal"
-  test ! -e "$root/executor"
-  test ! -e "$root/verifier"
+tmp_core_only_all="$(mktemp -d)"
+core_only_all_output="$(TARGET_CHOICE=all OPTIONAL_ROLES_INPUT=n CUSTOM_AGENTS_INPUT=n run_installer "$tmp_core_only_all")"
+assert_simple_success_output "$core_only_all_output" "Alpha Goal install completed."
+for root in "$tmp_core_only_all/.codex/skills" "$tmp_core_only_all/.claude/skills"; do
+  for skill in "${core_skills[@]}"; do
+    assert_skill_tree_matches "$repo_root/skills/$skill" "$root/$skill"
+  done
+  for skill in "${optional_role_skills[@]}"; do
+    test ! -e "$root/$skill"
+  done
 done
-test -f "$tmp_alpha_only_all/.codex/AGENTS.md"
-test -f "$tmp_alpha_only_all/.codex/config.toml"
-test ! -e "$tmp_alpha_only_all/.codex/hooks.json"
-test -f "$tmp_alpha_only_all/.claude/CLAUDE.md"
-test ! -e "$tmp_alpha_only_all/.codex/agents"
-! grep -q 'alpha-goal-managed-custom-agent-routing' "$tmp_alpha_only_all/.codex/AGENTS.md"
+test -f "$tmp_core_only_all/.codex/AGENTS.md"
+test -f "$tmp_core_only_all/.codex/config.toml"
+test ! -e "$tmp_core_only_all/.codex/hooks.json"
+test -f "$tmp_core_only_all/.claude/CLAUDE.md"
+test ! -e "$tmp_core_only_all/.codex/agents"
+! grep -q 'alpha-goal-managed-custom-agent-routing' "$tmp_core_only_all/.codex/AGENTS.md"
 
 tmp_upgrade="$(mktemp -d)"
 mkdir -p "$tmp_upgrade/.codex"
@@ -749,7 +784,7 @@ assert_simple_success_output "$merge_uninstall_output" "Alpha Goal uninstall com
 test -f "$tmp_merge/.codex/config.toml"
 grep -q 'keep = "yes"' "$tmp_merge/.codex/config.toml"
 grep -q 'multi_agent = false' "$tmp_merge/.codex/config.toml"
-for skill in alpha-goal executor verifier; do
+for skill in "${managed_public_skills[@]}"; do
   test ! -e "$tmp_merge/.codex/skills/$skill"
 done
 test ! -e "$tmp_merge/.codex/AGENTS.md"
@@ -758,7 +793,7 @@ test ! -e "$tmp_merge/.codex/agents"
 
 all_uninstall_output="$(TARGET_CHOICE=all run_installer "$tmp_all" --uninstall)"
 assert_simple_success_output "$all_uninstall_output" "Alpha Goal uninstall completed."
-for skill in alpha-goal executor verifier; do
+for skill in "${managed_public_skills[@]}"; do
   test ! -e "$tmp_all/.codex/skills/$skill"
   test ! -e "$tmp_all/.claude/skills/$skill"
 done
@@ -780,7 +815,9 @@ while IFS= read -r agent; do
 done < <(contract_agent_names)
 grep -q 'alpha-goal-managed-custom-agent-routing:v1' "$tmp_custom_uninstall_no/.codex/AGENTS.md"
 test "$routing_before_uninstall_skip" != "$(shasum -a 256 "$tmp_custom_uninstall_no/.codex/AGENTS.md" | awk '{print $1}')"
-test ! -e "$tmp_custom_uninstall_no/.codex/skills/alpha-goal"
+for skill in "${managed_public_skills[@]}"; do
+  test ! -e "$tmp_custom_uninstall_no/.codex/skills/$skill"
+done
 
 tmp_markdown_mix="$(mktemp -d)"
 mkdir -p "$tmp_markdown_mix/.codex"
@@ -1016,7 +1053,7 @@ diff -r --no-dereference "$tmp_uninstall_fault/before/claude" "$tmp_uninstall_fa
 test "$(stat -c '%a' "$tmp_uninstall_fault/.codex/agents")" = "711"
 test "$tmp_uninstall_fault/external/config.toml" -ef "$tmp_uninstall_fault/external/config-alias.toml"
 test "$tmp_uninstall_fault/external/skill" -ef "$tmp_uninstall_fault/.codex/skills/verifier"
-grep -q 'user sidecar' "$tmp_uninstall_fault/.codex/hooks.json.tmp"
+test "$(cat "$tmp_uninstall_fault/.codex/hooks.json.tmp")" = "user sidecar"
 
 unmanaged_fault_agent="$(contract_agent_names | tail -1)"
 rm "$tmp_uninstall_fault/.codex/agents/$unmanaged_fault_agent.toml"
@@ -1049,7 +1086,7 @@ rm "$tmp_codex/.codex/agents/$unmanaged_uninstall_agent.toml"
 printf 'user-owned uninstall agent\n' > "$tmp_codex/.codex/agents/$unmanaged_uninstall_agent.toml"
 codex_uninstall_output="$(run_installer "$tmp_codex" --uninstall)"
 assert_simple_success_output "$codex_uninstall_output" "Alpha Goal uninstall completed."
-for skill in alpha-goal executor verifier; do
+for skill in "${managed_public_skills[@]}"; do
   test ! -e "$tmp_codex/.codex/skills/$skill"
 done
 test ! -e "$tmp_codex/.codex/AGENTS.md"
@@ -1065,7 +1102,7 @@ done < <(contract_agent_names)
 
 claude_uninstall_output="$(TARGET_CHOICE=claude run_installer "$tmp_claude" --uninstall)"
 assert_simple_success_output "$claude_uninstall_output" "Alpha Goal uninstall completed."
-for skill in alpha-goal executor verifier; do
+for skill in "${managed_public_skills[@]}"; do
   test ! -e "$tmp_claude/.claude/skills/$skill"
 done
 test ! -e "$tmp_claude/.claude/CLAUDE.md"

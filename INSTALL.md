@@ -10,7 +10,7 @@ scripts/install.sh
 
 `scripts/install.sh` remains the supported entry point. Its implementation is split across `scripts/install/common.sh`, `interactive.sh`, `skills.sh`, `agents.sh`, `markdown.sh`, `config.sh`, `hooks.sh`, `transaction.sh`, `context.sh`, and `preflight.sh`; these modules are internal and are not standalone commands.
 
-The script always copies `alpha-goal` under the selected target's skill root and optionally copies the `executor` / `verifier` role pair:
+The script always copies the `deep-interview` / `alpha-goal` / `technical-design` goal-engineering core under the selected target's skill root and optionally copies the `executor` / `verifier` role pair:
 
 ```text
 codex:  ${CODEX_HOME:-$HOME/.codex}/skills
@@ -18,6 +18,8 @@ claude: $HOME/.claude/skills
 ```
 
 For `codex` and `all`, a separate default-Yes prompt installs the repository's managed Custom Agents under `${CODEX_HOME:-$HOME/.codex}/agents` and their routing block in the same configuration root's `AGENTS.md`. These agent files are user configuration, not skills or plugin components.
+
+For `PERSIST`, a Goal Contract takes effect only after explicit acceptance and is then immutable under the protocol. A material goal change starts a new Alpha Goal task instead of editing the accepted contract. Runtime handoff is recorded in `checkpoint.md`: only `active_owner` writes, each write increments `checkpoint_revision` once, and the next owner is assigned last.
 
 ## Options
 
@@ -34,7 +36,7 @@ The script creates copied skill directories under target-specific independent ro
 - `claude`: sync Claude `CLAUDE.md` and Claude skill copies.
 - `all`: sync or uninstall both Codex and Claude in one run.
 
-Install uses a three-step terminal wizard: Target, Features, and Review. Up/Down moves, Space toggles a feature, Enter advances or confirms, `b` returns to the previous step, and `q` or Escape cancels before any target write. `codex` is the default target. The optional `executor` / `verifier` pair and, for `codex` or `all`, the contract-declared Custom Agents are enabled by default. `alpha-goal` is always installed. Disabling optional roles preserves those skill copies and skips Codex recovery-hook installation or update. Disabling Custom Agents leaves their same-name files and the managed routing block untouched. Claude-only runs never inspect or modify Codex agents. The Review step shows selected roots and features before installation begins. The Codex configuration root is `${CODEX_HOME:-$HOME/.codex}` and can operate without `HOME` when `CODEX_HOME` is set; Claude paths remain based on `$HOME/.claude`, so `claude` and `all` require `HOME`. Template sync is enabled and verbose output is disabled. For uninstall, the existing compact flow asks for the target, Codex home when relevant, Custom Agent cleanup when relevant, template cleanup, hook cleanup when relevant, and verbose output; uninstall continues to remove all managed public skills.
+Install uses a three-step terminal wizard: Target, Features, and Review. Up/Down moves, Space toggles a feature, Enter advances or confirms, `b` returns to the previous step, and `q` or Escape cancels before any target write. `codex` is the default target. The optional `executor` / `verifier` pair and, for `codex` or `all`, the contract-declared Custom Agents are enabled by default. `deep-interview`, `alpha-goal`, and `technical-design` are always installed. Disabling optional roles preserves those skill copies and skips Codex recovery-hook installation or update. Disabling Custom Agents leaves their same-name files and the managed routing block untouched. Claude-only runs never inspect or modify Codex agents. The Review step shows selected roots and features before installation begins. The Codex configuration root is `${CODEX_HOME:-$HOME/.codex}` and can operate without `HOME` when `CODEX_HOME` is set; Claude paths remain based on `$HOME/.claude`, so `claude` and `all` require `HOME`. Template sync is enabled and verbose output is disabled. For uninstall, the existing compact flow asks for the target, Codex home when relevant, Custom Agent cleanup when relevant, template cleanup, hook cleanup when relevant, and verbose output; uninstall continues to remove all managed public skills.
 
 Non-interactive runs are refused. Any CLI argument other than `--uninstall`, including `--help`, `--target`, `--codex-home`, `--force`, sync toggles, or `--verbose`, is rejected.
 
@@ -84,7 +86,9 @@ When invoked by absolute path it can run from any working directory because the 
 ## Prompts
 
 ```text
-$alpha-goal 根据请求和已发现事实形成 Goal Frame，再判断走 DIRECT 还是 PERSIST。
+$deep-interview 对显式指定的需求维度做深度澄清并返回非权威 handoff。
+$technical-design 产出经审查的非权威技术方案。
+$alpha-goal 根据请求、已发现事实和可选 handoff 形成 Goal Frame，再判断走 DIRECT 还是 PERSIST。
 $executor 从已接受的 Goal Contract 恢复并执行下一批授权工作。
 $verifier 只审核 executor 提交的拟议终态，并给出最终路由。
 ```
