@@ -1,6 +1,8 @@
 {
   "shouldPass": false,
-  "expectedErrors": ["case ids must be exactly RB01 through RB36 in order"],
+  "expectedErrors": [
+    "case ids must be exactly RB01 through RB42 in order"
+  ],
   "inheritRoot": true,
   "replacements": [
     {

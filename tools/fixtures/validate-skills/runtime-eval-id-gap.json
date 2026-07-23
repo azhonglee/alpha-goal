@@ -1,12 +1,14 @@
 {
   "shouldPass": false,
-  "expectedErrors": ["case ids must be exactly RB01 through RB36 in order"],
+  "expectedErrors": [
+    "case ids must be exactly RB01 through RB42 in order"
+  ],
   "inheritRoot": true,
   "replacements": [
     {
       "file": "tools/evals/runtime-boundaries.json",
-      "search": "\"id\": \"RB36\"",
-      "replace": "\"id\": \"RB37\""
+      "search": "\"id\": \"RB42\"",
+      "replace": "\"id\": \"RB43\""
     }
   ]
 }

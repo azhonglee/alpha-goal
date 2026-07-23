@@ -10,7 +10,7 @@ scripts/install.sh
 
 `scripts/install.sh` remains the supported entry point. Its implementation is split across `scripts/install/common.sh`, `interactive.sh`, `skills.sh`, `agents.sh`, `markdown.sh`, `config.sh`, `hooks.sh`, `transaction.sh`, `context.sh`, and `preflight.sh`; these modules are internal and are not standalone commands.
 
-The script always copies `alpha-goal` under the selected target's skill root and optionally copies the `executor` / `verifier` role pair:
+The script always copies the `deep-interview` / `alpha-goal` / `technical-design` goal-engineering core under the selected target's skill root and optionally copies the `executor` / `verifier` role pair:
 
 ```text
 codex:  ${CODEX_HOME:-$HOME/.codex}/skills
@@ -18,6 +18,8 @@ claude: $HOME/.claude/skills
 ```
 
 For `codex` and `all`, a separate default-Yes prompt installs the repository's managed Custom Agents under `${CODEX_HOME:-$HOME/.codex}/agents` and their routing block in the same configuration root's `AGENTS.md`. These agent files are user configuration, not skills or plugin components.
+
+For `PERSIST`, `alpha-goal` compiles the Goal Contract and sets `status: accepted` only after required execution information, authority, observers, and risk treatment are complete. A material goal change starts a new Alpha Goal task instead of editing the accepted contract. Runtime state is recorded in `checkpoint.md` with `phase` set to `executing`, `ready_for_verification`, or `terminal`; verifier audits the current state and returns a verdict.
 
 ## Options
 
@@ -34,7 +36,7 @@ The script creates copied skill directories under target-specific independent ro
 - `claude`: sync Claude `CLAUDE.md` and Claude skill copies.
 - `all`: sync or uninstall both Codex and Claude in one run.
 
-Install uses a three-step terminal wizard: Target, Features, and Review. Up/Down moves, Space toggles a feature, Enter advances or confirms, `b` returns to the previous step, and `q` or Escape cancels before any target write. `codex` is the default target. The optional `executor` / `verifier` pair and, for `codex` or `all`, the contract-declared Custom Agents are enabled by default. `alpha-goal` is always installed. Disabling optional roles preserves those skill copies and skips Codex recovery-hook installation or update. Disabling Custom Agents leaves their same-name files and the managed routing block untouched. Claude-only runs never inspect or modify Codex agents. The Review step shows selected roots and features before installation begins. The Codex configuration root is `${CODEX_HOME:-$HOME/.codex}` and can operate without `HOME` when `CODEX_HOME` is set; Claude paths remain based on `$HOME/.claude`, so `claude` and `all` require `HOME`. Template sync is enabled and verbose output is disabled. For uninstall, the existing compact flow asks for the target, Codex home when relevant, Custom Agent cleanup when relevant, template cleanup, hook cleanup when relevant, and verbose output; uninstall continues to remove all managed public skills.
+Install uses a three-step terminal wizard: Target, Features, and Review. Up/Down moves, Space toggles a feature, Enter advances or confirms, `b` returns to the previous step, and `q` or Escape cancels before any target write. `codex` is the default target. The optional `executor` / `verifier` pair and, for `codex` or `all`, the contract-declared Custom Agents are enabled by default. `deep-interview`, `alpha-goal`, and `technical-design` are always installed. Disabling optional roles preserves those skill copies and skips Codex recovery-hook installation or update. Disabling Custom Agents leaves their same-name files and the managed routing block untouched. Claude-only runs never inspect or modify Codex agents. The Review step shows selected roots and features before installation begins. The Codex configuration root is `${CODEX_HOME:-$HOME/.codex}` and can operate without `HOME` when `CODEX_HOME` is set; Claude paths remain based on `$HOME/.claude`, so `claude` and `all` require `HOME`. Template sync is enabled and verbose output is disabled. For uninstall, the existing compact flow asks for the target, Codex home when relevant, Custom Agent cleanup when relevant, template cleanup, hook cleanup when relevant, and verbose output; uninstall continues to remove all managed public skills.
 
 Non-interactive runs are refused. Any CLI argument other than `--uninstall`, including `--help`, `--target`, `--codex-home`, `--force`, sync toggles, or `--verbose`, is rejected.
 
@@ -54,17 +56,15 @@ Existing same-name Custom Agent files are replaced only when their first line is
 
 Uninstall is conservative outside the managed copied-skill path. It removes only managed Markdown blocks, managed Custom Agent files, managed hooks, `config.toml` that byte-for-byte matches `templates/config.toml`, skill copies with the install marker, and skill symlinks that resolve to this repository. Mixed user Markdown keeps user content, mixed or modified `config.toml` is preserved, unmanaged agents and hooks are preserved, configuration symlinks are not followed or deleted, and unmanaged skill directories or external symlinks are preserved. The interactive cleanup prompts independently control Custom Agent, Markdown/config, and hook cleanup.
 
-The compact recovery hook definition lives in `templates/hooks.json`. It is a `PostCompact` hook without a matcher and must not set matcher. It reloads only from an explicit current artifact path and delegates identity, owner, recovery, and termination decisions to the selected skills instead of duplicating their protocol.
+The compact recovery hook definition lives in `templates/hooks.json`. It is a matcher-free `PostCompact` stage navigator: use the exact task directory from current context, inspect `checkpoint.md` and `phase` when present, otherwise inspect `goal-contract.md` status, then load only `alpha-goal`, `executor`, or `verifier`. Detailed validation and write protocols remain in those skills.
 
-Native Goal Sync is not hook-driven. On `PERSIST`, `alpha-goal` reuses an unfinished native goal or creates one after explicit Goal Contract acceptance; `DIRECT` creates no native goal.
+Native Goal Sync is not hook-driven. On `PERSIST`, `alpha-goal` reuses only a native goal matching the same accepted contract and generated objective, or creates one after the contract becomes accepted; `DIRECT` creates no native goal.
 
 Hook replacement is keyed by marker family. The current v4 template replaces other managed numbered versions in that family before it is added. The installer also removes the experimental `codex-compact-skill-recovery` family and preserves unmanaged hooks.
 
 Codex may require reviewing and trusting the changed hook with `/hooks` before it runs.
 
 ## Smoke test
-
-Before upgrading, finish any active checkpoint handoff. A remaining legacy `checkpoint.md.lock` is an unresolved conflict; do not guess whether its write completed.
 
 Run the executable smoke from the repository root:
 
@@ -84,7 +84,9 @@ When invoked by absolute path it can run from any working directory because the 
 ## Prompts
 
 ```text
-$alpha-goal 根据请求和已发现事实形成 Goal Frame，再判断走 DIRECT 还是 PERSIST。
+$deep-interview 通过 skill policy 设为仅显式调用，并按需维护 canonical interview.md。
+$technical-design 通过 skill policy 设为仅显式调用，创建并评审 canonical technical_design.md，返回 DESIGN_READY / DESIGN_INPUT_GAP / DESIGN_BLOCKED。
+$alpha-goal 从原始请求和可归因输入编译 Goal Contract，选择 DIRECT/PERSIST，并在自审接受后同步 native goal。
 $executor 从已接受的 Goal Contract 恢复并执行下一批授权工作。
 $verifier 只审核 executor 提交的拟议终态，并给出最终路由。
 ```

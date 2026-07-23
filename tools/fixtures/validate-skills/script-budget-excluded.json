@@ -1,9 +1,12 @@
 {
   "shouldPass": true,
   "inheritRoot": true,
+  "files": {
+    "skills/alpha-goal/scripts/generated.js": ""
+  },
   "repeatFiles": [
     {
-      "file": "skills/alpha-goal/scripts/authority-digest.js",
+      "file": "skills/alpha-goal/scripts/generated.js",
       "text": "x;",
       "count": 10000
     }

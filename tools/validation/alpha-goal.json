@@ -25,22 +25,51 @@
   },
   "publicSkills": [
     {
+      "name": "deep-interview",
+      "entry": false,
+      "ownedSemantics": [
+        "independent-requirement-clarification",
+        "interview-provenance",
+        "append-only-interview-record",
+        "source-neutral-clarification-handoff"
+      ],
+      "references": [
+        "references/claude-adapter.md"
+      ],
+      "scripts": []
+    },
+    {
       "name": "alpha-goal",
       "entry": true,
       "ownedSemantics": [
-        "goal-framing",
+        "raw-input-goal-compilation",
         "entry-route",
+        "optional-input-adoption",
         "goal-contract-authority",
-        "accepted-authority-digest",
-        "native-goal-binding"
+        "contract-acceptance",
+        "native-goal-objective-and-sync"
       ],
       "references": [
         "references/goal-contract-book.md",
         "references/claude-adapter.md"
       ],
-      "scripts": [
-        "scripts/authority-digest.js"
-      ]
+      "scripts": []
+    },
+    {
+      "name": "technical-design",
+      "entry": false,
+      "ownedSemantics": [
+        "pre-goal-technical-design",
+        "design-input-gap-routing",
+        "design-review",
+        "design-recovery",
+        "design-handoff"
+      ],
+      "references": [
+        "references/technical-design-book.md",
+        "references/claude-adapter.md"
+      ],
+      "scripts": []
     },
     {
       "name": "executor",
@@ -49,8 +78,8 @@
         "target-delivery-mutation",
         "raw-execution-evidence",
         "recovery-cursor",
-        "checkpoint-write-protocol",
-        "checkpoint-termination"
+        "checkpoint-update",
+        "checkpoint-phase-and-termination"
       ],
       "references": [],
       "scripts": []
@@ -59,10 +88,9 @@
       "name": "verifier",
       "entry": false,
       "ownedSemantics": [
+        "read-only-terminal-audit",
         "evidence-classification",
-        "terminal-audit-observations",
-        "criterion-status",
-        "evidence-freshness",
+        "criterion-results",
         "final-audit-route"
       ],
       "references": [],
@@ -84,23 +112,47 @@
         "NEXT_ITERATION",
         "BLOCKED"
       ]
+    },
+    "design": {
+      "owner": "technical-design",
+      "values": [
+        "DESIGN_READY",
+        "DESIGN_INPUT_GAP",
+        "DESIGN_BLOCKED"
+      ]
     }
   },
   "artifacts": [
+    {
+      "path": "interview.md",
+      "condition": "durable clarification requested or needed",
+      "sections": [
+        {
+          "name": "append-only-interview-log-and-handoff",
+          "owner": "deep-interview"
+        }
+      ]
+    },
+    {
+      "path": "technical_design.md",
+      "condition": "technical-design stage",
+      "sections": [
+        {
+          "name": "input-classification-proposal-evidence-and-review",
+          "owner": "technical-design"
+        }
+      ]
+    },
     {
       "path": "goal-contract.md",
       "condition": "PERSIST route before target mutation",
       "sections": [
         {
-          "name": "authority-and-boundaries",
+          "name": "objective-deliverables-and-boundaries",
           "owner": "alpha-goal"
         },
         {
-          "name": "success-criteria-and-acceptance-evidence",
-          "owner": "alpha-goal"
-        },
-        {
-          "name": "confirmation-and-authority-digest",
+          "name": "acceptance-criteria-and-verification",
           "owner": "alpha-goal"
         }
       ]
@@ -110,16 +162,12 @@
       "condition": "accepted PERSIST contract during execution and verification",
       "sections": [
         {
-          "name": "recorded-contract-identity-state-revision-and-write-control",
+          "name": "recorded-contract-identity-and-phase",
           "owner": "executor"
         },
         {
-          "name": "execution-and-stagnation-records",
+          "name": "execution-evidence-gaps-and-termination",
           "owner": "executor"
-        },
-        {
-          "name": "terminal-audit-observations-criterion-status-and-verdict",
-          "owner": "verifier"
         }
       ]
     }

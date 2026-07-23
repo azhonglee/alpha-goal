@@ -2,7 +2,11 @@
   "shouldPass": false,
   "expectedErrors": ["script is missing"],
   "inheritRoot": true,
-  "removeFiles": [
-    "skills/alpha-goal/scripts/authority-digest.js"
+  "replacements": [
+    {
+      "file": "tools/validation/alpha-goal.json",
+      "search": "\"references\": [\n        \"references/goal-contract-book.md\",\n        \"references/claude-adapter.md\"\n      ],\n      \"scripts\": []",
+      "replace": "\"references\": [\n        \"references/goal-contract-book.md\",\n        \"references/claude-adapter.md\"\n      ],\n      \"scripts\": [\n        \"scripts/not-present.js\"\n      ]"
+    }
   ]
 }

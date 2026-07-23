@@ -462,9 +462,9 @@ remove_legacy_codex_skill_links() {
   done
 }
 prepare_skill_selection() {
-  required_skills=(alpha-goal executor verifier)
+  required_skills=(deep-interview alpha-goal technical-design executor verifier)
   renamed_legacy_skills=(control-loop goal-verify)
-  install_skills=(alpha-goal)
+  install_skills=(deep-interview alpha-goal technical-design)
   if [[ "$install_optional_roles" == true ]]; then
     install_skills+=(executor verifier)
   fi
