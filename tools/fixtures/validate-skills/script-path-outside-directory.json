@@ -5,8 +5,8 @@
   "replacements": [
     {
       "file": "tools/validation/alpha-goal.json",
-      "search": "\"scripts/authority-digest.js\"",
-      "replace": "\"SKILL.md\""
+      "search": "\"references\": [\n        \"references/goal-contract-book.md\",\n        \"references/claude-adapter.md\"\n      ],\n      \"scripts\": []",
+      "replace": "\"references\": [\n        \"references/goal-contract-book.md\",\n        \"references/claude-adapter.md\"\n      ],\n      \"scripts\": [\n        \"SKILL.md\"\n      ]"
     }
   ]
 }

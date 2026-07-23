@@ -1,0 +1,7 @@
+interface:
+  display_name: "Deep Interview"
+  short_description: "Clarify material goal gaps into a handoff-ready frame"
+  default_prompt: "Use $deep-interview to clarify this request and maintain the canonical interview.md record."
+
+policy:
+  allow_implicit_invocation: false

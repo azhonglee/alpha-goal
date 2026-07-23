@@ -9,8 +9,9 @@ The codex target installs under ${CODEX_HOME:-$HOME/.codex}. The claude target
 installs independent Claude skill copies under $HOME/.claude/skills.
 
 Install runs ask for the target app configuration and whether to install the
-optional executor/verifier role pair. alpha-goal is always installed. Uninstall
-runs ask for cleanup choices. Non-interactive runs are refused.
+optional executor/verifier role pair. deep-interview, alpha-goal, and
+technical-design are always installed. Uninstall runs ask for cleanup choices.
+Non-interactive runs are refused.
 
 The codex target can also install the repository's managed Custom Agents and
 routing block under the Codex configuration root. It syncs AGENTS.md, config.toml,
