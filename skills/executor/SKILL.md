@@ -1,11 +1,11 @@
 ---
 name: executor
-description: "Execute or resume authorized work for one accepted PERSIST Goal Contract. Use after accepted handoff or a NEXT_ITERATION verdict; execute intermediate batches and prepare the final state for verification without changing the contract or making the final claim."
+description: "Execute or resume one accepted PERSIST Goal Contract. Use after accepted handoff or a NEXT_ITERATION verdict; choose and complete concrete batches until the outcome is ready for verification or no in-boundary approach remains."
 ---
 
 # Executor
 
-Execute the accepted outcome.
+Advance the accepted outcome to verification.
 
 ## Enter
 
@@ -22,11 +22,11 @@ Execute the accepted outcome.
 
 ## Execute
 
-1. Execute useful batches within the accepted scope, side effects, and risk boundary. Before mutation, recheck state identity, prerequisites, rollback/recovery, and evidence impact.
-2. Update target/delivery identity and mark invalidated evidence stale after relevant changes.
-3. Keep `phase: executing` through intermediate batches. Set `phase: ready_for_verification` only when implementation and authorized delivery are complete, or no authorized approach remains and a terminal blocked assessment is required.
+1. While the outcome is not ready for verification, choose the next concrete batch that advances it within the accepted boundaries. Before mutation, recheck current state, prerequisites, permitted side effects, recovery needs, and evidence impact.
+2. Execute the batch, run checks proportionate to its changes, and record actions, mutations, results or failures, recovery state, and evidence. Update target/delivery identity and stale evidence when the state changes.
+3. Continue with the next batch while an in-boundary approach remains. Set `phase: ready_for_verification` when implementation and delivery are complete, or when no such approach remains and a terminal blocker assessment is needed.
 4. Accept verifier output only while the checkpoint remains `phase: ready_for_verification` and its canonical task/checkpoint/contract paths, workspace, repository set, worktree/branch, and observed target/delivery identity match. Record the route and criterion results without reclassifying them:
-   - `NEXT_ITERATION`: record gaps, set `phase: executing`, and begin the authorized rework batch.
+   - `NEXT_ITERATION`: record the gap, set `phase: executing`, and continue from the required rework.
    - `PASS_TO_FINAL` or `BLOCKED`: record verdict and evidence summary, then set `phase: terminal`.
    - `GOAL_CHANGED`: record its attributable source/date, changed field, current identity, and unverified mutations; set `phase: terminal` and start follow-up in a new task directory.
 5. If a material goal or authority change is detected, stop target writes and record `GOAL_CHANGED`, its source, current identity, and unverified mutations with `phase: terminal`.
