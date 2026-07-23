@@ -34,7 +34,7 @@ Recommendation, if useful:
 
 Do not require the user to fill a schema or prescribe a clarification workflow.
 
-Choose `DIRECT` only for authorized read-only work without material disclosure/session/privacy effects or recovery/audit needs, or a clear reversible in-scope local change with direct final-state observation and no unresolved material decision, external/destructive/cross-repository effect, or recovery need.
+Choose `DIRECT` for authorized read-only work or a clear reversible in-scope local change with direct final-state observation, unless a `PERSIST` condition below applies.
 
 Choose `PERSIST` when any condition holds:
 
@@ -43,7 +43,7 @@ Choose `PERSIST` when any condition holds:
 - completion requires recovery across pause, compaction, handoff, or material risk checkpoints;
 - the user or repository requires a Goal Contract or persistent audit evidence.
 
-Ambiguity, confidence, size, duration, or approval alone does not choose persistence. A supplied `DESIGN_READY` handoff selects `PERSIST` whenever any design proposal will be consumed. `DIRECT` may proceed only by ignoring that handoff. On `DIRECT`, create no Goal Contract or native goal; return the relevant outcome, boundaries, completion conditions, and verification context for proportionate execution. Reroute if a persistent condition appears.
+Ambiguity, confidence, size, duration, or approval alone does not choose persistence. Consuming a supplied `DESIGN_READY` proposal selects `PERSIST`; `DIRECT` ignores it. On `DIRECT`, create no Goal Contract or native goal; return the outcome, boundaries, completion conditions, and verification context. Reroute if a `PERSIST` condition appears.
 
 ## Compile the Goal Contract
 
@@ -59,7 +59,7 @@ For every material contract field:
 - treat reference artifacts as context rather than automatic authority;
 - keep the contract `draft` while a material authority gap remains.
 
-No blocking gap may reach acceptance, handoff, target mutation, or Native Goal Sync. Keep only decisions, constraints, risks, and observers that affect execution or claims.
+No blocking gap may reach acceptance, handoff, target mutation, or Native Goal Sync.
 
 Before using a `DESIGN_READY` proposal, require the original request source, verify `Design status: ready`, verify the handoff workspace matches the current target workspace, and verify that its absolute `technical_design.md` path exists. A missing or failed check blocks the design handoff. Record a valid source as `technical-design: <absolute path>`.
 
@@ -78,7 +78,7 @@ Before acceptance:
 - keep `draft` while any known infeasibility, unavailable observer, unidentified claim surface, unmet prerequisite, incomplete authority-retained decision coverage, or material finding remains;
 - for cross-cutting or high-risk work, request independent read-only review from raw artifacts and require no unresolved Critical or High finding.
 
-Handle the result without a contract-confirmation round trip:
+Handle the result:
 
 - if a discoverable or derivable defect exists, keep `draft`, repair the contract, and rerun the checks;
 - if a material authority gap exists, keep `draft` and return the single highest-impact Goal Input Gap Report;
@@ -89,8 +89,6 @@ Handle the result without a contract-confirmation round trip:
 ## Derive Native Goal Objective
 
 Derive a compact native goal objective from the accepted Goal Contract. Include the observable outcome, required completion conditions, critical constraints, primary evidence surface, and canonical contract path.
-
-The derived objective summarizes the finish line for the native goal runtime. The accepted Goal Contract remains the source of truth.
 
 Use this shape:
 
@@ -126,5 +124,4 @@ After acceptance, call `get_goal`.
 
 ## Capability-Conditional Aids
 
-- Delegate independent read-heavy investigation, Goal Contract review, or evidence reruns.
-- Investigation agents never write shared authority artifacts.
+- Delegate independent read-heavy investigation, Goal Contract review, or evidence reruns without assigning shared authority artifacts.

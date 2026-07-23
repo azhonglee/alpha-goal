@@ -2,7 +2,7 @@
 
 For `PERSIST`, `alpha-goal` compiles canonical `goal-contract.md` from the user's raw request, higher-priority instructions, attributable discovered facts, and explicit authority decisions. It owns structuring; callers do not need to provide a prebuilt schema.
 
-The contract is an execution-facing instruction artifact. Following OpenAI goal and prompting principles, make the desired end state measurable, name the verification surface, state hard constraints explicitly, and define an unambiguous finish line. Prefer concise structured sections over narrative history.
+The contract is an execution-facing instruction artifact. Make the desired end state measurable, name the verification surface, state hard constraints explicitly, and define an unambiguous finish line. Prefer concise structured sections over narrative history.
 
 ## Authoring Principles
 
@@ -10,11 +10,9 @@ The contract is an execution-facing instruction artifact. Following OpenAI goal 
 2. **Concrete deliverables.** Name the files, behaviors, artifacts, or external results expected.
 3. **Hard boundaries.** Separate scope, non-goals, constraints, and permitted side effects.
 4. **Falsifiable acceptance.** Every criterion must be pass/fail, not aspirational.
-5. **Explicit verification surface.** Map each criterion to a command, observer, artifact, or inspection path; distinguish proof from proxy evidence.
+5. **Explicit verification surface.** Name the command, observer, artifact, or inspection path for each criterion.
 6. **Clear finish line.** Completion requires all required criteria passed, no blocking gap, no authority drift, and final verification on the delivered state.
-7. **Minimal context.** Record compact `source_references` instead of copying discovery transcripts or narrative history. Include only decisions that constrain execution or claims.
-8. **No invented detail.** Derive facts and consequences when entailed, but unknown authority-owned decisions keep the contract `draft`; do not fill them with defaults or recommendations.
-9. **Native-goal optimized.** The accepted contract must support a compact native goal objective with an observable Outcome, required completion conditions, high-impact Constraints, Evidence, and canonical Contract path.
+7. **No invented detail.** Derive facts and consequences when entailed, but unknown authority-owned decisions keep the contract `draft`; do not fill them with defaults or recommendations.
 
 ## Lifecycle
 
@@ -78,7 +76,5 @@ source_references:
 
 - `status` is the sole lifecycle field. Required content is `workspace`, at least one attributable `source_references` entry, Objective, Boundaries, Acceptance Criteria, Verification, desired-behavior authority, and executor autonomy. Include Deliverables only when material.
 - `source_references` identifies attributable inputs without requiring a producer or filename. Do not copy interview transcripts, discovery notes, or rejected alternatives into the contract.
-- A preceding design is provenance, not authority. Record a ready design source as `technical-design: <absolute path>` only after status, workspace, and path validation. Binding design constraints must also appear explicitly in the contract.
-- Every acceptance criterion must map to an observer. Every observer must support a criterion or material risk.
+- Every acceptance criterion must map to an observer, and proxy evidence must not be presented as proof. Every observer must support a criterion or material risk.
 - Material permitted side effects require attributable side-effect authority. Material or irreversible risk requires treatment and rollback/recovery; otherwise record a compact non-material basis.
-- Keep `draft` while required information, authority, observers, prerequisites, feasibility, claim surfaces, or material risk treatment is unresolved. Set `status: accepted` last after these checks pass; do not require a separate confirmation ceremony.

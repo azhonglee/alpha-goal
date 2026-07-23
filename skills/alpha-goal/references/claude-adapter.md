@@ -5,7 +5,7 @@ Read this reference only when Alpha Goal runs in Claude runtime or a Claude-inst
 ## Principle
 
 - Treat this as a tool-name adapter, not a new source of authority.
-- Keep Goal Contract, checkpoint, route, and evidence semantics unchanged. Treat a preceding `technical-design` handoff as proposal context only.
+- Keep Goal Contract, checkpoint, route, and evidence semantics unchanged.
 - Prefer Claude-native tools when available; otherwise record the adapter gap instead of pretending a Codex tool ran.
 
 ## Tool Mapping
@@ -26,24 +26,9 @@ Read this reference only when Alpha Goal runs in Claude runtime or a Claude-inst
 
 When Alpha Goal says to perform Native Goal Sync in Claude:
 - Do not call Codex-named `create_goal`, `get_goal`, or `update_goal`.
-- If `/goal` is available, pass the generated Native Goal Input to it without replacing or supplementing the contract-derived finish line.
+- If `/goal` is available, pass the generated Native Goal Input to it.
 - If `/goal` is not callable from the current Claude surface, return Native Goal Sync as unavailable in the alpha-goal handoff; do not create or write `checkpoint.md`.
 - Do not treat `TaskCreate` or `TaskUpdate` as proof that a native goal was created.
 - Do not hand off as synced when the adapter gap changes execution authority; ask the user whether to continue without native goal sync.
-
-## Claude Native Goal Mapping
-
-Map the generated structure directly:
-
-```text
-/goal Outcome: <one observable final state>
-Complete when:
-- <required acceptance condition>
-Constraints:
-- <highest-impact boundary>
-Evidence:
-- <primary verification observer>
-Contract: <absolute canonical goal-contract.md path>
-```
 
 Do not add generic requirements such as changed files, a commit, or clean git status unless the accepted Goal Contract requires them.
