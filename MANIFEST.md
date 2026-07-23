@@ -37,7 +37,7 @@ Claude capability adaptation lives in each applicable skill reference (`deep-int
 - `templates/custom-agent-routing.md` is a separately managed global `AGENTS.md` block installed only with the Custom Agent set.
 - `templates/config.toml` declares managed defaults for `features.multi_agent`, `features.default_mode_request_user_input`, and the `agents` limits. The installer fills missing managed keys, preserves existing values, and conservatively removes retired managed fields as described above.
 - `templates/hooks.json` defines one matcher-free `PostCompact` hook with marker `codex-alpha-goal-compact-recovery:v4`.
-- Recovery uses only an explicit artifact path already present in task context and follows top-level `active_owner`; a legacy `alpha-goal` owner is terminated to `caller` instead of resumed. `PASS_TO_FINAL`, `BLOCKED`, and `GOAL_CHANGED` terminate that checkpoint; later work starts a new Alpha Goal task directory. A lone canonical contract with `status: accepted` may initialize its checkpoint only when the goal is unchanged. Recovery never guesses the active task from directory recency.
+- Recovery is stage navigation, not a duplicate protocol: use the exact task directory from current context; `checkpoint.md.active_owner` selects `executor` or `verifier`; without a checkpoint, `goal-contract.md` draft selects `alpha-goal` and accepted selects `executor`; caller/terminal state needs no lifecycle skill. The selected skill owns detailed validation and writes.
 - Hook replacement uses the marker family, so the current v4 template replaces other managed numbered versions and the experimental family while preserving unmanaged hooks.
 
 ## Runtime artifacts

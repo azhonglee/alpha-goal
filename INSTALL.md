@@ -56,7 +56,7 @@ Existing same-name Custom Agent files are replaced only when their first line is
 
 Uninstall is conservative outside the managed copied-skill path. It removes only managed Markdown blocks, managed Custom Agent files, managed hooks, `config.toml` that byte-for-byte matches `templates/config.toml`, skill copies with the install marker, and skill symlinks that resolve to this repository. Mixed user Markdown keeps user content, mixed or modified `config.toml` is preserved, unmanaged agents and hooks are preserved, configuration symlinks are not followed or deleted, and unmanaged skill directories or external symlinks are preserved. The interactive cleanup prompts independently control Custom Agent, Markdown/config, and hook cleanup.
 
-The compact recovery hook definition lives in `templates/hooks.json`. It is a `PostCompact` hook without a matcher and must not set matcher. It reloads only from an explicit current artifact path and delegates identity, owner, recovery, and termination decisions to the selected skills instead of duplicating their protocol.
+The compact recovery hook definition lives in `templates/hooks.json`. It is a matcher-free `PostCompact` stage navigator: use the exact task directory from current context, inspect `checkpoint.md` and `active_owner` when present, otherwise inspect `goal-contract.md` status, then load only `alpha-goal`, `executor`, or `verifier`. Detailed validation and write protocols remain in those skills.
 
 Native Goal Sync is not hook-driven. On `PERSIST`, `alpha-goal` reuses only a native goal matching the same accepted contract and generated objective, or creates one after the contract becomes accepted; `DIRECT` creates no native goal.
 
