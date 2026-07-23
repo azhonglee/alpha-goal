@@ -20,7 +20,7 @@ Alpha Goal 给 AI Agent 一套 Goal Engineering 控制闭环，重点约束三�
     <tr>
       <td width="100" align="left"><strong>目标漂移</strong></td>
       <td align="left">需求没澄清就动手，做着做着方向偏了，顺手改一堆无关内容。</td>
-      <td align="left"><code>alpha-goal</code> 从原始请求、可归因输入和已发现事实编译 <code>goal-contract.md</code>，并仅在 Readiness 与 Self-Review 通过后接受。</td>
+      <td align="left"><code>alpha-goal</code> 从原始请求、可归因输入和已发现事实编译 <code>goal-contract.md</code>，并仅在执行所需信息、授权和验证条件完整后设置为 `accepted`。</td>
     </tr>
     <tr>
       <td width="100" align="left"><strong>行动越界</strong></td>
@@ -46,7 +46,7 @@ flowchart TD
   C --> A["alpha-goal：编译 Goal Contract"]
   A --> R{"DIRECT / PERSIST"}
   R --> D["DIRECT：忽略设计 handoff，正常执行"]
-  R --> P["PERSIST：Self-Review accepted"]
+  R --> P["PERSIST：accepted Goal Contract"]
   P --> S["Native Goal Sync"]
   S --> E["executor"]
   E --> V["verifier"]
@@ -56,9 +56,9 @@ flowchart TD
 
 `deep-interview` 是独立、source-neutral 的澄清阶段：按需写入 canonical `interview.md`，保留 append-only 问答、来源和未决 gap，不选择执行路由。`technical-design` 是独立的 pre-goal 设计阶段：写入 canonical `technical_design.md`，通过技术评审后返回 `DESIGN_READY`，或返回 `DESIGN_INPUT_GAP` / `DESIGN_BLOCKED`；恢复时必须使用当前上下文保存的精确路径。
 
-`alpha-goal` 直接从原始请求、可归因输入和已发现事实编译目标。若消费 `DESIGN_READY` 的任何提案，必须走 `PERSIST`；`DIRECT` 必须完全忽略该设计。设计路径只表示 provenance，只有显式写入 Goal Contract 的约束才影响执行或验收。Goal Contract 由 `alpha-goal` 完成 Readiness Gate 和 Self-Review 后设置为 `accepted`，不再增加单独的用户确认仪式。
+`alpha-goal` 直接从原始请求、可归因输入和已发现事实编译目标。若消费 `DESIGN_READY` 的任何提案，必须走 `PERSIST`；`DIRECT` 必须完全忽略该设计。设计路径只表示 provenance，只有显式写入 Goal Contract 的约束才影响执行或验收。`alpha-goal` 仅在执行所需信息、授权、observer 和风险处理完整后将 Goal Contract 设置为 `accepted`，不增加单独的用户确认仪式或重复 gate 字段。
 
-`executor` 与 `verifier` 只接受 `issued_by: alpha-goal` 的 accepted Goal Contract。它们可在路径、ready 状态和 workspace 匹配后读取设计作为解释性上下文，但不得从设计扩张 scope、acceptance criteria 或 checklist。`checkpoint.md` 继续采用 sequential single-writer 协议。
+`executor` 与 `verifier` 只接受 `status: accepted` 的 canonical Goal Contract。它们可在路径、ready 状态和 workspace 匹配后读取设计作为解释性上下文，但不得从设计扩张 scope、acceptance criteria 或 checklist。`checkpoint.md` 继续采用 sequential single-writer 协议。
 
 ## 快速开始
 
@@ -94,7 +94,7 @@ $alpha-goal 实现一下这个需求:<YOUR-PRD> or <YOUR-DESCRIPTION>，<YOUR-UX
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/alpha-goal/"><code>alpha-goal</code></a></td>
-      <td align="left">从原始请求和可归因输入选择 DIRECT/PERSIST，编译并自审 Goal Contract，再生成和同步 native goal objective。</td>
+      <td align="left">从原始请求和可归因输入选择 DIRECT/PERSIST，检查并接受 Goal Contract，再生成和同步 native goal objective。</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/technical-design/"><code>technical-design</code></a></td>

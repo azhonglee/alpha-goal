@@ -29,7 +29,7 @@
         "entryRoute": "PERSIST",
         "verificationRoute": "N/A",
         "nextOwner": "alpha-goal",
-        "invariant": "External delivery forces PERSIST; alpha-goal compiles a self-reviewed accepted Goal Contract with delivery authority and acceptance evidence before target or delivery mutation."
+        "invariant": "External delivery forces PERSIST; alpha-goal compiles an accepted Goal Contract with delivery authority and acceptance evidence before target or delivery mutation."
       }
     },
     {
@@ -44,12 +44,12 @@
     },
     {
       "id": "RB05",
-      "scenario": "A new Goal Contract says status accepted but lacks passed Self-Review/Readiness, while a preceding-schema accepted task resumes through an existing checkpoint.",
+      "scenario": "A new accepted Goal Contract has a non-empty Authority section but omits desired-behavior authority, side-effect authority for an external write, or recovery for irreversible risk; a preceding-schema task also attempts resume.",
       "expected": {
         "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "caller",
-        "invariant": "Reject the incomplete new contract. Permit the preceding schema only when its checkpoint matches canonical task directory, contract path, workspace/repository set, and Confirmation Record source/date; infer no missing authority."
+        "invariant": "Reject the incomplete new contract: section presence cannot replace attributable desired-behavior authority, authority for material side effects, or treatment and rollback/recovery for material or irreversible risk. Preserve preceding-schema resume only through matching checkpoint identity."
       }
     },
     {
@@ -89,7 +89,7 @@
         "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "executor",
-        "invariant": "Alpha-goal runs Readiness and Self-Review, records the result, and sets status accepted last without a separate user contract-confirmation round."
+        "invariant": "Alpha-goal checks required execution content, authority, observers, prerequisites, risks, and blockers, then sets status accepted last without recording duplicate gate results or requiring a confirmation ceremony."
       }
     },
     {
@@ -234,12 +234,12 @@
     },
     {
       "id": "RB24",
-      "scenario": "Modify Scope inside an accepted contract while preserving status and its prior Self-Review Record.",
+      "scenario": "Modify Scope inside an accepted contract while preserving status.",
       "expected": {
         "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "caller",
-        "invariant": "Accepted contracts are immutable by protocol, not tamper-detected. An attributable material change starts a new task and Goal Contract; suspected in-place tampering or identity mismatch stops execution and verification."
+        "invariant": "Accepted contracts are immutable by protocol. An attributable material change starts a new task and Goal Contract; suspected in-place tampering or identity mismatch stops execution and verification."
       }
     },
     {
@@ -289,7 +289,7 @@
         "entryRoute": "PERSIST",
         "verificationRoute": "N/A",
         "nextOwner": "alpha-goal",
-        "invariant": "A design source reference creates no obligation. Every binding design constraint must be adopted explicitly into Deliverables, Boundaries, Acceptance Criteria, Verification, or Risks and Recovery before Self-Review can pass."
+        "invariant": "A design source reference creates no obligation. Every binding design constraint must be adopted explicitly into Deliverables, Boundaries, Acceptance Criteria, Verification, or Risks and Recovery before the contract can be accepted."
       }
     },
     {
@@ -399,7 +399,7 @@
         "entryRoute": "PERSIST",
         "verificationRoute": "N/A",
         "nextOwner": "executor",
-        "invariant": "Run Readiness and Self-Review, require no unresolved Critical/High finding when independent review is needed, set status accepted last without a separate user contract-confirmation round, derive the structured native goal objective, and synchronize only a matching unfinished goal or create a new one."
+        "invariant": "Check required execution content, authority, observers, prerequisites, risks, blockers, and any required independent review; set status accepted last, derive the structured native goal objective, and synchronize only a matching unfinished goal or create a new one."
       }
     },
     {

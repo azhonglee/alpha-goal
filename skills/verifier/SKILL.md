@@ -9,8 +9,8 @@ Audit whether the accepted goal is terminally passed, fixable, or blocked withou
 
 ## Enter
 
-- Require an accepted contract, matching task/context checkpoint, and `active_owner: verifier`.
-- Require `issued_by: alpha-goal`, a passed Self-Review Record, and complete Readiness Gate. An earlier accepted contract may resume only through a checkpoint matching the identity fields required by that contract version; for the preceding schema, match task directory, contract path, repository set, and Confirmation Record source/date; infer nothing missing.
+- Require an accepted contract with workspace and attributable source references, non-empty Objective/Boundaries/Acceptance Criteria/Verification, desired-behavior authority and executor autonomy, total criterion-to-observer mapping, and no pre-existing blocking gap. Material side effects require attributable authority; material or irreversible risk requires treatment and rollback/recovery, or a compact non-material basis; require a matching task/context checkpoint and `active_owner: verifier`.
+- An earlier accepted contract may resume only through a checkpoint matching the identity fields required by that contract version; for the preceding schema, match task directory, contract path, repository set, and Confirmation Record source/date; infer nothing missing.
 - Any other invalid entry produces no verdict or checkpoint write.
 - Require the checkpoint to state either proposed final readiness or exhaustion of authorized approaches.
 - Re-observe the final target, delivery, and dependencies. Claim independent verification only when an isolated verifier performed it.

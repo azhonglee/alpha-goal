@@ -5,14 +5,14 @@
 | Directory | Owned semantics |
 | --- | --- |
 | `skills/deep-interview/` | Independent requirement clarification, canonical append-only `interview.md`, provenance, and source-neutral handoff. |
-| `skills/alpha-goal/` | Raw-input goal compilation, entry routing, Goal Contract authority, design-handoff validation, self-review acceptance, and native-goal synchronization. |
+| `skills/alpha-goal/` | Raw-input goal compilation, entry routing, Goal Contract authority, design-handoff validation, contract acceptance, and native-goal synchronization. |
 | `skills/technical-design/` | Pre-goal `technical_design.md`, input-gap/blocker routes, technical review, exact-path recovery, and non-authoritative design handoff. |
 | `skills/executor/` | Persistent target/delivery mutation, raw execution evidence, recovery cursor, and goal-change termination. |
 | `skills/verifier/` | Terminal-state observations, evidence classification, criterion status, and final audit route. |
 
 The shared structural contract is `tools/validation/alpha-goal.json`. It declares public skills, semantic owners, routes, conditional artifacts, Custom Agent profiles and distribution files, templates, eval files, and the exclusive instruction-unit budget. It does not validate skill prose.
 
-Native Goal Sync applies only to `PERSIST`: after Self-Review accepts the contract, `alpha-goal` reuses only a native goal for the same contract and generated objective, or creates one when none exists. Native state is not a canonical Alpha Goal artifact or acceptance evidence.
+Native Goal Sync applies only to `PERSIST`: after the contract becomes accepted, `alpha-goal` reuses only a native goal for the same contract and generated objective, or creates one when none exists. Native state is not a canonical Alpha Goal artifact or acceptance evidence.
 
 The installer always copies the deep-interview/alpha-goal/technical-design goal-engineering core and may omit the executor/verifier pair; that pair is required for the repository-defined persistent execution and final-audit loop. When the pair is omitted, the Codex recovery hook is not installed or updated.
 
@@ -37,18 +37,18 @@ Claude capability adaptation lives in each applicable skill reference (`deep-int
 - `templates/custom-agent-routing.md` is a separately managed global `AGENTS.md` block installed only with the Custom Agent set.
 - `templates/config.toml` declares managed defaults for `features.multi_agent`, `features.default_mode_request_user_input`, and the `agents` limits. The installer fills missing managed keys, preserves existing values, and conservatively removes retired managed fields as described above.
 - `templates/hooks.json` defines one matcher-free `PostCompact` hook with marker `codex-alpha-goal-compact-recovery:v4`.
-- Recovery uses only an explicit artifact path already present in task context and follows top-level `active_owner`; a legacy `alpha-goal` owner is terminated to `caller` instead of resumed. `PASS_TO_FINAL`, `BLOCKED`, and `GOAL_CHANGED` terminate that checkpoint; later work starts a new Alpha Goal task directory. A lone accepted contract with a passed Self-Review Record and complete Readiness Gate may initialize its checkpoint only when the goal is unchanged. Recovery never guesses the active task from directory recency.
+- Recovery uses only an explicit artifact path already present in task context and follows top-level `active_owner`; a legacy `alpha-goal` owner is terminated to `caller` instead of resumed. `PASS_TO_FINAL`, `BLOCKED`, and `GOAL_CHANGED` terminate that checkpoint; later work starts a new Alpha Goal task directory. A lone canonical contract with `status: accepted` may initialize its checkpoint only when the goal is unchanged. Recovery never guesses the active task from directory recency.
 - Hook replacement uses the marker family, so the current v4 template replaces other managed numbered versions and the experimental family while preserving unmanaged hooks.
 
 ## Runtime artifacts
 
-`deep-interview` may create canonical `interview.md` for durable clarification; its append-only record is evidence and provenance, not execution authority. `technical-design` creates canonical `technical_design.md`, returns `DESIGN_READY`, `DESIGN_INPUT_GAP`, or `DESIGN_BLOCKED`, and requires exact-path recovery. A ready design remains a proposal. `alpha-goal` validates its path, ready status, workspace, and original request source before adoption; consuming any design proposal requires `PERSIST`, and every binding constraint must be copied into the Goal Contract. Self-Review is the only route to `status: accepted`. Checkpoint updates retain the sequential single-writer protocol.
+`deep-interview` may create canonical `interview.md` for durable clarification; its append-only record is evidence and provenance, not execution authority. `technical-design` creates canonical `technical_design.md`, returns `DESIGN_READY`, `DESIGN_INPUT_GAP`, or `DESIGN_BLOCKED`, and requires exact-path recovery. A ready design remains a proposal. `alpha-goal` validates its path, ready status, workspace, and original request source before adoption; consuming any design proposal requires `PERSIST`, and every binding constraint must be copied into the Goal Contract. `status` is the sole lifecycle field; acceptance requires complete execution information, authority, observers, and risk treatment. Checkpoint updates retain the sequential single-writer protocol.
 
 | Path | Condition and owner |
 | --- | --- |
 | `<state-root>/YYYYMMDD-<task>/interview.md` | Durable clarification record owned by `deep-interview`; source-neutral and non-authoritative. |
 | `<state-root>/YYYYMMDD-<task>/technical_design.md` | Draft/ready technical proposal owned by `technical-design`; exact-path recovery required. |
-| `<state-root>/YYYYMMDD-<task>/goal-contract.md` | Compiled and self-reviewed by `alpha-goal`; accepted contract is the execution authority. |
+| `<state-root>/YYYYMMDD-<task>/goal-contract.md` | Compiled by `alpha-goal`; an accepted contract is the execution authority. |
 | `<state-root>/YYYYMMDD-<task>/checkpoint.md` | Execution/final-audit recovery and evidence handoff with sequential ownership. |
 
 `DIRECT` creates no Goal Contract or native goal. It must ignore a supplied design completely.

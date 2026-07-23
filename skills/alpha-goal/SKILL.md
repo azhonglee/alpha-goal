@@ -59,17 +59,17 @@ For every material contract field:
 - treat reference artifacts as context rather than automatic authority;
 - keep the contract `draft` while a material authority gap remains.
 
-No blocking gap may reach self-review acceptance, handoff, target mutation, or Native Goal Sync. Keep only decisions, constraints, risks, and observers that affect execution or claims.
+No blocking gap may reach acceptance, handoff, target mutation, or Native Goal Sync. Keep only decisions, constraints, risks, and observers that affect execution or claims.
 
 Before using a `DESIGN_READY` proposal, require the original request source, verify `Design status: ready`, verify the handoff workspace matches the current target workspace, and verify that its absolute `technical_design.md` path exists. A missing or failed check blocks the design handoff. Record a valid source as `technical-design: <absolute path>`.
 
 Adopt only proposal content compatible with authority. Express every adopted constraint inside Deliverables, Boundaries, Acceptance Criteria, Verification, or Risks and Recovery; a source reference alone creates no execution obligation. If design is absent but materially required for safe compilation, report the missing prerequisite.
 
-## Self-Review and Accept
+## Check and Accept
 
-Do not ask the user to confirm, accept, refine, or reject the compiled Goal Contract. User input is required only for a material authority-owned decision that cannot be derived or discovered; request that decision through one Goal Input Gap Report before Self-Review.
+Do not ask the user to confirm, accept, refine, or reject the compiled Goal Contract. User input is required only for a material authority-owned decision that cannot be derived or discovered; request that decision through one Goal Input Gap Report before acceptance checks.
 
-Run the Self-Review Gate against the draft:
+Before acceptance:
 
 - verify Objective, Deliverables, Boundaries, Acceptance Criteria, Verification, Authority, Risks and Recovery, and source provenance are internally consistent and attributable;
 - map every required criterion to a currently available observer and identify every claim surface and prerequisite;
@@ -80,11 +80,11 @@ Run the Self-Review Gate against the draft:
 
 Handle the result without a contract-confirmation round trip:
 
-- if a discoverable or derivable defect exists, keep `draft`, repair the contract, and rerun Self-Review;
+- if a discoverable or derivable defect exists, keep `draft`, repair the contract, and rerun the checks;
 - if a material authority gap exists, keep `draft` and return the single highest-impact Goal Input Gap Report;
 - if work is infeasible or blocked, keep `draft`, record the blocker, and do not mutate the target or native goal;
-- when every gate passes, complete the Readiness Gate and Self-Review Record, set `status: accepted` last, generate Native Goal Input, perform Native Goal Sync, and hand off the contract;
-- after self-review acceptance, a material objective or authority change starts a new task. Do not edit or reuse the accepted contract or checkpoint.
+- when every check passes, set `status: accepted` last, generate Native Goal Input, perform Native Goal Sync, and hand off the contract;
+- after acceptance, a material objective or authority change starts a new task. Do not edit or reuse the accepted contract or checkpoint.
 
 ## Derive Native Goal Objective
 

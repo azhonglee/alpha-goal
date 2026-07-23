@@ -20,7 +20,7 @@ Alpha Goal gives AI agents a Goal Engineering control loop for three common fail
     <tr>
       <td width="260" align="left"><strong>Goal&nbsp;drift</strong></td>
       <td align="left">The agent starts before requirements are clear, gradually moves off target, and changes unrelated things along the way.</td>
-      <td align="left"><code>alpha-goal</code> compiles <code>goal-contract.md</code> from the raw request, attributable inputs, and discovered facts, and accepts it only after Readiness and Self-Review pass.</td>
+      <td align="left"><code>alpha-goal</code> compiles <code>goal-contract.md</code> from the raw request, attributable inputs, and discovered facts, and sets it to `accepted` only when execution information, authority, and verification conditions are complete.</td>
     </tr>
     <tr>
       <td width="260" align="left"><strong>Action&nbsp;overreach</strong></td>
@@ -46,7 +46,7 @@ flowchart TD
   C --> A["alpha-goal: compile Goal Contract"]
   A --> R{"DIRECT / PERSIST"}
   R --> D["DIRECT: ignore design handoff and execute normally"]
-  R --> P["PERSIST: Self-Review accepted"]
+  R --> P["PERSIST: accepted Goal Contract"]
   P --> S["Native Goal Sync"]
   S --> E["executor"]
   E --> V["verifier"]
@@ -56,9 +56,9 @@ flowchart TD
 
 `deep-interview` is an independent, source-neutral clarification stage. It may maintain canonical `interview.md` with append-only turns, provenance, and unresolved gaps, but it does not choose an execution route. `technical-design` is an independent pre-goal design stage. It writes canonical `technical_design.md`, returns `DESIGN_READY` after review, or returns `DESIGN_INPUT_GAP` / `DESIGN_BLOCKED`; recovery requires the exact path preserved in current context.
 
-`alpha-goal` compiles directly from the raw request, attributable inputs, and discovered facts. Consuming any `DESIGN_READY` proposal forces `PERSIST`; `DIRECT` must ignore the design completely. A design path is provenance only. A constraint affects execution or acceptance only after it is written explicitly into the Goal Contract. `alpha-goal` sets the contract to `accepted` only after Readiness and Self-Review pass; there is no separate contract-confirmation ceremony.
+`alpha-goal` compiles directly from the raw request, attributable inputs, and discovered facts. Consuming any `DESIGN_READY` proposal forces `PERSIST`; `DIRECT` must ignore the design completely. A design path is provenance only. A constraint affects execution or acceptance only after it is written explicitly into the Goal Contract. `alpha-goal` sets the contract to `accepted` only when execution information, authority, observers, and risk treatment are complete; it adds neither a confirmation ceremony nor duplicate gate fields.
 
-`executor` and `verifier` accept only an accepted Goal Contract with `issued_by: alpha-goal`. They may read a design as explanatory context only after path, ready status, and workspace match, and must not expand scope, acceptance criteria, or checklists from it. `checkpoint.md` retains the sequential single-writer protocol.
+`executor` and `verifier` accept only a canonical Goal Contract with `status: accepted`. They may read a design as explanatory context only after path, ready status, and workspace match, and must not expand scope, acceptance criteria, or checklists from it. `checkpoint.md` retains the sequential single-writer protocol.
 
 ## Quick start
 
@@ -94,7 +94,7 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/alpha-goal/"><code>alpha-goal</code></a></td>
-      <td align="left">Choose DIRECT/PERSIST from raw and attributable input, compile and self-review the Goal Contract, then generate and synchronize the native goal objective.</td>
+      <td align="left">Choose DIRECT/PERSIST from raw and attributable input, check and accept the Goal Contract, then generate and synchronize the native goal objective.</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/technical-design/"><code>technical-design</code></a></td>

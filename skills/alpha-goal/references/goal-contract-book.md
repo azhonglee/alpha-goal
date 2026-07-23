@@ -18,8 +18,8 @@ The contract is an execution-facing instruction artifact. Following OpenAI goal 
 
 ## Lifecycle
 
-- `status: draft`: compilation or Self-Review is incomplete; target mutation is unauthorized.
-- `status: accepted`: alpha-goal passed the Self-Review Gate, completed the Self-Review Record, and satisfied the Readiness Gate.
+- `status: draft`: required execution information or authority is incomplete; target mutation is unauthorized.
+- `status: accepted`: the contract is complete, executable, and ready for handoff.
 - Never return an accepted contract to `draft` or replace its accepted contents. A material objective or authority change starts a new task directory and Goal Contract.
 
 ## Canonical Template
@@ -28,7 +28,6 @@ The contract is an execution-facing instruction artifact. Following OpenAI goal 
 # Goal Contract
 
 status: draft
-issued_by: alpha-goal
 workspace: <canonical workspace identity>
 source_references:
 - <attributable source path, URL, user decision, or current-thread reference>
@@ -53,9 +52,9 @@ source_references:
 - <allowed files, commands, systems, credentials, environments, external writes, and approval crossings>
 
 ## Acceptance Criteria
-| ID | Required pass/fail condition | Priority |
-| --- | --- | --- |
-| AC-1 | <falsifiable condition> | required |
+| ID | Required pass/fail condition |
+| --- | --- |
+| AC-1 | <falsifiable condition> |
 
 ## Verification
 | Criterion | Observer / command / artifact | Pass condition | Freshness / invalidation |
@@ -65,38 +64,21 @@ source_references:
 ## Authority and Approvals
 - Desired behavior authority: <who/source>
 - Side-effect authority: <who may authorize which effects>
-- Self-review owner: alpha-goal
 - Executor autonomy: <decisions delegated to executor>
 - Reserved decisions: <decisions requiring return to alpha-goal>
-- Source precedence: <task-level conflict rule; higher-priority instructions/tool policy remain invariant>
 
 ## Risks and Recovery
 - Material risks: <risk and treatment, or none>
 - Rollback/recovery: <required recovery path, or non-material with basis>
 - Unsupported claims: <claims unavailable from the verification surface>
 
-## Readiness Gate
-- Prerequisites available: <yes with evidence>
-- Required observers available: <yes with evidence>
-- All required criteria mapped to verification: yes
-- Material risks mapped to prevention/recovery: yes | non-material
-- Blocking gaps: none
-
-## Self-Review Record
-- Result: <passed | failed>
-- Reviewed by: alpha-goal
-- Reviewed at: <ISO-8601 timestamp>
-- Checks: <criteria mapping; observer availability; authority completeness; source conflicts; risk/recovery; blocker scan; independent review when required>
-- Findings: <none, or unresolved findings that keep status draft>
 ```
 
 ## Required Protocol
 
-- `status`, `issued_by`, `workspace`, `source_references`, and every contract section are required for first handoff.
-- `issued_by` must equal `alpha-goal`.
-- `source_references` must identify attributable inputs without requiring any specific producer or filename; the contract must not include interview logs, question/answer transcripts, discovery notes, or rejected alternatives.
-- A preceding design is provenance, not authority. Record a ready design source as `technical-design: <absolute path>` only after status, workspace, and path validation. Any design constraint that binds execution or acceptance must also appear explicitly inside the Goal Contract; source reference alone creates no obligation.
-- `status` is the sole contract lifecycle field.
-- Acceptance Criteria and Verification must have a total mapping: every required criterion has at least one observer and every observer supports a named criterion or risk.
-- Keep `draft` when a required observer is unavailable, a prerequisite is unmet, a claim surface is unidentified, feasibility is unknown, or a material authority decision remains unresolved.
-- Complete the Self-Review Record with `Result: passed`, then set `status: accepted` last. Self-review is the only route to `accepted`; never require a separate user confirmation of the compiled contract.
+- `status` is the sole lifecycle field. Required content is `workspace`, at least one attributable `source_references` entry, Objective, Boundaries, Acceptance Criteria, Verification, desired-behavior authority, and executor autonomy. Include Deliverables only when material.
+- `source_references` identifies attributable inputs without requiring a producer or filename. Do not copy interview transcripts, discovery notes, or rejected alternatives into the contract.
+- A preceding design is provenance, not authority. Record a ready design source as `technical-design: <absolute path>` only after status, workspace, and path validation. Binding design constraints must also appear explicitly in the contract.
+- Every acceptance criterion must map to an observer. Every observer must support a criterion or material risk.
+- Material permitted side effects require attributable side-effect authority. Material or irreversible risk requires treatment and rollback/recovery; otherwise record a compact non-material basis.
+- Keep `draft` while required information, authority, observers, prerequisites, feasibility, claim surfaces, or material risk treatment is unresolved. Set `status: accepted` last after these checks pass; do not require a separate confirmation ceremony.

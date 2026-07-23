@@ -46,7 +46,7 @@
         "entry-route",
         "optional-input-adoption",
         "goal-contract-authority",
-        "self-review-acceptance",
+        "contract-acceptance",
         "native-goal-objective-and-sync"
       ],
       "references": [
@@ -154,10 +154,6 @@
         },
         {
           "name": "acceptance-criteria-and-verification",
-          "owner": "alpha-goal"
-        },
-        {
-          "name": "readiness-and-self-review",
           "owner": "alpha-goal"
         }
       ]
