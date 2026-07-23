@@ -321,9 +321,10 @@ grep -q "references/claude-adapter.md" "$tmp_codex/.codex/skills/deep-interview/
 grep -q "references/claude-adapter.md" "$tmp_codex/.codex/skills/technical-design/SKILL.md"
 python3 -m json.tool "$tmp_codex/.codex/hooks.json" >/dev/null
 grep -q "codex-alpha-goal-compact-recovery:v4" "$tmp_codex/.codex/hooks.json"
-grep -q "independently decide whether" "$tmp_codex/.codex/hooks.json"
+grep -q "Never auto-trigger \$deep-interview or \$technical-design" "$tmp_codex/.codex/hooks.json"
 grep -q "exact task directory preserved in current task context" "$tmp_codex/.codex/hooks.json"
-grep -q "recover technical_design.md from that directory" "$tmp_codex/.codex/hooks.json"
+grep -q "user-invoked active design" "$tmp_codex/.codex/hooks.json"
+grep -q "user-invoked active interview" "$tmp_codex/.codex/hooks.json"
 grep -q "unadopted proposals are ignored" "$tmp_codex/.codex/hooks.json"
 grep -q "top-level active_owner" "$tmp_codex/.codex/hooks.json"
 grep -q "Re-read before every sequential write" "$tmp_codex/.codex/hooks.json"

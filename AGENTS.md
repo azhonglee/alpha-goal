@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-本仓库维护 `alpha-goal` Codex 技能包。公开技能位于 `skills/deep-interview/`、`skills/alpha-goal/`、`skills/technical-design/`、`skills/executor/`、`skills/verifier/`；深度访谈维护独立澄清记录，技术设计维护独立设计产物与评审路由；二者均不授予执行权，`alpha-goal` 负责从可归因输入编译 Goal Contract、选择入口路由并同步 native goal。`tools/validation/alpha-goal.json` 是 validator 共享契约，`templates/` 是可选用户配置模板，`scripts/install.sh` 负责受管目录复制安装，`tools/validate_skills.js` 用于本地布局校验。`README.md`、`INSTALL.md`、`MANIFEST.md` 应与这些路径和命令保持一致。
+本仓库维护 `alpha-goal` Codex 技能包。公开技能位于 `skills/deep-interview/`、`skills/alpha-goal/`、`skills/technical-design/`、`skills/executor/`、`skills/verifier/`；深度访谈与技术设计仅由用户显式触发，分别维护独立澄清记录和设计产物；二者均不授予执行权，`alpha-goal` 负责从可归因输入编译 Goal Contract、选择入口路由并同步 native goal。`tools/validation/alpha-goal.json` 是 validator 共享契约，`templates/` 是可选用户配置模板，`scripts/install.sh` 负责受管目录复制安装，`tools/validate_skills.js` 用于本地布局校验。`README.md`、`INSTALL.md`、`MANIFEST.md` 应与这些路径和命令保持一致。
 
 ## Build, Test, and Development Commands
 

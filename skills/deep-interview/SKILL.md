@@ -1,11 +1,11 @@
 ---
 name: deep-interview
-description: "Clarify an ambiguous or high-impact request and record the discovery trail in interview.md. Use for standalone requirement exploration, decision discovery, boundary testing, or pressure-testing assumptions. Maintain questions, answers, decisions, provenance, and unresolved gaps. This skill only clarifies; it does not route execution, authorize side effects, implement, or verify work."
+description: "Manual-only clarification workflow. Use only when the user explicitly invokes $deep-interview, explicitly asks to run Deep Interview, or an already active interview.md exact path is preserved in current context for resume. Record questions, answers, decisions, provenance, and unresolved gaps in interview.md when durable clarification is needed. Do not auto-trigger from ambiguity, impact, or missing requirements; do not route execution, authorize side effects, implement, or verify work."
 ---
 
 # Deep Interview
 
-Own clarification and the canonical interview record. Turn uncertainty into attributable decisions without assuming any downstream workflow.
+Run only after explicit user invocation, or resume an exact current-context `interview.md` with `status: active`. Inactive artifacts are references, not triggers. Never infer a trigger from ambiguity or missing decisions. Own the canonical interview record without assuming downstream workflow.
 
 ## Resolve the Interview Artifact
 

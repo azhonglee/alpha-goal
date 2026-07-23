@@ -18,6 +18,8 @@ The native goal is lifecycle metadata. It points to the contract and summarizes 
 
 Read the user's request, higher-priority instructions, attributable inputs, and relevant current-state evidence. Resolve discoverable facts before asking for decisions.
 
+Do not invoke `deep-interview` or `technical-design` automatically. Consume their output only when the user explicitly ran that skill or supplied its artifact. If missing design information blocks safe compilation, report the missing prerequisite or authority decision; the user decides whether to invoke `technical-design`.
+
 Derive details only when they are entailed by an attributable source. Never turn a recommendation, current implementation, convention, or model preference into authority.
 
 If a material authority-owned decision remains, return one **Goal Input Gap Report**:

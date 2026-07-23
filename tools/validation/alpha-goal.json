@@ -28,6 +28,7 @@
       "name": "deep-interview",
       "entry": false,
       "ownedSemantics": [
+        "manual-deep-interview-trigger",
         "independent-requirement-clarification",
         "interview-provenance",
         "append-only-interview-record",
@@ -59,6 +60,7 @@
       "name": "technical-design",
       "entry": false,
       "ownedSemantics": [
+        "manual-technical-design-trigger",
         "pre-goal-technical-design",
         "design-input-gap-routing",
         "design-review",

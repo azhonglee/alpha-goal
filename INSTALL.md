@@ -86,8 +86,8 @@ When invoked by absolute path it can run from any working directory because the 
 ## Prompts
 
 ```text
-$deep-interview 澄清模糊或高影响请求，并按需维护 canonical interview.md。
-$technical-design 创建并评审 canonical technical_design.md，返回 DESIGN_READY / DESIGN_INPUT_GAP / DESIGN_BLOCKED。
+$deep-interview 仅在用户显式调用时运行，并按需维护 canonical interview.md。
+$technical-design 仅在用户显式调用时创建并评审 canonical technical_design.md，返回 DESIGN_READY / DESIGN_INPUT_GAP / DESIGN_BLOCKED。
 $alpha-goal 从原始请求和可归因输入编译 Goal Contract，选择 DIRECT/PERSIST，并在自审接受后同步 native goal。
 $executor 从已接受的 Goal Contract 恢复并执行下一批授权工作。
 $verifier 只审核 executor 提交的拟议终态，并给出最终路由。

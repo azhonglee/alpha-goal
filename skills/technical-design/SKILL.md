@@ -1,11 +1,11 @@
 ---
 name: technical-design
-description: "Create a review-ready technical_design.md before goal framing when implementation, repair, refactor, hardening, cross-file behavior, interfaces, data models, dependencies, rollout, rollback, or material technical risk needs explicit design. Start from the user's request, optional clarification results, and discoverable repository facts; preserve product and side-effect authority, map the proposed design to observable evidence, then return DESIGN_READY, DESIGN_INPUT_GAP, or DESIGN_BLOCKED."
+description: "Manual-only technical design workflow. Use only when the user explicitly invokes $technical-design, explicitly asks to run Technical Design, or an already active technical_design.md exact path is preserved in current context for resume. Create and review technical_design.md, preserve authority boundaries, map proposals to evidence, and return DESIGN_READY, DESIGN_INPUT_GAP, or DESIGN_BLOCKED. Do not auto-trigger from complexity, cross-file scope, interfaces, data, rollout, or risk."
 ---
 
 # Technical Design
 
-Own the pre-goal technical design stage. Start from the user's request, instructions, optional attributable clarification results, and discoverable technical facts. Produce a canonical `technical_design.md`, review it, and return a ready handoff to the caller for a later `alpha-goal` stage as non-authoritative structured context.
+Run only after explicit user invocation, or resume an exact current-context `technical_design.md` with `Design status: draft` in an active design stage. Other artifacts are references, not triggers. Never infer a trigger from complexity or risk. Own the pre-goal technical design stage. Start from the user's request, instructions, optional attributable clarification results, and discoverable technical facts. Produce a canonical `technical_design.md`, review it, and return a ready handoff to the caller for a later `alpha-goal` stage as non-authoritative structured context.
 
 The design proposes how the work can be implemented and verified. It does not authorize desired behavior, scope, side effects, execution, or completion claims.
 

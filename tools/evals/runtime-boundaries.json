@@ -314,37 +314,37 @@
     },
     {
       "id": "RB32",
-      "scenario": "A standalone ambiguous or high-impact request needs durable clarification before any execution route is chosen.",
+      "scenario": "An ambiguous or high-impact request arrives without an explicit user invocation of Deep Interview.",
       "expected": {
         "entryRoute": "N/A",
         "verificationRoute": "N/A",
-        "nextOwner": "deep-interview",
-        "invariant": "Resolve discoverable facts, maintain canonical interview.md with append-only turns and attributable decisions, return its absolute path plus handoff status and unresolved gap ids, and make no assumption about the downstream consumer."
+        "nextOwner": "alpha-goal",
+        "invariant": "Do not auto-trigger deep-interview. Continue ordinary fact discovery and alpha-goal handling; the user may explicitly invoke $deep-interview if they want the standalone interview workflow."
       }
     },
     {
       "id": "RB33",
-      "scenario": "A clarification request is exploratory and does not authorize action-specific decisions.",
+      "scenario": "An exact interview.md path is present after compaction; one case has status active and another is explored, blocked, cancelled, conflict, or otherwise inactive.",
       "expected": {
         "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "deep-interview",
-        "invariant": "Stop when the requested preference, problem, or direction is clear; mark action-specific dimensions not-explored instead of forcing an execution-ready result or choosing DIRECT/PERSIST."
+        "invariant": "Resume deep-interview only for status active. Treat every inactive artifact as an input reference, never as a trigger, and never scan or guess among task directories."
       }
     },
     {
       "id": "RB34",
-      "scenario": "A non-trivial cross-file change requires explicit architecture, interface, data, rollout, rollback, and validation treatment before goal framing.",
+      "scenario": "A non-trivial cross-file change appears to need architecture and rollout analysis, but the user did not explicitly invoke Technical Design.",
       "expected": {
         "entryRoute": "N/A",
         "verificationRoute": "N/A",
-        "nextOwner": "technical-design",
-        "invariant": "Create canonical technical_design.md in the exact task directory, classify authority facts/discovered facts/design decisions/unresolved input, and keep Design status draft until the Technical Review Gate passes."
+        "nextOwner": "alpha-goal",
+        "invariant": "Do not auto-trigger technical-design. Alpha-goal resolves discoverable facts and reports any blocking design prerequisite or authority decision; only the user can explicitly invoke $technical-design."
       }
     },
     {
       "id": "RB35",
-      "scenario": "Technical design lacks one authority-owned product or side-effect decision that could materially change implementation or evidence.",
+      "scenario": "The user explicitly invokes $technical-design, and one authority-owned product or side-effect decision is missing.",
       "expected": {
         "entryRoute": "N/A",
         "verificationRoute": "N/A",
@@ -364,7 +364,7 @@
     },
     {
       "id": "RB37",
-      "scenario": "Technical design is infeasible or an external non-authority dependency prevents review completion.",
+      "scenario": "A user-invoked Technical Design is infeasible or an external non-authority dependency prevents review completion.",
       "expected": {
         "entryRoute": "N/A",
         "verificationRoute": "N/A",
@@ -374,12 +374,12 @@
     },
     {
       "id": "RB38",
-      "scenario": "Technical Review passes for a design with exact task identity and complete outcome-to-evidence mapping.",
+      "scenario": "An exact technical_design.md path is present after compaction; one case is draft in an active design stage and another is ready, blocked, stale, or outside the design stage.",
       "expected": {
         "entryRoute": "N/A",
         "verificationRoute": "N/A",
-        "nextOwner": "caller",
-        "invariant": "Set Design status ready, persist technical_design.md, and return DESIGN_READY with task id, artifact directory, workspace, absolute path, original request source, proposals, boundaries, evidence, and non-blocking limits; suggest alpha-goal without invoking it."
+        "nextOwner": "technical-design",
+        "invariant": "Resume technical-design only for Design status draft in current design-stage context after artifact directory, task id, and workspace validation. Treat ready, blocked, stale, or context-mismatched artifacts as input references and never scan or guess."
       }
     },
     {
