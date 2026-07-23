@@ -13,7 +13,6 @@ Execute the accepted outcome.
 - Bind execution to the task, contract, workspace, repository/worktree/branch, and current target/delivery state. Create `checkpoint.md` with this identity and `phase: executing` when absent; resume and accept verifier output only when the identity still matches.
 - Any other invalid entry authorizes no target or checkpoint write.
 - A referenced `technical_design.md` may be opened to validate its path, ready status, and workspace, then used as proposal context. It adds no scope, authority, or obligation beyond the Goal Contract.
-- A `checkpoint.md.lock` is an unresolved recovery conflict; stop before target or checkpoint writes.
 
 ## Checkpoint Writing
 

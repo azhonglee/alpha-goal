@@ -66,8 +66,6 @@ Codex may require reviewing and trusting the changed hook with `/hooks` before i
 
 ## Smoke test
 
-Before upgrading, finish any active checkpoint handoff. A remaining legacy `checkpoint.md.lock` is an unresolved conflict; do not guess whether its write completed.
-
 Run the executable smoke from the repository root:
 
 ```bash
