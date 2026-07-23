@@ -81,8 +81,8 @@ preflight_custom_agent_targets() {
     if [[ -L "$target" ]]; then
       die "Refusing to replace custom agent symlink: $target"
     fi
-    if [[ -e "$target" ]] && ! is_managed_custom_agent_file "$target"; then
-      die "Refusing to replace unmanaged or non-regular custom agent: $target"
+    if [[ -e "$target" && ! -f "$target" ]]; then
+      die "Refusing to replace non-regular custom agent: $target"
     fi
   done
 }
@@ -113,7 +113,7 @@ sync_custom_agent_files() {
     existed=false
     if [[ -e "$target" ]]; then
       existed=true
-      if ! is_managed_custom_agent_file "$target"; then
+      if [[ ! -f "$target" ]]; then
         rm -rf "$stage_root"
         die "Custom agent target changed after preflight: $target"
       fi

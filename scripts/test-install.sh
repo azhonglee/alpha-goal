@@ -859,17 +859,9 @@ grep -q "requires distinct Codex and Claude skill roots" <<<"$link_conflict_outp
 tmp_agent_unmanaged="$(mktemp -d)"
 mkdir -p "$tmp_agent_unmanaged/.codex/agents"
 printf 'user-owned\n' > "$tmp_agent_unmanaged/.codex/agents/builder.toml"
-if agent_unmanaged_output="$(run_installer "$tmp_agent_unmanaged" 2>&1)"; then
-  echo "install should refuse an unmanaged same-name custom agent" >&2
-  exit 1
-fi
-grep -q "Refusing to replace unmanaged or non-regular custom agent" <<<"$agent_unmanaged_output"
-test ! -e "$tmp_agent_unmanaged/.codex/agents/architect.toml"
-test ! -e "$tmp_agent_unmanaged/.codex/agents/scout.toml"
-test ! -e "$tmp_agent_unmanaged/.codex/agents/reviewer.toml"
-test ! -e "$tmp_agent_unmanaged/.codex/AGENTS.md"
-test ! -e "$tmp_agent_unmanaged/.codex/config.toml"
-test ! -e "$tmp_agent_unmanaged/.codex/skills"
+agent_unmanaged_output="$(run_installer "$tmp_agent_unmanaged")"
+assert_simple_success_output "$agent_unmanaged_output" "Alpha Goal install completed."
+assert_custom_agents_match "$tmp_agent_unmanaged/.codex"
 
 tmp_agent_symlink="$(mktemp -d)"
 mkdir -p "$tmp_agent_symlink/.codex/agents"
@@ -893,7 +885,7 @@ if agent_nonregular_output="$(run_installer "$tmp_agent_nonregular" 2>&1)"; then
   echo "install should refuse a non-regular same-name custom agent" >&2
   exit 1
 fi
-grep -q "Refusing to replace unmanaged or non-regular custom agent" <<<"$agent_nonregular_output"
+grep -q "Refusing to replace non-regular custom agent" <<<"$agent_nonregular_output"
 grep -q keep "$tmp_agent_nonregular/.codex/agents/reviewer.toml/sentinel"
 test ! -e "$tmp_agent_nonregular/.codex/agents/architect.toml"
 test ! -e "$tmp_agent_nonregular/.codex/agents/scout.toml"
