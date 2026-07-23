@@ -31,6 +31,6 @@ A blocker outranks fixable work; fixable work outranks pass. Continue safe obser
 
 ## Return the Verdict
 
-- Do not update `checkpoint.md` or the target. Re-read the checkpoint before returning; restart the audit if its phase, execution identity, or target state changed.
+- Re-read the checkpoint before returning; restart the audit if its phase, execution identity, or target state changed.
 - Return the route; observed `phase: ready_for_verification`; canonical task/checkpoint/contract paths; workspace, repository set, worktree/branch, and observed target/delivery identity; and criterion results with evidence and freshness. For `NEXT_ITERATION`, identify the authorized rework gap or observer mutation. For `BLOCKED`, identify the blocker. For `GOAL_CHANGED`, return the changed field, attributable source/date, prior and current identity, and unverified mutations.
 - The caller continues with executor for rework or checkpoint transition.
