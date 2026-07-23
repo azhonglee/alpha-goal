@@ -4,9 +4,9 @@
 
 | Directory | Owned semantics |
 | --- | --- |
-| `skills/deep-interview/` | Manual-only independent requirement clarification, canonical append-only `interview.md`, provenance, and source-neutral handoff. |
+| `skills/deep-interview/` | Explicit-only independent requirement clarification, canonical append-only `interview.md`, provenance, and source-neutral handoff. |
 | `skills/alpha-goal/` | Raw-input goal compilation, entry routing, Goal Contract authority, design-handoff validation, contract acceptance, and native-goal synchronization. |
-| `skills/technical-design/` | Manual-only pre-goal `technical_design.md`, input-gap/blocker routes, technical review, exact-path recovery, and non-authoritative design handoff. |
+| `skills/technical-design/` | Explicit-only pre-goal `technical_design.md`, input-gap/blocker routes, technical review, exact-path recovery, and non-authoritative design handoff. |
 | `skills/executor/` | Persistent target/delivery mutation, raw execution evidence, recovery cursor, and goal-change termination. |
 | `skills/verifier/` | Terminal-state observations, evidence classification, criterion status, and final audit route. |
 
@@ -42,7 +42,7 @@ Claude capability adaptation lives in each applicable skill reference (`deep-int
 
 ## Runtime artifacts
 
-`deep-interview` and `technical-design` never auto-trigger; only explicit user invocation or exact-path resume activates them. `deep-interview` may create canonical `interview.md` for durable clarification; its append-only record is evidence and provenance, not execution authority. `technical-design` creates canonical `technical_design.md`, returns `DESIGN_READY`, `DESIGN_INPUT_GAP`, or `DESIGN_BLOCKED`, and requires exact-path recovery. A ready design remains a proposal. `alpha-goal` validates its path, ready status, workspace, and original request source before adoption; consuming any design proposal requires `PERSIST`, and every binding constraint must be copied into the Goal Contract. `status` is the sole lifecycle field; acceptance requires complete execution information, authority, observers, and risk treatment. Checkpoint updates retain the sequential single-writer protocol.
+`deep-interview` and `technical-design` set `policy.allow_implicit_invocation: false`; Codex exposes them only through explicit `$skill` invocation. `deep-interview` may create canonical `interview.md` for durable clarification; its append-only record is evidence and provenance, not execution authority. `technical-design` creates canonical `technical_design.md`, returns `DESIGN_READY`, `DESIGN_INPUT_GAP`, or `DESIGN_BLOCKED`, and requires exact-path recovery. A ready design remains a proposal. `alpha-goal` validates its path, ready status, workspace, and original request source before adoption; consuming any design proposal requires `PERSIST`, and every binding constraint must be copied into the Goal Contract. `status` is the sole lifecycle field; acceptance requires complete execution information, authority, observers, and risk treatment. Checkpoint updates retain the sequential single-writer protocol.
 
 | Path | Condition and owner |
 | --- | --- |

@@ -54,7 +54,7 @@ flowchart TD
   V -->|"BLOCKED / PASS_TO_FINAL"| F["caller reports"]
 ```
 
-`deep-interview` is a manual-only, source-neutral clarification stage. It may maintain canonical `interview.md` with append-only turns, provenance, and unresolved gaps, but it does not choose an execution route. `technical-design` is also manual-only and is an independent pre-goal design stage. It writes canonical `technical_design.md`, returns `DESIGN_READY` after review, or returns `DESIGN_INPUT_GAP` / `DESIGN_BLOCKED`; recovery requires the exact path preserved in current context.
+`deep-interview` is explicit-only through `allow_implicit_invocation: false` and is a source-neutral clarification stage. It may maintain canonical `interview.md` with append-only turns, provenance, and unresolved gaps, but it does not choose an execution route. `technical-design` uses the same skill policy and is an independent pre-goal design stage. It writes canonical `technical_design.md`, returns `DESIGN_READY` after review, or returns `DESIGN_INPUT_GAP` / `DESIGN_BLOCKED`; recovery requires the exact path preserved in current context.
 
 `alpha-goal` compiles directly from the raw request, attributable inputs, and discovered facts. Consuming any `DESIGN_READY` proposal forces `PERSIST`; `DIRECT` must ignore the design completely. A design path is provenance only. A constraint affects execution or acceptance only after it is written explicitly into the Goal Contract. `alpha-goal` sets the contract to `accepted` only when execution information, authority, observers, and risk treatment are complete; it adds neither a confirmation ceremony nor duplicate gate fields.
 
@@ -90,7 +90,7 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
   <tbody>
     <tr>
       <td width="180" align="left"><a href="skills/deep-interview/"><code>deep-interview</code></a></td>
-      <td align="left">Only when explicitly invoked by the user, clarify the request and maintain append-only <code>interview.md</code> when durable provenance is needed, without choosing a route or granting execution authority.</td>
+      <td align="left">Clarify the request and maintain append-only <code>interview.md</code> when durable provenance is needed, without choosing a route or granting execution authority.</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/alpha-goal/"><code>alpha-goal</code></a></td>
@@ -98,7 +98,7 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/technical-design/"><code>technical-design</code></a></td>
-      <td align="left">Only when explicitly invoked by the user, maintain canonical <code>technical_design.md</code>, run technical review, and return DESIGN_READY / DESIGN_INPUT_GAP / DESIGN_BLOCKED without creating a Goal Contract.</td>
+      <td align="left">Maintain canonical <code>technical_design.md</code>, run technical review, and return DESIGN_READY / DESIGN_INPUT_GAP / DESIGN_BLOCKED without creating a Goal Contract.</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/executor/"><code>executor</code></a></td>

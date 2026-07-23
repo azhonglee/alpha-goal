@@ -314,32 +314,32 @@
     },
     {
       "id": "RB32",
-      "scenario": "An ambiguous or high-impact request arrives without an explicit user invocation of Deep Interview.",
+      "scenario": "An ambiguous or high-impact request arrives without explicit invocation of $deep-interview.",
       "expected": {
         "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "alpha-goal",
-        "invariant": "Do not auto-trigger deep-interview. Continue ordinary fact discovery and alpha-goal handling; the user may explicitly invoke $deep-interview if they want the standalone interview workflow."
+        "invariant": "deep-interview is not implicitly available because its skill policy sets allow_implicit_invocation=false; ordinary handling continues without loading it."
       }
     },
     {
       "id": "RB33",
-      "scenario": "An exact interview.md path is present after compaction; one case has status active and another is explored, blocked, cancelled, conflict, or otherwise inactive.",
+      "scenario": "The user explicitly invokes $deep-interview for exploratory clarification.",
       "expected": {
         "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "deep-interview",
-        "invariant": "Resume deep-interview only for status active. Treat every inactive artifact as an input reference, never as a trigger, and never scan or guess among task directories."
+        "invariant": "Explicit invocation makes the skill available; run its normal source-neutral interview workflow without choosing DIRECT/PERSIST."
       }
     },
     {
       "id": "RB34",
-      "scenario": "A non-trivial cross-file change appears to need architecture and rollout analysis, but the user did not explicitly invoke Technical Design.",
+      "scenario": "A complex cross-file change appears to need design, but the user did not explicitly invoke $technical-design.",
       "expected": {
         "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "alpha-goal",
-        "invariant": "Do not auto-trigger technical-design. Alpha-goal resolves discoverable facts and reports any blocking design prerequisite or authority decision; only the user can explicitly invoke $technical-design."
+        "invariant": "technical-design is not implicitly available because its skill policy sets allow_implicit_invocation=false; ordinary handling continues without loading it."
       }
     },
     {
@@ -374,12 +374,12 @@
     },
     {
       "id": "RB38",
-      "scenario": "An exact technical_design.md path is present after compaction; one case is draft in an active design stage and another is ready, blocked, stale, or outside the design stage.",
+      "scenario": "The user explicitly invokes $technical-design and its Technical Review passes.",
       "expected": {
         "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "technical-design",
-        "invariant": "Resume technical-design only for Design status draft in current design-stage context after artifact directory, task id, and workspace validation. Treat ready, blocked, stale, or context-mismatched artifacts as input references and never scan or guess."
+        "invariant": "Explicit invocation makes the skill available; persist the ready technical_design.md and return DESIGN_READY as non-authoritative input."
       }
     },
     {
