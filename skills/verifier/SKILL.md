@@ -9,8 +9,8 @@ Audit whether the accepted goal is terminally passed, fixable, or blocked withou
 
 ## Enter
 
-- Require an accepted contract with workspace and attributable source references, non-empty Objective/Boundaries/Acceptance Criteria/Verification, desired-behavior authority and executor autonomy, total criterion-to-observer mapping, and no pre-existing blocking gap. Material side effects require attributable authority; material or irreversible risk requires treatment and rollback/recovery, or a compact non-material basis; require a matching task/context checkpoint and `active_owner: verifier`.
-- An earlier accepted contract may resume only through a checkpoint matching the identity fields required by that contract version; for the preceding schema, match task directory, contract path, repository set, and Confirmation Record source/date; infer nothing missing.
+- Require an accepted contract with workspace and attributable source references, non-empty Objective/Boundaries/Acceptance Criteria/Verification, desired-behavior authority and executor autonomy, total criterion-to-observer mapping, and no pre-existing blocking gap. Material side effects require attributable authority; material or irreversible risk requires treatment and rollback/recovery, or a compact non-material basis; require a matching task/context checkpoint with `phase: ready_for_verification`.
+- Audit only the current schema. A checkpoint that still uses legacy ownership must return to executor for normalization before verification.
 - Any other invalid entry produces no verdict or checkpoint write.
 - Require the checkpoint to state either proposed final readiness or exhaustion of authorized approaches.
 - Re-observe the final target, delivery, and dependencies. Claim independent verification only when an isolated verifier performed it.
@@ -24,7 +24,7 @@ Audit whether the accepted goal is terminally passed, fixable, or blocked withou
 
 ## Route
 
-Return exactly one route:
+Return exactly one verification route:
 
 - `PASS_TO_FINAL`: every criterion passes with fresh final-state evidence and no drift or blocker.
 - `NEXT_ITERATION`: the terminal audit finds a concrete authorized rework batch that can close the gap.
@@ -32,11 +32,12 @@ Return exactly one route:
 
 A blocker outranks fixable work; fixable work outranks pass. Continue safe observation while it can resolve empty, partial, or suspicious results. Never return unchanged state without a blocker, changed condition, or materially different batch.
 
-## Record the Outcome
+If the goal or authority changed materially, return the separate `GOAL_CHANGED` termination signal instead of a verification route.
 
-- Immediately before writing, re-read the canonical checkpoint and require the expected revision and `active_owner: verifier`.
-- For a verdict, change only verification observations, evidence classification, criterion status, observed identity, freshness, gaps, and route. Preserve execution fields, increment `checkpoint_revision` once, record the route, and set `active_owner` last: `executor` for `NEXT_ITERATION`, otherwise `caller`.
-- If the acceptance authority materially changes the goal, stop observation without a verdict. Preserve execution and verification fields, record only attributable `GOAL_CHANGED` termination metadata and current identity, increment `checkpoint_revision` once, and set `active_owner: caller` last. Follow-up starts a new task directory.
-- If checkpoint content, revision, or owner changed since the prior read, discard the proposed write, reload current state, and verify again. Never run concurrent checkpoint writers.
+## Return the Verdict
 
-Do not implement fixes or make the final report; the caller owns final reporting after `PASS_TO_FINAL` or `BLOCKED`.
+- Do not write `checkpoint.md` or mutate the target. Re-read the checkpoint before the verdict; if its revision, phase, identity, or target state changed, discard the audit and restart from current state.
+- Return the route, canonical task/checkpoint/contract paths, workspace, repository set, worktree/branch, `based_on_checkpoint_revision`, criterion results, attributable observations, freshness, gaps, and observed state/delivery identity directly to executor.
+- On `NEXT_ITERATION`, identify the authorized rework gap for executor. Executor alone persists the returned outcome after matching phase, revision, and identity.
+
+Do not implement fixes, persist the verdict, or make the final report. Executor persists every valid packet; after a terminal write, the caller owns final reporting.

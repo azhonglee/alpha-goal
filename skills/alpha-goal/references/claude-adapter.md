@@ -27,7 +27,7 @@ Read this reference only when Alpha Goal runs in Claude runtime or a Claude-inst
 When Alpha Goal says to perform Native Goal Sync in Claude:
 - Do not call Codex-named `create_goal`, `get_goal`, or `update_goal`.
 - If `/goal` is available, pass the generated Native Goal Input to it without replacing or supplementing the contract-derived finish line.
-- If `/goal` is not callable from the current Claude surface, record Native Goal Sync as unavailable in `checkpoint.md` or the task artifact.
+- If `/goal` is not callable from the current Claude surface, return Native Goal Sync as unavailable in the alpha-goal handoff; do not create or write `checkpoint.md`.
 - Do not treat `TaskCreate` or `TaskUpdate` as proof that a native goal was created.
 - Do not hand off as synced when the adapter gap changes execution authority; ask the user whether to continue without native goal sync.
 

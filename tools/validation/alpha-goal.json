@@ -79,7 +79,7 @@
         "raw-execution-evidence",
         "recovery-cursor",
         "checkpoint-write-protocol",
-        "checkpoint-termination"
+        "checkpoint-phase-and-termination"
       ],
       "references": [],
       "scripts": []
@@ -88,10 +88,9 @@
       "name": "verifier",
       "entry": false,
       "ownedSemantics": [
+        "read-only-terminal-audit",
         "evidence-classification",
-        "terminal-audit-observations",
-        "criterion-status",
-        "evidence-freshness",
+        "criterion-results",
         "final-audit-route"
       ],
       "references": [],
@@ -160,19 +159,15 @@
     },
     {
       "path": "checkpoint.md",
-      "condition": "accepted PERSIST contract during execution and verification",
+      "condition": "accepted PERSIST contract during executor-owned execution and verification handoff",
       "sections": [
         {
-          "name": "recorded-contract-identity-state-revision-and-write-control",
+          "name": "recorded-contract-identity-revision-phase-and-write-control",
           "owner": "executor"
         },
         {
-          "name": "execution-and-stagnation-records",
+          "name": "execution-evidence-gaps-and-termination",
           "owner": "executor"
-        },
-        {
-          "name": "terminal-audit-observations-criterion-status-and-verdict",
-          "owner": "verifier"
         }
       ]
     }

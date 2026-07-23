@@ -50,15 +50,16 @@ flowchart TD
   P --> S["Native Goal Sync"]
   S --> E["executor"]
   E --> V["verifier"]
-  V -->|"NEXT_ITERATION"| E
-  V -->|"BLOCKED / PASS_TO_FINAL"| F["caller reports"]
+  V -->|"verdict packet"| E
+  E -->|"NEXT_ITERATION"| E
+  E -->|"BLOCKED / PASS_TO_FINAL"| F["caller reports"]
 ```
 
 `deep-interview` is explicit-only through `allow_implicit_invocation: false` and is a source-neutral clarification stage. It may maintain canonical `interview.md` with append-only turns, provenance, and unresolved gaps, but it does not choose an execution route. `technical-design` uses the same skill policy and is an independent pre-goal design stage. It writes canonical `technical_design.md`, returns `DESIGN_READY` after review, or returns `DESIGN_INPUT_GAP` / `DESIGN_BLOCKED`; recovery requires the exact path preserved in current context.
 
 `alpha-goal` compiles directly from the raw request, attributable inputs, and discovered facts. Consuming any `DESIGN_READY` proposal forces `PERSIST`; `DIRECT` must ignore the design completely. A design path is provenance only. A constraint affects execution or acceptance only after it is written explicitly into the Goal Contract. `alpha-goal` sets the contract to `accepted` only when execution information, authority, observers, and risk treatment are complete; it adds neither a confirmation ceremony nor duplicate gate fields.
 
-`executor` and `verifier` accept only a canonical Goal Contract with `status: accepted`. They may read a design as explanatory context only after path, ready status, and workspace match, and must not expand scope, acceptance criteria, or checklists from it. `checkpoint.md` retains the sequential single-writer protocol.
+`executor` and `verifier` accept only a canonical Goal Contract with `status: accepted`. They may read a design as explanatory context only after path, ready status, and workspace match, and must not expand scope, acceptance criteria, or checklists from it. Only executor writes `checkpoint.md`; verifier returns a revision/identity-bound verdict packet for executor to persist.
 
 ## Quick start
 
@@ -106,7 +107,7 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/verifier/"><code>verifier</code></a></td>
-      <td align="left">Audit fresh evidence for the proposed terminal state, update criterion status, and return <code>PASS_TO_FINAL</code>, <code>NEXT_ITERATION</code>, <code>BLOCKED</code>.</td>
+      <td align="left">Read-only audit fresh evidence for the proposed terminal state and return criterion results plus a <code>PASS_TO_FINAL</code>, <code>NEXT_ITERATION</code>, or <code>BLOCKED</code> verdict without writing the checkpoint.</td>
     </tr>
   </tbody>
 </table>

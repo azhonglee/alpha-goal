@@ -128,7 +128,7 @@
       "expected": {
         "entryRoute": "N/A",
         "verificationRoute": "BLOCKED",
-        "nextOwner": "caller",
+        "nextOwner": "executor",
         "invariant": "Known dependency failure would have kept the contract draft; attributable post-acceptance invalidation is reported without changing authority."
       }
     },
@@ -138,7 +138,7 @@
       "expected": {
         "entryRoute": "N/A",
         "verificationRoute": "BLOCKED",
-        "nextOwner": "caller",
+        "nextOwner": "executor",
         "invariant": "Known incompleteness would have kept the contract draft; new attributable post-acceptance invalidation of feasibility, authority, design, risk/recovery, observer, or claim coverage is BLOCKED."
       }
     },
@@ -184,12 +184,12 @@
     },
     {
       "id": "RB19",
-      "scenario": "Exercise sequential checkpoint initialization, executor-owned intermediate batches, one terminal verifier handoff, the three final-audit routes, and goal-change termination; attempt writes with stale revisions, unexpected owners, changed content, or another active writer.",
+      "scenario": "Exercise executor-only checkpoint initialization and batches, ready-for-verification handoff, read-only verifier routes, NEXT_ITERATION return, and goal-change termination; attempt stale executor writes.",
       "expected": {
         "entryRoute": "N/A",
         "verificationRoute": "N/A",
-        "nextOwner": "caller",
-        "invariant": "Each writer re-reads canonical checkpoint identity immediately before editing, writes only while it is active_owner, preserves other-owned fields, increments checkpoint_revision once, and sets the next owner last. A stale revision, unexpected owner, or changed content forces reload; knowledge that another writer may be active prevents the write. Concurrent writers are unsupported, and GOAL_CHANGED remains separate from verifier verdicts."
+        "nextOwner": "executor",
+        "invariant": "Only executor writes checkpoint.md. It atomically replaces legacy ownership fields with phase before verification, re-reads canonical identity and checkpoint_revision before every write, persists every matching verifier packet, increments revision once, and sets phase executing, ready_for_verification, or terminal. Stale packets and executor writes are rejected; GOAL_CHANGED remains a separate termination signal."
       }
     },
     {
@@ -204,12 +204,12 @@
     },
     {
       "id": "RB21",
-      "scenario": "Verifier is loaded alone after compaction from an explicit checkpoint path, resolves canonical artifacts independently of the process CWD, and discovers changed revision or owner on its immediate pre-write re-read.",
+      "scenario": "Verifier is loaded after compaction from an exact checkpoint path with phase ready_for_verification, then the checkpoint or target state changes before verdict.",
       "expected": {
         "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "verifier",
-        "invariant": "Verifier needs no remembered executor text. It follows identity and active_owner from canonical artifacts, emits no verdict or write for stale state, reloads, and continues only when the current owner is verifier and no other writer may be active."
+        "invariant": "Verifier reads goal-contract.md, checkpoint.md, and final state without writing. If checkpoint revision, phase, identity, or target state changes, discard the audit and restart from current state."
       }
     },
     {
@@ -218,8 +218,8 @@
       "expected": {
         "entryRoute": "N/A",
         "verificationRoute": "PASS_TO_FINAL",
-        "nextOwner": "caller",
-        "invariant": "The vague label is insufficient; PASS occurs only after complete attributable identity and fresh evidence."
+        "nextOwner": "executor",
+        "invariant": "The vague label is insufficient; PASS occurs only after complete attributable identity and fresh evidence. Verifier returns the packet to executor, which persists it and sets phase terminal before caller reporting."
       }
     },
     {
@@ -244,12 +244,12 @@
     },
     {
       "id": "RB25",
-      "scenario": "The terminal audit returns NEXT_ITERATION; executor completes the required rework, proposes a new terminal state, and compaction occurs while the old route remains in history.",
+      "scenario": "Verifier returns a revision/identity-bound NEXT_ITERATION packet directly to executor, which resumes after compaction.",
       "expected": {
         "entryRoute": "N/A",
-        "verificationRoute": "N/A",
-        "nextOwner": "verifier",
-        "invariant": "Top-level active_owner is authoritative; a historical route never overrides the current handoff."
+        "verificationRoute": "NEXT_ITERATION",
+        "nextOwner": "executor",
+        "invariant": "Verifier does not write. Executor accepts only a packet matching phase, canonical task/checkpoint/contract paths, workspace, repository set, worktree/branch, revision, and current state/delivery identity; it persists the full packet, changes phase to executing, records the new batch, and continues."
       }
     },
     {
@@ -278,7 +278,7 @@
       "expected": {
         "entryRoute": "N/A",
         "verificationRoute": "BLOCKED",
-        "nextOwner": "caller",
+        "nextOwner": "executor",
         "invariant": "Unavailable evidence known before acceptance would keep the contract draft; post-acceptance observer invalidation is BLOCKED and verifier does not redefine the claim."
       }
     },

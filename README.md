@@ -50,15 +50,16 @@ flowchart TD
   P --> S["Native Goal Sync"]
   S --> E["executor"]
   E --> V["verifier"]
-  V -->|"NEXT_ITERATION"| E
-  V -->|"BLOCKED / PASS_TO_FINAL"| F["调用者报告"]
+  V -->|"verdict packet"| E
+  E -->|"NEXT_ITERATION"| E
+  E -->|"BLOCKED / PASS_TO_FINAL"| F["调用者报告"]
 ```
 
 `deep-interview` 通过 `allow_implicit_invocation: false` 设为仅显式调用，是独立、source-neutral 的澄清阶段：按需写入 canonical `interview.md`，保留 append-only 问答、来源和未决 gap，不选择执行路由。`technical-design` 同样通过 skill policy 设为仅显式调用，是独立的 pre-goal 设计阶段：写入 canonical `technical_design.md`，通过技术评审后返回 `DESIGN_READY`，或返回 `DESIGN_INPUT_GAP` / `DESIGN_BLOCKED`；恢复时必须使用当前上下文保存的精确路径。
 
 `alpha-goal` 直接从原始请求、可归因输入和已发现事实编译目标。若消费 `DESIGN_READY` 的任何提案，必须走 `PERSIST`；`DIRECT` 必须完全忽略该设计。设计路径只表示 provenance，只有显式写入 Goal Contract 的约束才影响执行或验收。`alpha-goal` 仅在执行所需信息、授权、observer 和风险处理完整后将 Goal Contract 设置为 `accepted`，不增加单独的用户确认仪式或重复 gate 字段。
 
-`executor` 与 `verifier` 只接受 `status: accepted` 的 canonical Goal Contract。它们可在路径、ready 状态和 workspace 匹配后读取设计作为解释性上下文，但不得从设计扩张 scope、acceptance criteria 或 checklist。`checkpoint.md` 继续采用 sequential single-writer 协议。
+`executor` 与 `verifier` 只接受 `status: accepted` 的 canonical Goal Contract。它们可在路径、ready 状态和 workspace 匹配后读取设计作为解释性上下文，但不得从设计扩张 scope、acceptance criteria 或 checklist。`checkpoint.md` 由 executor 单写；verifier 只读并返回绑定 revision/identity 的 verdict packet，由 executor 持久化。
 
 ## 快速开始
 
@@ -106,7 +107,7 @@ $alpha-goal 实现一下这个需求:<YOUR-PRD> or <YOUR-DESCRIPTION>，<YOUR-UX
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/verifier/"><code>verifier</code></a></td>
-      <td align="left">只审核拟议终态的 fresh evidence，更新 criterion 状态，并输出 <code>PASS_TO_FINAL</code> / <code>NEXT_ITERATION</code> / <code>BLOCKED</code>。</td>
+      <td align="left">只读审核拟议终态的 fresh evidence，返回 criterion 结果与 <code>PASS_TO_FINAL</code> / <code>NEXT_ITERATION</code> / <code>BLOCKED</code> verdict；不写 checkpoint。</td>
     </tr>
   </tbody>
 </table>

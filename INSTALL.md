@@ -19,7 +19,7 @@ claude: $HOME/.claude/skills
 
 For `codex` and `all`, a separate default-Yes prompt installs the repository's managed Custom Agents under `${CODEX_HOME:-$HOME/.codex}/agents` and their routing block in the same configuration root's `AGENTS.md`. These agent files are user configuration, not skills or plugin components.
 
-For `PERSIST`, `alpha-goal` compiles the Goal Contract and sets `status: accepted` only after required execution information, authority, observers, and risk treatment are complete. A material goal change starts a new Alpha Goal task instead of editing the accepted contract. Runtime handoff is recorded in `checkpoint.md`: only `active_owner` writes, each write increments `checkpoint_revision` once, and the next owner is assigned last.
+For `PERSIST`, `alpha-goal` compiles the Goal Contract and sets `status: accepted` only after required execution information, authority, observers, and risk treatment are complete. A material goal change starts a new Alpha Goal task instead of editing the accepted contract. Runtime state is recorded in `checkpoint.md`: only executor writes, each write increments `checkpoint_revision` once, and `phase` is `executing`, `ready_for_verification`, or `terminal`. Verifier is read-only; executor persists a matching verdict packet.
 
 ## Options
 
@@ -56,7 +56,7 @@ Existing same-name Custom Agent files are replaced only when their first line is
 
 Uninstall is conservative outside the managed copied-skill path. It removes only managed Markdown blocks, managed Custom Agent files, managed hooks, `config.toml` that byte-for-byte matches `templates/config.toml`, skill copies with the install marker, and skill symlinks that resolve to this repository. Mixed user Markdown keeps user content, mixed or modified `config.toml` is preserved, unmanaged agents and hooks are preserved, configuration symlinks are not followed or deleted, and unmanaged skill directories or external symlinks are preserved. The interactive cleanup prompts independently control Custom Agent, Markdown/config, and hook cleanup.
 
-The compact recovery hook definition lives in `templates/hooks.json`. It is a matcher-free `PostCompact` stage navigator: use the exact task directory from current context, inspect `checkpoint.md` and `active_owner` when present, otherwise inspect `goal-contract.md` status, then load only `alpha-goal`, `executor`, or `verifier`. Detailed validation and write protocols remain in those skills.
+The compact recovery hook definition lives in `templates/hooks.json`. It is a matcher-free `PostCompact` stage navigator: use the exact task directory from current context, inspect `checkpoint.md` and `phase` when present, otherwise inspect `goal-contract.md` status, then load only `alpha-goal`, `executor`, or `verifier`. Detailed validation and write protocols remain in those skills.
 
 Native Goal Sync is not hook-driven. On `PERSIST`, `alpha-goal` reuses only a native goal matching the same accepted contract and generated objective, or creates one after the contract becomes accepted; `DIRECT` creates no native goal.
 
