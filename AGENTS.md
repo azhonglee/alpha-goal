@@ -27,7 +27,7 @@
 
 ## Testing Guidelines
 
-当前没有独立测试框架。修改技能布局、front matter、安装文档、模板或阶段输出契约后，至少运行 `node tools/validate_skills.js .` 和 `node tools/validate_skills.js --fixtures`。修改 JavaScript 校验脚本时运行对应命令。修改安装入口、内部模块或 smoke 时，逐个运行 `bash -n`；修改 `templates/config.toml`、安装行为或安装说明时，运行 `bash scripts/test-install.sh`。默认运行态记录只写入用户级 Alpha Goal state root：`$HOME/.alpha-goal/<workspace-slug>/`，其中 `<workspace-slug>` 来自稳定 workspace identity：`slug(repo_root or Goal Contract target workspace)`。Goal Contract 仅在执行信息、授权和验证条件完整并设置为 `accepted` 后生效，accepted contract 按协议不可变；材料性变化必须创建新任务。只有 executor 写同任务目录下的 `checkpoint.md`，记录执行、证据、阶段和终止信息；每次写入将 `checkpoint_revision` 增加一次。verifier 只读并返回绑定 revision/identity 的 verdict packet，由 executor 持久化。
+当前没有独立测试框架。修改技能布局、front matter、安装文档、模板或阶段输出契约后，至少运行 `node tools/validate_skills.js .` 和 `node tools/validate_skills.js --fixtures`。修改 JavaScript 校验脚本时运行对应命令。修改安装入口、内部模块或 smoke 时，逐个运行 `bash -n`；修改 `templates/config.toml`、安装行为或安装说明时，运行 `bash scripts/test-install.sh`。默认运行态记录只写入用户级 Alpha Goal state root：`$HOME/.alpha-goal/<workspace-slug>/`，其中 `<workspace-slug>` 来自稳定 workspace identity：`slug(repo_root or Goal Contract target workspace)`。Goal Contract 仅在执行信息、授权和验证条件完整并设置为 `accepted` 后生效，accepted contract 按协议不可变；材料性变化必须创建新任务。同任务目录下的 `checkpoint.md` 记录执行、证据、阶段和终止信息；verifier 审计当前状态并返回 verdict。
 
 ## Commit & Pull Request Guidelines
 

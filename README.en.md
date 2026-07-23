@@ -59,7 +59,7 @@ flowchart TD
 
 `alpha-goal` compiles directly from the raw request, attributable inputs, and discovered facts. Consuming any `DESIGN_READY` proposal forces `PERSIST`; `DIRECT` must ignore the design completely. A design path is provenance only. A constraint affects execution or acceptance only after it is written explicitly into the Goal Contract. `alpha-goal` sets the contract to `accepted` only when execution information, authority, observers, and risk treatment are complete; it adds neither a confirmation ceremony nor duplicate gate fields.
 
-`executor` and `verifier` accept only a canonical Goal Contract with `status: accepted`. They may read a design as explanatory context only after path, ready status, and workspace match, and must not expand scope, acceptance criteria, or checklists from it. Only executor writes `checkpoint.md`; verifier returns a revision/identity-bound verdict packet for executor to persist.
+`executor` and `verifier` accept only a canonical Goal Contract with `status: accepted`. They may read a design as explanatory context only after path, ready status, and workspace match, and must not expand scope, acceptance criteria, or checklists from it. `checkpoint.md` records execution phase and evidence; verifier audits the current state and returns a verdict.
 
 ## Quick start
 
@@ -107,7 +107,7 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/verifier/"><code>verifier</code></a></td>
-      <td align="left">Read-only audit fresh evidence for the proposed terminal state and return criterion results plus a <code>PASS_TO_FINAL</code>, <code>NEXT_ITERATION</code>, or <code>BLOCKED</code> verdict without writing the checkpoint.</td>
+      <td align="left">Audit fresh evidence for the proposed terminal state and return criterion results plus a <code>PASS_TO_FINAL</code>, <code>NEXT_ITERATION</code>, or <code>BLOCKED</code> verdict.</td>
     </tr>
   </tbody>
 </table>

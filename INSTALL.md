@@ -19,7 +19,7 @@ claude: $HOME/.claude/skills
 
 For `codex` and `all`, a separate default-Yes prompt installs the repository's managed Custom Agents under `${CODEX_HOME:-$HOME/.codex}/agents` and their routing block in the same configuration root's `AGENTS.md`. These agent files are user configuration, not skills or plugin components.
 
-For `PERSIST`, `alpha-goal` compiles the Goal Contract and sets `status: accepted` only after required execution information, authority, observers, and risk treatment are complete. A material goal change starts a new Alpha Goal task instead of editing the accepted contract. Runtime state is recorded in `checkpoint.md`: only executor writes, each write increments `checkpoint_revision` once, and `phase` is `executing`, `ready_for_verification`, or `terminal`. Verifier is read-only; executor persists a matching verdict packet.
+For `PERSIST`, `alpha-goal` compiles the Goal Contract and sets `status: accepted` only after required execution information, authority, observers, and risk treatment are complete. A material goal change starts a new Alpha Goal task instead of editing the accepted contract. Runtime state is recorded in `checkpoint.md` with `phase` set to `executing`, `ready_for_verification`, or `terminal`; verifier audits the current state and returns a verdict.
 
 ## Options
 

@@ -78,7 +78,7 @@
         "target-delivery-mutation",
         "raw-execution-evidence",
         "recovery-cursor",
-        "checkpoint-write-protocol",
+        "checkpoint-update",
         "checkpoint-phase-and-termination"
       ],
       "references": [],
@@ -159,10 +159,10 @@
     },
     {
       "path": "checkpoint.md",
-      "condition": "accepted PERSIST contract during executor-owned execution and verification handoff",
+      "condition": "accepted PERSIST contract during execution and verification",
       "sections": [
         {
-          "name": "recorded-contract-identity-revision-phase-and-write-control",
+          "name": "recorded-contract-identity-and-phase",
           "owner": "executor"
         },
         {

@@ -328,7 +328,7 @@ grep -q "exact task directory preserved in current context" "$tmp_codex/.codex/h
 grep -q "phase executing loads \$executor" "$tmp_codex/.codex/hooks.json"
 grep -q "phase ready_for_verification loads \$verifier" "$tmp_codex/.codex/hooks.json"
 grep -q "phase terminal needs no lifecycle skill" "$tmp_codex/.codex/hooks.json"
-grep -q "legacy checkpoint without phase loads \$executor" "$tmp_codex/.codex/hooks.json"
+grep -q "Missing or unknown phase stops recovery" "$tmp_codex/.codex/hooks.json"
 grep -q "status draft loads \$alpha-goal" "$tmp_codex/.codex/hooks.json"
 grep -q "status accepted loads \$executor" "$tmp_codex/.codex/hooks.json"
 grep -q "remembered skill text is stale" "$tmp_codex/.codex/hooks.json"

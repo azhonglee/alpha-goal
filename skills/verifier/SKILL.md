@@ -10,7 +10,6 @@ Audit whether the accepted goal is terminally passed, fixable, or blocked withou
 ## Enter
 
 - Require an accepted contract with workspace and attributable source references, non-empty Objective/Boundaries/Acceptance Criteria/Verification, desired-behavior authority and executor autonomy, total criterion-to-observer mapping, and no pre-existing blocking gap. Material side effects require attributable authority; material or irreversible risk requires treatment and rollback/recovery, or a compact non-material basis; require a matching task/context checkpoint with `phase: ready_for_verification`.
-- Audit only the current schema. A checkpoint that still uses legacy ownership must return to executor for normalization before verification.
 - Any other invalid entry produces no verdict or checkpoint write.
 - Require the checkpoint to state either proposed final readiness or exhaustion of authorized approaches.
 - Re-observe the final target, delivery, and dependencies. Claim independent verification only when an isolated verifier performed it.
@@ -36,8 +35,8 @@ If the goal or authority changed materially, return the separate `GOAL_CHANGED` 
 
 ## Return the Verdict
 
-- Do not write `checkpoint.md` or mutate the target. Re-read the checkpoint before the verdict; if its revision, phase, identity, or target state changed, discard the audit and restart from current state.
-- Return the route, canonical task/checkpoint/contract paths, workspace, repository set, worktree/branch, `based_on_checkpoint_revision`, criterion results, attributable observations, freshness, gaps, and observed state/delivery identity directly to executor.
-- On `NEXT_ITERATION`, identify the authorized rework gap for executor. Executor alone persists the returned outcome after matching phase, revision, and identity.
+- Do not update `checkpoint.md` or mutate the target. Re-read the checkpoint before the verdict; if its phase, identity, or target state changed, discard the audit and restart from current state.
+- Return the route, canonical task/checkpoint/contract paths, workspace, repository set, worktree/branch, criterion results, attributable observations, freshness, gaps, and observed state/delivery identity.
+- On `NEXT_ITERATION`, identify the authorized rework gap.
 
-Do not implement fixes, persist the verdict, or make the final report. Executor persists every valid packet; after a terminal write, the caller owns final reporting.
+Do not implement fixes or make the final report. The caller continues with executor for rework or checkpoint transition.

@@ -44,12 +44,12 @@
     },
     {
       "id": "RB05",
-      "scenario": "A new accepted Goal Contract has a non-empty Authority section but omits desired-behavior authority, side-effect authority for an external write, or recovery for irreversible risk; a preceding-schema task also attempts resume.",
+      "scenario": "An accepted Goal Contract has a non-empty Authority section but omits desired-behavior authority, side-effect authority for an external write, or recovery for irreversible risk.",
       "expected": {
         "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "caller",
-        "invariant": "Reject the incomplete new contract: section presence cannot replace attributable desired-behavior authority, authority for material side effects, or treatment and rollback/recovery for material or irreversible risk. Preserve preceding-schema resume only through matching checkpoint identity."
+        "invariant": "Reject the incomplete contract: section presence cannot replace attributable desired-behavior authority, authority for material side effects, or treatment and rollback/recovery for material or irreversible risk."
       }
     },
     {
@@ -184,12 +184,12 @@
     },
     {
       "id": "RB19",
-      "scenario": "Exercise executor-only checkpoint initialization and batches, ready-for-verification handoff, read-only verifier routes, NEXT_ITERATION return, and goal-change termination; attempt stale executor writes.",
+      "scenario": "Exercise checkpoint initialization, execution batches, ready-for-verification handoff, verifier routes, NEXT_ITERATION return, and goal-change termination.",
       "expected": {
         "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "executor",
-        "invariant": "Only executor writes checkpoint.md. It atomically replaces legacy ownership fields with phase before verification, re-reads canonical identity and checkpoint_revision before every write, persists every matching verifier packet, increments revision once, and sets phase executing, ready_for_verification, or terminal. Stale packets and executor writes are rejected; GOAL_CHANGED remains a separate termination signal."
+        "invariant": "Checkpoint phase is executing, ready_for_verification, or terminal. Executor reloads changed phase or identity before updating execution state; verifier audits the current state and returns a verdict. GOAL_CHANGED remains a separate termination signal."
       }
     },
     {
@@ -209,7 +209,7 @@
         "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "verifier",
-        "invariant": "Verifier reads goal-contract.md, checkpoint.md, and final state without writing. If checkpoint revision, phase, identity, or target state changes, discard the audit and restart from current state."
+        "invariant": "Verifier reads goal-contract.md, checkpoint.md, and final state. If checkpoint phase, identity, or target state changes, discard the audit and restart from current state."
       }
     },
     {
@@ -244,12 +244,12 @@
     },
     {
       "id": "RB25",
-      "scenario": "Verifier returns a revision/identity-bound NEXT_ITERATION packet directly to executor, which resumes after compaction.",
+      "scenario": "Verifier returns NEXT_ITERATION for the current checkpoint and observed state, then executor resumes after compaction.",
       "expected": {
         "entryRoute": "N/A",
         "verificationRoute": "NEXT_ITERATION",
         "nextOwner": "executor",
-        "invariant": "Verifier does not write. Executor accepts only a packet matching phase, canonical task/checkpoint/contract paths, workspace, repository set, worktree/branch, revision, and current state/delivery identity; it persists the full packet, changes phase to executing, records the new batch, and continues."
+        "invariant": "Executor accepts the verdict only when phase, canonical task/checkpoint/contract paths, workspace, repository set, worktree/branch, and current state/delivery identity still match; it records the audit outcome, changes phase to executing, and continues."
       }
     },
     {
