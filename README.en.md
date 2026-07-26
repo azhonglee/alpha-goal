@@ -69,7 +69,7 @@ node tools/validate_skills.js .
 node tools/validate_skills.js --fixtures
 ```
 
-The installer always copies `deep-interview`, `alpha-goal`, and `technical-design`, and lets the user choose whether to install `executor` and `verifier` as a pair. Codex/all runs independently offer the global Custom Agents declared by the shared contract (default Yes); choosing No preserves existing copies. See [INSTALL.md](INSTALL.md) for full behavior and smoke testing.
+The installer always copies `deep-interview`, `alpha-goal`, and `technical-design`, and lets the user choose whether to sync `executor` and `verifier` as a pair. Codex/all runs independently offer the global Custom Agents declared by the shared contract; turning sync off preserves existing copies. Automation can use `scripts/install.sh --non-interactive` for the fixed complete default Codex preset. See [INSTALL.md](INSTALL.md) for full behavior and smoke testing.
 
 ## Usage examples
 

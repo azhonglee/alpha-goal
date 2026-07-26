@@ -69,7 +69,7 @@ node tools/validate_skills.js .
 node tools/validate_skills.js --fixtures
 ```
 
-安装器始终复制 `deep-interview`、`alpha-goal` 与 `technical-design`，并让用户选择是否成组安装 `executor` 与 `verifier`；Codex/all 还会独立询问是否安装共享契约声明的全局 Custom Agents（默认 Yes），选择 No 会保留已有副本。完整行为和 smoke 流程见 [INSTALL.md](INSTALL.md)。
+安装器始终复制 `deep-interview`、`alpha-goal` 与 `technical-design`，并让用户选择是否成组同步 `executor` 与 `verifier`；Codex/all 还会独立选择是否同步共享契约声明的全局 Custom Agents，关闭同步会保留已有副本。自动化环境可用 `scripts/install.sh --non-interactive` 执行固定的默认 Codex 完整预设。完整行为和 smoke 流程见 [INSTALL.md](INSTALL.md)。
 
 ## 使用示例
 

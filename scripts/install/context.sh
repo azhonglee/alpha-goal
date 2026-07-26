@@ -1,16 +1,22 @@
 # shellcheck shell=bash
 
 initialize_install_target_context() {
-  require_interactive_terminal
-  if [[ "$uninstall" == true ]]; then
-    install_target="$(resolve_install_target)"
+  if [[ "$non_interactive" == true ]]; then
+    install_target="codex"
+    install_optional_roles=true
+    sync_custom_agents=true
   else
-    local wizard_result wizard_status
-    wizard_result="$(run_install_wizard)" || {
-      wizard_status=$?
-      exit "$wizard_status"
-    }
-    IFS=$'\t' read -r install_target install_optional_roles sync_custom_agents <<<"$wizard_result"
+    require_interactive_terminal
+    if [[ "$uninstall" == true ]]; then
+      install_target="$(resolve_install_target)"
+    else
+      local wizard_result wizard_status
+      wizard_result="$(run_install_wizard)" || {
+        wizard_status=$?
+        exit "$wizard_status"
+      }
+      IFS=$'\t' read -r install_target install_optional_roles sync_custom_agents <<<"$wizard_result"
+    fi
   fi
   sync_codex_config=false
   sync_claude_config=false
@@ -34,7 +40,7 @@ initialize_install_target_context() {
       exit 1
     fi
     codex_home="$(absolute_path "$codex_default_home")"
-    if [[ "$uninstall" == true ]]; then
+    if [[ "$uninstall" == true && "$non_interactive" != true ]]; then
       codex_home="$(absolute_path "$(prompt_text "Codex home" "$codex_default_home")")"
     fi
     target_root="$(absolute_path "$codex_home/skills")"
@@ -51,17 +57,17 @@ initialize_install_target_context() {
   fi
 
   if [[ "$sync_codex_config" == true ]]; then
-    if [[ "$uninstall" == true ]]; then
+    if [[ "$uninstall" == true && "$non_interactive" != true ]]; then
       sync_custom_agents="$(prompt_yes_no "Clean up Codex custom agents" true)"
     fi
   fi
-  if [[ "$uninstall" == true ]]; then
+  if [[ "$uninstall" == true && "$non_interactive" != true ]]; then
     sync_user_templates="$(prompt_yes_no "Clean up user templates" true)"
   else
     sync_user_templates=true
   fi
   if [[ "$sync_codex_config" == true ]]; then
-    if [[ "$uninstall" == true ]]; then
+    if [[ "$uninstall" == true && "$non_interactive" != true ]]; then
       sync_user_hooks="$(prompt_yes_no "Clean up Codex user hooks" true)"
     elif [[ "$install_optional_roles" == true ]]; then
       sync_user_hooks=true
@@ -71,7 +77,7 @@ initialize_install_target_context() {
   else
     sync_user_hooks=false
   fi
-  if [[ "$uninstall" == true ]]; then
+  if [[ "$uninstall" == true && "$non_interactive" != true ]]; then
     verbose="$(prompt_yes_no "Print detailed uninstall output" false)"
   else
     verbose=false
@@ -139,5 +145,9 @@ initialize_install_target_context() {
   fi
   if [[ "$sync_codex_config" == true && "$sync_custom_agents" == true ]]; then
     load_custom_agent_names
+  fi
+
+  if [[ "$uninstall" == true && "$non_interactive" != true ]]; then
+    confirm_uninstall_plan
   fi
 }

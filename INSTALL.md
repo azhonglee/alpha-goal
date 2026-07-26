@@ -25,22 +25,24 @@ For `PERSIST`, `alpha-goal` compiles the Goal Contract and sets `status: accepte
 
 ```bash
 scripts/install.sh
+scripts/install.sh --non-interactive
 scripts/install.sh --uninstall
+scripts/install.sh --non-interactive --uninstall
 ```
 
 ## Behavior
 
-The script creates copied skill directories under target-specific independent roots. `codex` uses `${CODEX_HOME:-$HOME/.codex}/skills`; `claude` keeps using `$HOME/.claude/skills`. `--uninstall` is the only supported CLI option. All other choices are made in the interactive terminal flow:
+The script creates copied skill directories under target-specific independent roots. `codex` uses `${CODEX_HOME:-$HOME/.codex}/skills`; `claude` keeps using `$HOME/.claude/skills`. Interactive choices select one of these targets:
 
 - `codex`: sync Codex config and Codex skill copies.
 - `claude`: sync Claude `CLAUDE.md` and Claude skill copies.
 - `all`: sync or uninstall both Codex and Claude in one run.
 
-Install uses a three-step terminal wizard: Target, Features, and Review. Up/Down moves, Space toggles a feature, Enter advances or confirms, `b` returns to the previous step, and `q` or Escape cancels before any target write. `codex` is the default target. The optional `executor` / `verifier` pair and, for `codex` or `all`, the contract-declared Custom Agents are enabled by default. `deep-interview`, `alpha-goal`, and `technical-design` are always installed. Disabling optional roles preserves those skill copies and skips Codex recovery-hook installation or update. Disabling Custom Agents leaves their same-name files and the managed routing block untouched. Claude-only runs never inspect or modify Codex agents. The Review step shows selected roots and features before installation begins. The Codex configuration root is `${CODEX_HOME:-$HOME/.codex}` and can operate without `HOME` when `CODEX_HOME` is set; Claude paths remain based on `$HOME/.claude`, so `claude` and `all` require `HOME`. Template sync is enabled and verbose output is disabled. For uninstall, the existing compact flow asks for the target, Codex home when relevant, Custom Agent cleanup when relevant, template cleanup, hook cleanup when relevant, and verbose output; uninstall continues to remove all managed public skills.
+Install uses a three-step terminal wizard: Target, Features, and Review. Up/Down moves, Space toggles a feature, Enter advances or confirms, `b` returns to the previous step, and `q` or Escape cancels before any target write. Cursor-capable terminals use an alternate screen so redraws do not erase the calling terminal's visible history. `codex` is the default target. The optional `executor` / `verifier` pair and, for `codex` or `all`, the contract-declared Custom Agents are selected for sync by default. `deep-interview`, `alpha-goal`, and `technical-design` are always synced. Turning optional roles off preserves those skill copies and skips Codex recovery-hook installation or update. Turning Custom Agents off leaves their same-name files and the managed routing block untouched. Claude-only runs never inspect or modify Codex agents. The Review step distinguishes `sync` from `keep existing` and shows the managed configuration coupled to each selection. The Codex configuration root is `${CODEX_HOME:-$HOME/.codex}` and can operate without `HOME` when `CODEX_HOME` is set; Claude paths remain based on `$HOME/.claude`, so `claude` and `all` require `HOME`. Template sync is enabled and verbose output is disabled. For interactive uninstall, the flow asks for the target, Codex home when relevant, Custom Agent cleanup when relevant, template cleanup, hook cleanup, and verbose output, then shows a final cleanup review before any write; uninstall continues to remove all managed public skills.
 
-Non-interactive runs are refused. Any CLI argument other than `--uninstall`, including `--help`, `--target`, `--codex-home`, `--force`, sync toggles, or `--verbose`, is rejected.
+`--non-interactive` is the fixed automation preset. It selects the default Codex root, all five public skills, managed Codex templates, the recovery hook, and Custom Agents without reading from a terminal. With `--uninstall`, it removes that default managed Codex installation without prompts. `CODEX_HOME` continues to override the default Codex root. The preset intentionally exposes no target or feature switches; it never selects Claude and never treats an omitted feature as an instruction to delete existing files. Runs without `--non-interactive` still require a terminal. Other CLI arguments, including `--help`, `--target`, `--codex-home`, `--force`, sync toggles, or `--verbose`, are rejected.
 
-Successful install and uninstall runs print one concise success line. Failures continue to print the specific error and exit non-zero.
+Successful install and uninstall runs print a concise result summary with the selected root, skill counts, managed configuration actions, preserved content, and Custom Agent actions. Failures continue to print the specific error and exit non-zero.
 
 Before the first managed-target write, install preflights every selected Markdown/config target, Custom Agent, skill destination, and hook. Markdown, TOML, and hook merges are executed against temporary copies; all skill/agent source copies and target ownership rules are checked. A conflict or malformed target therefore fails before configuration, agents, skills, or hooks are changed.
 
@@ -75,6 +77,7 @@ bash scripts/test-install.sh
 When invoked by absolute path it can run from any working directory because the script resolves the repository from its own path, isolates `HOME`, `CODEX_HOME`, and temporary files, and cleans up on exit. It fails explicitly when `codex` is unavailable. Coverage includes:
 
 - default, overridden, and HOME-less Codex roots, plus Claude HOME requirements and overlapping-target rejection;
+- fixed-preset non-interactive Codex install and uninstall without a TTY;
 - contract-defined Custom Agents, managed routing, source-identical skill copies, repeat installs, upgrades, and conservative uninstall;
 - stable config merge and retired-field migration with user-owned value preservation;
 - fresh-install and legacy-config `codex app-server --strict-config --listen stdio://` checks;
