@@ -26,8 +26,12 @@ while [[ $# -gt 0 ]]; do
       uninstall=true
       shift
       ;;
+    --non-interactive)
+      non_interactive=true
+      shift
+      ;;
     *)
-      die "Unknown option: $1 (only --uninstall is supported; run scripts/install.sh in an interactive terminal for configuration)"
+      die "Unknown option: $1 (supported options: --uninstall and --non-interactive)"
       ;;
   esac
 done

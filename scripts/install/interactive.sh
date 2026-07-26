@@ -2,6 +2,7 @@
 
 menu_rendered_rows=0
 wizard_key=""
+menu_session_active=false
 
 menu_supports_color() {
   [[ -t 2 && -z "${NO_COLOR:-}" && "${TERM:-}" != "dumb" ]]
@@ -47,6 +48,30 @@ begin_menu_render() {
     printf '' >&2
   fi
   menu_rendered_rows=0
+}
+
+begin_menu_session() {
+  menu_session_active=false
+  if menu_supports_cursor; then
+    printf '\033[?1049h' >&2
+    menu_session_active=true
+    trap end_menu_session EXIT
+    trap abort_menu_session HUP INT TERM
+  fi
+}
+
+end_menu_session() {
+  if [[ "$menu_session_active" == true ]]; then
+    printf '\033[?1049l' >&2
+    menu_session_active=false
+  fi
+  trap - EXIT HUP INT TERM
+}
+
+abort_menu_session() {
+  end_menu_session
+  printf '\nInstallation interrupted.\n' >&2
+  exit 130
 }
 
 render_wizard_header() {
@@ -142,17 +167,15 @@ render_install_target_menu() {
     menu_print_line "    ${dim}${details[$index]}${reset}"
   done
 
-  if [[ "$uninstall" != true ]]; then
-    menu_print_line ""
-    menu_print_line "${dim}Up/Down move  Enter continue  q/Esc cancel${reset}"
-  fi
+  menu_print_line ""
+  menu_print_line "${dim}Up/Down move  Enter continue  q/Esc cancel${reset}"
 }
 
 read_wizard_key() {
   local key rest=""
 
   if ! IFS= read -rsn1 key; then
-    printf '\n' >&2
+    end_menu_session
     die "No selection received"
   fi
 
@@ -183,6 +206,7 @@ prompt_install_target() {
 
   prompt_skills_root="codex $(display_codex_skills_root) / claude $(display_claude_skills_root)"
   menu_rendered_rows=0
+  begin_menu_session
   while true; do
     render_install_target_menu "$selected" "$prompt_skills_root"
     read_wizard_key
@@ -190,12 +214,14 @@ prompt_install_target() {
       enter)
         printf '\n' >&2
         menu_rendered_rows=0
+        end_menu_session
         printf '%s\n' "${targets[$selected]}"
         return
         ;;
       up) selected=$(( (selected + ${#targets[@]} - 1) % ${#targets[@]} )) ;;
       down) selected=$(( (selected + 1) % ${#targets[@]} )) ;;
       cancel)
+        end_menu_session
         printf '\nInstallation cancelled.\n' >&2
         return 130
         ;;
@@ -208,6 +234,11 @@ render_install_features() {
   local selected="$2"
   local optional_roles="$3"
   local custom_agents="$4"
+  local optional_summary="Sync persistent execution and final-audit roles; off keeps existing files"
+
+  if [[ "$target" == codex || "$target" == all ]]; then
+    optional_summary="Also sync the Codex recovery hook; off keeps existing files"
+  fi
 
   initialize_menu_style
   begin_menu_render
@@ -216,29 +247,29 @@ render_install_features() {
   menu_print_line ""
   if [[ "$selected" -eq 0 ]]; then
     render_toggle_row true "$optional_roles" \
-      "Executor + verifier" "Install the persistent execution and final-audit roles"
+      "Sync executor + verifier" "$optional_summary"
   else
     render_toggle_row false "$optional_roles" \
-      "Executor + verifier" "Install the persistent execution and final-audit roles"
+      "Sync executor + verifier" "$optional_summary"
   fi
   if [[ "$target" == codex || "$target" == all ]]; then
     if [[ "$selected" -eq 1 ]]; then
       render_toggle_row true "$custom_agents" \
-        "Codex Custom Agents" "Install managed agent profiles and routing guidance"
+        "Sync Codex Custom Agents" "Sync managed profiles and routing; off keeps existing files"
     else
       render_toggle_row false "$custom_agents" \
-        "Codex Custom Agents" "Install managed agent profiles and routing guidance"
+        "Sync Codex Custom Agents" "Sync managed profiles and routing; off keeps existing files"
     fi
   fi
   menu_print_line ""
   menu_print_line "${dim}Up/Down move  Space toggle  Enter continue  b back  q/Esc cancel${reset}"
 }
 
-format_enabled() {
+format_sync_choice() {
   if [[ "$1" == true ]]; then
-    printf '%s' "enabled"
+    printf '%s' "sync"
   else
-    printf '%s' "disabled"
+    printf '%s' "keep existing"
   fi
 }
 
@@ -252,7 +283,7 @@ render_install_review() {
   initialize_menu_style
   begin_menu_render
   render_wizard_header "3" "Review installation"
-  menu_print_line "${bold}Target${reset}"
+  menu_print_line "${bold}Skill roots${reset}"
   case "$target" in
     codex) menu_print_line "  Codex   ${dim}${codex_root}${reset}" ;;
     claude) menu_print_line "  Claude  ${dim}${claude_root}${reset}" ;;
@@ -263,12 +294,21 @@ render_install_review() {
   esac
   menu_print_line ""
   menu_print_line "${bold}Features${reset}"
-  menu_print_line "  deep-interview        ${green}enabled${reset}"
-  menu_print_line "  alpha-goal            ${green}enabled${reset}"
-  menu_print_line "  technical-design      ${green}enabled${reset}"
-  menu_print_line "  executor + verifier   $(format_enabled "$optional_roles")"
+  menu_print_line "  deep-interview        ${green}sync${reset}"
+  menu_print_line "  alpha-goal            ${green}sync${reset}"
+  menu_print_line "  technical-design      ${green}sync${reset}"
+  menu_print_line "  executor + verifier   $(format_sync_choice "$optional_roles")"
   if [[ "$target" == codex || "$target" == all ]]; then
-    menu_print_line "  Codex Custom Agents   $(format_enabled "$custom_agents")"
+    menu_print_line "  Codex Custom Agents   $(format_sync_choice "$custom_agents")"
+  fi
+  menu_print_line ""
+  menu_print_line "${bold}Managed configuration${reset}"
+  if [[ "$target" == codex || "$target" == all ]]; then
+    menu_print_line "  AGENTS.md + config.toml  sync"
+    menu_print_line "  hooks.json               $(format_sync_choice "$optional_roles")"
+  fi
+  if [[ "$target" == claude || "$target" == all ]]; then
+    menu_print_line "  CLAUDE.md                 sync"
   fi
   menu_print_line ""
   menu_print_line "${yellow}${bold}Press Enter to install${reset}  ${dim}b back  q/Esc cancel${reset}"
@@ -289,6 +329,7 @@ run_install_wizard() {
   claude_root="$(display_claude_skills_root)"
   prompt_skills_root="codex ${codex_root} / claude ${claude_root}"
   menu_rendered_rows=0
+  begin_menu_session
 
   while true; do
     target="${targets[$target_selected]}"
@@ -314,6 +355,7 @@ run_install_wizard() {
     read_wizard_key
     case "$wizard_key" in
       cancel)
+        end_menu_session
         printf '\nInstallation cancelled.\n' >&2
         return 130
         ;;
@@ -354,6 +396,7 @@ run_install_wizard() {
             if [[ "$target" == claude ]]; then
               custom_agents=false
             fi
+            end_menu_session
             printf '%s\t%s\t%s\n' "$target" "$optional_roles" "$custom_agents"
             return
             ;;
@@ -421,7 +464,45 @@ prompt_yes_no() {
 
 require_interactive_terminal() {
   if [[ ! -t 0 ]]; then
-    die "Interactive terminal required; only --uninstall may be passed as a CLI option"
+    die "Interactive terminal required; use --non-interactive for the default Codex preset"
+  fi
+}
+
+format_cleanup_choice() {
+  if [[ "$1" == true ]]; then
+    printf '%s' "clean managed content when safe"
+  else
+    printf '%s' "keep existing"
+  fi
+}
+
+confirm_uninstall_plan() {
+  printf '\n◆ Alpha Goal Uninstall\n' >&2
+  printf 'Review cleanup\n' >&2
+  case "$install_target" in
+    codex)
+      printf '  Target: Codex  %s\n' "$codex_home" >&2
+      ;;
+    claude)
+      printf '  Target: Claude  %s\n' "$claude_home" >&2
+      ;;
+    all)
+      printf '  Target: Codex  %s\n' "$codex_home" >&2
+      printf '          Claude %s\n' "$claude_home" >&2
+      ;;
+  esac
+  printf '  Skills: remove managed copies\n' >&2
+  if [[ "$sync_codex_config" == true ]]; then
+    printf '  Custom Agents: %s\n' "$(format_cleanup_choice "$sync_custom_agents")" >&2
+    printf '  AGENTS.md + config.toml: %s\n' "$(format_cleanup_choice "$sync_user_templates")" >&2
+    printf '  hooks.json: %s\n' "$(format_cleanup_choice "$sync_user_hooks")" >&2
+  fi
+  if [[ "$sync_claude_config" == true ]]; then
+    printf '  CLAUDE.md: %s\n' "$(format_cleanup_choice "$sync_user_templates")" >&2
+  fi
+  if [[ "$(prompt_yes_no "Proceed with uninstall" true)" != true ]]; then
+    printf 'Uninstallation cancelled.\n' >&2
+    exit 130
   fi
 }
 

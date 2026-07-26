@@ -125,6 +125,10 @@ else:
     if target in {"codex", "all"}:
         actions.append((b"Clean up Codex user hooks", [hook_input.encode(), b"\r"]))
     actions.append((b"Print detailed", [verbose_input.encode(), b"\r"]))
+    if wizard_mode == "cancel-uninstall":
+        actions.append((b"Proceed with uninstall", [b"n", b"\r"]))
+    else:
+        actions.append((b"Proceed with uninstall", [b"\r"]))
 
 master, slave = pty.openpty()
 proc = subprocess.Popen(
@@ -194,7 +198,7 @@ expect_invalid_arg() {
     echo "expected invalid argument failure: $*" >&2
     exit 1
   fi
-  grep -q "only --uninstall is supported" "$smoke_root/invalid.err"
+  grep -q "supported options: --uninstall and --non-interactive" "$smoke_root/invalid.err"
   rm -rf "$tmp_invalid"
 }
 
@@ -209,15 +213,8 @@ assert_simple_success_output() {
   test "$message_count" -eq 1
   completion_count="$(grep -E -o "Alpha Goal [[:alnum:] _-]+ completed\\." <<<"$output" | wc -l | tr -d ' ')"
   test "$completion_count" -eq 1
-  ! grep -q "Alpha Goal install summary" <<<"$output"
-  ! grep -q "Alpha Goal uninstall summary" <<<"$output"
-  ! grep -q "Codex skills root:" <<<"$output"
-  ! grep -q "Claude skills root:" <<<"$output"
-  ! grep -q "Skills root:" <<<"$output"
-  ! grep -q "Codex home:" <<<"$output"
-  ! grep -q "Claude home:" <<<"$output"
-  ! grep -q "Templates" <<<"$output"
-  ! grep -q "Hooks" <<<"$output"
+  grep -Eq "Target:|Targets:" <<<"$output"
+  grep -q "Skills:" <<<"$output"
   ! grep -q "╭─" <<<"$output"
   ! grep -q "╰─" <<<"$output"
 }
@@ -240,6 +237,8 @@ assert_skill_tree_matches() {
 contract_agent_names() {
   node -e 'const c=require(process.argv[1]); for (const name of Object.keys(c.customAgents || {}).sort()) console.log(name)' "$repo_root/tools/validation/alpha-goal.json"
 }
+
+managed_agent_count="$(contract_agent_names | wc -l | tr -d ' ')"
 
 
 assert_custom_agents_match() {
@@ -288,6 +287,12 @@ grep -q "deep-interview" <<<"$codex_output"
 grep -q "technical-design" <<<"$codex_output"
 grep -q "executor + verifier" <<<"$codex_output"
 grep -q "Codex Custom Agents" <<<"$codex_output"
+grep -q "Managed configuration" <<<"$codex_output"
+grep -q "AGENTS.md + config.toml" <<<"$codex_output"
+grep -q "hooks.json" <<<"$codex_output"
+grep -q "Skills: 5 synced (5 created, 0 replaced)." <<<"$codex_output"
+grep -q "Codex config: AGENTS.md created; config.toml created; hooks.json created." <<<"$codex_output"
+grep -q "Custom Agents: $managed_agent_count created, 0 replaced; routing updated." <<<"$codex_output"
 ! grep -q "Install executor and verifier \[Y/n\]" <<<"$codex_output"
 ! grep -q "Install Codex custom agents \[Y/n\]" <<<"$codex_output"
 ! grep -q "Codex home \\[" <<<"$codex_output"
@@ -332,6 +337,30 @@ grep -q "Missing or unknown phase stops recovery" "$tmp_codex/.codex/hooks.json"
 grep -q "status draft loads \$alpha-goal" "$tmp_codex/.codex/hooks.json"
 grep -q "status accepted loads \$executor" "$tmp_codex/.codex/hooks.json"
 grep -q "remembered skill text is stale" "$tmp_codex/.codex/hooks.json"
+
+tmp_non_interactive="$(mktemp -d)"
+non_interactive_install_output="$(
+  env -u CODEX_HOME HOME="$tmp_non_interactive" \
+    "$repo_root/scripts/install.sh" --non-interactive </dev/null
+)"
+assert_simple_success_output "$non_interactive_install_output" "Alpha Goal install completed."
+! grep -q "Step 1 of 3" <<<"$non_interactive_install_output"
+grep -q "Target: Codex ($tmp_non_interactive/.codex)." <<<"$non_interactive_install_output"
+grep -q "Skills: 5 synced (5 created, 0 replaced)." <<<"$non_interactive_install_output"
+for skill in "${managed_public_skills[@]}"; do
+  assert_skill_tree_matches "$repo_root/skills/$skill" "$tmp_non_interactive/.codex/skills/$skill"
+done
+assert_custom_agents_match "$tmp_non_interactive/.codex"
+non_interactive_uninstall_output="$(
+  env -u CODEX_HOME HOME="$tmp_non_interactive" \
+    "$repo_root/scripts/install.sh" --uninstall --non-interactive </dev/null
+)"
+assert_simple_success_output "$non_interactive_uninstall_output" "Alpha Goal uninstall completed."
+! grep -q "Choose which app configuration" <<<"$non_interactive_uninstall_output"
+grep -q "Skills: 5 removed, 0 preserved, 0 not found." <<<"$non_interactive_uninstall_output"
+for skill in "${managed_public_skills[@]}"; do
+  test ! -e "$tmp_non_interactive/.codex/skills/$skill"
+done
 
 tmp_codex_override="$(mktemp -d)"
 override_codex_home="$tmp_codex_override/config/codex"
@@ -464,6 +493,17 @@ for cancel_mode in cancel-target cancel-features-esc; do
   grep -q "Installation cancelled." <<<"$cancel_page_output"
   test "$(find "$tmp_cancel_page" -type f | wc -l | tr -d ' ')" -eq 1
   grep -q sentinel "$tmp_cancel_page/.codex/sentinel"
+done
+
+tmp_uninstall_cancel="$(mktemp -d)"
+run_installer "$tmp_uninstall_cancel" >/dev/null
+if uninstall_cancel_output="$(WIZARD_MODE=cancel-uninstall run_installer "$tmp_uninstall_cancel" --uninstall 2>&1)"; then
+  echo "cancelled uninstall should exit non-zero" >&2
+  exit 1
+fi
+grep -q "Uninstallation cancelled." <<<"$uninstall_cancel_output"
+for skill in "${managed_public_skills[@]}"; do
+  test -f "$tmp_uninstall_cancel/.codex/skills/$skill/SKILL.md"
 done
 
 tmp_no_color="$(mktemp -d)"
@@ -1026,7 +1066,7 @@ test -f "$tmp_uninstall_fault/fault-fired"
 grep -q "restored all managed targets changed by this run" <<<"$uninstall_fault_output"
 diff -r --no-dereference "$tmp_uninstall_fault/before/codex" "$tmp_uninstall_fault/.codex"
 diff -r --no-dereference "$tmp_uninstall_fault/before/claude" "$tmp_uninstall_fault/.claude"
-test "$(stat -c '%a' "$tmp_uninstall_fault/.codex/agents")" = "711"
+test "$(python3 -c 'import os, stat, sys; print(format(stat.S_IMODE(os.stat(sys.argv[1]).st_mode), "o"))' "$tmp_uninstall_fault/.codex/agents")" = "711"
 test "$tmp_uninstall_fault/external/config.toml" -ef "$tmp_uninstall_fault/external/config-alias.toml"
 test "$tmp_uninstall_fault/external/skill" -ef "$tmp_uninstall_fault/.codex/skills/verifier"
 test "$(cat "$tmp_uninstall_fault/.codex/hooks.json.tmp")" = "user sidecar"
