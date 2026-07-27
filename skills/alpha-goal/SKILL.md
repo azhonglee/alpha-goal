@@ -1,6 +1,6 @@
 ---
 name: alpha-goal
-description: "Turn raw requests and attributable context into a Goal Contract and native goal input. Use for goal framing, execution boundaries, acceptance criteria, verification, and native goal synchronization."
+description: "Frame software development work as executable, verifiable goals. Use when the user asks to design, implement, build, modify, fix, debug, refactor, optimize, test, integrate, migrate, deploy, or harden code or systems, or needs goal boundaries, acceptance criteria, verification, or native goal synchronization. Choose DIRECT or PERSIST; for persistent work, compile a Goal Contract from raw requests and attributable context."
 ---
 
 # Alpha Goal
