@@ -1,6 +1,6 @@
 ---
 name: alpha-goal
-description: "Frame software development work as executable, verifiable goals. Use when the user asks to design, implement, build, modify, fix, debug, refactor, optimize, test, integrate, migrate, deploy, or harden code or systems, or needs goal boundaries, acceptance criteria, verification, or native goal synchronization. Choose DIRECT or PERSIST; for persistent work, compile a Goal Contract from raw requests and attributable context."
+description: "Frame raw requests and attributable context as executable, verifiable goals. Use when the user asks to design, implement, build, modify, fix, debug, refactor, optimize, test, integrate, migrate, deploy, or harden code or systems."
 ---
 
 # Alpha Goal
