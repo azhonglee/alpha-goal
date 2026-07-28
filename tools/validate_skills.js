@@ -8,7 +8,6 @@ const FRONTMATTER_RE = /^---\n(.*?)\n---\n/s;
 const FIELD_RE = /^([A-Za-z0-9_-]+):\s*(.*?)\s*$/;
 const ALLOWED_FRONTMATTER_KEYS = new Set(["name", "description"]);
 const CONTRACT_PATH = "tools/validation/alpha-goal.json";
-const CUSTOM_AGENT_MARKER = "# alpha-goal-managed-custom-agent:v1";
 const CUSTOM_AGENT_EFFORTS = new Set(["low", "medium", "high", "xhigh"]);
 const CUSTOM_AGENT_SANDBOXES = new Set(["read-only", "workspace-write", "danger-full-access"]);
 const REQUIRED_FIXTURES = new Set([
@@ -352,7 +351,6 @@ function validateCustomAgents(root, contract, errors) {
     }
     if (!isFile(file)) continue;
     const text = fs.readFileSync(file, "utf8");
-    if (text.split(/\r?\n/, 1)[0] !== CUSTOM_AGENT_MARKER) errors.push(`${rel}: missing managed marker`);
     try {
       const data = parseToml(text);
       const allowed = new Set(["name", "description", "model", "model_reasoning_effort", "sandbox_mode", "developer_instructions"]);

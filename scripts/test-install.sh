@@ -240,6 +240,33 @@ contract_agent_names() {
 
 managed_agent_count="$(contract_agent_names | wc -l | tr -d ' ')"
 
+seed_legacy_custom_agents() {
+  local codex_home="$1"
+  local agent
+
+  mkdir -p "$codex_home/agents"
+  for agent in architect builder reviewer scout; do
+    cp "$repo_root/agents/$agent.toml" "$codex_home/agents/$agent.toml"
+  done
+  printf '\n# legacy-profile\n' >> "$codex_home/agents/builder.toml"
+  cat > "$codex_home/AGENTS.md" <<'EOF'
+<!-- alpha-goal-managed-custom-agent-routing:v1 -->
+## Custom-agent routing
+
+- The main agent owns scope, authority, acceptance decisions, and final synthesis.
+- Delegate only independent, bounded work when it materially improves speed, quality, or context isolation.
+- Use `scout` for read-only exploration and evidence collection.
+- Use `architect` for bounded architecture options, interface boundaries, migration/rollout consequences, and risk-to-validation mapping before implementation.
+- Use `builder` for authorized, clearly scoped implementation with explicit acceptance criteria.
+- Use `reviewer` for complex review, competing interpretations, cross-component consequences, or high-consequence risks.
+- Use built-in agents when no pinned custom role is required; if no role clearly fits, keep the work in the main agent.
+- Do not repeat the same work across agents merely to compare effort levels, and do not allow concurrent edits to overlapping files.
+- A model or reasoning profile never grants additional authority.
+
+<!-- generate-with-template:custom-agent-routing -->
+EOF
+}
+
 
 assert_custom_agents_match() {
   local codex_home="$1"
@@ -258,7 +285,6 @@ for (const [name, profile] of Object.entries(profiles)) {
   const target = path.join(codexHome, "agents", `${name}.toml`);
   if (!fs.statSync(target).isFile() || fs.lstatSync(target).isSymbolicLink()) process.exit(1);
   if (fs.readFileSync(source, "utf8") !== fs.readFileSync(target, "utf8")) process.exit(1);
-  if (fs.readFileSync(target, "utf8").split(/\r?\n/, 1)[0] !== "# alpha-goal-managed-custom-agent:v1") process.exit(1);
   const data = toml.parse(fs.readFileSync(target, "utf8"));
   if (data.name !== name || data.model !== profile.model || data.model_reasoning_effort !== profile.effort) process.exit(1);
   if (profile.sandbox === null ? Object.hasOwn(data, "sandbox_mode") : data.sandbox_mode !== profile.sandbox) process.exit(1);
@@ -328,6 +354,24 @@ grep -q "allow_implicit_invocation: false" "$tmp_codex/.codex/skills/deep-interv
 grep -q "allow_implicit_invocation: false" "$tmp_codex/.codex/skills/technical-design/agents/openai.yaml"
 python3 -m json.tool "$tmp_codex/.codex/hooks.json" >/dev/null
 grep -q "codex-alpha-goal-compact-recovery:v4" "$tmp_codex/.codex/hooks.json"
+
+tmp_agent_upgrade="$(mktemp -d)"
+seed_legacy_custom_agents "$tmp_agent_upgrade/.codex"
+mkdir -p "$tmp_agent_upgrade/before-skip"
+cp -a "$tmp_agent_upgrade/.codex/agents" "$tmp_agent_upgrade/before-skip/agents"
+find "$tmp_agent_upgrade/.codex/agents" -printf '%P %m\n' | sort > "$tmp_agent_upgrade/before-skip/agent-modes"
+custom_agent_upgrade_skip_output="$(CUSTOM_AGENTS_INPUT=n run_installer "$tmp_agent_upgrade")"
+assert_simple_success_output "$custom_agent_upgrade_skip_output" "Alpha Goal install completed."
+diff -r --no-dereference "$tmp_agent_upgrade/before-skip/agents" "$tmp_agent_upgrade/.codex/agents"
+find "$tmp_agent_upgrade/.codex/agents" -printf '%P %m\n' | sort > "$tmp_agent_upgrade/after-skip-agent-modes"
+cmp "$tmp_agent_upgrade/before-skip/agent-modes" "$tmp_agent_upgrade/after-skip-agent-modes"
+test ! -e "$tmp_agent_upgrade/.codex/agents/complex-builder.toml"
+grep -q '# legacy-profile' "$tmp_agent_upgrade/.codex/agents/builder.toml"
+! grep -q '`complex-builder`' "$tmp_agent_upgrade/.codex/AGENTS.md"
+custom_agent_upgrade_output="$(run_installer "$tmp_agent_upgrade")"
+assert_simple_success_output "$custom_agent_upgrade_output" "Alpha Goal install completed."
+grep -q "Custom Agents: 1 created, 4 replaced; routing updated." <<<"$custom_agent_upgrade_output"
+assert_custom_agents_match "$tmp_agent_upgrade/.codex"
 grep -q "Alpha Goal stage recovery" "$tmp_codex/.codex/hooks.json"
 grep -q "exact task directory preserved in current context" "$tmp_codex/.codex/hooks.json"
 grep -q "phase executing loads \$executor" "$tmp_codex/.codex/hooks.json"
@@ -560,6 +604,7 @@ test ! -e "$tmp_claude/.codex/AGENTS.md"
 test ! -e "$tmp_claude/.codex/skills/alpha-goal"
 test ! -e "$tmp_claude/.codex/agents/architect.toml"
 test ! -e "$tmp_claude/.codex/agents/builder.toml"
+test ! -e "$tmp_claude/.codex/agents/complex-builder.toml"
 test ! -e "$tmp_claude/.codex/agents/reviewer.toml"
 ! grep -q "Install Codex custom agents" <<<"$claude_output"
 grep -q "references/claude-adapter.md" "$tmp_claude/.claude/skills/deep-interview/SKILL.md"
@@ -916,6 +961,7 @@ test -L "$tmp_agent_symlink/.codex/agents/scout.toml"
 grep -q external "$tmp_agent_symlink/external-scout.toml"
 test ! -e "$tmp_agent_symlink/.codex/agents/architect.toml"
 test ! -e "$tmp_agent_symlink/.codex/agents/builder.toml"
+test ! -e "$tmp_agent_symlink/.codex/agents/complex-builder.toml"
 test ! -e "$tmp_agent_symlink/.codex/AGENTS.md"
 
 tmp_agent_nonregular="$(mktemp -d)"
@@ -928,6 +974,7 @@ fi
 grep -q "Refusing to replace non-regular custom agent" <<<"$agent_nonregular_output"
 grep -q keep "$tmp_agent_nonregular/.codex/agents/reviewer.toml/sentinel"
 test ! -e "$tmp_agent_nonregular/.codex/agents/architect.toml"
+test ! -e "$tmp_agent_nonregular/.codex/agents/complex-builder.toml"
 test ! -e "$tmp_agent_nonregular/.codex/agents/scout.toml"
 test ! -e "$tmp_agent_nonregular/.codex/AGENTS.md"
 
@@ -1016,6 +1063,39 @@ grep -q "Failed to activate staged skill copy" <<<"$write_fault_output"
 grep -q "restored all managed targets changed by this run" <<<"$write_fault_output"
 test ! -e "$tmp_write_fault/.codex"
 
+tmp_agent_upgrade_fault="$(mktemp -d)"
+seed_legacy_custom_agents "$tmp_agent_upgrade_fault/.codex"
+mkdir -p "$tmp_agent_upgrade_fault/before" "$tmp_agent_upgrade_fault/fake-bin"
+cp -a "$tmp_agent_upgrade_fault/.codex" "$tmp_agent_upgrade_fault/before/codex"
+python3 - "$tmp_agent_upgrade_fault/fake-bin/python3" <<'PYWRAP'
+import os
+import sys
+
+wrapper = r'''#!/usr/bin/env bash
+if [[ "$1" == "-" && "$2" == *"/.alpha-goal-skill-stage."*"/executor" && "$3" == *"/skills/executor" && ! -e "$FAIL_MARKER" ]]; then
+  : > "$FAIL_MARKER"
+  exit 71
+fi
+exec "$REAL_PYTHON" "$@"
+'''
+with open(sys.argv[1], "w") as handle:
+    handle.write(wrapper)
+os.chmod(sys.argv[1], 0o755)
+PYWRAP
+if agent_upgrade_fault_output="$(
+  PATH="$tmp_agent_upgrade_fault/fake-bin:$PATH" \
+  REAL_PYTHON="$real_python" \
+  FAIL_MARKER="$tmp_agent_upgrade_fault/fault-fired" \
+  run_installer "$tmp_agent_upgrade_fault" 2>&1
+)"; then
+  echo "custom-agent upgrade fault injection should fail" >&2
+  exit 1
+fi
+test -f "$tmp_agent_upgrade_fault/fault-fired"
+grep -q "Failed to activate staged skill copy" <<<"$agent_upgrade_fault_output"
+grep -q "restored all managed targets changed by this run" <<<"$agent_upgrade_fault_output"
+diff -r --no-dereference "$tmp_agent_upgrade_fault/before/codex" "$tmp_agent_upgrade_fault/.codex"
+
 tmp_uninstall_fault="$(mktemp -d)"
 TARGET_CHOICE=all run_installer "$tmp_uninstall_fault" >/dev/null
 chmod 0711 "$tmp_uninstall_fault/.codex/agents"
@@ -1071,35 +1151,11 @@ test "$tmp_uninstall_fault/external/config.toml" -ef "$tmp_uninstall_fault/exter
 test "$tmp_uninstall_fault/external/skill" -ef "$tmp_uninstall_fault/.codex/skills/verifier"
 test "$(cat "$tmp_uninstall_fault/.codex/hooks.json.tmp")" = "user sidecar"
 
-unmanaged_fault_agent="$(contract_agent_names | tail -1)"
-rm "$tmp_uninstall_fault/.codex/agents/$unmanaged_fault_agent.toml"
-printf 'external agent\n' > "$tmp_uninstall_fault/external/agent.toml"
-ln "$tmp_uninstall_fault/external/agent.toml" "$tmp_uninstall_fault/.codex/agents/$unmanaged_fault_agent.toml"
-mkdir -p "$tmp_uninstall_fault/before-unmanaged"
-cp -a "$tmp_uninstall_fault/.codex" "$tmp_uninstall_fault/before-unmanaged/codex"
-cp -a "$tmp_uninstall_fault/.claude" "$tmp_uninstall_fault/before-unmanaged/claude"
-rm "$tmp_uninstall_fault/fault-fired"
-if unmanaged_fault_output="$(
-  PATH="$tmp_uninstall_fault/fake-bin:$PATH" \
-  REAL_RM="$real_rm" \
-  FAIL_MARKER="$tmp_uninstall_fault/fault-fired" \
-  FAIL_TARGET="$tmp_uninstall_fault/.claude/skills/executor" \
-  TARGET_CHOICE=all \
-  run_installer "$tmp_uninstall_fault" --uninstall 2>&1
-)"; then
-  echo "unmanaged uninstall-fault injection should fail" >&2
-  exit 1
-fi
-test -f "$tmp_uninstall_fault/fault-fired"
-grep -q "restored all managed targets changed by this run" <<<"$unmanaged_fault_output"
-diff -r --no-dereference "$tmp_uninstall_fault/before-unmanaged/codex" "$tmp_uninstall_fault/.codex"
-diff -r --no-dereference "$tmp_uninstall_fault/before-unmanaged/claude" "$tmp_uninstall_fault/.claude"
-test "$tmp_uninstall_fault/external/agent.toml" -ef "$tmp_uninstall_fault/.codex/agents/$unmanaged_fault_agent.toml"
 test -z "$(find "$TMPDIR" -maxdepth 1 -type d -name 'alpha-goal-install-transaction.*' -print -quit)"
 
-unmanaged_uninstall_agent="$(contract_agent_names | tail -1)"
-rm "$tmp_codex/.codex/agents/$unmanaged_uninstall_agent.toml"
-printf 'user-owned uninstall agent\n' > "$tmp_codex/.codex/agents/$unmanaged_uninstall_agent.toml"
+replaced_uninstall_agent="$(contract_agent_names | tail -1)"
+rm "$tmp_codex/.codex/agents/$replaced_uninstall_agent.toml"
+printf 'user-owned uninstall agent\n' > "$tmp_codex/.codex/agents/$replaced_uninstall_agent.toml"
 codex_uninstall_output="$(run_installer "$tmp_codex" --uninstall)"
 assert_simple_success_output "$codex_uninstall_output" "Alpha Goal uninstall completed."
 for skill in "${managed_public_skills[@]}"; do
@@ -1109,11 +1165,7 @@ test ! -e "$tmp_codex/.codex/AGENTS.md"
 test ! -e "$tmp_codex/.codex/config.toml"
 test ! -e "$tmp_codex/.codex/hooks.json"
 while IFS= read -r agent; do
-  if [[ "$agent" == "$unmanaged_uninstall_agent" ]]; then
-    grep -q 'user-owned uninstall agent' "$tmp_codex/.codex/agents/$agent.toml"
-  else
-    test ! -e "$tmp_codex/.codex/agents/$agent.toml"
-  fi
+  test ! -e "$tmp_codex/.codex/agents/$agent.toml"
 done < <(contract_agent_names)
 
 claude_uninstall_output="$(TARGET_CHOICE=claude run_installer "$tmp_claude" --uninstall)"
