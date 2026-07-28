@@ -21,7 +21,6 @@ Use subagents for independent parallel subtasks when that improves throughput. B
 - Surface contradictions, missing prerequisites, and false assumptions early. Correct course directly; do not bypass repository workflows, skill or phase rules, validation gates, or explicit user instructions.
 - Do not mask defects with silent fallbacks, degraded behavior, post-hoc patches, or cosmetic fixes.
 - "Done" requires evidence: claim completion only when requirements are truly met and validation passes; validation must run against the final target state, not paths that will be deleted or invalidated.
-- For persistent work, follow the active skill's canonical artifact and state contract; direct work creates no Goal Contract state.
 - Commit promptly after verified changes; when the goal is complete and changes are committed, push the task branch and create a PR/MR.
 - Use `request_user_input` or equivalent structured input with clear context; do not use it for open-ended questions or mere data entry.
 - 输出和写作默认使用中文，包括产物文件，要求言简意赅、逻辑清晰、排版规范。专业术语可根据上下文选择性使用英文。
