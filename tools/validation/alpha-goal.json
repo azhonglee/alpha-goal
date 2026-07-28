@@ -13,8 +13,8 @@
       "sandbox": "read-only"
     },
     "builder": {
-      "model": "gpt-5.6-terra",
-      "effort": "high",
+      "model": "gpt-5.6-sol",
+      "effort": "medium",
       "sandbox": null
     },
     "complex-builder": {
