@@ -1,4 +1,3 @@
-# alpha-goal-managed-custom-agent:v1
 name = "scout"
 description = "Use for bounded, read-only exploration and evidence collection before decisions or changes."
 model = "gpt-5.6-terra"

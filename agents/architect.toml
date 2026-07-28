@@ -1,4 +1,3 @@
-# alpha-goal-managed-custom-agent:v1
 name = "architect"
 description = "Use for bounded architecture analysis, design options, interface boundaries, migrations, and risk-to-validation mapping before implementation."
 model = "gpt-5.6-sol"

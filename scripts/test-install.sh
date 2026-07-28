@@ -257,7 +257,7 @@ seed_legacy_custom_agents() {
 - Delegate only independent, bounded work when it materially improves speed, quality, or context isolation.
 - Use `scout` for read-only exploration and evidence collection.
 - Use `architect` for bounded architecture options, interface boundaries, migration/rollout consequences, and risk-to-validation mapping before implementation.
-- Use `builder` for authorized, clearly scoped local implementation with explicit acceptance criteria.
+- Use `builder` for authorized, clearly scoped implementation with explicit acceptance criteria.
 - Use `reviewer` for complex review, competing interpretations, cross-component consequences, or high-consequence risks.
 - Use built-in agents when no pinned custom role is required; if no role clearly fits, keep the work in the main agent.
 - Do not repeat the same work across agents merely to compare effort levels, and do not allow concurrent edits to overlapping files.
@@ -285,7 +285,6 @@ for (const [name, profile] of Object.entries(profiles)) {
   const target = path.join(codexHome, "agents", `${name}.toml`);
   if (!fs.statSync(target).isFile() || fs.lstatSync(target).isSymbolicLink()) process.exit(1);
   if (fs.readFileSync(source, "utf8") !== fs.readFileSync(target, "utf8")) process.exit(1);
-  if (fs.readFileSync(target, "utf8").split(/\r?\n/, 1)[0] !== "# alpha-goal-managed-custom-agent:v1") process.exit(1);
   const data = toml.parse(fs.readFileSync(target, "utf8"));
   if (data.name !== name || data.model !== profile.model || data.model_reasoning_effort !== profile.effort) process.exit(1);
   if (profile.sandbox === null ? Object.hasOwn(data, "sandbox_mode") : data.sandbox_mode !== profile.sandbox) process.exit(1);
@@ -1152,35 +1151,11 @@ test "$tmp_uninstall_fault/external/config.toml" -ef "$tmp_uninstall_fault/exter
 test "$tmp_uninstall_fault/external/skill" -ef "$tmp_uninstall_fault/.codex/skills/verifier"
 test "$(cat "$tmp_uninstall_fault/.codex/hooks.json.tmp")" = "user sidecar"
 
-unmanaged_fault_agent="$(contract_agent_names | tail -1)"
-rm "$tmp_uninstall_fault/.codex/agents/$unmanaged_fault_agent.toml"
-printf 'external agent\n' > "$tmp_uninstall_fault/external/agent.toml"
-ln "$tmp_uninstall_fault/external/agent.toml" "$tmp_uninstall_fault/.codex/agents/$unmanaged_fault_agent.toml"
-mkdir -p "$tmp_uninstall_fault/before-unmanaged"
-cp -a "$tmp_uninstall_fault/.codex" "$tmp_uninstall_fault/before-unmanaged/codex"
-cp -a "$tmp_uninstall_fault/.claude" "$tmp_uninstall_fault/before-unmanaged/claude"
-rm "$tmp_uninstall_fault/fault-fired"
-if unmanaged_fault_output="$(
-  PATH="$tmp_uninstall_fault/fake-bin:$PATH" \
-  REAL_RM="$real_rm" \
-  FAIL_MARKER="$tmp_uninstall_fault/fault-fired" \
-  FAIL_TARGET="$tmp_uninstall_fault/.claude/skills/executor" \
-  TARGET_CHOICE=all \
-  run_installer "$tmp_uninstall_fault" --uninstall 2>&1
-)"; then
-  echo "unmanaged uninstall-fault injection should fail" >&2
-  exit 1
-fi
-test -f "$tmp_uninstall_fault/fault-fired"
-grep -q "restored all managed targets changed by this run" <<<"$unmanaged_fault_output"
-diff -r --no-dereference "$tmp_uninstall_fault/before-unmanaged/codex" "$tmp_uninstall_fault/.codex"
-diff -r --no-dereference "$tmp_uninstall_fault/before-unmanaged/claude" "$tmp_uninstall_fault/.claude"
-test "$tmp_uninstall_fault/external/agent.toml" -ef "$tmp_uninstall_fault/.codex/agents/$unmanaged_fault_agent.toml"
 test -z "$(find "$TMPDIR" -maxdepth 1 -type d -name 'alpha-goal-install-transaction.*' -print -quit)"
 
-unmanaged_uninstall_agent="$(contract_agent_names | tail -1)"
-rm "$tmp_codex/.codex/agents/$unmanaged_uninstall_agent.toml"
-printf 'user-owned uninstall agent\n' > "$tmp_codex/.codex/agents/$unmanaged_uninstall_agent.toml"
+replaced_uninstall_agent="$(contract_agent_names | tail -1)"
+rm "$tmp_codex/.codex/agents/$replaced_uninstall_agent.toml"
+printf 'user-owned uninstall agent\n' > "$tmp_codex/.codex/agents/$replaced_uninstall_agent.toml"
 codex_uninstall_output="$(run_installer "$tmp_codex" --uninstall)"
 assert_simple_success_output "$codex_uninstall_output" "Alpha Goal uninstall completed."
 for skill in "${managed_public_skills[@]}"; do
@@ -1190,11 +1165,7 @@ test ! -e "$tmp_codex/.codex/AGENTS.md"
 test ! -e "$tmp_codex/.codex/config.toml"
 test ! -e "$tmp_codex/.codex/hooks.json"
 while IFS= read -r agent; do
-  if [[ "$agent" == "$unmanaged_uninstall_agent" ]]; then
-    grep -q 'user-owned uninstall agent' "$tmp_codex/.codex/agents/$agent.toml"
-  else
-    test ! -e "$tmp_codex/.codex/agents/$agent.toml"
-  fi
+  test ! -e "$tmp_codex/.codex/agents/$agent.toml"
 done < <(contract_agent_names)
 
 claude_uninstall_output="$(TARGET_CHOICE=claude run_installer "$tmp_claude" --uninstall)"

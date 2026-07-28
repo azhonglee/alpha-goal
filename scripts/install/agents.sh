@@ -45,14 +45,6 @@ JS
     die "No Custom Agent roles declared in $contract"
   fi
 }
-is_managed_custom_agent_file() {
-  local target="$1"
-  local first_line=""
-
-  [[ -f "$target" && ! -L "$target" ]] || return 1
-  IFS= read -r first_line < "$target" || true
-  [[ "$first_line" == "$custom_agent_copy_marker" ]]
-}
 
 preflight_custom_agent_targets() {
   local name
@@ -74,9 +66,6 @@ preflight_custom_agent_targets() {
     target="$custom_agents_root/$name.toml"
     if [[ -L "$source" || ! -f "$source" ]]; then
       die "Missing regular custom agent source: $source"
-    fi
-    if ! is_managed_custom_agent_file "$source"; then
-      die "Custom agent source is missing managed marker: $source"
     fi
     if [[ -L "$target" ]]; then
       die "Refusing to replace custom agent symlink: $target"
@@ -101,7 +90,7 @@ sync_custom_agent_files() {
   for name in "${custom_agent_names[@]}"; do
     source="$source_agent_root/$name.toml"
     staged="$stage_root/$name.toml"
-    if ! cp "$source" "$staged" || ! is_managed_custom_agent_file "$staged"; then
+    if ! cp "$source" "$staged" || ! cmp -s "$source" "$staged"; then
       rm -rf "$stage_root"
       die "Failed to stage custom agent: $name"
     fi
@@ -125,9 +114,9 @@ sync_custom_agent_files() {
       rm -rf "$stage_root"
       die "Failed to install custom agent: $target"
     fi
-    if [[ ! -f "$target" || -L "$target" ]] || ! is_managed_custom_agent_file "$target"; then
+    if [[ ! -f "$target" || -L "$target" ]] || ! cmp -s "$source_agent_root/$name.toml" "$target"; then
       rm -rf "$stage_root"
-      die "Installed custom agent failed managed-target validation: $target"
+      die "Installed custom agent failed source validation: $target"
     fi
     if [[ "$existed" == true ]]; then
       custom_agent_replaced_count=$((custom_agent_replaced_count + 1))
@@ -153,13 +142,13 @@ remove_custom_agent_files() {
     if [[ ! -e "$target" && ! -L "$target" ]]; then
       continue
     fi
-    if is_managed_custom_agent_file "$target"; then
+    if [[ -f "$target" && ! -L "$target" ]]; then
       rm "$target"
       custom_agent_removed_count=$((custom_agent_removed_count + 1))
-      log "Removed managed custom agent: $target"
+      log "Removed contract-declared custom agent: $target"
     else
       custom_agent_preserved_count=$((custom_agent_preserved_count + 1))
-      log "Preserved unmanaged custom agent during uninstall: $target"
+      log "Preserved non-regular custom agent during uninstall: $target"
     fi
   done
 }
