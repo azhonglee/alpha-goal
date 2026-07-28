@@ -5,10 +5,12 @@
 - Delegate only independent, bounded work when it materially improves speed, quality, or context isolation.
 - Use `scout` for read-only exploration and evidence collection.
 - Use `architect` for bounded architecture options, interface boundaries, migration/rollout consequences, and risk-to-validation mapping before implementation.
-- Use `builder` for authorized, clearly scoped local implementation with explicit acceptance criteria.
+- Use `builder` for authorized local single-component implementation without material integration, sequencing, migration/recovery, or broad validation.
+- Use `complex-builder` for authorized local implementation that spans components or requires material integration, sequencing, migration/recovery, or broad validation.
 - Use `reviewer` for complex review, competing interpretations, cross-component consequences, or high-consequence risks.
 - Use built-in agents when no pinned custom role is required; if no role clearly fits, keep the work in the main agent.
 - Do not repeat the same work across agents merely to compare effort levels, and do not allow concurrent edits to overlapping files.
+- Route unresolved architecture or authority decisions back to the main agent or `architect`; neither builder role may decide them implicitly.
 - A model or reasoning profile never grants additional authority.
 
 <!-- generate-with-template:custom-agent-routing -->
