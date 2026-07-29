@@ -103,6 +103,7 @@ Constraints:
 Evidence:
 - <primary verification observer or command>
 Contract: <absolute canonical goal-contract.md path, only if this compact goal cannot cover all required acceptance condition or constraint>
+Design: <absolute canonical design artifact path, only if input or context includes a design>
 ```
 
 Rules:
