@@ -102,11 +102,11 @@ Constraints:
 - <approval/recovery invariant>
 Evidence:
 - <primary verification observer or command>
-Contract: <absolute canonical goal-contract.md path>
+Contract: <absolute canonical goal-contract.md path, only if this compact goal cannot cover all required acceptance condition or constraint>
 ```
 
 Rules:
-
+- Count(characters) <= 4000.
 - Include all required finish-line conditions, but reference the contract instead of duplicating its full contents.
 - Include only constraints whose omission could cause scope, authority, safety, or acceptance drift.
 - Name an evidence surface that the thread can observe; do not use model confidence or effort as completion evidence.
