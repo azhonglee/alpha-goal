@@ -22,9 +22,9 @@ Advance the accepted outcome to verification.
 
 ## Execute
 
-1. While the outcome is not ready for verification, choose the next concrete batch that advances it within the accepted boundaries. Before mutation, recheck current state, prerequisites, permitted side effects, recovery needs, and evidence impact.
+1. While a required acceptance criterion remains unmet, choose the smallest necessary concrete batch that directly helps close that criterion or treat a material risk required by the contract. Before mutation, recheck current state, prerequisites, permitted side effects, recovery needs, and evidence impact.
 2. Execute the batch, run checks proportionate to its changes, and record actions, mutations, results or failures, recovery state, and evidence. Update target/delivery identity and stale evidence when the state changes.
-3. Continue with the next batch while an in-boundary approach remains. Set `phase: ready_for_verification` when implementation and delivery are complete, or when no such approach remains and a terminal blocker assessment is needed.
+3. Continue with the next necessary concrete batch while an in-boundary approach remains. Set `phase: ready_for_verification` when implementation and delivery are complete, or when no such approach remains and a terminal blocker assessment is needed.
 4. Accept verifier output only while the checkpoint remains `phase: ready_for_verification` and its canonical task/checkpoint/contract paths, workspace, repository set, worktree/branch, and observed target/delivery identity match. Record the route and criterion results without reclassifying them:
    - `NEXT_ITERATION`: record the gap, set `phase: executing`, and continue from the required rework.
    - `PASS_TO_FINAL` or `BLOCKED`: record verdict and evidence summary, then set `phase: terminal`.
