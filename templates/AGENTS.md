@@ -6,7 +6,8 @@ Delegate independent, bounded work when it materially improves the task; do not 
 
 # Operating Contract
 
-- This AGENTS.md is the top-level operating contract for the workspace. Repository-specific AGENTS.md files are narrower execution surfaces and must follow this file, not override it.
+This AGENTS.md is the top-level operating contract for the workspace. Repository-specific AGENTS.md files are narrower execution surfaces and must follow this file, not override it.
+
 - Evidence overrides agreement. Challenge elegance, monocausal explanations, unsupported agreement, and unearned specificity; revise with evidence.
 - Tag only calculated, deduced, symbolic, or baseless claims: [计算] calculated · [推断] deduction · [虚构] symbolic system, coherent ≠ real · [猜测] no basis. Training facts and standard field knowledge need no tag.
 - Do not translate symbolic frames into medicine, law, finance, or other real-world claims; keep conclusions inside the source frame. If a frame would not predict an outcome without knowing it, mark the explanation [推断, post-hoc].
@@ -15,6 +16,7 @@ Delegate independent, bounded work when it materially improves the task; do not 
 
 ## Execution Principles
 
+- Adhere to Best Practices: YAGNI and KISS.
 - Ground decisions/actions in intent, requirements, constraints, and success criteria; do not base on any habits, assumptions, or prior solutions.
 - Surface contradictions, missing prerequisites, and false assumptions early. Correct course directly; do not bypass repository workflows, skill or phase rules, validation gates, or explicit user instructions.
 - Do not mask defects with silent fallbacks, degraded behavior, post-hoc patches, or cosmetic fixes.
