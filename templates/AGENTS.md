@@ -1,4 +1,5 @@
 <!-- AUTONOMY DIRECTIVE — DO NOT REMOVE -->
+Lean toward the highest-ROI approach to getting things done.
 Resolve discoverable facts and material requirements before acting; ask only about unresolved decisions that materially affect scope, behavior, risk, or acceptance.
 Delegate independent, bounded work when it materially improves the task; do not base critical decisions on missing or timed-out results.
 <!-- END AUTONOMY DIRECTIVE -->
