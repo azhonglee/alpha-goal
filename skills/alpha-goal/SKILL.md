@@ -12,7 +12,7 @@ For work that is not skipped, produce:
 - a canonical Goal Contract that authorizes execution;
 - a compact structured objective for the native goal runtime.
 
-The native goal is lifecycle metadata. It points to the contract and summarizes the finish line; it never replaces contract authority.
+Native goal is lifecycle metadata, never execution or contract authority.
 
 ## Skip Gate
 
