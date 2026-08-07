@@ -92,10 +92,8 @@ Before acceptance:
 
 Handle the result:
 
-- if a discoverable or derivable defect exists, keep `draft`, repair the contract, and rerun the checks;
-- if a material authority gap exists, keep `draft` and return the single highest-impact Goal Input Gap Report;
-- if work is infeasible or blocked, keep `draft`, record the blocker, and do not mutate the target or native goal;
-- when every check passes, set `status: accepted` last, handoff to executor with contract; 
+- if any check fails, keep `draft`, repair or report the highest-impact gap or blocker, and do not mutate the target or native goal;
+- when all checks pass, set `status: accepted` last and hand off the contract to executor.
 
 
 ## Capability-Conditional Aids
