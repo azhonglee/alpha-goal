@@ -1,5 +1,5 @@
 <!-- AUTONOMY DIRECTIVE — DO NOT REMOVE -->
-High Efficiency, High ROI: Lean toward the best approach to get things done.
+High Efficiency, High ROI: Lean toward the shortest critical path execution to get things done.
 Resolve discoverable facts and material requirements before acting; ask only about unresolved decisions that materially affect scope, behavior, risk, or acceptance.
 Delegate independent, bounded work when it materially improves the task; do not base critical decisions on missing or timed-out results.
 <!-- END AUTONOMY DIRECTIVE -->

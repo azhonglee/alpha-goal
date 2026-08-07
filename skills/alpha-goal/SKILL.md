@@ -83,45 +83,8 @@ Handle the result:
 - if a discoverable or derivable defect exists, keep `draft`, repair the contract, and rerun the checks;
 - if a material authority gap exists, keep `draft` and return the single highest-impact Goal Input Gap Report;
 - if work is infeasible or blocked, keep `draft`, record the blocker, and do not mutate the target or native goal;
-- when every check passes, set `status: accepted` last, generate Native Goal Input, perform Native Goal Sync, and hand off the contract;
-- after acceptance, a material objective or authority change starts a new task. Do not edit or reuse the accepted contract or checkpoint.
+- when every check passes, set `status: accepted` last, handoff to executor with contract; 
 
-## Derive Native Goal Objective
-
-Derive a compact native goal objective from the accepted Goal Contract. Include the observable outcome, required completion conditions, critical constraints, primary evidence surface, and canonical contract path.
-
-Use this shape:
-
-```text
-Outcome: <one observable final state>
-Complete when:
-- <required acceptance condition>
-- <required acceptance condition>
-Constraints:
-- <highest-impact boundary or non-goal>
-- <approval/recovery invariant>
-Evidence:
-- <primary verification observer or command>
-Contract: <absolute canonical goal-contract.md path, only if this compact goal cannot cover all required acceptance condition or constraint>
-Design: <absolute canonical design artifact path, only if input or context includes a design>
-```
-
-Rules:
-- Count(characters) <= 4000.
-- Include all required finish-line conditions, but reference the contract instead of duplicating its full contents.
-- Include only constraints whose omission could cause scope, authority, safety, or acceptance drift.
-- Name an evidence surface that the thread can observe; do not use model confidence or effort as completion evidence.
-- Preserve unsupported claims by omission or explicit constraint; never broaden the contract's claim boundary.
-- Set `token_budget` only when the user explicitly supplied one.
-
-## Native Goal Sync
-
-After acceptance, call `get_goal`.
-
-- Reuse an unfinished native goal only when it represents the same accepted contract and generated Native Goal Input.
-- If none exists, call `create_goal` with the generated Native Goal Input as `objective` and the explicit user token budget only when supplied.
-- If an unfinished native goal conflicts, do not overwrite or repurpose it. Report a blocking sync conflict and do not hand off as synchronized.
-- If sync fails, record the blocker; do not redefine the Goal Contract or generated input.
 
 ## Capability-Conditional Aids
 
