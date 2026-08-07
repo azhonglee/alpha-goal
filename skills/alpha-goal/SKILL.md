@@ -39,7 +39,7 @@ Smallest next decision variable:
 Recommendation, if useful:
 ```
 
-Do not require the user to fill a schema or prescribe a clarification workflow.
+Use this report to frame the next question; do not make the user fill it out or reproduce the workflow.
 
 Repeat only while a material gap remains:
 
@@ -49,8 +49,6 @@ Repeat only while a material gap remains:
 4. Record the answer, source, boundary, consequence, and observer impact, then re-evaluate all remaining gaps. Re-run inspection when an answer exposes a new factual or authority gap.
 
 Stop only when no unresolved answer could materially change the objective, scope, non-goals, side effects, design, acceptance, risk treatment, or evidence. Keep the highest-impact unresolved authority decision in one Gap Report; do not guess or mutate the target.
-
-A supplied `DESIGN_READY` handoff is adopted only after this clarification and the skip gate has not triggered. Validate its source, ready status, workspace, and absolute path before adopting any proposal.
 
 ## Compile the Goal Contract
 
@@ -74,7 +72,7 @@ Adopt only proposal content compatible with authority. Express every adopted con
 
 ## Check and Accept
 
-Do not ask the user to confirm, accept, refine, or reject the compiled Goal Contract. User input is required only for a material authority-owned decision that cannot be derived or discovered; request that decision through one Goal Input Gap Report before acceptance checks.
+Do not add a confirmation ceremony after compiling the Goal Contract. Ask the user only for a material authority-owned decision that cannot be derived or discovered; use one Goal Input Gap Report for that decision.
 
 Before acceptance:
 
@@ -83,14 +81,8 @@ Before acceptance:
 - complete authority-retained decisions and their risk/observer treatment;
 - check source conflicts, side-effect authority, freshness, and the highest-impact assumption with a counterexample or failure case;
 - keep `draft` while any known infeasibility, unavailable observer, unidentified claim surface, unmet prerequisite, incomplete authority-retained decision coverage, or material finding remains;
-- for cross-cutting or high-risk work, request independent read-only review from raw artifacts and require no unresolved Critical or High finding.
 
 Handle the result:
 
 - if any check fails, keep `draft`, repair or report the highest-impact gap or blocker, and do not mutate the target;
 - when all checks pass, set `status: accepted` last and hand off the contract to executor.
-
-
-## Capability-Conditional Aids
-
-- Delegate independent read-heavy investigation, Goal Contract review, or evidence reruns without assigning shared authority artifacts.
