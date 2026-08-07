@@ -51,8 +51,7 @@
         "skip-gate",
         "optional-input-adoption",
         "goal-contract-authority",
-        "contract-acceptance",
-        "native-goal-objective-and-sync"
+        "contract-acceptance"
       ],
       "references": [
         "references/goal-contract-book.md",

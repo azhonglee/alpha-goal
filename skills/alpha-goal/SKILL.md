@@ -7,12 +7,7 @@ description: "Apply an early skip gate to engineering requests; for work that is
 
 Transform the user's raw request and attributable inputs into execution-ready goal artifacts. Treat upstream artifacts as reference context and preserve their provenance.
 
-For work that is not skipped, produce:
-
-- a canonical Goal Contract that authorizes execution;
-- a compact structured objective for the native goal runtime.
-
-Native goal is lifecycle metadata, never execution or contract authority.
+For work that is not skipped, produce a canonical Goal Contract that authorizes execution.
 
 ## Skip Gate
 
@@ -22,7 +17,7 @@ Apply this gate before running the rest of this skill. Return `SKIP` only when t
 - no material behavior, interface, data, security/privacy, permission, dependency, acceptance, rollout/rollback, or risk decision;
 - no external write, purchase, destructive/cross-repository action, material disclosure, credential/session change, recovery checkpoint, explicit Goal Contract, or audit record.
 
-`SKIP` means this skill is not needed: do not inspect inputs, clarify, create a Goal Contract, create a native goal, or emit another gate outcome. If the raw request does not clearly satisfy every condition, fall through into `Inspect Inputs`.
+`SKIP` means this skill is not needed: do not inspect inputs, clarify, create a Goal Contract, or emit another gate outcome. If the raw request does not clearly satisfy every condition, fall through into `Inspect Inputs`.
 
 ## Inspect Inputs
 
@@ -71,7 +66,7 @@ For every material contract field:
 - treat reference artifacts as context rather than automatic authority;
 - keep the contract `draft` while a material authority gap remains.
 
-No blocking gap may reach acceptance, handoff, target mutation, or Native Goal Sync.
+No blocking gap may reach acceptance, handoff, or target mutation.
 
 Before using a `DESIGN_READY` proposal, require the original request source, verify `Design status: ready`, verify the handoff workspace matches the current target workspace, and verify that its absolute `technical_design.md` path exists. A missing or failed check blocks the design handoff. Record a valid source as `technical-design: <absolute path>`.
 
@@ -92,7 +87,7 @@ Before acceptance:
 
 Handle the result:
 
-- if any check fails, keep `draft`, repair or report the highest-impact gap or blocker, and do not mutate the target or native goal;
+- if any check fails, keep `draft`, repair or report the highest-impact gap or blocker, and do not mutate the target;
 - when all checks pass, set `status: accepted` last and hand off the contract to executor.
 
 

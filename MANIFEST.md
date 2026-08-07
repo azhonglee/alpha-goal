@@ -5,14 +5,12 @@
 | Directory | Owned semantics |
 | --- | --- |
 | `skills/deep-interview/` | Explicit-only independent requirement clarification, canonical append-only `interview.md`, provenance, and source-neutral handoff. |
-| `skills/alpha-goal/` | Input inspection and clarification, Skip Gate, Goal Contract authority, design-handoff validation, contract acceptance, and native-goal synchronization. |
+| `skills/alpha-goal/` | Input inspection and clarification, Skip Gate, Goal Contract authority, design-handoff validation, and contract acceptance. |
 | `skills/technical-design/` | Explicit-only pre-goal `technical_design.md`, input-gap/blocker routes, technical review, exact-path recovery, and non-authoritative design handoff. |
 | `skills/executor/` | Persistent target/delivery mutation, raw execution evidence, recovery cursor, and goal-change termination. |
 | `skills/verifier/` | Terminal-state observations, evidence classification, criterion results, and final audit verdict. |
 
 The shared structural contract is `tools/validation/alpha-goal.json`. It declares public skills, semantic owners, routes, conditional artifacts, Custom Agent profiles and distribution files, templates, eval files, and the exclusive instruction-unit budget. It does not validate skill prose.
-
-Native Goal Sync applies when the Skip Gate does not return `SKIP` and the contract becomes accepted: `alpha-goal` reuses only a native goal for the same contract and generated objective, or creates one when none exists. Native state is not a canonical Alpha Goal artifact or acceptance evidence. `SKIP` creates neither a Goal Contract nor a native goal.
 
 The installer always copies the deep-interview/alpha-goal/technical-design goal-engineering core and may omit the executor/verifier pair; that pair is required for the repository-defined persistent execution and final-audit loop. When the pair is omitted, the Codex recovery hook is not installed or updated.
 
@@ -51,7 +49,7 @@ Claude capability adaptation lives in each applicable skill reference (`deep-int
 | `<state-root>/YYYYMMDD-<task>/goal-contract.md` | Compiled by `alpha-goal`; an accepted contract is the execution authority. |
 | `<state-root>/YYYYMMDD-<task>/checkpoint.md` | Runtime phase, execution state, evidence, and audit outcome. |
 
-`SKIP` creates no Goal Contract or native goal. A supplied design is consumed only when the Skip Gate does not return `SKIP`.
+`SKIP` creates no Goal Contract. A supplied design is consumed only when the Skip Gate does not return `SKIP`.
 
 ## Count budget
 

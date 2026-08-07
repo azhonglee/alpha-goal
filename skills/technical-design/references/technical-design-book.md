@@ -7,7 +7,7 @@ Write the canonical `technical_design.md` before goal framing. It is a reviewed 
 - `Design status: draft`: writing, input resolution, or review is incomplete.
 - `Design status: ready`: the Technical Review Gate passed and the final artifact was returned to the caller.
 - A material input or design change after readiness creates a new revision.
-- Design status never changes Goal Contract, native goal, execution, or verification lifecycle.
+- Design status never changes Goal Contract, execution, or verification lifecycle.
 
 ## Canonical Shape
 

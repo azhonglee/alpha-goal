@@ -18,7 +18,7 @@
       "expected": {
         "verificationRoute": "N/A",
         "nextOwner": "caller",
-        "invariant": "The request satisfies the SKIP gate; alpha-goal is not run, no Goal Contract or native goal is created, and ordinary execution and validation continue.",
+        "invariant": "The request satisfies the SKIP gate; alpha-goal is not run, no Goal Contract is created, and ordinary execution and validation continue.",
         "skipGate": "SKIP"
       }
     },
@@ -354,11 +354,11 @@
     },
     {
       "id": "RB36",
-      "scenario": "After native-goal sync, execution continues through multiple batches and risk boundaries before a proposed terminal state exists.",
+      "scenario": "After Goal Contract acceptance, execution continues through multiple batches and risk boundaries before a proposed terminal state exists.",
       "expected": {
         "verificationRoute": "N/A",
         "nextOwner": "executor",
-        "invariant": "Executor retains ownership, performs proportionate execution checks, and records progress; verifier is not invoked for intermediate slices. Native goal state remains lifecycle metadata and never replaces Goal Contract authority or acceptance evidence.",
+        "invariant": "Executor retains ownership, performs proportionate execution checks, and records progress; verifier is not invoked for intermediate slices.",
         "skipGate": "N/A"
       }
     },
@@ -398,7 +398,7 @@
       "expected": {
         "verificationRoute": "N/A",
         "nextOwner": "executor",
-        "invariant": "Check required execution content, authority, observers, prerequisites, risks, blockers, and any required independent review; set status accepted last, derive the structured native goal objective, and synchronize only a matching unfinished goal or create a new one.",
+        "invariant": "Check required execution content, authority, observers, prerequisites, risks, blockers, and any required independent review; set status accepted last and hand off the accepted Goal Contract to executor.",
         "skipGate": "N/A"
       }
     },

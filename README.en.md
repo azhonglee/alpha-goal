@@ -47,8 +47,7 @@ flowchart TD
   G -->|"SKIP"| D["caller continues concrete read-only or reversible local work"]
   G -->|"not skipped"| A["alpha-goal: Inspect Inputs → Clarify"]
   A --> P["compile and accept Goal Contract"]
-  P --> S["Native Goal Sync"]
-  S --> E["executor"]
+  P --> E["executor"]
   E --> V["verifier"]
   V -->|"verdict packet"| E
   E -->|"NEXT_ITERATION"| E
@@ -95,7 +94,7 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/alpha-goal/"><code>alpha-goal</code></a></td>
-      <td align="left">Run the Skip Gate first; when not skipped, inspect and grill-me the raw and attributable input, then check and accept the Goal Contract before generating and synchronizing the native goal objective.</td>
+      <td align="left">Run the Skip Gate first; when not skipped, inspect and grill-me the raw and attributable input, then check and accept the Goal Contract.</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/technical-design/"><code>technical-design</code></a></td>
@@ -118,9 +117,9 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 
 - Discover facts before handling material decisions owned by the user or another authority; current code cannot define desired behavior by itself.
 - Known infeasibility, an unavailable required observer, an unidentified claim surface, or an unmet prerequisite keeps the Goal Contract `draft`; `BLOCKED` only means an accepted premise was invalidated later by new facts.
-- `SKIP` work creates no Goal Contract or native goal; continued work uses the minimum artifacts needed for authority, recovery, and audit.
+- `SKIP` work creates no Goal Contract; continued work uses the minimum artifacts needed for authority, recovery, and audit.
 - Executor owns all intermediate batches, risk boundaries, and proportionate checks; invoke verifier only for proposed completion or a terminal blocker decision.
 - PASS binds to the target and delivery state actually observed and terminates that checkpoint; later work starts a new task.
 - Volatile evidence records observation time and invalidation conditions; unidentified mutable surfaces cannot support an exact-binding claim.
-- The Goal Contract is standard structured input to executor/verifier; when the Skip Gate does not return `SKIP` and the contract is accepted, `alpha-goal` reuses or creates the native goal.
+- The Goal Contract is standard structured input to executor/verifier; when the Skip Gate does not return `SKIP` and the contract is accepted, it is handed to executor.
 - `tools/evals/runtime-boundaries.json` preserves 42 static expected-boundary cases; schema validation is not runtime evidence.

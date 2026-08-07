@@ -19,7 +19,7 @@ claude: $HOME/.claude/skills
 
 For `codex` and `all`, a separate default-Yes prompt installs the repository's managed Custom Agents under `${CODEX_HOME:-$HOME/.codex}/agents` and their routing block in the same configuration root's `AGENTS.md`. These agent files are user configuration, not skills or plugin components.
 
-When the Skip Gate does not return `SKIP`, `alpha-goal` compiles the Goal Contract and sets `status: accepted` only after required execution information, authority, observers, and risk treatment are complete. A material goal change starts a new Alpha Goal task instead of editing the accepted contract. Runtime state is recorded in `checkpoint.md` with `phase` set to `executing`, `ready_for_verification`, or `terminal`; verifier audits the current state and returns a verdict. `SKIP` returns ownership to the caller without running `alpha-goal`, creating a Goal Contract, or creating a native goal.
+When the Skip Gate does not return `SKIP`, `alpha-goal` compiles the Goal Contract and sets `status: accepted` only after required execution information, authority, observers, and risk treatment are complete. A material goal change starts a new Alpha Goal task instead of editing the accepted contract. Runtime state is recorded in `checkpoint.md` with `phase` set to `executing`, `ready_for_verification`, or `terminal`; verifier audits the current state and returns a verdict. `SKIP` returns ownership to the caller without running `alpha-goal` or creating a Goal Contract.
 
 ## Options
 
@@ -60,8 +60,6 @@ Uninstall removes managed Markdown blocks, contract-declared regular Custom Agen
 
 The compact recovery hook definition lives in `templates/hooks.json`. It is a matcher-free `PostCompact` stage navigator: use the exact task directory from current context, inspect `checkpoint.md` and `phase` when present, otherwise inspect `goal-contract.md` status, then load only `alpha-goal`, `executor`, or `verifier`. Detailed validation and write protocols remain in those skills.
 
-Native Goal Sync is not hook-driven. When the Skip Gate does not return `SKIP` and the contract is accepted, `alpha-goal` reuses only a native goal matching the same accepted contract and generated objective, or creates one; `SKIP` creates no native goal.
-
 Hook replacement is keyed by marker family. The current v4 template replaces other managed numbered versions in that family before it is added. The installer also removes the experimental `codex-compact-skill-recovery` family and preserves unmanaged hooks.
 
 Codex may require reviewing and trusting the changed hook with `/hooks` before it runs.
@@ -89,7 +87,7 @@ When invoked by absolute path it can run from any working directory because the 
 ```text
 $deep-interview 通过 skill policy 设为仅显式调用，并按需维护 canonical interview.md。
 $technical-design 通过 skill policy 设为仅显式调用，创建并评审 canonical technical_design.md，返回 DESIGN_READY / DESIGN_INPUT_GAP / DESIGN_BLOCKED。
-$alpha-goal 检查并澄清原始请求和可归因输入，执行 Skip Gate；继续处理的工作编译并接受 Goal Contract，再同步 native goal。
+$alpha-goal 检查并澄清原始请求和可归因输入，执行 Skip Gate；继续处理的工作编译并接受 Goal Contract。
 $executor 从已接受的 Goal Contract 恢复并执行下一批授权工作。
 $verifier 只审核 executor 提交的拟议终态，并给出最终路由。
 ```
