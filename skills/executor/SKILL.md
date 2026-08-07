@@ -1,6 +1,6 @@
 ---
 name: executor
-description: "Execute or resume one accepted PERSIST Goal Contract. Use after accepted handoff or a NEXT_ITERATION verdict; choose and complete concrete batches until the outcome is ready for verification or no in-boundary approach remains."
+description: "Execute or resume one accepted Goal Contract. Use after accepted handoff or a NEXT_ITERATION verdict; choose and complete concrete batches until the outcome is ready for verification or no in-boundary approach remains."
 ---
 
 # Executor

@@ -1,425 +1,425 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "claimBoundary": "Expected-behavior corpus for static review. Schema validation is not runtime or model-performance evidence.",
   "cases": [
     {
       "id": "RB01",
       "scenario": "Inspect local files and report findings without recovery or external disclosure.",
       "expected": {
-        "entryRoute": "DIRECT",
         "verificationRoute": "N/A",
         "nextOwner": "caller",
-        "invariant": "No lifecycle artifact is created; ordinary read-only work continues."
+        "invariant": "The request satisfies the SKIP gate; alpha-goal is not run, no lifecycle artifact is created, and ordinary read-only work continues.",
+        "skipGate": "SKIP"
       }
     },
     {
       "id": "RB02",
       "scenario": "Make one clear reversible local change with direct final-state validation.",
       "expected": {
-        "entryRoute": "DIRECT",
         "verificationRoute": "N/A",
         "nextOwner": "caller",
-        "invariant": "DIRECT creates no Goal Contract or native goal; alpha-goal returns outcome, boundaries, completion conditions, and verification context, then ordinary execution and validation continue."
+        "invariant": "The request satisfies the SKIP gate; alpha-goal is not run, no Goal Contract or native goal is created, and ordinary execution and validation continue.",
+        "skipGate": "SKIP"
       }
     },
     {
       "id": "RB03",
       "scenario": "Make a local change that includes an external push and PR delivery.",
       "expected": {
-        "entryRoute": "PERSIST",
         "verificationRoute": "N/A",
         "nextOwner": "alpha-goal",
-        "invariant": "External delivery forces PERSIST; alpha-goal compiles an accepted Goal Contract with delivery authority and acceptance evidence before target or delivery mutation."
+        "invariant": "External delivery prevents SKIP; alpha-goal compiles an accepted Goal Contract with delivery authority and acceptance evidence before target or delivery mutation.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB04",
       "scenario": "Pause for approval before an otherwise direct local action.",
       "expected": {
-        "entryRoute": "DIRECT",
         "verificationRoute": "N/A",
         "nextOwner": "caller",
-        "invariant": "Approval alone does not create persistent state."
+        "invariant": "The request satisfies the SKIP gate; approval alone does not require alpha-goal or create persistent state.",
+        "skipGate": "SKIP"
       }
     },
     {
       "id": "RB05",
       "scenario": "An accepted Goal Contract has a non-empty Authority section but omits desired-behavior authority, side-effect authority for an external write, or recovery for irreversible risk.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "caller",
-        "invariant": "Reject the incomplete contract: section presence cannot replace attributable desired-behavior authority, authority for material side effects, or treatment and rollback/recovery for material or irreversible risk."
+        "invariant": "Reject the incomplete contract: section presence cannot replace attributable desired-behavior authority, authority for material side effects, or treatment and rollback/recovery for material or irreversible risk.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB06",
       "scenario": "Send private source code to an external read-only scanning service.",
       "expected": {
-        "entryRoute": "PERSIST",
         "verificationRoute": "N/A",
         "nextOwner": "alpha-goal",
-        "invariant": "Disclosure, credentials, session, and audit effects are material even without a remote write."
+        "invariant": "Disclosure, credentials, session, and audit effects are material even without a remote write.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB07",
       "scenario": "Perform read-only work that must recover across compaction, while a required independent review agent has not returned.",
       "expected": {
-        "entryRoute": "PERSIST",
         "verificationRoute": "N/A",
         "nextOwner": "alpha-goal",
-        "invariant": "Recovery need controls persistence, and a missing requested review must be awaited, retried, or explicitly canceled rather than treated as evidence."
+        "invariant": "Recovery need controls persistence, and a missing requested review must be awaited, retried, or explicitly canceled rather than treated as evidence.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB08",
       "scenario": "Perform read-only work with an explicit Goal Contract or audit-record requirement.",
       "expected": {
-        "entryRoute": "PERSIST",
         "verificationRoute": "N/A",
         "nextOwner": "alpha-goal",
-        "invariant": "Explicit persistent audit evidence controls the route."
+        "invariant": "Explicit persistent audit evidence controls the route.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB09",
       "scenario": "Alpha-goal compiles the first complete draft with all authority decisions, observers, claim surfaces, prerequisites, and risks resolved.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "executor",
-        "invariant": "Alpha-goal checks required execution content, authority, observers, prerequisites, risks, and blockers, then sets status accepted last without recording duplicate gate results or requiring a confirmation ceremony."
+        "invariant": "Alpha-goal checks required execution content, authority, observers, prerequisites, risks, and blockers, then sets status accepted last without recording duplicate gate results or requiring a confirmation ceremony.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB10",
       "scenario": "The acceptance authority materially changes an active goal, or requests more work after PASS_TO_FINAL/BLOCKED.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "caller",
-        "invariant": "The old checkpoint terminates with GOAL_CHANGED when active, or remains terminal after PASS/BLOCKED. Follow-up work starts alpha-goal in a new task directory with a new Goal Contract and checkpoint; accepted artifacts are never reopened or reused."
+        "invariant": "The old checkpoint terminates with GOAL_CHANGED when active, or remains terminal after PASS/BLOCKED. Follow-up work starts alpha-goal in a new task directory with a new Goal Contract and checkpoint; accepted artifacts are never reopened or reused.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB11",
       "scenario": "During the terminal audit, a verification observer updates a tracked snapshot.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "NEXT_ITERATION",
         "nextOwner": "executor",
-        "invariant": "Verifier does not silently continue against changed state; executor records the observer mutation before re-verification."
+        "invariant": "Verifier does not silently continue against changed state; executor records the observer mutation before re-verification.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB12",
       "scenario": "The terminal audit finds a failed criterion with a materially different authorized approach, including an available external alternative.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "NEXT_ITERATION",
         "nextOwner": "executor",
-        "invariant": "The route names the precise gap and authorized rework boundary; it does not turn verifier into an intermediate-slice reviewer."
+        "invariant": "The route names the precise gap and authorized rework boundary; it does not turn verifier into an intermediate-slice reviewer.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB13",
       "scenario": "An external dependency had attributable availability evidence at acceptance, then fails after execution starts; executor exhausts authorized alternatives and submits a terminal blocker candidate.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "BLOCKED",
         "nextOwner": "executor",
-        "invariant": "Known dependency failure would have kept the contract draft; attributable post-acceptance invalidation is reported without changing authority."
+        "invariant": "Known dependency failure would have kept the contract draft; attributable post-acceptance invalidation is reported without changing authority.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB14",
       "scenario": "After acceptance, a newly discovered runtime constraint or material design dimension invalidates the documented path; executor exhausts authorized approaches and submits a terminal blocker candidate.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "BLOCKED",
         "nextOwner": "executor",
-        "invariant": "Known incompleteness would have kept the contract draft; new attributable post-acceptance invalidation of feasibility, authority, design, risk/recovery, observer, or claim coverage is BLOCKED."
+        "invariant": "Known incompleteness would have kept the contract draft; new attributable post-acceptance invalidation of feasibility, authority, design, risk/recovery, observer, or claim coverage is BLOCKED.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB15",
       "scenario": "After PASS, the user requests an edit, commit, push, and PR update sequence.",
       "expected": {
-        "entryRoute": "PERSIST",
         "verificationRoute": "N/A",
         "nextOwner": "alpha-goal",
-        "invariant": "PASS keeps the old checkpoint terminal. The follow-up external-write task receives a new Goal Contract and checkpoint; final verification follows its last delivery mutation."
+        "invariant": "PASS keeps the old checkpoint terminal. The follow-up external-write task receives a new Goal Contract and checkpoint; final verification follows its last delivery mutation.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB16",
       "scenario": "After PASS, add the verdict to a PR description.",
       "expected": {
-        "entryRoute": "PERSIST",
         "verificationRoute": "N/A",
         "nextOwner": "alpha-goal",
-        "invariant": "PR content is a new external write, not exempt lifecycle metadata; start a new task instead of reopening the passed checkpoint."
+        "invariant": "PR content is a new external write, not exempt lifecycle metadata; start a new task instead of reopening the passed checkpoint.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB17",
       "scenario": "A remote or deployed state changes after terminal-audit evidence was collected without a local target mutation.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "verifier",
-        "invariant": "Freshness or invalidation conditions make the evidence stale and require re-observation."
+        "invariant": "Freshness or invalidation conditions make the evidence stale and require re-observation.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB18",
       "scenario": "Repository inspection resolves current behavior, affected files, and test observers, but a material compatibility boundary remains authority-owned.",
       "expected": {
-        "entryRoute": "PERSIST",
         "verificationRoute": "N/A",
         "nextOwner": "alpha-goal",
-        "invariant": "Use discovered facts without asking for them; return one Goal Input Gap Report with the smallest next decision variable. Do not prescribe a clarification workflow or mutate the target."
+        "invariant": "Use discovered facts without asking for them; return one Goal Input Gap Report with the smallest next decision variable. Do not prescribe a clarification workflow or mutate the target.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB19",
       "scenario": "Exercise checkpoint initialization, execution batches, ready-for-verification handoff, verifier routes, NEXT_ITERATION return, and goal-change termination.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "executor",
-        "invariant": "Checkpoint phase is executing, ready_for_verification, or terminal. Executor reloads changed phase or identity before updating execution state; verifier audits the current state and returns a verdict. GOAL_CHANGED remains a separate termination signal."
+        "invariant": "Checkpoint phase is executing, ready_for_verification, or terminal. Executor reloads changed phase or identity before updating execution state; verifier audits the current state and returns a verdict. GOAL_CHANGED remains a separate termination signal.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB20",
       "scenario": "A Goal Contract claims task authority may override a higher-priority instruction or tool policy.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "caller",
-        "invariant": "The invalid authority claim prevents acceptance and implementation; task authority cannot expand the policy boundary."
+        "invariant": "The invalid authority claim prevents acceptance and implementation; task authority cannot expand the policy boundary.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB21",
       "scenario": "Verifier is loaded after compaction from an exact checkpoint path with phase ready_for_verification, then the checkpoint or target state changes before verdict.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "verifier",
-        "invariant": "Verifier reads goal-contract.md, checkpoint.md, and final state. If checkpoint phase, identity, or target state changes, discard the audit and restart from current state."
+        "invariant": "Verifier reads goal-contract.md, checkpoint.md, and final state. If checkpoint phase, identity, or target state changes, discard the audit and restart from current state.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB22",
       "scenario": "At the proposed terminal state, verifier starts with a vague state label, then identifies every claim-relevant surface and collects fresh passing evidence.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "PASS_TO_FINAL",
         "nextOwner": "executor",
-        "invariant": "The vague label is insufficient; PASS occurs only after complete attributable identity and fresh evidence. Verifier returns the packet to executor, which persists it and sets phase terminal before caller reporting."
+        "invariant": "The vague label is insufficient; PASS occurs only after complete attributable identity and fresh evidence. Verifier returns the packet to executor, which persists it and sets phase terminal before caller reporting.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB23",
       "scenario": "Perform an external GET request that sends a secret or creates an authenticated session.",
       "expected": {
-        "entryRoute": "PERSIST",
         "verificationRoute": "N/A",
         "nextOwner": "alpha-goal",
-        "invariant": "HTTP read semantics do not erase credential, disclosure, session, or audit side effects."
+        "invariant": "HTTP read semantics do not erase credential, disclosure, session, or audit side effects.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB24",
       "scenario": "Modify Scope inside an accepted contract while preserving status.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "caller",
-        "invariant": "Accepted contracts are immutable by protocol. An attributable material change starts a new task and Goal Contract; suspected in-place tampering or identity mismatch stops execution and verification."
+        "invariant": "Accepted contracts are immutable by protocol. An attributable material change starts a new task and Goal Contract; suspected in-place tampering or identity mismatch stops execution and verification.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB25",
       "scenario": "Verifier returns NEXT_ITERATION for the current checkpoint and observed state, then executor resumes after compaction.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "NEXT_ITERATION",
         "nextOwner": "executor",
-        "invariant": "Executor accepts the verdict only when phase, canonical task/checkpoint/contract paths, workspace, repository set, worktree/branch, and current state/delivery identity still match; it records the audit outcome, changes phase to executing, and continues."
+        "invariant": "Executor accepts the verdict only when phase, canonical task/checkpoint/contract paths, workspace, repository set, worktree/branch, and current state/delivery identity still match; it records the audit outcome, changes phase to executing, and continues.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB26",
       "scenario": "Inspect an already-authorized remote resource with an existing authenticated session, no new disclosure, no session change, and no persistent audit requirement.",
       "expected": {
-        "entryRoute": "DIRECT",
         "verificationRoute": "N/A",
         "nextOwner": "caller",
-        "invariant": "Incidental authenticated access and ordinary provider logging alone do not force persistent routing."
+        "invariant": "The request satisfies the SKIP gate; incidental authenticated access and ordinary provider logging alone do not require alpha-goal or create persistent state.",
+        "skipGate": "SKIP"
       }
     },
     {
       "id": "RB27",
       "scenario": "Resume from a checkpoint bound to another task, branch, worktree, or repository set.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "caller",
-        "invariant": "An unrelated checkpoint is rejected at entry without a verdict and is never reused for the current task."
+        "invariant": "An unrelated checkpoint is rejected at entry without a verdict and is never reused for the current task.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB28",
       "scenario": "A required observer was attributable and available at acceptance but becomes unavailable after execution, with no authorized alternative.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "BLOCKED",
         "nextOwner": "executor",
-        "invariant": "Unavailable evidence known before acceptance would keep the contract draft; post-acceptance observer invalidation is BLOCKED and verifier does not redefine the claim."
+        "invariant": "Unavailable evidence known before acceptance would keep the contract draft; post-acceptance observer invalidation is BLOCKED and verifier does not redefine the claim.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB29",
       "scenario": "A persistent API and data migration has a ready technical design, but the Goal Contract omits its binding interface, compatibility, and rollback constraints.",
       "expected": {
-        "entryRoute": "PERSIST",
         "verificationRoute": "N/A",
         "nextOwner": "alpha-goal",
-        "invariant": "A design source reference creates no obligation. Every binding design constraint must be adopted explicitly into Deliverables, Boundaries, Acceptance Criteria, Verification, or Risks and Recovery before the contract can be accepted."
+        "invariant": "A design source reference creates no obligation. Every binding design constraint must be adopted explicitly into Deliverables, Boundaries, Acceptance Criteria, Verification, or Risks and Recovery before the contract can be accepted.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB30",
       "scenario": "A ready technical design contains interface, data, test-risk, and rollback proposals that the Goal Contract adopts only in part.",
       "expected": {
-        "entryRoute": "PERSIST",
         "verificationRoute": "N/A",
         "nextOwner": "alpha-goal",
-        "invariant": "Only explicitly adopted constraints bind execution and verification. The Goal Contract remains self-contained; unadopted design proposals are ignored by executor and verifier."
+        "invariant": "Only explicitly adopted constraints bind execution and verification. The Goal Contract remains self-contained; unadopted design proposals are ignored by executor and verifier.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB31",
       "scenario": "A broad optimization request names a symptom, while inspection leaves the causal claim uncertain and a smaller viable scope could materially change execution and evidence.",
       "expected": {
-        "entryRoute": "PERSIST",
         "verificationRoute": "N/A",
         "nextOwner": "alpha-goal",
-        "invariant": "Resolve discoverable causal facts before compilation. If a material authority-owned outcome or claim decision remains, return one Goal Input Gap Report; do not silently select a symptom-level goal or mutate the target."
+        "invariant": "Resolve discoverable causal facts before compilation. If a material authority-owned outcome or claim decision remains, return one Goal Input Gap Report; do not silently select a symptom-level goal or mutate the target.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB32",
       "scenario": "An ambiguous or high-impact request arrives without explicit invocation of $deep-interview.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "alpha-goal",
-        "invariant": "deep-interview is not implicitly available because its skill policy sets allow_implicit_invocation=false; ordinary handling continues without loading it."
+        "invariant": "deep-interview is not implicitly available because its skill policy sets allow_implicit_invocation=false; ordinary handling continues without loading it.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB33",
       "scenario": "The user explicitly invokes $deep-interview for exploratory clarification.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "deep-interview",
-        "invariant": "Explicit invocation makes the skill available; run its normal source-neutral interview workflow without choosing DIRECT/PERSIST."
+        "invariant": "Explicit invocation makes the skill available; run its normal source-neutral interview workflow without choosing an entry gate outcome.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB34",
       "scenario": "A complex cross-file change appears to need design, but the user did not explicitly invoke $technical-design.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "alpha-goal",
-        "invariant": "technical-design is not implicitly available because its skill policy sets allow_implicit_invocation=false; ordinary handling continues without loading it."
+        "invariant": "technical-design is not implicitly available because its skill policy sets allow_implicit_invocation=false; ordinary handling continues without loading it.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB35",
       "scenario": "The user explicitly invokes $technical-design, and one authority-owned product or side-effect decision is missing.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "caller",
-        "invariant": "Return DESIGN_INPUT_GAP with the single highest-impact decision variable and keep technical_design.md draft; do not guess, create a Goal Contract, or invoke alpha-goal."
+        "invariant": "Return DESIGN_INPUT_GAP with the single highest-impact decision variable and keep technical_design.md draft; do not guess, create a Goal Contract, or invoke alpha-goal.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB36",
       "scenario": "After native-goal sync, execution continues through multiple batches and risk boundaries before a proposed terminal state exists.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "executor",
-        "invariant": "Executor retains ownership, performs proportionate execution checks, and records progress; verifier is not invoked for intermediate slices. Native goal state remains lifecycle metadata and never replaces Goal Contract authority or acceptance evidence."
+        "invariant": "Executor retains ownership, performs proportionate execution checks, and records progress; verifier is not invoked for intermediate slices. Native goal state remains lifecycle metadata and never replaces Goal Contract authority or acceptance evidence.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB37",
       "scenario": "A user-invoked Technical Design is infeasible or an external non-authority dependency prevents review completion.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "caller",
-        "invariant": "Return DESIGN_BLOCKED with evidence, affected dimensions, and the smallest recovery condition; keep Design status draft and do not mutate the target."
+        "invariant": "Return DESIGN_BLOCKED with evidence, affected dimensions, and the smallest recovery condition; keep Design status draft and do not mutate the target.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB38",
       "scenario": "The user explicitly invokes $technical-design and its Technical Review passes.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "technical-design",
-        "invariant": "Explicit invocation makes the skill available; persist the ready technical_design.md and return DESIGN_READY as non-authoritative input."
+        "invariant": "Explicit invocation makes the skill available; persist the ready technical_design.md and return DESIGN_READY as non-authoritative input.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB39",
       "scenario": "Alpha-goal receives a DESIGN_READY packet and will consume at least one proposed constraint.",
       "expected": {
-        "entryRoute": "PERSIST",
         "verificationRoute": "N/A",
         "nextOwner": "alpha-goal",
-        "invariant": "Validate original request source, ready status, workspace, and absolute technical_design.md path; record the source and copy every binding proposal into the Goal Contract. DIRECT is allowed only by ignoring the design completely."
+        "invariant": "Validate original request source, ready status, workspace, and absolute technical_design.md path; record the source and copy every binding proposal into the Goal Contract. SKIP is allowed only when the design is not being consumed.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB40",
-      "scenario": "Alpha-goal compiles a PERSIST contract from raw request, attributable inputs, discovered facts, and explicit authority decisions with no remaining material gap.",
+      "scenario": "Alpha-goal compiles a Goal Contract after the skip gate does not trigger from raw request, attributable inputs, discovered facts, and explicit authority decisions with no remaining material gap.",
       "expected": {
-        "entryRoute": "PERSIST",
         "verificationRoute": "N/A",
         "nextOwner": "executor",
-        "invariant": "Check required execution content, authority, observers, prerequisites, risks, blockers, and any required independent review; set status accepted last, derive the structured native goal objective, and synchronize only a matching unfinished goal or create a new one."
+        "invariant": "Check required execution content, authority, observers, prerequisites, risks, blockers, and any required independent review; set status accepted last, derive the structured native goal objective, and synchronize only a matching unfinished goal or create a new one.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB41",
       "scenario": "Executor reads a referenced ready technical design containing proposals not adopted into the accepted Goal Contract.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "N/A",
         "nextOwner": "executor",
-        "invariant": "Require path, ready status, and workspace match; use the design only to explain contract-adopted implementation implications and ignore unadopted proposals for scope, checklist, acceptance, and completion."
+        "invariant": "Require path, ready status, and workspace match; use the design only to explain contract-adopted implementation implications and ignore unadopted proposals for scope, checklist, acceptance, and completion.",
+        "skipGate": "N/A"
       }
     },
     {
       "id": "RB42",
       "scenario": "Verifier receives evidence plus a referenced design whose unadopted proposal appears satisfied while a required contract criterion is still unmet.",
       "expected": {
-        "entryRoute": "N/A",
         "verificationRoute": "NEXT_ITERATION",
         "nextOwner": "executor",
-        "invariant": "Build verification conditions only from the accepted Goal Contract, ignore unadopted design proposals, and route on the unmet contract criterion rather than treating design satisfaction as completion."
+        "invariant": "Build verification conditions only from the accepted Goal Contract, ignore unadopted design proposals, and route on the unmet contract criterion rather than treating design satisfaction as completion.",
+        "skipGate": "N/A"
       }
     }
   ]

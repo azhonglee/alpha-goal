@@ -301,6 +301,20 @@ JS
   done < <(contract_agent_names)
 }
 
+list_file_modes() {
+  local root="$1"
+  local file relative mode
+  while IFS= read -r file; do
+    relative="${file#"$root"/}"
+    if mode="$(stat -f '%Lp' "$file" 2>/dev/null)"; then
+      printf '%s %s\n' "$relative" "$mode"
+    else
+      mode="$(stat -c '%a' "$file")"
+      printf '%s %s\n' "$relative" "$mode"
+    fi
+  done < <(find "$root" -type f -print | sort)
+}
+
 tmp_codex="$(mktemp -d)"
 codex_output="$(run_installer "$tmp_codex")"
 assert_simple_success_output "$codex_output" "Alpha Goal install completed."
@@ -359,11 +373,11 @@ tmp_agent_upgrade="$(mktemp -d)"
 seed_legacy_custom_agents "$tmp_agent_upgrade/.codex"
 mkdir -p "$tmp_agent_upgrade/before-skip"
 cp -a "$tmp_agent_upgrade/.codex/agents" "$tmp_agent_upgrade/before-skip/agents"
-find "$tmp_agent_upgrade/.codex/agents" -printf '%P %m\n' | sort > "$tmp_agent_upgrade/before-skip/agent-modes"
+list_file_modes "$tmp_agent_upgrade/.codex/agents" > "$tmp_agent_upgrade/before-skip/agent-modes"
 custom_agent_upgrade_skip_output="$(CUSTOM_AGENTS_INPUT=n run_installer "$tmp_agent_upgrade")"
 assert_simple_success_output "$custom_agent_upgrade_skip_output" "Alpha Goal install completed."
 diff -r --no-dereference "$tmp_agent_upgrade/before-skip/agents" "$tmp_agent_upgrade/.codex/agents"
-find "$tmp_agent_upgrade/.codex/agents" -printf '%P %m\n' | sort > "$tmp_agent_upgrade/after-skip-agent-modes"
+list_file_modes "$tmp_agent_upgrade/.codex/agents" > "$tmp_agent_upgrade/after-skip-agent-modes"
 cmp "$tmp_agent_upgrade/before-skip/agent-modes" "$tmp_agent_upgrade/after-skip-agent-modes"
 test ! -e "$tmp_agent_upgrade/.codex/agents/complex-builder.toml"
 grep -q '# legacy-profile' "$tmp_agent_upgrade/.codex/agents/builder.toml"

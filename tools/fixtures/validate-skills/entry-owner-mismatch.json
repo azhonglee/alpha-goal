@@ -1,6 +1,6 @@
 {
   "shouldPass": false,
-  "expectedErrors": ["entry route owner must match the public skill with entry=true"],
+  "expectedErrors": ["skip gate owner must match the public skill with entry=true"],
   "inheritRoot": true,
   "replacements": [
     {

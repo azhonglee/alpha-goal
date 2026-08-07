@@ -110,4 +110,4 @@ Include architecture, components, data flow, interfaces, data models, persistenc
 
 Include any dimension whose answer can change implementation, interfaces, data, dependencies, tests, rollout, rollback, security, privacy, performance, or risk handling. Do not create placeholder sections solely to satisfy a fixed template.
 
-Set `Design status: ready` only after Review Record is `passed`. The ready artifact remains a proposal until `alpha-goal` adopts its contents into an accepted Goal Contract. A supplied DESIGN_READY handoff forces PERSIST if any proposal is consumed; DIRECT must ignore the design completely.
+Set `Design status: ready` only after Review Record is `passed`. The ready artifact remains a proposal until `alpha-goal` adopts its contents into an accepted Goal Contract. A supplied DESIGN_READY handoff can be consumed only when the skip gate does not return `SKIP`; validate its source, ready status, workspace, and absolute path, then adopt proposals explicitly.

@@ -1,6 +1,6 @@
 ---
 name: verifier
-description: "Audit the proposed terminal state of one accepted PERSIST task. Use after implementation and authorized delivery are complete or no authorized path remains. Collect final-state evidence and return PASS_TO_FINAL, NEXT_ITERATION, BLOCKED, or a GOAL_CHANGED termination signal; do not review intermediate slices or implement fixes."
+description: "Audit the proposed terminal state of one accepted Goal Contract task. Use after implementation and authorized delivery are complete or no authorized path remains. Collect final-state evidence and return PASS_TO_FINAL, NEXT_ITERATION, BLOCKED, or a GOAL_CHANGED termination signal; do not review intermediate slices or implement fixes."
 ---
 
 # Verifier

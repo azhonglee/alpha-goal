@@ -43,10 +43,10 @@ Alpha Goal 给 AI Agent 一套 Goal Engineering 控制闭环，重点约束三�
 flowchart TD
   I["deep-interview：独立澄清 / interview.md"] -.-> C["调用者选择下一阶段"]
   T["technical-design：technical_design.md"] -.-> C
-  C --> A["alpha-goal：编译 Goal Contract"]
-  A --> R{"DIRECT / PERSIST"}
-  R --> D["DIRECT：忽略设计 handoff，正常执行"]
-  R --> P["PERSIST：accepted Goal Contract"]
+  C --> G{"Skip Gate"}
+  G -->|"SKIP"| D["调用者继续具体只读或可逆本地工作"]
+  G -->|"不跳过"| A["alpha-goal：Inspect Inputs → Clarify"]
+  A --> P["编译并接受 Goal Contract"]
   P --> S["Native Goal Sync"]
   S --> E["executor"]
   E --> V["verifier"]
@@ -57,7 +57,7 @@ flowchart TD
 
 `deep-interview` 通过 `allow_implicit_invocation: false` 设为仅显式调用，是独立、source-neutral 的澄清阶段：按需写入 canonical `interview.md`，保留 append-only 问答、来源和未决 gap，不选择执行路由。`technical-design` 同样通过 skill policy 设为仅显式调用，是独立的 pre-goal 设计阶段：写入 canonical `technical_design.md`，通过技术评审后返回 `DESIGN_READY`，或返回 `DESIGN_INPUT_GAP` / `DESIGN_BLOCKED`；恢复时必须使用当前上下文保存的精确路径。
 
-`alpha-goal` 直接从原始请求、可归因输入和已发现事实编译目标。若消费 `DESIGN_READY` 的任何提案，必须走 `PERSIST`；`DIRECT` 必须完全忽略该设计。设计路径只表示 provenance，只有显式写入 Goal Contract 的约束才影响执行或验收。`alpha-goal` 仅在执行所需信息、授权、observer 和风险处理完整后将 Goal Contract 设置为 `accepted`，不增加单独的用户确认仪式或重复 gate 字段。
+`alpha-goal` 先经过 Skip Gate；只有具体只读工作或可直接观察的可逆本地变更，且不存在材料性决策、副作用、恢复或审计要求时才返回 `SKIP`，这类请求不运行 `alpha-goal`。未满足跳过条件时，`alpha-goal` 才检查输入并以 grill-me 方式澄清材料性决策，然后编译并接受 Goal Contract。`DESIGN_READY` 只在未触发 `SKIP` 后作为非权威提案被校验和显式采纳；设计路径只表示 provenance，只有写入 Goal Contract 的约束才影响执行或验收。`alpha-goal` 仅在执行所需信息、授权、observer 和风险处理完整后将 Goal Contract 设置为 `accepted`。
 
 `executor` 与 `verifier` 只接受 `status: accepted` 的 canonical Goal Contract。它们可在路径、ready 状态和 workspace 匹配后读取设计作为解释性上下文，但不得从设计扩张 scope、acceptance criteria 或 checklist。`checkpoint.md` 记录执行阶段和证据；verifier 审计当前状态并返回 verdict。
 
@@ -95,7 +95,7 @@ $alpha-goal 实现一下这个需求:<YOUR-PRD> or <YOUR-DESCRIPTION>，<YOUR-UX
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/alpha-goal/"><code>alpha-goal</code></a></td>
-      <td align="left">从原始请求和可归因输入选择 DIRECT/PERSIST，检查并接受 Goal Contract，再生成和同步 native goal objective。</td>
+      <td align="left">先执行 Skip Gate；未跳过时检查并以 grill-me 方式澄清原始请求和可归因输入，再检查并接受 Goal Contract、生成和同步 native goal objective。</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/technical-design/"><code>technical-design</code></a></td>
@@ -118,9 +118,9 @@ Alpha Goal 让 agent 工作保持目标明确、行动有界、声明受证据�
 
 - 先发现事实，再处理由用户或其他授权来源拥有的材料性决策；现有代码不能自行定义期望行为。
 - 已知不可行、required observer 不可用、claim surface 未标识或 prerequisite 未满足时，Goal Contract 必须保持 `draft`；`BLOCKED` 只表示 accepted 前提在运行期被新事实推翻。
-- 直达任务不制造持久协议；持久任务用最小 artifact 支持授权、恢复和审计。
+- `SKIP` 工作不制造 Goal Contract 或 native goal；继续处理的工作用最小 artifact 支持授权、恢复和审计。
 - executor 负责全部中间 batch、风险边界和按比例自检；只有拟议完成态或需要终态 blocker 判定时才调用 verifier。
 - PASS 绑定实际观察到的最终目标与交付状态并终止该 checkpoint；后续工作创建新任务。
 - 时效性证据记录观察时间与失效条件；无法标识的可变表面不得声称精确绑定。
-- Goal Contract 是 executor/verifier 的标准结构化输入；`alpha-goal` 在 accepted `PERSIST` 交接前复用或创建 native goal。
+- Goal Contract 是 executor/verifier 的标准结构化输入；Skip Gate 未返回 `SKIP` 且契约 accepted 后，`alpha-goal` 复用或创建 native goal。
 - `tools/evals/runtime-boundaries.json` 固化 42 个静态边界预期；结构校验通过不等于真实运行证据。

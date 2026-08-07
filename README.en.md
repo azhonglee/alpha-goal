@@ -43,10 +43,10 @@ In practice, it compresses requirement clarification, authority boundaries, iter
 flowchart TD
   I["deep-interview: independent clarification / interview.md"] -.-> C["caller chooses the next stage"]
   T["technical-design: technical_design.md"] -.-> C
-  C --> A["alpha-goal: compile Goal Contract"]
-  A --> R{"DIRECT / PERSIST"}
-  R --> D["DIRECT: ignore design handoff and execute normally"]
-  R --> P["PERSIST: accepted Goal Contract"]
+  C --> G{"Skip Gate"}
+  G -->|"SKIP"| D["caller continues concrete read-only or reversible local work"]
+  G -->|"not skipped"| A["alpha-goal: Inspect Inputs → Clarify"]
+  A --> P["compile and accept Goal Contract"]
   P --> S["Native Goal Sync"]
   S --> E["executor"]
   E --> V["verifier"]
@@ -57,7 +57,7 @@ flowchart TD
 
 `deep-interview` is explicit-only through `allow_implicit_invocation: false` and is a source-neutral clarification stage. It may maintain canonical `interview.md` with append-only turns, provenance, and unresolved gaps, but it does not choose an execution route. `technical-design` uses the same skill policy and is an independent pre-goal design stage. It writes canonical `technical_design.md`, returns `DESIGN_READY` after review, or returns `DESIGN_INPUT_GAP` / `DESIGN_BLOCKED`; recovery requires the exact path preserved in current context.
 
-`alpha-goal` compiles directly from the raw request, attributable inputs, and discovered facts. Consuming any `DESIGN_READY` proposal forces `PERSIST`; `DIRECT` must ignore the design completely. A design path is provenance only. A constraint affects execution or acceptance only after it is written explicitly into the Goal Contract. `alpha-goal` sets the contract to `accepted` only when execution information, authority, observers, and risk treatment are complete; it adds neither a confirmation ceremony nor duplicate gate fields.
+`alpha-goal` first passes the Skip Gate. It returns `SKIP` only for concrete read-only work or a directly observable reversible local change with no material decision, side effect, recovery, or audit requirement; those requests do not run `alpha-goal`. When the request is not clearly skippable, `alpha-goal` inspects inputs, clarifies material decisions with a grill-me loop, and then compiles and accepts the Goal Contract. A `DESIGN_READY` handoff is validated and adopted as a non-authoritative proposal only when `SKIP` was not triggered; its path is provenance, and only constraints written into the Goal Contract affect execution or acceptance. `alpha-goal` sets the contract to `accepted` only when execution information, authority, observers, and risk treatment are complete.
 
 `executor` and `verifier` accept only a canonical Goal Contract with `status: accepted`. They may read a design as explanatory context only after path, ready status, and workspace match, and must not expand scope, acceptance criteria, or checklists from it. `checkpoint.md` records execution phase and evidence; verifier audits the current state and returns a verdict.
 
@@ -95,7 +95,7 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/alpha-goal/"><code>alpha-goal</code></a></td>
-      <td align="left">Choose DIRECT/PERSIST from raw and attributable input, check and accept the Goal Contract, then generate and synchronize the native goal objective.</td>
+      <td align="left">Run the Skip Gate first; when not skipped, inspect and grill-me the raw and attributable input, then check and accept the Goal Contract before generating and synchronizing the native goal objective.</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/technical-design/"><code>technical-design</code></a></td>
@@ -118,9 +118,9 @@ Alpha Goal keeps agent work explicit, bounded, and accountable to evidence.
 
 - Discover facts before handling material decisions owned by the user or another authority; current code cannot define desired behavior by itself.
 - Known infeasibility, an unavailable required observer, an unidentified claim surface, or an unmet prerequisite keeps the Goal Contract `draft`; `BLOCKED` only means an accepted premise was invalidated later by new facts.
-- Direct work creates no persistent protocol; persistent work uses the minimum artifacts needed for authority, recovery, and audit.
+- `SKIP` work creates no Goal Contract or native goal; continued work uses the minimum artifacts needed for authority, recovery, and audit.
 - Executor owns all intermediate batches, risk boundaries, and proportionate checks; invoke verifier only for proposed completion or a terminal blocker decision.
 - PASS binds to the target and delivery state actually observed and terminates that checkpoint; later work starts a new task.
 - Volatile evidence records observation time and invalidation conditions; unidentified mutable surfaces cannot support an exact-binding claim.
-- The Goal Contract is standard structured input to executor/verifier; `alpha-goal` reuses or creates the native goal before accepted `PERSIST` handoff.
+- The Goal Contract is standard structured input to executor/verifier; when the Skip Gate does not return `SKIP` and the contract is accepted, `alpha-goal` reuses or creates the native goal.
 - `tools/evals/runtime-boundaries.json` preserves 42 static expected-boundary cases; schema validation is not runtime evidence.

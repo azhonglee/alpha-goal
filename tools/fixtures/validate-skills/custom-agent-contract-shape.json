@@ -4,8 +4,8 @@
   "replacements": [
     {
       "file": "tools/validation/alpha-goal.json",
-      "search": "\"builder\": {\n      \"model\": \"gpt-5.6-sol\",\n      \"effort\": \"medium\",\n      \"sandbox\": null",
-      "replace": "\"builder\": {\n      \"model\": \"gpt-5.6-sol\",\n      \"effort\": \"maximum\",\n      \"sandboxMode\": null"
+      "search": "\"builder\": {\n      \"model\": \"gpt-5.6-terra\",\n      \"effort\": \"high\",\n      \"sandbox\": null",
+      "replace": "\"builder\": {\n      \"model\": \"gpt-5.6-terra\",\n      \"effort\": \"maximum\",\n      \"sandboxMode\": null"
     }
   ],
   "expectedErrors": [

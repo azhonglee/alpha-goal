@@ -5,7 +5,7 @@ Read this reference only when Alpha Goal runs in Claude runtime or a Claude-inst
 ## Principle
 
 - Treat this as a tool-name adapter, not a new source of authority.
-- Keep Goal Contract, checkpoint, route, and evidence semantics unchanged.
+- Keep Goal Contract, checkpoint, skip-gate, and evidence semantics unchanged.
 - Prefer Claude-native tools when available; otherwise record the adapter gap instead of pretending a Codex tool ran.
 
 ## Tool Mapping

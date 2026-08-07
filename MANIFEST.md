@@ -5,14 +5,14 @@
 | Directory | Owned semantics |
 | --- | --- |
 | `skills/deep-interview/` | Explicit-only independent requirement clarification, canonical append-only `interview.md`, provenance, and source-neutral handoff. |
-| `skills/alpha-goal/` | Raw-input goal compilation, entry routing, Goal Contract authority, design-handoff validation, contract acceptance, and native-goal synchronization. |
+| `skills/alpha-goal/` | Input inspection and clarification, Skip Gate, Goal Contract authority, design-handoff validation, contract acceptance, and native-goal synchronization. |
 | `skills/technical-design/` | Explicit-only pre-goal `technical_design.md`, input-gap/blocker routes, technical review, exact-path recovery, and non-authoritative design handoff. |
 | `skills/executor/` | Persistent target/delivery mutation, raw execution evidence, recovery cursor, and goal-change termination. |
 | `skills/verifier/` | Terminal-state observations, evidence classification, criterion results, and final audit verdict. |
 
 The shared structural contract is `tools/validation/alpha-goal.json`. It declares public skills, semantic owners, routes, conditional artifacts, Custom Agent profiles and distribution files, templates, eval files, and the exclusive instruction-unit budget. It does not validate skill prose.
 
-Native Goal Sync applies only to `PERSIST`: after the contract becomes accepted, `alpha-goal` reuses only a native goal for the same contract and generated objective, or creates one when none exists. Native state is not a canonical Alpha Goal artifact or acceptance evidence.
+Native Goal Sync applies when the Skip Gate does not return `SKIP` and the contract becomes accepted: `alpha-goal` reuses only a native goal for the same contract and generated objective, or creates one when none exists. Native state is not a canonical Alpha Goal artifact or acceptance evidence. `SKIP` creates neither a Goal Contract nor a native goal.
 
 The installer always copies the deep-interview/alpha-goal/technical-design goal-engineering core and may omit the executor/verifier pair; that pair is required for the repository-defined persistent execution and final-audit loop. When the pair is omitted, the Codex recovery hook is not installed or updated.
 
@@ -42,7 +42,7 @@ Claude capability adaptation lives in each applicable skill reference (`deep-int
 
 ## Runtime artifacts
 
-`deep-interview` and `technical-design` set `policy.allow_implicit_invocation: false`; Codex exposes them only through explicit `$skill` invocation. `deep-interview` may create canonical `interview.md` for durable clarification; its append-only record is evidence and provenance, not execution authority. `technical-design` creates canonical `technical_design.md`, returns `DESIGN_READY`, `DESIGN_INPUT_GAP`, or `DESIGN_BLOCKED`, and requires exact-path recovery. A ready design remains a proposal. `alpha-goal` validates its path, ready status, workspace, and original request source before adoption; consuming any design proposal requires `PERSIST`, and every binding constraint must be copied into the Goal Contract. `status` is the sole lifecycle field; acceptance requires complete execution information, authority, observers, and risk treatment. The checkpoint records runtime phase and evidence; verifier returns the audit verdict.
+`deep-interview` and `technical-design` set `policy.allow_implicit_invocation: false`; Codex exposes them only through explicit `$skill` invocation. `deep-interview` may create canonical `interview.md` for durable clarification; its append-only record is evidence and provenance, not execution authority. `technical-design` creates canonical `technical_design.md`, returns `DESIGN_READY`, `DESIGN_INPUT_GAP`, or `DESIGN_BLOCKED`, and requires exact-path recovery. A ready design remains a proposal. `alpha-goal` validates its path, ready status, workspace, and original request source before adoption; consuming any design proposal requires the Skip Gate not to return `SKIP`, and every binding constraint must be copied into the Goal Contract. `status` is the sole lifecycle field; acceptance requires complete execution information, authority, observers, and risk treatment. The checkpoint records runtime phase and evidence; verifier returns the audit verdict.
 
 | Path | Condition and owner |
 | --- | --- |
@@ -51,7 +51,7 @@ Claude capability adaptation lives in each applicable skill reference (`deep-int
 | `<state-root>/YYYYMMDD-<task>/goal-contract.md` | Compiled by `alpha-goal`; an accepted contract is the execution authority. |
 | `<state-root>/YYYYMMDD-<task>/checkpoint.md` | Runtime phase, execution state, evidence, and audit outcome. |
 
-`DIRECT` creates no Goal Contract or native goal. It must ignore a supplied design completely.
+`SKIP` creates no Goal Contract or native goal. A supplied design is consumed only when the Skip Gate does not return `SKIP`.
 
 ## Count budget
 

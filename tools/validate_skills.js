@@ -69,13 +69,14 @@ function readContract(root, errors) {
 }
 
 function validateContract(contract, errors) {
-  if (contract.schemaVersion !== 8) errors.push(`${CONTRACT_PATH}: schemaVersion must be 8`);
+  if (contract.schemaVersion !== 9) errors.push(`${CONTRACT_PATH}: schemaVersion must be 9`);
   if (!Number.isInteger(contract.instructionBudgetExclusiveMax) || contract.instructionBudgetExclusiveMax < 1) {
     errors.push(`${CONTRACT_PATH}: instructionBudgetExclusiveMax must be a positive integer`);
   }
 
   requireArray(contract, "publicSkills", errors);
   requireArray(contract, "artifacts", errors);
+  requireObject(contract, "gates", errors);
   requireObject(contract, "routes", errors);
   requireObject(contract, "distribution", errors);
   requireObject(contract, "customAgents", errors);
@@ -115,19 +116,24 @@ function validateContract(contract, errors) {
   }
   requireUniqueStrings(skillNames, `${CONTRACT_PATH}: public skill names`, errors);
   if (entryCount !== 1) errors.push(`${CONTRACT_PATH}: exactly one public skill must have entry=true`);
-  if (entryCount === 1 && contract.routes?.entry?.owner !== entrySkillName) {
-    errors.push(`${CONTRACT_PATH}: entry route owner must match the public skill with entry=true`);
+  if (entryCount === 1 && contract.gates?.skip?.owner !== entrySkillName) {
+    errors.push(`${CONTRACT_PATH}: skip gate owner must match the public skill with entry=true`);
+  }
+  if (!contract.gates?.skip?.values?.includes("SKIP")) {
+    errors.push(`${CONTRACT_PATH}: skip gate values must include SKIP`);
   }
 
   const knownOwners = new Set(skillNames);
-  for (const [routeName, route] of Object.entries(contract.routes || {})) {
-    if (!isObject(route)) {
-      errors.push(`${CONTRACT_PATH}: route ${routeName} must be an object`);
-      continue;
+  for (const [collectionName, collection] of [["gate", contract.gates], ["route", contract.routes]]) {
+    for (const [name, item] of Object.entries(collection || {})) {
+      if (!isObject(item)) {
+        errors.push(`${CONTRACT_PATH}: ${collectionName} ${name} must be an object`);
+        continue;
+      }
+      if (!knownOwners.has(item.owner)) errors.push(`${CONTRACT_PATH}: ${collectionName} ${name} has unknown owner ${JSON.stringify(item.owner)}`);
+      requireArray(item, "values", errors, `${CONTRACT_PATH}: ${collectionName} ${name}`);
+      requireUniqueStrings(item.values, `${CONTRACT_PATH}: ${collectionName} ${name} values`, errors);
     }
-    if (!knownOwners.has(route.owner)) errors.push(`${CONTRACT_PATH}: route ${routeName} has unknown owner ${JSON.stringify(route.owner)}`);
-    requireArray(route, "values", errors, `${CONTRACT_PATH}: route ${routeName}`);
-    requireUniqueStrings(route.values, `${CONTRACT_PATH}: route ${routeName} values`, errors);
   }
 
   for (const key of ["agents", "templates", "scripts", "evals", "docs"]) {
@@ -425,7 +431,7 @@ function validateRuntimeEvals(root, contract, errors) {
     return;
   }
 
-  if (!isObject(data) || data.schemaVersion !== 1) errors.push(`${rel}: schemaVersion must be 1`);
+  if (!isObject(data) || data.schemaVersion !== 2) errors.push(`${rel}: schemaVersion must be 2`);
   if (!nonEmptyString(data.claimBoundary)) errors.push(`${rel}: claimBoundary must be a non-empty string`);
   if (!Array.isArray(data.cases) || data.cases.length !== 42) {
     errors.push(`${rel}: cases must contain exactly 42 entries`);
@@ -433,7 +439,7 @@ function validateRuntimeEvals(root, contract, errors) {
   }
 
   const ids = [];
-  const entryRoutes = new Set([...(contract.routes?.entry?.values || []), "N/A"]);
+  const skipGates = new Set([...(contract.gates?.skip?.values || []), "N/A"]);
   const verificationRoutes = new Set([...(contract.routes?.verification?.values || []), "N/A"]);
   const owners = new Set(["caller", ...(contract.publicSkills || []).map(skill => skill.name)]);
   for (const item of data.cases) {
@@ -447,7 +453,7 @@ function validateRuntimeEvals(root, contract, errors) {
       errors.push(`${rel}: ${item.id} missing expected object`);
       continue;
     }
-    if (!entryRoutes.has(item.expected.entryRoute)) errors.push(`${rel}: ${item.id} invalid entryRoute`);
+    if (!skipGates.has(item.expected.skipGate)) errors.push(`${rel}: ${item.id} invalid skipGate`);
     if (!verificationRoutes.has(item.expected.verificationRoute)) errors.push(`${rel}: ${item.id} invalid verificationRoute`);
     if (!owners.has(item.expected.nextOwner)) errors.push(`${rel}: ${item.id} invalid nextOwner`);
     if (!nonEmptyString(item.expected.invariant)) errors.push(`${rel}: ${item.id} missing invariant`);

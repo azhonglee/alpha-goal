@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 8,
+  "schemaVersion": 9,
   "instructionBudgetExclusiveMax": 9301,
   "customAgents": {
     "architect": {
@@ -13,13 +13,13 @@
       "sandbox": "read-only"
     },
     "builder": {
-      "model": "gpt-5.6-sol",
-      "effort": "medium",
+      "model": "gpt-5.6-terra",
+      "effort": "high",
       "sandbox": null
     },
     "complex-builder": {
       "model": "gpt-5.6-sol",
-      "effort": "high",
+      "effort": "medium",
       "sandbox": null
     },
     "reviewer": {
@@ -48,7 +48,7 @@
       "entry": true,
       "ownedSemantics": [
         "raw-input-goal-compilation",
-        "entry-route",
+        "skip-gate",
         "optional-input-adoption",
         "goal-contract-authority",
         "contract-acceptance",
@@ -102,14 +102,15 @@
       "scripts": []
     }
   ],
-  "routes": {
-    "entry": {
+  "gates": {
+    "skip": {
       "owner": "alpha-goal",
       "values": [
-        "DIRECT",
-        "PERSIST"
+        "SKIP"
       ]
-    },
+    }
+  },
+  "routes": {
     "verification": {
       "owner": "verifier",
       "values": [
@@ -150,7 +151,7 @@
     },
     {
       "path": "goal-contract.md",
-      "condition": "PERSIST route before target mutation",
+      "condition": "skip gate does not trigger before target mutation",
       "sections": [
         {
           "name": "objective-deliverables-and-boundaries",
@@ -164,7 +165,7 @@
     },
     {
       "path": "checkpoint.md",
-      "condition": "accepted PERSIST contract during execution and verification",
+      "condition": "accepted Goal Contract during execution and verification",
       "sections": [
         {
           "name": "recorded-contract-identity-and-phase",
