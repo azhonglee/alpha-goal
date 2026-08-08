@@ -19,7 +19,7 @@ claude: $HOME/.claude/skills
 
 For `codex` and `all`, a separate default-Yes prompt installs the repository's managed Custom Agents under `${CODEX_HOME:-$HOME/.codex}/agents` and their routing block in the same configuration root's `AGENTS.md`. These agent files are user configuration, not skills or plugin components.
 
-When the Skip Gate does not return `SKIP`, `alpha-goal` compiles the Goal Contract and sets `status: accepted` only after required execution information, authority, observers, and risk treatment are complete. A material goal change starts a new Alpha Goal task instead of editing the accepted contract. Runtime state is recorded in `checkpoint.md` with `phase` set to `executing`, `ready_for_verification`, or `terminal`; verifier audits the current state and returns a verdict. `SKIP` returns ownership to the caller without running `alpha-goal` or creating a Goal Contract.
+`alpha-goal` checks already-provided Gate Inputs before the Skip Gate: raw request, higher-priority/repository constraints, handoff metadata and intended consumption, plus supplied lifecycle state. `SKIP` returns ownership to the caller without state only when all inputs permit it. Otherwise an existing lifecycle first remains with its current owner for any required transition; new goal framing resolves the task directory and creates or recovers a `draft` before full inspection or clarification, then sets `status: accepted` only after required execution information, authority, observers, and risk treatment are complete. A material goal change starts a new Alpha Goal task instead of editing the accepted contract. Runtime state is recorded in `checkpoint.md` with `phase` set to `executing`, `ready_for_verification`, or `terminal`; verifier audits the current state and returns a verdict.
 
 ## Options
 
@@ -87,7 +87,7 @@ When invoked by absolute path it can run from any working directory because the 
 ```text
 $deep-interview 通过 skill policy 设为仅显式调用，并按需维护 canonical interview.md。
 $technical-design 通过 skill policy 设为仅显式调用，创建并评审 canonical technical_design.md，返回 DESIGN_READY / DESIGN_INPUT_GAP / DESIGN_BLOCKED。
-$alpha-goal 检查并澄清原始请求和可归因输入，执行 Skip Gate；继续处理的工作编译并接受 Goal Contract。
+$alpha-goal 检查 Gate Inputs 并执行 Skip Gate；未跳过时先创建/恢复 draft，再检查、澄清并接受 Goal Contract。
 $executor 从已接受的 Goal Contract 恢复并执行下一批授权工作。
 $verifier 只审核 executor 提交的拟议终态，并给出最终路由。
 ```

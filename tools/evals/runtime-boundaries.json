@@ -24,11 +24,11 @@
     },
     {
       "id": "RB03",
-      "scenario": "Make a local change that includes an external push and PR delivery.",
+      "scenario": "Make an otherwise reversible local change when repository or higher-priority context requires an external push and PR delivery.",
       "expected": {
         "verificationRoute": "N/A",
         "nextOwner": "alpha-goal",
-        "invariant": "External delivery prevents SKIP; alpha-goal compiles an accepted Goal Contract with delivery authority and acceptance evidence before target or delivery mutation.",
+        "invariant": "External delivery in a gate input prevents SKIP; alpha-goal creates a draft, then compiles an accepted Goal Contract with delivery authority and acceptance evidence before target or delivery mutation.",
         "skipGate": "N/A"
       }
     },
@@ -68,7 +68,7 @@
       "expected": {
         "verificationRoute": "N/A",
         "nextOwner": "alpha-goal",
-        "invariant": "Recovery need controls persistence, and a missing requested review must be awaited, retried, or explicitly canceled rather than treated as evidence.",
+        "invariant": "Recovery need prevents SKIP; alpha-goal creates or recovers a draft before waiting or clarifying, and a missing requested review must be awaited, retried, or explicitly canceled rather than treated as evidence.",
         "skipGate": "N/A"
       }
     },
@@ -84,21 +84,21 @@
     },
     {
       "id": "RB09",
-      "scenario": "Alpha-goal compiles the first complete draft with all authority decisions, observers, claim surfaces, prerequisites, and risks resolved.",
+      "scenario": "A matching existing Alpha Goal draft now has all authority decisions, observers, claim surfaces, prerequisites, and risks resolved.",
       "expected": {
         "verificationRoute": "N/A",
         "nextOwner": "executor",
-        "invariant": "Alpha-goal checks required execution content, authority, observers, prerequisites, risks, and blockers, then sets status accepted last without recording duplicate gate results or requiring a confirmation ceremony.",
+        "invariant": "Alpha-goal completes the existing draft, adopts material conclusions into standard fields, removes Unresolved Gaps, checks required execution content, authority, observers, prerequisites, risks, and blockers, then sets status accepted last without a confirmation ceremony.",
         "skipGate": "N/A"
       }
     },
     {
       "id": "RB10",
-      "scenario": "The acceptance authority materially changes an active goal, or requests more work after PASS_TO_FINAL/BLOCKED.",
+      "scenario": "The acceptance authority materially changes an active goal, or requests follow-up after PASS_TO_FINAL/BLOCKED, while the supplied exact task path makes the raw request otherwise look skippable.",
       "expected": {
         "verificationRoute": "N/A",
         "nextOwner": "caller",
-        "invariant": "The old checkpoint terminates with GOAL_CHANGED when active, or remains terminal after PASS/BLOCKED. Follow-up work starts alpha-goal in a new task directory with a new Goal Contract and checkpoint; accepted artifacts are never reopened or reused.",
+        "invariant": "Existing lifecycle state is a gate input and prevents SKIP. The caller keeps the old owner in control until an active checkpoint terminates with GOAL_CHANGED, or observes that PASS/BLOCKED is already terminal; only then does follow-up work start alpha-goal in a new task directory. Accepted artifacts are never reopened or reused.",
         "skipGate": "N/A"
       }
     },
@@ -388,7 +388,7 @@
       "expected": {
         "verificationRoute": "N/A",
         "nextOwner": "alpha-goal",
-        "invariant": "Validate original request source, ready status, workspace, and absolute technical_design.md path; record the source and copy every binding proposal into the Goal Contract. SKIP is allowed only when the design is not being consumed.",
+        "invariant": "Before the gate, check attributable handoff metadata and intent to consume it; intended consumption prevents SKIP. After non-SKIP, validate original request source, ready status, workspace, and absolute technical_design.md path; record the source and copy every binding proposal into the Goal Contract.",
         "skipGate": "N/A"
       }
     },

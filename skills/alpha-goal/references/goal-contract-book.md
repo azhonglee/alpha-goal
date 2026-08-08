@@ -1,6 +1,6 @@
 # Goal Contract Book
 
-When the skip gate does not return `SKIP`, `alpha-goal` compiles canonical `goal-contract.md` from the user's raw request, higher-priority instructions, attributable discovered facts, and explicit authority decisions. It owns structuring; callers do not need to provide a prebuilt schema.
+When the skip gate does not return `SKIP`, `alpha-goal` immediately creates or recovers canonical draft `goal-contract.md` before full inspection or clarification. It compiles from the user's raw request, higher-priority instructions, attributable discovered facts, and explicit authority decisions. It owns structuring; callers do not need to provide a prebuilt schema.
 
 The contract is an execution-facing instruction artifact. Make the desired end state measurable, name the verification surface, state hard constraints explicitly, and define an unambiguous finish line. Prefer concise structured sections over narrative history.
 
@@ -19,6 +19,8 @@ The contract is an execution-facing instruction artifact. Make the desired end s
 - `status: draft`: required execution information or authority is incomplete; target mutation is unauthorized.
 - `status: accepted`: the contract is complete, executable, and ready for handoff.
 - Never return an accepted contract to `draft` or replace its accepted contents. A material objective or authority change starts a new task directory and Goal Contract.
+- A draft may contain `Unresolved Gaps` as a recovery cursor: keep only the current highest-impact gap, known sources, and next decision variable; never store a transcript.
+- Before acceptance, adopt every material conclusion into the standard fields and remove `Unresolved Gaps`.
 
 ## Canonical Template
 
@@ -70,11 +72,15 @@ source_references:
 - Rollback/recovery: <required recovery path, or non-material with basis>
 - Unsupported claims: <claims unavailable from the verification surface>
 
+<!-- Draft only; remove before acceptance. -->
+## Unresolved Gaps
+- <current highest-impact gap, known sources, and next decision variable>
+
 ```
 
 ## Required Protocol
 
 - `status` is the sole lifecycle field. Required content is `workspace`, at least one attributable `source_references` entry, Objective, Boundaries, Acceptance Criteria, Verification, desired-behavior authority, and executor autonomy. Include Deliverables only when material.
-- `source_references` identifies attributable inputs without requiring a producer or filename. Do not copy interview transcripts, discovery notes, or rejected alternatives into the contract.
+- `source_references` identifies attributable inputs without requiring a producer or filename. Do not copy interview transcripts, discovery notes, or rejected alternatives into the contract; draft-only `Unresolved Gaps` is the limited recovery cursor above.
 - Every acceptance criterion must map to an observer, and proxy evidence must not be presented as proof. Every observer must support a criterion or material risk.
 - Material permitted side effects require attributable side-effect authority. Material or irreversible risk requires treatment and rollback/recovery; otherwise record a compact non-material basis.

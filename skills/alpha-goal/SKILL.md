@@ -9,21 +9,41 @@ Transform the user's raw request and attributable inputs into execution-ready go
 
 For work that is not skipped, produce a canonical Goal Contract that authorizes execution.
 
+## Inspect Gate Inputs
+
+Before deciding the Skip Gate, inspect only gate inputs already available or explicitly referenced:
+
+- raw request;
+- higher-priority and repository constraints;
+- attributable handoff metadata and whether any handoff will be consumed;
+- an already-provided exact Alpha Goal task path and its lifecycle state.
+
+Do not inspect implementation or create an artifact to prove `SKIP`. If a gate fact is unclear, do not skip.
+
 ## Skip Gate
 
-Apply this gate before running the rest of this skill. Return `SKIP` only when the raw request itself clearly describes all of the following:
+Return `SKIP` only when the combined gate inputs clearly show all of the following:
 
 - concrete read-only analysis, or a clear reversible in-scope local change with direct final-state observation;
 - no material behavior, interface, data, security/privacy, permission, dependency, acceptance, rollout/rollback, or risk decision;
-- no external write, purchase, destructive/cross-repository action, material disclosure, credential/session change, recovery checkpoint, explicit Goal Contract, or audit record.
+- no external write, purchase, destructive/cross-repository action, material disclosure, credential/session change, recovery checkpoint, explicit Goal Contract, or audit record;
+- no intended handoff consumption and no need to create, recover, or audit lifecycle state.
 
-`SKIP` means this skill is not needed: do not inspect inputs, clarify, create a Goal Contract, or emit another gate outcome. If the raw request does not clearly satisfy every condition, fall through into `Inspect Inputs`.
+Handoffs remain context, never authority. `SKIP` creates no state and returns ordinary work to the caller.
+
+If supplied lifecycle state is not a matching draft and still authorizes or requires work by its current owner, return control to that owner; do not alter it or initialize a competing draft. After any required terminal transition, re-enter Alpha Goal for the new task. Otherwise continue immediately with `Initialize Draft`.
+
+## Initialize Draft
+
+Before full inspection or the first question, resolve `$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/` from the stable workspace basename. Use an exact task directory supplied by attributable context; otherwise create a new directory. Read `references/goal-contract-book.md`, then create or recover its matching canonical `goal-contract.md` as `draft`.
+
+Write only known facts, their sources, and the current highest-impact gap. Do not mutate the target. Reuse a matching draft; if the name holds an accepted, terminal, or unrelated task, use the first unused numeric suffix.
 
 ## Inspect Inputs
 
-Read the user's request, higher-priority instructions, attributable inputs, and relevant current-state evidence. Resolve discoverable facts before asking for decisions.
+After the draft exists, read the user's request, higher-priority instructions, attributable inputs, and relevant current-state evidence. Resolve discoverable facts before asking for decisions.
 
-Derive details only when they are entailed by an attributable source. Never turn a recommendation, current implementation, convention, or model preference into authority.
+Derive details only when they are entailed by an attributable source. Never turn a recommendation, current implementation, convention, or model preference into authority. Update the draft with inspection results and the next highest-impact gap before asking a question.
 
 ## Clarify
 
@@ -46,15 +66,13 @@ Repeat only while a material gap remains:
 1. Select the highest-impact unresolved question by authority ownership, blast radius, irreversibility, behavior/interface/data impact, acceptance ambiguity, and rollback risk.
 2. Ask one pointed question containing one decision variable. State the discovered facts, why the answer matters, concrete options or a recommendation when useful, and never ask for discoverable facts.
 3. Grill the answer with a concrete example, counterexample, boundary, trade-off, failure case, implementation consequence, or acceptance observer. Ask a follow-up on the same question when another reasonable answer could still change execution or evidence.
-4. Record the answer, source, boundary, consequence, and observer impact, then re-evaluate all remaining gaps. Re-run inspection when an answer exposes a new factual or authority gap.
+4. Before asking again or pausing, record each material answer in its applicable contract fields with its source, boundary, consequence, and observer impact; update the next highest-impact gap. Re-run inspection when an answer exposes a new factual or authority gap.
 
 Stop only when no unresolved answer could materially change the objective, scope, non-goals, side effects, design, acceptance, risk treatment, or evidence. Keep the highest-impact unresolved authority decision in one Gap Report; do not guess or mutate the target.
 
 ## Compile the Goal Contract
 
-Resolve `$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/` from the stable workspace basename. Use an exact task directory supplied by an attributable upstream handoff; otherwise create a new directory. Reuse only a matching `draft`; if the name holds an accepted, terminal, or unrelated task, use the first unused numeric suffix.
-
-Read `references/goal-contract-book.md` and compile canonical `goal-contract.md` as `draft` directly from the user's request, higher-priority instructions, attributable inputs, discovered facts, and explicit authority decisions.
+Complete the initialized canonical `goal-contract.md` from the user's request, higher-priority instructions, attributable inputs, discovered facts, and explicit authority decisions.
 
 For every material contract field:
 
@@ -80,6 +98,7 @@ Before acceptance:
 - map every required criterion to a currently available observer and identify every claim surface and prerequisite;
 - complete authority-retained decisions and their risk/observer treatment;
 - check source conflicts, side-effect authority, freshness, and the highest-impact assumption with a counterexample or failure case;
+- adopt every material conclusion from draft-only `Unresolved Gaps` into standard contract fields and remove that temporary section;
 - keep `draft` while any known infeasibility, unavailable observer, unidentified claim surface, unmet prerequisite, incomplete authority-retained decision coverage, or material finding remains;
 
 Handle the result:
