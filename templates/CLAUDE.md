@@ -28,12 +28,12 @@ Use subagents for independent parallel subtasks when that improves throughput. B
 - Do not mask defects with silent fallbacks, degraded behavior, post-hoc patches, or cosmetic fixes.
 - "Done" requires evidence: claim completion only when requirements are truly met and validation passes; validation must run against the final target state, not paths that will be deleted or invalidated.
 - Commit promptly after changes are complete and verified.
-- Reuse accepted Alpha Goal artifacts when the Skip Gate has continued the work; do not create Goal Contract state for `SKIP` work.
+- Check only already-provided raw request, constraints, handoff intent, and lifecycle state before the Skip Gate; keep an existing lifecycle with its current owner for required transitions, otherwise create or recover a draft before full inspection, clarification, or target mutation. Do not create Goal Contract state for `SKIP` work.
 - When goal is complete and has committed changes, push the task branch and create a PR/MR.
 
 ## Isolation Principles
 
-- Resolve the Alpha Goal state root only when the Skip Gate does not return `SKIP` and before writing Goal Contract, checkpoint, review, or verification records. Use `$HOME/.alpha-goal/<workspace-slug>/`, with `<workspace-slug>` derived from `slug(basename(repo_root or Goal Contract target workspace))`, never from the full path or session directory.
+- Resolve the Alpha Goal state root immediately after the Skip Gate does not return `SKIP` and before full inspection, clarification, or writing Goal Contract, checkpoint, review, or verification records. Use `$HOME/.alpha-goal/<workspace-slug>/`, with `<workspace-slug>` derived from `slug(basename(repo_root or Goal Contract target workspace))`, never from the full path or session directory.
 - Ensure `.worktrees/` is ignored before placing repository-local worktrees there.
 - Use repository-local worktrees to isolate changes per goal/task batch. Create them under `<repo>/.worktrees/claude/<goal-slug>/` unless the repository already defines a stricter convention or the path is not technically usable.
 - In monorepos, create the worktree under the owning subrepo's `.worktrees/claude/<goal-slug>/`.

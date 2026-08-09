@@ -43,9 +43,11 @@ In practice, it compresses requirement clarification, authority boundaries, iter
 flowchart TD
   I["deep-interview: independent clarification / interview.md"] -.-> C["caller chooses the next stage"]
   T["technical-design: technical_design.md"] -.-> C
-  C --> G{"Skip Gate"}
+  C --> GI["Gate Inputs"]
+  GI --> G{"Skip Gate"}
   G -->|"SKIP"| D["caller continues concrete read-only or reversible local work"]
-  G -->|"not skipped"| A["alpha-goal: Inspect Inputs → Clarify"]
+  G -->|"not skipped"| R["resolve task directory and create/recover draft"]
+  R --> A["alpha-goal: Inspect Inputs → Clarify"]
   A --> P["compile and accept Goal Contract"]
   P --> E["executor"]
   E --> V["verifier"]
@@ -56,7 +58,7 @@ flowchart TD
 
 `deep-interview` is explicit-only through `allow_implicit_invocation: false` and is a source-neutral clarification stage. It may maintain canonical `interview.md` with append-only turns, provenance, and unresolved gaps, but it does not choose an execution route. `technical-design` uses the same skill policy and is an independent pre-goal design stage. It writes canonical `technical_design.md`, returns `DESIGN_READY` after review, or returns `DESIGN_INPUT_GAP` / `DESIGN_BLOCKED`; recovery requires the exact path preserved in current context.
 
-`alpha-goal` first passes the Skip Gate. It returns `SKIP` only for concrete read-only work or a directly observable reversible local change with no material decision, side effect, recovery, or audit requirement; those requests do not run `alpha-goal`. When the request is not clearly skippable, `alpha-goal` inspects inputs, clarifies material decisions with a grill-me loop, and then compiles and accepts the Goal Contract. A `DESIGN_READY` handoff is validated and adopted as a non-authoritative proposal only when `SKIP` was not triggered; its path is provenance, and only constraints written into the Goal Contract affect execution or acceptance. `alpha-goal` sets the contract to `accepted` only when execution information, authority, observers, and risk treatment are complete.
+`alpha-goal` first reads the already-provided Gate Inputs: raw request, higher-priority/repository constraints, handoff metadata and intended consumption, and exact task path with lifecycle state. It returns `SKIP` only for concrete read-only work or a directly observable reversible local change when those inputs show no material decision, side effect, handoff consumption, recovery, or audit requirement; these requests create no state. When not skipped, an existing lifecycle stays with its current owner for any required transition; otherwise `alpha-goal` immediately resolves the task directory and creates or recovers the canonical `draft` before full input inspection and grill-me clarification. Each material answer is written to the contract before another question or pause. A `DESIGN_READY` handoff remains a non-authoritative proposal: intended consumption prevents `SKIP`, and it affects work only after full validation and explicit adoption. `alpha-goal` sets the contract to `accepted` only when execution information, authority, observers, and risk treatment are complete.
 
 `executor` and `verifier` accept only a canonical Goal Contract with `status: accepted`. They may read a design as explanatory context only after path, ready status, and workspace match, and must not expand scope, acceptance criteria, or checklists from it. `checkpoint.md` records execution phase and evidence; verifier audits the current state and returns a verdict.
 
@@ -94,7 +96,7 @@ You usually do not need to name a skill. Describe the work normally; Alpha Goal 
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/alpha-goal/"><code>alpha-goal</code></a></td>
-      <td align="left">Run the Skip Gate first; when not skipped, inspect and grill-me the raw and attributable input, then check and accept the Goal Contract.</td>
+      <td align="left">Check Gate Inputs and run the Skip Gate; when not skipped, create or recover a draft before inspection, clarification, and Goal Contract acceptance.</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/technical-design/"><code>technical-design</code></a></td>

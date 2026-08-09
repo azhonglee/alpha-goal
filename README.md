@@ -43,9 +43,11 @@ Alpha Goal 给 AI Agent 一套 Goal Engineering 控制闭环，重点约束三�
 flowchart TD
   I["deep-interview：独立澄清 / interview.md"] -.-> C["调用者选择下一阶段"]
   T["technical-design：technical_design.md"] -.-> C
-  C --> G{"Skip Gate"}
+  C --> GI["Gate Inputs"]
+  GI --> G{"Skip Gate"}
   G -->|"SKIP"| D["调用者继续具体只读或可逆本地工作"]
-  G -->|"不跳过"| A["alpha-goal：Inspect Inputs → Clarify"]
+  G -->|"不跳过"| R["解析任务目录并创建/恢复 draft"]
+  R --> A["alpha-goal：Inspect Inputs → Clarify"]
   A --> P["编译并接受 Goal Contract"]
   P --> E["executor"]
   E --> V["verifier"]
@@ -56,7 +58,7 @@ flowchart TD
 
 `deep-interview` 通过 `allow_implicit_invocation: false` 设为仅显式调用，是独立、source-neutral 的澄清阶段：按需写入 canonical `interview.md`，保留 append-only 问答、来源和未决 gap，不选择执行路由。`technical-design` 同样通过 skill policy 设为仅显式调用，是独立的 pre-goal 设计阶段：写入 canonical `technical_design.md`，通过技术评审后返回 `DESIGN_READY`，或返回 `DESIGN_INPUT_GAP` / `DESIGN_BLOCKED`；恢复时必须使用当前上下文保存的精确路径。
 
-`alpha-goal` 先经过 Skip Gate；只有具体只读工作或可直接观察的可逆本地变更，且不存在材料性决策、副作用、恢复或审计要求时才返回 `SKIP`，这类请求不运行 `alpha-goal`。未满足跳过条件时，`alpha-goal` 才检查输入并以 grill-me 方式澄清材料性决策，然后编译并接受 Goal Contract。`DESIGN_READY` 只在未触发 `SKIP` 后作为非权威提案被校验和显式采纳；设计路径只表示 provenance，只有写入 Goal Contract 的约束才影响执行或验收。`alpha-goal` 仅在执行所需信息、授权、observer 和风险处理完整后将 Goal Contract 设置为 `accepted`。
+`alpha-goal` 先读取已提供的 Gate Inputs：原始请求、上级/仓库约束、handoff 元数据及拟消费意图、精确任务路径及 lifecycle state。只有具体只读工作或可直接观察的可逆本地变更，且这些输入均不存在材料性决策、副作用、handoff 消费、恢复或审计要求时才返回 `SKIP`；这类请求不创建 state。未跳过时，已有 lifecycle 先由当前 owner 完成必要 transition；否则立即解析任务目录并创建/恢复 canonical `draft`，再完整检查输入并以 grill-me 方式澄清材料性决策。每次材料性回答先写入契约，再继续提问或暂停。`DESIGN_READY` 是非权威提案：拟消费会阻止 `SKIP`，仅在完整校验并显式采纳后生效。`alpha-goal` 仅在执行所需信息、授权、observer 和风险处理完整后将 Goal Contract 设置为 `accepted`。
 
 `executor` 与 `verifier` 只接受 `status: accepted` 的 canonical Goal Contract。它们可在路径、ready 状态和 workspace 匹配后读取设计作为解释性上下文，但不得从设计扩张 scope、acceptance criteria 或 checklist。`checkpoint.md` 记录执行阶段和证据；verifier 审计当前状态并返回 verdict。
 
@@ -94,7 +96,7 @@ $alpha-goal 实现一下这个需求:<YOUR-PRD> or <YOUR-DESCRIPTION>，<YOUR-UX
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/alpha-goal/"><code>alpha-goal</code></a></td>
-      <td align="left">先执行 Skip Gate；未跳过时检查并以 grill-me 方式澄清原始请求和可归因输入，再检查并接受 Goal Contract。</td>
+      <td align="left">检查 Gate Inputs 并执行 Skip Gate；未跳过时先创建/恢复 draft，再检查、澄清并接受 Goal Contract。</td>
     </tr>
     <tr>
       <td width="180" align="left"><a href="skills/technical-design/"><code>technical-design</code></a></td>
