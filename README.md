@@ -56,7 +56,7 @@ flowchart TD
   E -->|"BLOCKED / PASS_TO_FINAL"| F["调用者报告"]
 ```
 
-`deep-interview` 通过 `allow_implicit_invocation: false` 设为仅显式调用，是独立、source-neutral 的澄清阶段：按需写入 canonical `interview.md`，保留 append-only 问答、来源和未决 gap，不选择执行路由。`technical-design` 同样通过 skill policy 设为仅显式调用，是独立的 pre-goal 设计阶段：写入 canonical `technical_design.md`，通过技术评审后返回 `DESIGN_READY`，或返回 `DESIGN_INPUT_GAP` / `DESIGN_BLOCKED`；恢复时必须使用当前上下文保存的精确路径。
+`deep-interview`、`technical-design` 和 `alpha-goal` 均通过 `allow_implicit_invocation: false` 设为仅显式调用。`deep-interview` 是独立、source-neutral 的澄清阶段：按需写入 canonical `interview.md`，保留 append-only 问答、来源和未决 gap，不选择执行路由。`technical-design` 是独立的 pre-goal 设计阶段：写入 canonical `technical_design.md`，通过技术评审后返回 `DESIGN_READY`，或返回 `DESIGN_INPUT_GAP` / `DESIGN_BLOCKED`；恢复时必须使用当前上下文保存的精确路径。
 
 `alpha-goal` 先读取已提供的 Gate Inputs：原始请求、上级/仓库约束、handoff 元数据及拟消费意图、精确任务路径及 lifecycle state。只有具体只读工作或可直接观察的可逆本地变更，且这些输入均不存在材料性决策、副作用、handoff 消费、恢复或审计要求时才返回 `SKIP`；这类请求不创建 state。未跳过时，已有 lifecycle 先由当前 owner 完成必要 transition；否则立即解析任务目录并创建/恢复 canonical `draft`，再完整检查输入并以 grill-me 方式澄清材料性决策。每次材料性回答先写入契约，再继续提问或暂停。`DESIGN_READY` 是非权威提案：拟消费会阻止 `SKIP`，仅在完整校验并显式采纳后生效。`alpha-goal` 仅在执行所需信息、授权、observer 和风险处理完整后将 Goal Contract 设置为 `accepted`。
 
