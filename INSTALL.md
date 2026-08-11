@@ -87,7 +87,7 @@ When invoked by absolute path it can run from any working directory because the 
 ```text
 $deep-interview 通过 skill policy 设为仅显式调用，并按需维护 canonical interview.md。
 $technical-design 通过 skill policy 设为仅显式调用，创建并评审 canonical technical_design.md，返回 DESIGN_READY / DESIGN_INPUT_GAP / DESIGN_BLOCKED。
-$alpha-goal 检查 Gate Inputs 并执行 Skip Gate；未跳过时先创建/恢复 draft，再检查、澄清并接受 Goal Contract。
+$alpha-goal 通过 skill policy 设为仅显式调用；检查 Gate Inputs 并执行 Skip Gate，未跳过时先创建/恢复 draft，再检查、澄清并接受 Goal Contract。
 $executor 从已接受的 Goal Contract 恢复并执行下一批授权工作。
 $verifier 只审核 executor 提交的拟议终态，并给出最终路由。
 ```

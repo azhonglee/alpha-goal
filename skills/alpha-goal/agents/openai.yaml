@@ -2,3 +2,6 @@ interface:
   display_name: "Alpha Goal"
   short_description: "Frame engineering requests as executable goals"
   default_prompt: "Use $alpha-goal to apply the skip gate and frame this engineering request as an executable, verifiable Goal Contract when needed."
+
+policy:
+  allow_implicit_invocation: false
