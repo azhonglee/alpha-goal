@@ -5,7 +5,7 @@
 | Directory | Owned semantics |
 | --- | --- |
 | `skills/deep-interview/` | Explicit-only independent requirement clarification, canonical append-only `interview.md`, provenance, and source-neutral handoff. |
-| `skills/alpha-goal/` | Input inspection and clarification, Skip Gate, Goal Contract authority, design-handoff validation, and contract acceptance. |
+| `skills/alpha-goal/` | Explicit-only input inspection and clarification, Skip Gate, Goal Contract authority, design-handoff validation, and contract acceptance. |
 | `skills/technical-design/` | Explicit-only pre-goal `technical_design.md`, input-gap/blocker routes, technical review, exact-path recovery, and non-authoritative design handoff. |
 | `skills/executor/` | Persistent target/delivery mutation, raw execution evidence, recovery cursor, and goal-change termination. |
 | `skills/verifier/` | Terminal-state observations, evidence classification, criterion results, and final audit verdict. |

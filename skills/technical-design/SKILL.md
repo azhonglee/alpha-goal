@@ -1,155 +1,62 @@
 ---
 name: technical-design
-description: "Create a review-ready technical_design.md before goal framing when implementation, repair, refactor, hardening, cross-file behavior, interfaces, data models, dependencies, rollout, rollback, or material technical risk needs explicit design. Start from the user's request, optional clarification results, and discoverable repository facts; preserve product and side-effect authority, map the proposed design to observable evidence, then return DESIGN_READY, DESIGN_INPUT_GAP, or DESIGN_BLOCKED."
+description: "Explicit-only pre-goal technical design for work whose implementation shape, interfaces, data, dependencies, rollout, rollback, or material technical risk needs review. Produce technical_design.md and one DESIGN_* route; do not clarify product authority, accept goals, implement, or verify delivery."
 ---
 
 # Technical Design
 
-Own the pre-goal technical design stage. Start from the user's request, instructions, optional attributable clarification results, and discoverable technical facts. Produce a canonical `technical_design.md`, review it, and return a ready handoff to the caller for a later `alpha-goal` stage as non-authoritative structured context.
+Own the pre-goal technical design stage. Convert the user's request, explicit authority facts, optional clarification results, and discoverable technical facts into a reviewed `technical_design.md` proposal for a later `alpha-goal` stage.
 
-The design proposes how the work can be implemented and verified. It does not authorize desired behavior, scope, side effects, execution, or completion claims.
+The design proposes how work can be implemented and observed. It does not authorize desired behavior, scope, side effects, execution, or completion claims.
 
-In a Claude-installed skill context, read `references/claude-adapter.md` before writing or reviewing the design.
+## Read References When Needed
 
-## Resolve the Design Artifact
+- Read `references/technical-design-book.md` before resolving or recovering the artifact, writing its schema, classifying detailed coverage, or returning a route packet.
+- In a Claude-installed skill context, also read `references/claude-adapter.md` before writing or reviewing the design.
 
-Use an explicitly supplied artifact directory when present. Otherwise resolve `$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/`, where `<workspace-slug>` is derived from the stable workspace basename. Reuse only a matching `draft`; use the first unused numeric suffix for ready, blocked, or unrelated artifacts. Preserve the exact absolute artifact directory for recovery; never guess among directories under the workspace root.
+## Classify Inputs
 
-Write the canonical `technical_design.md` in that directory and record `artifact_directory` plus a stable `task_id` in the artifact. Preserve the exact path in current task context across compaction. If the exact path is unavailable or conflicts with the request, return `DESIGN_BLOCKED` instead of selecting the newest or most similar directory. On recovery, require the current-context path to match the artifact directory, task id, and workspace; an existing but stale or wrong exact path is still blocked.
+Before detailed analysis or returning any route, resolve or recover the canonical `technical_design.md` as `draft` using the reference rules. Record the task identity, sources, known facts, and current highest-impact gap before asking for authority input.
 
-## Frame Design Input
+Build the smallest design frame needed from the request, instructions, attributable clarification, repository facts, candidate observers, and recovery surfaces. Keep these classes distinct:
 
-Build the smallest design frame needed from:
+- **authority facts**: explicit user or higher-priority product, scope, risk, or side-effect decisions that constrain the proposal;
+- **discovered facts**: current-state evidence that informs design but grants no authority;
+- **design decisions**: technical proposals owned by this skill;
+- **unresolved input**: product, scope, side-effect, or risk decisions this skill cannot make.
 
-- the user's requested outcome and stated boundaries;
-- higher-priority instructions and policies;
-- optional attributable decisions or clarification artifacts;
-- repository structure, current behavior, interfaces, data, dependencies, tests, runtime, and delivery constraints;
-- candidate acceptance observers and recovery surfaces.
-
-Separate these classes:
-
-- **authority facts** — explicit user or higher-priority decisions that may constrain the proposal;
-- **discovered facts** — current-state evidence that informs design but grants no authority;
-- **design decisions** — technical proposals owned by this skill;
-- **unresolved input** — product, scope, side-effect, or risk decisions this skill cannot make.
-
-Never turn current implementation, convention, recommendation, or design preference into product or side-effect authority.
+Never turn implementation, convention, recommendation, or design preference into authority.
 
 ## Technical Clarification Gate
 
-Resolve discoverable technical facts directly. Keep an unknown `blocking` when a different answer could change code, interfaces, data, dependencies, tests, rollout, rollback, security, privacy, performance, or risk handling.
+Resolve discoverable technical facts directly. Classify each unresolved unknown as `blocking`, `non-material`, or `deferred-non-goal` according to whether it can change implementation or evidence materially.
 
-Classify every unresolved unknown as:
+If an authority-owned input is missing, keep `Design status: draft` and return the highest-impact `DESIGN_INPUT_GAP` packet defined in the reference. Do not guess. The caller may resolve the gap directly or through an independent clarification workflow, then rerun this skill.
 
-- `blocking` — design cannot be trusted without a decision or missing fact;
-- `non-material` — the answer cannot change implementation or evidence materially;
-- `deferred-non-goal` — explicitly outside the supplied request.
+## Design and Review
 
-If an authority-owned input is missing, do not guess. Return one highest-impact `DESIGN_INPUT_GAP`:
+Use material-first coverage rather than a fixed questionnaire. Always map proposed outcomes to evidence and cover material risks plus recovery, or record an explicit non-material basis. Cover architecture, components, data flow, interfaces, data models, persistence, middleware, infrastructure, dependencies, tests, scalability, rollout, and rollback only when touched or material.
 
-```text
-Route: DESIGN_INPUT_GAP
-Gap id:
-Affected design dimension:
-Known facts and sources:
-Why the gap changes implementation, risk, or evidence:
-Decision owner:
-Smallest next decision variable:
-Invalidated design sections:
-Recommendation, if useful:
-```
+Write the canonical artifact using the reference schema. Keep it `draft` while writing or reviewing, distinguish input classes, mark unresolved required content `[blocking]`, and do not claim execution authority.
 
-The current caller may resolve the gap directly or use any independent clarification workflow, then rerun this skill.
+Before readiness, require:
 
-## Design Coverage
+- the design remains within the request and authority facts;
+- every required, touched, or material dimension has no blocking gap;
+- every proposed outcome and touched risk maps to an observer, test, or artifact;
+- prerequisites and dependencies are available or represented as blockers;
+- unsupported product, safety, performance, or completion claims are explicit;
+- the Review Record is `passed` with no unresolved Critical or High finding.
 
-Use material-first coverage rather than a fixed questionnaire.
+For non-trivial implementation, repair, refactor, hardening, cross-file behavior, interface/data change, or material risk, request independent read-only review when available using the raw request, source references, and design artifact.
 
-Always cover:
+## Routes
 
-- proposed outcome-to-evidence mapping;
-- material risks, recovery, or an explicit non-material risk basis.
+Return exactly one route using the packet in the reference:
 
-Cover when touched or material:
-
-1. Architecture, Components, Data Flow, Interfaces/API, Data Models.
-2. Persistence, Middleware, Infrastructure, External Dependencies.
-3. Test Plans, Scalability, Rollout, Risks, Rollback.
-
-A dimension is covered only when it records the proposal, boundary, implementation impact, evidence observer, and status.
-
-Use these probes:
-
-- Architecture: what structure changes, stays stable, or becomes an integration boundary?
-- Components: which modules own the change and which remain untouched?
-- Interfaces/API: which signatures, commands, events, prompts, or contracts change?
-- Data Models: which schema, artifact, or state shape is created, changed, or preserved?
-- Data Flow: what input, transformation, output, and recovery path must hold?
-- Persistence/Middleware/Infrastructure: what storage, runtime, dependency, credential, or deployment assumption matters?
-- Test Plans: what evidence proves each proposed outcome and touched risk?
-- Risks/Rollback: which failure mode, migration risk, compatibility issue, or rollback path matters?
-
-## Write technical_design.md
-
-Read `references/technical-design-book.md` and write the canonical artifact.
-
-- Keep `Design status: draft` while writing and reviewing.
-- Record source references and distinguish authority facts, discovered facts, and design decisions.
-- Write only attributable facts and explicit technical deductions.
-- Keep unresolved required content marked `[blocking]`.
-- Omit untouched dimensions unless recording `not touched` prevents ambiguity.
-- Keep the artifact technical and proposal-oriented; do not claim execution authorization.
-
-## Technical Review Gate
-
-Before returning `DESIGN_READY`:
-
-- the design remains inside the supplied request and explicit authority facts;
-- required, touched, or material dimensions have no blocking gap;
-- architecture, components, interfaces, data models, data flow, and tests are explicit when touched;
-- every proposed outcome maps to a test, observer, or artifact;
-- evidence covers touched risks, not only the happy path;
-- rollout and rollback are handled or explicitly non-material/deferred-non-goal;
-- prerequisites and external dependencies are observable and available or represented as blockers;
-- unsupported product, safety, performance, or completion claims are listed rather than implied.
-
-For non-trivial implementation, repair, refactor, hardening, cross-file behavior, interface/data change, or material risk, request independent read-only review when available. Pass the raw request, source references, and design artifact. Require no unresolved Critical or High finding before `DESIGN_READY`.
-
-## Return Ready Design to Caller
-
-Only after the Technical Review Gate passes:
-
-1. set `Design status: ready`;
-2. persist the final `technical_design.md`;
-3. return the artifact and handoff packet to the caller as structured, non-authoritative input for a later `alpha-goal` stage.
-
-Return:
-
-```text
-Route: DESIGN_READY
-Suggested next stage: alpha-goal
-Task id: <stable task identifier>
-Artifact directory: <absolute artifact directory>
-Workspace: <stable workspace identity>
-Design status: ready
-Design: <absolute technical_design.md path>
-Original request source: <reference>
-Source references: <compact attributable list>
-Authority facts: <compact attributable list>
-Proposed outcome: <observable technical outcome>
-Proposed deliverables: <compact list>
-Proposed boundaries and constraints: <compact list>
-Proposed acceptance evidence: <compact list>
-Unresolved non-blocking limits: <compact list or none>
-```
-
-The ready packet is returned to the caller as input to goal engineering, not as an accepted goal or execution authority.
-
-## Other Return Routes
-
-- `DESIGN_INPUT_GAP`: an authority-owned input is required. Keep `Design status: draft`.
-- `DESIGN_BLOCKED`: design is infeasible or a non-authority dependency prevents review completion. Return the blocker, evidence, affected dimensions, and smallest recovery condition; keep `Design status: draft`.
+- `DESIGN_READY`: the review gate passed; set `Design status: ready`, persist the final artifact, and return it as non-authoritative input for a later `alpha-goal` stage.
+- `DESIGN_INPUT_GAP`: an authority-owned input is required; keep `Design status: draft`.
+- `DESIGN_BLOCKED`: design is infeasible or a non-authority dependency prevents review completion; keep `Design status: draft` and return the blocker, evidence, affected dimensions, and smallest recovery condition.
 
 ## Hard Boundaries
 
@@ -157,4 +64,4 @@ The ready packet is returned to the caller as input to goal engineering, not as 
 - Do not create Goal Contracts or goal/task lifecycle state.
 - Do not infer authority from discovered facts or design preference.
 - Do not implement, mutate the target, deploy, purchase, or verify final delivery.
-- Do not treat `technical_design.md` as execution authority.
+- Do not treat `technical_design.md` or `DESIGN_READY` as execution authority.

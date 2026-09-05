@@ -1,107 +1,66 @@
 ---
 name: alpha-goal
-description: "Apply an early skip gate to engineering requests; for work that is not skipped, inspect, clarify, and frame it as an executable, verifiable goal. Use when the user asks to design, implement, build, modify, fix, debug, refactor, optimize, test, integrate, migrate, deploy, or harden code or systems."
+description: "Explicitly invoke for engineering requests that need the Alpha Goal Skip Gate. Return SKIP for simple eligible work; otherwise compile and accept one executable Goal Contract from attributable inputs. Do not use for standalone clarification or technical design, and do not implement or verify the goal."
 ---
 
 # Alpha Goal
 
-Transform the user's raw request and attributable inputs into execution-ready goal artifacts. Treat upstream artifacts as reference context and preserve their provenance.
+Apply the Skip Gate to the supplied engineering request. For non-`SKIP` work, compile attributable inputs into the canonical Goal Contract that authorizes later execution.
 
-For work that is not skipped, produce a canonical Goal Contract that authorizes execution.
+Alpha Goal owns goal framing and acceptance only. Upstream interview or design artifacts are context, never authority by themselves.
 
-## Inspect Gate Inputs
+## Read References When Needed
 
-Before deciding the Skip Gate, inspect only gate inputs already available or explicitly referenced:
-
-- raw request;
-- higher-priority and repository constraints;
-- attributable handoff metadata and whether any handoff will be consumed;
-- an already-provided exact Alpha Goal task path and its lifecycle state.
-
-Do not inspect implementation or create an artifact to prove `SKIP`. If a gate fact is unclear, do not skip.
+- Read `references/goal-contract-book.md` before creating or recovering a draft, emitting a Goal Input Gap Report, or checking field-level acceptance requirements.
+- In a Claude-installed skill context, also read `references/claude-adapter.md` before using runtime-specific tools. Keep this adapter discoverable whenever Alpha Goal may run under Claude.
 
 ## Skip Gate
 
-Return `SKIP` only when the combined gate inputs clearly show all of the following:
+Inspect only gate inputs already available or explicitly referenced: the raw request, higher-priority and repository constraints, attributable handoff metadata and consumption intent, and any supplied exact Alpha Goal task path plus lifecycle state. Do not inspect implementation or create state merely to prove `SKIP`. If a gate fact is unclear, do not skip.
 
-- concrete read-only analysis, or a clear reversible in-scope local change with direct final-state observation;
-- no material behavior, interface, data, security/privacy, permission, dependency, acceptance, rollout/rollback, or risk decision;
-- no external write, purchase, destructive/cross-repository action, material disclosure, credential/session change, recovery checkpoint, explicit Goal Contract, or audit record;
-- no intended handoff consumption and no need to create, recover, or audit lifecycle state.
+Return `SKIP` only when all are clear:
 
-Handoffs remain context, never authority. `SKIP` creates no state and returns ordinary work to the caller.
+- the work is concrete read-only analysis or a reversible in-scope local change with direct final-state observation;
+- no material behavior, interface, data, security/privacy, permission, dependency, acceptance, rollout/rollback, or risk decision exists;
+- no external write, purchase, destructive or cross-repository action, material disclosure, credential/session change, recovery checkpoint, explicit Goal Contract, or audit record is required;
+- no handoff will be consumed and no lifecycle state must be created, recovered, or audited.
 
-If supplied lifecycle state is not a matching draft and still authorizes or requires work by its current owner, return control to that owner; do not alter it or initialize a competing draft. After any required terminal transition, re-enter Alpha Goal for the new task. Otherwise continue immediately with `Initialize Draft`.
+`SKIP` creates no state and returns ordinary work to the caller. Handoffs remain context, never authority.
 
-## Initialize Draft
+If supplied lifecycle state belongs to a current owner and still requires its transition, return control to that owner rather than altering it or creating a competing draft. After a required terminal transition, re-enter Alpha Goal for the new task.
 
-Before full inspection or the first question, resolve `$HOME/.alpha-goal/<workspace-slug>/YYYYMMDD-<task-slug>/` from the stable workspace basename. Use an exact task directory supplied by attributable context; otherwise create a new directory. Read `references/goal-contract-book.md`, then create or recover its matching canonical `goal-contract.md` as `draft`.
+## Non-SKIP Lifecycle
 
-Write only known facts, their sources, and the current highest-impact gap. Do not mutate the target. Reuse a matching draft; if the name holds an accepted, terminal, or unrelated task, use the first unused numeric suffix.
+1. **Initialize draft before full inspection or questions.** Resolve or recover the canonical `goal-contract.md` as `draft` using the reference rules. Write only known facts, sources, and the highest-impact gap. Do not mutate the target.
+2. **Inspect attributable inputs.** Read the request, instructions, supplied artifacts, and relevant current-state evidence. Resolve discoverable facts before asking. Derive only what sources entail; never convert implementation, convention, recommendation, or model preference into authority.
+3. **Clarify material authority gaps.** Use one highest-impact Goal Input Gap Report and ask one decision variable at a time. Pressure-test answers against boundaries, failure cases, implementation consequences, and acceptance observers. Keep `draft` and do not guess while a material gap remains.
+4. **Compile the contract.** Express the observable objective, material deliverables, boundaries, permitted side effects, falsifiable criteria, observers, authority, risks, recovery, and provenance in the canonical schema.
+5. **Check and accept.** Repair discoverable defects; report authority gaps or blockers; set `status: accepted` last only when the complete contract is attributable, feasible, authorized, and verifiable. Hand the accepted contract to executor without adding a confirmation ceremony.
 
-## Inspect Inputs
+An accepted contract is immutable. A material objective or authority change starts a new task and contract; do not return the accepted artifact to `draft` or reuse its checkpoint.
 
-After the draft exists, read the user's request, higher-priority instructions, attributable inputs, and relevant current-state evidence. Resolve discoverable facts before asking for decisions.
+## Adopt Optional Inputs
 
-Derive details only when they are entailed by an attributable source. Never turn a recommendation, current implementation, convention, or model preference into authority. Update the draft with inspection results and the next highest-impact gap before asking a question.
+Validate every consumed artifact's source, status, workspace, and exact path. For a `DESIGN_READY` proposal, also require the original request source and an existing absolute `technical_design.md` path. A missing or failed check blocks adoption.
 
-## Clarify
+Adopt only proposal content compatible with authority. Copy each binding conclusion into the applicable contract field; a source reference alone creates no execution obligation. If technical design is absent but materially required for safe compilation, report that missing prerequisite.
 
-Use a grill-me loop to remove material uncertainty; do not treat a plausible first answer as complete. If a material authority-owned decision remains, return one **Goal Input Gap Report**:
-
-```text
-Gap id:
-Affected goal field:
-Known facts and sources:
-Why the gap changes execution, risk, or evidence:
-Decision owner:
-Smallest next decision variable:
-Recommendation, if useful:
-```
-
-Use this report to frame the next question; do not make the user fill it out or reproduce the workflow.
-
-Repeat only while a material gap remains:
-
-1. Select the highest-impact unresolved question by authority ownership, blast radius, irreversibility, behavior/interface/data impact, acceptance ambiguity, and rollback risk.
-2. Ask one pointed question containing one decision variable. State the discovered facts, why the answer matters, concrete options or a recommendation when useful, and never ask for discoverable facts.
-3. Grill the answer with a concrete example, counterexample, boundary, trade-off, failure case, implementation consequence, or acceptance observer. Ask a follow-up on the same question when another reasonable answer could still change execution or evidence.
-4. Before asking again or pausing, record each material answer in its applicable contract fields with its source, boundary, consequence, and observer impact; update the next highest-impact gap. Re-run inspection when an answer exposes a new factual or authority gap.
-
-Stop only when no unresolved answer could materially change the objective, scope, non-goals, side effects, design, acceptance, risk treatment, or evidence. Keep the highest-impact unresolved authority decision in one Gap Report; do not guess or mutate the target.
-
-## Compile the Goal Contract
-
-Complete the initialized canonical `goal-contract.md` from the user's request, higher-priority instructions, attributable inputs, discovered facts, and explicit authority decisions.
-
-For every material contract field:
-
-- retain its attributable source;
-- preserve its authority boundary;
-- resolve conflicts through source precedence;
-- treat reference artifacts as context rather than automatic authority;
-- keep the contract `draft` while a material authority gap remains.
-
-No blocking gap may reach acceptance, handoff, or target mutation.
-
-Before using a `DESIGN_READY` proposal, require the original request source, verify `Design status: ready`, verify the handoff workspace matches the current target workspace, and verify that its absolute `technical_design.md` path exists. A missing or failed check blocks the design handoff. Record a valid source as `technical-design: <absolute path>`.
-
-Adopt only proposal content compatible with authority. Express every adopted constraint inside Deliverables, Boundaries, Acceptance Criteria, Verification, or Risks and Recovery; a source reference alone creates no execution obligation. If design is absent but materially required for safe compilation, report the missing prerequisite.
-
-## Check and Accept
-
-Do not add a confirmation ceremony after compiling the Goal Contract. Ask the user only for a material authority-owned decision that cannot be derived or discovered; use one Goal Input Gap Report for that decision.
+## Acceptance Gate
 
 Before acceptance:
 
-- verify Objective, Deliverables, Boundaries, Acceptance Criteria, Verification, Authority, Risks and Recovery, and source provenance are internally consistent and attributable;
-- map every required criterion to a currently available observer and identify every claim surface and prerequisite;
-- complete authority-retained decisions and their risk/observer treatment;
-- check source conflicts, side-effect authority, freshness, and the highest-impact assumption with a counterexample or failure case;
-- adopt every material conclusion from draft-only `Unresolved Gaps` into standard contract fields and remove that temporary section;
-- keep `draft` while any known infeasibility, unavailable observer, unidentified claim surface, unmet prerequisite, incomplete authority-retained decision coverage, or material finding remains;
+- required fields, source provenance, and authority are internally consistent and attributable;
+- every criterion maps to a currently available observer, with claim surfaces, prerequisites, freshness, and invalidation identified;
+- side effects and material risks have authority, treatment, and rollback or recovery;
+- authority-retained decisions are complete and the highest-impact assumption survives a counterexample or failure case;
+- no known infeasibility, unavailable observer, unidentified claim surface, unmet prerequisite, or material finding remains;
+- draft-only gaps have been adopted into standard fields and removed.
 
-Handle the result:
+If a check fails, keep `draft`, repair it or report the highest-impact gap or blocker, and do not mutate the target.
 
-- if any check fails, keep `draft`, repair or report the highest-impact gap or blocker, and do not mutate the target;
-- when all checks pass, set `status: accepted` last and hand off the contract to executor.
+## Hard Boundaries
+
+- Do not perform standalone requirement exploration; consume attributable clarification when supplied.
+- Do not create technical designs; consume and validate them when supplied.
+- Do not implement, mutate the target, deliver, or verify completion.
+- Do not treat discovered facts, recommendations, or upstream artifacts as authority.

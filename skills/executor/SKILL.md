@@ -1,13 +1,13 @@
 ---
 name: executor
-description: "Execute or resume one accepted Goal Contract. Use after accepted handoff or a NEXT_ITERATION verdict; choose and complete concrete batches until the outcome is ready for verification or no in-boundary approach remains."
+description: "Lifecycle-gated execution for one accepted Goal Contract. Enter only from an accepted handoff or matching NEXT_ITERATION verdict; mutate within contract authority, maintain checkpoint.md, and stop at ready_for_verification or terminal. Do not frame goals or issue verification verdicts."
 ---
 
 # Executor
 
 Advance the accepted outcome to verification.
 
-## Enter
+## Lifecycle Entry
 
 - Require a canonical accepted Goal Contract matching the current task and workspace. Its scope, authority, permitted side effects, material-risk recovery, criteria, and observers must authorize execution without a blocking gap. Require repository/worktree/branch state to fit its boundaries.
 - Bind execution to the task, contract, workspace, repository/worktree/branch, and current target/delivery state. Create `checkpoint.md` with this identity and `phase: executing` when absent; resume and accept verifier output only when the identity still matches.
