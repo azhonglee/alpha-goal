@@ -78,7 +78,7 @@ The installer always copies `deep-interview`, `alpha-goal`, and `technical-desig
 $alpha-goal Implement this requirement: <YOUR-PRD> or <YOUR-DESCRIPTION>, <YOUR-UX> or <YOUR-DESIGN>.
 ```
 
-You usually do not need to name a skill. Describe the work normally; Alpha Goal activates implicitly.
+Alpha Goal is explicit-only; invoke it with `$alpha-goal` when you want this workflow.
 
 ## Public skills
 

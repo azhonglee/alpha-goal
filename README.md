@@ -78,7 +78,7 @@ node tools/validate_skills.js --fixtures
 $alpha-goal 实现一下这个需求:<YOUR-PRD> or <YOUR-DESCRIPTION>，<YOUR-UX> or <YOUR-DESIGN> 。
 ```
 
-通常不需要显式写出 skill 名称。正常描述你的需求即可；Alpha Goal 会隐式触发。
+Alpha Goal 为仅显式调用；需要进入该流程时，请使用 `$alpha-goal`。
 
 ## 公开技能
 

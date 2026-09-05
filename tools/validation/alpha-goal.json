@@ -39,6 +39,7 @@
         "source-neutral-clarification-handoff"
       ],
       "references": [
+        "references/interview-record.md",
         "references/claude-adapter.md"
       ],
       "scripts": []

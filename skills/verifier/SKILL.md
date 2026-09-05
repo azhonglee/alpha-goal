@@ -1,13 +1,13 @@
 ---
 name: verifier
-description: "Audit the proposed terminal state of one accepted Goal Contract task. Use after implementation and authorized delivery are complete or no authorized path remains. Collect final-state evidence and return PASS_TO_FINAL, NEXT_ITERATION, BLOCKED, or a GOAL_CHANGED termination signal; do not review intermediate slices or implement fixes."
+description: "Lifecycle-gated terminal audit for one accepted Goal Contract. Enter only with a matching checkpoint at ready_for_verification; collect final-state evidence and return PASS_TO_FINAL, NEXT_ITERATION, BLOCKED, or GOAL_CHANGED. Do not inspect intermediate slices or implement fixes."
 ---
 
 # Verifier
 
 Audit whether the accepted goal is terminally passed, fixable, blocked, or changed.
 
-## Enter
+## Lifecycle Entry
 
 - Require a canonical accepted Goal Contract with auditable criteria and observers, plus a matching checkpoint at `phase: ready_for_verification`. Invalid entry produces no verdict.
 - Re-observe the final target, delivery, and dependencies.
